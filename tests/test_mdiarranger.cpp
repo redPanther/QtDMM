@@ -116,6 +116,20 @@ static void testWindows()
 
   arranger.setTitleBarHidden(wins[2], true);
   check(MdiArranger::titleBarHidden(wins[2]) && !MdiArranger::titleBarHidden(wins[0]), "one title bar alone");
+
+  // back to the automatic mode, hide and show a window, then title bars on:
+  // every visible window has its title bar again
+  arranger.setMode(MdiArranger::DisplaysOnTop);
+  wins[1]->show();
+  wins[0]->hide();
+  QTest::qWait(50);
+  wins[0]->show();
+  QTest::qWait(50);
+  arranger.setTitleBarsHidden(false);
+  QTest::qWait(50);
+  for (QMdiSubWindow *w : wins)
+    check(!(w->windowFlags() & Qt::FramelessWindowHint) && !MdiArranger::titleBarHidden(w),
+          QString("title bar back on %1").arg(w->objectName()));
 }
 
 int main(int argc, char **argv)

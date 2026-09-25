@@ -73,7 +73,18 @@ void MdiArranger::setTitleBarHidden(QMdiSubWindow *window, bool hidden)
   window->setProperty("titleBarKnown", true);
   window->setGeometry(g);
   if (visible)
+  {
     window->show();
+    if (!hidden)
+    {
+      // a window that was activated while frameless draws an empty title
+      // bar until it is activated again
+      QMdiSubWindow *active = m_area->activeSubWindow();
+      m_area->setActiveSubWindow(window);
+      if (active && active != window)
+        m_area->setActiveSubWindow(active);
+    }
+  }
   arrange();
 }
 
