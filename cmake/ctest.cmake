@@ -38,6 +38,13 @@ if (BUILD_TESTING)
 	target_link_libraries(${TEST_METER} PRIVATE Qt6::Widgets Qt::Core Qt::Test)
 	add_test(NAME analog_meter COMMAND ${TEST_METER})
 
+	## the MDI window arrangement: automatic layout, order, title bars
+	set( TEST_MDI test_mdiarranger)
+	add_executable(${TEST_MDI} MACOSX_BUNDLE tests/test_mdiarranger.cpp src/mdiarranger.cpp)
+	target_include_directories(${TEST_MDI} PRIVATE src)
+	target_link_libraries(${TEST_MDI} PRIVATE Qt6::Widgets Qt::Core Qt::Test)
+	add_test(NAME mdi_arranger COMMAND ${TEST_MDI})
+
 	## the digital display: glyph table and a headless render check
 	set( TEST_DISPLAY test_display)
 	add_executable(${TEST_DISPLAY} MACOSX_BUNDLE tests/test_display.cpp src/displaywid.cpp src/panelframe.cpp src/siprefix.cpp)

@@ -35,10 +35,15 @@ class DisplayWid;
 class HelpDlg;
 class MeterWid;
 class ReadingLogWid;
-class QDockWidget;
+class AlarmBar;
+class MdiArranger;
+class ViewFrame;
+class QMdiArea;
+class QMdiSubWindow;
 
-/// The application window: menus, toolbars, status bar and the two dock
-/// panels (LCD display, analog meter) around a MainWid.
+/// The application window: toolbars, status bar, the alarm banner and an
+/// MDI area with four windows - LCD display, analog meter, graph (MainWid)
+/// and readings table - placed by an MdiArranger.
 ///
 /// Also the place where several QtDMM instances talk to each other: the
 /// SharedStateManager's state changes ("RECORD", "STOP", "RAISE_<id>") are
@@ -78,30 +83,43 @@ protected Q_SLOTS:
   void      setUseTextLabel(bool on);
   /// Title = app name, instance id and the configured meter.
   void      updateWindowTitle();
-  /// Graph button: hides the graph and lets the window shrink to the panels.
-  void      setGraphVisible(bool on);
   /// Space: starts the recorder, or stops it when it is running.
   void      toggleRecordingSLOT();
   /// F11
   void      setFullScreen(bool on);
+  /// Arrange actions and the title-bar action follow the arranger.
+  void      syncArrangeActions();
+  /// Header lines of display and meter: meter model and port.
+  void      updateHeaders();
 
 protected:
   MainWid    *m_wid;
   DisplayWid *m_display;
   MeterWid   *m_meter;
-  QDockWidget *m_meterDock;
-  QDockWidget *m_displayDock;
   ReadingLogWid *m_readings;
-  QDockWidget *m_readingsDock;
-  QAction    *m_lockPanels;
+  AlarmBar   *m_alarmBar;
+  QMdiArea   *m_mdi;
+  MdiArranger *m_arranger;
+  ViewFrame  *m_displayFrame;
+  ViewFrame  *m_meterFrame;
+  ViewFrame  *m_readingsFrame;
+  QMdiSubWindow *m_displayWin;
+  QMdiSubWindow *m_meterWin;
+  QMdiSubWindow *m_graphWin;
+  QMdiSubWindow *m_readingsWin;
+  QAction    *m_displayAction = nullptr;
+  QAction    *m_meterAction = nullptr;
+  QAction    *m_readingsAction = nullptr;
+  QAction    *m_arrangeTop;
+  QAction    *m_arrangeFree;
+  QAction    *m_titleBars;
+  QMenu      *m_arrangeMenu;
+  bool        m_restoring = false;   ///< restoreWindows() is setting the actions
   QAction    *m_fullScreen;
   QAction    *m_zoomIn;
   QAction    *m_zoomOut;
   QAction    *m_zoomFit;
   QAction    *m_copyImage;
-  int         m_heightWithGraph = 0;   ///< window height before the graph was hidden
-  /// Locked panels have no title bar and cannot be moved or floated.
-  void        setPanelsLocked(bool locked);
   bool        m_running;
   QLabel     *m_error;
   QLabel     *m_info;
@@ -118,7 +136,22 @@ protected:
   void        createExtraActions();
   /// Appends the shortcut to every action's tooltip: "Start (Ctrl+S)".
   void        addShortcutsToToolTips();
-  /// Saves window/dock state; vetoed by MainWid::closeWin() on unsaved data.
+  /// Adds @p view as an MDI window with @p title (@p role: MdiArranger::Role;
+  /// @p name identifies it in the settings).
+  QMdiSubWindow *addView(QWidget *view, const QString &title, int role, const QString &name);
+  /// A checkable action that shows/hides @p win.
+  QAction    *windowAction(QMdiSubWindow *win, const QString &text, const char *shortcut,
+                           const char *icon, const QString &whatsThis);
+  void        bindWindowAction(QAction *action, QMdiSubWindow *win);
+  /// The window's context menu (from its header line).
+  void        windowMenu(QMdiSubWindow *win, const QPoint &globalPos);
+  /// Window layout from/to the settings (Windows/... keys).
+  void        restoreWindows();
+  void        saveWindows();
+  QIcon       arrangeIcon() const;
+  /// Keeps the window actions checked when a window is closed or shown.
+  bool        eventFilter(QObject *watched, QEvent *event) override;
+  /// Saves window state; vetoed by MainWid::closeWin() on unsaved data.
   void        closeEvent(QCloseEvent *)Q_DECL_OVERRIDE;
   /// Raises this window when another instance asks for it ("RAISE_<id>").
   void        bringMainWindowToFront();

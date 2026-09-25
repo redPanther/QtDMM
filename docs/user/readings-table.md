@@ -9,9 +9,8 @@ session - each of the meter's two to four readings per second, including
 mode changes, `OL` and HOLD.
 
 Switch it on with **Readings table** in the toolbar or the menu (Ctrl+4).
-It opens as a panel docked below the graph; like the other panels it can
-be dragged to another side or pulled out as a separate window, and QtDMM
-remembers where you left it.
+It opens as a window in a column right of the graph; see
+[Window layout](connecting.md#window-layout) for arranging the windows.
 
 ## The columns
 

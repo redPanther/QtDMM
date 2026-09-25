@@ -93,17 +93,33 @@ like on the meter itself), the bar graph and, below the value, the minimum
 and maximum since the last **Reset** (Ctrl+R). Min/max reset automatically
 when the meter switches to a different unit.
 
-The display is a panel like the [analog meter](analog-meter.md): drag its
-title bar to dock it on another side of the window or to pull it out as a
-separate window, and resize it — digits and lettering scale with it.
-**Display** in the toolbar or the menu hides and shows it. Bar graph, min/max
+The display is a window like the [analog meter](analog-meter.md); digits and
+lettering scale with it. **Display** in the toolbar or the menu (Ctrl+1)
+hides and shows it. Bar graph, min/max
 and the LCD tint are set on the *Appearance* settings page.
 
 ## Window layout
 
-A fresh QtDMM starts as a compact instrument: display and analog meter side
-by side, the recorder graph hidden. The **Graph** button in the toolbar
-shows and hides the graph; starting a recording shows it. Both panels can be
-dragged to another side of the window or out into their own windows once
-**Lock panels** in the menu is switched off; positions are remembered. The
-window title names the configured meter.
+The main window holds four windows: the digital display, the analog meter,
+the recorder graph and the [readings table](readings-table.md). The toolbar
+buttons (or Ctrl+1 … Ctrl+4) show and hide them; starting a recording shows
+the graph. The window title names the configured meter, and display and
+meter carry a header line with the meter, its port and a dot that blinks
+green while readings come in.
+
+**Arrange** in the toolbar (and in the menu) chooses how the windows are
+placed:
+
+- **Displays on top** (the default): display and meter share a strip at the
+  top, the graph takes the space below and the readings table a column on
+  the right. Everything follows the size of the main window. To change the
+  order, drag a window onto another one: the target is outlined, and on
+  release the two swap places; dropped anywhere else, the window snaps back.
+- **Free**: place and size the windows yourself; QtDMM remembers where they
+  are.
+
+**Hide title bars** (Ctrl+L) takes the title bars away so the windows sit
+flush next to each other - the default for *Displays on top*. A window
+without title bar keeps its name in the header line; right-click the header
+for its menu (hide the window, title bar on or off), and hold Ctrl to drag
+it. Window layouts of versions before 26.1 are not taken over.

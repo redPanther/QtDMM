@@ -1,8 +1,8 @@
 # Keyboard and mouse
 
 Every toolbar button shows its shortcut in the tooltip. Shortcuts of the
-main window work while it is the active window, whichever panel has the
-focus.
+main window work while it is the active window, whichever of its windows
+has the focus. Ctrl+drag moves a window, also one without title bar.
 
 ## Main window
 
@@ -28,7 +28,7 @@ focus.
 | Ctrl+T | Tip of the day |
 | Ctrl+Q | Quit |
 
-## Panels and window
+## Windows
 
 | Key | Action |
 |---|---|
@@ -36,7 +36,7 @@ focus.
 | Ctrl+2 | Show / hide the analog meter |
 | Ctrl+3 or Ctrl+G | Show / hide the recorder graph |
 | Ctrl+4 | Show / hide the readings table |
-| Ctrl+L | Lock / unlock the panels (hides their title bars) |
+| Ctrl+L | Hide / show the title bars of the windows |
 | F11 | Full screen on / off |
 
 ## Graph

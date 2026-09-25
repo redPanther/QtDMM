@@ -38,12 +38,11 @@ class Settings;
 class InstancesDlg;
 class MeterWid;
 class ReadingLog;
-class AlarmBar;
 struct Alarm;
 class SharedStateManager;
 
-/// The central widget: the recorder graph with the alarm banner above it,
-/// the settings and the other dialogs.
+/// The recorder graph (shown in its own MDI window), plus the settings and
+/// the other dialogs.
 ///
 /// The meter session itself - connection, min/max memory, alarms, SCPI
 /// server, external program - is a MeterController, which MainWid creates.
@@ -78,9 +77,6 @@ public:
   void        setConsoleLogging(bool);
   /// Stores the toolbar visibility (display, dmm, graph, file) in the settings.
   void        setToolbarVisibility(bool, bool, bool, bool);
-  /// Shows or hides the recorder graph (recording goes on regardless).
-  void        setGraphVisible(bool);
-  bool        graphVisible() const;
   /// The recorder graph (for the zoom/pan shortcuts in MainWin).
   DMMGraph   *graph() const { return ui_graph; }
   /// False until a meter has been chosen in the settings once; a fresh
@@ -88,6 +84,11 @@ public:
   bool        dmmConfigured() const;
   /// What the window title shows: the model, else the port, else a hint.
   QString     dmmTitle() const;
+  /// The configured port for display ("/dev/ttyUSB0", "BLE AA:BB:...";
+  /// never a Bluetooth key).
+  QString     portName() const;
+  /// The meter session (connection, alarms, SCPI); views connect to it.
+  MeterController *controller() const { return m_ctl; }
   Settings   *settings() const { return m_settings; }
 
 Q_SIGNALS:
@@ -152,7 +153,6 @@ protected:
   QPrinter    m_printer;
   DisplayWid *m_display;
   MeterWid   *m_meter;
-  AlarmBar   *m_alarmBar;
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   TipDlg     *m_tipDlg;

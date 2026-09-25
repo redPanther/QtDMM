@@ -35,7 +35,6 @@
 #include "meterwid.h"
 #include "readinglog.h"
 #include "alarm.h"
-#include "alarmbar.h"
 #include "siprefix.h"
 #include "tipdlg.h"
 #include "settings.h"
@@ -104,14 +103,9 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
   m_settings->save();
   Q_EMIT sendState("UPDATE_INSTANCES_"+QString::number(QDateTime::currentMSecsSinceEpoch()));
 
-  // alarms: the controller judges every reading and runs the program; the
-  // banner above the graph, beep, popup and raising the window are UI
-  m_alarmBar = new AlarmBar(this);
-  if (auto *box = qobject_cast<QBoxLayout *>(layout()))
-    box->insertWidget(0, m_alarmBar);
+  // alarms: the controller judges every reading and runs the program; beep,
+  // popup and raising the window are UI (the banner is MainWin's)
   connect(m_ctl, &MeterController::alarmRaised, this, &MainWid::alarmRaised);
-  connect(m_ctl, &MeterController::alarmBannerChanged, m_alarmBar, &AlarmBar::setAlarms);
-  connect(m_alarmBar, &AlarmBar::acknowledged, m_ctl, &MeterController::acknowledgeAlarms);
   connect(m_ctl, &MeterController::recordingRequested, this, [this](bool start)
   {
     if (start)
@@ -574,22 +568,6 @@ void MainWid::showTipsSLOT()
   m_tipDlg->show();
 }
 
-void MainWid::setGraphVisible(bool on)
-{
-  ui_graph->setVisible(on);
-  // the graph is all this frame shows; without it collapse the frame so the
-  // panels get the space and no empty strip remains
-  setFrameShape(on ? QFrame::StyledPanel : QFrame::NoFrame);
-  setMaximumHeight(on ? QWIDGETSIZE_MAX : 0);
-  m_settings->setBool("MainWindow/show-graph", on);
-  m_settings->save();
-}
-
-bool MainWid::graphVisible() const
-{
-  return m_settings->getBool("MainWindow/show-graph", false);
-}
-
 bool MainWid::dmmConfigured() const
 {
   // DMM/configured is set when the settings dialog is confirmed with OK (or
@@ -600,6 +578,18 @@ bool MainWid::dmmConfigured() const
     return true;
   const QString model = m_settings->getString("DMM/model");
   return !model.isEmpty() && model != "Manual";
+}
+
+QString MainWid::portName() const
+{
+  // a Bluetooth port string carries the encryption key: never show it
+  const QString device = m_configDlg->device().simplified();
+  const QString type = device.section(' ', 0, 0).toLower();
+  if (type == "ble" || type == "blegatt")
+    return "BLE " + device.section(' ', 1, 1);
+  if (type == "calc")
+    return tr("calculated");
+  return device;
 }
 
 QString MainWid::dmmTitle() const
