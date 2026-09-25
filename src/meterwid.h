@@ -22,6 +22,7 @@
 #include <QColor>
 #include <QPixmap>
 #include <QTimer>
+#include <limits>
 
 /// Colour set and options of the analog meter (MeterWid).
 struct MeterStyle
@@ -84,6 +85,22 @@ public:
   void setStyle(const MeterStyle &style);
   void reset();   ///< peak and Auto-bipolar latch
 
+  /// @name Fed by the MeterController
+  /// The main value of a reading (other ids are ignored): full scale from the
+  /// meter's display count and the decimals shown, the dial label from the
+  /// unit and the coupling, overload from letters in the text.
+  /// @{
+  void setDisplayCounts(int counts) { m_counts = counts; }
+public Q_SLOTS:
+  void showReading(double dval, const QString &val, const QString &unit, const QString &special,
+                   const QString &range, bool hold, bool showBar, int id);
+  /// Min/max memory in SI base units; drawn as marks in display units.
+  void showMinimum(double value, const QString &text, const QString &unit);
+  void showMaximum(double value, const QString &text, const QString &unit);
+  void clearMinMax();
+  /// @}
+public:
+
   ScaleMode scaleMode() const { return m_scaleMode; }
   bool bipolar() const { return m_bipolar; }
   double fullScale() const { return m_fullScale; }
@@ -133,6 +150,12 @@ private:
   static QString formatLabel(double v);
   static double niceStep(double range, int targetMajors);
 
+  void applyMinMax();   ///< m_minBase/m_maxBase -> marks and peak
+
+  int m_counts = 4000;
+  QString m_unitText;   ///< unit of the last reading, with prefix
+  double m_minBase = std::numeric_limits<double>::quiet_NaN();
+  double m_maxBase = std::numeric_limits<double>::quiet_NaN();
   MeterStyle m_style = MeterStyle::dark();
   ScaleMode m_scaleMode = Auto;
   bool m_bipolar = false;

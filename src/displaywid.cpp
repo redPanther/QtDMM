@@ -666,3 +666,46 @@ void DisplayWid::paintEvent(QPaintEvent *)
   drawExtra(p, l);
   drawBar(p, l, false);
 }
+
+// ---------------------------------------------------------------- MeterController feed
+
+void DisplayWid::showReading(double, const QString &val, const QString &unit, const QString &special,
+                             const QString &range, bool hold, bool showBar, int id)
+{
+  setHold(hold);
+  if (range == "AUTO")
+    setAuto(true);
+  if (range == "MANU")
+    setManu(true);
+  setShowBar(showBar);
+  setMode(id, special);
+  if (!hold)
+  {
+    setValue(id, val);
+    setUnit(id, unit);
+  }
+  update();
+}
+
+void DisplayWid::showMinimum(double, const QString &text, const QString &unit)
+{
+  setMinUnit(unit);
+  setMinValue(text);
+  update();
+}
+
+void DisplayWid::showMaximum(double, const QString &text, const QString &unit)
+{
+  setMaxUnit(unit);
+  setMaxValue(text);
+  update();
+}
+
+void DisplayWid::clearMinMax()
+{
+  setMinValue("");
+  setMaxValue("");
+  setMinUnit("");
+  setMaxUnit("");
+  update();
+}

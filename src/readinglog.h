@@ -60,6 +60,13 @@ public:
   void clear();
   /// An alarm raised on the newest reading: the row gets the colour.
   void markLast(const QColor &color, const QString &name);
+
+public Q_SLOTS:
+  /// A reading from the MeterController, stamped with the current time.
+  void appendReading(double dval, const QString &val, const QString &unit, const QString &special,
+                     const QString &range, bool hold, bool showBar, int id);
+
+public:
   const Entry &entry(int row) const { return m_entries[row]; }
 
   int maxRows() const { return m_maxRows; }

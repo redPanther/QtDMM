@@ -30,8 +30,7 @@
 
 #include "printdlg.h"
 
-class DMM;
-class QProcess;
+class MeterController;
 class ConfigDlg;
 class DisplayWid;
 class TipDlg;
@@ -39,21 +38,19 @@ class Settings;
 class InstancesDlg;
 class MeterWid;
 class ReadingLog;
-class AlarmManager;
 class AlarmBar;
 struct Alarm;
 class SharedStateManager;
-class ScpiServer;
-class MdnsResponder;
 
-/// The central widget: owns the DMM connection, the settings dialog and the
-/// graph, and routes readings to the display, the meter and the recorder.
+/// The central widget: the recorder graph with the alarm banner above it,
+/// the settings and the other dialogs.
 ///
-/// MainWin provides the frame (menus, toolbars, docks, status bar) and hooks
-/// its actions up to the *SLOT members here. Readings arrive in valueSLOT();
-/// the sampled value is fed to the graph from timerEvent() at the recorder's
-/// sample rate. External-application triggers, min/max memory and the
-/// dialogs (settings, print, tips, instances) live here as well.
+/// The meter session itself - connection, min/max memory, alarms, SCPI
+/// server, external program - is a MeterController, which MainWid creates.
+/// The views (display, analog meter, readings table, graph) are connected to
+/// its signals here and know nothing of each other. MainWin provides the
+/// frame (menus, toolbars, docks, status bar) and hooks its actions up to
+/// the *SLOT members here.
 class MainWid : public QFrame, private Ui::UIMainWid
 {
   Q_OBJECT
@@ -116,9 +113,6 @@ Q_SIGNALS:
   void        scpiStatus(const QString&);
 
 public Q_SLOTS:
-  /// A reading from DMM::value(). Updates display, meter, min/max, the
-  /// external-application thresholds and remembers dval for the sampler.
-  void        valueSLOT(double, const QString &, const QString &, const QString &, const QString &, bool, bool, int);
   /// Clears min/max memory and the meter's peak/auto-bipolar latch.
   void        resetSLOT();
   /// Connect (true) or disconnect (false) the meter.
@@ -152,32 +146,15 @@ public Q_SLOTS:
   void        instancesChangedSlot(QStringList&);
 
 protected:
-  DMM        *m_dmm;
-  double      m_min;
-  double      m_max;
-  QString     m_lastUnit;
+  MeterController *m_ctl;
   ConfigDlg  *m_configDlg;
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;
-  QProcess   *m_external;
   DisplayWid *m_display;
   MeterWid   *m_meter;
-  ReadingLog *m_readingLog = nullptr;
-  AlarmManager *m_alarms;
   AlarmBar   *m_alarmBar;
-  QString     m_baseUnit;          ///< of the current reading, for the alarms
-  bool        m_overload = false;
-  /// Runs an alarm's actions; the banner is rebuilt from all raised alarms.
-  void        alarmRaised(int index, const Alarm &alarm, double value);
-  void        alarmCleared(int index, const Alarm &alarm);
-  void        updateAlarmBar();
-  SharedStateManager *m_stateMgr;
-  ScpiServer *m_scpi;
-  MdnsResponder *m_mdns;
-  /// Starts/stops the SCPI server as configured and reports its state.
-  void        applyScpi();
-  void        updateScpiStatus();
-  double      m_dval;
+  /// The desktop part of an alarm: beep, raise the window, popup.
+  void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   TipDlg     *m_tipDlg;
   InstancesDlg *m_instancesDlg;
   Settings    *m_settings;
@@ -185,17 +162,13 @@ protected:
 
   /// Applies the settings to DMM, graph, display and meter.
   void        readConfig();
-  /// Derives full scale, coupling label, overload and peak for the meter.
-  void        feedMeter(const QString &val, const QString &unit, const QString &special, bool hold);
   QRect       parentRect() const;
-  /// Sample timer: hands the current value to the graph.
-  void        timerEvent(QTimerEvent *);
 
 protected Q_SLOTS:
   /// Launches the configured external application (threshold trigger).
   void        startExternalSLOT();
   /// The external application exited.
-  void        exitedSLOT();
+  void        exitedSLOT(int exitStatus);
   /// Graph zoom changed; re-applies the window/total size.
   void        zoomedSLOT();
 };

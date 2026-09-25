@@ -239,3 +239,18 @@ bool ReadingLog::writeAny(const QString &path, QString *error) const
   }
   return sheet.write(path, *format, error);
 }
+
+void ReadingLog::appendReading(double dval, const QString &val, const QString &unit, const QString &special,
+                               const QString &range, bool hold, bool, int id)
+{
+  Entry e;
+  e.when = QDateTime::currentDateTime();
+  e.dval = dval;
+  e.val = val;
+  e.unit = unit;
+  e.special = special;
+  e.range = range;
+  e.hold = hold;
+  e.id = id;
+  append(e);
+}

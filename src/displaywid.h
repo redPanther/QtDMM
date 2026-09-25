@@ -61,6 +61,21 @@ public:
   /// @}
   void setFaceColor(const QColor &);   ///< LCD tint
 
+public Q_SLOTS:
+  /// @name Fed by the MeterController
+  /// @{
+  /// A reading: annunciators, value and unit of line @p id; a held reading
+  /// keeps the old value.
+  void showReading(double dval, const QString &val, const QString &unit, const QString &special,
+                   const QString &range, bool hold, bool showBar, int id);
+  /// A new minimum/maximum for the MIN/MAX row (@p value is not used).
+  void showMinimum(double value, const QString &text, const QString &unit);
+  void showMaximum(double value, const QString &text, const QString &unit);
+  void clearMinMax();
+  /// @}
+
+public:
+
   QSize sizeHint() const override;
   QSize minimumSizeHint() const override;
 

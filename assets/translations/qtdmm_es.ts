@@ -1098,140 +1098,90 @@ DMM connected and switched on?</source>
 <context>
     <name>MainWid</name>
     <message>
-        <location filename="../../src/mainwid.cpp" line="186"/>
+        <location filename="../../src/mainwid.cpp" line="202"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: datos sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="187"/>
+        <location filename="../../src/mainwid.cpp" line="203"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. If you quit now it will be lost.&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Datos sin guardar&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Todavía hay mediciones sin guardar en memoria. Si sale ahora se perderán.&lt;p&gt;¿Desea exportarlas antes?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="202"/>
+        <location filename="../../src/mainwid.cpp" line="218"/>
         <source>Export data first</source>
         <translation>Exportar primero</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="206"/>
+        <location filename="../../src/mainwid.cpp" line="222"/>
         <source>Quit without saving</source>
         <translation>Salir sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="622"/>
+        <location filename="../../src/mainwid.cpp" line="477"/>
         <source>Automatic start at %1</source>
         <translation>Inicio automático a las %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="624"/>
+        <location filename="../../src/mainwid.cpp" line="479"/>
         <source>Raising threshold %1</source>
         <translation>Umbral ascendente %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="626"/>
+        <location filename="../../src/mainwid.cpp" line="481"/>
         <source>Falling threshold %1</source>
         <translation>Umbral descendente %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="661"/>
-        <source>SCPI server: %1</source>
-        <translation>Servidor SCPI: %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="684"/>
-        <source>The server is not running.</source>
-        <translation>El servidor no está en marcha.</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="689"/>
-        <source>1 client</source>
-        <translation>1 cliente</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="689"/>
-        <source>%1 clients</source>
-        <translation>%1 clientes</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="690"/>
-        <source>SCPI %1:%2 (%3)</source>
-        <translation>SCPI %1:%2 (%3)</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="691"/>
-        <source>Listening on %1, port %2, %3 connected.</source>
-        <translation>Escuchando en %1, puerto %2, %3 conectado(s).</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="693"/>
-        <source>Announced as &quot;%1&quot;.</source>
-        <translation>Anunciado como «%1».</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="702"/>
-        <location filename="../../src/mainwid.cpp" line="743"/>
+        <location filename="../../src/mainwid.cpp" line="504"/>
+        <location filename="../../src/mainwid.cpp" line="534"/>
         <source>QtDMM: Launch error</source>
         <translation>QtDMM: error de ejecución</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="703"/>
+        <location filename="../../src/mainwid.cpp" line="505"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Error de ejecución&lt;/b&gt;&lt;/font&gt;&lt;p&gt;¡La aplicación %1 sigue en ejecución!&lt;p&gt;¿Desea terminarla ahora?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="715"/>
+        <location filename="../../src/mainwid.cpp" line="517"/>
         <source>Yes, kill it!</source>
         <translation>Sí, terminarla</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="719"/>
+        <location filename="../../src/mainwid.cpp" line="521"/>
         <source>No, keep running</source>
         <translation>No, dejarla en ejecución</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="744"/>
+        <location filename="../../src/mainwid.cpp" line="535"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Error de ejecución&lt;/b&gt;&lt;/font&gt;&lt;p&gt;No se pudo ejecutar %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="755"/>
+        <location filename="../../src/mainwid.cpp" line="546"/>
         <source>Bummer!</source>
         <translation>¡Qué pena!</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="761"/>
+        <location filename="../../src/mainwid.cpp" line="552"/>
         <source>Launched %1</source>
         <translation>%1 iniciado</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="766"/>
+        <location filename="../../src/mainwid.cpp" line="557"/>
         <source>%1 terminated with exit code %2.</source>
         <translation>%1 terminó con el código %2.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="817"/>
+        <location filename="../../src/mainwid.cpp" line="608"/>
         <source>no meter configured</source>
         <translation>ningún multímetro configurado</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="845"/>
-        <source>Alarm %1: %2 (%3)</source>
-        <translation>Alarma %1: %2 (%3)</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="872"/>
-        <source>Alarm %1: could not run %2</source>
-        <translation>Alarma %1: no se pudo ejecutar %2</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="877"/>
+        <location filename="../../src/mainwid.cpp" line="646"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarma de QtDMM: %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="889"/>
-        <source>Alarm %1 cleared</source>
-        <translation>Alarma %1 apagada</translation>
     </message>
 </context>
 <context>
@@ -1372,6 +1322,59 @@ Elija qué instancia debe grabar.</translation>
         <location filename="../../src/mainwin.cpp" line="489"/>
         <source>Supported devices...</source>
         <translation>Dispositivos compatibles…</translation>
+    </message>
+</context>
+<context>
+    <name>MeterController</name>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="42"/>
+        <source>Alarm %1 cleared</source>
+        <translation>Alarma %1 apagada</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="195"/>
+        <source>Alarm %1: %2 (%3)</source>
+        <translation>Alarma %1: %2 (%3)</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="212"/>
+        <source>Alarm %1: could not run %2</source>
+        <translation>Alarma %1: no se pudo ejecutar %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="266"/>
+        <source>SCPI server: %1</source>
+        <translation>Servidor SCPI: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="288"/>
+        <source>The server is not running.</source>
+        <translation>El servidor no está en marcha.</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="293"/>
+        <source>1 client</source>
+        <translation>1 cliente</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="293"/>
+        <source>%1 clients</source>
+        <translation>%1 clientes</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="294"/>
+        <source>Listening on %1, port %2, %3 connected.</source>
+        <translation>Escuchando en %1, puerto %2, %3 conectado(s).</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="296"/>
+        <source>Announced as &quot;%1&quot;.</source>
+        <translation>Anunciado como «%1».</translation>
+    </message>
+    <message>
+        <location filename="../../src/metercontroller.cpp" line="297"/>
+        <source>SCPI %1:%2 (%3)</source>
+        <translation>SCPI %1:%2 (%3)</translation>
     </message>
 </context>
 <context>
