@@ -701,7 +701,7 @@ void MainWin::restoreWindows()
   }
   m_displayAction->setChecked(cfg->getBool("Display/show", true));
   m_meterAction->setChecked(cfg->getBool("Windows/meter", true));
-  action_Graph->setChecked(cfg->getBool("MainWindow/show-graph", true));
+  action_Graph->setChecked(cfg->getBool("MainWindow/show-graph", false));   // a fresh start is a compact instrument
   m_readingsAction->setChecked(cfg->getBool("Windows/readings", false));
   // an unchecked action did not toggle: hide its window explicitly
   for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction })

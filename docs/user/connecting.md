@@ -102,7 +102,8 @@ and the LCD tint are set on the *Appearance* settings page.
 
 The main window holds four windows: the digital display, the analog meter,
 the recorder graph and the [readings table](readings-table.md). The toolbar
-buttons (or Ctrl+1 … Ctrl+4) show and hide them; starting a recording shows
+buttons (or Ctrl+1 … Ctrl+4) show and hide them. A fresh QtDMM starts as a
+compact instrument with display and meter only; starting a recording shows
 the graph. The window title names the configured meter, and display and
 meter carry a header line with the meter, its port and a dot that blinks
 green while readings come in.
