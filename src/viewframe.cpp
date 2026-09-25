@@ -23,6 +23,8 @@ ViewFrame::ViewFrame(QWidget *view, bool showDot, QWidget *parent)
   lay->setSpacing(2);
 
   m_header = new QWidget(this);
+  m_header->setObjectName("viewHeader");   // designs style it by name
+  m_header->setAttribute(Qt::WA_StyledBackground);
   m_header->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_header, &QWidget::customContextMenuRequested, this, [this](const QPoint &p)
   {

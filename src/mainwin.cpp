@@ -37,6 +37,7 @@
 #include "mdiarranger.h"
 #include "metercontroller.h"
 #include "viewframe.h"
+#include "designs.h"
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QLoggingCategory>
@@ -173,6 +174,20 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   toolBarDMM->addAction(arrangeButton);
   if (auto *button = qobject_cast<QToolButton *>(toolBarDMM->widgetForAction(arrangeButton)))
     button->setPopupMode(QToolButton::InstantPopup);
+
+  // colour designs of the window (the LCD tint and the meter style are
+  // settings of their own)
+  m_designMenu = new QMenu(tr("D&esign"), this);
+  auto *designGroup = new QActionGroup(this);
+  for (auto [d, text] : { std::pair{Designs::System, tr("&System")}, std::pair{Designs::Silver, tr("S&ilver")},
+                          std::pair{Designs::Dark, tr("&Dark")} })
+  {
+    QAction *a = m_designMenu->addAction(text);
+    a->setCheckable(true);
+    a->setData(int(d));
+    designGroup->addAction(a);
+    connect(a, &QAction::triggered, this, [this, d = d] { setDesign(d); });
+  }
 
   updateWindowTitle();
   connect(m_wid, &MainWid::configChanged, this, &MainWin::updateWindowTitle);
@@ -525,6 +540,7 @@ void MainWin::on_action_Menu_triggered()
     m_menu->addAction(m_meterAction);
     m_menu->addAction(m_readingsAction);
     m_menu->addMenu(m_arrangeMenu);
+    m_menu->addMenu(m_designMenu);
     m_menu->addAction(m_fullScreen);
     m_menu->addSeparator();
     m_menu->addAction(m_zoomIn);
@@ -654,6 +670,7 @@ void MainWin::updateHeaders()
 void MainWin::restoreWindows()
 {
   Settings *cfg = m_wid->settings();
+  setDesign(Designs::fromName(cfg->getString("Windows/design", "system")));
   m_restoring = true;
   const QString order = cfg->getString("Windows/order", QString());
   if (!order.isEmpty())
@@ -704,6 +721,7 @@ void MainWin::saveWindows()
   cfg->setString("Windows/order", order.join(','));
   cfg->setString("Windows/arrange", m_arranger->mode() == MdiArranger::Free ? "free" : "top");
   cfg->setBool("Windows/title-bars-hidden", m_arranger->titleBarsHidden());
+  cfg->setString("Windows/design", Designs::name(Designs::current()));
   if (m_arranger->mode() == MdiArranger::Free)
     for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
     {
@@ -716,10 +734,28 @@ void MainWin::saveWindows()
   cfg->setBool("MainWindow/show-graph", action_Graph->isChecked());
 }
 
+void MainWin::setDesign(int design)
+{
+  const auto d = static_cast<Designs::Design>(design);
+  Designs::apply(d);
+  m_mdi->setBackground(Designs::areaBrush(d));
+  const QBrush frame = Designs::frameBrush(d);
+  for (ViewFrame *f : { m_displayFrame, m_meterFrame, m_readingsFrame })
+  {
+    f->setProperty("frameBrush", frame.style() == Qt::NoBrush ? QVariant() : QVariant(frame));
+    f->update();
+  }
+  const Designs::GraphColors g = Designs::graphColors(d);
+  m_wid->graph()->setThemeColors(g.background, g.grid, g.labels);
+  m_arrangeMenu->menuAction()->setIcon(arrangeIcon());
+  for (QAction *a : m_designMenu->actions())
+    a->setChecked(a->data().toInt() == design);
+}
+
 // Drawn, so it follows the palette (there is no bundled icon for it).
 QIcon MainWin::arrangeIcon() const
 {
-  const QColor fg = palette().color(QPalette::ButtonText);
+  const QColor fg = QApplication::palette().color(QPalette::ButtonText);
   QIcon icon;
   for (int sz : { 24, 48 })
   {

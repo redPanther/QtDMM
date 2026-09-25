@@ -123,3 +123,8 @@ flush next to each other - the default for *Displays on top*. A window
 without title bar keeps its name in the header line; right-click the header
 for its menu (hide the window, title bar on or off), and hold Ctrl to drag
 it. Window layouts of versions before 26.1 are not taken over.
+
+**Design** in the menu sets the colours of the window: *System* (the look of
+your desktop), *Silver* (brushed aluminium) or *Dark*. The graph and the
+readings table follow; the LCD tint and the style of the analog meter are
+separate settings on the *Appearance* page.

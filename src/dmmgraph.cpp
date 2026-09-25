@@ -120,6 +120,12 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
 
   m_yAxis = new QValueAxis();
   m_chart->addAxis(m_yAxis, Qt::AlignLeft);
+  m_defaultLabels = m_yAxis->labelsBrush();
+  m_defaultAxisLine = m_yAxis->linePenColor();
+  m_yTitle = new QGraphicsSimpleTextItem(m_chart);
+  m_yTitle->setFont(m_xAxis->titleFont());
+  m_yTitle->setBrush(m_xAxis->titleBrush());
+  connect(m_chart, &QChart::plotAreaChanged, this, [this](const QRectF &) { placeYTitle(); });
   m_dataSeries->attachAxis(m_yAxis);
   m_dataPoints->attachAxis(m_yAxis);
   m_intSeries->attachAxis(m_yAxis);
@@ -566,7 +572,19 @@ void DMMGraph::setUnit(const QString &unit)
   // base unit and the prefix is dropped here.
   m_unit = SiPrefix::split(unit).baseUnit;
 
-  m_yAxis->setTitleText(m_unit.isEmpty() ? QString() : QString("[%1]").arg(m_unit));
+  m_yTitle->setText(m_unit.isEmpty() ? QString() : QString("[%1]").arg(m_unit));
+  // room above the plot for the title
+  const int h = m_unit.isEmpty() ? 0 : int(m_yTitle->boundingRect().height());
+  m_chart->setMargins(QMargins(4, 4 + h, 4, 4));
+  placeYTitle();
+}
+
+// right-aligned with the axis line, just above the plot area
+void DMMGraph::placeYTitle()
+{
+  const QRectF plot = m_chart->plotArea();
+  const QRectF text = m_yTitle->boundingRect();
+  m_yTitle->setPos(qMax(2.0, plot.left() - text.width() - 4), plot.top() - text.height() - 2);
 }
 
 void DMMGraph::clearSLOT()
@@ -1091,9 +1109,7 @@ void DMMGraph::setColors(const QColor &bg, const QColor &grid,
   m_intColor          = integration;
   m_intThresholdColor = intThreshold;
 
-  m_chart->setBackgroundBrush(m_bgColor);
-  m_xAxis->setGridLineColor(m_gridColor);
-  m_yAxis->setGridLineColor(m_gridColor);
+  applyThemeColors();
   updateSeriesAppearance();
 
   m_crosshairVLine->setPen(QPen(m_cursorColor));
@@ -1101,6 +1117,32 @@ void DMMGraph::setColors(const QColor &bg, const QColor &grid,
   m_triggerLine->setPen(QPen(m_startColor));
   m_externalLine->setPen(QPen(m_externalColor));
   m_integrationLine->setPen(QPen(m_intThresholdColor));
+}
+
+void DMMGraph::setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels)
+{
+  m_themeBackground = background;
+  m_themeGrid = grid;
+  m_themeLabels = labels;
+  applyThemeColors();
+}
+
+// The design decides the frame of the plot (background, grid, lettering);
+// the curves keep the colours from the settings.
+void DMMGraph::applyThemeColors()
+{
+  const bool own = m_themeBackground.style() == Qt::NoBrush;
+  m_chart->setBackgroundBrush(own ? QBrush(m_bgColor) : m_themeBackground);
+  const QColor grid = own ? m_gridColor : m_themeGrid;
+  const QBrush labels = own ? m_defaultLabels : QBrush(m_themeLabels);
+  for (QValueAxis *axis : { m_xAxis, m_yAxis })
+  {
+    axis->setGridLineColor(grid);
+    axis->setLabelsBrush(labels);
+    axis->setTitleBrush(labels);
+    axis->setLinePenColor(own ? m_defaultAxisLine : m_themeLabels);
+  }
+  m_yTitle->setBrush(labels);
 }
 
 void DMMGraph::setLineStyle(int lineMode, int pointMode, int intLineMode, int intPointMode)

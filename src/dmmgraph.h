@@ -136,6 +136,9 @@ public:
                              const QColor &data, const QColor &cursor,
                              const QColor &start, const QColor &external,
                              const QColor &integration, const QColor &intThreshold);
+  /// Colours of the window design (background, grid, axis lettering); a
+  /// background of Qt::NoBrush means the colours from the settings.
+  void             setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels);
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
   /// Draws a vertical mark at the current sample (an alarm raised); marks
@@ -291,6 +294,16 @@ protected:
   QScatterSeries  *m_intPoints;
   QValueAxis      *m_xAxis;
   QValueAxis      *m_yAxis;
+  /// The y axis title ("[V]"), written horizontally above the axis: turned
+  /// by 90 degrees a "V" reads like ">".
+  QGraphicsSimpleTextItem *m_yTitle;
+  QBrush           m_themeBackground;   ///< Qt::NoBrush: m_bgColor
+  QColor           m_themeGrid;
+  QColor           m_themeLabels;
+  QBrush           m_defaultLabels;     ///< the chart's own label colour
+  QColor           m_defaultAxisLine;   ///< the chart's own axis line colour
+  void             applyThemeColors();
+  void             placeYTitle();
   QGraphicsLineItem *m_crosshairVLine;
   QGraphicsLineItem *m_crosshairHLine;
   QGraphicsLineItem *m_triggerLine;

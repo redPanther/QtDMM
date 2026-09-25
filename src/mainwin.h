@@ -114,6 +114,7 @@ protected:
   QAction    *m_arrangeFree;
   QAction    *m_titleBars;
   QMenu      *m_arrangeMenu;
+  QMenu      *m_designMenu;
   bool        m_restoring = false;   ///< restoreWindows() is setting the actions
   QAction    *m_fullScreen;
   QAction    *m_zoomIn;
@@ -149,6 +150,8 @@ protected:
   void        restoreWindows();
   void        saveWindows();
   QIcon       arrangeIcon() const;
+  /// Applies a colour design (Designs::Design) to the window and the views.
+  void        setDesign(int design);
   /// Keeps the window actions checked when a window is closed or shown.
   bool        eventFilter(QObject *watched, QEvent *event) override;
   /// Saves window state; vetoed by MainWid::closeWin() on unsaved data.
