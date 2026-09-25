@@ -14,16 +14,6 @@
 #include "sharedstatemanager.h"
 #include "siprefix.h"
 
-namespace
-{
-// Decoders mark overload and similar states with letters in the value text
-// ("OL", "-OL", "EFLO"); a number never has one.
-bool isOverload(const QString &val)
-{
-  static const QRegularExpression letters("[A-Za-z]");
-  return val.contains(letters);
-}
-}
 
 MeterController::MeterController(QObject *parent)
   : QObject(parent)
@@ -33,6 +23,7 @@ MeterController::MeterController(QObject *parent)
   , m_mdns(new MdnsResponder(this))
   , m_external(new QProcess(this))
 {
+  qRegisterMetaType<Reading>();
   connect(m_dmm, &DMM::value, this, &MeterController::valueSLOT);
   connect(m_dmm, &DMM::error, this, &MeterController::error);
 
@@ -113,9 +104,27 @@ void MeterController::timerEvent(QTimerEvent *)
 void MeterController::valueSLOT(double dval, const QString &val, const QString &unit, const QString &special,
                                 const QString &range, bool hold, bool showBar, int id)
 {
-  const qint64 now = QDateTime::currentMSecsSinceEpoch();
-  const bool overload = isOverload(val);
-  const QString baseUnit = SiPrefix::split(unit).baseUnit;
+  // the one place the display strings are interpreted: decoders mark
+  // overload and similar states with letters in the value text ("OL",
+  // "-OL", "EFLO"), a number never has one
+  static const QRegularExpression letters("[A-Za-z]");
+  Reading rd;
+  rd.value = dval;
+  rd.text = val;
+  rd.unit = unit;
+  const SiPrefix::Split split = SiPrefix::split(unit);
+  rd.prefix = split.prefix;
+  rd.baseUnit = split.baseUnit;
+  rd.special = special;
+  rd.range = range;
+  rd.hold = hold;
+  rd.showBar = showBar;
+  rd.overload = val.contains(letters);
+  rd.id = id;
+  rd.msecs = QDateTime::currentMSecsSinceEpoch();
+  const qint64 now = rd.msecs;
+  const bool overload = rd.overload;
+  const QString &baseUnit = rd.baseUnit;
 
   // min/max and the sampled value follow the main value; a held display is
   // the old reading again, so it does not count
@@ -142,7 +151,7 @@ void MeterController::valueSLOT(double dval, const QString &val, const QString &
     m_dval = dval;
   }
 
-  Q_EMIT reading(dval, val, unit, special, range, hold, showBar, id);
+  Q_EMIT reading(rd);
   if (newMax)
     Q_EMIT maximumChanged(m_max, val, unit);
   if (newMin)

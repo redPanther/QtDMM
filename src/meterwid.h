@@ -58,6 +58,8 @@ struct MeterStyle
 /// The scale is in the unit the multimeter displays (with SI prefix), the
 /// full scale comes from the display count of the meter - see
 /// fullScaleFromReading(). Values are plain doubles in that unit.
+struct Reading;
+
 class MeterWid : public QWidget
 {
   Q_OBJECT
@@ -92,8 +94,7 @@ public:
   /// @{
   void setDisplayCounts(int counts) { m_counts = counts; }
 public Q_SLOTS:
-  void showReading(double dval, const QString &val, const QString &unit, const QString &special,
-                   const QString &range, bool hold, bool showBar, int id);
+  void showReading(const Reading &reading);
   /// Min/max memory in SI base units; drawn as marks in display units.
   void showMinimum(double value, const QString &text, const QString &unit);
   void showMaximum(double value, const QString &text, const QString &unit);

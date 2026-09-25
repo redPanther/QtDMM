@@ -17,6 +17,7 @@
 //======================================================================
 
 #include "meterwid.h"
+#include "reading.h"
 #include "siprefix.h"
 #include "panelframe.h"
 
@@ -645,13 +646,13 @@ void MeterWid::paintEvent(QPaintEvent *)
 // The analog meter works in the unit the multimeter displays (with prefix),
 // so its full scale follows the display count and the decimals of the
 // reading, exactly like the meter's own bar graph.
-void MeterWid::showReading(double, const QString &val, const QString &unit, const QString &special,
-                           const QString &, bool hold, bool, int id)
+void MeterWid::showReading(const Reading &r)
 {
-  if (id != 0)
+  if (r.id != 0)
     return;
-  static const QRegularExpression letters("[A-Za-z]");
-  const bool overload = val.contains(letters);
+  const QString &val = r.text;
+  const QString &unit = r.unit;
+  const QString &special = r.special;
 
   const double fs = fullScaleFromReading(val, m_counts, unit);
   if (!std::isnan(fs))
@@ -668,8 +669,8 @@ void MeterWid::showReading(double, const QString &val, const QString &unit, cons
     label += " CONT";
 
   m_unitText = unit;
-  const double value = overload ? 0.0 : QString(val).remove(' ').toDouble();
-  setReading(value, val, label, overload, hold);
+  const double value = r.overload ? 0.0 : QString(val).remove(' ').toDouble();
+  setReading(value, val, label, r.overload, r.hold);
   applyMinMax();
 }
 

@@ -106,10 +106,9 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   m_readingsWin = addView(m_readingsFrame, tr("Readings"), MdiArranger::Table, "readings");
 
   for (ViewFrame *f : { m_displayFrame, m_meterFrame })
-    connect(ctl, &MeterController::reading, f, [f](double, const QString &, const QString &, const QString &,
-                                                   const QString &, bool, bool, int id)
+    connect(ctl, &MeterController::reading, f, [f](const Reading &r)
     {
-      if (id == 0)
+      if (r.id == 0)
         f->pulse();
     });
   for (auto [frame, win] : { std::pair{m_displayFrame, m_displayWin}, std::pair{m_meterFrame, m_meterWin},

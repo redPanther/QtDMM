@@ -21,6 +21,7 @@
 //======================================================================
 
 #include "displaywid.h"
+#include "reading.h"
 #include "panelframe.h"
 #include "siprefix.h"
 
@@ -669,20 +670,19 @@ void DisplayWid::paintEvent(QPaintEvent *)
 
 // ---------------------------------------------------------------- MeterController feed
 
-void DisplayWid::showReading(double, const QString &val, const QString &unit, const QString &special,
-                             const QString &range, bool hold, bool showBar, int id)
+void DisplayWid::showReading(const Reading &r)
 {
-  setHold(hold);
-  if (range == "AUTO")
+  setHold(r.hold);
+  if (r.range == "AUTO")
     setAuto(true);
-  if (range == "MANU")
+  if (r.range == "MANU")
     setManu(true);
-  setShowBar(showBar);
-  setMode(id, special);
-  if (!hold)
+  setShowBar(r.showBar);
+  setMode(r.id, r.special);
+  if (!r.hold)
   {
-    setValue(id, val);
-    setUnit(id, unit);
+    setValue(r.id, r.text);
+    setUnit(r.id, r.unit);
   }
   update();
 }

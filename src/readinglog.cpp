@@ -1,6 +1,7 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "readinglog.h"
+#include "reading.h"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -240,17 +241,16 @@ bool ReadingLog::writeAny(const QString &path, QString *error) const
   return sheet.write(path, *format, error);
 }
 
-void ReadingLog::appendReading(double dval, const QString &val, const QString &unit, const QString &special,
-                               const QString &range, bool hold, bool, int id)
+void ReadingLog::appendReading(const Reading &r)
 {
   Entry e;
-  e.when = QDateTime::currentDateTime();
-  e.dval = dval;
-  e.val = val;
-  e.unit = unit;
-  e.special = special;
-  e.range = range;
-  e.hold = hold;
-  e.id = id;
+  e.when = QDateTime::fromMSecsSinceEpoch(r.msecs);
+  e.dval = r.value;
+  e.val = r.text;
+  e.unit = r.unit;
+  e.special = r.special;
+  e.range = r.range;
+  e.hold = r.hold;
+  e.id = r.id;
   append(e);
 }

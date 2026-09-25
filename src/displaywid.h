@@ -31,6 +31,8 @@
 /// DC, diode, continuity), the min/max memory, a bar graph and up to three
 /// secondary values are all drawn with QPainter and scale with the widget.
 /// Unlit segments and annunciators stay faintly visible, like on a real LCD.
+struct Reading;
+
 class DisplayWid : public QWidget
 {
   Q_OBJECT
@@ -64,10 +66,9 @@ public:
 public Q_SLOTS:
   /// @name Fed by the MeterController
   /// @{
-  /// A reading: annunciators, value and unit of line @p id; a held reading
+  /// A reading: annunciators, value and unit of its line; a held reading
   /// keeps the old value.
-  void showReading(double dval, const QString &val, const QString &unit, const QString &special,
-                   const QString &range, bool hold, bool showBar, int id);
+  void showReading(const Reading &reading);
   /// A new minimum/maximum for the MIN/MAX row (@p value is not used).
   void showMinimum(double value, const QString &text, const QString &unit);
   void showMaximum(double value, const QString &text, const QString &unit);

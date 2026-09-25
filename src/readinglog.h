@@ -12,6 +12,8 @@
 /// the newest maxRows() entries (a ring), knows min/max/mean of what it
 /// holds and writes itself as CSV. No widgets here, so it can be tested;
 /// ReadingLogWid shows it.
+struct Reading;
+
 class ReadingLog : public QAbstractTableModel
 {
   Q_OBJECT
@@ -62,9 +64,8 @@ public:
   void markLast(const QColor &color, const QString &name);
 
 public Q_SLOTS:
-  /// A reading from the MeterController, stamped with the current time.
-  void appendReading(double dval, const QString &val, const QString &unit, const QString &special,
-                     const QString &range, bool hold, bool showBar, int id);
+  /// A reading from the MeterController.
+  void appendReading(const Reading &reading);
 
 public:
   const Entry &entry(int row) const { return m_entries[row]; }

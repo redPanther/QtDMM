@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "alarm.h"
+#include "reading.h"
 
 class DMM;
 class QProcess;
@@ -86,9 +87,8 @@ public Q_SLOTS:
   void        acknowledgeAlarms();
 
 Q_SIGNALS:
-  /// A reading, as DMM::value() delivered it, after min/max and alarms.
-  void        reading(double dval, const QString &val, const QString &unit, const QString &special,
-                      const QString &range, bool hold, bool showBar, int id);
+  /// A reading, after min/max; overload and prefix already worked out.
+  void        reading(const Reading &reading);
   /// A new minimum (@p value in SI base units, @p text and @p unit as the
   /// meter showed them).
   void        minimumChanged(double value, const QString &text, const QString &unit);
