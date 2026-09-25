@@ -104,26 +104,24 @@ The main window holds four windows: the digital display, the analog meter,
 the recorder graph and the [readings table](readings-table.md). The toolbar
 buttons (or Ctrl+1 … Ctrl+4) show and hide them. A fresh QtDMM starts as a
 compact instrument with display and meter only; starting a recording shows
-the graph. The window title names the configured meter, and display and
-meter carry a header line with the meter, its port and a dot that blinks
-green while readings come in.
+the graph. The window title names the configured meter; in the status bar a
+dot blinks green while readings come in and turns grey when none has come
+for three seconds.
 
 **Arrange** in the toolbar (and in the menu) chooses how the windows are
 placed:
 
 - **Displays on top** (the default): display and meter share a strip at the
   top, the graph takes the space below and the readings table a column on
-  the right. Everything follows the size of the main window. To change the
-  order, drag a window onto another one: the target is outlined, and on
-  release the two swap places; dropped anywhere else, the window snaps back.
+  the right. Everything follows the size of the main window.
 - **Free**: place and size the windows yourself; QtDMM remembers where they
   are.
 
 **Hide title bars** (Ctrl+L) takes the title bars away so the windows sit
-flush next to each other - the default for *Displays on top*. A window
-without title bar keeps its name in the header line; right-click the header
-for its menu (hide the window, title bar on or off), and hold Ctrl to drag
-it. Window layouts of versions before 26.1 are not taken over.
+flush next to each other - the default for *Displays on top*. Right-click
+the display or the meter for its window menu (hide the window, title bar on
+or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
+layouts of versions before 26.1 are not taken over.
 
 **Design** in the menu sets the colours of the window: *System* (the look of
 your desktop), *Silver* (brushed aluminium) or *Dark*. The graph and the

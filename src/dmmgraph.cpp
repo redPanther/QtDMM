@@ -263,7 +263,7 @@ void DMMGraph::updateXAxisRange()
 
 void DMMGraph::updateSeriesAppearance()
 {
-  m_dataSeries->setPen(QPen(m_dataColor, m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
+  m_dataSeries->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
   m_dataSeries->setVisible(m_lineMode != NoLine);
 
   QScatterSeries::MarkerShape shape = QScatterSeries::MarkerShapeCircle;
@@ -285,7 +285,7 @@ void DMMGraph::updateSeriesAppearance()
 
   m_dataPoints->setMarkerShape(shape);
   m_dataPoints->setMarkerSize(size);
-  m_dataPoints->setColor(m_dataColor);
+  m_dataPoints->setColor(dataColor());
   m_dataPoints->setVisible(m_pointMode != NoPoint);
 
   m_intSeries->setPen(QPen(m_intColor, m_intLineWidth, penStyle(m_intLineMode), Qt::RoundCap, Qt::RoundJoin));
@@ -574,7 +574,8 @@ void DMMGraph::setUnit(const QString &unit)
 
   m_yTitle->setText(m_unit.isEmpty() ? QString() : QString("[%1]").arg(m_unit));
   // room above the plot for the title
-  const int h = m_unit.isEmpty() ? 0 : int(m_yTitle->boundingRect().height());
+  const int h = m_unit.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
+                                             + QFontMetricsF(m_yAxis->labelsFont()).height() / 2);
   m_chart->setMargins(QMargins(4, 4 + h, 4, 4));
   placeYTitle();
 }
@@ -584,7 +585,9 @@ void DMMGraph::placeYTitle()
 {
   const QRectF plot = m_chart->plotArea();
   const QRectF text = m_yTitle->boundingRect();
-  m_yTitle->setPos(qMax(2.0, plot.left() - text.width() - 4), plot.top() - text.height() - 2);
+  // the top tick label is centred on the plot's top edge: stay above it
+  const double labelHalf = QFontMetricsF(m_yAxis->labelsFont()).height() / 2;
+  m_yTitle->setPos(qMax(2.0, plot.left() - text.width() - 4), plot.top() - labelHalf - text.height() - 1);
 }
 
 void DMMGraph::clearSLOT()
@@ -1119,12 +1122,24 @@ void DMMGraph::setColors(const QColor &bg, const QColor &grid,
   m_integrationLine->setPen(QPen(m_intThresholdColor));
 }
 
-void DMMGraph::setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels)
+void DMMGraph::setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
+                              const QColor &data)
 {
   m_themeBackground = background;
   m_themeGrid = grid;
   m_themeLabels = labels;
+  m_themeData = data;
   applyThemeColors();
+  updateSeriesAppearance();
+}
+
+// The curve colour from the settings - unless it is still the default blue
+// and the design proposes one that reads better on its background.
+QColor DMMGraph::dataColor() const
+{
+  if (m_themeData.isValid() && m_dataColor == QColor(Qt::blue))
+    return m_themeData;
+  return m_dataColor;
 }
 
 // The design decides the frame of the plot (background, grid, lettering);

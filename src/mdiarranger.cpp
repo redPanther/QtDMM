@@ -6,7 +6,6 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QMouseEvent>
-#include <QRubberBand>
 #include <QTimer>
 #include <QtMath>
 
@@ -93,30 +92,6 @@ bool MdiArranger::titleBarHidden(const QMdiSubWindow *window)
   return window->property("titleBarHidden").toBool();
 }
 
-void MdiArranger::setOrder(const QList<QMdiSubWindow *> &order)
-{
-  QList<QMdiSubWindow *> newOrder;
-  QList<Role> newRoles;
-  for (QMdiSubWindow *w : order)
-  {
-    const int i = m_order.indexOf(w);
-    if (i >= 0 && !newOrder.contains(w))
-    {
-      newOrder << w;
-      newRoles << m_roles[i];
-    }
-  }
-  for (int i = 0; i < m_order.size(); ++i)
-    if (!newOrder.contains(m_order[i]))
-    {
-      newOrder << m_order[i];
-      newRoles << m_roles[i];
-    }
-  m_order = newOrder;
-  m_roles = newRoles;
-  arrange();
-}
-
 void MdiArranger::arrange()
 {
   if (m_mode == Free || m_pending)
@@ -132,7 +107,8 @@ void MdiArranger::arrange()
 // The instruments in a strip on top - as many rows as make them biggest,
 // at most 45 % of the height when there is anything else - and below the
 // graph, with a table in a column on the right.
-QList<QRect> MdiArranger::layout(const QRect &area, const QList<Role> &roles, int headerHeight)
+QList<QRect> MdiArranger::layout(const QRect &area, const QList<Role> &roles, int headerHeight,
+                                 int tableMinWidth)
 {
   QList<QRect> out(roles.size());
   const QRect all = area.adjusted(kGap, kGap, -kGap, -kGap);
@@ -168,7 +144,9 @@ QList<QRect> MdiArranger::layout(const QRect &area, const QList<Role> &roles, in
       row(graphs, r, Qt::Vertical);
       return;
     }
-    const int tw = qMax(kTableMinWidth, int(r.width() * 0.3));
+    // the table's footer (buttons, statistics) must not be squeezed, but the
+    // graph keeps at least half
+    const int tw = qMin(qMax(tableMinWidth, int(r.width() * 0.3)), r.width() / 2);
     row(graphs, QRect(r.left(), r.top(), r.width() - tw - kGap, r.height()), Qt::Vertical);
     row(tables, QRect(r.right() - tw + 1, r.top(), tw, r.height()), Qt::Vertical);
   };
@@ -233,12 +211,16 @@ void MdiArranger::doArrange()
   }
   // a header line inside the window, plus the title bar when it is shown
   const int header = m_titleBarsHidden ? 22 : 48;
-  const QList<QRect> rects = layout(m_area->viewport()->rect(), roles, header);
+  int tableMin = kTableMinWidth;
+  for (int i = 0; i < visible.size(); ++i)
+    if (roles[i] == Table)
+      tableMin = qMax(tableMin, visible[i]->minimumSizeHint().width());
+  const QList<QRect> rects = layout(m_area->viewport()->rect(), roles, header, tableMin);
   for (int i = 0; i < visible.size(); ++i)
     visible[i]->setGeometry(rects[i]);
 }
 
-// ---------------------------------------------------------------- dragging
+// ---------------------------------------------------------------- Ctrl+drag
 
 QMdiSubWindow *MdiArranger::subWindowOf(QObject *object) const
 {
@@ -246,51 +228,6 @@ QMdiSubWindow *MdiArranger::subWindowOf(QObject *object) const
     if (auto *w = qobject_cast<QMdiSubWindow *>(o))
       return m_order.contains(w) ? w : nullptr;
   return nullptr;
-}
-
-QMdiSubWindow *MdiArranger::windowAt(const QPoint &viewportPos, QMdiSubWindow *except) const
-{
-  for (QMdiSubWindow *w : m_order)
-    if (w != except && w->isVisible() && w->geometry().contains(viewportPos))
-      return w;
-  return nullptr;
-}
-
-void MdiArranger::dragMoved(QMdiSubWindow *window)
-{
-  if (m_mode == Free)
-    return;
-  window->raise();
-  if (!m_band)
-    m_band = new QRubberBand(QRubberBand::Rectangle, m_area->viewport());
-  const QPoint p = m_area->viewport()->mapFromGlobal(QCursor::pos());
-  if (QMdiSubWindow *target = windowAt(p, window))
-  {
-    m_band->setGeometry(target->geometry());
-    m_band->show();
-    m_band->raise();
-    window->raise();
-  }
-  else
-    m_band->hide();
-}
-
-void MdiArranger::dragDropped(QMdiSubWindow *window)
-{
-  if (m_band)
-    m_band->hide();
-  if (m_mode == Free)
-    return;
-  const QPoint p = m_area->viewport()->mapFromGlobal(QCursor::pos());
-  if (QMdiSubWindow *target = windowAt(p, window))
-  {
-    const int a = m_order.indexOf(window);
-    const int b = m_order.indexOf(target);
-    m_order.swapItemsAt(a, b);
-    m_roles.swapItemsAt(a, b);
-    Q_EMIT changed();
-  }
-  doArrange();   // without a target the window snaps back
 }
 
 bool MdiArranger::eventFilter(QObject *watched, QEvent *event)
@@ -308,62 +245,31 @@ bool MdiArranger::eventFilter(QObject *watched, QEvent *event)
       break;
     case QEvent::MouseButtonPress:
     {
+      // Free mode: Ctrl+drag moves a window, also one without title bar
       auto *me = static_cast<QMouseEvent *>(event);
-      QMdiSubWindow *w = me->button() == Qt::LeftButton ? subWindowOf(watched) : nullptr;
-      if (!w)
+      if (m_mode != Free || me->button() != Qt::LeftButton || !(me->modifiers() & Qt::ControlModifier))
         break;
-      if (me->modifiers() & Qt::ControlModifier)
+      if (QMdiSubWindow *w = subWindowOf(watched))
       {
-        // Ctrl+drag moves any window, with or without title bar
         m_drag = w;
-        m_ctrlDrag = true;
-        m_dragStart = w->pos();
-        m_ctrlOffset = me->globalPosition().toPoint() - w->pos();
+        m_dragOffset = me->globalPosition().toPoint() - w->pos();
         w->raise();
         return true;
-      }
-      if (watched == w)   // the title bar (or the border) of the sub-window
-      {
-        m_drag = w;
-        m_ctrlDrag = false;
-        m_dragStart = w->pos();
       }
       break;
     }
     case QEvent::MouseMove:
       if (m_drag)
       {
-        if (m_ctrlDrag)
-        {
-          m_drag->move(static_cast<QMouseEvent *>(event)->globalPosition().toPoint() - m_ctrlOffset);
-          dragMoved(m_drag);
-          return true;
-        }
-        if (watched == m_drag)
-        {
-          // QMdiSubWindow moves itself; follow it after the move
-          QMdiSubWindow *w = m_drag;
-          QTimer::singleShot(0, this, [this, w] { if (m_drag == w && w->pos() != m_dragStart) dragMoved(w); });
-        }
+        m_drag->move(static_cast<QMouseEvent *>(event)->globalPosition().toPoint() - m_dragOffset);
+        return true;
       }
       break;
     case QEvent::MouseButtonRelease:
       if (m_drag)
       {
-        QMdiSubWindow *w = m_drag;
-        const bool ctrl = m_ctrlDrag;
         m_drag = nullptr;
-        m_ctrlDrag = false;
-        if (ctrl || watched == w)
-        {
-          QTimer::singleShot(0, this, [this, w, start = m_dragStart]
-          {
-            if (w->pos() != start)
-              dragDropped(w);
-          });
-          if (ctrl)
-            return true;
-        }
+        return true;
       }
       break;
     default:

@@ -9,17 +9,14 @@
 
 class QMdiArea;
 class QMdiSubWindow;
-class QRubberBand;
 
 /// Places the sub-windows of a QMdiArea.
 ///
 /// In the automatic mode ("Displays on top") the instruments share a strip
 /// at the top, the graph takes the rest and a table gets a narrower column
 /// on the right; the layout is redone whenever the area is resized or a
-/// window is shown or hidden. Dragging a window onto another one swaps the
-/// two (the target is outlined while dragging), dropped elsewhere it snaps
-/// back. "Free" is the classic MDI. Windows without title bar can be moved
-/// with Ctrl+drag.
+/// window is shown or hidden. "Free" is the classic MDI; there, windows
+/// without title bar are moved with Ctrl+drag.
 ///
 /// Knows nothing about QtDMM's windows or settings: it only sees
 /// sub-windows and their roles, so it can move on unchanged.
@@ -47,14 +44,12 @@ public:
   void setTitleBarHidden(QMdiSubWindow *window, bool hidden);
   static bool titleBarHidden(const QMdiSubWindow *window);
 
-  /// Order of the windows as it is now (after swaps), e.g. to store it.
-  QList<QMdiSubWindow *> order() const { return m_order; }
-  /// Restores an order; windows not in @p order keep their place at the end.
-  void setOrder(const QList<QMdiSubWindow *> &order);
 
   /// The rects the automatic mode gives the visible windows inside @p area
-  /// (in viewport coordinates). Public for the tests.
-  static QList<QRect> layout(const QRect &area, const QList<Role> &roles, int headerHeight);
+  /// (in viewport coordinates); a table column is at least @p tableMinWidth
+  /// wide. Public for the tests.
+  static QList<QRect> layout(const QRect &area, const QList<Role> &roles, int headerHeight,
+                             int tableMinWidth = 260);
 
 public Q_SLOTS:
   /// Lays the windows out again (deferred, once per event loop pass).
@@ -64,7 +59,7 @@ public Q_SLOTS:
   void arrangeNow();
 
 Q_SIGNALS:
-  /// The user swapped two windows or changed the mode or the title bars.
+  /// The mode or the title bars changed.
   void changed();
 
 protected:
@@ -72,9 +67,6 @@ protected:
 
 private:
   void doArrange();
-  QMdiSubWindow *windowAt(const QPoint &viewportPos, QMdiSubWindow *except) const;
-  void dragMoved(QMdiSubWindow *window);
-  void dragDropped(QMdiSubWindow *window);
   QMdiSubWindow *subWindowOf(QObject *object) const;
 
   QMdiArea *m_area;
@@ -83,11 +75,6 @@ private:
   QList<QMdiSubWindow *> m_order;
   QList<Role> m_roles;             ///< parallel to m_order
   bool m_pending = false;
-  QRubberBand *m_band = nullptr;
-
-  // a window being dragged by its title bar or with Ctrl
-  QMdiSubWindow *m_drag = nullptr;
-  QPoint m_dragStart;              ///< window position when the drag began
-  QPoint m_ctrlOffset;             ///< cursor - window position (Ctrl+drag)
-  bool m_ctrlDrag = false;
+  QMdiSubWindow *m_drag = nullptr; ///< a window being moved with Ctrl+drag
+  QPoint m_dragOffset;             ///< cursor - window position
 };

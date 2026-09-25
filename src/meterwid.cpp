@@ -501,17 +501,23 @@ void MeterWid::drawReadouts(QPainter &p, const Geometry &g) const
   const QRectF cur(g.face.left() + fw * 0.05, g.face.top() + fh * 0.78, fw * 0.28, fh * 0.16);
   const QRectF max(g.face.right() - fw * 0.05 - fw * 0.28, cur.top(), fw * 0.28, fh * 0.16);
 
+  // CURRENT and MAX in one format: the meter's decimals, but without the
+  // leading zeros of its fixed-width display ("006.58" -> "6.58")
+  static const QRegularExpression leadingZeros("^([-+]?)0+(?=\\d)");
+  QString current = m_text.trimmed();
+  current.remove(' ').replace(leadingZeros, "\\1");
+
   p.setFont(scaledFont(g.fontPx * 1.15, true));
   p.setPen(m_style.boxText);
   p.drawText(cur.adjusted(fh * 0.02, 0, -fh * 0.02, 0), Qt::AlignCenter,
-             m_overload ? tr("OL") : m_text.trimmed());
+             m_overload ? tr("OL") : current);
 
   QString peakText = QStringLiteral("—");
   if (!std::isnan(m_peak))
   {
     // same number of decimals as the meter's own rendering of the value
-    const int dot = m_text.indexOf('.');
-    const int decimals = dot < 0 ? 0 : m_text.trimmed().size() - dot - 1;
+    const int dot = current.indexOf('.');
+    const int decimals = dot < 0 ? 0 : current.size() - dot - 1;
     peakText = QString::number(m_peak, 'f', qBound(0, decimals, 6));
   }
   p.drawText(max.adjusted(fh * 0.02, 0, -fh * 0.02, 0), Qt::AlignCenter, peakText);

@@ -75,10 +75,7 @@ const char *kSilverSheet =
   "  border-bottom: 1px solid #8e96a1; }"
   "QStatusBar { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
   "  stop:0 #d9dde2, stop:1 #aab1ba); }"
-  "QMdiSubWindow { background: #dfe2e6; }"
-  "QWidget#viewHeader { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
-  "  stop:0 #ffffff, stop:0.5 #dde1e6, stop:0.51 #cfd4da, stop:1 #b7bec7);"
-  "  border: 1px solid #99a1ab; border-radius: 3px; }";
+  "QMdiSubWindow { background: #dfe2e6; }";
 
 const char *kDarkSheet =
   "QToolBar { border-bottom: 1px solid #1c1c1e; }";
@@ -165,6 +162,7 @@ Designs::GraphColors Designs::graphColors(Design d)
     c.background = QColor(36, 36, 40);
     c.grid = QColor(80, 80, 86);
     c.labels = QColor(210, 210, 210);
+    c.data = QColor(0x56, 0xb4, 0xe9);   // sky blue: the default blue is hard to see on dark grey
   }
   return c;
 }

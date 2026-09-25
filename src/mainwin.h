@@ -37,7 +37,6 @@ class MeterWid;
 class ReadingLogWid;
 class AlarmBar;
 class MdiArranger;
-class ViewFrame;
 class QMdiArea;
 class QMdiSubWindow;
 
@@ -89,8 +88,8 @@ protected Q_SLOTS:
   void      setFullScreen(bool on);
   /// Arrange actions and the title-bar action follow the arranger.
   void      syncArrangeActions();
-  /// Header lines of display and meter: meter model and port.
-  void      updateHeaders();
+  /// The readings dot in the status bar and its tooltip (meter and port).
+  void      updateLed();
 
 protected:
   MainWid    *m_wid;
@@ -100,9 +99,10 @@ protected:
   AlarmBar   *m_alarmBar;
   QMdiArea   *m_mdi;
   MdiArranger *m_arranger;
-  ViewFrame  *m_displayFrame;
-  ViewFrame  *m_meterFrame;
-  ViewFrame  *m_readingsFrame;
+  QLabel     *m_led;        ///< readings dot in the status bar
+  QTimer     *m_ledIdle;
+  bool        m_ledActive = false;
+  bool        m_ledBlink = false;
   QMdiSubWindow *m_displayWin;
   QMdiSubWindow *m_meterWin;
   QMdiSubWindow *m_graphWin;

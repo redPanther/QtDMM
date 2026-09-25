@@ -104,6 +104,7 @@ ReadingLogWid::ReadingLogWid(QWidget *parent) :
 
   m_stats = new QLabel(this);
   m_stats->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  m_stats->setWordWrap(true);   // a long line must not dictate the width
   layout->addWidget(m_stats);
 
   connect(m_log, &QAbstractItemModel::rowsInserted, this, &ReadingLogWid::followSLOT);

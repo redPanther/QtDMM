@@ -1,5 +1,5 @@
 // Tests for MdiArranger: the automatic layout ("Displays on top") and the
-// bookkeeping of order and title bars on a real QMdiArea (offscreen).
+// title bars on a real QMdiArea (offscreen).
 #include <QApplication>
 #include <QDebug>
 #include <QLabel>
@@ -97,11 +97,6 @@ static void testWindows()
   check(MdiArranger::titleBarHidden(wins[0]), "window a has no title bar");
   check(wins[0]->geometry().right() < wins[1]->geometry().left(), "a left of b");
   check(wins[0]->geometry().bottom() < wins[2]->geometry().top(), "instruments above the graph");
-
-  arranger.setOrder({ wins[1], wins[0] });
-  QTest::qWait(50);
-  check(arranger.order() == QList<QMdiSubWindow *>({ wins[1], wins[0], wins[2] }), "order b, a, then the rest");
-  check(wins[1]->geometry().right() < wins[0]->geometry().left(), "after the swap b is left of a");
 
   wins[1]->hide();
   QTest::qWait(50);

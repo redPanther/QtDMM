@@ -11,8 +11,8 @@
 ///
 /// A design is more than a palette: Fusion ignores gradient brushes in the
 /// palette on most widgets, so the gradients come from a style sheet
-/// (toolbars, status bar) and from the views that paint them themselves
-/// (ViewFrame, the MDI area background, the graph). The LCD tint and the
+/// (toolbars, status bar), the views' background brush and what paints
+/// itself (the MDI area background, the graph). The LCD tint and the
 /// analog meter's style are settings of their own and stay as they are.
 namespace Designs
 {
@@ -29,7 +29,7 @@ namespace Designs
 
   /// Background of the MDI area.
   QBrush areaBrush(Design d);
-  /// Background of a view frame (display, meter, table); Qt::NoBrush = the
+  /// Background of the views (display, meter, table); Qt::NoBrush = the
   /// palette's window colour.
   QBrush frameBrush(Design d);
 
@@ -40,6 +40,7 @@ namespace Designs
     QBrush background;   ///< chart background
     QColor grid;
     QColor labels;       ///< axis labels and titles
+    QColor data;         ///< curve colour, used while the setting is the default
   };
   GraphColors graphColors(Design d);
 }

@@ -137,8 +137,10 @@ public:
                              const QColor &start, const QColor &external,
                              const QColor &integration, const QColor &intThreshold);
   /// Colours of the window design (background, grid, axis lettering); a
-  /// background of Qt::NoBrush means the colours from the settings.
-  void             setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels);
+  /// background of Qt::NoBrush means the colours from the settings. @p data
+  /// replaces the curve colour only while that is the default blue.
+  void             setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
+                                  const QColor &data = QColor());
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
   /// Draws a vertical mark at the current sample (an alarm raised); marks
@@ -300,6 +302,8 @@ protected:
   QBrush           m_themeBackground;   ///< Qt::NoBrush: m_bgColor
   QColor           m_themeGrid;
   QColor           m_themeLabels;
+  QColor           m_themeData;         ///< proposed curve colour, invalid = none
+  QColor           dataColor() const;   ///< the curve colour in use
   QBrush           m_defaultLabels;     ///< the chart's own label colour
   QColor           m_defaultAxisLine;   ///< the chart's own axis line colour
   void             applyThemeColors();

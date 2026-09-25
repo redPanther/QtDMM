@@ -36,7 +36,6 @@
 #include "alarmbar.h"
 #include "mdiarranger.h"
 #include "metercontroller.h"
-#include "viewframe.h"
 #include "designs.h"
 #include <QMdiArea>
 #include <QMdiSubWindow>
@@ -87,13 +86,11 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   // controller (see MainWid)
   m_display = new DisplayWid(this);
   m_wid->setDisplay(m_display);
-  m_displayFrame = new ViewFrame(m_display, true);
-  m_displayWin = addView(m_displayFrame, tr("Display"), MdiArranger::Instrument, "display");
+  m_displayWin = addView(m_display, tr("Display"), MdiArranger::Instrument, "display");
 
   m_meter = new MeterWid(this);
   m_wid->setMeter(m_meter);
-  m_meterFrame = new ViewFrame(m_meter, true);
-  m_meterWin = addView(m_meterFrame, tr("Analog meter"), MdiArranger::Instrument, "meter");
+  m_meterWin = addView(m_meter, tr("Analog meter"), MdiArranger::Instrument, "meter");
   m_wid->setStateManager(m_stateMgr);
 
   m_graphWin = addView(m_wid, tr("Graph"), MdiArranger::Graph, "graph");
@@ -101,19 +98,18 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   m_readings = new ReadingLogWid(this);
   m_readings->setMaxRows(m_wid->settings()->getInt("ReadingLog/max-rows", 10000));
   m_wid->setReadingLog(m_readings->log());
-  m_readingsFrame = new ViewFrame(m_readings, false);
-  m_readingsFrame->setTitle(tr("Readings"));
-  m_readingsWin = addView(m_readingsFrame, tr("Readings"), MdiArranger::Table, "readings");
+  m_readingsWin = addView(m_readings, tr("Readings"), MdiArranger::Table, "readings");
 
-  for (ViewFrame *f : { m_displayFrame, m_meterFrame })
-    connect(ctl, &MeterController::reading, f, [f](const Reading &r)
+  // right-click on display or meter: the window's menu (also without title bar)
+  for (auto [view, win] : { std::pair<QWidget *, QMdiSubWindow *>{m_display, m_displayWin},
+                            std::pair<QWidget *, QMdiSubWindow *>{m_meter, m_meterWin} })
+  {
+    view->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(view, &QWidget::customContextMenuRequested, this, [this, view = view, w = win](const QPoint &pos)
     {
-      if (r.id == 0)
-        f->pulse();
+      windowMenu(w, view->mapToGlobal(pos));
     });
-  for (auto [frame, win] : { std::pair{m_displayFrame, m_displayWin}, std::pair{m_meterFrame, m_meterWin},
-                             std::pair{m_readingsFrame, m_readingsWin} })
-    connect(frame, &ViewFrame::menuRequested, this, [this, w = win](const QPoint &pos) { windowMenu(w, pos); });
+  }
 
   // one checkable action per window: toolbar buttons, menu entries, shortcuts
   m_displayAction = windowAction(m_displayWin, tr("&Display"), "Ctrl+1", ":/Symbols/display.xpm",
@@ -143,8 +139,8 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   m_arrangeTop->setCheckable(true);
   m_arrangeTop->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Displays on top</span></p>"
                                 "<p>The displays share a strip at the top, the graph takes the rest and the "
-                                "readings table a column on the right; everything follows the window size. "
-                                "Drag a window onto another one to swap the two.</p></body></html>"));
+                                "readings table a column on the right; everything follows the window size."
+                                "</p></body></html>"));
   m_arrangeFree = new QAction(tr("&Free"), arrangeGroup);
   m_arrangeFree->setCheckable(true);
   m_arrangeFree->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Free</span></p>"
@@ -156,8 +152,8 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   m_titleBars->setCheckable(true);
   m_titleBars->setShortcut(QKeySequence("Ctrl+L"));
   m_titleBars->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Hide title bars</span></p>"
-                               "<p>Windows without title bar sit flush next to each other. Their header line "
-                               "keeps the name, right-click it for the window's menu; Ctrl+drag moves a window."
+                               "<p>Windows without title bar sit flush next to each other. Right-click the display "
+                               "or the meter for the window's menu; in Free mode Ctrl+drag moves a window."
                                "</p></body></html>"));
   connect(m_titleBars, &QAction::triggered, m_arranger, &MdiArranger::setTitleBarsHidden);
   connect(m_arranger, &MdiArranger::changed, this, &MainWin::syncArrangeActions);
@@ -190,7 +186,7 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
 
   updateWindowTitle();
   connect(m_wid, &MainWid::configChanged, this, &MainWin::updateWindowTitle);
-  connect(m_wid, &MainWid::configChanged, this, &MainWin::updateHeaders);
+  connect(m_wid, &MainWid::configChanged, this, &MainWin::updateLed);
 
   createExtraActions();
   addShortcutsToToolTips();
@@ -200,6 +196,29 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   connectSLOT(false);
 
   // status bar
+  // a dot that blinks green while readings come in and turns grey when they
+  // stop; the connection text follows it
+  m_led = new QLabel(statusBar());
+  statusBar()->addWidget(m_led);
+  m_ledIdle = new QTimer(this);
+  m_ledIdle->setSingleShot(true);
+  m_ledIdle->setInterval(3000);
+  connect(m_ledIdle, &QTimer::timeout, this, [this]
+  {
+    m_ledActive = false;
+    updateLed();
+  });
+  connect(m_wid->controller(), &MeterController::reading, this, [this](const Reading &r)
+  {
+    if (r.id != 0)
+      return;
+    m_ledActive = true;
+    m_ledBlink = !m_ledBlink;
+    m_ledIdle->start();
+    updateLed();
+  });
+  updateLed();
+
   m_error = new QLabel(statusBar());
   m_error->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   statusBar()->addWidget(m_error, 20);
@@ -655,31 +674,24 @@ void MainWin::syncArrangeActions()
   m_titleBars->setChecked(m_arranger->titleBarsHidden());
 }
 
-void MainWin::updateHeaders()
+void MainWin::updateLed()
 {
-  for (ViewFrame *f : { m_displayFrame, m_meterFrame })
-  {
-    f->setTitle(m_wid->dmmTitle());
-    f->setDetail(m_wid->dmmConfigured() ? m_wid->portName() : QString());
-  }
+  const QColor c = !m_ledActive ? QApplication::palette().color(QPalette::Disabled, QPalette::WindowText)
+                                : m_ledBlink ? QColor(0x22, 0xaa, 0x22) : QColor(0x66, 0xcc, 0x66);
+  m_led->setText(QString("<span style='color:%1'>&#9679;</span>").arg(c.name()));
+  const QString meter = m_wid->dmmConfigured() ? QString("%1 · %2").arg(m_wid->dmmTitle(), m_wid->portName())
+                                               : m_wid->dmmTitle();
+  m_led->setToolTip(m_ledActive ? tr("%1: readings are coming in").arg(meter)
+                                : tr("%1: no reading for 3 s").arg(meter));
 }
 
-// Which windows are shown, their order, the mode and - in Free mode - where
+// Which windows are shown, the mode and - in Free mode - where
 // they are. The display's visibility is the old Display/show key.
 void MainWin::restoreWindows()
 {
   Settings *cfg = m_wid->settings();
   setDesign(Designs::fromName(cfg->getString("Windows/design", "system")));
   m_restoring = true;
-  const QString order = cfg->getString("Windows/order", QString());
-  if (!order.isEmpty())
-  {
-    QList<QMdiSubWindow *> wins;
-    for (const QString &name : order.split(','))
-      if (auto *w = m_mdi->findChild<QMdiSubWindow *>(name))
-        wins << w;
-    m_arranger->setOrder(wins);
-  }
   const bool free = cfg->getString("Windows/arrange", "top") == "free";
   m_arranger->setMode(free ? MdiArranger::Free : MdiArranger::DisplaysOnTop);
   m_arranger->setTitleBarsHidden(cfg->getBool("Windows/title-bars-hidden", !free));
@@ -707,17 +719,12 @@ void MainWin::restoreWindows()
     qobject_cast<QWidget *>(a->property("window").value<QObject *>())->setVisible(a->isChecked());
   m_restoring = false;
   syncArrangeActions();
-  updateHeaders();
   m_arranger->arrange();
 }
 
 void MainWin::saveWindows()
 {
   Settings *cfg = m_wid->settings();
-  QStringList order;
-  for (QMdiSubWindow *w : m_arranger->order())
-    order << w->objectName();
-  cfg->setString("Windows/order", order.join(','));
   cfg->setString("Windows/arrange", m_arranger->mode() == MdiArranger::Free ? "free" : "top");
   cfg->setBool("Windows/title-bars-hidden", m_arranger->titleBarsHidden());
   cfg->setString("Windows/design", Designs::name(Designs::current()));
@@ -738,14 +745,22 @@ void MainWin::setDesign(int design)
   const auto d = static_cast<Designs::Design>(design);
   Designs::apply(d);
   m_mdi->setBackground(Designs::areaBrush(d));
+  // the instruments are drawn on a transparent background: the window's
+  // (brushed metal in Silver) shows around them
   const QBrush frame = Designs::frameBrush(d);
-  for (ViewFrame *f : { m_displayFrame, m_meterFrame, m_readingsFrame })
+  for (QWidget *view : { static_cast<QWidget *>(m_display), static_cast<QWidget *>(m_meter),
+                         static_cast<QWidget *>(m_readings) })
   {
-    f->setProperty("frameBrush", frame.style() == Qt::NoBrush ? QVariant() : QVariant(frame));
-    f->update();
+    const bool own = frame.style() != Qt::NoBrush;
+    QPalette pal = view->palette();
+    pal.setBrush(QPalette::Window, own ? frame : QApplication::palette().window());
+    view->setPalette(pal);
+    view->setAutoFillBackground(own);
+    view->update();
   }
+  updateLed();
   const Designs::GraphColors g = Designs::graphColors(d);
-  m_wid->graph()->setThemeColors(g.background, g.grid, g.labels);
+  m_wid->graph()->setThemeColors(g.background, g.grid, g.labels, g.data);
   m_arrangeMenu->menuAction()->setIcon(arrangeIcon());
   for (QAction *a : m_designMenu->actions())
     a->setChecked(a->data().toInt() == design);

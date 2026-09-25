@@ -589,6 +589,8 @@ QString MainWid::portName() const
     return "BLE " + device.section(' ', 1, 1);
   if (type == "calc")
     return tr("calculated");
+  if (type == "serial")
+    return device.section(' ', 1);   // "SERIAL /dev/ttyUSB0": the port alone
   return device;
 }
 
