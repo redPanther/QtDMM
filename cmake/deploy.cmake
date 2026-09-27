@@ -64,32 +64,6 @@ elseif(UNIX AND NOT APPLE)
 		"  configure_file(\"${CMAKE_BINARY_DIR}/tarball-version.txt\" \"\${CPACK_TEMPORARY_DIRECTORY}/.tarball-version\" COPYONLY)\n"
 		"endif()\n")
 	set(CPACK_PRE_BUILD_SCRIPTS "${CMAKE_BINARY_DIR}/tarball-version.cmake")
-
-	## RPM wants "* Www Mmm DD YYYY Name <mail> - version-release" entries; the
-	## CHANGELOG file (shipped as %doc) has its own format, so the spec gets one
-	## entry for this version, dated with the commit date
-	set(_y ${QTDMM_COMMIT_YEAR})
-	set(_m ${QTDMM_COMMIT_MONTH})
-	set(_d ${QTDMM_COMMIT_DAY})
-	# day of the week (Zeller's congruence, 0 = Saturday)
-	if (_m LESS 3)
-		math(EXPR _zm "${_m} + 12")
-		math(EXPR _zy "${_y} - 1")
-	else()
-		set(_zm ${_m})
-		set(_zy ${_y})
-	endif()
-	math(EXPR _wd "(${_d} + (13 * (${_zm} + 1)) / 5 + ${_zy} % 100 + (${_zy} % 100) / 4 + (${_zy} / 100) / 4 + 5 * (${_zy} / 100)) % 7")
-	set(_days Sat Sun Mon Tue Wed Thu Fri)
-	set(_months Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
-	list(GET _days ${_wd} _wday)
-	math(EXPR _mi "${_m} - 1")
-	list(GET _months ${_mi} _mon)
-	if (_d LESS 10)
-		set(_d "0${_d}")
-	endif()
-	set(RPM_CHANGELOG "* ${_wday} ${_mon} ${_d} ${_y} QtDMM team <hello@qtdmm.de> - ${QTDMM_PACKAGE_VERSION}-1\n- QtDMM ${QTDMM_VERSION}; the changes are listed in CHANGELOG")
-#	configure_file(${CMAKE_SOURCE_DIR}/QtDMM.spec.in ${CMAKE_SOURCE_DIR}/QtDMM.spec @ONLY)
 endif()
 
 include(CPack)
