@@ -3,6 +3,7 @@
 // renamed or forgotten page fails the build, not the user pressing F1.
 #include <QApplication>
 #include <QTextBrowser>
+#include <QAbstractTextDocumentLayout>
 #include <QFile>
 #include <QDir>
 #include <QRegularExpression>
@@ -99,16 +100,26 @@ int main(int argc, char **argv)
             .arg(dlg.contentPages().join(", "), linked.join(", ")));
     check(dlg.currentPage() == "index.md", "HelpDlg should open on index.md");
     // the device table is the heaviest page; with the layout left enabled
-    // while parsing QTextBrowser needs seconds for it, not milliseconds
+    // while parsing, QTextBrowser lays the document out again after every
+    // block and needs seconds for it, not milliseconds. The time depends on
+    // the machine (slow on RISC-V, #130), so the check counts layout passes:
+    // HelpBrowser parses with the layout switched off, which leaves a handful
+    // of size changes instead of one per block.
     dlg.show();
+    QTextBrowser *browser = dlg.findChild<QTextBrowser *>("ui_page");
+    check(browser != nullptr, "HelpDlg has no ui_page browser");
+    int relayouts = 0;
+    if (browser)
+      QObject::connect(browser->document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged,
+                       [&relayouts] { relayouts++; });
     QElapsedTimer timer;
     timer.start();
     dlg.showPage("supported-devices.md");
     const qint64 ms = timer.elapsed();
     check(dlg.currentPage() == "supported-devices.md",
           "showPage(\"supported-devices.md\") did not switch the page");
-    check(ms < 1500, QString("supported-devices.md took %1 ms to load").arg(ms));
-    qInfo() << "supported-devices.md loaded in" << ms << "ms";
+    check(relayouts < 20, QString("supported-devices.md was laid out %1 times while loading").arg(relayouts));
+    qInfo() << "supported-devices.md loaded in" << ms << "ms," << relayouts << "layout passes";
 
     // Ctrl+F search: first match selected, wraps around, misses reported
     check(dlg.search("UT61E") && dlg.selectedText() == "UT61E",
