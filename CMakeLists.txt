@@ -32,12 +32,22 @@ foreach(file_path IN LISTS XPM_FILES)
 endforeach()
 set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
-set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/Translations\">\n")
-foreach(translation_file IN LISTS TRANSLATIONS)
-	string(REGEX REPLACE "^.*/${PROJECT_NAME}_([^.]+)\\.ts$" "\\1" lang ${translation_file})
-	set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${lang}\">${CMAKE_BINARY_DIR}/${PROJECT_NAME}_${lang}.qm</file>\n")
-endforeach()
-set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
+## Translations are compiled into the binary by default: one file, nothing to
+## find at run time. Linux/BSD distributions that package them as files
+## (Fedora's %find_lang --with-qt) turn this off; the .qm files are then
+## installed to share/qtdmm/translations. Windows and macOS always embed them.
+option(QTDMM_EMBED_TRANSLATIONS "Compile the translations into the binary instead of installing them as .qm files" ON)
+if (WIN32 OR APPLE)
+	set(QTDMM_EMBED_TRANSLATIONS ON)
+endif()
+if (QTDMM_EMBED_TRANSLATIONS)
+	set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/Translations\">\n")
+	foreach(translation_file IN LISTS TRANSLATIONS)
+		get_filename_component(qm_name "${translation_file}" NAME_WE)
+		set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${qm_name}.qm\">${CMAKE_BINARY_DIR}/${qm_name}.qm</file>\n")
+	endforeach()
+	set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
+endif()
 
 ## in-app help: the user guide pages, aliased by their path below docs/user so
 ## relative Markdown links resolve the same way in QTextBrowser and in MkDocs
@@ -231,6 +241,11 @@ if (NOT WIN32)
 	install(FILES ${CMAKE_BINARY_DIR}/qtdmm.1.gz DESTINATION share/man/man1)
 	## AppStream metadata for software centres, named after the component id
 	install(FILES assets/appimage/qtdmm.appdata.xml DESTINATION share/metainfo RENAME io.github.qtdmm.qtdmm.metainfo.xml)
+endif()
+
+## main.cpp looks for them next to the binary: <prefix>/bin/../share/qtdmm/translations
+if (NOT QTDMM_EMBED_TRANSLATIONS)
+	install(FILES ${QM_FILES} DESTINATION share/qtdmm/translations)
 endif()
 
 ## include test framework

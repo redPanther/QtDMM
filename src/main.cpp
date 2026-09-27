@@ -78,7 +78,20 @@ void initTranslation(QApplication *app,QTranslator *QtTranslation, QTranslator *
   else
     qWarning() << "Could not load Qt translation!";
 
-  if (AppTranslation->load(QString("%1").arg(QLocale::system().name()), ":/Translations")) //
+  // compiled in (default), or installed as files by a distribution package
+  // (QTDMM_EMBED_TRANSLATIONS=OFF): <prefix>/share/qtdmm/translations
+  const QStringList dirs = {":/Translations",
+                            QCoreApplication::applicationDirPath() + "/../share/qtdmm/translations"};
+  bool loaded = false;
+  for (const QString &dir : dirs)
+  {
+    if (AppTranslation->load(QLocale::system(), "qtdmm", "_", dir))
+    {
+      loaded = true;
+      break;
+    }
+  }
+  if (loaded)
     app->installTranslator(AppTranslation);
   else
     qWarning() << "Could not load App translation!";
