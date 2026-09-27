@@ -75,6 +75,14 @@ then fill in the new entries (Qt Linguist or a text editor) and commit the
 files in the source tree, and two targets running it in parallel corrupted
 them.
 
+The compiled `.qm` files are embedded in the binary. Distribution packages
+that want them as separate files (Fedora's `%find_lang --with-qt`) configure
+with `-DQTDMM_EMBED_TRANSLATIONS=OFF`: the `.qm` files are then installed to
+`share/qtdmm/translations`, where `src/main.cpp` finds them relative to the
+binary (`<prefix>/bin/../share/qtdmm/translations`). On Windows and macOS the
+option is always on, so the portable ZIP and the app bundle stay
+self-contained.
+
 ## Platforms
 
 Linux, macOS and FreeBSD are built and tested by the GitHub workflows with

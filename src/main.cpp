@@ -73,15 +73,33 @@ void qtdmmMessageOutput(QtMsgType type, const QMessageLogContext &context, const
 
 void initTranslation(QApplication *app,QTranslator *QtTranslation, QTranslator *AppTranslation)
 {
-  if (QtTranslation->load(QString("qt_%1").arg(QLocale::system().name()), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
-    app->installTranslator(QtTranslation);
-  else
-    qWarning() << "Could not load Qt translation!";
+  // the texts are English: there is nothing to load for English or the C
+  // locale, and no reason to warn about it
+  const QLocale locale = QLocale::system();
+  const bool english = locale.language() == QLocale::English || locale.language() == QLocale::C;
 
-  if (AppTranslation->load(QString("%1").arg(QLocale::system().name()), ":/Translations")) //
+  if (QtTranslation->load(QString("qt_%1").arg(locale.name()), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+    app->installTranslator(QtTranslation);
+  else if (!english)
+    qWarning() << "Could not load Qt translation for" << locale.name();
+
+  // compiled in (default), or installed as files by a distribution package
+  // (QTDMM_EMBED_TRANSLATIONS=OFF): <prefix>/share/qtdmm/translations
+  const QStringList dirs = {":/Translations",
+                            QCoreApplication::applicationDirPath() + "/../share/qtdmm/translations"};
+  bool loaded = false;
+  for (const QString &dir : dirs)
+  {
+    if (AppTranslation->load(locale, "qtdmm", "_", dir))
+    {
+      loaded = true;
+      break;
+    }
+  }
+  if (loaded)
     app->installTranslator(AppTranslation);
-  else
-    qWarning() << "Could not load App translation!";
+  else if (!english)
+    qWarning() << "Could not load App translation for" << locale.name();
 }
 
 int main(int argc, char **argv)
