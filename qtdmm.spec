@@ -7,12 +7,14 @@ Version:	26.1
 # Sonst -p -e weglassen
 Release:	%autorelease -p -e rc1
 Summary:	DMM Readout Software Including a Configurable Recorder
-License:	AGPL-3.0-or-later
+License:	GPL-3.0-or-later
 URL:		https://www.qtdmm.de
 BuildSystem:	cmake
 %if %{with test}
 BuildOption:	-DBUILD_TESTING=ON
 %endif
+# Übersetzungen als eigene Dateien für %%find_lang
+BuildOption:	-DQTDMM_EMBED_TRANSLATIONS=OFF
 Source0:	%{name}-%{version}.tar.gz
 BuildRequires:	appdata-tools desktop-file-utils gcc-c++
 BuildRequires:	cmake(Qt6Bluetooth) cmake(Qt6Charts) cmake(Qt6LinguistTools) cmake(Qt6SerialPort) cmake(Qt6Svg)
@@ -27,18 +29,14 @@ Bluetooth LE and the network.
 
 %install
 %cmake_install
-# Wenn da denn getrennt ist
-#%%find_lang %%{name} --with-qt
-
-# Wenn es denn Übersetzungen eineln sind
-#%%files -f %%{name}.lang
+%find_lang %{name} --with-qt
 
 %check
 desktop-file-validate %{buildroot}%{_datadir}/applications/%{name}.desktop
 appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/*.metainfo.xml
 QT_QPA_PLATFORM=offscreen %ctest
 
-%files
+%files -f %{name}.lang
 %license LICENSE
 %doc AUTHORS README.md CHANGELOG
 %{_bindir}/%{name}
@@ -46,6 +44,8 @@ QT_QPA_PLATFORM=offscreen %ctest
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 %{_mandir}/man1/%{name}.1*
 %{_metainfodir}/*.xml
+%dir %{_datadir}/%{name}
+%dir %{_datadir}/%{name}/translations
 
 %changelog
 %autochangelog

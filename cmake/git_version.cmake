@@ -27,7 +27,7 @@
 #   PROJECT_VERSION[_MAJOR|_MINOR|_PATCH]
 #                           numbers only, for CMake, CPack, the macOS bundle and
 #                           Windows version resources            (26.2.0)
-#   QTDMM_COMMIT_YEAR/_MONTH/_DAY  date of the commit (RPM changelog)
+#   QTDMM_COMMIT_YEAR/_MONTH/_DAY  date of the commit (man page)
 #
 # qtdmm_parse_describe() is also what tests/test_version.cmake checks.
 
