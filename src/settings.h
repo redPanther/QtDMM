@@ -48,6 +48,10 @@ public:
 
   /// Removes the settings file of another instance.
   void           deleteConfig(QString instance_id);
+  /// Writes this instance's settings as the file of a new instance, without
+  /// the meter and its connection (DMM/, Port settings/), the window position
+  /// and the SCPI server switch. Returns the file written.
+  QString        copyConfig(const QString &instance_id) const;
 
   /// Ids of all instances that have a settings file next to this one.
   QStringList    getConfigInstances();
