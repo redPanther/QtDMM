@@ -676,6 +676,10 @@ void MainWin::bindWindowAction(QAction *action, QMdiSubWindow *win)
   action->setProperty("window", QVariant::fromValue<QObject *>(win));
   connect(action, &QAction::toggled, win, [this, win](bool on)
   {
+    // the view inside may have been closed with the window before (Qt
+    // closes it along): show it again, or the window stays empty
+    if (on && win->widget())
+      win->widget()->show();
     win->setVisible(on);
     if (on)
     {
@@ -691,6 +695,15 @@ bool MainWin::eventFilter(QObject *watched, QEvent *event)
 {
   if (watched == m_display && event->type() == QEvent::Resize)
     m_fold->move(m_display->width() - m_fold->width() - 6, 6);
+  // closing a window (its title bar button, Ctrl+F4) only hides it: a real
+  // close would close the view inside as well, and it would not come back
+  if (event->type() == QEvent::Close)
+    if (auto *win = qobject_cast<QMdiSubWindow *>(watched))
+    {
+      win->hide();
+      event->ignore();
+      return true;
+    }
   if (event->type() == QEvent::Show || event->type() == QEvent::Hide)
     for (QAction *a : { m_displayAction, m_meterAction, m_readingsAction, action_Graph })
       if (a && a->property("window").value<QObject *>() == watched)
