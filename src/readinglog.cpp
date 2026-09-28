@@ -66,7 +66,7 @@ QVariant ReadingLog::data(const QModelIndex &index, int role) const
 
   switch (index.column())
   {
-    case Time:  return formatTime(e.when);
+    case Time:  return m_singleDay ? e.when.toString("HH:mm:ss.zzz") : formatTime(e.when);
     case Value: return e.val.trimmed();
     case Unit:  return e.unit;
     case Mode:  return e.id > 0 ? tr("2nd") + (e.special.isEmpty() ? QString() : " " + modeText(e.special)) : modeText(e.special);
@@ -108,6 +108,18 @@ void ReadingLog::append(const Entry &entry)
   beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
   m_entries.append(entry);
   endInsertRows();
+  updateSingleDay();
+}
+
+void ReadingLog::updateSingleDay()
+{
+  // the rows are in time order: first and last tell whether a day changed
+  const bool single = m_entries.isEmpty() || m_entries.first().when.date() == m_entries.last().when.date();
+  if (single == m_singleDay)
+    return;
+  m_singleDay = single;
+  if (!m_entries.isEmpty())
+    Q_EMIT dataChanged(index(0, Time), index(m_entries.size() - 1, Time), {Qt::DisplayRole});
 }
 
 void ReadingLog::markLast(const QColor &color, const QString &name)
@@ -126,6 +138,7 @@ void ReadingLog::clear()
     return;
   beginResetModel();
   m_entries.clear();
+  m_singleDay = true;
   endResetModel();
 }
 
@@ -138,6 +151,7 @@ void ReadingLog::setMaxRows(int rows)
     beginRemoveRows(QModelIndex(), 0, excess - 1);
     m_entries.remove(0, excess);
     endRemoveRows();
+    updateSingleDay();
   }
 }
 
@@ -188,7 +202,9 @@ QString ReadingLog::toText(const QList<int> &rows) const
     if (r < 0 || r >= m_entries.size())
       continue;
     QStringList cells;
-    for (int c = 0; c < ColumnCount; ++c)
+    // the date stays in the copy: pasted elsewhere the rows lose their context
+    cells << formatTime(m_entries[r].when);
+    for (int c = Time + 1; c < ColumnCount; ++c)
       cells << data(index(r, c), Qt::DisplayRole).toString();
     lines << cells.join('\t');
   }

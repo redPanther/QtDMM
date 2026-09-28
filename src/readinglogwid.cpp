@@ -18,6 +18,7 @@
 #include <QStyle>
 #include <QTableView>
 #include <QToolButton>
+#include <QStyleOptionViewItem>
 #include <QVBoxLayout>
 
 #include "siprefix.h"
@@ -39,11 +40,12 @@ ReadingLogWid::ReadingLogWid(QWidget *parent) :
   m_view->verticalHeader()->setDefaultSectionSize(m_view->fontMetrics().height() + 4);
   m_view->verticalHeader()->setVisible(false);
   m_view->horizontalHeader()->setStretchLastSection(false);
-  m_view->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-  // the default is 1000 rows measured per column and per inserted row; the
-  // columns hold fixed-width values, so the newest rows are enough
-  m_view->horizontalHeader()->setResizeContentsPrecision(20);
+  // widths come from fitColumns(): every column as wide as its content, the
+  // rest of the width shared out; a table narrower than that scrolls
+  m_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+  m_view->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
   m_view->horizontalHeader()->setHighlightSections(false);
+  m_view->viewport()->installEventFilter(this);
   m_view->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_view, &QTableView::customContextMenuRequested, this, [this](const QPoint &pos)
   {
@@ -107,6 +109,24 @@ ReadingLogWid::ReadingLogWid(QWidget *parent) :
   m_stats->setWordWrap(true);   // a long line must not dictate the width
   layout->addWidget(m_stats);
 
+  connect(m_log, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &, int first, int last)
+  {
+    measureRows(first, last);
+  });
+  connect(m_log, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &tl, const QModelIndex &br)
+  {
+    // the Time column gained or lost its date: measure it afresh
+    if (tl.column() <= ReadingLog::Time && br.column() >= ReadingLog::Time && br.row() - tl.row() + 1 == m_log->rowCount())
+    {
+      m_need[ReadingLog::Time] = 0;
+      measureRows(qMax(0, m_log->rowCount() - kMeasureRows), m_log->rowCount() - 1);
+    }
+  });
+  connect(m_log, &QAbstractItemModel::modelReset, this, [this]
+  {
+    m_need.fill(0);
+    measureRows(0, -1);
+  });
   connect(m_log, &QAbstractItemModel::rowsInserted, this, &ReadingLogWid::followSLOT);
   connect(m_log, &QAbstractItemModel::rowsInserted, this, &ReadingLogWid::updateStats);
   connect(m_log, &QAbstractItemModel::rowsRemoved, this, &ReadingLogWid::updateStats);
@@ -118,7 +138,51 @@ ReadingLogWid::ReadingLogWid(QWidget *parent) :
         || m_view->verticalScrollBar()->hasFocus())
       m_follow->setChecked(value >= m_view->verticalScrollBar()->maximum());
   });
+  m_need.fill(0, ReadingLog::ColumnCount);
+  measureRows(0, -1);
   updateStats();
+}
+
+void ReadingLogWid::measureRows(int first, int last)
+{
+  // Header and the given rows, measured with the view's own item size hints
+  // (padding and style included). m_need only grows: a column that jumps
+  // back and forth with every reading would be worse than one a bit wide.
+  // Only new rows are measured, so a full table costs nothing per reading.
+  QHeaderView *header = m_view->horizontalHeader();
+  const QStyleOptionViewItem option = [this]
+  {
+    QStyleOptionViewItem o;
+    o.initFrom(m_view);
+    o.font = m_view->font();
+    return o;
+  }();
+  bool grown = false;
+  for (int c = 0; c < ReadingLog::ColumnCount; ++c)
+  {
+    int w = qMax(m_need[c], header->sectionSizeHint(c));
+    for (int r = qMax(first, last - kMeasureRows + 1); r <= last; ++r)
+      w = qMax(w, m_view->itemDelegateForColumn(c) ? m_view->itemDelegateForColumn(c)->sizeHint(option, m_log->index(r, c)).width()
+                                                    : m_view->itemDelegate()->sizeHint(option, m_log->index(r, c)).width());
+    if (w != m_need[c])
+    {
+      m_need[c] = w;
+      grown = true;
+    }
+  }
+  if (grown || first > last)
+    fitColumns();
+}
+
+void ReadingLogWid::fitColumns()
+{
+  int sum = 0;
+  for (int w : m_need)
+    sum += w;
+  const int extra = qMax(0, m_view->viewport()->width() - sum);
+  const int n = ReadingLog::ColumnCount;
+  for (int c = 0; c < n; ++c)
+    m_view->horizontalHeader()->resizeSection(c, m_need[c] + extra / n + (c == n - 1 ? extra % n : 0));
 }
 
 int ReadingLogWid::maxRows() const
@@ -133,14 +197,6 @@ void ReadingLogWid::setMaxRows(int rows)
 
 void ReadingLogWid::followSLOT()
 {
-  // A first HOLD or a longer value would stay clipped without a resize, but
-  // resizeColumnsToContents() measures up to resizeContentsPrecision() rows
-  // per column - not the visible ones - which costs tens of milliseconds per
-  // reading once the table has filled up. The precision is lowered in the
-  // constructor; the explicit call is only needed while the table is young,
-  // afterwards the widest value has been seen.
-  if (m_log->rowCount() <= 50)
-    m_view->resizeColumnsToContents();
   if (m_follow->isChecked())
     m_view->scrollToBottom();
 }
@@ -195,6 +251,8 @@ void ReadingLogWid::copySLOT()
 
 bool ReadingLogWid::eventFilter(QObject *watched, QEvent *event)
 {
+  if (watched == m_view->viewport() && event->type() == QEvent::Resize)
+    fitColumns();
   if (watched == m_view && (event->type() == QEvent::ShortcutOverride || event->type() == QEvent::KeyPress))
   {
     QKeyEvent *key = static_cast<QKeyEvent *>(event);

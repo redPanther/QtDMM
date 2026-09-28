@@ -52,13 +52,37 @@ int main(int argc, char **argv)
   log.append(entry(0, " OL ", "V", 2));
   log.append(entry(50.0, "50.0", "Hz", 3, 1));   // a secondary value
   check(log.rowCount() == 4 && inserted == 4, "four rows appended");
-  check(log.data(log.index(0, ReadingLog::Time)).toString() == "2026-09-21 14:03:05.250", "time cell");
+  check(log.isSingleDay() && log.data(log.index(0, ReadingLog::Time)).toString() == "14:03:05.250",
+        "time cell without the date while all rows are from one day: " + log.data(log.index(0, ReadingLog::Time)).toString());
   check(log.data(log.index(1, ReadingLog::Value)).toString() == "12.2", "value cell");
   check(log.data(log.index(1, ReadingLog::Unit)).toString() == "mV", "unit cell");
   check(log.data(log.index(2, ReadingLog::Value)).toString() == "OL", "overload cell is trimmed");
   check(log.data(log.index(3, ReadingLog::Mode)).toString().startsWith("2nd"), "secondary value marked");
   check(log.data(log.index(1, ReadingLog::Value), ReadingLog::DvalRole).toDouble() == 0.0122, "dval role");
   check(log.headerData(ReadingLog::Value, Qt::Horizontal).toString() == "Value", "header");
+
+  // --- 1b. a day change brings the date into every row, and it goes again
+  //         when the rows of the first day have been dropped ---
+  {
+    ReadingLog days;
+    int timeChanges = 0;
+    QObject::connect(&days, &QAbstractItemModel::dataChanged, [&](const QModelIndex &tl, const QModelIndex &br)
+    {
+      if (tl.column() == ReadingLog::Time && br.column() == ReadingLog::Time && tl.row() == 0)
+        ++timeChanges;
+    });
+    days.append(entry(1.0, "1.000", "V", 0));
+    days.append(entry(2.0, "2.000", "V", 86400));   // the next day
+    check(!days.isSingleDay() && timeChanges == 1, "the second day switches the dates on");
+    check(days.data(days.index(0, ReadingLog::Time)).toString() == "2026-09-21 14:03:05.250", "time cell with date");
+    check(days.data(days.index(1, ReadingLog::Time)).toString() == "2026-09-22 14:03:05.250", "next day's cell");
+    days.setMaxRows(1);
+    check(days.isSingleDay() && timeChanges == 2, "one day left: the dates go");
+    check(days.data(days.index(0, ReadingLog::Time)).toString() == "14:03:05.250", "time only again");
+    days.append(entry(3.0, "3.000", "V", 90000));
+    days.clear();
+    check(days.isSingleDay(), "cleared log is single-day");
+  }
 
   // --- 2. statistics skip overloads and secondary values ---
   ReadingLog::Stats s = log.stats();

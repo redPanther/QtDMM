@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
+#include <QVector>
 #include <QWidget>
 
 #include "readinglog.h"
@@ -39,6 +40,11 @@ protected:
 private Q_SLOTS:
   void updateStats();
   void followSLOT();
+  /// Widens m_need to rows @p first..@p last (at most the newest
+  /// kMeasureRows of them) and the header; a reset passes an empty range.
+  void measureRows(int first, int last);
+  /// Column widths: m_need each, the rest of the viewport shared evenly.
+  void fitColumns();
 
 private:
   ReadingLog *m_log;
@@ -47,4 +53,6 @@ private:
   QCheckBox *m_follow;
   QSpinBox *m_maxRows;
   QLabel *m_stats;
+  QVector<int> m_need;                    ///< width each column needs, only grows
+  static constexpr int kMeasureRows = 50;
 };

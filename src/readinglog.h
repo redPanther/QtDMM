@@ -87,8 +87,12 @@ public:
   /// date and number cells, plus an Alarm column).
   bool writeAny(const QString &path, QString *error = nullptr) const;
 
-  /// "2026-09-21 14:03:05.250", the Time column.
+  /// "2026-09-21 14:03:05.250", the time with its date (clipboard, and
+  /// the Time column once the rows span more than one day).
   static QString formatTime(const QDateTime &when);
+  /// True while all rows are from the same day: the Time column then shows
+  /// only the time of day ("14:03:05.250").
+  bool isSingleDay() const { return m_singleDay; }
   /// The Mode column: the decoders' codes as words ("OH" -> "Resistance").
   static QString modeText(const QString &special);
 
@@ -96,4 +100,8 @@ private:
   QVector<Entry> m_entries;
   int m_maxRows = 10000;
   bool m_paused = false;
+  bool m_singleDay = true;
+  /// Recomputes m_singleDay after rows came or went; when it flips, the
+  /// whole Time column changes its text.
+  void updateSingleDay();
 };
