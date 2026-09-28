@@ -16,12 +16,16 @@ It opens as a window in a column right of the graph; see
 
 | Column | Content |
 |---|---|
-| Time | when the reading arrived, to the millisecond |
+| Time | when the reading arrived, to the millisecond; the date is added once the rows span more than one day |
 | Value | the value as shown on the meter, `OL` for overload |
 | Unit | with its SI prefix, as on the display (`mV`, `kOhm`) |
 | Mode | `DC`, `AC`, `AC+DC`, `Resistance`, `Diode`, `Continuity`, `Capacitance`, `Frequency`, `Temperature` |
 | Range | `AUTO` or `MANU`, when the meter reports it |
 | Hold | `HOLD` while the meter's hold function is on |
+
+The columns are as wide as their content and never narrower, so they do
+not jump while readings come in; a table narrower than that scrolls
+sideways. Copied rows always carry the date.
 
 Meters that send a second value with each reading (a frequency next to the
 voltage, say) get an extra row for it, marked `2nd` in the Mode column.

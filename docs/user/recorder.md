@@ -65,6 +65,23 @@ port.
   charge or energy over time.
 - **Print** (Ctrl+P) prints the graph with a title and comment.
 
+## Colours
+
+**Settings → Graph → Graph colours** sets the colours of the graph:
+
+- **Neutral** follows the window's design.
+- **Scope blue**, **Phosphor green**, **Phosphor amber** and **Chart
+  recorder** look like an oscilloscope or a paper recorder. They divide the
+  graph into 10 × 8 squares of 1, 2 or 5 units each (1 V, 2 V, 5 V, 10 V,
+  ...), so the visible time and the vertical scale grow to whole squares.
+  The phosphor colours add a fine scale on the centre lines and dash the
+  integration curve.
+- **Custom** uses the colour buttons on the same page.
+
+A curve colour you chose yourself stays in every variant. The graph's
+right-click menu, **Graph colours**, can choose other colours for this graph
+only; *Default* goes back to the setting.
+
 ## Export and import
 
 *Export* (Ctrl+E) writes the recording as CSV, or - pick the file type in

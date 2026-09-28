@@ -95,8 +95,21 @@ when the meter switches to a different unit.
 
 The display is a window like the [analog meter](analog-meter.md); digits and
 lettering scale with it. **Display** in the toolbar or the menu (Ctrl+1)
-hides and shows it. Bar graph, min/max
-and the LCD tint are set on the *Appearance* settings page.
+hides and shows it. Bar graph and min/max are set on the *Appearance*
+settings page.
+
+**LCD colours** in the display's right-click menu: *Classic* (the
+yellow-green of most meters), *Backlight blue* (light segments on blue),
+*Amber*, *High contrast* (black on white) or *Custom*, the tint from the
+*Appearance* page. Changing that tint switches the display to *Custom*.
+
+For meters whose keys QtDMM knows (the UNI-T UT60BT, UT61B+/D+/E+ and
+UT161), a row of the meter's keys sits under the display: SELECT and Hz/%,
+RANGE and AUTO, HOLD, REL, MIN/MAX and PEAK, LIGHT. HOLD and AUTO light up
+as the meter reports them. **Pressing a key does nothing yet** - sending it
+to the meter comes in a later version. The small triangle in the display's
+top right corner, or **Hide controls** in its right-click menu, folds the
+row away.
 
 ## Window layout
 
@@ -104,7 +117,13 @@ The main window holds four windows: the digital display, the analog meter,
 the recorder graph and the [readings table](readings-table.md). The toolbar
 buttons (or Ctrl+1 … Ctrl+4) show and hide them. A fresh QtDMM starts as a
 compact instrument with display and meter only; starting a recording shows
-the graph. The window title names the configured meter; in the status bar a
+the graph.
+
+The first start sizes the main window for what it shows. When you switch on
+the graph or the table for the first time, the window grows to make room -
+down for the graph, to the right for the table - up to most of the screen;
+it never shrinks by itself. Once you have sized, maximized or snapped the
+window yourself, it keeps your size. The window title names the configured meter; in the status bar a
 dot blinks green while readings come in and turns grey when none has come
 for three seconds.
 
@@ -124,6 +143,10 @@ or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
 layouts of versions before 26.1 are not taken over.
 
 **Design** in the menu sets the colours of the window: *System* (the look of
-your desktop), *Silver* (brushed aluminium) or *Dark*. The graph and the
-readings table follow; the LCD tint and the style of the analog meter are
-separate settings on the *Appearance* page.
+your desktop), *Silver* (brushed aluminium) or *Dark*. The readings table
+and a graph in the colours *Neutral* follow; the LCD colours, the graph's
+colours and the style of the analog meter are chosen separately.
+
+The symbols are KDE's Breeze icons, light or dark to match the window. On
+Linux, **Settings → Appearance → Use the desktop's icon theme** takes the
+symbols from your desktop's icon theme where it has them.
