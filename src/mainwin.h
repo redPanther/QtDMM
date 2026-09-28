@@ -165,7 +165,6 @@ protected:
   /// Window layout from/to the settings (Windows/... keys).
   void        restoreWindows();
   void        saveWindows();
-  QIcon       arrangeIcon() const;
   /// Applies a colour design (Designs::Design) to the window and the views.
   void        setDesign(int design);
   /// Keeps the window actions checked when a window is closed or shown.

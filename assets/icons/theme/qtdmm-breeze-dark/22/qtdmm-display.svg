@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22">
+  <style id="current-color-scheme" type="text/css">.ColorScheme-Text { color:#eff0f1; } .ColorScheme-Highlight { color:#3daee9; }</style>
+  <!-- the "8.8" of a seven-segment display in a frame -->
+  <rect class="ColorScheme-Text" x="1.5" y="4.5" width="19" height="13" rx="1" fill="none" stroke="currentColor"/>
+  <g class="ColorScheme-Text" fill="currentColor">
+    <rect x="5" y="7" width="4" height="1"/><rect x="5" y="10.5" width="4" height="1"/><rect x="5" y="14" width="4" height="1"/>
+    <rect x="4" y="8" width="1" height="2.5"/><rect x="9" y="8" width="1" height="2.5"/>
+    <rect x="4" y="11.5" width="1" height="2.5"/><rect x="9" y="11.5" width="1" height="2.5"/>
+    <rect x="11" y="14" width="1" height="1"/>
+    <rect x="14" y="7" width="4" height="1"/><rect x="14" y="10.5" width="4" height="1"/><rect x="14" y="14" width="4" height="1"/>
+    <rect x="13" y="8" width="1" height="2.5"/><rect x="18" y="8" width="1" height="2.5"/>
+    <rect x="13" y="11.5" width="1" height="2.5"/><rect x="18" y="11.5" width="1" height="2.5"/>
+  </g>
+</svg>

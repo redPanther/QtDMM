@@ -36,11 +36,10 @@ GraphPrefs::GraphPrefs(QWidget *parent) : PrefWidget(parent)
   m_label = tr("Graph");
   m_description = tr("<b>Here you can configure the colors and"
                      " drawing style for the graph.</b>");
-  m_pixmap = new QPixmap(":/Symbols/graph.xpm");
+  m_iconName = "office-chart-line";
 }
 GraphPrefs::~GraphPrefs()
 {
-  delete m_pixmap;
 }
 
 void GraphPrefs::defaultsSLOT()

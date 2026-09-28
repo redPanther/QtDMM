@@ -73,10 +73,10 @@ ReadingLogWid::ReadingLogWid(QWidget *parent) :
   connect(m_pause, &QToolButton::toggled, this, [this](bool paused)
   {
     m_log->setPaused(paused);
-    m_pause->setIcon(style()->standardIcon(paused ? QStyle::SP_MediaPlay : QStyle::SP_MediaPause));
+    m_pause->setIcon(QIcon::fromTheme(paused ? "media-playback-start" : "media-playback-pause"));
     m_pause->setToolTip(paused ? tr("Resume logging") : tr("Pause logging"));
   });
-  m_pause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+  m_pause->setIcon(QIcon::fromTheme("media-playback-pause"));
   bar->addWidget(m_pause);
 
   m_follow = new QCheckBox(tr("&Follow"), this);

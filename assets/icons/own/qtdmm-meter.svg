@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22">
+  <style id="current-color-scheme" type="text/css">.ColorScheme-Text { color:#232629; } .ColorScheme-Highlight { color:#3daee9; }</style>
+  <!-- analog meter: frame, scale arc with ticks, needle -->
+  <rect class="ColorScheme-Text" x="1.5" y="3.5" width="19" height="15" rx="1" fill="none" stroke="currentColor"/>
+  <path class="ColorScheme-Text" d="M 5.07 11.5 A 7 7 0 0 1 16.93 11.5" fill="none" stroke="currentColor"/>
+  <g class="ColorScheme-Text" stroke="currentColor" stroke-width="1">
+    <line x1="4.2" y1="10.5" x2="5.5" y2="11.3"/>
+    <line x1="11" y1="5.5" x2="11" y2="7"/>
+    <line x1="17.8" y1="10.5" x2="16.5" y2="11.3"/>
+    <line x1="7.4" y1="6.9" x2="8.1" y2="8.2"/>
+    <line x1="14.6" y1="6.9" x2="13.9" y2="8.2"/>
+  </g>
+  <line class="ColorScheme-Highlight" x1="11" y1="15.5" x2="15" y2="7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+  <circle class="ColorScheme-Text" cx="11" cy="15.5" r="1.5" fill="currentColor"/>
+</svg>

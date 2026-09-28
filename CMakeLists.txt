@@ -49,6 +49,17 @@ if (QTDMM_EMBED_TRANSLATIONS)
 	set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 endif()
 
+## icon themes (Breeze symbols, light and dark; tools/update_icons.py), as
+## :/icons/<theme>/... for QIcon::fromTheme()
+file(GLOB_RECURSE THEME_FILES CONFIGURE_DEPENDS assets/icons/theme/*/index.theme assets/icons/theme/*/22/*.svg)
+list(SORT THEME_FILES)
+set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/icons\">\n")
+foreach(file_path IN LISTS THEME_FILES)
+	file(RELATIVE_PATH alias "${CMAKE_SOURCE_DIR}/assets/icons/theme" "${file_path}")
+	set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${alias}\">${file_path}</file>\n")
+endforeach()
+set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
+
 ## in-app help: the user guide pages, aliased by their path below docs/user so
 ## relative Markdown links resolve the same way in QTextBrowser and in MkDocs
 file(GLOB_RECURSE HELP_FILES CONFIGURE_DEPENDS docs/user/*.md docs/user/*.png docs/user/*.svg docs/user/*.jpg)

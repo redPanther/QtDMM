@@ -3,6 +3,8 @@
 #include "designs.h"
 
 #include <QApplication>
+#include <QIcon>
+#include <QWidget>
 #include <QLinearGradient>
 #include <QPalette>
 #include <QStyle>
@@ -14,6 +16,38 @@ Designs::Design g_current = Designs::System;
 bool g_saved = false;
 QPalette g_systemPalette;
 QString g_systemStyle;
+QString g_systemIconTheme;   ///< the desktop's icon theme, empty on Windows/macOS
+bool g_systemIcons = false;
+
+// the first call remembers what the system had, for System and the icons
+void saveSystem()
+{
+  if (g_saved)
+    return;
+  g_systemPalette = QApplication::palette();
+  g_systemStyle = QApplication::style()->name();
+  g_systemIconTheme = QIcon::themeName();
+  QIcon::setThemeSearchPaths(QStringList(":/icons") + QIcon::themeSearchPaths());
+  g_saved = true;
+}
+
+void applyIcons()
+{
+  const QString breeze = Designs::iconTheme();
+  if (g_systemIcons && !g_systemIconTheme.isEmpty())
+  {
+    QIcon::setThemeName(g_systemIconTheme);
+    QIcon::setFallbackThemeName(breeze);
+  }
+  else
+  {
+    QIcon::setThemeName(breeze);
+    QIcon::setFallbackThemeName(QString());
+  }
+  // icons from fromTheme() look the theme up again when painted
+  for (QWidget *w : QApplication::allWidgets())
+    w->update();
+}
 
 // top-to-bottom gradient over the whole painted object
 QLinearGradient vgrad(std::initializer_list<QPair<double, QColor>> stops)
@@ -107,24 +141,40 @@ Designs::Design Designs::current()
 
 void Designs::apply(Design d)
 {
-  if (!g_saved)
-  {
-    g_systemPalette = QApplication::palette();
-    g_systemStyle = QApplication::style()->name();
-    g_saved = true;
-  }
+  saveSystem();
   g_current = d;
   if (d == System)
   {
     qApp->setStyleSheet(QString());
     QApplication::setStyle(QStyleFactory::create(g_systemStyle));
     QApplication::setPalette(g_systemPalette);
-    return;
   }
-  // native styles (Windows, macOS) take no palette; Fusion does
-  QApplication::setStyle(QStyleFactory::create("Fusion"));
-  QApplication::setPalette(d == Dark ? darkPalette() : silverPalette());
-  qApp->setStyleSheet(d == Silver ? kSilverSheet : kDarkSheet);
+  else
+  {
+    // native styles (Windows, macOS) take no palette; Fusion does
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+    QApplication::setPalette(d == Dark ? darkPalette() : silverPalette());
+    qApp->setStyleSheet(d == Silver ? kSilverSheet : kDarkSheet);
+  }
+  applyIcons();
+}
+
+QString Designs::iconTheme()
+{
+  // by the window colour, so System on a dark desktop gets the dark set
+  return QApplication::palette().color(QPalette::Window).lightness() < 128 ? "qtdmm-breeze-dark" : "qtdmm-breeze";
+}
+
+void Designs::setSystemIcons(bool systemIcons)
+{
+  saveSystem();
+  g_systemIcons = systemIcons;
+  applyIcons();
+}
+
+bool Designs::systemIcons()
+{
+  return g_systemIcons;
 }
 
 QBrush Designs::areaBrush(Design d)

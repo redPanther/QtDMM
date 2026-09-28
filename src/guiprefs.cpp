@@ -34,11 +34,13 @@ GuiPrefs::GuiPrefs(QWidget *parent) : PrefWidget(parent)
   m_label = tr("Appearance");
   m_description = tr("<b>Here you can configure QtDMM's visual"
                      " appearance and behaviour.</b>");
-  m_pixmap = new QPixmap(":/Symbols/gui.xpm");
+  m_iconName = "preferences-desktop-theme-global";
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+  ui_systemIcons->hide();   // no desktop icon themes there
+#endif
 }
 GuiPrefs::~GuiPrefs()
 {
-  delete m_pixmap;
 }
 
 void GuiPrefs::defaultsSLOT()
@@ -59,6 +61,7 @@ void GuiPrefs::defaultsSLOT()
 
   ui_alertUnsavedData->setChecked(m_cfg->getBool("Alert/unsaved-file", true));
   ui_textLabel->setChecked(m_cfg->getBool("Icons/text-label", false));
+  ui_systemIcons->setChecked(m_cfg->getBool("Icons/system-theme", false));
 
   ui_dmmToolBar->setChecked(m_cfg->getBool("Toolbar/dmm", true));
   ui_graphToolBar->setChecked(m_cfg->getBool("Toolbar/graph", true));
@@ -85,6 +88,7 @@ void GuiPrefs::factoryDefaultsSLOT()
 
   ui_alertUnsavedData->setChecked(true);
   ui_textLabel->setChecked(false);
+  ui_systemIcons->setChecked(false);
 
   ui_dmmToolBar->setChecked(true);
   ui_graphToolBar->setChecked(true);
@@ -119,6 +123,7 @@ void GuiPrefs::applySLOT()
   m_cfg->setBool("Display/display-min-max", showMinMax());
   m_cfg->setBool("Alert/unsaved-file", alertUnsavedData());
   m_cfg->setBool("Icons/text-label", useTextLabel());
+  m_cfg->setBool("Icons/system-theme", systemIcons());
   m_cfg->setBool("Toolbar/dmm", showDmmToolbar());
   m_cfg->setBool("Toolbar/graph", showGraphToolbar());
   m_cfg->setBool("Toolbar/file", showFileToolbar());
@@ -192,6 +197,11 @@ bool GuiPrefs::alertUnsavedData() const
 bool GuiPrefs::useTextLabel() const
 {
   return ui_textLabel->isChecked();
+}
+
+bool GuiPrefs::systemIcons() const
+{
+  return ui_systemIcons->isChecked();
 }
 
 QColor GuiPrefs::displayBgColor() const

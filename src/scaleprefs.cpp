@@ -40,7 +40,7 @@ ScalePrefs::ScalePrefs(QWidget *parent) : PrefWidget(parent)
   m_description = tr("<b>Here you can configure the vertical scale"
                      " of the recorder and the length (in time)"
                      " of the window.</b>");
-  m_pixmap = new QPixmap(":/Symbols/scale.xpm");
+  m_iconName = "measure";
 
   EngNumberValidator *validator = new EngNumberValidator(this);
 
@@ -49,7 +49,6 @@ ScalePrefs::ScalePrefs(QWidget *parent) : PrefWidget(parent)
 }
 ScalePrefs::~ScalePrefs()
 {
-  delete m_pixmap;
 }
 
 void ScalePrefs::defaultsSLOT()

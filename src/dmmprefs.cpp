@@ -52,7 +52,7 @@ DmmPrefs::DmmPrefs(QWidget *parent) : PrefWidget(parent)
   m_description = tr("<b>Here you can configure the serial port"
                      " and protocol for your DMM. There is"
                      " also a number of predefined models.</b>");
-  m_pixmap = new QPixmap(":/Symbols/dmm.xpm");
+  m_iconName = "qtdmm-dmm";
 
   setupComboBoxModel();
 
@@ -79,7 +79,6 @@ DmmPrefs::DmmPrefs(QWidget *parent) : PrefWidget(parent)
 
 DmmPrefs::~DmmPrefs()
 {
-  delete m_pixmap;
 }
 
 // The persisted protocol: the name (ReadEvent::toString) since the protocol

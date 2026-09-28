@@ -100,6 +100,8 @@ Q_SIGNALS:
   void        error(const QString &);
   /// The "icons with text" preference changed.
   void        useTextLabel(bool);
+  /// The desktop's icon theme first (true) or only the built-in Breeze set.
+  void        systemIcons(bool);
   /// Asks MainWin to connect/disconnect (drives the Connect action).
   void        setConnect(bool);
   /// Toolbar visibility read from the settings, for MainWin to apply.

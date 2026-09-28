@@ -34,7 +34,7 @@ IntegrationPrefs::IntegrationPrefs(QWidget *parent) : PrefWidget(parent)
   m_label = tr("Integration curve");
   m_description = tr("<b>Here you can configure the parameter"
                      " for the integration curve.</b>");
-  m_pixmap = new QPixmap(":/Symbols/integration.xpm");
+  m_iconName = "qtdmm-integration";
 
   EngNumberValidator *validator = new EngNumberValidator(this);
 
@@ -44,7 +44,6 @@ IntegrationPrefs::IntegrationPrefs(QWidget *parent) : PrefWidget(parent)
 }
 IntegrationPrefs::~IntegrationPrefs()
 {
-  delete m_pixmap;
 }
 
 void IntegrationPrefs::defaultsSLOT()

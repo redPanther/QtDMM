@@ -39,6 +39,8 @@ public:
   bool      showMinMax() const;
   bool      alertUnsavedData() const;
   bool      useTextLabel() const;
+  /// Symbols from the desktop's icon theme first (Linux, Designs::setSystemIcons).
+  bool      systemIcons() const;
   QColor    displayBgColor() const;
   bool      saveWindowPosition() const;
   bool      saveWindowSize() const;

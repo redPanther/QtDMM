@@ -140,6 +140,7 @@ public:
   bool                  saveWindowSize() const;
   bool                  alertUnsavedData() const;
   bool                  useTextLabel() const;
+  bool                  systemIcons() const;
   bool                  showTip() const;
   int                   currentTipId() const;
   bool                  showDmmToolbar() const;

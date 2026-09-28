@@ -475,6 +475,7 @@ void MainWid::readConfig()
   else if (m_configDlg->sampleMode() == DMMGraph::Falling)
     Q_EMIT info(tr("Falling threshold %1").arg(m_configDlg->fallingThreshold()));
   Q_EMIT useTextLabel(m_configDlg->useTextLabel());
+  Q_EMIT systemIcons(m_configDlg->systemIcons());
   Q_EMIT toolbarVisibility(m_configDlg->showDisplay(),
                            m_configDlg->showDmmToolbar(),
                            m_configDlg->showGraphToolbar(),

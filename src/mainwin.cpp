@@ -112,13 +112,13 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   }
 
   // one checkable action per window: toolbar buttons, menu entries, shortcuts
-  m_displayAction = windowAction(m_displayWin, tr("&Display"), "Ctrl+1", ":/Symbols/display.xpm",
+  m_displayAction = windowAction(m_displayWin, tr("&Display"), "Ctrl+1", "qtdmm-display",
     tr("<html><head/><body><p><span style=\" font-weight:600;\">Display</span></p>"
        "<p>Show the reading on the LCD-style digital display.</p></body></html>"));
-  m_meterAction = windowAction(m_meterWin, tr("Analog &meter"), "Ctrl+2", ":/Symbols/meter.xpm",
+  m_meterAction = windowAction(m_meterWin, tr("Analog &meter"), "Ctrl+2", "qtdmm-meter",
     tr("<html><head/><body><p><span style=\" font-weight:600;\">Analog meter</span></p>"
        "<p>Show the reading on a moving-coil style instrument.</p></body></html>"));
-  m_readingsAction = windowAction(m_readingsWin, tr("&Readings table"), "Ctrl+4", ":/Symbols/table.xpm",
+  m_readingsAction = windowAction(m_readingsWin, tr("&Readings table"), "Ctrl+4", "table",
     tr("<html><head/><body><p><span style=\" font-weight:600;\">Readings table</span></p>"
        "<p>Every reading the meter sent, one row each, with time, mode and range - "
        "the raw protocol of the session next to the recorder's graph. Copy rows to a "
@@ -164,7 +164,7 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   m_arrangeMenu->addSeparator();
   m_arrangeMenu->addAction(m_titleBars);
   QAction *arrangeButton = m_arrangeMenu->menuAction();
-  arrangeButton->setIcon(arrangeIcon());
+  arrangeButton->setIcon(QIcon::fromTheme("qtdmm-arrange"));
   arrangeButton->setToolTip(tr("Arrange the windows"));
   toolBarDMM->addAction(arrangeButton);
   if (auto *button = qobject_cast<QToolButton *>(toolBarDMM->widgetForAction(arrangeButton)))
@@ -251,6 +251,7 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   });
   connect(m_wid, SIGNAL(info(const QString &)), m_info, SLOT(setText(const QString &)));
   connect(m_wid, SIGNAL(useTextLabel(bool)), this, SLOT(setUseTextLabel(bool)));
+  connect(m_wid, &MainWid::systemIcons, this, [](bool on) { Designs::setSystemIcons(on); });
   connect(m_wid, SIGNAL(setConnect(bool)), this, SLOT(setConnectSLOT(bool)));
   connect(m_wid, SIGNAL(connectDMM(bool)), action_Connect, SLOT(setChecked(bool)));
   connect(m_wid, SIGNAL(toolbarVisibility(bool, bool, bool, bool)),
@@ -547,7 +548,8 @@ void MainWin::on_action_About_triggered()
                    "<p>Website: <a href='https://qtdmm.de'>qtdmm.de</a> &middot; "
                    "Contact: <a href='mailto:hello@qtdmm.de'>hello@qtdmm.de</a><br>"
                    "Source and bug reports: <a href='https://github.com/qtdmm/QtDMM'>github.com/qtdmm/QtDMM</a><br>"
-                   "Icons (except the DMM icon) are taken from the KDE project.</p>")
+                   "Symbols from the <b>Breeze</b> icon theme of the KDE community (LGPL 3); "
+                   "QtDMM's own symbols are drawn in its style.</p>")
                 .arg(APP_VERSION).arg(qVersion()));
 
   // The device list used to be pasted in here as a table; it lives in the
@@ -633,7 +635,7 @@ QMdiSubWindow *MainWin::addView(QWidget *view, const QString &title, int role, c
 QAction *MainWin::windowAction(QMdiSubWindow *win, const QString &text, const char *shortcut,
                                const char *icon, const QString &whatsThis)
 {
-  auto *action = new QAction(QIcon(icon), text, this);
+  auto *action = new QAction(QIcon::fromTheme(icon), text, this);
   action->setShortcut(QKeySequence(shortcut));
   action->setWhatsThis(whatsThis);
   bindWindowAction(action, win);
@@ -868,30 +870,8 @@ void MainWin::setDesign(int design)
   updateLed();
   const Designs::GraphColors g = Designs::graphColors(d);
   m_wid->graph()->setThemeColors(g.background, g.grid, g.labels, g.data);
-  m_arrangeMenu->menuAction()->setIcon(arrangeIcon());
   for (QAction *a : m_designMenu->actions())
     a->setChecked(a->data().toInt() == design);
-}
-
-// Drawn, so it follows the palette (there is no bundled icon for it).
-QIcon MainWin::arrangeIcon() const
-{
-  const QColor fg = QApplication::palette().color(QPalette::ButtonText);
-  QIcon icon;
-  for (int sz : { 24, 48 })
-  {
-    QPixmap pm(sz, sz);
-    pm.fill(Qt::transparent);
-    QPainter p(&pm);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.scale(sz / 24.0, sz / 24.0);
-    p.setPen(QPen(fg, 1.6));
-    p.drawRect(QRectF(3, 3, 8, 6));
-    p.drawRect(QRectF(13, 3, 8, 6));
-    p.drawRect(QRectF(3, 11, 18, 10));
-    icon.addPixmap(pm);
-  }
-  return icon;
 }
 
 void MainWin::setToolbarVisibilitySLOT()
@@ -919,8 +899,8 @@ void MainWin::setupIcons()
 {
   // theme icons exist on Linux desktops only; Windows and macOS get the
   // bundled ones
-  QIcon iconConnectOn = QIcon::fromTheme("network-connect", QIcon(":/Symbols/connect_on.xpm"));
-  QIcon iconConnectOff = QIcon::fromTheme("network-disconnect", QIcon(":/Symbols/connect_icon.xpm"));
+  QIcon iconConnectOn = QIcon::fromTheme("network-connect");
+  QIcon iconConnectOff = QIcon::fromTheme("network-disconnect");
 
   this->action_Connect->setIcon(iconConnectOff);
   connect(this->action_Connect, &QAction::toggled, this, [ = ](bool checked)

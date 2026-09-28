@@ -97,6 +97,19 @@ XLSX/ODS export - the ZIP container itself is written by
 `SpreadsheetWriter`, since LibreOffice rejects miniz's data descriptors on
 the ODS mimetype entry).
 
+The symbols come from KDE's **Breeze** icon theme (LGPL-3.0-or-later, license in
+`assets/icons/theme/LICENSE.breeze`). `tools/update_icons.py` copies the ones
+QtDMM uses from an installed Breeze into two icon themes, `qtdmm-breeze` and
+`qtdmm-breeze-dark`, and adds QtDMM's own symbols from `assets/icons/own/`
+(DMM, display, analog meter, integration, instances, arrange). The themes
+are compiled into the resources (`:/icons`), and the code asks for symbols
+by name with `QIcon::fromTheme()`. `Designs` picks the light or the dark set
+by the window colour. On Linux, *Appearance → Use the desktop's icon theme*
+puts the desktop's theme first and keeps the built-in set as the fallback.
+To use a new symbol, add its Breeze name to `BREEZE` in the script (or an SVG
+to `own/`, drawn with `currentColor` like Breeze), run it and commit the
+result.
+
 The Bluetooth LE port (`src/portdevices/ble.cpp`) needs Qt6 Bluetooth and
 is optional: CMake option `QTDMM_WITH_BLE` (on when the module is found;
 the Windows workflow installs `qtconnectivity`, Ubuntu `qt6-connectivity-dev`,

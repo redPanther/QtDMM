@@ -43,4 +43,14 @@ namespace Designs
     QColor data;         ///< curve colour, used while the setting is the default
   };
   GraphColors graphColors(Design d);
+
+  /// The symbols: QtDMM's Breeze set (:/icons/qtdmm-breeze, -dark),
+  /// light or dark to match the palette. With @p systemIcons (Linux) the
+  /// desktop's icon theme comes first and the Breeze set fills the gaps
+  /// (QtDMM's own symbols are only there). Called by apply() with the last
+  /// choice; widgets repaint with the new symbols.
+  void setSystemIcons(bool systemIcons);
+  bool systemIcons();
+  /// The name of the Breeze set in use ("qtdmm-breeze" or "qtdmm-breeze-dark").
+  QString iconTheme();
 }
