@@ -85,6 +85,18 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
   connect(ui_graph, SIGNAL(sampleTime(int)), m_configDlg, SLOT(setSampleTimeSLOT(int)));
   connect(ui_graph, SIGNAL(graphSize(int, int)), m_configDlg, SLOT(setGraphSizeSLOT(int, int)));
   connect(ui_graph, SIGNAL(externalTriggered()), this, SLOT(startExternalSLOT()));
+  // the graph's colour variant; a config from before the variants, whose
+  // colours were set on the settings page, keeps them as Custom
+  {
+    QString variant = m_settings->getString("Graph/variant");
+    if (variant.isEmpty())
+      variant = m_settings->getString("Graph/background").isEmpty() ? "neutral" : "custom";
+    ui_graph->setColorVariant(DMMGraph::variantFromName(variant));
+  }
+  connect(ui_graph, &DMMGraph::colorVariantChanged, this, [this](int v)
+  {
+    m_settings->setString("Graph/variant", DMMGraph::variantName(static_cast<DMMGraph::ColorVariant>(v)));
+  });
   connect(m_ctl, &MeterController::externalFinished, this, &MainWid::exitedSLOT);
   connect(ui_graph, SIGNAL(configure()), this, SLOT(configSLOT()));
   connect(ui_graph, SIGNAL(exportData()), this, SLOT(exportSLOT()));
@@ -409,12 +421,13 @@ void MainWid::readConfig()
   dmm->setPortSettings(static_cast<QSerialPort::DataBits>(m_configDlg->bits()), static_cast<QSerialPort::StopBits>(m_configDlg->stopBits()),
                          m_configDlg->parity(), m_configDlg->externalSetup(), m_configDlg->rts(), m_configDlg->dtr() );
 
+  // the sample time first: setGraphSize() counts the window in samples, and
+  // the x axis converts them back with the sample time
+  ui_graph->setSampleTime(m_configDlg->sampleStep());
+  ui_graph->setSampleLength(m_configDlg->sampleLength());
   ui_graph->setGraphSize(m_configDlg->windowSeconds(), m_configDlg->totalSeconds());
   ui_graph->setStartTime(m_configDlg->startTime());
   ui_graph->setMode(m_configDlg->sampleMode());
-
-  ui_graph->setSampleTime(m_configDlg->sampleStep());
-  ui_graph->setSampleLength(m_configDlg->sampleLength());
 
   ui_graph->setCrosshair(m_configDlg->crosshair());
 

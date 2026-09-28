@@ -92,6 +92,20 @@ public:
     Integration   ///< integration threshold
   };
 
+  /// The graph's colours (context menu "Graph colours", Graph/variant).
+  /// Each brings background, grid, lettering and curve colours; a curve
+  /// colour chosen in the settings stays. Custom is the colours from the
+  /// settings page, as before the variants.
+  enum ColorVariant
+  {
+    Neutral,         ///< follows the window design
+    ScopeBlue,       ///< oscilloscope, blue screen
+    PhosphorGreen,   ///< green phosphor tube: one colour, 10 x 8 divisions
+    PhosphorAmber,   ///< the same in amber
+    ChartRecorder,   ///< paper and ink
+    Custom           ///< the colours from the settings page
+  };
+
   /// Entries of the context menu.
   enum PopupID
   {
@@ -104,7 +118,8 @@ public:
     IDExportData,
     IDImportData,
     IDCopyImage,
-    IDExportImage
+    IDExportImage,
+    IDColorVariant   ///< property "variant" says which
   };
 
   DMMGraph(QWidget *parent, Settings *settings);
@@ -141,6 +156,14 @@ public:
   /// replaces the curve colour only while that is the default blue.
   void             setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
                                   const QColor &data = QColor());
+  void             setColorVariant(ColorVariant variant);
+  ColorVariant     colorVariant() const { return m_variant; }
+  /// "neutral", "scope", "phosphor-green", "phosphor-amber", "recorder", "custom"
+  static QString   variantName(ColorVariant variant);
+  static ColorVariant variantFromName(const QString &name);
+  /// The smallest step of the 1-2-5 series (..., 0.5, 1, 2, 5, 10, ...) that
+  /// is at least @p v; the division of the scope variants. Public for the tests.
+  static double    niceStep(double v);
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
   /// Draws a vertical mark at the current sample (an alarm raised); marks
@@ -173,6 +196,8 @@ Q_SIGNALS:
   void             sampleTime(int);
   /// The external application threshold was crossed.
   void             externalTriggered();
+  /// The colour variant was changed from the context menu.
+  void             colorVariantChanged(int variant);
   void             zoomIn(double);
   void             zoomOut(double);
   /// Show the whole recording (key 0).
@@ -304,8 +329,19 @@ protected:
   QColor           m_themeLabels;
   QColor           m_themeData;         ///< proposed curve colour, invalid = none
   QColor           dataColor() const;   ///< the curve colour in use
+  QColor           intColor() const;    ///< the integration curve colour in use
+  ColorVariant     m_variant = Neutral;
+  /// Scope, phosphor and recorder: 10 x 8 divisions of 1-2-5 steps.
+  bool             divisions() const;
+  bool             phosphor() const { return m_variant == PhosphorGreen || m_variant == PhosphorAmber; }
+  /// The y range, widened to 8 whole divisions of 1-2-5 steps when divisions().
+  void             setYRange(double min, double max);
+  /// Phosphor: the centre axes with 5 fine ticks per division.
+  QGraphicsPathItem *m_centreTicks;
+  void             updateCentreTicks();
   QBrush           m_defaultLabels;     ///< the chart's own label colour
   QColor           m_defaultAxisLine;   ///< the chart's own axis line colour
+  QString          m_defaultLabelFormat; ///< Qt's, for the variants without divisions
   void             applyThemeColors();
   void             placeYTitle();
   QGraphicsLineItem *m_crosshairVLine;

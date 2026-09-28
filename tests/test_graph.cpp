@@ -9,6 +9,8 @@
 #include <QFileInfo>
 
 #include "dmmgraph.h"
+#include <QChartView>
+#include <QValueAxis>
 #include "siprefix.h"
 #include "engnumbervalidator.h"
 #include "settings.h"
@@ -330,6 +332,32 @@ int main(int argc, char **argv)
     check(!image.isNull() && image.size() == QSize(320, 200), "PNG has the requested size");
 
     check(!graph.exportImageFile(tmpDir.filePath("no/such/dir/graph.svg")), "an unwritable path fails");
+  }
+
+  // --- 7c. colour variants: 1-2-5 divisions and 10 x 8 for the scope-like
+  //          ones, names round-trip ---
+  {
+    check(DMMGraph::niceStep(0.3) == 0.5 && DMMGraph::niceStep(1) == 1 && DMMGraph::niceStep(1.01) == 2
+          && DMMGraph::niceStep(4.9) == 5 && DMMGraph::niceStep(6) == 10 && qFuzzyCompare(DMMGraph::niceStep(0.0021), 0.005),
+          "niceStep follows 1-2-5");
+    for (auto v : { DMMGraph::Neutral, DMMGraph::ScopeBlue, DMMGraph::PhosphorGreen, DMMGraph::PhosphorAmber,
+                    DMMGraph::ChartRecorder, DMMGraph::Custom })
+      check(DMMGraph::variantFromName(DMMGraph::variantName(v)) == v, "variant name round-trip " + DMMGraph::variantName(v));
+    check(DMMGraph::variantFromName("nonsense") == DMMGraph::Neutral, "unknown variant is neutral");
+
+    Settings cfg("varianttest", tmpDir.path());
+    DMMGraph graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setScale(false, false, -0.3, 11.7);
+    auto *y = graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first();
+    auto *yAxis = qobject_cast<QValueAxis *>(y);
+    check(qFuzzyCompare(yAxis->min(), -0.3) && qFuzzyCompare(yAxis->max(), 11.7), "neutral keeps the scale as set");
+    graph.setColorVariant(DMMGraph::PhosphorGreen);
+    const double div = (yAxis->max() - yAxis->min()) / 8;
+    check(yAxis->tickCount() == 9 && qFuzzyCompare(div, 2.0) && qFuzzyCompare(yAxis->min(), -2.0),
+          QString("phosphor: 8 divisions of 2 from -2, got %1..%2").arg(yAxis->min()).arg(yAxis->max()));
+    graph.setColorVariant(DMMGraph::Custom);
+    check(yAxis->tickCount() == 5 && qFuzzyCompare(yAxis->max(), 11.7), "custom goes back to the plain scale");
   }
 
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
