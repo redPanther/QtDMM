@@ -682,6 +682,23 @@ void MainWin::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
   QAction *title = menu.addAction(tr("&Title bar"));
   title->setCheckable(true);
   title->setChecked(!MdiArranger::titleBarHidden(win));
+  if (win == m_displayWin)
+  {
+    QMenu *lcd = menu.addMenu(tr("&LCD colours"));
+    const std::pair<DisplayWid::LcdVariant, QString> variants[] = {
+      { DisplayWid::Classic, tr("&Classic") }, { DisplayWid::BacklightBlue, tr("&Backlight blue") },
+      { DisplayWid::Amber, tr("&Amber") }, { DisplayWid::HighContrast, tr("&High contrast") },
+      { DisplayWid::Custom, tr("C&ustom (from the settings)") } };
+    for (const auto &[v, text] : variants)
+    {
+      if (v == DisplayWid::Custom)
+        lcd->addSeparator();
+      QAction *a = lcd->addAction(text);
+      a->setCheckable(true);
+      a->setChecked(m_display->lcdVariant() == v);
+      connect(a, &QAction::triggered, this, [this, v = v] { m_wid->setLcdVariant(v); });
+    }
+  }
   menu.addSeparator();
   menu.addMenu(m_arrangeMenu);
   QAction *chosen = menu.exec(globalPos);

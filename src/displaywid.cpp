@@ -111,17 +111,82 @@ void DisplayWid::setDisplayMode(int counts, bool minMax, bool bar, int numValues
 
 void DisplayWid::setFaceColor(const QColor &c)
 {
-  if (!c.isValid() || c == m_face)
+  if (!c.isValid())
     return;
-  m_face = c;
+  m_customFace = c;
+  applyVariant();
+}
+
+void DisplayWid::setLcdVariant(LcdVariant variant)
+{
+  m_variant = variant;
+  applyVariant();
+}
+
+QColor DisplayWid::classicFace()
+{
+  return QColor(0xda, 0xdc, 0x77);
+}
+
+// Face and segments; the glow and the ghost segments follow from them.
+void DisplayWid::applyVariant()
+{
+  switch (m_variant)
+  {
+    case Classic:
+      m_face = classicFace();
+      m_segment = QColor(0x16, 0x1e, 0x14);
+      break;
+    case BacklightBlue:
+      m_face = QColor(0x1d, 0x5c, 0xc4);
+      m_segment = QColor(0xe9, 0xf3, 0xff);
+      break;
+    case Amber:
+      m_face = QColor(0xf2, 0xa9, 0x3b);
+      m_segment = QColor(0x24, 0x16, 0x02);
+      break;
+    case HighContrast:
+      m_face = QColor(0xf6, 0xf6, 0xf2);
+      m_segment = Qt::black;
+      break;
+    case Custom:
+      m_face = m_customFace.isValid() ? m_customFace : classicFace();
+      m_segment = QColor(0x16, 0x1e, 0x14);
+      break;
+  }
   m_staticDirty = true;
   update();
+}
+
+QString DisplayWid::lcdVariantName(LcdVariant variant)
+{
+  switch (variant)
+  {
+    case BacklightBlue: return "blue";
+    case Amber:         return "amber";
+    case HighContrast:  return "contrast";
+    case Custom:        return "custom";
+    default:            return "classic";
+  }
+}
+
+DisplayWid::LcdVariant DisplayWid::lcdVariantFromName(const QString &name)
+{
+  for (LcdVariant v : { BacklightBlue, Amber, HighContrast, Custom })
+    if (name == lcdVariantName(v))
+      return v;
+  return Classic;
 }
 
 QColor DisplayWid::ghost() const
 {
   QColor c = m_segment;
-  c.setAlpha(m_face.lightness() < 128 ? 40 : 26);
+  // light segments on a dark face (backlight blue) stand out much more:
+  // their ghosts must stay fainter than dark ghosts on a light face
+  if (m_segment.lightness() > m_face.lightness())
+    c.setAlpha(18);
+  else
+    c.setAlpha(m_face.lightness() < 128 ? 40 : 26);
   return c;
 }
 

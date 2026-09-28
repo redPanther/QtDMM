@@ -169,6 +169,13 @@ void MainWid::setConsoleLogging(bool on)
 void MainWid::setDisplay(DisplayWid *display)
 {
   m_display = display;
+  // the LCD's colours; a config from before the variants lands on Classic
+  // when its tint is the old default, on Custom (its own tint) otherwise
+  QString lcd = m_settings->getString("Display/lcd");
+  if (lcd.isEmpty())
+    lcd = m_settings->getColor("Display/display-background", DisplayWid::classicFace()) == DisplayWid::classicFace()
+            ? "classic" : "custom";
+  display->setLcdVariant(DisplayWid::lcdVariantFromName(lcd));
   connect(m_ctl, &MeterController::reading, display, &DisplayWid::showReading);
   connect(m_ctl, &MeterController::minimumChanged, display, &DisplayWid::showMinimum);
   connect(m_ctl, &MeterController::maximumChanged, display, &DisplayWid::showMaximum);
@@ -457,7 +464,12 @@ void MainWid::readConfig()
                          m_configDlg->intLineMode(),
                          m_configDlg->intPointMode());
 
-  m_display->setFaceColor(m_configDlg->displayBgColor());
+  // a tint changed on the Appearance page is meant to be seen: Custom
+  const QColor tint = m_configDlg->displayBgColor();
+  if (m_lcdTint.isValid() && tint != m_lcdTint && m_display->lcdVariant() != DisplayWid::Custom)
+    setLcdVariant(DisplayWid::Custom);
+  m_lcdTint = tint;
+  m_display->setFaceColor(tint);
   m_display->setDisplayMode(m_configDlg->display(), m_configDlg->showMinMax(),
                             m_configDlg->showBar(), m_configDlg->numValues());
   dmm->setNumValues(m_configDlg->numValues());
@@ -657,4 +669,11 @@ void MainWid::alarmRaised(const Alarm &alarm, const QString &shown, const QStrin
     box->setModal(false);
     box->show();
   }
+}
+
+void MainWid::setLcdVariant(int variant)
+{
+  const auto v = static_cast<DisplayWid::LcdVariant>(variant);
+  m_display->setLcdVariant(v);
+  m_settings->setString("Display/lcd", DisplayWid::lcdVariantName(v));
 }

@@ -67,6 +67,8 @@ public:
   bool        saveWindowSize() const;
   /// The LCD panel to feed; created and docked by MainWin.
   void        setDisplay(DisplayWid *);
+  /// The LCD's colours (DisplayWid::LcdVariant), stored as Display/lcd.
+  void        setLcdVariant(int variant);
   /// The analog meter to feed; created and docked by MainWin.
   void        setMeter(MeterWid *);
   /// Table model that gets every reading (MainWin owns it).
@@ -154,6 +156,7 @@ protected:
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;
   DisplayWid *m_display;
+  QColor      m_lcdTint;   ///< the Appearance page's tint last applied
   MeterWid   *m_meter;
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
