@@ -57,7 +57,7 @@ QVariant ReadingLog::data(const QModelIndex &index, int role) const
     return c;
   }
   if (role == Qt::ToolTipRole && !e.alarmName.isEmpty())
-    return tr("Alarm %1").arg(e.alarmName);
+    return e.alarmName;   // the row is marked in the alarm's colour; "Alarm 1", not "Alarm Alarm 1"
   if (role == Qt::TextAlignmentRole)
     return int(index.column() == Value ? Qt::AlignRight | Qt::AlignVCenter : Qt::AlignLeft | Qt::AlignVCenter);
   if (role != Qt::DisplayRole)

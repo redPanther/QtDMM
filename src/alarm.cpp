@@ -328,3 +328,11 @@ void AlarmManager::acknowledgeAll()
   for (int i = 0; i < m_state.size(); ++i)
     acknowledge(i);
 }
+
+QString Alarm::title(const QString &name)
+{
+  const QString word = QCoreApplication::translate("Alarm", "Alarm");
+  if (name.startsWith(word, Qt::CaseInsensitive))
+    return name;
+  return QCoreApplication::translate("Alarm", "Alarm %1").arg(name);
+}

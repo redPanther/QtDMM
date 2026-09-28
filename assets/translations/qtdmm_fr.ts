@@ -38,6 +38,16 @@
         <source>for %1 s</source>
         <translation>pendant %1 s</translation>
     </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="334"/>
+        <source>Alarm</source>
+        <translation>Alarme</translation>
+    </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="337"/>
+        <source>Alarm %1</source>
+        <translation>Alarme %1</translation>
+    </message>
 </context>
 <context>
     <name>AlarmBar</name>
@@ -1215,23 +1225,23 @@ Le multimètre est-il branché et allumé ?</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="845"/>
-        <source>Alarm %1: %2 (%3)</source>
-        <translation>Alarme %1 : %2 (%3)</translation>
+        <source>%1: %2 (%3)</source>
+        <translation>%1 : %2 (%3)</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="872"/>
-        <source>Alarm %1: could not run %2</source>
-        <translation>Alarme %1 : impossible de lancer %2</translation>
+        <source>%1: could not run %2</source>
+        <translation>%1 : impossible de lancer %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwid.cpp" line="889"/>
+        <source>%1 cleared</source>
+        <translation>%1 effacée</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="877"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarme QtDMM : %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="889"/>
-        <source>Alarm %1 cleared</source>
-        <translation>Alarme %1 effacée</translation>
     </message>
 </context>
 <context>
@@ -1640,17 +1650,17 @@ Then log out and back in so the new group membership becomes active.</source>
 Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au groupe prenne effet.</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="104"/>
+        <location filename="../../src/main.cpp" line="122"/>
         <source>protocol debugging information</source>
         <translation>informations de débogage du protocole</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="105"/>
+        <location filename="../../src/main.cpp" line="123"/>
         <source>sets directory where config files are located</source>
         <translation>définit le répertoire des fichiers de configuration</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="106"/>
+        <location filename="../../src/main.cpp" line="124"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>définit &lt;config-id&gt;</translation>
     </message>
@@ -1704,11 +1714,6 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
         <location filename="../../src/readinglog.cpp" line="41"/>
         <source>Temperature</source>
         <translation>Température</translation>
-    </message>
-    <message>
-        <location filename="../../src/readinglog.cpp" line="60"/>
-        <source>Alarm %1</source>
-        <translation>Alarme %1</translation>
     </message>
     <message>
         <location filename="../../src/readinglog.cpp" line="71"/>

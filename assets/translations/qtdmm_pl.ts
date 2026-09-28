@@ -38,6 +38,16 @@
         <source>for %1 s</source>
         <translation>przez %1 s</translation>
     </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="334"/>
+        <source>Alarm</source>
+        <translation>Alarm</translation>
+    </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="337"/>
+        <source>Alarm %1</source>
+        <translation>Alarm %1</translation>
+    </message>
 </context>
 <context>
     <name>AlarmBar</name>
@@ -1215,23 +1225,23 @@ Czy multimetr jest podłączony i włączony?</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="845"/>
-        <source>Alarm %1: %2 (%3)</source>
-        <translation>Alarm %1: %2 (%3)</translation>
+        <source>%1: %2 (%3)</source>
+        <translation>%1: %2 (%3)</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="872"/>
-        <source>Alarm %1: could not run %2</source>
-        <translation>Alarm %1: nie można uruchomić %2</translation>
+        <source>%1: could not run %2</source>
+        <translation>%1: nie można uruchomić %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwid.cpp" line="889"/>
+        <source>%1 cleared</source>
+        <translation>%1 zgasł</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="877"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarm QtDMM: %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="889"/>
-        <source>Alarm %1 cleared</source>
-        <translation>Alarm %1 zgasł</translation>
     </message>
 </context>
 <context>
@@ -1641,17 +1651,17 @@ Then log out and back in so the new group membership becomes active.</source>
 Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło działać.</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="104"/>
+        <location filename="../../src/main.cpp" line="122"/>
         <source>protocol debugging information</source>
         <translation>informacje diagnostyczne protokołu</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="105"/>
+        <location filename="../../src/main.cpp" line="123"/>
         <source>sets directory where config files are located</source>
         <translation>ustawia katalog plików konfiguracyjnych</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="106"/>
+        <location filename="../../src/main.cpp" line="124"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>ustawia &lt;config-id&gt;</translation>
     </message>
@@ -1705,11 +1715,6 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <location filename="../../src/readinglog.cpp" line="41"/>
         <source>Temperature</source>
         <translation>Temperatura</translation>
-    </message>
-    <message>
-        <location filename="../../src/readinglog.cpp" line="60"/>
-        <source>Alarm %1</source>
-        <translation>Alarm %1</translation>
     </message>
     <message>
         <location filename="../../src/readinglog.cpp" line="71"/>

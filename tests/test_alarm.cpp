@@ -202,5 +202,10 @@ int main(int argc, char **argv)
     qInfo() << "All alarm tests passed.";
   else
     qWarning() << failed << "alarm test(s) failed.";
+  // --- the name in messages: default names already say "Alarm" ---
+  check(Alarm::title("Alarm 1") == "Alarm 1", "default name is not doubled: " + Alarm::title("Alarm 1"));
+  check(Alarm::title("High voltage") == "Alarm High voltage", "own name gets the word: " + Alarm::title("High voltage"));
+  check(Alarm::title("alarm for the fridge") == "alarm for the fridge", "a name starting with the word is kept");
+
   return failed == 0 ? 0 : 1;
 }
