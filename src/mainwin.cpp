@@ -871,7 +871,12 @@ void MainWin::autoGrow(const QSize &delta)
   if (m_userSized || !m_growEnabled || isMaximized() || isFullScreen())
     return;
   const QRect av = screen()->availableGeometry();
-  const int maxW = int(av.width() * 0.84), maxH = int(av.height() * 0.84);
+  // Wayland neither tells a window where it is nor lets it move, so a
+  // grown frame cannot be pulled back onto the screen: grow less there.
+  // Compositors place new windows in the upper left part (Miriway at a
+  // quarter of the width, KWin further left), which leaves room for 70 %.
+  const double limit = QGuiApplication::platformName().startsWith("wayland") ? 0.70 : 0.84;
+  const int maxW = int(av.width() * limit), maxH = int(av.height() * limit);
   const QSize s = size();
   const QSize n(qMax(s.width(), qMin(s.width() + delta.width(), maxW)),
                 qMax(s.height(), qMin(s.height() + delta.height(), maxH)));
