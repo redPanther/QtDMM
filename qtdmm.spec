@@ -5,7 +5,7 @@ Name:		qtdmm
 Version:	26.1
 # Für RC's -p -e rcX
 # Sonst -p -e weglassen
-Release:	%autorelease -p -e rc1
+Release:	%autorelease -p -e rc2
 Summary:	DMM Readout Software Including a Configurable Recorder
 License:	GPL-3.0-or-later
 URL:		https://www.qtdmm.de
