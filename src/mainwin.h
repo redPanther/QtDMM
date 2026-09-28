@@ -116,6 +116,22 @@ protected:
   QMenu      *m_arrangeMenu;
   QMenu      *m_designMenu;
   bool        m_restoring = false;   ///< restoreWindows() is setting the actions
+  // Window size (package 26.2, 4a): the window starts at the size its
+  // content needs and grows when a view is shown for the first time, up to
+  // 84 % of the screen per side. It never shrinks by itself and stops
+  // growing for good once the user sized, maximized or went full screen.
+  bool        m_userSized = false;   ///< persisted as Windows/user-sized
+  bool        m_growEnabled = false; ///< off until the window is on screen
+  QSize       m_expectSize;          ///< the size we asked for last
+  QSet<QObject *> m_grown;           ///< views the window already grew for
+  int         em() const;            ///< a font height, the unit of all sizes
+  /// Width and height a view adds to the window (0 = none in that direction).
+  QSize       growthFor(QMdiSubWindow *win) const;
+  /// Grows the window by @p delta within the limits, moving it up/left when
+  /// the frame would stick out of the screen.
+  void        autoGrow(const QSize &delta);
+  /// A view was shown: grow for it once per session.
+  void        growFor(QMdiSubWindow *win);
   QAction    *m_fullScreen;
   QAction    *m_zoomIn;
   QAction    *m_zoomOut;
@@ -156,6 +172,11 @@ protected:
   bool        eventFilter(QObject *watched, QEvent *event) override;
   /// Saves window state; vetoed by MainWid::closeWin() on unsaved data.
   void        closeEvent(QCloseEvent *)Q_DECL_OVERRIDE;
+  /// A size we did not ask for came from the user (or the window manager
+  /// on their behalf, like snapping to a screen half): no more growing.
+  void        resizeEvent(QResizeEvent *) override;
+  void        changeEvent(QEvent *) override;
+  void        showEvent(QShowEvent *) override;
   /// Raises this window when another instance asks for it ("RAISE_<id>").
   void        bringMainWindowToFront();
 };

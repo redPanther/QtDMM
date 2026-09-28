@@ -263,19 +263,37 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   // window (MainWindow/state) is not taken over
   restoreWindows();
 
-  if (!winRect.isEmpty())
+  setMinimumSize(19 * em(), 13 * em());
+  // winRect() falls back to 500 x 350: only a stored width means a stored
+  // geometry; a first start lets the window manager place the window
+  const bool stored = m_wid->settings()->getInt("Position/width", 0) > 0;
+  if (stored && m_wid->saveWindowPosition())
+    move(winRect.x(), winRect.y());
+  // the views shown at the start count as grown for; the table column gets
+  // the width the window has for it
+  for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
+    if (!w->isHidden())
+      m_grown.insert(w);
+  if (m_grown.contains(m_readingsWin))
+    m_arranger->setTableWidth(growthFor(m_readingsWin).width());
+  if (stored && m_wid->saveWindowSize())
   {
-    if (m_wid->saveWindowPosition())
-    {
-      move(winRect.x(), winRect.y());
-    }
-    if (m_wid->saveWindowSize())
-      resize(winRect.width(), winRect.height());
-    else
-      resize(550, 250);
+    resize(winRect.width(), winRect.height());
+    m_userSized = m_wid->settings()->getBool("Windows/user-sized", false);
   }
   else
-    resize(550, 250);
+  {
+    // from the content: an LCD, plus what each shown view adds
+    QSize start(28 * em(), 22 * em());
+    if (m_grown.contains(m_displayWin) && m_grown.contains(m_meterWin))
+      start += growthFor(m_meterWin);
+    for (QMdiSubWindow *w : { m_graphWin, m_readingsWin })
+      if (m_grown.contains(w))
+        start += growthFor(w);
+    const QRect av = screen()->availableGeometry();
+    resize(qMin(start.width(), int(av.width() * 0.84)), qMin(start.height(), int(av.height() * 0.84)));
+  }
+  m_expectSize = size();
 
   connect(m_stateMgr, &SharedStateManager::stateChanged, this, [=](const QString& state){
     if (state == "RECORD")
@@ -630,7 +648,11 @@ void MainWin::bindWindowAction(QAction *action, QMdiSubWindow *win)
   {
     win->setVisible(on);
     if (on)
+    {
       m_mdi->setActiveSubWindow(win);
+      if (!m_restoring)
+        growFor(win);
+    }
   });
 }
 
@@ -735,9 +757,94 @@ void MainWin::saveWindows()
       cfg->setString("Windows/geometry-" + w->objectName(),
                      QString("%1 %2 %3 %4").arg(g.x()).arg(g.y()).arg(g.width()).arg(g.height()));
     }
+  cfg->setBool("Windows/user-sized", m_userSized);
   cfg->setBool("Windows/meter", m_meterAction->isChecked());
   cfg->setBool("Windows/readings", m_readingsAction->isChecked());
   cfg->setBool("MainWindow/show-graph", action_Graph->isChecked());
+}
+
+// ---------------------------------------------------------------- window size
+
+int MainWin::em() const
+{
+  return QFontMetrics(font()).height();
+}
+
+QSize MainWin::growthFor(QMdiSubWindow *win) const
+{
+  if (win == m_graphWin)
+    return QSize(0, 18 * em());    // below the instruments
+  if (win == m_readingsWin)
+    return QSize(19 * em(), 0);    // a column on the right
+  if (win == m_meterWin || win == m_displayWin)
+    return QSize(20 * em(), 0);    // next to the other instrument
+  return QSize();
+}
+
+void MainWin::growFor(QMdiSubWindow *win)
+{
+  if (m_grown.contains(win))
+    return;
+  m_grown.insert(win);
+  // the display and the analog meter share the top row: the first of them
+  // needs no room of its own
+  if ((win == m_displayWin || win == m_meterWin)
+      && !m_grown.contains(win == m_displayWin ? m_meterWin : m_displayWin))
+    return;
+  const QSize before = size();
+  autoGrow(growthFor(win));
+  if (win == m_readingsWin)
+    m_arranger->setTableWidth(size().width() - before.width());
+}
+
+void MainWin::autoGrow(const QSize &delta)
+{
+  if (m_userSized || !m_growEnabled || isMaximized() || isFullScreen())
+    return;
+  const QRect av = screen()->availableGeometry();
+  const int maxW = int(av.width() * 0.84), maxH = int(av.height() * 0.84);
+  const QSize s = size();
+  const QSize n(qMax(s.width(), qMin(s.width() + delta.width(), maxW)),
+                qMax(s.height(), qMin(s.height() + delta.height(), maxH)));
+  if (n == s)
+    return;
+  const QSize frameExtra = frameGeometry().size() - s;
+  m_expectSize = n;
+  resize(n);
+  // stay on screen: move up/left when the grown frame would stick out
+  QPoint p = pos();
+  p.setX(qMax(av.left(), qMin(p.x(), av.right() + 1 - (n.width() + frameExtra.width()))));
+  p.setY(qMax(av.top(), qMin(p.y(), av.bottom() + 1 - (n.height() + frameExtra.height()))));
+  if (p != pos())
+    move(p);
+}
+
+void MainWin::resizeEvent(QResizeEvent *event)
+{
+  QMainWindow::resizeEvent(event);
+  if (m_growEnabled && event->size() != m_expectSize && event->oldSize().isValid()
+      && !isMaximized() && !isFullScreen())
+    m_userSized = true;
+}
+
+void MainWin::changeEvent(QEvent *event)
+{
+  QMainWindow::changeEvent(event);
+  if (event->type() == QEvent::WindowStateChange && (isMaximized() || isFullScreen()))
+    m_userSized = true;
+}
+
+void MainWin::showEvent(QShowEvent *event)
+{
+  QMainWindow::showEvent(event);
+  // the window manager may still adjust the first size; what it settles on
+  // is the start, not a size the user chose
+  if (!m_growEnabled)
+    QTimer::singleShot(300, this, [this]
+    {
+      m_expectSize = size();
+      m_growEnabled = true;
+    });
 }
 
 void MainWin::setDesign(int design)

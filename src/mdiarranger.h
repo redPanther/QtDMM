@@ -43,6 +43,9 @@ public:
   /// Title bar of one window.
   void setTitleBarHidden(QMdiSubWindow *window, bool hidden);
   static bool titleBarHidden(const QMdiSubWindow *window);
+  /// The table column in the automatic mode is at least this wide (still
+  /// at most half the area): the width the main window grew by for it.
+  void setTableWidth(int width);
 
 
   /// The rects the automatic mode gives the visible windows inside @p area
@@ -77,4 +80,5 @@ private:
   bool m_pending = false;
   QMdiSubWindow *m_drag = nullptr; ///< a window being moved with Ctrl+drag
   QPoint m_dragOffset;             ///< cursor - window position
+  int m_tableWidth = 0;            ///< see setTableWidth()
 };

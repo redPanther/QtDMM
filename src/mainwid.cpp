@@ -248,8 +248,9 @@ bool MainWid::saveWindowSize() const
 
 QRect MainWid::parentRect() const
 {
-  QRect fRect = parentWidget()->frameGeometry();
-  QRect rect  = parentWidget()->rect();
+  // the main window: MainWid itself sits inside an MDI window now
+  QRect fRect = window()->frameGeometry();
+  QRect rect  = window()->rect();
 
   return QRect(fRect.x(), fRect.y(), rect.width(), rect.height());
 }

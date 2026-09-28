@@ -211,7 +211,7 @@ void MdiArranger::doArrange()
   }
   // a header line inside the window, plus the title bar when it is shown
   const int header = m_titleBarsHidden ? 22 : 48;
-  int tableMin = kTableMinWidth;
+  int tableMin = qMax(kTableMinWidth, m_tableWidth);
   for (int i = 0; i < visible.size(); ++i)
     if (roles[i] == Table)
       tableMin = qMax(tableMin, visible[i]->minimumSizeHint().width());
@@ -276,4 +276,12 @@ bool MdiArranger::eventFilter(QObject *watched, QEvent *event)
       break;
   }
   return QObject::eventFilter(watched, event);
+}
+
+void MdiArranger::setTableWidth(int width)
+{
+  if (width == m_tableWidth)
+    return;
+  m_tableWidth = width;
+  arrange();
 }
