@@ -369,6 +369,8 @@ void DMMGraph::updateSeriesAppearance()
   m_dataPoints->setMarkerShape(shape);
   m_dataPoints->setMarkerSize(size);
   m_dataPoints->setColor(dataColor());
+  // Qt Charts rims the markers in white: dense points turn into a white band
+  m_dataPoints->setBorderColor(dataColor());
   m_dataPoints->setVisible(m_pointMode != NoPoint);
 
   // phosphor: one colour, the integration curve dashed when it is a solid line
@@ -394,6 +396,7 @@ void DMMGraph::updateSeriesAppearance()
   m_intPoints->setMarkerShape(intShape);
   m_intPoints->setMarkerSize(intSize);
   m_intPoints->setColor(intColor());
+  m_intPoints->setBorderColor(intColor());
   m_intPoints->setVisible(m_showIntegration && m_intPointMode != NoPoint);
 }
 
@@ -1215,12 +1218,6 @@ void DMMGraph::setColors(const QColor &bg, const QColor &grid,
 
   applyThemeColors();
   updateSeriesAppearance();
-
-  m_crosshairVLine->setPen(QPen(m_cursorColor));
-  m_crosshairHLine->setPen(QPen(m_cursorColor));
-  m_triggerLine->setPen(QPen(m_startColor));
-  m_externalLine->setPen(QPen(m_externalColor));
-  m_integrationLine->setPen(QPen(m_intThresholdColor));
 }
 
 void DMMGraph::setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
@@ -1402,6 +1399,30 @@ void DMMGraph::applyThemeColors()
   m_xAxis->setLabelFormat(divisions() ? "%.4g" : m_defaultLabelFormat);
   m_yAxis->setLabelFormat(divisions() ? "%.4g" : m_defaultLabelFormat);
   m_yTitle->setBrush(labels);
+
+  // cursor and threshold lines: a colour chosen in the settings stays,
+  // the defaults follow the variant (a black cursor on phosphor is lost)
+  const bool own = m_variant == Custom;
+  auto pick = [own](const QColor &setting, Qt::GlobalColor def, const QColor &variant)
+  {
+    return own || setting != QColor(def) || !variant.isValid() ? setting : variant;
+  };
+  QColor start, external;
+  switch (m_variant)
+  {
+    case ScopeBlue:     start = QColor("#ff5fd2"); external = QColor("#6dff6d"); break;
+    case PhosphorGreen: start = QColor::fromHsv(135, 190, 160); external = QColor::fromHsv(135, 120, 130); break;
+    case PhosphorAmber: start = QColor::fromHsv(38, 230, 160); external = QColor::fromHsv(38, 150, 130); break;
+    case ChartRecorder: start = QColor("#2e7d32"); external = QColor("#222222"); break;
+    default: break;
+  }
+  const Qt::PenStyle lineStyle = phosphor() ? Qt::DashLine : Qt::SolidLine;
+  const QColor cursor = pick(m_cursorColor, Qt::black, labels);
+  m_crosshairVLine->setPen(QPen(cursor));
+  m_crosshairHLine->setPen(QPen(cursor));
+  m_triggerLine->setPen(QPen(pick(m_startColor, Qt::magenta, start), 1, lineStyle));
+  m_externalLine->setPen(QPen(pick(m_externalColor, Qt::cyan, external), 1, lineStyle));
+  m_integrationLine->setPen(QPen(pick(m_intThresholdColor, Qt::darkBlue, intColor()), 1, lineStyle));
   updateXAxisRange();
   setYRange(m_scaleMin, m_scaleMax);
   updateThresholdLinePositions();
