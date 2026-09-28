@@ -776,6 +776,11 @@ bool ConfigDlg::crosshair() const
   return m_graph->crosshair();
 }
 
+QString ConfigDlg::graphVariant() const
+{
+  return m_graph->variant();
+}
+
 QColor ConfigDlg::bgColor() const
 {
   return m_graph->bgColor();

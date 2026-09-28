@@ -101,6 +101,7 @@ public:
   double                scaleMax() const;
   bool                  automaticScale() const;
   bool                  includeZero() const;
+  QString               graphVariant() const;   ///< GraphPrefs::variant()
   QColor                bgColor() const;
   QColor                gridColor() const;
   QColor                dataColor() const;

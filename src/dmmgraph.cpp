@@ -832,24 +832,21 @@ void DMMGraph::handleChartMousePress(QMouseEvent *ev)
     action->setProperty("ID", IDExportImage);
     m_popup->addAction(action);
 
-    // the colour variants; phosphor comes in two colours
+    // this graph's colours: the default from the settings page, or one of
+    // the variants for this graph only
     QMenu *colours = m_popup->addMenu(tr("Graph &colours"));
-    auto variant = [this](QMenu *menu, const QString &text, ColorVariant v)
+    auto variant = [this, colours](const QString &text, int v)
     {
-      QAction *a = menu->addAction(text);
+      QAction *a = colours->addAction(text);
       a->setProperty("ID", IDColorVariant);
-      a->setProperty("variant", int(v));
+      a->setProperty("variant", v);
       a->setCheckable(true);
-      a->setChecked(m_variant == v);
+      a->setChecked(m_variantOverride == v);
     };
-    variant(colours, tr("&Neutral"), Neutral);
-    variant(colours, tr("&Scope blue"), ScopeBlue);
-    QMenu *phosphorMenu = colours->addMenu(tr("&Phosphor"));
-    variant(phosphorMenu, tr("&Green"), PhosphorGreen);
-    variant(phosphorMenu, tr("&Amber"), PhosphorAmber);
-    variant(colours, tr("Chart &recorder"), ChartRecorder);
+    variant(tr("&Default: %1").arg(variantTitle(m_defaultVariant)), -1);
     colours->addSeparator();
-    variant(colours, tr("C&ustom (from the settings)"), Custom);
+    for (ColorVariant v : { Neutral, ScopeBlue, PhosphorGreen, PhosphorAmber, ChartRecorder, Custom })
+      variant(variantTitle(v), v);
 
     if (!m_running)
     {
@@ -1269,11 +1266,26 @@ QColor DMMGraph::intColor() const
   }
 }
 
-void DMMGraph::setColorVariant(ColorVariant variant)
+void DMMGraph::setColorVariant(ColorVariant defaultVariant, int override)
 {
-  m_variant = variant;
+  m_defaultVariant = defaultVariant;
+  m_variantOverride = override;
+  m_variant = override >= 0 ? static_cast<ColorVariant>(override) : defaultVariant;
   applyThemeColors();
   updateSeriesAppearance();
+}
+
+QString DMMGraph::variantTitle(ColorVariant variant)
+{
+  switch (variant)
+  {
+    case ScopeBlue:     return tr("Scope blue");
+    case PhosphorGreen: return tr("Phosphor green");
+    case PhosphorAmber: return tr("Phosphor amber");
+    case ChartRecorder: return tr("Chart recorder");
+    case Custom:        return tr("Custom");
+    default:            return tr("Neutral");
+  }
 }
 
 QString DMMGraph::variantName(ColorVariant variant)
@@ -1484,8 +1496,8 @@ void DMMGraph::popupSLOT(QAction *action)
       exportImageSLOT();
       break;
     case IDColorVariant:
-      setColorVariant(static_cast<ColorVariant>(action->property("variant").toInt()));
-      Q_EMIT colorVariantChanged(m_variant);
+      setColorVariant(m_defaultVariant, action->property("variant").toInt());
+      Q_EMIT colorVariantChanged(m_variantOverride);
       break;
   }
 }

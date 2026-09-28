@@ -352,11 +352,13 @@ int main(int argc, char **argv)
     auto *y = graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first();
     auto *yAxis = qobject_cast<QValueAxis *>(y);
     check(qFuzzyCompare(yAxis->min(), -0.3) && qFuzzyCompare(yAxis->max(), 11.7), "neutral keeps the scale as set");
-    graph.setColorVariant(DMMGraph::PhosphorGreen);
+    graph.setColorVariant(DMMGraph::Neutral, DMMGraph::PhosphorGreen);   // this graph only
     const double div = (yAxis->max() - yAxis->min()) / 8;
     check(yAxis->tickCount() == 9 && qFuzzyCompare(div, 2.0) && qFuzzyCompare(yAxis->min(), -2.0),
           QString("phosphor: 8 divisions of 2 from -2, got %1..%2").arg(yAxis->min()).arg(yAxis->max()));
-    graph.setColorVariant(DMMGraph::Custom);
+    check(graph.colorOverride() == DMMGraph::PhosphorGreen, "the override is kept");
+    graph.setColorVariant(DMMGraph::Custom);   // the default, no override
+    check(graph.colorVariant() == DMMGraph::Custom && graph.colorOverride() == -1, "default without override");
     check(yAxis->tickCount() == 5 && qFuzzyCompare(yAxis->max(), 11.7), "custom goes back to the plain scale");
   }
 

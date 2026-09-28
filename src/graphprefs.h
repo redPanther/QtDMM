@@ -32,6 +32,8 @@ class GraphPrefs : public PrefWidget, private Ui::UIGraphPrefs
 public:
   GraphPrefs(QWidget *parent = Q_NULLPTR);
   ~GraphPrefs();
+  /// The graphs' default colours, a DMMGraph::variantName().
+  QString       variant() const;
   QColor        bgColor() const;
   QColor        gridColor() const;
   QColor        dataColor() const;
@@ -47,4 +49,7 @@ public Q_SLOTS:
   virtual void  defaultsSLOT();
   virtual void  factoryDefaultsSLOT();
   virtual void  applySLOT();
+
+private:
+  QComboBox    *m_variant;
 };

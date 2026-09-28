@@ -86,17 +86,12 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
   connect(ui_graph, SIGNAL(sampleTime(int)), m_configDlg, SLOT(setSampleTimeSLOT(int)));
   connect(ui_graph, SIGNAL(graphSize(int, int)), m_configDlg, SLOT(setGraphSizeSLOT(int, int)));
   connect(ui_graph, SIGNAL(externalTriggered()), this, SLOT(startExternalSLOT()));
-  // the graph's colour variant; a config from before the variants, whose
-  // colours were set on the settings page, keeps them as Custom
-  {
-    QString variant = m_settings->getString("Graph/variant");
-    if (variant.isEmpty())
-      variant = m_settings->getString("Graph/background").isEmpty() ? "neutral" : "custom";
-    ui_graph->setColorVariant(DMMGraph::variantFromName(variant));
-  }
+  // this graph's own colours from its context menu (empty = the default
+  // from the settings page, applied in readConfig())
   connect(ui_graph, &DMMGraph::colorVariantChanged, this, [this](int v)
   {
-    m_settings->setString("Graph/variant", DMMGraph::variantName(static_cast<DMMGraph::ColorVariant>(v)));
+    m_settings->setString("Windows/graph-variant",
+                          v < 0 ? QString() : DMMGraph::variantName(static_cast<DMMGraph::ColorVariant>(v)));
   });
   connect(m_ctl, &MeterController::externalFinished, this, &MainWid::exitedSLOT);
   connect(ui_graph, SIGNAL(configure()), this, SLOT(configSLOT()));
@@ -447,6 +442,11 @@ void MainWid::readConfig()
                      m_configDlg->scaleMin(),
                      m_configDlg->scaleMax());
 
+  {
+    const QString own = m_settings->getString("Windows/graph-variant");
+    ui_graph->setColorVariant(DMMGraph::variantFromName(m_configDlg->graphVariant()),
+                              own.isEmpty() ? -1 : int(DMMGraph::variantFromName(own)));
+  }
   ui_graph->setColors(m_configDlg->bgColor(),
                       m_configDlg->gridColor(),
                       m_configDlg->dataColor(),

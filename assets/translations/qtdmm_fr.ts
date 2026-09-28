@@ -748,155 +748,155 @@ Le multimètre est-il branché et allumé ?</translation>
         <translation>Exporter l&apos;image...</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="836"/>
+        <location filename="../../src/dmmgraph.cpp" line="837"/>
         <source>Graph &amp;colours</source>
         <translation>&amp;Couleurs du graphe</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="845"/>
-        <source>&amp;Neutral</source>
-        <translation>&amp;Neutre</translation>
-    </message>
-    <message>
         <location filename="../../src/dmmgraph.cpp" line="846"/>
-        <source>&amp;Scope blue</source>
-        <translation>Oscilloscope &amp;bleu</translation>
+        <source>&amp;Default: %1</source>
+        <translation>Par &amp;défaut : %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="847"/>
-        <source>&amp;Phosphor</source>
-        <translation>&amp;Phosphore</translation>
-    </message>
-    <message>
-        <location filename="../../src/dmmgraph.cpp" line="848"/>
-        <source>&amp;Green</source>
-        <translation>&amp;Vert</translation>
-    </message>
-    <message>
-        <location filename="../../src/dmmgraph.cpp" line="849"/>
-        <source>&amp;Amber</source>
-        <translation>&amp;Ambre</translation>
-    </message>
-    <message>
-        <location filename="../../src/dmmgraph.cpp" line="850"/>
-        <source>Chart &amp;recorder</source>
-        <translation>&amp;Enregistreur papier</translation>
-    </message>
-    <message>
-        <location filename="../../src/dmmgraph.cpp" line="852"/>
-        <source>C&amp;ustom (from the settings)</source>
-        <translation>&amp;Personnalisé (des réglages)</translation>
-    </message>
-    <message>
-        <location filename="../../src/dmmgraph.cpp" line="857"/>
+        <location filename="../../src/dmmgraph.cpp" line="854"/>
         <source>Export data...</source>
         <translation>Exporter les données…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="861"/>
+        <location filename="../../src/dmmgraph.cpp" line="858"/>
         <source>Import data...</source>
         <translation>Importer des données…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1011"/>
+        <location filename="../../src/dmmgraph.cpp" line="1008"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1011"/>
+        <location filename="../../src/dmmgraph.cpp" line="1008"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1011"/>
+        <location filename="../../src/dmmgraph.cpp" line="1008"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1013"/>
+        <location filename="../../src/dmmgraph.cpp" line="1010"/>
         <source>Export data</source>
         <translation>Exporter les données</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1055"/>
+        <location filename="../../src/dmmgraph.cpp" line="1052"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM : données non enregistrées</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1056"/>
+        <location filename="../../src/dmmgraph.cpp" line="1053"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Importing data will overwrite your measured data&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;L&apos;importation écrasera vos mesures.&lt;p&gt;Voulez-vous d&apos;abord exporter vos données non enregistrées ?</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1068"/>
+        <location filename="../../src/dmmgraph.cpp" line="1065"/>
         <source>Export data first</source>
         <translation>Exporter d&apos;abord</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1072"/>
+        <location filename="../../src/dmmgraph.cpp" line="1069"/>
         <source>Import &amp; overwrite data</source>
         <translation>Importer et écraser</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1083"/>
+        <location filename="../../src/dmmgraph.cpp" line="1080"/>
         <source>Import data</source>
         <translation>Importer les données</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1083"/>
+        <location filename="../../src/dmmgraph.cpp" line="1080"/>
         <source>CSV (*.csv);;All files (*)</source>
         <translation>CSV (*.csv);;Tous les fichiers (*)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1562"/>
+        <location filename="../../src/dmmgraph.cpp" line="1282"/>
+        <source>Scope blue</source>
+        <translation>Oscilloscope bleu</translation>
+    </message>
+    <message>
+        <location filename="../../src/dmmgraph.cpp" line="1283"/>
+        <source>Phosphor green</source>
+        <translation>Phosphore vert</translation>
+    </message>
+    <message>
+        <location filename="../../src/dmmgraph.cpp" line="1284"/>
+        <source>Phosphor amber</source>
+        <translation>Phosphore ambre</translation>
+    </message>
+    <message>
+        <location filename="../../src/dmmgraph.cpp" line="1285"/>
+        <source>Chart recorder</source>
+        <translation>Enregistreur papier</translation>
+    </message>
+    <message>
+        <location filename="../../src/dmmgraph.cpp" line="1286"/>
+        <source>Custom</source>
+        <translation>Personnalisé</translation>
+    </message>
+    <message>
+        <location filename="../../src/dmmgraph.cpp" line="1287"/>
+        <source>Neutral</source>
+        <translation>Neutre</translation>
+    </message>
+    <message>
+        <location filename="../../src/dmmgraph.cpp" line="1574"/>
         <source>Scalable vector graphics (*.svg)</source>
         <translation>Graphique vectoriel évolutif (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1562"/>
+        <location filename="../../src/dmmgraph.cpp" line="1574"/>
         <source>PDF (*.pdf)</source>
         <translation>PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1563"/>
+        <location filename="../../src/dmmgraph.cpp" line="1575"/>
         <source>PNG image (*.png)</source>
         <translation>Image PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1563"/>
+        <location filename="../../src/dmmgraph.cpp" line="1575"/>
         <source>JPEG image (*.jpg)</source>
         <translation>Image JPEG (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1566"/>
+        <location filename="../../src/dmmgraph.cpp" line="1578"/>
         <source>Export image</source>
         <translation>Exporter l&apos;image</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1616"/>
+        <location filename="../../src/dmmgraph.cpp" line="1628"/>
         <source>QtDMM recording, %1</source>
         <translation>Enregistrement QtDMM, %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1617"/>
-        <location filename="../../src/dmmgraph.cpp" line="1632"/>
+        <location filename="../../src/dmmgraph.cpp" line="1629"/>
+        <location filename="../../src/dmmgraph.cpp" line="1644"/>
         <source>QtDMM graph</source>
         <translation>Graphique QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1618"/>
+        <location filename="../../src/dmmgraph.cpp" line="1630"/>
         <source>%1 values, %2 s per sample, unit %3</source>
         <translation>%1 valeurs, %2 s par échantillon, unité %3</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1623"/>
-        <location filename="../../src/dmmgraph.cpp" line="1641"/>
-        <location filename="../../src/dmmgraph.cpp" line="1656"/>
+        <location filename="../../src/dmmgraph.cpp" line="1635"/>
+        <location filename="../../src/dmmgraph.cpp" line="1653"/>
+        <location filename="../../src/dmmgraph.cpp" line="1668"/>
         <source>Could not write %1</source>
         <translation>Impossible d&apos;écrire %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1660"/>
+        <location filename="../../src/dmmgraph.cpp" line="1672"/>
         <source>Graph written to %1</source>
         <translation>Graphique écrit dans %1</translation>
     </message>
@@ -1122,14 +1122,34 @@ Le multimètre est-il branché et allumé ?</translation>
 <context>
     <name>GraphPrefs</name>
     <message>
-        <location filename="../../src/graphprefs.cpp" line="36"/>
+        <location filename="../../src/graphprefs.cpp" line="37"/>
         <source>Graph</source>
         <translation>Graphe</translation>
     </message>
     <message>
-        <location filename="../../src/graphprefs.cpp" line="37"/>
+        <location filename="../../src/graphprefs.cpp" line="38"/>
         <source>&lt;b&gt;Here you can configure the colors and drawing style for the graph.&lt;/b&gt;</source>
         <translation>&lt;b&gt;Configurez ici les couleurs et le style de tracé du graphe.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/graphprefs.cpp" line="47"/>
+        <source>Custom: the colours below</source>
+        <translation>Personnalisé : les couleurs ci-dessous</translation>
+    </message>
+    <message>
+        <location filename="../../src/graphprefs.cpp" line="48"/>
+        <source>Neutral: follows the design</source>
+        <translation>Neutre : suit l&apos;apparence</translation>
+    </message>
+    <message>
+        <location filename="../../src/graphprefs.cpp" line="51"/>
+        <source>The colours of the graph: background, grid, lettering and curves. Custom uses the colours below. A graph&apos;s context menu can choose other colours for that graph only.</source>
+        <translation>Les couleurs du graphe : fond, grille, libellés et courbes. « Personnalisé » utilise les couleurs ci-dessous. Le menu contextuel d&apos;un graphe peut choisir d&apos;autres couleurs pour ce graphe seulement.</translation>
+    </message>
+    <message>
+        <location filename="../../src/graphprefs.cpp" line="55"/>
+        <source>Graph &amp;colours:</source>
+        <translation>&amp;Couleurs du graphe :</translation>
     </message>
 </context>
 <context>
@@ -1244,22 +1264,22 @@ Le multimètre est-il branché et allumé ?</translation>
 <context>
     <name>MainWid</name>
     <message>
-        <location filename="../../src/mainwid.cpp" line="216"/>
+        <location filename="../../src/mainwid.cpp" line="211"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM : données non enregistrées</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="217"/>
+        <location filename="../../src/mainwid.cpp" line="212"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. If you quit now it will be lost.&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Des mesures non enregistrées sont encore en mémoire. Si vous quittez maintenant, elles seront perdues.&lt;p&gt;Voulez-vous d&apos;abord les exporter ?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="232"/>
+        <location filename="../../src/mainwid.cpp" line="227"/>
         <source>Export data first</source>
         <translation>Exporter d&apos;abord</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="236"/>
+        <location filename="../../src/mainwid.cpp" line="231"/>
         <source>Quit without saving</source>
         <translation>Quitter sans enregistrer</translation>
     </message>
@@ -1535,57 +1555,57 @@ Choisissez quelle instance doit enregistrer.</translation>
         <translation>Appareils pris en charge…</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="711"/>
+        <location filename="../../src/mainwin.cpp" line="724"/>
         <source>&amp;Hide window</source>
         <translation>&amp;Masquer la fenêtre</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="712"/>
+        <location filename="../../src/mainwin.cpp" line="725"/>
         <source>&amp;Title bar</source>
         <translation>&amp;Barre de titre</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="717"/>
+        <location filename="../../src/mainwin.cpp" line="730"/>
         <source>Hide &amp;controls</source>
         <translation>Masquer les &amp;commandes</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="724"/>
+        <location filename="../../src/mainwin.cpp" line="737"/>
         <source>&amp;LCD colours</source>
         <translation>Couleurs du &amp;LCD</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="726"/>
+        <location filename="../../src/mainwin.cpp" line="739"/>
         <source>&amp;Classic</source>
         <translation>&amp;Classique</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="726"/>
+        <location filename="../../src/mainwin.cpp" line="739"/>
         <source>&amp;Backlight blue</source>
         <translation>Rétroéclairage &amp;bleu</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="727"/>
+        <location filename="../../src/mainwin.cpp" line="740"/>
         <source>&amp;Amber</source>
         <translation>&amp;Ambre</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="727"/>
+        <location filename="../../src/mainwin.cpp" line="740"/>
         <source>&amp;High contrast</source>
         <translation>&amp;Contraste élevé</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="728"/>
+        <location filename="../../src/mainwin.cpp" line="741"/>
         <source>C&amp;ustom (from the settings)</source>
         <translation>&amp;Personnalisé (des réglages)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="762"/>
+        <location filename="../../src/mainwin.cpp" line="775"/>
         <source>%1: readings are coming in</source>
         <translation>%1 : des mesures arrivent</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="763"/>
+        <location filename="../../src/mainwin.cpp" line="776"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1 : aucune mesure depuis 3 s</translation>
     </message>

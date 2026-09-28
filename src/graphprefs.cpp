@@ -26,6 +26,7 @@
 
 
 #include "colorbutton.h"
+#include "dmmgraph.h"
 #include "graphprefs.h"
 #include "settings.h"
 
@@ -37,6 +38,31 @@ GraphPrefs::GraphPrefs(QWidget *parent) : PrefWidget(parent)
   m_description = tr("<b>Here you can configure the colors and"
                      " drawing style for the graph.</b>");
   m_iconName = "office-chart-line";
+
+  // the graphs' colours; the colour buttons below are the variant Custom
+  // (cursor and thresholds always)
+  m_variant = new QComboBox(this);
+  for (auto v : { DMMGraph::Neutral, DMMGraph::ScopeBlue, DMMGraph::PhosphorGreen, DMMGraph::PhosphorAmber,
+                  DMMGraph::ChartRecorder, DMMGraph::Custom })
+    m_variant->addItem(v == DMMGraph::Custom ? tr("Custom: the colours below")
+                                             : v == DMMGraph::Neutral ? tr("Neutral: follows the design")
+                                                                      : DMMGraph::variantTitle(v),
+                       DMMGraph::variantName(v));
+  m_variant->setWhatsThis(tr("The colours of the graph: background, grid, lettering and curves. "
+                             "Custom uses the colours below. A graph's context menu can choose "
+                             "other colours for that graph only."));
+  auto *row = new QHBoxLayout;
+  auto *label = new QLabel(tr("Graph &colours:"), this);
+  label->setBuddy(m_variant);
+  row->addWidget(label);
+  row->addWidget(m_variant, 1);
+  if (auto *box = qobject_cast<QBoxLayout *>(layout()))
+    box->insertLayout(0, row);
+}
+
+QString GraphPrefs::variant() const
+{
+  return m_variant->currentData().toString();
 }
 GraphPrefs::~GraphPrefs()
 {
@@ -64,6 +90,12 @@ void GraphPrefs::defaultsSLOT()
     ui_extColor->setColor(Qt::cyan);
     m_cfg->save();
   }
+  // a config from before the variants, whose colours were set here, keeps
+  // them as Custom
+  QString variant = m_cfg->getString("Graph/variant");
+  if (variant.isEmpty())
+    variant = m_cfg->getString("Graph/background").isEmpty() ? "neutral" : "custom";
+  m_variant->setCurrentIndex(qMax(0, m_variant->findData(variant)));
   ui_lineMode->setCurrentIndex(m_cfg->getInt("Graph/line-mode", 1));
   ui_pointMode->setCurrentIndex(m_cfg->getInt("Graph/point-mode"));
   ui_crosshair->setChecked(m_cfg->getBool("Graph/crosshair-cursor", true));
@@ -80,6 +112,7 @@ void GraphPrefs::factoryDefaultsSLOT()
   ui_cursorColor->setColor(Qt::black);
   ui_startColor->setColor(Qt::magenta);   // mt: removed .rgb()
   ui_extColor->setColor(Qt::cyan);   // mt: removed .rgb()
+  m_variant->setCurrentIndex(0);
   ui_lineMode->setCurrentIndex(1);
   ui_pointMode->setCurrentIndex(0);
   ui_lineWidth->setValue(2);
@@ -95,6 +128,7 @@ void GraphPrefs::applySLOT()
   m_cfg->setColor("Graph/cursor", ui_cursorColor->color());
   m_cfg->setColor("Graph/start-trigger", ui_startColor->color());
   m_cfg->setColor("Graph/external-trigger", ui_extColor->color());
+  m_cfg->setString("Graph/variant", variant());
   m_cfg->setInt("Graph/line-width", ui_lineWidth->value());
   m_cfg->setInt("Graph/line-mode", ui_lineMode->currentIndex());
   m_cfg->setInt("Graph/point-mode", ui_pointMode->currentIndex());

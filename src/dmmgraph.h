@@ -156,11 +156,16 @@ public:
   /// replaces the curve colour only while that is the default blue.
   void             setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
                                   const QColor &data = QColor());
-  void             setColorVariant(ColorVariant variant);
+  /// The colours in use: @p override for this graph (context menu), or
+  /// the default from the settings page when @p override is -1.
+  void             setColorVariant(ColorVariant defaultVariant, int override = -1);
   ColorVariant     colorVariant() const { return m_variant; }
+  int              colorOverride() const { return m_variantOverride; }
   /// "neutral", "scope", "phosphor-green", "phosphor-amber", "recorder", "custom"
   static QString   variantName(ColorVariant variant);
   static ColorVariant variantFromName(const QString &name);
+  /// The variant's name in the menus ("Scope blue").
+  static QString   variantTitle(ColorVariant variant);
   /// The smallest step of the 1-2-5 series (..., 0.5, 1, 2, 5, 10, ...) that
   /// is at least @p v; the division of the scope variants. Public for the tests.
   static double    niceStep(double v);
@@ -196,8 +201,9 @@ Q_SIGNALS:
   void             sampleTime(int);
   /// The external application threshold was crossed.
   void             externalTriggered();
-  /// The colour variant was changed from the context menu.
-  void             colorVariantChanged(int variant);
+  /// The context menu chose this graph's colours: a ColorVariant, or -1
+  /// for the default from the settings page.
+  void             colorVariantChanged(int override);
   void             zoomIn(double);
   void             zoomOut(double);
   /// Show the whole recording (key 0).
@@ -330,7 +336,9 @@ protected:
   QColor           m_themeData;         ///< proposed curve colour, invalid = none
   QColor           dataColor() const;   ///< the curve colour in use
   QColor           intColor() const;    ///< the integration curve colour in use
-  ColorVariant     m_variant = Neutral;
+  ColorVariant     m_variant = Neutral;          ///< in use
+  ColorVariant     m_defaultVariant = Neutral;   ///< from the settings page
+  int              m_variantOverride = -1;       ///< this graph's choice, -1 = default
   /// Scope, phosphor and recorder: 10 x 8 divisions of 1-2-5 steps.
   bool             divisions() const;
   bool             phosphor() const { return m_variant == PhosphorGreen || m_variant == PhosphorAmber; }
