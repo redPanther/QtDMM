@@ -560,12 +560,13 @@ void MainWid::readConfig()
   m_dmm->setPortSettings(static_cast<QSerialPort::DataBits>(m_configDlg->bits()), static_cast<QSerialPort::StopBits>(m_configDlg->stopBits()),
                          m_configDlg->parity(), m_configDlg->externalSetup(), m_configDlg->rts(), m_configDlg->dtr() );
 
+  // the sample time first: setGraphSize() counts the window in samples, and
+  // the x axis converts them back with the sample time
+  ui_graph->setSampleTime(m_configDlg->sampleStep());
+  ui_graph->setSampleLength(m_configDlg->sampleLength());
   ui_graph->setGraphSize(m_configDlg->windowSeconds(), m_configDlg->totalSeconds());
   ui_graph->setStartTime(m_configDlg->startTime());
   ui_graph->setMode(m_configDlg->sampleMode());
-
-  ui_graph->setSampleTime(m_configDlg->sampleStep());
-  ui_graph->setSampleLength(m_configDlg->sampleLength());
 
   ui_graph->setCrosshair(m_configDlg->crosshair());
 
