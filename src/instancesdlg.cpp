@@ -284,6 +284,9 @@ void InstancesDlg::on_ui_instance_add_clicked()
     return;
   }
 
+  // start from this instance's settings, so only the meter needs setting up
+  m_settings->copyConfig(configId);
+
   QString exePath = QCoreApplication::applicationFilePath();
 
   QStringList args;

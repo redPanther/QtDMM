@@ -16,7 +16,11 @@ qtdmm [options]
 
 Every QtDMM window is one *instance*, identified by its `--config-id`. Start
 further instances from **Instances** (Ctrl+N): *Add* asks for a name and
-launches a new QtDMM with that id; the list shows which instances are
+launches a new QtDMM with that id. The new instance starts with a copy of
+the current one's settings (graph, display, alarms, …) but without the
+meter and its connection, so only the meter needs choosing; its window does
+not take over the position, and an SCPI server stays off until you enable
+it with a free port. The list shows which instances are
 configured, which are running and what each one currently reads, and lets
 you open or remove them. The **ƒ** button creates a calculated instance
 from a name, a unit and a formula in one go (see

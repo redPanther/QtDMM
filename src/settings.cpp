@@ -177,3 +177,24 @@ void Settings::deleteConfig(QString instance_id)
   configFile.remove();
 }
 
+QString Settings::copyConfig(const QString &instance_id) const
+{
+  Settings target(instance_id, m_configPath);
+  for (const QString &key : m_qsettings->allKeys())
+  {
+    // the meter belongs to the instance; the list of custom ports and the
+    // path of sigrok-cli are the same for all of them
+    const bool meter = key.startsWith("DMM/")
+                       || (key.startsWith("Port settings/")
+                           && !key.startsWith("Port settings/custom_device")
+                           && key != "Port settings/sigrok_exe");
+    // the new window would open exactly over this one, and the second SCPI
+    // server would find its port taken
+    const bool clash = key == "Position/x" || key == "Position/y" || key == "Scpi/enabled";
+    if (!meter && !clash)
+      target.m_qsettings->setValue(key, m_qsettings->value(key));
+  }
+  target.m_qsettings->sync();
+  return target.fileName();
+}
+
