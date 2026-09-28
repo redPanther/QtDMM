@@ -3,8 +3,8 @@
 //
 // Instances dialog without a running second QtDMM: the list is built from the
 // config files in a temporary config directory, delete mode removes the
-// selected instance's file, and a calculated instance is created with the
-// keys DMM and MainWin rely on.
+// selected instance's file, a calculated instance is created with the keys
+// DMM and MainWin rely on, and a new instance copies all but the meter.
 
 #include <QtWidgets>
 #include <QTemporaryDir>
@@ -91,6 +91,36 @@ int main(int argc, char **argv)
     check(calc.getBool("DMM/configured"), "configured flag set (auto-connect at first start)");
     check(calc.getString("Port settings/device") == "calc W u * i", "device string");
     check(calc.getString("DMM/calc-expression") == "u * i", "formula key");
+  }
+
+  // --- 4. a new instance copies everything but the meter ---
+  settings.setString("Port settings/device", "Serial /dev/ttyUSB0");
+  settings.setString("Port settings/ble-key", "00112233445566778899aabbccddeeff");
+  settings.setString("Port settings/custom_device0", "RFC2217 bench:4000");
+  settings.setInt("Port settings/baud", 19200);
+  settings.setInt("Graph/sample-time", 5);
+  settings.setColor("Graph/background", QColor("#123456"));
+  settings.setInt("Position/x", 100);
+  settings.setInt("Position/width", 800);
+  settings.setBool("Scpi/enabled", true);
+  settings.setInt("Scpi/port", 5025);
+  settings.save();
+  const QString copyFile = settings.copyConfig("copy");
+  check(QFile::exists(copyFile), "copied config written: " + copyFile);
+  {
+    Settings copy("copy", dir.path());
+    check(copy.fileExists(), "copy exists (no welcome dialog)");
+    check(copy.getInt("Graph/sample-time") == 5, "graph setting copied");
+    check(copy.getColor("Graph/background") == QColor("#123456"), "colour copied");
+    check(copy.getInt("Position/width") == 800, "window size copied");
+    check(copy.getInt("Scpi/port") == 5025, "SCPI port copied");
+    check(copy.getString("Port settings/custom_device0") == "RFC2217 bench:4000", "custom port list copied");
+    check(copy.getString("DMM/model").isEmpty(), "model not copied");
+    check(copy.getString("Port settings/device").isEmpty(), "device not copied");
+    check(copy.getString("Port settings/ble-key").isEmpty(), "BLE key not copied");
+    check(copy.getInt("Port settings/baud", -1) == -1, "baud rate not copied");
+    check(copy.getInt("Position/x", -1) == -1, "window position not copied");
+    check(!copy.getBool("Scpi/enabled"), "SCPI server not enabled in the copy");
   }
 
   if (failed == 0)
