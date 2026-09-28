@@ -36,6 +36,8 @@ class HelpDlg;
 class MeterWid;
 class ReadingLogWid;
 class AlarmBar;
+class ControlBar;
+class FoldButton;
 class MdiArranger;
 class QMdiArea;
 class QMdiSubWindow;
@@ -116,6 +118,14 @@ protected:
   QMenu      *m_arrangeMenu;
   QMenu      *m_designMenu;
   bool        m_restoring = false;   ///< restoreWindows() is setting the actions
+  ControlBar *m_controls;            ///< the meter's keys under the display
+  FoldButton *m_fold;
+  bool        m_controlsSupported = false;
+  /// Folds the keys away (Display/controls-hidden), from the fold button
+  /// or "Hide controls" in the display's menu.
+  void        setControlsFolded(bool folded);
+  /// Keys and fold button shown for a meter that has keys, not folded.
+  void        updateControls();
   // Window size (package 26.2, 4a): the window starts at the size its
   // content needs and grows when a view is shown for the first time, up to
   // 84 % of the screen per side. It never shrinks by itself and stops

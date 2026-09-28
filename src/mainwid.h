@@ -104,6 +104,8 @@ Q_SIGNALS:
   void        useTextLabel(bool);
   /// The desktop's icon theme first (true) or only the built-in Breeze set.
   void        systemIcons(bool);
+  /// The configured meter has keys QtDMM can press (ControlBar).
+  void        remoteControl(bool supported);
   /// Asks MainWin to connect/disconnect (drives the Connect action).
   void        setConnect(bool);
   /// Toolbar visibility read from the settings, for MainWin to apply.

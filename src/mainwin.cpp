@@ -37,6 +37,7 @@
 #include "mdiarranger.h"
 #include "metercontroller.h"
 #include "designs.h"
+#include "controlbar.h"
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QLoggingCategory>
@@ -86,7 +87,30 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   // controller (see MainWid)
   m_display = new DisplayWid(this);
   m_wid->setDisplay(m_display);
-  m_displayWin = addView(m_display, tr("Display"), MdiArranger::Instrument, "display");
+  // the display with the meter's keys below it (only for meters that have
+  // them) and the fold button in its corner
+  auto *displayBox = new QWidget(this);
+  auto *displayLayout = new QVBoxLayout(displayBox);
+  displayLayout->setContentsMargins(0, 0, 0, 0);
+  displayLayout->setSpacing(4);
+  displayLayout->addWidget(m_display, 1);
+  m_controls = new ControlBar(displayBox);
+  displayLayout->addWidget(m_controls);
+  m_fold = new FoldButton(m_display);
+  m_fold->setFolded(m_wid->settings()->getBool("Display/controls-hidden", false));
+  m_display->installEventFilter(this);   // keeps the fold button in the corner
+  connect(m_fold, &FoldButton::toggled, this, [this](bool folded) { setControlsFolded(folded); });
+  connect(m_wid->controller(), &MeterController::reading, m_controls, &ControlBar::showReading);
+  connect(m_controls, &ControlBar::keyPressed, this, [this](const QString &key)
+  {
+    statusBar()->showMessage(tr("The meter's %1 key: remote control is not built in yet.").arg(key.toUpper()), 4000);
+  });
+  connect(m_wid, &MainWid::remoteControl, this, [this](bool supported)
+  {
+    m_controlsSupported = supported;
+    updateControls();
+  });
+  m_displayWin = addView(displayBox, tr("Display"), MdiArranger::Instrument, "display");
 
   m_meter = new MeterWid(this);
   m_wid->setMeter(m_meter);
@@ -275,6 +299,8 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
     if (!w->isHidden())
       m_grown.insert(w);
+  if (!m_controls->isHidden())
+    m_grown.insert(m_controls);
   if (m_grown.contains(m_readingsWin))
     m_arranger->setTableWidth(growthFor(m_readingsWin).width());
   if (stored && m_wid->saveWindowSize())
@@ -291,6 +317,8 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
     for (QMdiSubWindow *w : { m_graphWin, m_readingsWin })
       if (m_grown.contains(w))
         start += growthFor(w);
+    if (!m_controls->isHidden())
+      start += QSize(0, 2 * em());
     const QRect av = screen()->availableGeometry();
     resize(qMin(start.width(), int(av.width() * 0.84)), qMin(start.height(), int(av.height() * 0.84)));
   }
@@ -661,6 +689,8 @@ void MainWin::bindWindowAction(QAction *action, QMdiSubWindow *win)
 // A window was closed with its title bar button, or shown: its action follows.
 bool MainWin::eventFilter(QObject *watched, QEvent *event)
 {
+  if (watched == m_display && event->type() == QEvent::Resize)
+    m_fold->move(m_display->width() - m_fold->width() - 6, 6);
   if (event->type() == QEvent::Show || event->type() == QEvent::Hide)
     for (QAction *a : { m_displayAction, m_meterAction, m_readingsAction, action_Graph })
       if (a && a->property("window").value<QObject *>() == watched)
@@ -682,6 +712,13 @@ void MainWin::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
   QAction *title = menu.addAction(tr("&Title bar"));
   title->setCheckable(true);
   title->setChecked(!MdiArranger::titleBarHidden(win));
+  if (win == m_displayWin && m_controlsSupported)
+  {
+    QAction *hideControls = menu.addAction(tr("Hide &controls"));
+    hideControls->setCheckable(true);
+    hideControls->setChecked(m_fold->isFolded());
+    connect(hideControls, &QAction::toggled, this, [this](bool on) { setControlsFolded(on); });
+  }
   if (win == m_displayWin)
   {
     QMenu *lcd = menu.addMenu(tr("&LCD colours"));
@@ -866,6 +903,29 @@ void MainWin::showEvent(QShowEvent *event)
     });
 }
 
+// ---------------------------------------------------------------- meter keys
+
+void MainWin::setControlsFolded(bool folded)
+{
+  m_fold->setFolded(folded);
+  m_wid->settings()->setBool("Display/controls-hidden", folded);
+  updateControls();
+}
+
+void MainWin::updateControls()
+{
+  m_fold->setVisible(m_controlsSupported);
+  const bool show = m_controlsSupported && !m_fold->isFolded();
+  m_controls->setVisible(show);
+  // the first time the keys appear, the window grows for them
+  if (show && !m_grown.contains(m_controls))
+  {
+    m_grown.insert(m_controls);
+    autoGrow(QSize(0, 2 * em()));
+  }
+  m_arranger->arrange();
+}
+
 void MainWin::setDesign(int design)
 {
   const auto d = static_cast<Designs::Design>(design);
@@ -922,6 +982,7 @@ void MainWin::setupIcons()
   this->action_Connect->setIcon(iconConnectOff);
   connect(this->action_Connect, &QAction::toggled, this, [ = ](bool checked)
   {
+    m_controls->setConnected(checked);
     this->action_Connect->setIcon(checked ? iconConnectOn : iconConnectOff);
   });
 }

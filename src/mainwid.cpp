@@ -27,6 +27,7 @@
 #include <cmath>
 
 #include "mainwid.h"
+#include "controlbar.h"
 #include "dmmgraph.h"
 #include "configdlg.h"
 #include "dmm.h"
@@ -501,6 +502,7 @@ void MainWid::readConfig()
     Q_EMIT info(tr("Falling threshold %1").arg(m_configDlg->fallingThreshold()));
   Q_EMIT useTextLabel(m_configDlg->useTextLabel());
   Q_EMIT systemIcons(m_configDlg->systemIcons());
+  Q_EMIT remoteControl(ControlBar::supported(m_configDlg->dmmInfo()));
   Q_EMIT toolbarVisibility(m_configDlg->showDisplay(),
                            m_configDlg->showDmmToolbar(),
                            m_configDlg->showGraphToolbar(),
