@@ -190,8 +190,10 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   QAction *arrangeButton = m_arrangeMenu->menuAction();
   arrangeButton->setIcon(QIcon::fromTheme("qtdmm-arrange"));
   arrangeButton->setToolTip(tr("Arrange the windows"));
-  toolBarDMM->addAction(arrangeButton);
-  if (auto *button = qobject_cast<QToolButton *>(toolBarDMM->widgetForAction(arrangeButton)))
+  // on the right, next to the menu button: it arranges the whole window,
+  // not the meter
+  toolBarMenu->insertAction(action_Menu, arrangeButton);
+  if (auto *button = qobject_cast<QToolButton *>(toolBarMenu->widgetForAction(arrangeButton)))
     button->setPopupMode(QToolButton::InstantPopup);
 
   // colour designs of the window (the LCD tint and the meter style are
