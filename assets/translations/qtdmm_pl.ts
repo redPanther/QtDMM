@@ -38,6 +38,16 @@
         <source>for %1 s</source>
         <translation>przez %1 s</translation>
     </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="334"/>
+        <source>Alarm</source>
+        <translation>Alarm</translation>
+    </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="337"/>
+        <source>Alarm %1</source>
+        <translation>Alarm %1</translation>
+    </message>
 </context>
 <context>
     <name>AlarmBar</name>
@@ -692,211 +702,211 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>%1 s</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="719"/>
-        <location filename="../../src/dmmgraph.cpp" line="721"/>
-        <location filename="../../src/dmmgraph.cpp" line="723"/>
-        <location filename="../../src/dmmgraph.cpp" line="725"/>
+        <location filename="../../src/dmmgraph.cpp" line="734"/>
+        <location filename="../../src/dmmgraph.cpp" line="736"/>
+        <location filename="../../src/dmmgraph.cpp" line="738"/>
+        <location filename="../../src/dmmgraph.cpp" line="740"/>
         <source>Sampling</source>
         <translation>Próbkowanie</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="719"/>
-        <location filename="../../src/dmmgraph.cpp" line="721"/>
-        <location filename="../../src/dmmgraph.cpp" line="723"/>
-        <location filename="../../src/dmmgraph.cpp" line="725"/>
+        <location filename="../../src/dmmgraph.cpp" line="734"/>
+        <location filename="../../src/dmmgraph.cpp" line="736"/>
+        <location filename="../../src/dmmgraph.cpp" line="738"/>
+        <location filename="../../src/dmmgraph.cpp" line="740"/>
         <source>Stopped</source>
         <translation>Zatrzymany</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="790"/>
+        <location filename="../../src/dmmgraph.cpp" line="805"/>
         <source>Disconnect</source>
         <translation>Rozłącz</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="797"/>
+        <location filename="../../src/dmmgraph.cpp" line="812"/>
         <source>Connect</source>
         <translation>Połącz</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="806"/>
+        <location filename="../../src/dmmgraph.cpp" line="821"/>
         <source>Stop recorder</source>
         <translation>Zatrzymaj rejestrator</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="813"/>
+        <location filename="../../src/dmmgraph.cpp" line="828"/>
         <source>Start recorder</source>
         <translation>Uruchom rejestrator</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="818"/>
+        <location filename="../../src/dmmgraph.cpp" line="833"/>
         <source>Clear graph</source>
         <translation>Wyczyść wykres</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="824"/>
+        <location filename="../../src/dmmgraph.cpp" line="839"/>
         <source>Configure...</source>
         <translation>Konfiguruj…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="828"/>
+        <location filename="../../src/dmmgraph.cpp" line="843"/>
         <source>Copy image</source>
         <translation>Kopiuj obraz</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="831"/>
+        <location filename="../../src/dmmgraph.cpp" line="846"/>
         <source>Export image...</source>
         <translation>Eksportuj obraz...</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="837"/>
+        <location filename="../../src/dmmgraph.cpp" line="852"/>
         <source>Graph &amp;colours</source>
         <translation>&amp;Kolory wykresu</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="846"/>
+        <location filename="../../src/dmmgraph.cpp" line="861"/>
         <source>&amp;Default: %1</source>
         <translation>&amp;Domyślne: %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="854"/>
+        <location filename="../../src/dmmgraph.cpp" line="869"/>
         <source>Export data...</source>
         <translation>Eksportuj dane…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="858"/>
+        <location filename="../../src/dmmgraph.cpp" line="873"/>
         <source>Import data...</source>
         <translation>Importuj dane…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1008"/>
+        <location filename="../../src/dmmgraph.cpp" line="1023"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1008"/>
+        <location filename="../../src/dmmgraph.cpp" line="1023"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1008"/>
+        <location filename="../../src/dmmgraph.cpp" line="1023"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1010"/>
+        <location filename="../../src/dmmgraph.cpp" line="1025"/>
         <source>Export data</source>
         <translation>Eksportuj dane</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1052"/>
+        <location filename="../../src/dmmgraph.cpp" line="1067"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: niezapisane dane</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1053"/>
+        <location filename="../../src/dmmgraph.cpp" line="1068"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Importing data will overwrite your measured data&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Niezapisane dane&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Import nadpisze zmierzone dane.&lt;p&gt;Czy najpierw wyeksportować niezapisane dane?</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1065"/>
+        <location filename="../../src/dmmgraph.cpp" line="1080"/>
         <source>Export data first</source>
         <translation>Najpierw eksportuj</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1069"/>
+        <location filename="../../src/dmmgraph.cpp" line="1084"/>
         <source>Import &amp; overwrite data</source>
         <translation>Importuj i nadpisz</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1080"/>
+        <location filename="../../src/dmmgraph.cpp" line="1095"/>
         <source>Import data</source>
         <translation>Importuj dane</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1080"/>
+        <location filename="../../src/dmmgraph.cpp" line="1095"/>
         <source>CSV (*.csv);;All files (*)</source>
         <translation>CSV (*.csv);;Wszystkie pliki (*)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1282"/>
+        <location filename="../../src/dmmgraph.cpp" line="1291"/>
         <source>Scope blue</source>
         <translation>Oscyloskop niebieski</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1283"/>
+        <location filename="../../src/dmmgraph.cpp" line="1292"/>
         <source>Phosphor green</source>
         <translation>Luminofor zielony</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1284"/>
+        <location filename="../../src/dmmgraph.cpp" line="1293"/>
         <source>Phosphor amber</source>
         <translation>Luminofor bursztynowy</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1285"/>
+        <location filename="../../src/dmmgraph.cpp" line="1294"/>
         <source>Chart recorder</source>
         <translation>Rejestrator papierowy</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1286"/>
+        <location filename="../../src/dmmgraph.cpp" line="1295"/>
         <source>Custom</source>
         <translation>Własne</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1287"/>
+        <location filename="../../src/dmmgraph.cpp" line="1296"/>
         <source>Neutral</source>
         <translation>Neutralne</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1574"/>
+        <location filename="../../src/dmmgraph.cpp" line="1607"/>
         <source>Scalable vector graphics (*.svg)</source>
         <translation>Skalowalna grafika wektorowa (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1574"/>
+        <location filename="../../src/dmmgraph.cpp" line="1607"/>
         <source>PDF (*.pdf)</source>
         <translation>PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1575"/>
+        <location filename="../../src/dmmgraph.cpp" line="1608"/>
         <source>PNG image (*.png)</source>
         <translation>Obraz PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1575"/>
+        <location filename="../../src/dmmgraph.cpp" line="1608"/>
         <source>JPEG image (*.jpg)</source>
         <translation>Obraz JPEG (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1578"/>
+        <location filename="../../src/dmmgraph.cpp" line="1611"/>
         <source>Export image</source>
         <translation>Eksport obrazu</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1628"/>
+        <location filename="../../src/dmmgraph.cpp" line="1661"/>
         <source>QtDMM recording, %1</source>
         <translation>Zapis QtDMM, %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1629"/>
-        <location filename="../../src/dmmgraph.cpp" line="1644"/>
+        <location filename="../../src/dmmgraph.cpp" line="1662"/>
+        <location filename="../../src/dmmgraph.cpp" line="1677"/>
         <source>QtDMM graph</source>
         <translation>Wykres QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1630"/>
+        <location filename="../../src/dmmgraph.cpp" line="1663"/>
         <source>%1 values, %2 s per sample, unit %3</source>
         <translation>Wartości: %1, %2 s na próbkę, jednostka %3</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1635"/>
-        <location filename="../../src/dmmgraph.cpp" line="1653"/>
         <location filename="../../src/dmmgraph.cpp" line="1668"/>
+        <location filename="../../src/dmmgraph.cpp" line="1686"/>
+        <location filename="../../src/dmmgraph.cpp" line="1701"/>
         <source>Could not write %1</source>
         <translation>Nie można zapisać %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1672"/>
+        <location filename="../../src/dmmgraph.cpp" line="1705"/>
         <source>Graph written to %1</source>
         <translation>Wykres zapisany do %1</translation>
     </message>
@@ -1614,18 +1624,18 @@ Wybierz, która instancja ma rejestrować.</translation>
     <name>MeterController</name>
     <message>
         <location filename="../../src/metercontroller.cpp" line="33"/>
-        <source>Alarm %1 cleared</source>
-        <translation>Alarm %1 zgasł</translation>
+        <source>%1 cleared</source>
+        <translation>%1 zgasł</translation>
     </message>
     <message>
         <location filename="../../src/metercontroller.cpp" line="204"/>
-        <source>Alarm %1: %2 (%3)</source>
-        <translation>Alarm %1: %2 (%3)</translation>
+        <source>%1: %2 (%3)</source>
+        <translation>%1: %2 (%3)</translation>
     </message>
     <message>
         <location filename="../../src/metercontroller.cpp" line="221"/>
-        <source>Alarm %1: could not run %2</source>
-        <translation>Alarm %1: nie można uruchomić %2</translation>
+        <source>%1: could not run %2</source>
+        <translation>%1: nie można uruchomić %2</translation>
     </message>
     <message>
         <location filename="../../src/metercontroller.cpp" line="275"/>
@@ -1994,11 +2004,6 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <location filename="../../src/readinglog.cpp" line="42"/>
         <source>Temperature</source>
         <translation>Temperatura</translation>
-    </message>
-    <message>
-        <location filename="../../src/readinglog.cpp" line="61"/>
-        <source>Alarm %1</source>
-        <translation>Alarm %1</translation>
     </message>
     <message>
         <location filename="../../src/readinglog.cpp" line="72"/>

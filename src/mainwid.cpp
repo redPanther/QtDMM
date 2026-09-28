@@ -124,7 +124,7 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
   connect(m_ctl, &MeterController::markRequested, this, [this](const QColor &color, const QString &name, bool graph, bool)
   {
     if (graph)
-      ui_graph->addMark(color, name);
+      ui_graph->addMark(color, Alarm::title(name));
   });
   m_ctl->setAlarms(m_configDlg->alarms());
 

@@ -458,6 +458,8 @@ void DMMGraph::updateMarkPositions()
 
 void DMMGraph::setGraphSize(int size, int length)
 {
+  m_windowSeconds = size;
+  m_totalSeconds = length;
   m_size = static_cast<int>((static_cast<double>(size) / m_sampleTime * 10.));
   m_length = static_cast<int>((static_cast<double>(length) / m_sampleTime * 10. + 1));
 
@@ -476,6 +478,16 @@ void DMMGraph::setGraphSize(int size, int length)
   rebuildSeries();
   updateXAxisRange();
   updateThresholdLinePositions();
+}
+
+void DMMGraph::setSampleTime(int v)
+{
+  if (v <= 0 || v == m_sampleTime)
+    return;
+  m_sampleTime = v;
+  // m_size and m_length count samples of the old sample time
+  if (m_windowSeconds > 0)
+    setGraphSize(m_windowSeconds, m_totalSeconds);
 }
 
 void DMMGraph::startSLOT()

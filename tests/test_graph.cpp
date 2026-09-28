@@ -11,6 +11,7 @@
 #include "dmmgraph.h"
 #include <QChartView>
 #include <QValueAxis>
+#include <QScrollBar>
 #include "siprefix.h"
 #include "engnumbervalidator.h"
 #include "settings.h"
@@ -177,6 +178,27 @@ int main(int argc, char **argv)
 
     graph.setGraphSize(10, 10);
     graph.addValue(1.23);
+  }
+
+  // --- 5b. window size and sample time in either order: MainWid used to set
+  //          the window (counted in samples) before the sample time, and any
+  //          later x axis update showed it scaled by the ratio of the two ---
+  {
+    Settings cfg("ordertest", tmpDir.path());
+    DMMGraph graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    auto *x = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Horizontal).first());
+    graph.setGraphSize(600, 3600);   // with the default sample time of 0.1 s
+    graph.setSampleTime(10);         // then 1 s
+    // the error showed on the next x axis update, e.g. scrolling
+    auto *bar = graph.findChild<QScrollBar *>(QString(), Qt::FindDirectChildrenOnly);   // not the chart view's
+    bar->setValue(1);
+    bar->setValue(0);
+    check(qAbs(x->max() - x->min() - 599) < 1.5,
+          QString("window stays 600 s after a new sample time, got %1 s").arg(x->max() - x->min()));
+    graph.setSampleTime(10);         // unchanged: nothing to do
+    graph.setGraphSize(300, 3600);
+    check(qAbs(x->max() - x->min() - 299) < 1.5, QString("300 s window, got %1 s").arg(x->max() - x->min()));
   }
 
   // --- 6. engineering-prefix export/import: setUnit() must strip a leading

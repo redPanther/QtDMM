@@ -40,6 +40,11 @@ struct Alarm
   static QList<Alarm> listFromJson(const QString &json);
   static QString listToJson(const QList<Alarm> &alarms);
 
+  /// How messages name an alarm: "Alarm High voltage" for a name of its
+  /// own, but just "Alarm 1" for the default names, which already start
+  /// with the word (not "Alarm Alarm 1").
+  static QString title(const QString &name);
+
   /// The condition in words: "below 5 V for 3 s". @p unit is the base unit.
   QString describe(const QString &unit) const;
   /// Whether @p value (base units; @p overload for OL) satisfies the condition

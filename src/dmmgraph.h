@@ -134,7 +134,9 @@ public:
   /// stripped because values arrive in base units (see DmmDecoder::DmmResponse).
   void             setUnit(const QString &);
   /// Sample time in tenths of a second.
-  void             setSampleTime(int v) { m_sampleTime = v; }
+  /// The window and the length are kept in seconds: a new sample time
+  /// recounts them in samples, so the order of the two calls does not matter.
+  void             setSampleTime(int v);
   /// Recording duration in tenths of a second after which recording stops
   /// on its own (0 = until stopped).
   void             setSampleLength(int v) { m_sampleLength = v; }
@@ -260,8 +262,10 @@ protected:
   bool             writeImage(const QString &fileName, QSize size);
 
   QScrollBar      *scrollbar;
-  int              m_size;
-  int              m_length;
+  int              m_size;          ///< visible window in samples
+  int              m_length;        ///< recording length in samples
+  int              m_windowSeconds = 0;   ///< setGraphSize(), for setSampleTime()
+  int              m_totalSeconds = 0;
   double           m_scaleMin;
   double           m_scaleMax;
   bool             m_autoScale;

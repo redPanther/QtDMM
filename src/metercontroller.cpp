@@ -30,7 +30,7 @@ MeterController::MeterController(QObject *parent)
   connect(m_alarms, &AlarmManager::raised, this, &MeterController::onAlarmRaised);
   connect(m_alarms, &AlarmManager::cleared, this, [this](int, const Alarm &alarm)
   {
-    Q_EMIT info(tr("Alarm %1 cleared").arg(alarm.name));
+    Q_EMIT info(tr("%1 cleared").arg(Alarm::title(alarm.name)));
     updateBanner();
   });
 
@@ -201,7 +201,7 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
 {
   const QString shown = m_overload ? QStringLiteral("OL") : EngNumberValidator::engValue(value) + m_baseUnit;
   const QString text = alarm.message.isEmpty() ? alarm.describe(m_baseUnit) : alarm.message;
-  Q_EMIT error(tr("Alarm %1: %2 (%3)").arg(alarm.name, text, shown));
+  Q_EMIT error(tr("%1: %2 (%3)").arg(Alarm::title(alarm.name), text, shown));
 
   if (alarm.recorder == Alarm::RecorderStart)
     Q_EMIT recordingRequested(true);
@@ -218,7 +218,7 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
     {
       const QString program = args.takeFirst();
       if (!QProcess::startDetached(program, args))
-        Q_EMIT error(tr("Alarm %1: could not run %2").arg(alarm.name, program));
+        Q_EMIT error(tr("%1: could not run %2").arg(Alarm::title(alarm.name), program));
     }
   }
   Q_EMIT alarmRaised(alarm, shown, text);
