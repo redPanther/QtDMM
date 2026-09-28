@@ -842,7 +842,7 @@ void MainWid::alarmRaised(int, const Alarm &alarm, double value)
 {
   const QString shown = m_overload ? QStringLiteral("OL") : EngNumberValidator::engValue(value) + m_baseUnit;
   const QString text = alarm.message.isEmpty() ? alarm.describe(m_baseUnit) : alarm.message;
-  Q_EMIT error(tr("Alarm %1: %2 (%3)").arg(alarm.name, text, shown));
+  Q_EMIT error(tr("%1: %2 (%3)").arg(Alarm::title(alarm.name), text, shown));
 
   if (alarm.beep)
     QApplication::beep();
@@ -857,7 +857,7 @@ void MainWid::alarmRaised(int, const Alarm &alarm, double value)
   else if (alarm.recorder == Alarm::RecorderStop)
     stopSLOT();
   if (alarm.markGraph)
-    ui_graph->addMark(alarm.color, alarm.name);
+    ui_graph->addMark(alarm.color, Alarm::title(alarm.name));
   if (alarm.markTable && m_readingLog)
     m_readingLog->markLast(alarm.color, alarm.name);
   if (!alarm.command.isEmpty())
@@ -869,7 +869,7 @@ void MainWid::alarmRaised(int, const Alarm &alarm, double value)
     {
       const QString program = args.takeFirst();
       if (!QProcess::startDetached(program, args))
-        Q_EMIT error(tr("Alarm %1: could not run %2").arg(alarm.name, program));
+        Q_EMIT error(tr("%1: could not run %2").arg(Alarm::title(alarm.name), program));
     }
   }
   if (alarm.popup)
@@ -886,7 +886,7 @@ void MainWid::alarmRaised(int, const Alarm &alarm, double value)
 
 void MainWid::alarmCleared(int, const Alarm &alarm)
 {
-  Q_EMIT info(tr("Alarm %1 cleared").arg(alarm.name));
+  Q_EMIT info(tr("%1 cleared").arg(Alarm::title(alarm.name)));
   updateAlarmBar();
 }
 

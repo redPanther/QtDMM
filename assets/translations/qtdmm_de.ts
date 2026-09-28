@@ -38,6 +38,16 @@
         <source>for %1 s</source>
         <translation>für %1 s</translation>
     </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="334"/>
+        <source>Alarm</source>
+        <translation>Alarm</translation>
+    </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="337"/>
+        <source>Alarm %1</source>
+        <translation>Alarm %1</translation>
+    </message>
 </context>
 <context>
     <name>AlarmBar</name>
@@ -1174,23 +1184,23 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="845"/>
-        <source>Alarm %1: %2 (%3)</source>
-        <translation>Alarm %1: %2 (%3)</translation>
+        <source>%1: %2 (%3)</source>
+        <translation>%1: %2 (%3)</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="872"/>
-        <source>Alarm %1: could not run %2</source>
-        <translation>Alarm %1: %2 konnte nicht gestartet werden</translation>
+        <source>%1: could not run %2</source>
+        <translation>%1: %2 konnte nicht gestartet werden</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwid.cpp" line="889"/>
+        <source>%1 cleared</source>
+        <translation>%1 erloschen</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="877"/>
         <source>QtDMM alarm: %1</source>
         <translation>QtDMM-Alarm: %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="889"/>
-        <source>Alarm %1 cleared</source>
-        <translation>Alarm %1 erloschen</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="702"/>
@@ -1596,17 +1606,17 @@ Please choose which instance should record.</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../src/main.cpp" line="104"/>
+        <location filename="../../src/main.cpp" line="122"/>
         <source>protocol debugging information</source>
         <translation>Protokol debugging Informationen</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="105"/>
+        <location filename="../../src/main.cpp" line="123"/>
         <source>sets directory where config files are located</source>
         <translation>setzt das Verzeichnis wo die Konfiguration sich befindet</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="106"/>
+        <location filename="../../src/main.cpp" line="124"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>setzt die &lt;config-id&gt;</translation>
     </message>
@@ -1705,11 +1715,6 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
         <location filename="../../src/readinglog.cpp" line="41"/>
         <source>Temperature</source>
         <translation>Temperatur</translation>
-    </message>
-    <message>
-        <location filename="../../src/readinglog.cpp" line="60"/>
-        <source>Alarm %1</source>
-        <translation>Alarm %1</translation>
     </message>
     <message>
         <location filename="../../src/readinglog.cpp" line="71"/>

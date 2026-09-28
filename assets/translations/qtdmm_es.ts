@@ -38,6 +38,16 @@
         <source>for %1 s</source>
         <translation>durante %1 s</translation>
     </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="334"/>
+        <source>Alarm</source>
+        <translation>Alarma</translation>
+    </message>
+    <message>
+        <location filename="../../src/alarm.cpp" line="337"/>
+        <source>Alarm %1</source>
+        <translation>Alarma %1</translation>
+    </message>
 </context>
 <context>
     <name>AlarmBar</name>
@@ -1215,23 +1225,23 @@ DMM connected and switched on?</source>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="845"/>
-        <source>Alarm %1: %2 (%3)</source>
-        <translation>Alarma %1: %2 (%3)</translation>
+        <source>%1: %2 (%3)</source>
+        <translation>%1: %2 (%3)</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="872"/>
-        <source>Alarm %1: could not run %2</source>
-        <translation>Alarma %1: no se pudo ejecutar %2</translation>
+        <source>%1: could not run %2</source>
+        <translation>%1: no se pudo ejecutar %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwid.cpp" line="889"/>
+        <source>%1 cleared</source>
+        <translation>%1 apagada</translation>
     </message>
     <message>
         <location filename="../../src/mainwid.cpp" line="877"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarma de QtDMM: %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwid.cpp" line="889"/>
-        <source>Alarm %1 cleared</source>
-        <translation>Alarma %1 apagada</translation>
     </message>
 </context>
 <context>
@@ -1640,17 +1650,17 @@ Then log out and back in so the new group membership becomes active.</source>
 Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo tenga efecto.</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="104"/>
+        <location filename="../../src/main.cpp" line="122"/>
         <source>protocol debugging information</source>
         <translation>información de depuración del protocolo</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="105"/>
+        <location filename="../../src/main.cpp" line="123"/>
         <source>sets directory where config files are located</source>
         <translation>establece el directorio de los archivos de configuración</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="106"/>
+        <location filename="../../src/main.cpp" line="124"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>establece &lt;config-id&gt;</translation>
     </message>
@@ -1704,11 +1714,6 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
         <location filename="../../src/readinglog.cpp" line="41"/>
         <source>Temperature</source>
         <translation>Temperatura</translation>
-    </message>
-    <message>
-        <location filename="../../src/readinglog.cpp" line="60"/>
-        <source>Alarm %1</source>
-        <translation>Alarma %1</translation>
     </message>
     <message>
         <location filename="../../src/readinglog.cpp" line="71"/>
