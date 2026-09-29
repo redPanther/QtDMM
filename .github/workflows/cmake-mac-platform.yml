@@ -29,6 +29,12 @@ jobs:
       working-directory: ${{github.workspace}}/
       run: ./compile.sh
 
+    - name: Check the bundle icon
+      working-directory: ${{github.workspace}}/
+      run: |
+        test -f build/qtdmm.app/Contents/Resources/qtdmm.icns
+        test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' build/qtdmm.app/Contents/Info.plist)" = qtdmm.icns
+
     - name: Test
       working-directory: ${{github.workspace}}/
       run: ./compile.sh ctest
