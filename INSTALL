@@ -11,8 +11,8 @@ Requirements:
   and LinguistTools modules (Debian/Ubuntu: qt6-base-dev qt6-serialport-dev
   qt6-charts-dev qt6-tools-dev qt6-tools-dev-tools)
 - CMake version 3.16 or higher
-- hidapi (ubuntu: libhidapi-dev | fedora: hidapi-devel | MacOSX/FreeBSD: hidapi;
-  Windows: fetched automatically)
+- hidapi (ubuntu: libhidapi-dev | fedora: hidapi-devel | FreeBSD: hidapi;
+  Windows and macOS: fetched automatically)
 - optional: python3 for the documentation checks in ctest, doxygen and
   graphviz for the developer documentation (./compile.sh doxygen)
 - A supported or compatible multimeter - or none: the built-in virtual
@@ -67,13 +67,14 @@ FreeBSD:
 
 macOS:
 ------
-- Ready-made: the release page has a .dmg for Apple Silicon (arm64). It is
-  signed ad hoc only, so macOS asks once before the first start - see
-  docs/user/troubleshooting.md ("macOS").
-- Building: brew install cmake qt@6 hidapi, then ./compile.sh (it finds Qt
-  through brew --prefix qt@6) or ./compile.sh run. The result is
-  build/qtdmm.app. A self-contained bundle like the release one:
-    macdeployqt build/qtdmm.app -dmg
+- Ready-made: the release page has a .dmg (macOS 12 or newer, Apple Silicon
+  and Intel). It is signed ad hoc only, so macOS asks once before the first
+  start - see docs/user/troubleshooting.md ("macOS").
+- Building: brew install cmake qt@6, then ./compile.sh (it finds Qt through
+  brew --prefix qt@6) or ./compile.sh run; hidapi is fetched and built by
+  CMake, as on Windows. The result is build/qtdmm.app (arm64 with Homebrew's
+  Qt). The release .dmg is built with the official Qt instead - see
+  .github/workflows/cmake-mac-platform.yml.
 
 Windows:
 --------

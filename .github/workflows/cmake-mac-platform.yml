@@ -7,9 +7,6 @@ on:
     branches: [ "master" ]
   workflow_call:   # from release.yml for a version tag
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   build:
     runs-on: macos-latest
@@ -19,16 +16,24 @@ jobs:
       with:
         fetch-depth: 0   # tags and history: the version comes from git describe
 
-    - name: Install dependencies
-      run: |
-        brew update
-        brew install cmake qt@6 hidapi
-        # Make Qt6 CMake config files discoverable
-        echo "/opt/homebrew/opt/qt@6/bin" >> $GITHUB_PATH
+    # The official Qt, not Homebrew's: Homebrew splits Qt into many
+    # prefixes, which macdeployqt cannot resolve, and its bottles only run on
+    # the runner's macOS. This Qt is universal (arm64 + x86_64) and runs on
+    # macOS 12 and later; hidapi is built from source by CMake, as on Windows.
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.*'
+        modules: 'qtserialport qtcharts'
+        cache: true
 
-    - name: Configure and Build
-      working-directory: ${{github.workspace}}/
-      run: ./compile.sh
+    - name: Configure
+      run: >
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DQTDMM_WERROR=ON
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+
+    - name: Build
+      run: cmake --build build --parallel
 
     - name: Check the bundle icon
       working-directory: ${{github.workspace}}/
@@ -37,8 +42,7 @@ jobs:
         test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' build/qtdmm.app/Contents/Info.plist)" = qtdmm.icns
 
     - name: Test
-      working-directory: ${{github.workspace}}/
-      run: ./compile.sh ctest
+      run: ctest --test-dir build --output-on-failure
 
     # The .dmg: Qt and hidapi copied into the bundle (macdeployqt), signed
     # ad hoc (Apple Silicon refuses to start unsigned code), no Developer ID
@@ -49,20 +53,21 @@ jobs:
         rm -rf stage packages && mkdir -p stage packages
         cp -R build/qtdmm.app stage/QtDMM.app
         macdeployqt stage/QtDMM.app -always-overwrite
-        # nothing may still point into Homebrew: the .dmg has to run without it
+        # every library the bundle uses is inside it or part of macOS
         find stage/QtDMM.app -type f -print0 | xargs -0 file | grep Mach-O | cut -d: -f1 > machos.txt
         wc -l < machos.txt
-        if xargs otool -L < machos.txt | grep -E '^\s+/(opt/homebrew|usr/local)/'; then
-          echo "::error::the bundle still links against Homebrew"; exit 1
+        if xargs otool -L < machos.txt | grep -E '^\s+/' | grep -v -E '^\s+/(System/Library|usr/lib)/'; then
+          echo "::error::the bundle links against libraries outside the bundle"; exit 1
         fi
+        lipo -archs stage/QtDMM.app/Contents/MacOS/qtdmm
         codesign --force --deep --sign - stage/QtDMM.app
         codesign --verify --deep --strict stage/QtDMM.app
         otool -l stage/QtDMM.app/Contents/MacOS/qtdmm | grep -A3 LC_BUILD_VERSION | grep minos
         ln -s /Applications stage/Applications
-        hdiutil create -volname QtDMM -srcfolder stage -ov -format UDZO packages/QtDMM-macos-arm64.dmg
+        hdiutil create -volname QtDMM -srcfolder stage -ov -format UDZO packages/QtDMM-macos.dmg
 
     - name: Upload package
       uses: actions/upload-artifact@v4
       with:
-        name: QtDMM-macos-arm64
+        name: QtDMM-macos
         path: packages/*.dmg

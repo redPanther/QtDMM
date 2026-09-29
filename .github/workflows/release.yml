@@ -38,7 +38,7 @@ jobs:
         TAG: ${{ github.ref_name }}
       run: |
         mv dist/QtDMM.AppImage "dist/QtDMM-${TAG}-x86_64.AppImage"
-        mv dist/QtDMM-macos-arm64.dmg "dist/QtDMM-${TAG}-macos-arm64.dmg"
+        mv dist/QtDMM-macos.dmg "dist/QtDMM-${TAG}-macos.dmg"
         ls -l dist
         if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
           gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
