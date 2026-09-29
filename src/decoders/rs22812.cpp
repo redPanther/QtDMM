@@ -112,11 +112,9 @@ bool DecoderRS22812::checkFormat(const char* data, size_t idx)
     {
       // A
       unit++;
-      if ((mode < 2) && (mode > 7))
-      {
-        (void)fprintf(stderr, "mode vs. units mismatch: mode %#x, units %#x\n", mode, byte);
-        return false;
-      }
+      // no mode check: it read (mode < 2) && (mode > 7), which is never
+      // true; the A sign may also light in modes outside 2..7, so a
+      // real check needs a capture first
     }
     if (byte & 0x08)
     {
@@ -146,11 +144,9 @@ bool DecoderRS22812::checkFormat(const char* data, size_t idx)
     {
       // Hz
       unit++;
-      if ((mode < 10) && (mode > 12))
-      {
-        (void)fprintf(stderr, "mode vs. units mismatch: mode %#x, units %#x\n", mode, byte);
-        return false;
-      }
+      // no mode check: it read (mode < 10) && (mode > 12), which is never
+      // true; the Hz sign may also light in modes outside 10..12, so a
+      // real check needs a capture first
     }
     if (unit > 1)
     {
@@ -224,11 +220,9 @@ bool DecoderRS22812::checkFormat(const char* data, size_t idx)
     {
       // S
       unit++;
-      if ((mode < 16) && (mode > 18))
-      {
-        (void)fprintf(stderr, "mode vs. units mismatch: mode %#x, units %#x\n", mode, byte);
-        return false;
-      }
+      // no mode check: it read (mode < 16) && (mode > 18), which is never
+      // true; the S sign may also light in modes outside 16..18, so a
+      // real check needs a capture first
     }
     if (byte & 0x20)
     {
