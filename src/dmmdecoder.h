@@ -64,21 +64,21 @@ public:
   class DMMInfo
   {
   public:
-    QString vendor;                 ///< manufacturer as shown in the model list
+    QString vendor;                    ///< manufacturer as shown in the model list
     QString model;
-    QString name;                   ///< "vendor model", filled in by addConfig()
-    int   baud;                     ///< 600 ... 19200
-    ReadEvent::DataFormat protocol; ///< which decoder handles the meter
-    int   bits;                     ///< data bits, 5..8
-    int   stopBits;                 ///< 1 or 2
-    int   numValues;                ///< frames per reading, for meters that send several lines
-    int   parity;                   ///< 0 none, 1 even, 2 odd
-    int   display;                  ///< display counts: 2000, 4000, 6000, ... 1000000
-    bool  externalSetup;            ///< true: leave the port settings alone, the user configured it
-    bool  rts;                      ///< drive RTS high (some cables are powered from it)
-    bool  dtr;                      ///< drive DTR high
-    QString sigrokExe;              ///< sigrok-cli path for SigrokDevice, empty otherwise
-    QString sigrokDriver;           ///< libsigrok driver of a bench meter read through sigrok-cli ("scpi-dmm"), empty otherwise
+    QString name;                      ///< "vendor model", filled in by addConfig()
+    int   baud{0};                     ///< 600 ... 19200
+    ReadEvent::DataFormat protocol{ReadEvent::Invalid}; ///< which decoder handles the meter
+    int   bits{8};                     ///< data bits, 5..8
+    int   stopBits{1};                 ///< 1 or 2
+    int   numValues{1};                ///< frames per reading, for meters that send several lines
+    int   parity{0};                   ///< 0 none, 1 even, 2 odd
+    int   display{0};                  ///< display counts: 2000, 4000, 6000, ... 1000000
+    bool  externalSetup{false};        ///< true: leave the port settings alone, the user configured it
+    bool  rts{false};                  ///< drive RTS high (some cables are powered from it)
+    bool  dtr{false};                  ///< drive DTR high
+    QString sigrokExe{""};             ///< sigrok-cli path for SigrokDevice, empty otherwise
+    QString sigrokDriver{""};          ///< libsigrok driver of a bench meter read through sigrok-cli ("scpi-dmm"), empty otherwise
   };
 
   explicit DmmDecoder(ReadEvent::DataFormat df);
