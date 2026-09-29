@@ -59,6 +59,20 @@ it is installed the port is missing from the list. HID cables use the Windows
 HID class driver and work without any driver installation. Debug output
 (`qtdmm --debug`) is shown when QtDMM is started from a command prompt.
 
+## macOS
+
+The `.dmg` from the release page is for Macs with Apple Silicon (M1 and
+newer). Open it and drag **QtDMM** onto **Applications**. The app is not
+signed with an Apple developer certificate, so the first start is blocked
+with "QtDMM cannot be opened" or "Apple could not verify QtDMM". Allow it once:
+
+- Open *System Settings → Privacy & Security*, scroll down to the message
+  about QtDMM and click **Open Anyway**, then confirm; or
+- in Terminal: `xattr -dr com.apple.quarantine /Applications/QtDMM.app`
+
+After that it starts normally. Serial ports appear as `/dev/cu.usbserial-…`
+(use the `cu.` ports, not `tty.`). Bluetooth LE is not available on macOS yet.
+
 ## "Another instance is running"
 
 QtDMM instances coordinate through shared memory so that several meters can be

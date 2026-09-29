@@ -5,6 +5,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_call:   # from release.yml for a version tag
 
 env:
   BUILD_TYPE: Release
@@ -38,3 +39,30 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/
       run: ./compile.sh ctest
+
+    # The .dmg: Qt and hidapi copied into the bundle (macdeployqt), signed
+    # ad hoc (Apple Silicon refuses to start unsigned code), no Developer ID
+    # and no notarisation - Gatekeeper asks once, see docs/user/troubleshooting.md
+    - name: Package
+      working-directory: ${{github.workspace}}/
+      run: |
+        rm -rf stage packages && mkdir -p stage packages
+        cp -R build/qtdmm.app stage/QtDMM.app
+        macdeployqt stage/QtDMM.app -always-overwrite
+        # nothing may still point into Homebrew: the .dmg has to run without it
+        find stage/QtDMM.app -type f -print0 | xargs -0 file | grep Mach-O | cut -d: -f1 > machos.txt
+        wc -l < machos.txt
+        if xargs otool -L < machos.txt | grep -E '^\s+/(opt/homebrew|usr/local)/'; then
+          echo "::error::the bundle still links against Homebrew"; exit 1
+        fi
+        codesign --force --deep --sign - stage/QtDMM.app
+        codesign --verify --deep --strict stage/QtDMM.app
+        otool -l stage/QtDMM.app/Contents/MacOS/qtdmm | grep -A3 LC_BUILD_VERSION | grep minos
+        ln -s /Applications stage/Applications
+        hdiutil create -volname QtDMM -srcfolder stage -ov -format UDZO packages/QtDMM-macos-arm64.dmg
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: QtDMM-macos-arm64
+        path: packages/*.dmg
