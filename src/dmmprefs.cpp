@@ -293,7 +293,7 @@ void DmmPrefs::defaultsSLOT()
 
   for (const auto& cfg : dmm_info)
   {
-    if (model == cfg.name)
+    if (DmmDecoder::sameModel(model, cfg.name))
     {
       int vendorIdx = ui_vendor->findText(cfg.vendor);
       if (vendorIdx >= 0)

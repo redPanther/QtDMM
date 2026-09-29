@@ -136,6 +136,8 @@ qt_add_resources(RES_SOURCES ${RESOURCES})
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
 	add_custom_target(doxygen
+		# the Doxyfile writes to <source>/build/doxygen; doxygen only creates the last level
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/build/doxygen
 		COMMAND Doxygen::doxygen ${CMAKE_SOURCE_DIR}/Doxyfile
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 		COMMENT "Generating developer documentation with Doxygen"
@@ -200,12 +202,23 @@ if(WIN32)
 	set(WIN_RESOURCES assets/windows/qtdmm.rc) # executable icon
 endif()
 
+if(APPLE)
+	# bundle icon: copied to qtdmm.app/Contents/Resources, named in Info.plist
+	# (regenerate with tools/make_icons.py from assets/icons/qtdmm.svg)
+	set(MAC_RESOURCES assets/macos/qtdmm.icns)
+	set_source_files_properties(${MAC_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
 add_executable(${PROJECT_NAME}
 	MACOSX_BUNDLE
 	WIN32
 	${SRC_FILES}
 	${WIN_RESOURCES}
+	${MAC_RESOURCES}
 )
+if(APPLE)
+	set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE qtdmm.icns)
+endif()
 
 # paranoia options, force you to correct all compiler warnings
 # (compile.sh turns this on for ctest builds, so CI fails on a new warning)
@@ -261,6 +274,7 @@ if (NOT WIN32)
 	install(FILES assets/icons/qtdmm_32.png DESTINATION share/icons/hicolor/32x32/apps RENAME qtdmm.png)
 	install(FILES assets/icons/qtdmm_64.png DESTINATION share/icons/hicolor/64x64/apps RENAME qtdmm.png)
 	install(FILES assets/icons/qtdmm_128.png DESTINATION share/icons/hicolor/128x128/apps RENAME qtdmm.png)
+	install(FILES assets/icons/qtdmm.svg DESTINATION share/icons/hicolor/scalable/apps)
 	install(FILES ${CMAKE_BINARY_DIR}/qtdmm.1.gz DESTINATION share/man/man1)
 	## AppStream metadata for software centres, named after the component id
 	install(FILES assets/appimage/qtdmm.appdata.xml DESTINATION share/metainfo RENAME io.github.qtdmm.qtdmm.metainfo.xml)

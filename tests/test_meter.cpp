@@ -258,6 +258,26 @@ int main(int argc, char **argv)
       render(w, size).save(QDir(dump).filePath("meter_ivory_half.png"));
       render(w, QSize(960, 540)).save(QDir(dump).filePath("meter_ivory_large.png"));
       render(w, QSize(240, 135)).save(QDir(dump).filePath("meter_ivory_small.png"));
+      // issue #143: BM869s, 500 mV range, low reading, long unit labels
+      MeterStyle dk = MeterStyle::dark();
+      dk.ballistics = false;
+      w.setStyle(dk);
+      w.reset();
+      w.setFullScale(500.0);
+      w.setReading(14.87, "014.87", "mV AC", false, false);
+      w.setMinMax(12.04, 15.84);
+      w.setPeak(15.84);
+      render(w, QSize(740, 560)).save(QDir(dump).filePath("meter_dark_issue143.png"));
+      render(w, QSize(960, 436)).save(QDir(dump).filePath("meter_dark_wide.png"));
+      w.setReading(0.0, "000.00", "mV AC+DC", false, false);
+      render(w, QSize(740, 560)).save(QDir(dump).filePath("meter_dark_acdc_zero.png"));
+      w.setStyle(iv);
+      w.setFullScale(4.0);
+      w.setReading(0.512, "0.512", "V DIODE", false, false);
+      w.setMinMax(0.498, 0.531);
+      w.setPeak(0.531);
+      render(w, QSize(480, 360)).save(QDir(dump).filePath("meter_ivory_diode.png"));
+      render(w, QSize(240, 180)).save(QDir(dump).filePath("meter_ivory_diode_small.png"));
     }
   }
 

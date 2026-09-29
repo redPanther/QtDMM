@@ -1,0 +1,66 @@
+name: API documentation
+
+# Builds the Doxygen developer documentation from master and publishes it on
+# GitHub Pages (https://qtdmm.github.io/QtDMM/). Pages must be set to
+# "Source: GitHub Actions" in the repository settings.
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "src/**"
+      - "docs/dev/**"
+      - "docs/user/scpi-server.md"
+      - "Doxyfile"
+      - ".github/workflows/apidoc.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# one deployment at a time; a newer merge waits instead of cancelling a
+# deployment that is already running
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # forks have no Pages site for this
+    if: github.repository == 'qtdmm/QtDMM'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0   # tags: the version shown on the pages comes from git describe
+
+    - name: Install Doxygen
+      run: |
+        sudo apt update
+        sudo apt install -y doxygen graphviz
+
+    - name: Run Doxygen
+      # the checked-in Doxyfile plus the version; no CMake or Qt needed
+      run: |
+        version=$(git describe --tags --abbrev=7 --always)
+        mkdir -p build/doxygen   # doxygen creates only the last level
+        ( cat Doxyfile; echo "PROJECT_NUMBER = $version" ) | doxygen -
+
+    - uses: actions/upload-pages-artifact@v3
+      with:
+        path: build/doxygen/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - id: deployment
+      uses: actions/deploy-pages@v4

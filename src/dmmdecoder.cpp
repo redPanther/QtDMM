@@ -16,6 +16,17 @@ void DmmDecoder::addConfig(DMMInfo info)
   DmmDecoder::m_configurations->push_back(info);
 }
 
+bool DmmDecoder::sameModel(const QString &a, const QString &b)
+{
+  auto bare = [](QString name)
+  {
+    if (name.endsWith(QLatin1String(" *")))
+      name.chop(2);
+    return name;
+  };
+  return bare(a) == bare(b);
+}
+
 std::vector<DmmDecoder::DMMInfo> DmmDecoder::getDeviceConfigurations()
 {
   if(!DmmDecoder::m_configurations)

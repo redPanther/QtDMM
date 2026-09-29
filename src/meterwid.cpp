@@ -27,6 +27,7 @@
 #include <QRadialGradient>
 #include <QRegularExpression>
 #include <QFontMetricsF>
+#include <QtMath>
 #include <cmath>
 #include <limits>
 
@@ -69,6 +70,23 @@ QFont scaledFont(double px, bool bold = false)
   f.setPixelSize(qMax(5, int(std::lround(px))));
   f.setBold(bold);
   return f;
+}
+
+// scaledFont(), made smaller until @p text is at most @p maxWidth wide
+QFont fittedFont(double px, bool bold, const QString &text, double maxWidth)
+{
+  QFont f = scaledFont(px, bold);
+  const double w = QFontMetricsF(f).horizontalAdvance(text);
+  if (w > maxWidth && w > 0)
+    f = scaledFont(px * maxWidth / w, bold);
+  return f;
+}
+
+// the meter's fixed-width text without its leading zeros ("014.87" -> "14.87")
+QString withoutLeadingZeros(QString text)
+{
+  static const QRegularExpression leadingZeros("^([-+]?)0+(?=\\d)");
+  return text.trimmed().remove(' ').replace(leadingZeros, "\\1");
 }
 }
 
@@ -173,6 +191,13 @@ void MeterWid::setReading(double value, const QString &text, const QString &unit
   m_value = value;
   m_text = text;
   m_overload = overload;
+  if (!overload)
+  {
+    // MIN and MAX use the meter's decimals; "0.L" would say one
+    const QString shown = withoutLeadingZeros(text);
+    const int dot = shown.indexOf('.');
+    m_decimals = dot < 0 ? 0 : qBound(0, int(shown.size() - dot - 1), 6);
+  }
   m_hold = hold;
 
   if (m_scaleMode == Auto && !overload && value < -0.05 * m_fullScale && !m_bipolar)
@@ -398,32 +423,17 @@ void MeterWid::drawScale(QPainter &p, const Geometry &g) const
       const QPointF c0 = polar(g.pivot, R + g.fontPx * 1.0, a);
       const double w = fm.horizontalAdvance(label) + 4;
       const double h = fm.height();
+      // the end labels sit close to the bezel: keep them on the dial
+      QRectF box(c0.x() - w / 2, c0.y() - h / 2, w, h);
+      const double inset = g.fontPx * 0.3;
+      if (box.right() > g.face.right() - inset)
+        box.moveRight(g.face.right() - inset);
+      if (box.left() < g.face.left() + inset)
+        box.moveLeft(g.face.left() + inset);
+      if (box.top() < g.face.top() + inset)
+        box.moveTop(g.face.top() + inset);
       p.setPen(c);
-      p.drawText(QRectF(c0.x() - w / 2, c0.y() - h / 2, w, h), Qt::AlignCenter, label);
-    }
-  }
-
-  // inner percentage scale (unipolar only, it has no meaning around zero)
-  if (m_style.percentScale && !m_bipolar)
-  {
-    const double r2 = R * 0.74;
-    QPainterPath arc2;
-    addArc(arc2, g.pivot, r2, angleOf(0.0), angleOf(vMax), true);
-    p.setPen(QPen(m_style.scale, qMax(0.8, R * 0.006)));
-    p.setBrush(Qt::NoBrush);
-    p.drawPath(arc2);
-    const QFont small = scaledFont(g.fontPx * 0.6);
-    p.setFont(small);
-    const QFontMetricsF fm2(small);
-    for (int pct = 0; pct <= 100; pct += 20)
-    {
-      const double a = angleOf(pct / 100.0 * vMax);
-      p.drawLine(polar(g.pivot, r2, a), polar(g.pivot, r2 - R * 0.035, a));
-      const QString label = QString::number(pct);
-      const QPointF c0 = polar(g.pivot, r2 - g.fontPx * 0.75, a);
-      const double w = fm2.horizontalAdvance(label) + 4;
-      const double h = fm2.height();
-      p.drawText(QRectF(c0.x() - w / 2, c0.y() - h / 2, w, h), Qt::AlignCenter, label);
+      p.drawText(box, Qt::AlignCenter, label);
     }
   }
 
@@ -471,56 +481,83 @@ void MeterWid::drawBoxes(QPainter &p, const Geometry &g) const
     p.drawRoundedRect(r.adjusted(1, 1, -1, -1), rr, rr);
   };
 
-  // unit label in the middle, like the "VU" plate
-  const QRectF unitBox(g.face.center().x() - fw * 0.13, g.face.top() + fh * 0.60, fw * 0.26, fh * 0.17);
-  box(unitBox);
-  p.setFont(scaledFont(g.fontPx * 1.35, true));
-  p.setPen(m_style.boxText);
-  p.drawText(unitBox, Qt::AlignCenter, m_unit.isEmpty() ? QStringLiteral("—") : m_unit);
+  // unit label in the middle, straight on the dial like the "VU" legend;
+  // long labels ("mV AC+DC", "V DIODE") get a smaller font instead of
+  // running over
+  const QString unit = m_unit.isEmpty() ? QStringLiteral("—") : m_unit;
+  const QRectF unitRect(g.face.center().x() - fw * 0.17, g.face.top() + fh * 0.60, fw * 0.34, fh * 0.17);
+  p.setFont(fittedFont(g.fontPx * 1.35, true, unit, unitRect.width()));
+  p.setPen(m_style.scale);
+  p.drawText(unitRect, Qt::AlignCenter, unit);
 
-  // readout boxes with their captions
-  const QRectF cur(g.face.left() + fw * 0.05, g.face.top() + fh * 0.78, fw * 0.28, fh * 0.16);
-  const QRectF max(g.face.right() - fw * 0.05 - fw * 0.28, cur.top(), fw * 0.28, fh * 0.16);
-  box(cur);
+  // readout boxes with their captions: minimum left, maximum right
+  QRectF min, max;
+  readoutRects(g, &min, &max);
+  box(min);
   box(max);
   p.setFont(scaledFont(g.fontPx * 0.7));
   p.setPen(m_style.scale.darker(m_style.face.lightness() < 128 ? 150 : 100));
-  p.drawText(QRectF(cur.left(), cur.top() - g.fontPx * 1.05, cur.width(), g.fontPx), Qt::AlignLeft | Qt::AlignVCenter, tr("CURRENT"));
+  p.drawText(QRectF(min.left(), min.top() - g.fontPx * 1.05, min.width(), g.fontPx), Qt::AlignLeft | Qt::AlignVCenter, tr("MIN"));
   p.drawText(QRectF(max.left(), max.top() - g.fontPx * 1.05, max.width(), g.fontPx), Qt::AlignRight | Qt::AlignVCenter, tr("MAX"));
 
   // "OL" caption next to the lamp
-  const QPointF lamp(g.face.right() - fw * 0.11, g.face.top() + fh * 0.66);
-  p.setFont(scaledFont(g.fontPx * 0.7, true));
-  p.drawText(QRectF(lamp.x() + fh * 0.05, lamp.y() - g.fontPx * 0.5, fw * 0.05, g.fontPx), Qt::AlignLeft | Qt::AlignVCenter, tr("OL"));
+  const QPointF lamp = lampCenter(g);
+  const QFont olFont = scaledFont(g.fontPx * 0.7, true);
+  p.setFont(olFont);
+  p.drawText(QRectF(lamp.x() + fh * 0.05, lamp.y() - g.fontPx * 0.5, QFontMetricsF(olFont).horizontalAdvance(tr("OL")) + 2, g.fontPx),
+             Qt::AlignLeft | Qt::AlignVCenter, tr("OL"));
+}
+
+QPointF MeterWid::lampCenter(const Geometry &g) const
+{
+  const double fw = g.face.width();
+  const double fh = g.face.height();
+  // on a narrow dial the caption would run off the face at the usual place
+  const double caption = QFontMetricsF(scaledFont(g.fontPx * 0.7, true)).horizontalAdvance(tr("OL")) + 2;
+  const double x = qMin(g.face.right() - fw * 0.11, g.face.right() - fw * 0.03 - caption - fh * 0.05);
+  return QPointF(x, g.face.top() + fh * 0.66);
+}
+
+// The boxes sit in the bottom corners, as wide as they can be while the
+// needle - even at its end stop - passes to their inner side: at a height
+// h above the pivot it is h * tan(49.5 deg) off the centre line.
+void MeterWid::readoutRects(const Geometry &g, QRectF *min, QRectF *max) const
+{
+  const double fw = g.face.width();
+  const double fh = g.face.height();
+  const double top = g.face.top() + fh * 0.80;
+  const double height = fh * 0.15;
+  const double clear = (g.pivot.y() - top) * std::tan(qDegreesToRadians(kStop)) + fh * 0.03;
+  const double margin = fw * 0.03;
+  const double width = qMin(fw * 0.28, fw / 2 - clear - margin);
+  *min = QRectF(g.face.left() + margin, top, width, height);
+  *max = QRectF(g.face.right() - margin - width, top, width, height);
+}
+
+QString MeterWid::readoutText(double value) const
+{
+  if (std::isnan(value))
+    return QStringLiteral("—");
+  return QString::number(value, 'f', m_decimals);
 }
 
 void MeterWid::drawReadouts(QPainter &p, const Geometry &g) const
 {
   const double fw = g.face.width();
   const double fh = g.face.height();
-  const QRectF cur(g.face.left() + fw * 0.05, g.face.top() + fh * 0.78, fw * 0.28, fh * 0.16);
-  const QRectF max(g.face.right() - fw * 0.05 - fw * 0.28, cur.top(), fw * 0.28, fh * 0.16);
+  QRectF min, max;
+  readoutRects(g, &min, &max);
 
-  // CURRENT and MAX in one format: the meter's decimals, but without the
-  // leading zeros of its fixed-width display ("006.58" -> "6.58")
-  static const QRegularExpression leadingZeros("^([-+]?)0+(?=\\d)");
-  QString current = m_text.trimmed();
-  current.remove(' ').replace(leadingZeros, "\\1");
-
-  p.setFont(scaledFont(g.fontPx * 1.15, true));
   p.setPen(m_style.boxText);
-  p.drawText(cur.adjusted(fh * 0.02, 0, -fh * 0.02, 0), Qt::AlignCenter,
-             m_overload ? tr("OL") : current);
-
-  QString peakText = QStringLiteral("—");
-  if (!std::isnan(m_peak))
+  auto readout = [&](const QRectF &r, const QString &text)
   {
-    // same number of decimals as the meter's own rendering of the value
-    const int dot = current.indexOf('.');
-    const int decimals = dot < 0 ? 0 : current.size() - dot - 1;
-    peakText = QString::number(m_peak, 'f', qBound(0, decimals, 6));
-  }
-  p.drawText(max.adjusted(fh * 0.02, 0, -fh * 0.02, 0), Qt::AlignCenter, peakText);
+    const QRectF inner = r.adjusted(fh * 0.02, 0, -fh * 0.02, 0);
+    p.setFont(fittedFont(g.fontPx * 1.15, true, text, inner.width()));
+    p.drawText(inner, Qt::AlignCenter, text);
+  };
+  readout(min, readoutText(m_markMin));
+  // the maximum of the min/max memory, or the peak where only that is set
+  readout(max, readoutText(std::isnan(m_markMax) ? m_peak : m_markMax));
 
   if (m_hold)
   {
@@ -533,9 +570,8 @@ void MeterWid::drawReadouts(QPainter &p, const Geometry &g) const
 
 void MeterWid::drawLamp(QPainter &p, const Geometry &g) const
 {
-  const double fw = g.face.width();
   const double fh = g.face.height();
-  const QPointF c(g.face.right() - fw * 0.11, g.face.top() + fh * 0.66);
+  const QPointF c = lampCenter(g);
   const double r = fh * 0.035;
 
   if (m_overload)

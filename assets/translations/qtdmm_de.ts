@@ -1463,72 +1463,72 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
         <translation>Fenster anordnen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="199"/>
+        <location filename="../../src/mainwin.cpp" line="201"/>
         <source>D&amp;esign</source>
         <translation>D&amp;esign</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="201"/>
+        <location filename="../../src/mainwin.cpp" line="203"/>
         <source>&amp;System</source>
         <translation>&amp;System</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="201"/>
+        <location filename="../../src/mainwin.cpp" line="203"/>
         <source>S&amp;ilver</source>
         <translation>S&amp;ilber</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="202"/>
+        <location filename="../../src/mainwin.cpp" line="204"/>
         <source>&amp;Dark</source>
         <translation>&amp;Dunkel</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="259"/>
+        <location filename="../../src/mainwin.cpp" line="261"/>
         <source>The SCPI server: other programs can read the meter here (Settings, SCPI server).</source>
         <translation>Der SCPI-Server: andere Programme können das Messgerät hier auslesen (Einstellungen, SCPI-Server).</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="427"/>
+        <location filename="../../src/mainwin.cpp" line="429"/>
         <source>&amp;Full screen</source>
         <translation>&amp;Vollbild</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="430"/>
+        <location filename="../../src/mainwin.cpp" line="432"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Full screen&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Use the whole screen for the instruments, e.g. on a lab monitor. F11 again returns to the normal window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Vollbild&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Den ganzen Bildschirm für die Instrumente nutzen, z. B. auf einem Labormonitor. F11 erneut drücken bringt das normale Fenster zurück.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="435"/>
+        <location filename="../../src/mainwin.cpp" line="437"/>
         <source>Zoom &amp;in</source>
         <translation>Ver&amp;größern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="438"/>
+        <location filename="../../src/mainwin.cpp" line="440"/>
         <source>Zoom &amp;out</source>
         <translation>Ver&amp;kleinern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="441"/>
+        <location filename="../../src/mainwin.cpp" line="443"/>
         <source>Show &amp;whole recording</source>
         <translation>&amp;Ganze Aufnahme zeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="444"/>
+        <location filename="../../src/mainwin.cpp" line="446"/>
         <source>Copy graph &amp;image</source>
         <translation>Graph als &amp;Bild kopieren</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="446"/>
+        <location filename="../../src/mainwin.cpp" line="448"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copy graph image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Puts a picture of the recorder graph on the clipboard, ready to paste into a report or a chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graph als Bild kopieren&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Legt ein Bild des Aufnahme-Graphen in die Zwischenablage, bereit zum Einfügen in einen Bericht oder Chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="501"/>
+        <location filename="../../src/mainwin.cpp" line="503"/>
         <source>Record DMM data</source>
         <translation>DMM Daten aufnehmen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="502"/>
+        <location filename="../../src/mainwin.cpp" line="504"/>
         <source>Multiple instances of QtDMM have been detected.
 Please choose which instance should record.</source>
         <translatorcomment>Wählen Sie aus, welche Instanz aufnehmen soll.</translatorcomment>
@@ -1536,87 +1536,87 @@ Please choose which instance should record.</source>
 Please choose which instance should record.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="505"/>
+        <location filename="../../src/mainwin.cpp" line="507"/>
         <source>This instance</source>
         <translation>Diese Instanz</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="506"/>
+        <location filename="../../src/mainwin.cpp" line="508"/>
         <source>All instances</source>
         <translation>Alle Instanzen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="566"/>
+        <location filename="../../src/mainwin.cpp" line="568"/>
         <source>About QtDMM</source>
         <translation>Über QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="569"/>
+        <location filename="../../src/mainwin.cpp" line="571"/>
         <source>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;A readout and transient recorder for digital multimeters.&lt;/p&gt;&lt;p&gt;Built with &lt;b&gt;Qt&lt;/b&gt; %2. Licensed under the &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions before 0.9.0 under GPL 2).&lt;/p&gt;&lt;p&gt;0.9.5 onwards: tuxmaster and contributors, see the AUTHORS file.&lt;br&gt;0.9.3 and before: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Source and bug reports: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbols from the &lt;b&gt;Breeze&lt;/b&gt; icon theme of the KDE community (LGPL 3); QtDMM&apos;s own symbols are drawn in its style.&lt;/p&gt;</source>
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Anzeige und Transientenrekorder für digitale Multimeter.&lt;/p&gt;&lt;p&gt;Gebaut mit &lt;b&gt;Qt&lt;/b&gt; %2. Lizenziert unter der &lt;b&gt;GNU GPL 3&lt;/b&gt; (Versionen vor 0.9.0 unter GPL 2).&lt;/p&gt;&lt;p&gt;Ab 0.9.5: tuxmaster und Mitwirkende, siehe Datei AUTHORS.&lt;br&gt;0.9.3 und davor: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Kontakt: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Quellcode und Fehlermeldungen: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Die Symbole stammen aus dem Symbolthema &lt;b&gt;Breeze&lt;/b&gt; der KDE-Gemeinschaft (LGPL 3); die eigenen Symbole von QtDMM sind in seinem Stil gezeichnet.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="586"/>
+        <location filename="../../src/mainwin.cpp" line="588"/>
         <source>Supported devices...</source>
         <translation>Unterstützte Geräte...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="724"/>
+        <location filename="../../src/mainwin.cpp" line="726"/>
         <source>&amp;Hide window</source>
         <translation>Fenster &amp;ausblenden</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="725"/>
+        <location filename="../../src/mainwin.cpp" line="727"/>
         <source>&amp;Title bar</source>
         <translation>&amp;Titelleiste</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="730"/>
+        <location filename="../../src/mainwin.cpp" line="732"/>
         <source>Hide &amp;controls</source>
         <translation>&amp;Bedienleiste ausblenden</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="737"/>
+        <location filename="../../src/mainwin.cpp" line="739"/>
         <source>&amp;LCD colours</source>
         <translation>&amp;LCD-Farben</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="739"/>
+        <location filename="../../src/mainwin.cpp" line="741"/>
         <source>&amp;Classic</source>
         <translation>&amp;Klassisch</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="739"/>
+        <location filename="../../src/mainwin.cpp" line="741"/>
         <source>&amp;Backlight blue</source>
         <translation>&amp;Hintergrundlicht blau</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="740"/>
+        <location filename="../../src/mainwin.cpp" line="742"/>
         <source>&amp;Amber</source>
         <translation>&amp;Bernstein</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="740"/>
+        <location filename="../../src/mainwin.cpp" line="742"/>
         <source>&amp;High contrast</source>
         <translation>&amp;Hoher Kontrast</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="741"/>
+        <location filename="../../src/mainwin.cpp" line="743"/>
         <source>C&amp;ustom (from the settings)</source>
         <translation>&amp;Eigene (aus den Einstellungen)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="775"/>
+        <location filename="../../src/mainwin.cpp" line="777"/>
         <source>%1: readings are coming in</source>
         <translation>%1: Messwerte kommen an</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="776"/>
+        <location filename="../../src/mainwin.cpp" line="778"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: seit 3 s kein Messwert</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="346"/>
+        <location filename="../../src/mainwin.cpp" line="348"/>
         <source>Another instance is running.</source>
         <translation>Andere Instanz läuft noch</translation>
     </message>
@@ -1677,23 +1677,24 @@ Please choose which instance should record.</translation>
 <context>
     <name>MeterWid</name>
     <message>
-        <location filename="../../src/meterwid.cpp" line="488"/>
-        <source>CURRENT</source>
-        <translation>CURRENT</translation>
+        <location filename="../../src/meterwid.cpp" line="500"/>
+        <source>MIN</source>
+        <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/meterwid.cpp" line="489"/>
+        <location filename="../../src/meterwid.cpp" line="501"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/meterwid.cpp" line="494"/>
-        <location filename="../../src/meterwid.cpp" line="513"/>
+        <location filename="../../src/meterwid.cpp" line="507"/>
+        <location filename="../../src/meterwid.cpp" line="508"/>
+        <location filename="../../src/meterwid.cpp" line="516"/>
         <source>OL</source>
         <translation>OL</translation>
     </message>
     <message>
-        <location filename="../../src/meterwid.cpp" line="530"/>
+        <location filename="../../src/meterwid.cpp" line="567"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
