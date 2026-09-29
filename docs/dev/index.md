@@ -53,8 +53,8 @@ HTML with
 ./compile.sh doxygen
 ```
 
-(or `cmake --build build --target doxygen`, or plain `doxygen` in the
-repository root - the `Doxyfile` is checked in) and open
+(or `cmake --build build --target doxygen`, or `mkdir -p build/doxygen &&
+doxygen` in the repository root - the `Doxyfile` is checked in) and open
 `build/doxygen/html/index.html`. With graphviz installed the pages carry
 class, collaboration, include and directory diagrams as interactive SVG
 (`dot` is looked up on the PATH; without it doxygen warns once and leaves

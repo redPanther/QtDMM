@@ -125,6 +125,8 @@ qt_add_resources(RES_SOURCES ${RESOURCES})
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
 	add_custom_target(doxygen
+		# the Doxyfile writes to <source>/build/doxygen; doxygen only creates the last level
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/build/doxygen
 		COMMAND Doxygen::doxygen ${CMAKE_SOURCE_DIR}/Doxyfile
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 		COMMENT "Generating developer documentation with Doxygen"
