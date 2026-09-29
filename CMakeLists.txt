@@ -189,12 +189,23 @@ if(WIN32)
 	set(WIN_RESOURCES assets/windows/qtdmm.rc) # executable icon
 endif()
 
+if(APPLE)
+	# bundle icon: copied to qtdmm.app/Contents/Resources, named in Info.plist
+	# (regenerate with tools/make_icns.py)
+	set(MAC_RESOURCES assets/macos/qtdmm.icns)
+	set_source_files_properties(${MAC_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
 add_executable(${PROJECT_NAME}
 	MACOSX_BUNDLE
 	WIN32
 	${SRC_FILES}
 	${WIN_RESOURCES}
+	${MAC_RESOURCES}
 )
+if(APPLE)
+	set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE qtdmm.icns)
+endif()
 
 # paranoia options, force you to correct all compiler warnings
 # (compile.sh turns this on for ctest builds, so CI fails on a new warning)
