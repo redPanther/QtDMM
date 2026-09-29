@@ -191,7 +191,7 @@ endif()
 
 if(APPLE)
 	# bundle icon: copied to qtdmm.app/Contents/Resources, named in Info.plist
-	# (regenerate with tools/make_icns.py)
+	# (regenerate with tools/make_icons.py from assets/icons/qtdmm.svg)
 	set(MAC_RESOURCES assets/macos/qtdmm.icns)
 	set_source_files_properties(${MAC_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif()
@@ -261,6 +261,7 @@ if (NOT WIN32)
 	install(FILES assets/icons/qtdmm_32.png DESTINATION share/icons/hicolor/32x32/apps RENAME qtdmm.png)
 	install(FILES assets/icons/qtdmm_64.png DESTINATION share/icons/hicolor/64x64/apps RENAME qtdmm.png)
 	install(FILES assets/icons/qtdmm_128.png DESTINATION share/icons/hicolor/128x128/apps RENAME qtdmm.png)
+	install(FILES assets/icons/qtdmm.svg DESTINATION share/icons/hicolor/scalable/apps)
 	install(FILES ${CMAKE_BINARY_DIR}/qtdmm.1.gz DESTINATION share/man/man1)
 	## AppStream metadata for software centres, named after the component id
 	install(FILES assets/appimage/qtdmm.appdata.xml DESTINATION share/metainfo RENAME io.github.qtdmm.qtdmm.metainfo.xml)
