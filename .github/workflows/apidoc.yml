@@ -44,6 +44,7 @@ jobs:
       # the checked-in Doxyfile plus the version; no CMake or Qt needed
       run: |
         version=$(git describe --tags --abbrev=7 --always)
+        mkdir -p build/doxygen   # doxygen creates only the last level
         ( cat Doxyfile; echo "PROJECT_NUMBER = $version" ) | doxygen -
 
     - uses: actions/upload-pages-artifact@v3
