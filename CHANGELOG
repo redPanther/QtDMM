@@ -1,4 +1,22 @@
 
+* 29/09/2026 26.1-rc2 (second release candidate for 26.1, fixes after rc1)
+- AppImage: command-line options (--version, --config-id, ...) reach QtDMM again
+- Settings dialog fits small screens (1080p on Windows): pages scroll, the dialog stays on screen
+- Recorder: the time window no longer comes out stretched after scrolling when the sample time is not 0.1 s
+- Alarm messages say "Alarm 1: ..." instead of "Alarm Alarm 1: ..."
+- A new instance starts with the settings of the current one; only the meter has to be chosen
+- Brymen BM869s confirmed on hardware (thanks to the tester); saved settings keep the meter
+- App icon as scalable SVG (installed to hicolor/scalable on Linux/BSD); the macOS icon and a new 256 px
+  Windows icon entry are rendered from it
+- No "could not load translation" warning under an English or C locale
+- Man page rewritten: all options, files and examples, version and date from the build
+- Packaging: Fedora COPR builds (thanks to tuxmaster); CMake option QTDMM_EMBED_TRANSLATIONS=OFF installs the
+  translations as files for distribution packages
+- Build: gcc and clang warnings fixed (thanks to tuxmaster); CI builds treat warnings as errors
+  (CMake option QTDMM_WERROR)
+- Tests: the handbook test no longer depends on the CPU speed (failed on RISC-V)
+- Security policy (SECURITY.md): report vulnerabilities privately through GitHub
+
 * 24/09/2026 26.1-rc1 (first release candidate for 26.1; versions are now YY.N, see docs/dev/releasing.md)
 Platforms, build and packaging
 - Calendar versioning YY.N (26.1, 26.1-rc1, 26.1.1, see calver.org), taken from git tags - no manual version bumps

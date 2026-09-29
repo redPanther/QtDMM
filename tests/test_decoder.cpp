@@ -65,6 +65,14 @@ int main(int argc, char **argv)
       qWarning() << "unknown names must give Invalid / no decoder";
       ++problems;
     }
+    // a saved model keeps its meter when the "not confirmed" mark goes
+    if (!DmmDecoder::sameModel("Brymen BM869s *", "Brymen BM869s")
+        || !DmmDecoder::sameModel("Brymen BM869s", "Brymen BM869s *")
+        || DmmDecoder::sameModel("Brymen BM869s", "Brymen BM867s"))
+    {
+      qWarning() << "sameModel() does not ignore the trailing \" *\"";
+      ++problems;
+    }
     if (problems == 0)
       qInfo() << "Protocol table consistent:" << protocols().size() << "protocols.";
     return problems == 0 ? 0 : 1;
