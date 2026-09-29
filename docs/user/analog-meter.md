@@ -2,8 +2,8 @@
 
 Besides the digital display, QtDMM can show the reading on a moving-coil style
 instrument: a dial with a scale on an arc, a needle that swings with the
-inertia of a real meter, a red zone at the top end, boxes with the current
-value and the maximum, and an overload lamp.
+inertia of a real meter, a red zone at the top end, boxes with the minimum
+and the maximum, and an overload lamp.
 
 Switch it on with **Analog meter** in the toolbar or in the menu. It
 opens as a panel docked to the right of the graph; drag its title bar to dock
@@ -16,11 +16,10 @@ The scale is drawn in the unit the multimeter shows, prefix included, and its
 full scale follows the meter's range: a 4000-count meter reading `3.856 V`
 gets a 0 … 4 V scale, `385.6 mV` a 0 … 400 mV scale. When the meter changes
 range the scale relabels itself. A percentage (state of charge, duty cycle)
-always gets a 0 … 100 % scale. The inner 0 … 100 arc is the same reading as
-a percentage of full scale, like the bar graph on the meter itself.
+always gets a 0 … 100 % scale.
 
-Negative readings push the needle into the short stub left of zero and show
-their sign in the **CURRENT** box. On the **GUI** settings page you can choose
+Negative readings push the needle into the short stub left of zero. On the
+**GUI** settings page you can choose
 how the scale is laid out:
 
 - **Automatic** — zero at the left; as soon as a clearly negative reading
@@ -33,9 +32,10 @@ page lets you move it.
 
 ## Readouts and lamp
 
-**CURRENT** shows the reading exactly as the multimeter sends it, **MAX** the
-maximum since the last reset in the same unit. The min/max memory is also
-marked on the scale: a small red triangle at the minimum, a green one at
+**MIN** and **MAX** show the minimum and the maximum since the last reset,
+in the unit of the scale and with as many decimals as the multimeter shows.
+The current value is what the needle and the digital display show. The
+min/max memory is also marked on the scale: a small red triangle at the minimum, a green one at
 the maximum; *Reset* (Ctrl+R) clears both. The **OL** lamp lights and the
 needle rests against the right stop while the meter reports overload; **HOLD**
 appears while the meter's hold function is active.

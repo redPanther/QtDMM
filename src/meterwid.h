@@ -40,7 +40,6 @@ struct MeterStyle
   QColor hold;   ///< HOLD indicator
   QColor minMark;   ///< min/max memory marks on the arc
   QColor maxMark;
-  bool   percentScale = true;   ///< inner 0..100 % arc
   bool   ballistics = true;   ///< damped needle movement
   double redZoneFrom = 0.9;   ///< fraction of full scale
 
@@ -50,8 +49,8 @@ struct MeterStyle
 
 /// Analog moving-coil instrument in the style of a studio VU meter: dark
 /// dial, white scale on an arc, red zone at the top end, needle swinging
-/// from a pivot below the dial, readout boxes for the current value and the
-/// peak, an overload lamp. Everything is drawn with QPainter, so it scales
+/// from a pivot below the dial, readout boxes for the minimum and maximum of
+/// the min/max memory, an overload lamp. Everything is drawn with QPainter, so it scales
 /// with the widget and re-labels itself when the meter changes range.
 ///
 /// The scale is in the unit the multimeter displays (with SI prefix), the
@@ -127,12 +126,19 @@ private:
   void drawReadouts(QPainter &p, const Geometry &g) const;
   void drawLamp(QPainter &p, const Geometry &g) const;
   void drawMarks(QPainter &p, const Geometry &g) const;
+  /// The MIN (left) and MAX (right) readout boxes, kept clear of the needle.
+  void readoutRects(const Geometry &g, QRectF *min, QRectF *max) const;
+  /// Centre of the overload lamp; its "OL" caption fits to its right.
+  QPointF lampCenter(const Geometry &g) const;
+  /// A readout value with the decimals the meter shows (m_decimals).
+  QString readoutText(double value) const;
   void retarget();
   void stepBallistics();
 
   static QString formatLabel(double v);
   static double niceStep(double range, int targetMajors);
 
+  int m_decimals = 0;   ///< decimals of the last reading that was not an overload
   MeterStyle m_style = MeterStyle::dark();
   ScaleMode m_scaleMode = Auto;
   bool m_bipolar = false;
