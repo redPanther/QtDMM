@@ -1,10 +1,11 @@
 #include "brymen_bm86x.h"
 
 // Brymen BM86x over the BU-86X adapter (libsigrok "brymen-bm86x", "hid/bu86x").
-// "*": ported from the libsigrok parser, not confirmed on hardware.
+// "*": ported from the libsigrok parser, not confirmed on hardware. The
+// BM869s was confirmed by a user (2026-09).
 static const bool registered = []() {
   DmmDecoder::addConfig({"Brymen", "BM867s *", "", 0, ReadEvent::BrymenBM86x, 8, 1, 1, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Brymen", "BM869s *", "", 0, ReadEvent::BrymenBM86x, 8, 1, 1, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM869s", "", 0, ReadEvent::BrymenBM86x, 8, 1, 1, 0, 50000, 0, 0, 0});
   return true;
 }();
 

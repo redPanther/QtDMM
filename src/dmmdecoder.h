@@ -108,6 +108,10 @@ public:
   static std::vector<DMMInfo>        getDeviceConfigurations();
   /// Registers a meter; called from the decoder files' static initialisers.
   static void                        addConfig(DMMInfo info);
+  /// True when two model names ("vendor model") name the same meter. A
+  /// trailing " *" (not yet confirmed on hardware) is ignored, so a saved
+  /// setting keeps its meter when the mark goes away after a confirmation.
+  static bool                        sameModel(const QString &a, const QString &b);
   /// Factory: the decoder for a protocol, null for ReadEvent::Invalid.
   static std::shared_ptr<DmmDecoder> getInstance(ReadEvent::DataFormat df);
   /// Factory by protocol name (ReadEvent::toString()).
