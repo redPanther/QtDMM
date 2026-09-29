@@ -59,7 +59,8 @@ repository root - the `Doxyfile` is checked in) and open
 class, collaboration, include and directory diagrams as interactive SVG
 (`dot` is looked up on the PATH; without it doxygen warns once and leaves
 the diagrams out). Doxygen itself is optional: without it the target simply
-does not exist. The published copy lives at <https://qtdmm.de/api/>.
+does not exist. The published copy at <https://qtdmm.github.io/QtDMM/> is
+rebuilt from `master` after every merge (`.github/workflows/apidoc.yml`).
 
 ## Translations
 
