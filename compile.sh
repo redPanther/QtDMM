@@ -52,12 +52,8 @@ else
 	CMAKE_PARAMS="-DCMAKE_PREFIX_PATH=$(brew --prefix qt@6)"
 fi
 
-if ${CTEST}
-then
-	CMAKE_PARAMS="${CMAKE_PARAMS} -DQTDMM_WERROR=ON"
-fi
-
-cmake ${CMAKE_PARAMS} -DBUILD_TESTING=$(${CTEST} && echo "ON" || echo "OFF") -B build
+cmake ${CMAKE_PARAMS} -DBUILD_TESTING=$(${CTEST} && echo "ON" || echo "OFF") \
+	-DQTDMM_WERROR=$(${CTEST} && echo "ON" || echo "OFF") -B build
 cmake --build build --parallel ${JOBS} || exit 1
 
 cd build

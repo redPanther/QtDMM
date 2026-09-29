@@ -1,4 +1,7 @@
 if (BUILD_TESTING)
+	## QTDMM_WERROR: warnings in the tests fail the build, too
+	add_compile_options(${QTDMM_WARNING_FLAGS})
+
 	set( TEST_DECODER test_decoder)
 	enable_testing()
 
