@@ -197,11 +197,19 @@ add_executable(${PROJECT_NAME}
 )
 
 # paranoia options, force you to correct all compiler warnings
+# (compile.sh turns this on for ctest builds, so CI fails on a new warning)
+option(QTDMM_WERROR "Treat compiler warnings in QtDMM's own code as errors" OFF)
 if(QTDMM_WERROR)
+	# bundled third-party code keeps its warnings; they are not ours to fix
+	set(_third_party src/3rdparty/miniz/miniz.c src/3rdparty/tiny-aes/aes.c)
 	if(MSVC)
 		target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+		set_source_files_properties(${_third_party}
+			PROPERTIES COMPILE_OPTIONS "/WX-")
 	else()
 		target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror) # -Wextra -Wpedantic
+		set_source_files_properties(${_third_party}
+			PROPERTIES COMPILE_OPTIONS "-Wno-error")
 	endif()
 endif()
 
