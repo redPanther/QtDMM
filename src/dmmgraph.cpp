@@ -155,6 +155,11 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
 
   m_chartView = new QChartView(m_chart, this);
   m_chartView->setRenderHint(QPainter::Antialiasing);
+  // the graph background fills the widget edge to edge, without Qt Charts'
+  // inset and rounded corners, so the scrollbar below lines up with it
+  m_chart->setBackgroundRoundness(0);
+  m_chart->layout()->setContentsMargins(0, 0, 0, 0);
+  m_chartView->setFrameShape(QFrame::NoFrame);
   m_chartView->viewport()->setMouseTracking(true);
   m_chartView->viewport()->installEventFilter(this);
   // keyboard zoom/pan once the graph has been clicked
@@ -1391,6 +1396,16 @@ void DMMGraph::applyThemeColors()
       break;
   }
   m_chart->setBackgroundBrush(background);
+  // the scrollbar in the graph's colours: a dark graph gets no light strip
+  {
+    QPalette pal = scrollbar->palette();
+    for (QPalette::ColorRole role : { QPalette::Window, QPalette::Base, QPalette::Button })
+      pal.setBrush(role, background);
+    pal.setColor(QPalette::WindowText, labels);
+    pal.setColor(QPalette::ButtonText, labels);
+    scrollbar->setPalette(pal);
+    scrollbar->setAutoFillBackground(true);
+  }
   m_chart->setPlotAreaBackgroundBrush(plot);
   m_chart->setPlotAreaBackgroundVisible(plot.style() != Qt::NoBrush);
   for (QValueAxis *axis : { m_xAxis, m_yAxis })
