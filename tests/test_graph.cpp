@@ -3,6 +3,7 @@
 // compare the replacement against.
 #include <QApplication>
 #include <QSignalSpy>
+#include <QTest>
 #include <QTemporaryDir>
 #include <QTextStream>
 #include <QDebug>
@@ -321,6 +322,10 @@ int main(int argc, char **argv)
     DMMGraph graph(nullptr, &cfg);
     graph.resize(800, 500);
     check(graph.importCsvFile(dataDir + "/new_larger.csv"), "image export: import failed");
+    // as in the program: the graph is on screen and laid out (a hidden
+    // widget gets no resize event, and Qt Charts lays out one turn later)
+    graph.show();
+    QTest::qWait(100);
 
     const QString svg = tmpDir.filePath("graph.svg");
     check(graph.exportImageFile(svg, QSize(1000, 600)), "SVG written");
@@ -338,7 +343,11 @@ int main(int argc, char **argv)
           "SVG carries the requested size: " + QString::fromUtf8(content.left(200)));
     // vector output, not a pixel dump: the curve and the axis labels are
     // paths and text, so there is no embedded raster image
-    check(content.contains("<path") || content.contains("<polyline"), "SVG has vector paths");
+    // the curve itself: Qt Charts writes a line series as one short
+    // polyline per segment, so a curve of ~270 samples gives hundreds of
+    // them; the frame and the grid alone are a few dozen
+    const int shapes = content.count("<polyline") + content.count("<path");
+    check(shapes >= 200, QString("SVG holds the curve as vectors (%1 polylines/paths)").arg(shapes));
     check(!content.contains("<image"), "SVG holds no embedded bitmap");
     check(content.contains("QtDMM"), "SVG names its origin in the title");
 

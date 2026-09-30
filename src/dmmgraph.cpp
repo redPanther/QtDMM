@@ -143,6 +143,11 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
 
   m_chartView = new QChartView(m_chart, this);
   m_chartView->setRenderHint(QPainter::Antialiasing);
+  // the graph background fills the widget edge to edge, without Qt Charts'
+  // inset and rounded corners, so the scrollbar below lines up with it
+  m_chart->setBackgroundRoundness(0);
+  m_chart->layout()->setContentsMargins(0, 0, 0, 0);
+  m_chartView->setFrameShape(QFrame::NoFrame);
   m_chartView->viewport()->setMouseTracking(true);
   m_chartView->viewport()->installEventFilter(this);
   // keyboard zoom/pan once the graph has been clicked
@@ -1004,6 +1009,11 @@ bool DMMGraph::importCsvFile(const QString &fileName)
   m_sampleCounter = m_pointer = cnt;
   setScale(true, true, 0, 0);
   m_dirty = false;
+  // setGraphSize() above built the series before the values were in; the
+  // graph shows the import by itself, not only after MainWid applies the
+  // new size
+  rebuildSeries();
+  updateXAxisRange();
 
   Q_EMIT error(fileName);
   update();
@@ -1104,6 +1114,14 @@ void DMMGraph::setColors(const QColor &bg, const QColor &grid,
   m_intThresholdColor = intThreshold;
 
   m_chart->setBackgroundBrush(m_bgColor);
+  // the scrollbar in the graph's colours: a dark graph gets no light strip
+  QPalette pal = scrollbar->palette();
+  for (QPalette::ColorRole role : { QPalette::Window, QPalette::Base, QPalette::Button })
+    pal.setColor(role, m_bgColor);
+  pal.setColor(QPalette::WindowText, m_gridColor);
+  pal.setColor(QPalette::ButtonText, m_gridColor);
+  scrollbar->setPalette(pal);
+  scrollbar->setAutoFillBackground(true);
   m_xAxis->setGridLineColor(m_gridColor);
   m_yAxis->setGridLineColor(m_gridColor);
   updateSeriesAppearance();
@@ -1339,7 +1357,9 @@ bool DMMGraph::writeImage(const QString &fileName, QSize size)
       Q_EMIT error(tr("Could not write %1").arg(fileName));
       return false;
     }
-    m_chartView->render(&p);
+    // into the requested size, as PDF and PNG: at the view's own size the
+    // drawing sat in a corner of a larger viewBox
+    m_chartView->render(&p, QRectF(QPointF(0, 0), QSizeF(size)));
     p.end();
   }
   else if (suffix == "pdf")
