@@ -1,0 +1,165 @@
+{
+  "decoder": "VC870Continuous",
+  "comment": "SYNTHETIC: frames built by hand from docs/protocols/sources/vc870_protocol.pdf (function and range codes, five ASCII digits per display, status bits). Expectations are worked out from the displayed reading as the ranges table of that document gives it, not taken from the decoder. The 4 kOhm range and the ranges above it (resistance), and the AC voltage and current ranges are left out: the decoder scales them a decade differently from the DC ranges and the document does not say which is right. No capture from a real VC870 exists here. Replace with real data when available.",
+  "tests": [
+    {
+      "comment": "DCV 4 V range: 1.2345 V",
+      "hex": "30 30 30 31 32 33 34 35 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 1.2345,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "DCV 40 V range: 23.456 V",
+      "hex": "30 30 31 32 33 34 35 36 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 23.456,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "DCV 400 V range: -300.00 V",
+      "hex": "30 30 32 33 30 30 30 30 30 30 30 30 30 30 30 34 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": -300.0,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "DCV 1000 V range: 1000.0 V",
+      "hex": "30 30 33 31 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 1000.0,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "DCV overload",
+      "hex": "30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 31 30 30 30 30 30 0D 0A",
+      "expected": {
+        "val": "0L",
+        "dval": 0.0,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "DCmV 400 mV range: 123.45 mV",
+      "hex": "31 30 30 31 32 33 34 35 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 0.12345,
+        "unit": "mV",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "Temperature: 123.4 C with 254.1 F on the second display",
+      "hex": "31 31 30 30 31 32 33 34 30 32 35 34 31 30 30 30 30 30 30 30 31 0D 0A",
+      "expected": {
+        "dval": 123.4,
+        "unit": "C",
+        "special": "TE",
+        "dval2": 254.1,
+        "unit2": "F",
+        "id2": 1
+      }
+    },
+    {
+      "comment": "Resistance 400 Ohm range: 123.45 Ohm",
+      "hex": "32 30 30 31 32 33 34 35 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 123.45,
+        "unit": "Ohm",
+        "special": "OH"
+      }
+    },
+    {
+      "comment": "Resistance 4 kOhm range: 1.2340 kOhm",
+      "hex": "32 30 31 31 32 33 34 30 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 1234.0,
+        "unit": "kOhm",
+        "special": "OH"
+      }
+    },
+    {
+      "comment": "Capacitance 40 nF range: 12.345 nF",
+      "hex": "33 30 30 31 32 33 34 35 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 1.2345e-08,
+        "unit": "nF",
+        "special": "CA"
+      }
+    },
+    {
+      "comment": "Diode: 0.5123 V",
+      "hex": "34 30 30 30 35 31 32 33 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 0.5123,
+        "unit": "V",
+        "special": "DI"
+      }
+    },
+    {
+      "comment": "Frequency 40 Hz range: 20.000 Hz",
+      "hex": "35 30 30 32 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 20.0,
+        "unit": "Hz",
+        "special": "FR"
+      }
+    },
+    {
+      "comment": "Frequency 4 kHz range: 2.0000 kHz",
+      "hex": "35 30 32 32 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 2000.0,
+        "unit": "kHz",
+        "special": "FR"
+      }
+    },
+    {
+      "comment": "DCuA 400 uA range: 123.45 uA",
+      "hex": "36 30 30 31 32 33 34 35 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 0.00012345,
+        "unit": "uA",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "DCmA 40 mA range: 12.345 mA",
+      "hex": "37 30 30 31 32 33 34 35 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 0.012345,
+        "unit": "mA",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "DCA 10 A range: 9.876 A",
+      "hex": "38 30 30 30 39 38 37 36 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
+      "expected": {
+        "dval": 9.876,
+        "unit": "A",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "Active and apparent power: 123.4 W, 200.0 VA",
+      "hex": "39 30 30 30 31 32 33 34 30 32 30 30 30 30 30 30 30 30 30 30 31 0D 0A",
+      "expected": {
+        "dval": 123.4,
+        "unit": "W",
+        "dval2": 200.0,
+        "unit2": "VA",
+        "id2": 1
+      }
+    }
+  ]
+}

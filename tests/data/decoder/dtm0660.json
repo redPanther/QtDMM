@@ -1,0 +1,76 @@
+{
+  "decoder": "DTM0660",
+  "comment": "SYNTHETIC: frames built by hand from the layout in src/decoders/dtm0660.cpp (which follows libsigrok's dtm0660 parser): 15 bytes with the index in the high nibble, seven-segment digits, flag bits. docs/protocols/sources/dtm0660-brochure.pdf is the chip's brochure, which does not give the serial frame. Expectations are worked out from the displayed reading. No capture from a real DTM0660 meter exists here. Replace with real data when available.",
+  "tests": [
+    {
+      "comment": "1.234 V DC",
+      "hex": "12 20 3A 4B 5D 68 7F 84 9E A0 B0 C0 D2 E0 F0",
+      "expected": {
+        "val": "  1.234",
+        "dval": 1.234,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "-12.34 mV DC",
+      "hex": "12 21 3A 4A 5D 69 7F 84 9E A0 B1 C0 D2 E0 F0",
+      "expected": {
+        "val": " -12.34",
+        "dval": -0.01234,
+        "unit": "mV",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "4.700 kOhm",
+      "hex": "10 24 3E 49 5A 6E 7B 8E 9B A4 B0 C2 D0 E0 F0",
+      "expected": {
+        "val": "  4.700",
+        "dval": 4700.0,
+        "unit": "kOhm",
+        "special": "OH"
+      }
+    },
+    {
+      "comment": "50.00 Hz, AC coupled",
+      "hex": "11 2C 37 4E 5B 6F 7B 8E 9B A0 B0 C0 D4 E0 F0",
+      "expected": {
+        "val": "  50.00",
+        "dval": 50.0,
+        "unit": "Hz",
+        "special": "HZ"
+      }
+    },
+    {
+      "comment": "100.0 nF",
+      "hex": "10 20 3A 4E 5B 6E 7B 8F 9B A2 B0 C1 D0 E0 F0",
+      "expected": {
+        "val": "  100.0",
+        "dval": 1e-07,
+        "unit": "nF",
+        "special": "CA"
+      }
+    },
+    {
+      "comment": "Diode: 0.512 V",
+      "hex": "10 2E 3B 4D 57 60 7A 8A 9D A8 B0 C0 D2 E0 F0",
+      "expected": {
+        "val": "  0.512",
+        "dval": 0.512,
+        "unit": "V",
+        "special": "DI"
+      }
+    },
+    {
+      "comment": "Overload on the volts range",
+      "hex": "12 20 30 4E 5B 66 71 80 90 A0 B0 C0 D2 E0 F0",
+      "expected": {
+        "val": " 0L ",
+        "dval": 0.0,
+        "unit": "V",
+        "special": "DC"
+      }
+    }
+  ]
+}

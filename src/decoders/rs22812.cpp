@@ -376,6 +376,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderRS22812::decode(const QByteArray &
   else if (bit(data, 1, 0)) formatResultValue(0, "m", unit);
   else if (bit(data, 1, 5)) formatResultValue(0, "k", unit);
   else if (bit(data, 1, 4)) formatResultValue(0, "M", unit);
+  else                      formatResultValue(0, "", unit);   // no prefix: the unit still has to get out
 
   return m_result;
 }

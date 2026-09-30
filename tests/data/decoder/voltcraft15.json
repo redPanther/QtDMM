@@ -1,0 +1,60 @@
+{
+  "decoder": "Voltcraft15Continuous",
+  "comment": "The Metex-family frames of voltcraft14.json with a line feed after the carriage return (15 bytes, VC 635/655). The frames are the real captures of metex-22t.log; the expectations are derived from the log, not from the decoder. No capture from a Voltcraft VC 635/655 exists here.",
+  "tests": [
+    {
+      "comment": "[metex-22t.log, as Metex14] 'FR  0.050 KHz'",
+      "hex": "46 52 20 20 30 2E 30 35 30 20 4B 48 7A 0D 0A",
+      "expected": {
+        "dval": 50.0,
+        "unit": "kHz",
+        "hold": false
+      }
+    },
+    {
+      "comment": "[metex-22t.log, as Metex14] 'DC  0017    V'",
+      "hex": "44 43 20 20 30 30 31 37 20 20 20 20 56 0D 0A",
+      "expected": {
+        "dval": 17.0,
+        "unit": "V",
+        "hold": false
+      }
+    },
+    {
+      "comment": "[metex-22t.log, as Metex14] 'DC  0.001  mA'",
+      "hex": "44 43 20 20 30 2E 30 30 31 20 20 6D 41 0D 0A",
+      "expected": {
+        "dval": 1e-06,
+        "unit": "mA",
+        "hold": false
+      }
+    },
+    {
+      "comment": "[metex-22t.log, as Metex14] 'DC  00.01   A'",
+      "hex": "44 43 20 20 30 30 2E 30 31 20 20 20 41 0D 0A",
+      "expected": {
+        "dval": 0.01,
+        "unit": "A",
+        "hold": false
+      }
+    },
+    {
+      "comment": "[metex-22t.log, as Metex14] 'TE  0001    C'",
+      "hex": "54 45 20 20 30 30 30 31 20 20 20 20 43 0D 0A",
+      "expected": {
+        "dval": 1.0,
+        "unit": "C",
+        "hold": false
+      }
+    },
+    {
+      "comment": "[metex-22t.log, as Metex14] 'DI  0039   mV'",
+      "hex": "44 49 20 20 30 30 33 39 20 20 20 6D 56 0D 0A",
+      "expected": {
+        "dval": 0.039,
+        "unit": "mV",
+        "hold": false
+      }
+    }
+  ]
+}

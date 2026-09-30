@@ -25,16 +25,16 @@ regression tests.
 | `cyrustek_es51922.cpp` | `CyrustekES51922` | Uni-Trend UT61E, Wintex TD2200 | `UT61E.log` | yes |
 | `cyrustek_es51962.cpp` | `CyrustekES51962` | PeakTech 3315, Uni-Trend UT70B | `UT70B.log` | yes |
 | `cyrustek_es51986.cpp` | `CyrustekES51986` | Iso-Tech IDM 73, Tenma 72-1016, Uni-Trend UT803 | `UT803.log` | yes |
-| `do3122.cpp` | `DO3122Continuous` | Duratool DO3122 | — | none |
+| `do3122.cpp` | `DO3122Continuous` | Duratool DO3122 | — (`duratool.pdf` is the meter's datasheet, no frame description; layout from the decoder) | synthetic |
 | `fluke_qm.cpp` | `FlukeQM` | Fluke 87-IV/89-IV/187/189 (9600 Bd) and 287/289 (115200 Bd) over the IR serial adapter (unconfirmed) | `fluke_18x_remote.pdf`, `fluke_28x_remote.pdf` (Fluke's Remote Interface Specifications; no capture) | yes, from the specifications' examples |
 | `fluke45.cpp` | `Fluke45` | Fluke 45 bench meter, RS-232 (unconfirmed) | `fluke_45_users_manual.pdf` (chapter 5; no capture) | yes, built from the manual's tables |
 | `gdm703.cpp` | `GDM703Continuous` | Voltcraft GDM 703/704/705 (unconfirmed; chip WENS98A per the [sigrok IC list](https://sigrok.org/wiki/Multimeter_ICs)) | — (layout from Toussaint's CDMM, `ablage/CDMM`) | synthetic |
-| `dtm0660.cpp` | `DTM0660` | Generic DTM0660 (4000/6000/8000 count) | — | none |
-| `m9803r.cpp` | `M9803RContinuous` | ELV M9803R, MASTECH M9803R, McVoice M-980T | — | none |
+| `dtm0660.cpp` | `DTM0660` | Generic DTM0660 (4000/6000/8000 count) | — (`dtm0660-brochure.pdf` has no serial frame; layout from the decoder, after libsigrok) | synthetic |
+| `m9803r.cpp` | `M9803RContinuous` | ELV M9803R, MASTECH M9803R, McVoice M-980T | — (byte table in the decoder's header, reverse engineered by Toussaint) | synthetic, unprefixed readings only |
 | `qm1537.cpp` | `QM1537Continuous` | Digitek DT4000ZC, Digitech QM1537, PeakTech 3430, TekPower TP4000ZC, Uni-Trend UT61B/C/D, Vichy VC99 | `UT61BCD.log` | yes |
-| `rs22812.cpp` | `RS22812Continuous` | Radioshack 22-812 | — | none |
+| `rs22812.cpp` | `RS22812Continuous` | Radioshack 22-812 | — (layout from [rs22812](https://github.com/syn-net/rs22812) and the sigrok wiki) | synthetic |
 | `vc820.cpp` | `VC820Continuous` | Digitek DT-9062/INO2513, Digitech QM1462/QM1538, HoldPeak HP-90EPC, PeakTech 3330, Tenma 72-7745, Uni-Trend UT60A/UT60E, Voltcraft VC 820/840 | `UT60AE.log` | yes |
-| `vc870.cpp` | `VC870Continuous` | Voltcraft VC 870 | — | none |
+| `vc870.cpp` | `VC870Continuous` | Voltcraft VC 870 | `vc870_protocol.pdf` (frame description, no capture) | yes, synthetic, from the document's tables; resistance above 400 Ohm and the AC ranges left out, see below |
 | `victron_ble.cpp` | `VictronBLE` | Victron SmartShunt, BMV-712 Smart, SmartSolar / BlueSolar MPPT, Phoenix Inverter Smart over Bluetooth LE (SmartShunt 500A/50mV, SmartSolar MPPT 100/20 48V and Phoenix Inverter 12V 500VA verified live) | — (bit layouts and test vectors from [victron-ble](https://github.com/keshavdv/victron-ble); AES-CTR decryption tested in `test_victronble`) | yes |
 | `unit_idmm.cpp` | `UniTiDMM` | UNI-T UT60BT over Bluetooth LE GATT (verified live, dial walk against the LCD) | `tmp/ut60bt/walk_all.log` (UT60BT captures); frames and tables from [ble-multimeter](https://github.com/deligent4/ut60bt_multimeter) and [ut61xpy](https://github.com/olegv142/ut61xpy), both in `ablage/` | yes |
 | `unit_idmm.cpp` | `UniTUT61Plus` | UNI-T UT61B+/D+/E+ over the UT-D09 USB-HID cable or the UT-D07B Bluetooth adapter, UT161B/D/E over Bluetooth (unconfirmed) | — (synthetic vectors from UNI-T's app range tables via [unit_ut61eplus](https://github.com/ljakob/unit_ut61eplus), matching [ut61xpy](https://github.com/olegv142/ut61xpy)) | yes, synthetic |
@@ -81,6 +81,28 @@ this as `frames_per_reading: 2`.
 and `UT81B.log` document Uni-Trend meters that QtDMM does not support yet.
 They are not usable as tests today, but are the starting material for adding
 those devices.
+
+`voltcraft14.json` and `voltcraft15.json` run the real Metex captures of
+`metex-22t.log` through `Voltcraft14Continuous` and `Voltcraft15Continuous`
+(the same frame layout, the second with a line feed after the carriage
+return). `PeakTech10` and `Sigrok` (the text of sigrok-cli) still have no
+vectors.
+
+### Left out of the synthetic fixtures
+
+Points where the decoder and the sources do not obviously agree, so no
+vector asserts either side until a real meter (or a capture) settles them:
+
+- `vc870.cpp`, resistance ranges 40 kOhm to 40 MOhm: the decoder's factors
+  are ten times those of the frequency and capacitance ranges of the same
+  table (40 kOhm: `1e1`, dot position 4), and the range table of
+  `vc870_protocol.pdf` reads like 40.000 kOhm there. The AC voltage and
+  current ranges are scaled one decade differently from the DC ones; that
+  fits 4000-count AC ranges, which the document does not say.
+- `m9803r.cpp`: `dval` is in display units for mV, kOhm, nF and so on (the
+  decoder's own note says so), and the 000.0 Ohm range (mode 4, decimal point
+  0) puts the point after the first digit, not the third as the byte table
+  says. An overload shows as `.0L`.
 
 ## Provenance
 
