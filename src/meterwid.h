@@ -71,7 +71,7 @@ public:
   explicit MeterWid(QWidget *parent = nullptr);
 
   /// Current reading in display units. text is the meter's own rendering of
-  /// it ("3.856", shown verbatim in the CURRENT box), unit what the dial
+  /// it ("3.856"; MIN and MAX use its decimals), unit what the dial
   /// label shows (e.g. "mV DC"); overload parks the needle at the right stop.
   void setReading(double value, const QString &text, const QString &unit, bool overload, bool hold);
   void setFullScale(double fs);   ///< > 0, in display units
