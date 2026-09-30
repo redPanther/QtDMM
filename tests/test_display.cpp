@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include "displaywid.h"
+#include "siprefix.h"
 
 static int failed = 0;
 
@@ -52,6 +53,15 @@ int main(int argc, char **argv)
     check(DisplayWid::segmentsFor(ch) != 0, QString("glyph for '%1'").arg(ch));
   check(DisplayWid::segmentsFor('L') == DisplayWid::segmentsFor('l'), "letters are case-insensitive");
   check(DisplayWid::segmentsFor('0') != DisplayWid::segmentsFor('o'), "0 and o differ (o is lower case)");
+
+  // --- 1b. units as the displays write them (LCD and analog meter share it) ---
+  check(SiPrefix::displayText("Ohm") == QStringLiteral("Ω"), "Ohm -> Ω");
+  check(SiPrefix::displayText("kOhm") == QStringLiteral("kΩ"), "kOhm -> kΩ");
+  check(SiPrefix::displayText("MOhm") == QStringLiteral("MΩ"), "MOhm -> MΩ");
+  check(SiPrefix::displayText("C") == QStringLiteral("°C"), "C -> °C");
+  check(SiPrefix::displayText("dF") == QStringLiteral("°F"), "dF -> °F");
+  check(SiPrefix::displayText("cosphi") == QStringLiteral("cosφ"), "cosphi -> cosφ");
+  check(SiPrefix::displayText("mV") == "mV" && SiPrefix::displayText("Hz") == "Hz", "other units unchanged");
 
   // --- 2. render: a value paints more dark pixels than an empty display ---
   const QString dump = qEnvironmentVariable("TEST_DISPLAY_DUMP");

@@ -1209,6 +1209,11 @@ bool DMMGraph::importCsvFile(const QString &fileName)
   m_sampleCounter = m_pointer = cnt;
   setScale(true, true, 0, 0);
   m_dirty = false;
+  // setGraphSize() above built the series before the values were in; the
+  // graph shows the import by itself, not only after MainWid applies the
+  // new size
+  rebuildSeries();
+  updateXAxisRange();
 
   Q_EMIT error(fileName);
   update();
@@ -1765,7 +1770,9 @@ bool DMMGraph::writeImage(const QString &fileName, QSize size)
       Q_EMIT error(tr("Could not write %1").arg(fileName));
       return false;
     }
-    m_chartView->render(&p);
+    // into the requested size, as PDF and PNG: at the view's own size the
+    // drawing sat in a corner of a larger viewBox
+    m_chartView->render(&p, QRectF(QPointF(0, 0), QSizeF(size)));
     p.end();
   }
   else if (suffix == "pdf")

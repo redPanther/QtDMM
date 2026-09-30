@@ -746,7 +746,8 @@ void MeterWid::showReading(const Reading &r)
   if (!std::isnan(fs))
     setFullScale(fs);
 
-  QString label = unit;
+  // the unit as the digital display writes it ("kΩ", "°C")
+  QString label = SiPrefix::displayText(unit);
   if (special == "AC" || special == "DC")
     label += " " + special;
   else if (special == "ACDC")

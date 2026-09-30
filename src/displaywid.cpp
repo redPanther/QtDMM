@@ -363,16 +363,7 @@ double DisplayWid::drawUnit(QPainter &p, const QPointF &origin, double h, const 
 {
   if (unit.isEmpty())
     return 0.0;
-  SiPrefix::Split parts = SiPrefix::split(unit);
-  QString text = parts.prefix + parts.baseUnit;
-  if (parts.baseUnit == "Ohm")
-    text = parts.prefix + QStringLiteral("Ω");
-  else if (parts.baseUnit == "dF")
-    text = QStringLiteral("°F");
-  else if (parts.baseUnit == "C")
-    text = QStringLiteral("°C");
-  else if (parts.baseUnit == "cosphi")
-    text = QStringLiteral("cosφ");
+  const QString text = SiPrefix::displayText(unit);
 
   const QFont f = sansFont(h * 0.62);
   p.setFont(f);
