@@ -1,0 +1,81 @@
+{
+  "decoder": "M9803RContinuous",
+  "comment": "SYNTHETIC: frames built by hand from the byte table in the header of src/decoders/m9803r.cpp (Matthias Toussaint's reverse engineering). Only readings without an SI prefix are here: the decoder reports dval in display units for mV, kOhm, nF and so on (see the note at its end), and its 000.0 Ohm range puts the decimal point one place too far left, so both are left out until a meter can settle them. No capture from a real M9803R exists here. Replace with real data when available.",
+  "tests": [
+    {
+      "comment": "DCV 0.000 V range: 1.234 V, auto",
+      "hex": "00 04 03 02 01 00 01 00 04 0D 0A",
+      "expected": {
+        "dval": 1.234,
+        "unit": "V",
+        "special": "DC",
+        "range": "AUTO"
+      }
+    },
+    {
+      "comment": "DCV 0.000 V range: -1.234 V",
+      "hex": "08 04 03 02 01 00 01 00 04 0D 0A",
+      "expected": {
+        "dval": -1.234,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "DCV 0000. V range: 1234 V",
+      "hex": "00 04 03 02 01 00 04 00 04 0D 0A",
+      "expected": {
+        "val": "1234",
+        "dval": 1234.0,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "ACV 00.00 V range: 23.05 V, manual",
+      "hex": "00 05 00 03 02 01 02 00 02 0D 0A",
+      "expected": {
+        "dval": 23.05,
+        "unit": "V",
+        "special": "AC",
+        "range": "MANU"
+      }
+    },
+    {
+      "comment": "DCV overload",
+      "hex": "01 00 00 00 00 00 01 00 04 0D 0A",
+      "expected": {
+        "dval": 0.0,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "Diode: 0.512 V",
+      "hex": "00 02 01 05 00 06 00 00 04 0D 0A",
+      "expected": {
+        "dval": 0.512,
+        "unit": "V",
+        "special": "DI"
+      }
+    },
+    {
+      "comment": "Ohms with beep, 000.0 Ohm: 123.4 Ohm",
+      "hex": "00 04 03 02 01 05 00 00 04 0D 0A",
+      "expected": {
+        "dval": 123.4,
+        "unit": "Ohm",
+        "special": "OH"
+      }
+    },
+    {
+      "comment": "Frequency 00.00 Hz: 50.00 Hz",
+      "hex": "00 00 00 00 05 0A 05 00 04 0D 0A",
+      "expected": {
+        "dval": 50.0,
+        "unit": "Hz",
+        "special": "HZ"
+      }
+    }
+  ]
+}

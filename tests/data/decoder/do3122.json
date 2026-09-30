@@ -1,0 +1,80 @@
+{
+  "decoder": "DO3122Continuous",
+  "comment": "SYNTHETIC: frames built by hand from the layout in src/decoders/do3122.cpp (header, seven-segment digits, mode and unit bytes); docs/protocols/sources/duratool.pdf is the meter's datasheet, which does not give the serial frame. Expectations are worked out from the displayed reading. No capture from a real Duratool DO3122 exists here. Replace with real data when available.",
+  "tests": [
+    {
+      "comment": "1.234 V DC",
+      "hex": "AA 55 52 24 01 00 36 2F EB 06 04 00 00 00 00 00 00 00 00 00 00 08",
+      "expected": {
+        "val": "1.234",
+        "dval": 1.234,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "-123.4 mV DC",
+      "hex": "AA 55 52 24 01 00 B6 2F 6B 06 0C 00 00 00 00 00 00 00 00 00 00 0A",
+      "expected": {
+        "val": "-123.4",
+        "dval": -0.1234,
+        "unit": "mV",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "230.5 V AC",
+      "hex": "AA 55 52 24 01 00 BD 5F 2F 6B 02 00 00 00 00 00 00 00 00 00 00 08",
+      "expected": {
+        "val": "230.5",
+        "dval": 230.5,
+        "unit": "V",
+        "special": "AC"
+      }
+    },
+    {
+      "comment": "4.700 kOhm (leading digits may be blank)",
+      "hex": "AA 55 52 24 01 00 5F 5F 87 36 00 00 00 00 00 00 00 00 00 00 00 60",
+      "expected": {
+        "dval": 4700.0,
+        "unit": "kOhm",
+        "special": ""
+      }
+    },
+    {
+      "comment": "50.00 Hz",
+      "hex": "AA 55 52 24 01 00 5F DF 5F 3D 00 00 00 00 00 00 00 00 00 00 00 80",
+      "expected": {
+        "dval": 50.0,
+        "unit": "Hz"
+      }
+    },
+    {
+      "comment": "4.70 uF: capacitance has its own unit byte",
+      "hex": "AA 55 52 24 01 00 5F 87 36 00 00 00 00 00 00 00 00 00 00 00 A0 00",
+      "expected": {
+        "dval": 4.7e-06,
+        "unit": "uF"
+      }
+    },
+    {
+      "comment": "Diode: 0.512 V",
+      "hex": "AA 55 52 24 01 00 6B 06 BD 5F 01 00 00 00 00 00 00 00 00 00 00 08",
+      "expected": {
+        "dval": 0.512,
+        "unit": "V",
+        "special": "Diode"
+      }
+    },
+    {
+      "comment": "overload",
+      "hex": "AA 55 52 24 01 00 80 58 5F 00 04 00 00 00 00 00 00 00 00 00 00 08",
+      "expected": {
+        "val": "OL",
+        "dval": 0.0,
+        "unit": "V",
+        "special": "DC"
+      }
+    }
+  ]
+}

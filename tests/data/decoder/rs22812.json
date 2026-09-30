@@ -1,0 +1,72 @@
+{
+  "decoder": "RS22812Continuous",
+  "comment": "SYNTHETIC: frames built by hand from the layout in https://github.com/syn-net/rs22812 (digit codes, flag bits, checksum = sum of bytes 0-7 + 57); expectations worked out from the displayed reading. No capture from a real RadioShack 22-812 exists here. Replace with real data when available.",
+  "tests": [
+    {
+      "comment": "1.234 V DC, auto range",
+      "hex": "00 02 00 72 F1 BD 50 03 AE",
+      "expected": {
+        "dval": 1.234,
+        "unit": "V",
+        "special": "DC",
+        "range": "AUTO",
+        "hold": false
+      }
+    },
+    {
+      "comment": "-12.34 mV DC, auto range",
+      "hex": "00 03 00 72 F9 B5 50 0B B7",
+      "expected": {
+        "dval": -0.01234,
+        "unit": "mV",
+        "special": "DC",
+        "range": "AUTO",
+        "hold": false
+      }
+    },
+    {
+      "comment": "230.5 V AC, manual range, hold",
+      "hex": "01 02 00 EB D7 F1 B5 16 BA",
+      "expected": {
+        "dval": 230.5,
+        "unit": "V",
+        "special": "AC",
+        "range": "MANU",
+        "hold": true
+      }
+    },
+    {
+      "comment": "4.700 kOhm, auto range",
+      "hex": "08 60 00 D7 D7 59 72 03 1D",
+      "expected": {
+        "dval": 4700.0,
+        "unit": "kOhm",
+        "special": "OH",
+        "range": "AUTO",
+        "hold": false
+      }
+    },
+    {
+      "comment": "100.0 nF, auto range",
+      "hex": "09 08 40 DF D7 D7 50 03 6A",
+      "expected": {
+        "dval": 1e-07,
+        "unit": "nF",
+        "special": "CA",
+        "range": "AUTO",
+        "hold": false
+      }
+    },
+    {
+      "comment": "50.00 Hz, auto range",
+      "hex": "0A 80 00 D7 DF D7 E3 03 36",
+      "expected": {
+        "dval": 50.0,
+        "unit": "Hz",
+        "special": "HZ",
+        "range": "AUTO",
+        "hold": false
+      }
+    }
+  ]
+}
