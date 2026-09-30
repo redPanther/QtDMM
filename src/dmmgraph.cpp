@@ -697,15 +697,13 @@ void DMMGraph::addValue(double val)
         }
     }
 
-    if (m_pointer > 0)
-    {
-      if (m_lastVal <= m_integrationThreshold)
-        (*m_arrayInt)[m_pointer] = 0.0;
-      else
-        (*m_arrayInt)[m_pointer] = (*m_arrayInt)[m_pointer - 1] + val;
-    }
+    // integration: the running sum of the readings above the threshold, back
+    // to 0 at or below it (the first sample, too: it used to start at the
+    // threshold itself, a spike at the left edge)
+    if (val <= m_integrationThreshold)
+      (*m_arrayInt)[m_pointer] = 0.0;
     else
-      (*m_arrayInt)[m_pointer] = qMax(val, m_integrationThreshold);
+      (*m_arrayInt)[m_pointer] = (m_pointer > 0 ? (*m_arrayInt)[m_pointer - 1] : 0.0) + val;
 
     (*m_array)[m_pointer++] = val;
     // "All": the window grows once the recording fills it

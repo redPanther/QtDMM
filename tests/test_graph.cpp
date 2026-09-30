@@ -12,6 +12,7 @@
 #include "dmmgraph.h"
 #include <QChartView>
 #include <QValueAxis>
+#include <QXYSeries>
 #include <QScrollBar>
 #include <QToolButton>
 #include "siprefix.h"
@@ -261,6 +262,28 @@ int main(int argc, char **argv)
 
     graph.setGraphSize(10, 10);
     graph.addValue(1.23);
+  }
+
+  // --- 5a. integration: the running sum of the readings above the threshold,
+  //          0 at or below it - the first sample, too (it used to be the
+  //          threshold itself, a spike at the left edge) ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(1);
+    graph.setGraphSize(100, 100);
+    graph.setIntegration(true, 1.0, 0.5, 0.0);
+    graph.setMode(DMMGraph::Manual);
+    graph.startSLOT();
+    for (double v : { 0.1, 0.2, 0.8, 0.9, 0.1, 0.6 })
+      graph.addValue(v);
+    const QList<QAbstractSeries *> series = graph.findChild<QChartView *>()->chart()->series();
+    auto *integral = series.size() > 2 ? qobject_cast<QXYSeries *>(series[2]) : nullptr;   // data line, data points, integration
+    QStringList got;
+    if (integral)
+      for (const QPointF &p : integral->points())
+        got << QString::number(p.y());
+    check(got.join(' ') == "0 0 0.8 1.7 0 0.6",
+          QString("integration: expected '0 0 0.8 1.7 0 0.6', got '%1'").arg(got.join(' ')));
   }
 
   // --- 5b. window size and sample time in either order: MainWid used to set
