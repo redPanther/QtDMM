@@ -76,6 +76,20 @@ then fill in the new entries (Qt Linguist or a text editor) and commit the
 files in the source tree, and two targets running it in parallel corrupted
 them.
 
+Alt letters (the `&` in a text) must not repeat within one menu or among the
+widgets shown together, or Alt+letter only moves the focus between them. The
+tests `mnemonics_<language>` start QtDMM offscreen with
+`--check-mnemonics` in every language, go through all menus, all settings
+pages and every kind of port on the meter page, and list each doubled letter
+together with the letters already taken there:
+
+```
+ctest --test-dir build -R mnemonics --output-on-failure
+```
+
+The language comes from `LANG`, so on Windows and macOS the tests check the
+system language only.
+
 The compiled `.qm` files are embedded in the binary. Distribution packages
 that want them as separate files (Fedora's `%find_lang --with-qt`) configure
 with `-DQTDMM_EMBED_TRANSLATIONS=OFF`: the `.qm` files are then installed to

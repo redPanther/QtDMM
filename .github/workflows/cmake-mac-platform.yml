@@ -63,7 +63,7 @@ jobs:
         test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' build/qtdmm.app/Contents/Info.plist)" = qtdmm.icns
 
     - name: Test
-      run: ctest --test-dir build --output-on-failure
+      run: ctest --test-dir build --output-on-failure --timeout 300
 
     - name: Build universal (release only)
       if: inputs.release

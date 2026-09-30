@@ -24,6 +24,8 @@
 #include <iostream>
 
 #include "mainwin.h"
+#include "mnemoniccheck.h"
+#include "settings.h"
 
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
@@ -125,14 +127,43 @@ int main(int argc, char **argv)
   parser.addOption({"debug", QObject::tr("protocol debugging information")});
   parser.addOption({"config-dir",QObject::tr("sets directory where config files are located"), "config-dir"});
   parser.addOption({"config-id",QObject::tr("sets <config-id>"), "config-id"});
+  // for the tests: list doubled Alt letters and keys, then quit
+  QCommandLineOption checkMnemonics("check-mnemonics");
+  checkMnemonics.setFlags(QCommandLineOption::HiddenFromHelp);
+  parser.addOption(checkMnemonics);
   parser.addHelpOption();
   parser.addVersionOption();
   parser.process(app);
+
+  if (parser.isSet(checkMnemonics))
+  {
+    // a config of its own: a missing one would greet with a dialog, and
+    // only Settings knows the file's name on each platform
+    Settings cfg(parser.value("config-id"), parser.value("config-dir"));
+    if (!cfg.fileExists())
+    {
+      cfg.setInt("QtDMM/version", 0);
+      cfg.setInt("QtDMM/revision", 84);
+      cfg.save();
+    }
+  }
 
   MainWin mainWin(parser);
 
   mainWin.show();
   mainWin.move(100, 100);
+
+  if (parser.isSet(checkMnemonics))
+  {
+    QTimer::singleShot(0, &mainWin, [&mainWin]
+    {
+      const QStringList conflicts = MnemonicCheck::run(&mainWin);
+      for (const QString &c : conflicts)
+        std::cout << qPrintable(c) << std::endl;
+      std::cout << conflicts.size() << " conflict(s), language " << qPrintable(QLocale::system().name()) << std::endl;
+      QCoreApplication::exit(conflicts.isEmpty() ? 0 : 1);
+    });
+  }
 
   return app.exec();
 }
