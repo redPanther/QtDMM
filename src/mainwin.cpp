@@ -706,15 +706,21 @@ bool MainWin::eventFilter(QObject *watched, QEvent *event)
       event->ignore();
       return true;
     }
-  if (event->type() == QEvent::Show || event->type() == QEvent::Hide)
+  // minimizing the main window hides its children spontaneously; they are
+  // not closed, so only explicit show/hide counts (isHidden() stays false)
+  if ((event->type() == QEvent::Show || event->type() == QEvent::Hide) && !event->spontaneous())
     for (QAction *a : { m_displayAction, m_meterAction, m_readingsAction, action_Graph })
       if (a && a->property("window").value<QObject *>() == watched)
       {
-        const bool visible = event->type() == QEvent::Show;
+        const bool visible = !static_cast<QWidget *>(watched)->isHidden();
         if (a->isChecked() != visible && !m_restoring)
         {
           QSignalBlocker block(a);
           a->setChecked(visible);
+          // the settings dialog keeps its own "Show display": update it, or
+          // the next OK there would bring the display back
+          if (a == m_displayAction)
+            setToolbarVisibilitySLOT();
         }
       }
   return QMainWindow::eventFilter(watched, event);
