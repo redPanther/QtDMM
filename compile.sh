@@ -78,7 +78,7 @@ fi
 if ${CTEST}
 then
 	echo
-	ctest --test-dir . --output-on-failure
+	ctest --test-dir . --output-on-failure --timeout 300
 	echo
 fi
 

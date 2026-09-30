@@ -25,6 +25,7 @@
 
 #include "mainwin.h"
 #include "mnemoniccheck.h"
+#include "settings.h"
 
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
@@ -133,6 +134,19 @@ int main(int argc, char **argv)
   parser.addHelpOption();
   parser.addVersionOption();
   parser.process(app);
+
+  if (parser.isSet(checkMnemonics))
+  {
+    // a config of its own: a missing one would greet with a dialog, and
+    // only Settings knows the file's name on each platform
+    Settings cfg(parser.value("config-id"), parser.value("config-dir"));
+    if (!cfg.fileExists())
+    {
+      cfg.setInt("QtDMM/version", 0);
+      cfg.setInt("QtDMM/revision", 84);
+      cfg.save();
+    }
+  }
 
   MainWin mainWin(parser);
 
