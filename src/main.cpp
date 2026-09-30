@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include "mainwin.h"
+#include "mnemoniccheck.h"
 
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
@@ -125,6 +126,10 @@ int main(int argc, char **argv)
   parser.addOption({"debug", QObject::tr("protocol debugging information")});
   parser.addOption({"config-dir",QObject::tr("sets directory where config files are located"), "config-dir"});
   parser.addOption({"config-id",QObject::tr("sets <config-id>"), "config-id"});
+  // for the tests: list doubled Alt letters and keys, then quit
+  QCommandLineOption checkMnemonics("check-mnemonics");
+  checkMnemonics.setFlags(QCommandLineOption::HiddenFromHelp);
+  parser.addOption(checkMnemonics);
   parser.addHelpOption();
   parser.addVersionOption();
   parser.process(app);
@@ -133,6 +138,18 @@ int main(int argc, char **argv)
 
   mainWin.show();
   mainWin.move(100, 100);
+
+  if (parser.isSet(checkMnemonics))
+  {
+    QTimer::singleShot(0, &mainWin, [&mainWin]
+    {
+      const QStringList conflicts = MnemonicCheck::run(&mainWin);
+      for (const QString &c : conflicts)
+        std::cout << qPrintable(c) << std::endl;
+      std::cout << conflicts.size() << " conflict(s), language " << qPrintable(QLocale::system().name()) << std::endl;
+      QCoreApplication::exit(conflicts.isEmpty() ? 0 : 1);
+    });
+  }
 
   return app.exec();
 }
