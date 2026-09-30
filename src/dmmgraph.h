@@ -171,6 +171,10 @@ public:
   /// The smallest step of the 1-2-5 series (..., 0.5, 1, 2, 5, 10, ...) that
   /// is at least @p v; the division of the scope variants. Public for the tests.
   static double    niceStep(double v);
+  /// The smallest time step (..., 1, 2, 5, 10, 15, 30 s, 1, 2, 5, 10, 15,
+  /// 30 min, 1, 2, 3, 6, 12 h, days) that is at least @p v seconds: the
+  /// x division. Public for the tests.
+  static double    timeStep(double v);
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
   /// Draws a vertical mark at the current sample (an alarm raised); marks
@@ -374,6 +378,15 @@ protected:
   QString          m_defaultLabelFormat; ///< Qt's, for the variants without divisions
   void             applyThemeColors();
   void             placeYTitle();
+  /// @name x labels in s, min or h
+  /// Qt's axis can only print the seconds; its own labels are kept for the
+  /// layout but drawn invisible, these are drawn over them at every tick.
+  /// @{
+  QList<QGraphicsSimpleTextItem *> m_xLabels;
+  double           m_xStep = 0;         ///< seconds between the x ticks
+  QColor           m_xLabelColor;
+  void             updateXLabels();
+  /// @}
   QGraphicsLineItem *m_crosshairVLine;
   QGraphicsLineItem *m_crosshairHLine;
   QGraphicsLineItem *m_triggerLine;

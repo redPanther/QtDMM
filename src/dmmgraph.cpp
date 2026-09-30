@@ -128,7 +128,12 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
   m_yTitle = new QGraphicsSimpleTextItem(m_chart);
   m_yTitle->setFont(m_xAxis->titleFont());
   m_yTitle->setBrush(m_xAxis->titleBrush());
-  connect(m_chart, &QChart::plotAreaChanged, this, [this](const QRectF &) { placeYTitle(); updateCentreTicks(); });
+  connect(m_chart, &QChart::plotAreaChanged, this, [this](const QRectF &)
+  {
+    placeYTitle();
+    updateCentreTicks();
+    updateXLabels();
+  });
   m_centreTicks = new QGraphicsPathItem(m_chart);
   m_centreTicks->setZValue(5);   // above the grid, below the curves' markers
   m_dataSeries->attachAxis(m_yAxis);
@@ -352,20 +357,90 @@ void DMMGraph::updateXAxisRange()
   int sv = qMax(0, scrollbar->value());
 
   double start = sv * step, end = (sv + qMax(1, m_size) - 1) * step;
+  double div = timeStep((end - start) / 6);   // about 5 ticks
   if (divisions() && end > start)
   {
-    // 10 divisions of a 1-2-5 step that cover the window, starting on a step
-    double div = niceStep((end - start) / 10);
+    // 10 divisions of a time step that cover the window, starting on a
+    // step: 600 s are 10 x 1 min
+    div = timeStep((end - start) / 10);
     double first = std::floor(start / div) * div;
     while (first + 10 * div < end - div * 1e-9)
     {
-      div = niceStep(div * 1.01);
+      div = timeStep(div * 1.01);
       first = std::floor(start / div) * div;
     }
     start = first;
     end = first + 10 * div;
   }
   m_xAxis->setRange(start, end);
+  // the ticks on whole steps, counted from the start of the recording
+  m_xStep = div;
+  m_xAxis->setTickType(QValueAxis::TicksDynamic);
+  m_xAxis->setTickAnchor(0);
+  m_xAxis->setTickInterval(div);
+  updateXLabels();
+}
+
+double DMMGraph::timeStep(double v)
+{
+  if (!(v > 0) || !std::isfinite(v))
+    return 1;
+  static const double steps[] = { 0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800,
+                                  3600, 7200, 10800, 21600, 43200, 86400 };
+  for (double s : steps)
+    if (s >= v * (1 - 1e-12))
+      return s;
+  return niceStep(v / 86400) * 86400;   // days in 1-2-5
+}
+
+// Seconds, minutes or hours, as the step reads best; the title says which.
+void DMMGraph::updateXLabels()
+{
+  if (!m_xAxis || m_xStep <= 0)
+    return;
+  double unit = 1;
+  QString title = tr("[sec]");
+  if (m_xStep >= 3600 && std::fmod(m_xStep, 3600) == 0)
+  {
+    unit = 3600;
+    title = tr("[h]");
+  }
+  else if (m_xStep >= 60 && std::fmod(m_xStep, 60) == 0)
+  {
+    unit = 60;
+    title = tr("[min]");
+  }
+  if (m_xAxis->titleText() != title)
+    m_xAxis->setTitleText(title);
+
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  QList<double> values;
+  if (max > min && plot.width() > 0)
+    for (double v = std::ceil(min / m_xStep - 1e-9) * m_xStep; v <= max + m_xStep * 1e-9 && values.size() < 200; v += m_xStep)
+      values << v;
+  while (m_xLabels.size() < values.size())
+  {
+    auto *item = new QGraphicsSimpleTextItem(m_chart);
+    item->setZValue(m_yTitle->zValue());
+    m_xLabels << item;
+  }
+  const QFont font = m_xAxis->labelsFont();
+  // Qt's labels start below the axis line and its tick marks
+  const double top = plot.bottom() + 6;
+  for (int i = 0; i < m_xLabels.size(); ++i)
+  {
+    QGraphicsSimpleTextItem *item = m_xLabels[i];
+    item->setVisible(i < values.size());
+    if (i >= values.size())
+      continue;
+    const double v = values[i] / unit;
+    item->setText(QString::number(std::abs(v) < 1e-9 ? 0.0 : v, 'g', 6));
+    item->setFont(font);
+    item->setBrush(m_xLabelColor.isValid() ? QBrush(m_xLabelColor) : m_xAxis->titleBrush());
+    const double x = plot.left() + (values[i] - min) / (max - min) * plot.width();
+    item->setPos(x - item->boundingRect().width() / 2, top);
+  }
 }
 
 double DMMGraph::niceStep(double v)
@@ -1522,11 +1597,14 @@ void DMMGraph::applyThemeColors()
     axis->setLinePen(line);
   }
   // 10 x 8 divisions for the scope-like variants, Qt's default otherwise;
-  // their round steps need no forced decimals
-  m_xAxis->setTickCount(divisions() ? 11 : 5);
+  // their round steps need no forced decimals. The x ticks are time steps
+  // (updateXAxisRange()), labelled by updateXLabels(): Qt's own x labels
+  // only keep the room for them.
   m_yAxis->setTickCount(divisions() ? 9 : 5);
-  m_xAxis->setLabelFormat(divisions() ? "%.4g" : m_defaultLabelFormat);
+  m_xAxis->setLabelFormat("%.4g");
   m_yAxis->setLabelFormat(divisions() ? "%.4g" : m_defaultLabelFormat);
+  m_xLabelColor = labels;
+  m_xAxis->setLabelsBrush(Qt::transparent);
   m_yTitle->setBrush(labels);
 
   // cursor and threshold lines: a colour chosen in the settings stays,

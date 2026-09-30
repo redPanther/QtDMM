@@ -12,6 +12,7 @@
 #include "dmmgraph.h"
 #include <QChartView>
 #include <QValueAxis>
+#include <QGraphicsSimpleTextItem>
 #include <QXYSeries>
 #include <QScrollBar>
 #include <QToolButton>
@@ -496,6 +497,46 @@ int main(int argc, char **argv)
     graph.setColorVariant(DMMGraph::Custom);   // the default, no override
     check(graph.colorVariant() == DMMGraph::Custom && graph.colorOverride() == -1, "default without override");
     check(yAxis->tickCount() == 5 && qFuzzyCompare(yAxis->max(), 11.7), "custom goes back to the plain scale");
+  }
+
+  // --- 7d. the time axis: whole time steps, labelled in s, min or h; the
+  //          scope-like variants make 600 s 10 x 1 min (not 10 x 100 s) ---
+  {
+    check(DMMGraph::timeStep(45) == 60 && DMMGraph::timeStep(61) == 120 && DMMGraph::timeStep(3) == 5
+          && DMMGraph::timeStep(12) == 15 && DMMGraph::timeStep(400) == 600 && DMMGraph::timeStep(2000) == 3600
+          && DMMGraph::timeStep(0.15) == 0.2 && DMMGraph::timeStep(100000) == 172800,
+          "timeStep: 1, 2, 5, 10, 15, 30 s, 1, 2, 5, 10, 15, 30 min, h, days");
+    Settings cfg("timeaxis", tmpDir.path());
+    DMMGraph graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setSampleTime(10);
+    graph.setGraphSize(600, 3600);
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    auto *x = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
+    auto labels = [&]
+    {
+      QStringList out;
+      for (QGraphicsItem *item : chart->childItems())
+        if (auto *t = dynamic_cast<QGraphicsSimpleTextItem *>(item); t && t->isVisible()
+            && t->pos().y() > chart->plotArea().bottom())
+          out << t->text();
+      return out;
+    };
+    check(x->tickType() == QValueAxis::TicksDynamic && x->tickInterval() == 120 && x->titleText() == "[min]",
+          QString("neutral 600 s: a tick every 2 min, got %1 s, '%2'").arg(x->tickInterval()).arg(x->titleText()));
+    check(labels().join(' ') == "0 2 4 6 8", "neutral 600 s: labels 0 2 4 6 8 min, got " + labels().join(' '));
+    graph.setColorVariant(DMMGraph::ScopeBlue);
+    check(x->tickInterval() == 60 && qFuzzyCompare(x->max() - x->min(), 600.0),
+          QString("scope 600 s: 10 x 1 min, got %1 x %2 s").arg((x->max() - x->min()) / x->tickInterval()).arg(x->tickInterval()));
+    check(labels().join(' ') == "0 1 2 3 4 5 6 7 8 9 10", "scope 600 s: labels 0..10 min, got " + labels().join(' '));
+    graph.setGraphSize(20, 3600);
+    check(x->tickInterval() == 2 && x->titleText() == "[sec]", QString("scope 20 s: 10 x 2 s, got %1").arg(x->tickInterval()));
+    graph.setGraphSize(7200, 36000);
+    check(x->tickInterval() == 900 && x->titleText() == "[min]", QString("scope 2 h: 10 x 15 min, got %1").arg(x->tickInterval()));
+    graph.setColorVariant(DMMGraph::Neutral);
+    check(x->tickInterval() == 1800 && x->titleText() == "[min]", QString("neutral 2 h: every 30 min, got %1").arg(x->tickInterval()));
   }
 
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
