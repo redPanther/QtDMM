@@ -100,6 +100,37 @@ int main(int argc, char **argv)
   check(std::isnan(MeterWid::fullScaleFromReading("", 4000)), "empty string is not a number");
   check(std::isnan(MeterWid::fullScaleFromReading("3.856", 0)), "no counts, no scale");
 
+  // --- 2b. scale step: 1-2-5, labels do not touch, 0 is a major tick ---
+  {
+    const double radius = 220.0;   // px from the pivot to the labels
+    for (bool bipolar : { false, true })
+      for (double fs : { 0.22, 2.2, 4.0, 6.0, 22.0, 40.0, 50.0, 60.0, 220.0, 400.0, 500.0, 600.0, 1000.0 })
+      {
+        // a label is about as wide as "-1000" in a 20 px bold font
+        const double labelWidth = 11.0 * QString::number(bipolar ? -fs : fs).size() + 10.0;
+        const double step = MeterWid::scaleStep(fs, bipolar, radius, labelWidth);
+        const double mag = std::pow(10.0, std::floor(std::log10(step) + 1e-9));
+        const long mant = std::lround(step / mag);
+        const QString what = QString("FS %1 %2: step %3").arg(fs).arg(bipolar ? "bipolar" : "unipolar").arg(step);
+        check(near(step, mant * mag, 1e-9 * mag) && (mant == 1 || mant == 2 || mant == 5), what + " is 1-2-5");
+        const double pxPerUnit = radius * (M_PI / 2.0) / (bipolar ? 2.0 * fs : fs);
+        check(step * pxPerUnit >= labelWidth - 1e-9, what + " leaves the labels apart");
+        check(step <= fs + 1e-9, what + " labels something besides 0");
+      }
+    // the review cases (R4-03): 22 V bipolar is labelled -20 ... 20 in steps
+    // of 5 or 10 (0 included), 500 bipolar no longer crowds eleven labels
+    const double s22 = MeterWid::scaleStep(22.0, true, radius, 40.0);
+    check(near(std::fmod(20.0, s22), 0.0), QString("22 V bipolar: step %1 divides 20").arg(s22));
+    check(MeterWid::scaleStep(500.0, true, radius, 55.0) >= 200.0 - 1e-9, "500 bipolar: step 200 or more");
+  }
+
+  // --- 2c. MIN/MAX readouts ---
+  check(MeterWid::readoutString(-0.004, 2) == "0.00", "a rounded zero has no minus sign (R4-04)");
+  check(MeterWid::readoutString(-0.004, 3) == "-0.004", "a small negative value keeps its sign");
+  check(MeterWid::readoutString(3.856, 3) == "3.856", "three decimals");
+  check(MeterWid::readoutString(-1.5, 1) == "-1.5", "negative value");
+  check(MeterWid::readoutString(std::nan(""), 2) == QStringLiteral("—"), "no value: a dash");
+
   // --- 3. ballistics: converges, bounded overshoot, timer stops ---
   {
     MeterWid w;
