@@ -159,6 +159,40 @@ int main(int argc, char **argv)
     }
   }
 
+  // --- 3c. All on a longer recording: from one minute on it asks for whole
+  //         minutes (the settings keep seconds only up to 99999; an odd
+  //         value above was cut and asked for again with every sample) ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(10);   // one sample per second
+    graph.setGraphSize(10, 3600);
+    QToolButton *all = nullptr;
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "All")
+        all = b;
+    check(all, "All on a long recording: button exists");
+    if (all)
+    {
+      all->click();
+      QList<int> requests;
+      // MainWid applies each request through the settings
+      QObject::connect(&graph, &DMMGraph::windowRequested, &graph, [&](int seconds)
+      {
+        requests << seconds;
+        graph.setGraphSize(seconds, 3600);
+      });
+      graph.startSLOT();
+      for (int i = 0; i < 3000; ++i)   // 300 s
+        graph.addValue(1.0);
+      bool minutes = !requests.isEmpty();
+      for (int seconds : requests)
+        minutes = minutes && (seconds <= 60 || seconds % 60 == 0);
+      check(minutes, QString("All on a long recording: whole minutes above 60 s (%1)").arg(
+              [&] { QStringList l; for (int r : requests) l << QString::number(r); return l.join(' '); }()));
+      check(requests.size() < 20, QString("All on a long recording: grows in steps, not per sample (%1 requests)").arg(requests.size()));
+    }
+  }
+
   // --- 4. regression test for the CSV-import sample-time bug (dmmgraph.cpp):
   //         m_sampleTime used to be computed by summing a growing offset on
   //         every row instead of once after the loop, inflating it with row

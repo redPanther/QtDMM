@@ -210,6 +210,10 @@ void DMMGraph::requestAll(bool grow)
   // growing by a quarter at a time: the window does not change with every sample
   int target = int(std::ceil(grow ? recorded * 1.25 : recorded));
   target = qMax(target, 10);
+  // whole minutes from one minute on: the settings keep seconds only up to
+  // 99999, an odd value above would be cut and asked for again with every sample
+  if (target > 60)
+    target = (target + 59) / 60 * 60;
   if (m_totalSeconds > 0)
     target = qMin(target, m_totalSeconds);
   if (target != m_windowSeconds)
