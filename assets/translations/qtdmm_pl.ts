@@ -1550,7 +1550,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="242"/>
         <source>D&amp;esign</source>
-        <translation>&amp;Wygląd</translation>
+        <translation>Wy&amp;gląd</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="244"/>
@@ -1605,7 +1605,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="487"/>
         <source>Cop&amp;y graph image</source>
-        <translation>Kopiuj wykres jako ob&amp;raz</translation>
+        <translation>Kopi&amp;uj wykres jako obraz</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="489"/>
@@ -1657,7 +1657,7 @@ Wybierz, która instancja ma rejestrować.</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="779"/>
         <source>&amp;Title bar</source>
-        <translation>&amp;Pasek tytułu</translation>
+        <translation>Pasek &amp;tytułu</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="784"/>
@@ -1687,7 +1687,7 @@ Wybierz, która instancja ma rejestrować.</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="794"/>
         <source>&amp;High contrast</source>
-        <translation>&amp;Wysoki kontrast</translation>
+        <translation>Wysoki k&amp;ontrast</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="795"/>
@@ -3857,7 +3857,7 @@ Maksymalna rozdzielczość to 1/10 sekundy, ale można też próbkować raz na t
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="437"/>
-        <source>&amp;About</source>
+        <source>A&amp;bout</source>
         <translation>&amp;O programie</translation>
     </message>
     <message>

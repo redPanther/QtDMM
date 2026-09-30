@@ -1510,7 +1510,7 @@ DMM connected and switched on?</source>
     <message>
         <location filename="../../src/mainwin.cpp" line="205"/>
         <source>&amp;Arrange</source>
-        <translation>&amp;Organizar</translation>
+        <translation>Organi&amp;zar</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="213"/>
@@ -1550,7 +1550,7 @@ DMM connected and switched on?</source>
     <message>
         <location filename="../../src/mainwin.cpp" line="242"/>
         <source>D&amp;esign</source>
-        <translation>D&amp;iseño</translation>
+        <translation>Dise&amp;ño</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="244"/>
@@ -1687,7 +1687,7 @@ Elija qué instancia debe grabar.</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="794"/>
         <source>&amp;High contrast</source>
-        <translation>Alto &amp;contraste</translation>
+        <translation>Alto con&amp;traste</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="795"/>
@@ -3029,7 +3029,7 @@ Puede introducir los valores con un sufijo como m, u, n, p, k, M, G, T&lt;br&gt;
     <message>
         <location filename="../../src/ui/uigraphprefs.ui" line="227"/>
         <source>&amp;Grid</source>
-        <translation>&amp;Cuadrícula</translation>
+        <translation>C&amp;uadrícula</translation>
     </message>
     <message>
         <location filename="../../src/ui/uigraphprefs.ui" line="271"/>
@@ -3855,7 +3855,7 @@ La resolución máxima es de una décima de segundo, pero también puede muestre
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="437"/>
-        <source>&amp;About</source>
+        <source>A&amp;bout</source>
         <translation>Acerca d&amp;e</translation>
     </message>
     <message>

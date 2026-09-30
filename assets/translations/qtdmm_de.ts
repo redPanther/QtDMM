@@ -1510,7 +1510,7 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="205"/>
         <source>&amp;Arrange</source>
-        <translation>&amp;Anordnen</translation>
+        <translation>Anord&amp;nen</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="213"/>
@@ -1585,7 +1585,7 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="478"/>
         <source>Zoom &amp;in</source>
-        <translation>V&amp;ergrößern</translation>
+        <translation>Ve&amp;rgrößern</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="481"/>
@@ -1683,7 +1683,7 @@ Please choose which instance should record.</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="794"/>
         <source>&amp;High contrast</source>
-        <translation>&amp;Hoher Kontrast</translation>
+        <translation>Hoher Ko&amp;ntrast</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="795"/>
@@ -3706,6 +3706,11 @@ Die maximale Auflösung für die Datensammlung liegt bei 1/10 Sekunde, bei Bedar
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Handbuch&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Das QtDMM-Handbuch öffnen: Multimeter anschließen, der Rekorder, Fehlersuche und die Liste der unterstützten Geräte.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../../src/ui/uimainwin.ui" line="437"/>
+        <source>A&amp;bout</source>
+        <translation>&amp;Über</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/uimainwin.ui" line="457"/>
         <source>Ctrl+M</source>
         <translation>Ctrl+M</translation>
@@ -3859,11 +3864,6 @@ Die maximale Auflösung für die Datensammlung liegt bei 1/10 Sekunde, bei Bedar
         <location filename="../../src/ui/uimainwin.ui" line="397"/>
         <source>Direct Hel&amp;p</source>
         <translation>&amp;Direkte Hilfe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/uimainwin.ui" line="437"/>
-        <source>&amp;About</source>
-        <translation>&amp;Über</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="440"/>

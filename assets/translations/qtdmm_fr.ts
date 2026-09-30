@@ -1410,7 +1410,7 @@ Le multimètre est-il branché et allumé ?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="139"/>
         <source>&amp;Display</source>
-        <translation>&amp;Afficheur</translation>
+        <translation>A&amp;fficheur</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="117"/>
@@ -1510,7 +1510,7 @@ Le multimètre est-il branché et allumé ?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="205"/>
         <source>&amp;Arrange</source>
-        <translation>&amp;Disposer</translation>
+        <translation>Dispo&amp;ser</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="213"/>
@@ -1687,7 +1687,7 @@ Choisissez quelle instance doit enregistrer.</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="794"/>
         <source>&amp;High contrast</source>
-        <translation>&amp;Contraste élevé</translation>
+        <translation>Contraste é&amp;levé</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="795"/>
@@ -3855,7 +3855,7 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="437"/>
-        <source>&amp;About</source>
+        <source>A&amp;bout</source>
         <translation>&amp;À propos</translation>
     </message>
     <message>

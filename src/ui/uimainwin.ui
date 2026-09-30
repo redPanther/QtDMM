@@ -434,7 +434,7 @@
     <iconset theme="help-about"/>
    </property>
    <property name="text">
-    <string>&amp;About</string>
+    <string>A&amp;bout</string>
    </property>
    <property name="whatsThis">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copyright information&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show copyright information and some blurb about QtDMM. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
