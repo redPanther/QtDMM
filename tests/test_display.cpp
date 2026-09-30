@@ -63,6 +63,50 @@ int main(int argc, char **argv)
   check(SiPrefix::displayText("cosphi") == QStringLiteral("cosφ"), "cosphi -> cosφ");
   check(SiPrefix::displayText("mV") == "mV" && SiPrefix::displayText("Hz") == "Hz", "other units unchanged");
 
+  // --- 1c. leading zeros go, as on the meter (table, analog meter) ---
+  check(SiPrefix::withoutLeadingZeros("000.00") == "0.00", "000.00 -> 0.00");
+  check(SiPrefix::withoutLeadingZeros("-029.30") == "-29.30", "-029.30 -> -29.30");
+  check(SiPrefix::withoutLeadingZeros(" 00012 ") == "12" && SiPrefix::withoutLeadingZeros("0") == "0", "integers");
+  check(SiPrefix::withoutLeadingZeros("OL") == "OL" && SiPrefix::withoutLeadingZeros("0.L") == "0.L", "text stays");
+
+  // --- 1d. the LCD: leading zeros dark, the minus always in the sign cell
+  //         ("-029.30" shows "-  29.30" like the UT61E, not "- 029.30"
+  //         nor " -29.30"): the same picture as the value without them ---
+  {
+    DisplayWid a, b;
+    for (DisplayWid *d : { &a, &b })
+    {
+      d->setDisplayMode(22000, true, true, 1);
+      d->setUnit(0, "mV");
+    }
+    a.setValue(0, "000.00");
+    b.setValue(0, "0.00");
+    check(render(a, QSize(520, 200)) == render(b, QSize(520, 200)), "LCD: 000.00 looks like 0.00");
+    a.setValue(0, "-029.30");
+    b.setValue(0, "-29.30");
+    const QImage zeros = render(a, QSize(520, 200));
+    check(zeros == render(b, QSize(520, 200)), "LCD: -029.30 looks like -29.30");
+    // the minus in the same place for 2 and 3 digits: the pixels "-" adds
+    // to "29.30" and to "129.30" are the same
+    auto minusPixels = [&](const QString &digits)
+    {
+      b.setValue(0, digits);
+      const QImage plain = render(b, QSize(520, 200));
+      b.setValue(0, "-" + digits);
+      const QImage minus = render(b, QSize(520, 200));
+      QRect box;
+      for (int y = 0; y < plain.height(); ++y)
+        for (int x = 0; x < plain.width(); ++x)
+          if (plain.pixel(x, y) != minus.pixel(x, y))
+            box |= QRect(x, y, 1, 1);
+      return box;
+    };
+    const QRect two = minusPixels("29.30"), three = minusPixels("129.30");
+    check(!two.isEmpty() && two == three,
+          QString("LCD: the minus in the sign cell for 29.30 (%1,%2) and 129.30 (%3,%4)")
+            .arg(two.x()).arg(two.width()).arg(three.x()).arg(three.width()));
+  }
+
   // --- 2. render: a value paints more dark pixels than an empty display ---
   const QString dump = qEnvironmentVariable("TEST_DISPLAY_DUMP");
   const QSize size(520, 200);

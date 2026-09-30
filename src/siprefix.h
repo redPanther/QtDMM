@@ -35,4 +35,9 @@ namespace SiPrefix
   /// A unit as the displays show it: "kOhm" -> "kΩ", "dF" -> "°F",
   /// "C" -> "°C", "cosphi" -> "cosφ"; others unchanged.
   QString displayText(const QString &unit);
+
+  /// A meter's fixed-width reading without its leading zeros, as a meter
+  /// shows it: "000.00" -> "0.00", "-029.30" -> "-29.30", "00012" -> "12".
+  /// One zero before the decimal point stays; text like "OL" is unchanged.
+  QString withoutLeadingZeros(const QString &text);
 }
