@@ -271,6 +271,10 @@ protected:
   /// @{
   QWidget         *m_timeBar = nullptr;
   QList<QToolButton *> m_timeButtons;   ///< property "seconds": 0 = All
+  /// Time and value under the crosshair, fixed top left above the plot (a
+  /// tooltip window trailed behind the mouse).
+  QLabel          *m_cursorLabel = nullptr;
+  void             hideCrosshair();
   bool             m_followAll = false;   ///< "All": the window grows with the recording
   void             timeButtonClicked(int seconds);
   /// "All": asks for a window that holds the recording so far (plus room

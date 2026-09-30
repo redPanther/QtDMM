@@ -24,7 +24,6 @@
 #include <QtWidgets>
 #include <QPen>
 #include <QRegularExpression>
-#include <QToolTip>
 #include <cmath>
 #include <QSvgGenerator>
 #include <QPdfWriter>
@@ -192,6 +191,10 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
     m_timeButtons.append(b);
   }
   updateTimeButtons();
+
+  m_cursorLabel = new QLabel(m_chartView);
+  m_cursorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);   // no Leave for the view
+  m_cursorLabel->hide();
 }
 
 void DMMGraph::timeButtonClicked(int seconds)
@@ -239,6 +242,14 @@ void DMMGraph::placeTimeBar()
   m_timeBar->adjustSize();
   m_timeBar->move(m_chartView->width() - m_timeBar->width() - 6, 3);
   m_timeBar->raise();
+}
+
+void DMMGraph::hideCrosshair()
+{
+  m_crosshairVLine->setVisible(false);
+  m_crosshairHLine->setVisible(false);
+  if (m_cursorLabel)
+    m_cursorLabel->hide();
 }
 
 DMMGraph::~DMMGraph()
@@ -310,8 +321,7 @@ void DMMGraph::resizeEvent(QResizeEvent *)
 
   // Simpler than tracking/restoring hover state across a resize: just hide it,
   // the next mouse move will reposition it correctly.
-  m_crosshairVLine->setVisible(false);
-  m_crosshairHLine->setVisible(false);
+  hideCrosshair();
 
   updateThresholdLinePositions();
 }
@@ -851,9 +861,7 @@ bool DMMGraph::eventFilter(QObject *watched, QEvent *event)
         handleChartWheel(static_cast<QWheelEvent *>(event));
         return true;
       case QEvent::Leave:
-        m_crosshairVLine->setVisible(false);
-        m_crosshairHLine->setVisible(false);
-        QToolTip::hideText();
+        hideCrosshair();
         break;
       default:
         break;
@@ -1039,9 +1047,7 @@ void DMMGraph::handleChartMouseMove(QMouseEvent *ev)
 
     if (m_cursorMode != NoCursor || !m_crosshair)
     {
-      m_crosshairVLine->setVisible(false);
-      m_crosshairHLine->setVisible(false);
-      QToolTip::hideText();
+      hideCrosshair();
       return;
     }
 
@@ -1063,13 +1069,18 @@ void DMMGraph::handleChartMouseMove(QMouseEvent *ev)
       m_crosshairHLine->setLine(plot.left(), scenePoint.y(), plot.right(), scenePoint.y());
       m_crosshairHLine->setVisible(true);
       QString unit;
-      text += "\n" + QString("%1 %2").arg(formatEngineeringValue(val, &unit)).arg(unit);
+      text += "   " + QString("%1 %2").arg(formatEngineeringValue(val, &unit)).arg(unit);
     }
     else
       m_crosshairHLine->setVisible(false);
 
-    QPoint globalPos = m_chartView->viewport()->mapToGlobal(pos) + QPoint(4, 4);
-    QToolTip::showText(globalPos, text, m_chartView);
+    // fixed above the plot, left-aligned so only its end moves with the text
+    m_cursorLabel->setText(text);
+    m_cursorLabel->adjustSize();
+    const QPoint topLeft = m_chartView->mapFromScene(plot.topLeft());
+    m_cursorLabel->move(topLeft.x() + 4, 3);
+    m_cursorLabel->show();
+    m_cursorLabel->raise();
   }
 }
 
@@ -1497,6 +1508,8 @@ void DMMGraph::applyThemeColors()
                                      " QToolButton:checked { border-color: %1; }"
                                      " QToolButton:hover { border-color: %2; }")
                                .arg(labels.name(), QColor(labels.red(), labels.green(), labels.blue(), 110).name(QColor::HexArgb)));
+  if (m_cursorLabel)
+    m_cursorLabel->setStyleSheet(QString("QLabel { color: %1; background: transparent; }").arg(labels.name()));
   m_chart->setPlotAreaBackgroundBrush(plot);
   m_chart->setPlotAreaBackgroundVisible(plot.style() != Qt::NoBrush);
   for (QValueAxis *axis : { m_xAxis, m_yAxis })
