@@ -72,8 +72,8 @@ macOS:
   start - see docs/user/troubleshooting.md ("macOS").
 - Building: brew install cmake qt@6, then ./compile.sh (it finds Qt through
   brew --prefix qt@6) or ./compile.sh run; hidapi is fetched and built by
-  CMake, as on Windows. The result is build/qtdmm.app (arm64 with Homebrew's
-  Qt). The release .dmg is built with the official Qt instead - see
+  CMake, as on Windows. The result is build/qtdmm.app, for the Mac's own
+  architecture. The release .dmg is built with the official Qt instead - see
   .github/workflows/cmake-mac-platform.yml.
 
 Windows:

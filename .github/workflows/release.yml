@@ -25,8 +25,11 @@ jobs:
     with:
       release: true
 
+  # Linux and Windows are required; a failed macOS job leaves the release
+  # without the .dmg instead of without any files
   draft:
     needs: [ linux, windows, macos ]
+    if: ${{ !cancelled() && needs.linux.result == 'success' && needs.windows.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v4
@@ -40,7 +43,11 @@ jobs:
         TAG: ${{ github.ref_name }}
       run: |
         mv dist/QtDMM.AppImage "dist/QtDMM-${TAG}-x86_64.AppImage"
-        mv dist/QtDMM-macos-universal.dmg "dist/QtDMM-${TAG}-macos.dmg"
+        if [ -f dist/QtDMM-macos-universal.dmg ]; then
+          mv dist/QtDMM-macos-universal.dmg "dist/QtDMM-${TAG}-macos.dmg"
+        else
+          echo "::warning::no macOS .dmg (the macos job failed); the release goes out without it"
+        fi
         ls -l dist
         if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
           gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
