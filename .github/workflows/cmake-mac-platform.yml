@@ -77,9 +77,12 @@ jobs:
         cp -R "$BUILD_DIR/qtdmm.app" stage/QtDMM.app
         macdeployqt stage/QtDMM.app -always-overwrite
         # every library the bundle uses is inside it or part of macOS
-        find stage/QtDMM.app -type f -print0 | xargs -0 file | grep Mach-O | cut -d: -f1 > machos.txt
+        # file prints an extra "(for architecture ...)" line per slice of a
+        # universal binary; keep one line per file
+        find stage/QtDMM.app -type f -print0 | xargs -0 file | grep Mach-O | grep -v '(for architecture' \
+          | cut -d: -f1 | sort -u > machos.txt
         wc -l < machos.txt
-        if xargs otool -L < machos.txt | grep -E '^\s+/' | grep -v -E '^\s+/(System/Library|usr/lib)/'; then
+        if tr '\n' '\0' < machos.txt | xargs -0 otool -L | grep -E '^\s+/' | grep -v -E '^\s+/(System/Library|usr/lib)/'; then
           echo "::error::the bundle links against libraries outside the bundle"; exit 1
         fi
         lipo -archs stage/QtDMM.app/Contents/MacOS/qtdmm
