@@ -61,7 +61,7 @@ HID class driver and work without any driver installation. Debug output
 
 ## macOS
 
-The `.dmg` from the release page runs on macOS 12 or newer, on Apple Silicon
+The `.dmg` from the release page runs on macOS 13 or newer, on Apple Silicon
 and Intel Macs. Open it and drag **QtDMM** onto **Applications**. The app is not
 signed with an Apple developer certificate, so the first start is blocked
 with "QtDMM cannot be opened" or "Apple could not verify QtDMM". Allow it once:

@@ -67,7 +67,7 @@ FreeBSD:
 
 macOS:
 ------
-- Ready-made: the release page has a .dmg (macOS 12 or newer, Apple Silicon
+- Ready-made: the release page has a .dmg (macOS 13 or newer, Apple Silicon
   and Intel). It is signed ad hoc only, so macOS asks once before the first
   start - see docs/user/troubleshooting.md ("macOS").
 - Building: brew install cmake qt@6, then ./compile.sh (it finds Qt through
