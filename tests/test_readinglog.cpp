@@ -110,6 +110,13 @@ int main(int argc, char **argv)
   log.append(entry(9.0, "9.000", "V", 5));
   check(log.rowCount() == 2, "resumed log takes readings again");
 
+  // --- 3c. the meter's fixed-width text without leading zeros, as the
+  //          meter shows it (table, copy and export) ---
+  log.append(entry(0.0, "000.00", "mV", 6));
+  log.append(entry(-0.0293, "-029.30", "mV", 7));
+  check(log.data(log.index(2, ReadingLog::Value)).toString() == "0.00", "000.00 -> 0.00");
+  check(log.data(log.index(3, ReadingLog::Value)).toString() == "-29.30", "-029.30 -> -29.30");
+
   // --- 4. clipboard text ---
   log.clear();
   check(log.rowCount() == 0 && resets == 1, "clear resets");

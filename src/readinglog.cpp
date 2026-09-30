@@ -67,7 +67,7 @@ QVariant ReadingLog::data(const QModelIndex &index, int role) const
   switch (index.column())
   {
     case Time:  return m_singleDay ? e.when.toString("HH:mm:ss.zzz") : formatTime(e.when);
-    case Value: return e.val.trimmed();
+    case Value: return SiPrefix::withoutLeadingZeros(e.val);   // "000.00" -> "0.00", as the meter shows it
     case Unit:  return e.unit;
     case Mode:  return e.id > 0 ? tr("2nd") + (e.special.isEmpty() ? QString() : " " + modeText(e.special)) : modeText(e.special);
     case Range: return e.range;
@@ -228,7 +228,7 @@ bool ReadingLog::write(const QString &path, QString *error) const
   ts << "timestamp;value;unit;mode;range;hold\n";
   for (const Entry &e : m_entries)
     ts << QString("%1;%2;%3;%4;%5;%6\n")
-            .arg(e.when.toString("yyyy-MM-ddTHH:mm:ss,zzz"), e.val.trimmed(), e.unit,
+            .arg(e.when.toString("yyyy-MM-ddTHH:mm:ss,zzz"), SiPrefix::withoutLeadingZeros(e.val), e.unit,
                  e.id > 0 ? "2nd " + modeText(e.special) : modeText(e.special), e.range, e.hold ? "1" : "0");
   return true;
 }
@@ -248,7 +248,7 @@ bool ReadingLog::writeAny(const QString &path, QString *error) const
   sheet.setHeader({tr("Time"), tr("Value"), tr("Unit"), tr("Mode"), tr("Range"), tr("Hold"), tr("Alarm")});
   for (const Entry &e : m_entries)
   {
-    const QString val = e.val.trimmed();
+    const QString val = SiPrefix::withoutLeadingZeros(e.val);
     bool numeric = false;
     const double number = val.toDouble(&numeric);
     sheet.addRow({e.when, numeric ? QVariant(number) : QVariant(val), e.unit,

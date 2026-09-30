@@ -1,6 +1,7 @@
 #include "siprefix.h"
 
 #include <cmath>
+#include <QRegularExpression>
 
 namespace
 {
@@ -79,6 +80,12 @@ double scale(double value, QString *prefixOut)
 QString format(double value, QString *prefixOut)
 {
   return QString::number(scale(value, prefixOut), 'g', 12);
+}
+
+QString withoutLeadingZeros(const QString &text)
+{
+  static const QRegularExpression leadingZeros("^([-+]?)0+(?=\\d)");
+  return text.trimmed().remove(' ').replace(leadingZeros, "\\1");
 }
 
 QString displayText(const QString &unit)
