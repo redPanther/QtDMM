@@ -1,5 +1,7 @@
 %bcond test 1
 %global	toolchain gcc
+# application id: desktop file, icons and AppStream component
+%global	appid io.github.qtdmm.qtdmm
 
 Name:		qtdmm
 Version:	26.1
@@ -32,7 +34,7 @@ Bluetooth LE and the network.
 %find_lang %{name} --with-qt
 
 %check
-desktop-file-validate %{buildroot}%{_datadir}/applications/%{name}.desktop
+desktop-file-validate %{buildroot}%{_datadir}/applications/%{appid}.desktop
 appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/*.metainfo.xml
 QT_QPA_PLATFORM=offscreen %ctest
 
@@ -40,9 +42,9 @@ QT_QPA_PLATFORM=offscreen %ctest
 %license LICENSE
 %doc AUTHORS README.md CHANGELOG
 %{_bindir}/%{name}
-%{_datadir}/applications/%{name}.desktop
-%{_datadir}/icons/hicolor/*/apps/%{name}.png
-%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
+%{_datadir}/applications/%{appid}.desktop
+%{_datadir}/icons/hicolor/*/apps/%{appid}.png
+%{_datadir}/icons/hicolor/scalable/apps/%{appid}.svg
 %{_mandir}/man1/%{name}.1*
 %{_metainfodir}/*.xml
 %dir %{_datadir}/%{name}
