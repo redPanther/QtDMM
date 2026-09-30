@@ -50,25 +50,35 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    </releases>
    ```
 
-3. Merge that as a normal PR, then tag the merge commit on `master` and push
-   the tag:
+   In `qtdmm.spec`, a release candidate has `Release: %autorelease -p -e rcN`;
+   the final release drops `-p -e rcN`.
+3. Merge that as a normal PR.
+4. Before tagging, try the macOS release path once: *Actions → macOS test
+   build → Run workflow* on `master` with **release** ticked. It builds the
+   universal `.dmg` exactly as the tag will; a failure shows up here instead
+   of in the release.
+5. Tag the merge commit on `master` and push the tag:
 
    ```bash
    git tag -a 26.1-rc1 -m "QtDMM 26.1-rc1"
    git push upstream 26.1-rc1
    ```
 
-4. The **Release** workflow (`.github/workflows/release.yml`) builds the
-   Linux AppImage and the Windows installer and ZIP. It then creates a
-   **draft** release with them, marked as a pre-release when the tag has a
-   suffix.
+6. The **Release** workflow (`.github/workflows/release.yml`) builds the
+   Linux AppImage, the Windows installer and ZIP and the universal macOS
+   `.dmg`. It then creates a **draft** release with them, marked as a
+   pre-release when the tag has a suffix. If only the macOS job fails, the
+   draft is still made, without the `.dmg`.
    If the release was made on GitHub's release page instead (which creates
    the tag), the workflow adds the files to it and leaves it as it is. Its
-   builds take about 20 minutes, and until then the release has no binaries.
+   builds take about half an hour (the universal macOS build is the slowest),
+   and until then the release has no binaries.
    Mark a release candidate as a pre-release there by hand.
-5. Check the draft on GitHub: download and start the builds, then write the
-   notes (from CHANGELOG). Publish it.
-6. Tell the website: the download page links the new release.
+7. Check the draft on GitHub: download and start the builds, then write the
+   notes (from CHANGELOG). Publish it. The macOS `.dmg` is only checked by
+   CI (bundle contents, architectures, signature, minimum macOS, a start
+   with `--version`); test it on a Mac when one is available.
+8. Tell the website: the download page links the new release.
 
 A bugfix release `26.1.1` is tagged the same way, on a branch `26.1` created
 from the `26.1` tag when `master` has moved on.

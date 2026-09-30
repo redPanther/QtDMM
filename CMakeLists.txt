@@ -175,10 +175,8 @@ if(APPLE)
 	set(MACOSX_BUNDLE_BUNDLE_NAME "${APP_NAME}")
 	set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
 	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
-	# Homebrew's Qt is arm64 only; the release build passes "arm64;x86_64"
-	if(NOT CMAKE_OSX_ARCHITECTURES)
-		set(CMAKE_OSX_ARCHITECTURES "arm64")
-	endif()
+	# no CMAKE_OSX_ARCHITECTURES default: a local build is for the Mac's own
+	# architecture (Homebrew's Qt has only that one); the CI passes it
 endif()
 
 ## the sources are UTF-8 (unit strings such as "µ" and "Ω"); MSVC would
