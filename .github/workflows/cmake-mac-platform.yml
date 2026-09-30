@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "master" ]
   workflow_call:   # from release.yml for a version tag
+    inputs:
+      release:
+        description: "also build the universal (arm64 + x86_64) .dmg for the release"
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -20,6 +25,9 @@ jobs:
     # prefixes, which macdeployqt cannot resolve, and its bottles only run on
     # the runner's macOS. This Qt is universal (arm64 + x86_64) and runs on
     # macOS 12 and later; hidapi is built from source by CMake, as on Windows.
+    # Pushes and PRs build, test and package arm64 only (the runner's
+    # architecture); the universal build doubles every compile, the tests
+    # included, so only a release makes it, without tests.
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -30,7 +38,7 @@ jobs:
     - name: Configure
       run: >
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DQTDMM_WERROR=ON
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DCMAKE_OSX_ARCHITECTURES=arm64
 
     - name: Build
       run: cmake --build build --parallel
@@ -44,14 +52,24 @@ jobs:
     - name: Test
       run: ctest --test-dir build --output-on-failure
 
+    - name: Build universal (release only)
+      if: inputs.release
+      run: |
+        cmake -S . -B build-universal -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DQTDMM_WERROR=OFF \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+        cmake --build build-universal --parallel
+
     # The .dmg: Qt and hidapi copied into the bundle (macdeployqt), signed
     # ad hoc (Apple Silicon refuses to start unsigned code), no Developer ID
     # and no notarisation - Gatekeeper asks once, see docs/user/troubleshooting.md
     - name: Package
       working-directory: ${{github.workspace}}/
+      env:
+        BUILD_DIR: ${{ inputs.release && 'build-universal' || 'build' }}
+        DMG: ${{ inputs.release && 'QtDMM-macos-universal.dmg' || 'QtDMM-macos-arm64.dmg' }}
       run: |
         rm -rf stage packages && mkdir -p stage packages
-        cp -R build/qtdmm.app stage/QtDMM.app
+        cp -R "$BUILD_DIR/qtdmm.app" stage/QtDMM.app
         macdeployqt stage/QtDMM.app -always-overwrite
         # every library the bundle uses is inside it or part of macOS
         find stage/QtDMM.app -type f -print0 | xargs -0 file | grep Mach-O | cut -d: -f1 > machos.txt
@@ -64,7 +82,7 @@ jobs:
         codesign --verify --deep --strict stage/QtDMM.app
         otool -l stage/QtDMM.app/Contents/MacOS/qtdmm | grep -A3 LC_BUILD_VERSION | grep minos
         ln -s /Applications stage/Applications
-        hdiutil create -volname QtDMM -srcfolder stage -ov -format UDZO packages/QtDMM-macos.dmg
+        hdiutil create -volname QtDMM -srcfolder stage -ov -format UDZO "packages/$DMG"
 
     - name: Upload package
       uses: actions/upload-artifact@v4

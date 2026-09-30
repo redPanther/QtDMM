@@ -22,6 +22,8 @@ jobs:
 
   macos:
     uses: ./.github/workflows/cmake-mac-platform.yml
+    with:
+      release: true
 
   draft:
     needs: [ linux, windows, macos ]
@@ -38,7 +40,7 @@ jobs:
         TAG: ${{ github.ref_name }}
       run: |
         mv dist/QtDMM.AppImage "dist/QtDMM-${TAG}-x86_64.AppImage"
-        mv dist/QtDMM-macos.dmg "dist/QtDMM-${TAG}-macos.dmg"
+        mv dist/QtDMM-macos-universal.dmg "dist/QtDMM-${TAG}-macos.dmg"
         ls -l dist
         if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
           gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
