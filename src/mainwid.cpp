@@ -191,7 +191,9 @@ void MainWid::setMeter(MeterWid *meter)
 
 void MainWid::setReadingLog(ReadingLog *log)
 {
-  connect(m_ctl, &MeterController::reading, log, &ReadingLog::appendReading);
+  // the table shows the recorder's readings series: the controller feeds it
+  // whether or not a table exists
+  log->setStore(m_ctl->recorder());
   connect(m_ctl, &MeterController::markRequested, log, [log](const QColor &color, const QString &name, bool, bool table)
   {
     if (table)

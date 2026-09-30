@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "readinglog.h"
 #include "reading.h"
+#include "recordingstore.h"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -11,13 +12,80 @@
 #include "siprefix.h"
 #include "spreadsheet.h"
 
-ReadingLog::ReadingLog(QObject *parent) : QAbstractTableModel(parent)
+ReadingLog::ReadingLog(QObject *parent) : QAbstractTableModel(parent), m_store(new RecordingStore(this))
 {
+  connectStore();
+}
+
+// The store's signals come in pairs around each change, as the model wants them.
+void ReadingLog::connectStore()
+{
+  connect(m_store, &RecordingStore::readingsAboutToInsert, this,
+          [this](int first, int last) { beginInsertRows(QModelIndex(), first, last); });
+  connect(m_store, &RecordingStore::readingsInserted, this, [this] { endInsertRows(); updateSingleDay(); });
+  connect(m_store, &RecordingStore::readingsAboutToRemove, this,
+          [this](int first, int last) { beginRemoveRows(QModelIndex(), first, last); });
+  connect(m_store, &RecordingStore::readingsRemoved, this, [this] { endRemoveRows(); updateSingleDay(); });
+  connect(m_store, &RecordingStore::readingsAboutToClear, this, [this] { beginResetModel(); });
+  connect(m_store, &RecordingStore::readingsCleared, this, [this]
+  {
+    m_singleDay = true;
+    endResetModel();
+  });
+  connect(m_store, &RecordingStore::readingMarked, this, [this](int row)
+  {
+    Q_EMIT dataChanged(index(row, 0), index(row, ColumnCount - 1), {Qt::BackgroundRole, Qt::ToolTipRole});
+  });
+}
+
+void ReadingLog::setStore(RecordingStore *store)
+{
+  if (!store || store == m_store)
+    return;
+  beginResetModel();
+  m_store->disconnect(this);
+  m_store = store;
+  connectStore();
+  m_singleDay = allOneDay();
+  endResetModel();
+}
+
+bool ReadingLog::isPaused() const
+{
+  return m_store->readingsPaused();
+}
+
+void ReadingLog::setPaused(bool paused)
+{
+  m_store->setReadingsPaused(paused);
+}
+
+int ReadingLog::maxRows() const
+{
+  return m_store->readingCapacity();
+}
+
+ReadingLog::Entry ReadingLog::entry(int row) const
+{
+  const LoggedReading &r = m_store->readingAt(row);
+  Entry e;
+  e.when = QDateTime::fromMSecsSinceEpoch(r.when);
+  e.dval = r.value;
+  e.val = r.text;
+  e.unit = r.unit;
+  e.special = r.special;
+  e.range = r.range;
+  e.hold = r.hold();
+  e.id = r.id;
+  if (r.alarmArgb)
+    e.alarmColor = QColor::fromRgba(r.alarmArgb);
+  e.alarmName = r.alarmName;
+  return e;
 }
 
 int ReadingLog::rowCount(const QModelIndex &parent) const
 {
-  return parent.isValid() ? 0 : m_entries.size();
+  return parent.isValid() ? 0 : m_store->readingCount();
 }
 
 int ReadingLog::columnCount(const QModelIndex &parent) const
@@ -45,15 +113,15 @@ QString ReadingLog::modeText(const QString &special)
 
 QVariant ReadingLog::data(const QModelIndex &index, int role) const
 {
-  if (!index.isValid() || index.row() >= m_entries.size())
+  if (!index.isValid() || index.row() >= m_store->readingCount())
     return QVariant();
-  const Entry &e = m_entries[index.row()];
+  const LoggedReading &e = m_store->readingAt(index.row());
 
   if (role == DvalRole)
-    return e.dval;
-  if (role == Qt::BackgroundRole && e.alarmColor.isValid())
+    return e.value;
+  if (role == Qt::BackgroundRole && e.alarmArgb)
   {
-    QColor c = e.alarmColor;
+    QColor c = QColor::fromRgba(e.alarmArgb);
     c.setAlpha(70);
     return c;
   }
@@ -66,12 +134,16 @@ QVariant ReadingLog::data(const QModelIndex &index, int role) const
 
   switch (index.column())
   {
-    case Time:  return m_singleDay ? e.when.toString("HH:mm:ss.zzz") : formatTime(e.when);
-    case Value: return SiPrefix::withoutLeadingZeros(e.val);   // "000.00" -> "0.00", as the meter shows it
+    case Time:
+    {
+      const QDateTime when = QDateTime::fromMSecsSinceEpoch(e.when);
+      return m_singleDay ? when.toString("HH:mm:ss.zzz") : formatTime(when);
+    }
+    case Value: return SiPrefix::withoutLeadingZeros(e.text);   // "000.00" -> "0.00", as the meter shows it
     case Unit:  return e.unit;
     case Mode:  return e.id > 0 ? tr("2nd") + (e.special.isEmpty() ? QString() : " " + modeText(e.special)) : modeText(e.special);
     case Range: return e.range;
-    case Hold:  return e.hold ? tr("HOLD") : QString();
+    case Hold:  return e.hold() ? tr("HOLD") : QString();
   }
   return QVariant();
 }
@@ -96,89 +168,78 @@ QVariant ReadingLog::headerData(int section, Qt::Orientation orientation, int ro
 
 void ReadingLog::append(const Entry &entry)
 {
-  if (m_paused)
-    return;
-  if (m_entries.size() >= m_maxRows)
-  {
-    const int excess = m_entries.size() - m_maxRows + 1;
-    beginRemoveRows(QModelIndex(), 0, excess - 1);
-    m_entries.remove(0, excess);
-    endRemoveRows();
-  }
-  beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
-  m_entries.append(entry);
-  endInsertRows();
-  updateSingleDay();
+  static const QRegularExpression letters("[A-Za-z]");
+  Reading r;
+  r.value = entry.dval;
+  r.text = entry.val;
+  r.unit = entry.unit;
+  r.special = entry.special;
+  r.range = entry.range;
+  r.hold = entry.hold;
+  r.id = entry.id;
+  r.overload = entry.val.contains(letters);
+  r.msecs = entry.when.toMSecsSinceEpoch();
+  m_store->logReading(r);
+}
+
+bool ReadingLog::allOneDay() const
+{
+  // the rows are in time order: first and last tell whether a day changed
+  const int count = m_store->readingCount();
+  return count == 0 || entry(0).when.date() == entry(count - 1).when.date();
 }
 
 void ReadingLog::updateSingleDay()
 {
-  // the rows are in time order: first and last tell whether a day changed
-  const bool single = m_entries.isEmpty() || m_entries.first().when.date() == m_entries.last().when.date();
+  const bool single = allOneDay();
   if (single == m_singleDay)
     return;
   m_singleDay = single;
-  if (!m_entries.isEmpty())
-    Q_EMIT dataChanged(index(0, Time), index(m_entries.size() - 1, Time), {Qt::DisplayRole});
+  const int count = m_store->readingCount();
+  if (count)
+    Q_EMIT dataChanged(index(0, Time), index(count - 1, Time), {Qt::DisplayRole});
 }
 
 void ReadingLog::markLast(const QColor &color, const QString &name)
 {
-  if (m_entries.isEmpty())
-    return;
-  const int row = m_entries.size() - 1;
-  m_entries[row].alarmColor = color;
-  m_entries[row].alarmName = name;
-  Q_EMIT dataChanged(index(row, 0), index(row, ColumnCount - 1), {Qt::BackgroundRole, Qt::ToolTipRole});
+  m_store->markLastReading(color.rgba(), name);
 }
 
 void ReadingLog::clear()
 {
-  if (m_entries.isEmpty())
-    return;
-  beginResetModel();
-  m_entries.clear();
-  m_singleDay = true;
-  endResetModel();
+  m_store->clearReadings();
 }
 
 void ReadingLog::setMaxRows(int rows)
 {
-  m_maxRows = qMax(1, rows);
-  if (m_entries.size() > m_maxRows)
-  {
-    const int excess = m_entries.size() - m_maxRows;
-    beginRemoveRows(QModelIndex(), 0, excess - 1);
-    m_entries.remove(0, excess);
-    endRemoveRows();
-    updateSingleDay();
-  }
+  m_store->setReadingCapacity(rows);
 }
 
 ReadingLog::Stats ReadingLog::stats() const
 {
   static const QRegularExpression letters("[A-Za-z]");
   Stats s;
-  s.count = m_entries.size();
+  s.count = m_store->readingCount();
   double sum = 0;
-  for (const Entry &e : m_entries)
+  for (int i = 0; i < s.count; ++i)
   {
-    if (e.id != 0 || e.val.contains(letters))   // secondary values, OL
+    const LoggedReading &e = m_store->readingAt(i);
+    if (e.id != 0 || e.text.contains(letters))   // secondary values, OL
       continue;
     if (s.numeric == 0)
-      s.min = s.max = e.dval;
-    s.min = qMin(s.min, e.dval);
-    s.max = qMax(s.max, e.dval);
-    sum += e.dval;
+      s.min = s.max = e.value;
+    s.min = qMin(s.min, e.value);
+    s.max = qMax(s.max, e.value);
+    sum += e.value;
     ++s.numeric;
   }
   if (s.numeric)
     s.mean = sum / s.numeric;
   // the unit of the newest main reading (second values have their own)
-  for (int i = m_entries.size() - 1; i >= 0; --i)
-    if (m_entries[i].id == 0)
+  for (int i = s.count - 1; i >= 0; --i)
+    if (m_store->readingAt(i).id == 0)
     {
-      s.unit = SiPrefix::split(m_entries[i].unit).baseUnit;
+      s.unit = SiPrefix::split(m_store->readingAt(i).unit).baseUnit;
       break;
     }
   return s;
@@ -194,16 +255,16 @@ QString ReadingLog::toText(const QList<int> &rows) const
 
   QList<int> which = rows;
   if (which.isEmpty())
-    for (int r = 0; r < m_entries.size(); ++r)
+    for (int r = 0; r < m_store->readingCount(); ++r)
       which << r;
   std::sort(which.begin(), which.end());
   for (int r : which)
   {
-    if (r < 0 || r >= m_entries.size())
+    if (r < 0 || r >= m_store->readingCount())
       continue;
     QStringList cells;
     // the date stays in the copy: pasted elsewhere the rows lose their context
-    cells << formatTime(m_entries[r].when);
+    cells << formatTime(QDateTime::fromMSecsSinceEpoch(m_store->readingAt(r).when));
     for (int c = Time + 1; c < ColumnCount; ++c)
       cells << data(index(r, c), Qt::DisplayRole).toString();
     lines << cells.join('\t');
@@ -219,17 +280,20 @@ bool ReadingLog::write(const QString &path, QString *error) const
       *error = text;
     return false;
   };
-  if (m_entries.isEmpty())
+  if (m_store->readingCount() == 0)
     return fail(tr("Nothing to export."));
   QFile file(path);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     return fail(tr("Cannot open file."));
   QTextStream ts(&file);
   ts << "timestamp;value;unit;mode;range;hold\n";
-  for (const Entry &e : m_entries)
+  for (int i = 0; i < m_store->readingCount(); ++i)
+  {
+    const Entry e = entry(i);
     ts << QString("%1;%2;%3;%4;%5;%6\n")
             .arg(e.when.toString("yyyy-MM-ddTHH:mm:ss,zzz"), SiPrefix::withoutLeadingZeros(e.val), e.unit,
                  e.id > 0 ? "2nd " + modeText(e.special) : modeText(e.special), e.range, e.hold ? "1" : "0");
+  }
   return true;
 }
 
@@ -238,7 +302,7 @@ bool ReadingLog::writeAny(const QString &path, QString *error) const
   const auto format = SpreadsheetWriter::formatForFile(path);
   if (!format)
     return write(path, error);
-  if (m_entries.isEmpty())
+  if (m_store->readingCount() == 0)
   {
     if (error)
       *error = tr("Nothing to export.");
@@ -246,8 +310,9 @@ bool ReadingLog::writeAny(const QString &path, QString *error) const
   }
   SpreadsheetWriter sheet(tr("Readings"));
   sheet.setHeader({tr("Time"), tr("Value"), tr("Unit"), tr("Mode"), tr("Range"), tr("Hold"), tr("Alarm")});
-  for (const Entry &e : m_entries)
+  for (int i = 0; i < m_store->readingCount(); ++i)
   {
+    const Entry e = entry(i);
     const QString val = SiPrefix::withoutLeadingZeros(e.val);
     bool numeric = false;
     const double number = val.toDouble(&numeric);
@@ -259,16 +324,5 @@ bool ReadingLog::writeAny(const QString &path, QString *error) const
 
 void ReadingLog::appendReading(const Reading &r)
 {
-  if (r.id > 0 && r.text.isEmpty())   // a secondary display that is off
-    return;
-  Entry e;
-  e.when = QDateTime::fromMSecsSinceEpoch(r.msecs);
-  e.dval = r.value;
-  e.val = r.text;
-  e.unit = r.unit;
-  e.special = r.special;
-  e.range = r.range;
-  e.hold = r.hold;
-  e.id = r.id;
-  append(e);
+  m_store->logReading(r);
 }

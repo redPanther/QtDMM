@@ -122,6 +122,7 @@ Quality RecordingStore::currentQuality() const
 
 void RecordingStore::setReading(const Reading &reading)
 {
+  logReading(reading);
   if (reading.id != 0)
     return;
   m_reading = reading;
@@ -280,4 +281,62 @@ void RecordingStore::addValue(double val)
     Q_EMIT alert();
     stop();
   }
+}
+
+void RecordingStore::logReading(const Reading &reading)
+{
+  // a secondary display that is off (an empty second value) is no reading
+  if (m_readingsPaused || (reading.id > 0 && reading.text.isEmpty()))
+    return;
+  if (m_readings.size() >= m_readingCapacity)
+    removeOldestReadings(m_readings.size() - m_readingCapacity + 1);
+
+  LoggedReading row;
+  row.when = reading.msecs;
+  row.value = reading.value;
+  row.quality = reading.overload ? Quality::Overload : Quality::Valid;
+  row.flags = sampleFlags(reading);
+  row.text = reading.text;
+  row.unit = reading.unit;
+  row.special = reading.special;
+  row.range = reading.range;
+  row.id = reading.id;
+
+  const int at = m_readings.size();
+  Q_EMIT readingsAboutToInsert(at, at);
+  m_readings.append(row);
+  Q_EMIT readingsInserted();
+}
+
+void RecordingStore::removeOldestReadings(int count)
+{
+  Q_EMIT readingsAboutToRemove(0, count - 1);
+  m_readings.remove(0, count);
+  Q_EMIT readingsRemoved();
+}
+
+void RecordingStore::setReadingCapacity(int rows)
+{
+  m_readingCapacity = qMax(1, rows);
+  if (m_readings.size() > m_readingCapacity)
+    removeOldestReadings(m_readings.size() - m_readingCapacity);
+}
+
+void RecordingStore::clearReadings()
+{
+  if (m_readings.isEmpty())
+    return;
+  Q_EMIT readingsAboutToClear();
+  m_readings.clear();
+  Q_EMIT readingsCleared();
+}
+
+void RecordingStore::markLastReading(quint32 argb, const QString &name)
+{
+  if (m_readings.isEmpty())
+    return;
+  const int row = m_readings.size() - 1;
+  m_readings[row].alarmArgb = argb;
+  m_readings[row].alarmName = name;
+  Q_EMIT readingMarked(row);
 }

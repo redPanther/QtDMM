@@ -178,6 +178,71 @@ int main(int argc, char **argv)
     check(back.unit == "V" && back.values.size() == 1 && back.values.first() == 7, "write: recording content");
   }
 
+  // --- 2. the readings series: every reading of every value, whether or
+  //        not a recording runs, with its own capacity and pause ---
+  {
+    RecordingStore store;
+    store.setCapacity(100);
+    int inserted = 0, removed = 0, cleared = 0;
+    QObject::connect(&store, &RecordingStore::readingsInserted, [&] { ++inserted; });
+    QObject::connect(&store, &RecordingStore::readingsRemoved, [&] { ++removed; });
+    QObject::connect(&store, &RecordingStore::readingsCleared, [&] { ++cleared; });
+
+    Reading second = reading(50, "50.00", "AC", false, "MANU");
+    second.id = 1;
+    store.setReading(reading(0.01234, "12.34", "DC", true));
+    store.setReading(second);
+    store.setReading(reading(0, "OL", "DC"));
+    check(!store.isRunning() && store.count() == 0, "readings: no recording must be needed");
+    check(store.readingCount() == 3 && inserted == 3,
+          QString("readings: expected 3 rows, got %1").arg(store.readingCount()));
+    const LoggedReading &first = store.readingAt(0);
+    check(first.text == "12.34" && first.unit == "mV" && first.special == "DC" && first.range == "AUTO" &&
+          first.hold() && first.value == 0.01234 && first.id == 0,
+          "readings: the full tuple of the first row");
+    check(store.readingAt(1).id == 1 && store.readingAt(1).range == "MANU", "readings: a secondary value is a row too");
+    check(store.readingAt(2).quality == Quality::Overload, "readings: OL is quality Overload");
+
+    // pause: the readings series stops, the recording does not
+    store.setReadingsPaused(true);
+    store.start();
+    store.setReading(reading(1, "1.000", "DC"));
+    store.addValue(1);
+    check(store.readingCount() == 3, "readings: a paused series takes nothing");
+    check(store.count() == 1, "readings: pausing the series must not stop the recording");
+    store.setReadingsPaused(false);
+    // and the other way round: a stopped recording does not stop the series
+    store.stop();
+    store.setReading(reading(2, "2.000", "DC"));
+    check(store.readingCount() == 4, "readings: a stopped recording must not stop the series");
+
+    // capacity: the oldest go, one removal per change
+    store.setReadingCapacity(3);
+    check(store.readingCount() == 3 && removed == 1 && store.readingAt(0).id == 1,
+          "readings: shrinking drops the oldest");
+    store.setReading(reading(3, "3.000", "DC"));
+    check(store.readingCount() == 3 && removed == 2 && store.readingAt(2).text == "3.000",
+          "readings: a full series drops one for each new reading");
+    store.setReadingCapacity(0);
+    check(store.readingCapacity() == 1 && store.readingCount() == 1, "readings: capacity is at least 1");
+
+    // marks
+    store.markLastReading(0xffd82222u, "Alarm 1");
+    check(store.readingAt(0).alarmArgb == 0xffd82222u && store.readingAt(0).alarmName == "Alarm 1",
+          "readings: the newest row gets the mark");
+
+    // clear: the recording is left alone
+    store.setReadingCapacity(100);
+    store.clearReadings();
+    check(store.readingCount() == 0 && cleared == 1, "readings: clear");
+    check(store.count() == 1, "readings: clearing the series must not clear the recording");
+    store.clearReadings();
+    check(cleared == 1, "readings: clearing an empty series says nothing");
+    // logReading() feeds the series only, not the recording's sample
+    store.logReading(reading(5, "5.000", "AC"));
+    check(store.readingCount() == 1, "readings: logReading");
+  }
+
   if (failed)
   {
     qWarning() << failed << "RecordingStore check(s) failed";

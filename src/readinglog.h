@@ -8,11 +8,14 @@
 #include <QVector>
 
 /// Every reading the meter sent, one row each, as a table model: the raw
-/// protocol of a session next to the recorder's time-gridded graph. Keeps
-/// the newest maxRows() entries (a ring), knows min/max/mean of what it
-/// holds and writes itself as CSV. No widgets here, so it can be tested;
-/// ReadingLogWid shows it.
+/// protocol of a session next to the recorder's time-gridded graph. A thin
+/// model over the readings series of a RecordingStore (the newest maxRows()
+/// readings, a ring): it holds no rows of its own, knows min/max/mean of
+/// what the store holds and writes itself as CSV. Without setStore() it uses
+/// a store of its own. No widgets here, so it can be tested; ReadingLogWid
+/// shows it.
 struct Reading;
+class RecordingStore;
 
 class ReadingLog : public QAbstractTableModel
 {
@@ -48,6 +51,11 @@ public:
 
   explicit ReadingLog(QObject *parent = nullptr);
 
+  /// Shows the readings of @p store (the MeterController's recorder). The
+  /// row limit and the pause are the store's: set maxRows() after this. Not owned.
+  void setStore(RecordingStore *store);
+  RecordingStore *store() const { return m_store; }
+
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -57,8 +65,8 @@ public:
   /// while paused.
   void append(const Entry &entry);
   /// Paused: readings pass by without being logged (the pause button).
-  bool isPaused() const { return m_paused; }
-  void setPaused(bool paused) { m_paused = paused; }
+  bool isPaused() const;
+  void setPaused(bool paused);
   void clear();
   /// An alarm raised on the newest reading: the row gets the colour.
   void markLast(const QColor &color, const QString &name);
@@ -68,9 +76,9 @@ public Q_SLOTS:
   void appendReading(const Reading &reading);
 
 public:
-  const Entry &entry(int row) const { return m_entries[row]; }
+  Entry entry(int row) const;
 
-  int maxRows() const { return m_maxRows; }
+  int maxRows() const;
   /// Rows to keep, at least 1; trims the log when it shrinks.
   void setMaxRows(int rows);
 
@@ -97,10 +105,10 @@ public:
   static QString modeText(const QString &special);
 
 private:
-  QVector<Entry> m_entries;
-  int m_maxRows = 10000;
-  bool m_paused = false;
+  RecordingStore *m_store;
   bool m_singleDay = true;
+  void connectStore();
+  bool allOneDay() const;
   /// Recomputes m_singleDay after rows came or went; when it flips, the
   /// whole Time column changes its text.
   void updateSingleDay();
