@@ -344,7 +344,7 @@ void MainWin::createExtraActions()
   m_zoomFit = new QAction(tr("Show &whole recording"), this);
   m_zoomFit->setShortcut(QKeySequence("Ctrl+0"));
   connect(m_zoomFit, &QAction::triggered, m_wid->graph(), &DMMGraph::zoomFitSLOT);
-  m_copyImage = new QAction(tr("Copy graph &image"), this);
+  m_copyImage = new QAction(tr("Cop&y graph image"), this);
   m_copyImage->setShortcut(QKeySequence("Ctrl+Shift+C"));
   m_copyImage->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Copy graph image</span></p>"
                                "<p>Puts a picture of the recorder graph on the clipboard, ready to paste into a "

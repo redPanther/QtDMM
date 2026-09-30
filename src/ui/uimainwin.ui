@@ -406,7 +406,7 @@
      <normaloff>:/Symbols/help.xpm</normaloff>:/Symbols/help.xpm</iconset>
    </property>
    <property name="text">
-    <string>&amp;Direct Help</string>
+    <string>Direct Hel&amp;p</string>
    </property>
    <property name="iconText">
     <string>Help</string>

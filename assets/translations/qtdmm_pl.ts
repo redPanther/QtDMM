@@ -587,193 +587,193 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>[s]</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="167"/>
+        <location filename="../../src/dmmgraph.cpp" line="172"/>
         <source>QtDMM: %1</source>
         <translation>QtDMM: %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="187"/>
         <location filename="../../src/dmmgraph.cpp" line="192"/>
+        <location filename="../../src/dmmgraph.cpp" line="197"/>
         <source>Sampling start:</source>
         <translation>Start próbkowania:</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="188"/>
-        <location filename="../../src/dmmgraph.cpp" line="197"/>
+        <location filename="../../src/dmmgraph.cpp" line="193"/>
+        <location filename="../../src/dmmgraph.cpp" line="202"/>
         <source>Sampling resolution:</source>
         <translation>Rozdzielczość próbkowania:</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="200"/>
+        <location filename="../../src/dmmgraph.cpp" line="205"/>
         <source>%1 Seconds</source>
         <translation>%1 s</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="625"/>
-        <location filename="../../src/dmmgraph.cpp" line="627"/>
-        <location filename="../../src/dmmgraph.cpp" line="629"/>
-        <location filename="../../src/dmmgraph.cpp" line="631"/>
+        <location filename="../../src/dmmgraph.cpp" line="628"/>
+        <location filename="../../src/dmmgraph.cpp" line="630"/>
+        <location filename="../../src/dmmgraph.cpp" line="632"/>
+        <location filename="../../src/dmmgraph.cpp" line="634"/>
         <source>Sampling</source>
         <translation>Próbkowanie</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="625"/>
-        <location filename="../../src/dmmgraph.cpp" line="627"/>
-        <location filename="../../src/dmmgraph.cpp" line="629"/>
-        <location filename="../../src/dmmgraph.cpp" line="631"/>
+        <location filename="../../src/dmmgraph.cpp" line="628"/>
+        <location filename="../../src/dmmgraph.cpp" line="630"/>
+        <location filename="../../src/dmmgraph.cpp" line="632"/>
+        <location filename="../../src/dmmgraph.cpp" line="634"/>
         <source>Stopped</source>
         <translation>Zatrzymany</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="696"/>
+        <location filename="../../src/dmmgraph.cpp" line="699"/>
         <source>Disconnect</source>
         <translation>Rozłącz</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="703"/>
+        <location filename="../../src/dmmgraph.cpp" line="706"/>
         <source>Connect</source>
         <translation>Połącz</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="712"/>
+        <location filename="../../src/dmmgraph.cpp" line="715"/>
         <source>Stop recorder</source>
         <translation>Zatrzymaj rejestrator</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="719"/>
+        <location filename="../../src/dmmgraph.cpp" line="722"/>
         <source>Start recorder</source>
         <translation>Uruchom rejestrator</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="724"/>
+        <location filename="../../src/dmmgraph.cpp" line="727"/>
         <source>Clear graph</source>
         <translation>Wyczyść wykres</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="730"/>
+        <location filename="../../src/dmmgraph.cpp" line="733"/>
         <source>Configure...</source>
         <translation>Konfiguruj…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="734"/>
+        <location filename="../../src/dmmgraph.cpp" line="737"/>
         <source>Copy image</source>
         <translation>Kopiuj obraz</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="737"/>
+        <location filename="../../src/dmmgraph.cpp" line="740"/>
         <source>Export image...</source>
         <translation>Eksportuj obraz...</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="744"/>
+        <location filename="../../src/dmmgraph.cpp" line="747"/>
         <source>Export data...</source>
         <translation>Eksportuj dane…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="748"/>
+        <location filename="../../src/dmmgraph.cpp" line="751"/>
         <source>Import data...</source>
         <translation>Importuj dane…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="898"/>
+        <location filename="../../src/dmmgraph.cpp" line="901"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="898"/>
+        <location filename="../../src/dmmgraph.cpp" line="901"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="898"/>
+        <location filename="../../src/dmmgraph.cpp" line="901"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="900"/>
+        <location filename="../../src/dmmgraph.cpp" line="903"/>
         <source>Export data</source>
         <translation>Eksportuj dane</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="942"/>
+        <location filename="../../src/dmmgraph.cpp" line="945"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: niezapisane dane</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="943"/>
+        <location filename="../../src/dmmgraph.cpp" line="946"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Importing data will overwrite your measured data&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Niezapisane dane&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Import nadpisze zmierzone dane.&lt;p&gt;Czy najpierw wyeksportować niezapisane dane?</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="955"/>
+        <location filename="../../src/dmmgraph.cpp" line="958"/>
         <source>Export data first</source>
         <translation>Najpierw eksportuj</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="959"/>
+        <location filename="../../src/dmmgraph.cpp" line="962"/>
         <source>Import &amp; overwrite data</source>
         <translation>Importuj i nadpisz</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="970"/>
+        <location filename="../../src/dmmgraph.cpp" line="973"/>
         <source>Import data</source>
         <translation>Importuj dane</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="970"/>
+        <location filename="../../src/dmmgraph.cpp" line="973"/>
         <source>CSV (*.csv);;All files (*)</source>
         <translation>CSV (*.csv);;Wszystkie pliki (*)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1278"/>
+        <location filename="../../src/dmmgraph.cpp" line="1294"/>
         <source>Scalable vector graphics (*.svg)</source>
         <translation>Skalowalna grafika wektorowa (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1278"/>
+        <location filename="../../src/dmmgraph.cpp" line="1294"/>
         <source>PDF (*.pdf)</source>
         <translation>PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1279"/>
+        <location filename="../../src/dmmgraph.cpp" line="1295"/>
         <source>PNG image (*.png)</source>
         <translation>Obraz PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1279"/>
+        <location filename="../../src/dmmgraph.cpp" line="1295"/>
         <source>JPEG image (*.jpg)</source>
         <translation>Obraz JPEG (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1282"/>
+        <location filename="../../src/dmmgraph.cpp" line="1298"/>
         <source>Export image</source>
         <translation>Eksport obrazu</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1332"/>
+        <location filename="../../src/dmmgraph.cpp" line="1348"/>
         <source>QtDMM recording, %1</source>
         <translation>Zapis QtDMM, %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1333"/>
-        <location filename="../../src/dmmgraph.cpp" line="1348"/>
+        <location filename="../../src/dmmgraph.cpp" line="1349"/>
+        <location filename="../../src/dmmgraph.cpp" line="1366"/>
         <source>QtDMM graph</source>
         <translation>Wykres QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1334"/>
+        <location filename="../../src/dmmgraph.cpp" line="1350"/>
         <source>%1 values, %2 s per sample, unit %3</source>
         <translation>Wartości: %1, %2 s na próbkę, jednostka %3</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1339"/>
-        <location filename="../../src/dmmgraph.cpp" line="1357"/>
-        <location filename="../../src/dmmgraph.cpp" line="1372"/>
+        <location filename="../../src/dmmgraph.cpp" line="1355"/>
+        <location filename="../../src/dmmgraph.cpp" line="1375"/>
+        <location filename="../../src/dmmgraph.cpp" line="1390"/>
         <source>Could not write %1</source>
         <translation>Nie można zapisać %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1376"/>
+        <location filename="../../src/dmmgraph.cpp" line="1394"/>
         <source>Graph written to %1</source>
         <translation>Wykres zapisany do %1</translation>
     </message>
@@ -803,29 +803,29 @@ Czy multimetr jest podłączony i włączony?</translation>
 <context>
     <name>DisplayWid</name>
     <message>
-        <location filename="../../src/displaywid.cpp" line="428"/>
+        <location filename="../../src/displaywid.cpp" line="419"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
     <message>
-        <location filename="../../src/displaywid.cpp" line="428"/>
+        <location filename="../../src/displaywid.cpp" line="419"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/displaywid.cpp" line="428"/>
+        <location filename="../../src/displaywid.cpp" line="419"/>
         <source>MANU</source>
         <translation>MANU</translation>
     </message>
     <message>
-        <location filename="../../src/displaywid.cpp" line="451"/>
-        <location filename="../../src/displaywid.cpp" line="533"/>
-        <location filename="../../src/displaywid.cpp" line="549"/>
+        <location filename="../../src/displaywid.cpp" line="442"/>
+        <location filename="../../src/displaywid.cpp" line="524"/>
+        <location filename="../../src/displaywid.cpp" line="540"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/displaywid.cpp" line="548"/>
+        <location filename="../../src/displaywid.cpp" line="539"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
@@ -1128,73 +1128,73 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>Zakończ bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="623"/>
+        <location filename="../../src/mainwid.cpp" line="624"/>
         <source>Automatic start at %1</source>
         <translation>Automatyczny start o %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="625"/>
+        <location filename="../../src/mainwid.cpp" line="626"/>
         <source>Raising threshold %1</source>
         <translation>Próg narastający %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="627"/>
+        <location filename="../../src/mainwid.cpp" line="628"/>
         <source>Falling threshold %1</source>
         <translation>Próg opadający %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="662"/>
+        <location filename="../../src/mainwid.cpp" line="663"/>
         <source>SCPI server: %1</source>
         <translation>Serwer SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="685"/>
+        <location filename="../../src/mainwid.cpp" line="686"/>
         <source>The server is not running.</source>
         <translation>Serwer nie jest uruchomiony.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="690"/>
+        <location filename="../../src/mainwid.cpp" line="691"/>
         <source>1 client</source>
         <translation>1 klient</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="690"/>
+        <location filename="../../src/mainwid.cpp" line="691"/>
         <source>%1 clients</source>
         <translation>Klienci: %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="691"/>
+        <location filename="../../src/mainwid.cpp" line="692"/>
         <source>SCPI %1:%2 (%3)</source>
         <translation>SCPI %1:%2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="692"/>
+        <location filename="../../src/mainwid.cpp" line="693"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>Nasłuchiwanie na %1, port %2, podłączono: %3.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="694"/>
+        <location filename="../../src/mainwid.cpp" line="695"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Ogłaszany jako „%1”.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="703"/>
+        <location filename="../../src/mainwid.cpp" line="704"/>
         <location filename="../../src/mainwid.cpp" line="744"/>
         <source>QtDMM: Launch error</source>
         <translation>QtDMM: błąd uruchamiania</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="704"/>
+        <location filename="../../src/mainwid.cpp" line="705"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Błąd uruchamiania&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Aplikacja %1 wciąż działa!&lt;p&gt;Czy zakończyć ją teraz?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="716"/>
+        <location filename="../../src/mainwid.cpp" line="717"/>
         <source>Yes, kill it!</source>
         <translation>Tak, zakończ</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="720"/>
+        <location filename="../../src/mainwid.cpp" line="721"/>
         <source>No, keep running</source>
         <translation>Nie, zostaw</translation>
     </message>
@@ -1254,7 +1254,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="73"/>
         <source>&amp;Display</source>
-        <translation>&amp;Wyświetlacz</translation>
+        <translation>Wyświet&amp;lacz</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="76"/>
@@ -1294,7 +1294,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="129"/>
         <source>&amp;Lock panels</source>
-        <translation>&amp;Zablokuj panele</translation>
+        <translation>Zablokuj pa&amp;nele</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="132"/>
@@ -1314,7 +1314,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="330"/>
         <source>&amp;Full screen</source>
-        <translation>&amp;Pełny ekran</translation>
+        <translation>Pełny &amp;ekran</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="333"/>
@@ -1324,7 +1324,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="338"/>
         <source>Zoom &amp;in</source>
-        <translation>Po&amp;większ</translation>
+        <translation>Pow&amp;iększ</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="341"/>
@@ -1338,8 +1338,8 @@ Czy multimetr jest podłączony i włączony?</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="347"/>
-        <source>Copy graph &amp;image</source>
-        <translation>Kopiuj wykres jako &amp;obraz</translation>
+        <source>Cop&amp;y graph image</source>
+        <translation>Kopiuj wykres jako ob&amp;raz</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="349"/>
@@ -1387,24 +1387,24 @@ Wybierz, która instancja ma rejestrować.</translation>
 <context>
     <name>MeterWid</name>
     <message>
-        <location filename="../../src/meterwid.cpp" line="499"/>
+        <location filename="../../src/meterwid.cpp" line="536"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/meterwid.cpp" line="500"/>
+        <location filename="../../src/meterwid.cpp" line="537"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/meterwid.cpp" line="506"/>
-        <location filename="../../src/meterwid.cpp" line="507"/>
-        <location filename="../../src/meterwid.cpp" line="515"/>
+        <location filename="../../src/meterwid.cpp" line="543"/>
+        <location filename="../../src/meterwid.cpp" line="544"/>
+        <location filename="../../src/meterwid.cpp" line="552"/>
         <source>OL</source>
         <translation>OL</translation>
     </message>
     <message>
-        <location filename="../../src/meterwid.cpp" line="566"/>
+        <location filename="../../src/meterwid.cpp" line="612"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
@@ -1652,17 +1652,17 @@ Then log out and back in so the new group membership becomes active.</source>
 Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło działać.</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="122"/>
+        <location filename="../../src/main.cpp" line="126"/>
         <source>protocol debugging information</source>
         <translation>informacje diagnostyczne protokołu</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="123"/>
+        <location filename="../../src/main.cpp" line="127"/>
         <source>sets directory where config files are located</source>
         <translation>ustawia katalog plików konfiguracyjnych</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="124"/>
+        <location filename="../../src/main.cpp" line="128"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>ustawia &lt;config-id&gt;</translation>
     </message>
@@ -2151,7 +2151,7 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="212"/>
         <source>Baud &amp;rate:</source>
-        <translation>&amp;Prędkość (bod):</translation>
+        <translation>Prędkość (bo&amp;d):</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="228"/>
@@ -2406,7 +2406,7 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="893"/>
         <source>Cou&amp;pling:</source>
-        <translation>S&amp;przężenie:</translation>
+        <translation>Sp&amp;rzężenie:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="909"/>
@@ -3388,7 +3388,7 @@ Maksymalna rozdzielczość to 1/10 sekundy, ale można też próbkować raz na t
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="391"/>
         <source>&amp;Tip of the day</source>
-        <translation>&amp;Porada dnia</translation>
+        <translation>Porada &amp;dnia</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="394"/>
@@ -3397,7 +3397,7 @@ Maksymalna rozdzielczość to 1/10 sekundy, ale można też próbkować raz na t
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="409"/>
-        <source>&amp;Direct Help</source>
+        <source>Direct Hel&amp;p</source>
         <translation>Pomoc &amp;bezpośrednia</translation>
     </message>
     <message>
@@ -3615,7 +3615,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="53"/>
         <source>Sample &amp;every:</source>
-        <translation>Próbkuj &amp;co:</translation>
+        <translation>Pró&amp;bkuj co:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="69"/>
@@ -3695,7 +3695,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="263"/>
         <source>&amp;Manual</source>
-        <translation>&amp;Ręczny</translation>
+        <translation>Ręczn&amp;y</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="308"/>
@@ -3848,7 +3848,7 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="111"/>
         <source>&amp;Manual</source>
-        <translation>&amp;Ręczny</translation>
+        <translation>Ręczn&amp;y</translation>
     </message>
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="142"/>
