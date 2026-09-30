@@ -31,4 +31,8 @@ namespace SiPrefix
 
   /// scale() rendered as text with up to 12 significant digits.
   QString format(double value, QString *prefixOut = nullptr);
+
+  /// A unit as the displays show it: "kOhm" -> "kΩ", "dF" -> "°F",
+  /// "C" -> "°C", "cosphi" -> "cosφ"; others unchanged.
+  QString displayText(const QString &unit);
 }

@@ -81,4 +81,18 @@ QString format(double value, QString *prefixOut)
   return QString::number(scale(value, prefixOut), 'g', 12);
 }
 
+QString displayText(const QString &unit)
+{
+  const Split parts = split(unit);
+  if (parts.baseUnit == QLatin1String("Ohm"))
+    return parts.prefix + QStringLiteral("Ω");
+  if (parts.baseUnit == QLatin1String("dF"))
+    return QStringLiteral("°F");
+  if (parts.baseUnit == QLatin1String("C"))
+    return QStringLiteral("°C");
+  if (parts.baseUnit == QLatin1String("cosphi"))
+    return QStringLiteral("cosφ");
+  return parts.prefix + parts.baseUnit;
+}
+
 }

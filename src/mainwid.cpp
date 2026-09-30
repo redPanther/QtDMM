@@ -383,7 +383,8 @@ void MainWid::feedMeter(const QString &val, const QString &unit, const QString &
   if (!std::isnan(fs))
     m_meter->setFullScale(fs);
 
-  QString label = unit;
+  // the unit as the digital display writes it ("kΩ", "°C")
+  QString label = SiPrefix::displayText(unit);
   if (special == "AC" || special == "DC")
     label += " " + special;
   else if (special == "ACDC")
