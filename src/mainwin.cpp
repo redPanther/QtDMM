@@ -157,33 +157,55 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   toolBarDMM->addAction(m_readingsAction);
   connect(m_displayAction, &QAction::toggled, this, &MainWin::setToolbarVisibilitySLOT);
 
-  // arrangement: automatic ("Displays on top") or free, title bars on/off
+  // arrangement: automatic (displays on top or on the left), fixed or free,
+  // title bars on/off
   auto *arrangeGroup = new QActionGroup(this);
-  m_arrangeTop = new QAction(tr("Displays on &top"), arrangeGroup);
-  m_arrangeTop->setCheckable(true);
-  m_arrangeTop->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Displays on top</span></p>"
-                                "<p>The displays share a strip at the top, the graph takes the rest and the "
-                                "readings table a column on the right; everything follows the window size."
-                                "</p></body></html>"));
-  m_arrangeFree = new QAction(tr("&Free"), arrangeGroup);
-  m_arrangeFree->setCheckable(true);
-  m_arrangeFree->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Free</span></p>"
-                                 "<p>Place and size the windows as you like.</p></body></html>"));
-  connect(m_arrangeTop, &QAction::triggered, this, [this] { m_arranger->setMode(MdiArranger::DisplaysOnTop); });
-  connect(m_arrangeFree, &QAction::triggered, this, [this] { m_arranger->setMode(MdiArranger::Free); });
+  auto arrangeAction = [this, arrangeGroup](const QString &text, MdiArranger::Mode mode, const QString &whatsThis)
+  {
+    auto *a = new QAction(text, arrangeGroup);
+    a->setCheckable(true);
+    a->setWhatsThis(whatsThis);
+    connect(a, &QAction::triggered, this, [this, mode] { m_arranger->setMode(mode); });
+    return a;
+  };
+  const QString arrangeHint = tr("<p>Drag a divider between two windows to share the space differently. "
+                                 "Ctrl+drag a window (or drag its title bar) onto another one to swap them.</p>");
+  m_arrangeTop = arrangeAction(tr("Displays on &top"), MdiArranger::DisplaysOnTop,
+                               tr("<html><head/><body><p><span style=\" font-weight:600;\">Displays on top</span></p>"
+                                  "<p>The displays share a strip at the top, the graph takes the rest and the "
+                                  "readings table a column on the right; everything follows the window size."
+                                  "</p>%1</body></html>").arg(arrangeHint));
+  m_arrangeLeft = arrangeAction(tr("Displays on the &left"), MdiArranger::DisplaysOnLeft,
+                                tr("<html><head/><body><p><span style=\" font-weight:600;\">Displays on the left</span></p>"
+                                   "<p>The displays share a column on the left, the graph and the readings table "
+                                   "take the rest; everything follows the window size.</p>%1</body></html>")
+                                  .arg(arrangeHint));
+  m_arrangeFixed = arrangeAction(tr("F&ixed"), MdiArranger::Fixed,
+                                 tr("<html><head/><body><p><span style=\" font-weight:600;\">Fixed</span></p>"
+                                    "<p>Keeps the layout as it is: from Displays on top or on the left as they "
+                                    "are, from Free the windows snap into a grid made from their positions. "
+                                    "A window shown later gets a place at the edge.</p>%1</body></html>")
+                                   .arg(arrangeHint));
+  m_arrangeFree = arrangeAction(tr("&Free"), MdiArranger::Free,
+                                tr("<html><head/><body><p><span style=\" font-weight:600;\">Free</span></p>"
+                                   "<p>Place and size the windows as you like; Ctrl+drag moves a window, "
+                                   "also one without title bar.</p></body></html>"));
 
   m_titleBars = new QAction(tr("&Hide title bars"), this);
   m_titleBars->setCheckable(true);
   m_titleBars->setShortcut(QKeySequence("Ctrl+L"));
   m_titleBars->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Hide title bars</span></p>"
                                "<p>Windows without title bar sit flush next to each other. Right-click the display "
-                               "or the meter for the window's menu; in Free mode Ctrl+drag moves a window."
+                               "or the meter for the window's menu; Ctrl+drag moves a window, in the arranged modes onto "
+                               "another one to swap them."
                                "</p></body></html>"));
   connect(m_titleBars, &QAction::triggered, m_arranger, &MdiArranger::setTitleBarsHidden);
   connect(m_arranger, &MdiArranger::changed, this, &MainWin::syncArrangeActions);
 
   m_arrangeMenu = new QMenu(tr("&Arrange"), this);
   m_arrangeMenu->addAction(m_arrangeTop);
+  m_arrangeMenu->addAction(m_arrangeLeft);
+  m_arrangeMenu->addAction(m_arrangeFixed);
   m_arrangeMenu->addAction(m_arrangeFree);
   m_arrangeMenu->addSeparator();
   m_arrangeMenu->addAction(m_titleBars);
@@ -769,6 +791,8 @@ void MainWin::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
 void MainWin::syncArrangeActions()
 {
   m_arrangeTop->setChecked(m_arranger->mode() == MdiArranger::DisplaysOnTop);
+  m_arrangeLeft->setChecked(m_arranger->mode() == MdiArranger::DisplaysOnLeft);
+  m_arrangeFixed->setChecked(m_arranger->mode() == MdiArranger::Fixed);
   m_arrangeFree->setChecked(m_arranger->mode() == MdiArranger::Free);
   m_titleBars->setChecked(m_arranger->titleBarsHidden());
 }
@@ -791,8 +815,17 @@ void MainWin::restoreWindows()
   Settings *cfg = m_wid->settings();
   setDesign(Designs::fromName(cfg->getString("Windows/design", "system")));
   m_restoring = true;
-  const bool free = cfg->getString("Windows/arrange", "top") == "free";
-  m_arranger->setMode(free ? MdiArranger::Free : MdiArranger::DisplaysOnTop);
+  const QString arrange = cfg->getString("Windows/arrange", "top");
+  const bool free = arrange == "free";
+  const MdiArranger::Mode mode = free ? MdiArranger::Free : arrange == "left" ? MdiArranger::DisplaysOnLeft
+                                 : arrange == "fixed" ? MdiArranger::Fixed : MdiArranger::DisplaysOnTop;
+  // Fixed gets its tree first: switching to it from a start in Free would
+  // derive one from the positions
+  if (mode == MdiArranger::Fixed)
+    m_arranger->setMode(MdiArranger::DisplaysOnTop);
+  m_arranger->setMode(mode);
+  // the layout the user made (dividers, swaps); none or a broken one: the rule
+  m_arranger->setLayoutText(cfg->getString("Windows/layout", QString()));
   m_arranger->setTitleBarsHidden(cfg->getBool("Windows/title-bars-hidden", !free));
   if (free)
   {
@@ -824,7 +857,9 @@ void MainWin::restoreWindows()
 void MainWin::saveWindows()
 {
   Settings *cfg = m_wid->settings();
-  cfg->setString("Windows/arrange", m_arranger->mode() == MdiArranger::Free ? "free" : "top");
+  static const char *const modes[] = { "top", "left", "fixed", "free" };
+  cfg->setString("Windows/arrange", modes[m_arranger->mode()]);
+  cfg->setString("Windows/layout", m_arranger->layoutText());
   cfg->setBool("Windows/title-bars-hidden", m_arranger->titleBarsHidden());
   cfg->setString("Windows/design", Designs::name(Designs::current()));
   if (m_arranger->mode() == MdiArranger::Free)

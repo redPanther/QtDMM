@@ -113,6 +113,8 @@ protected:
   QAction    *m_meterAction = nullptr;
   QAction    *m_readingsAction = nullptr;
   QAction    *m_arrangeTop;
+  QAction    *m_arrangeLeft;
+  QAction    *m_arrangeFixed;
   QAction    *m_arrangeFree;
   QAction    *m_titleBars;
   QMenu      *m_arrangeMenu;
