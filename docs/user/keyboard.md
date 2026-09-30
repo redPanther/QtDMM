@@ -2,8 +2,10 @@
 
 Every toolbar button shows its shortcut in the tooltip. Shortcuts of the
 main window work while it is the active window, whichever of its windows
-has the focus. In *Free* window layout Ctrl+drag moves a window, also one
-without title bar.
+has the focus. Ctrl+drag moves a window, also one without title bar: in
+*Free* window layout anywhere, in the arranged layouts onto another window
+to swap the two. There, the gaps between the windows can be dragged to
+share the space differently.
 
 ## Main window
 

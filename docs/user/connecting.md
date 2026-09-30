@@ -133,11 +133,26 @@ placed:
 - **Displays on top** (the default): display and meter share a strip at the
   top, the graph takes the space below and the readings table a column on
   the right. Everything follows the size of the main window.
+- **Displays on the left**: the same with display and meter in a column on
+  the left.
+- **Fixed**: keeps the layout as it is. From *Displays on top* or *on the
+  left* it takes that layout over; from *Free* the windows snap into a grid
+  made from where they are (it shows for a moment first). A window shown
+  later gets a place at the bottom edge, a hidden one leaves its space to its
+  neighbours.
 - **Free**: place and size the windows yourself; QtDMM remembers where they
   are.
 
+In the arranged modes the gaps between the windows are dividers: drag one to
+share the space differently (the mouse pointer changes on them; they can
+also be taken a few pixels inside a window's edge). Drag a window with
+Ctrl held - or at its title bar - onto another one and the two swap places;
+dropped elsewhere it goes back. A layout changed like this is remembered.
+In *Displays on top* and *on the left* it lasts until a window is shown or
+hidden; then the windows are placed by the rule again.
+
 **Hide title bars** (Ctrl+L) takes the title bars away so the windows sit
-flush next to each other - the default for *Displays on top*. Right-click
+flush next to each other - the default for the arranged modes. Right-click
 the display or the meter for its window menu (hide the window, title bar on
 or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
 layouts of versions before 26.1 are not taken over.
