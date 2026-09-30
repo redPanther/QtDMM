@@ -94,8 +94,9 @@ public:
   /// otherwise (the rule applies).
   QString layoutText() const;
   /// Takes a tree saved with layoutText(). An automatic mode uses it while
-  /// exactly its windows are shown. False (and nothing changes) when the
-  /// text does not parse or names an unknown window.
+  /// exactly its windows are shown; an empty text goes back to the rule.
+  /// False (and nothing changes) when the text does not parse or names an
+  /// unknown window.
   bool setLayoutText(const QString &text);
 
   /// Milliseconds Fixed from Free shows the new cells before they apply.

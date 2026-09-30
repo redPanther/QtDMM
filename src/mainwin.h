@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <QtGui>
 #include <QtWidgets>
 #include <QMenu>
@@ -117,6 +119,8 @@ protected:
   QAction    *m_arrangeFixed;
   QAction    *m_arrangeFree;
   QAction    *m_titleBars;
+  QAction    *m_autoSaveLayout;   ///< Windows/auto-save: the layout is saved on exit
+  bool        m_startDisplay = true;   ///< Display/show of the start layout (auto-save off)
   QMenu      *m_arrangeMenu;
   QMenu      *m_designMenu;
   bool        m_restoring = false;   ///< restoreWindows() is setting the actions
@@ -177,6 +181,17 @@ protected:
   /// Window layout from/to the settings (Windows/... keys).
   void        restoreWindows();
   void        saveWindows();
+  /// @name Workspace: the window layout, from the settings or a file
+  /// @{
+  /// Reads a key; the type of @p def says bool or string.
+  using WorkspaceGet = std::function<QVariant(const QString &key, const QVariant &def)>;
+  using WorkspaceSet = std::function<void(const QString &key, const QVariant &value)>;
+  /// Shows the windows, mode, tree, title bars, design and (Free) positions.
+  void        applyWorkspace(const WorkspaceGet &get);
+  void        storeWorkspace(const WorkspaceSet &set);
+  void        loadWorkspace();
+  void        saveWorkspace();
+  /// @}
   /// Applies a colour design (Designs::Design) to the window and the views.
   void        setDesign(int design);
   /// Keeps the window actions checked when a window is closed or shown.

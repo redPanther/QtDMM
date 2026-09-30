@@ -151,6 +151,15 @@ dropped elsewhere it goes back. A layout changed like this is remembered.
 In *Displays on top* and *on the left* it lasts until a window is shown or
 hidden; then the windows are placed by the rule again.
 
+**Load workspace...** and **Save workspace...** in the same menu keep a
+window layout in a file (`*.qtdmm-workspace`): which windows are shown, the
+arrangement with its dividers, the title bars, the design and the size of
+the main window - for instance one layout for the bench and one for long
+recordings. **Save layout on exit** (on by default) makes QtDMM start with
+the layout it had when it was closed. Switched off, it starts with the
+layout it had when the option was switched off, or with the workspace
+loaded last.
+
 **Hide title bars** (Ctrl+L) takes the title bars away so the windows sit
 flush next to each other - the default for the arranged modes. Right-click
 the display or the meter for its window menu (hide the window, title bar on

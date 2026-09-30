@@ -209,6 +209,25 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   m_arrangeMenu->addAction(m_arrangeFree);
   m_arrangeMenu->addSeparator();
   m_arrangeMenu->addAction(m_titleBars);
+  m_arrangeMenu->addSeparator();
+  QAction *loadWs = m_arrangeMenu->addAction(QIcon::fromTheme("document-open"), tr("L&oad workspace..."));
+  loadWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Load workspace</span></p>"
+                          "<p>Takes a window layout saved with <i>Save workspace</i>: which windows are shown, "
+                          "the arrangement, title bars, design and the size of the main window.</p>"
+                          "</body></html>"));
+  connect(loadWs, &QAction::triggered, this, &MainWin::loadWorkspace);
+  QAction *saveWs = m_arrangeMenu->addAction(QIcon::fromTheme("document-save-as"), tr("&Save workspace..."));
+  saveWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Save workspace</span></p>"
+                          "<p>Writes the window layout to a file: which windows are shown, the arrangement, "
+                          "title bars, design and the size of the main window.</p></body></html>"));
+  connect(saveWs, &QAction::triggered, this, &MainWin::saveWorkspace);
+  m_autoSaveLayout = m_arrangeMenu->addAction(tr("Save layout on e&xit"));
+  m_autoSaveLayout->setCheckable(true);
+  m_autoSaveLayout->setChecked(true);
+  m_autoSaveLayout->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Save layout on exit</span></p>"
+                                    "<p>On: QtDMM starts with the window layout it had when it was closed. Off: it "
+                                    "starts with the layout last saved while this was on, or the workspace last "
+                                    "loaded.</p></body></html>"));
   QAction *arrangeButton = m_arrangeMenu->menuAction();
   arrangeButton->setIcon(QIcon::fromTheme("qtdmm-arrange"));
   arrangeButton->setToolTip(tr("Arrange the windows"));
@@ -659,6 +678,11 @@ void MainWin::on_action_Menu_triggered()
 void MainWin::closeEvent(QCloseEvent *ev)
 {
   setToolbarVisibilitySLOT();
+  // the settings dialog saves "Show display" as well: without auto-save it
+  // keeps the start layout's
+  if (!m_autoSaveLayout->isChecked())
+    m_wid->setToolbarVisibility(m_startDisplay, toolBarDMM->isVisible(), toolBarRecorder->isVisible(),
+                                toolBarFile->isVisible());
   // dock layout (meter position, floating state, size) and toolbar layout
   saveWindows();
   m_wid->settings()->setInt("ReadingLog/max-rows", m_readings->maxRows());
@@ -813,39 +837,72 @@ void MainWin::updateLed()
 void MainWin::restoreWindows()
 {
   Settings *cfg = m_wid->settings();
-  setDesign(Designs::fromName(cfg->getString("Windows/design", "system")));
+  applyWorkspace([cfg](const QString &key, const QVariant &def) -> QVariant
+  {
+    if (def.typeId() == QMetaType::Bool)
+      return cfg->getBool(key, def.toBool());
+    return cfg->getString(key, def.toString());
+  });
+  m_autoSaveLayout->setChecked(cfg->getBool("Windows/auto-save", true));
+  m_startDisplay = m_displayAction->isChecked();
+}
+
+void MainWin::saveWindows()
+{
+  Settings *cfg = m_wid->settings();
+  cfg->setBool("Windows/auto-save", m_autoSaveLayout->isChecked());
+  // without auto-save the layout stays as last saved (or loaded)
+  if (!m_autoSaveLayout->isChecked())
+    return;
+  storeWorkspace([cfg](const QString &key, const QVariant &value)
+  {
+    if (value.typeId() == QMetaType::Bool)
+      cfg->setBool(key, value.toBool());
+    else
+      cfg->setString(key, value.toString());
+  });
+  cfg->setBool("Windows/user-sized", m_userSized);
+}
+
+void MainWin::applyWorkspace(const WorkspaceGet &get)
+{
+  setDesign(Designs::fromName(get("Windows/design", QString("system")).toString()));
   m_restoring = true;
-  const QString arrange = cfg->getString("Windows/arrange", "top");
+  const QString arrange = get("Windows/arrange", QString("top")).toString();
   const bool free = arrange == "free";
   const MdiArranger::Mode mode = free ? MdiArranger::Free : arrange == "left" ? MdiArranger::DisplaysOnLeft
                                  : arrange == "fixed" ? MdiArranger::Fixed : MdiArranger::DisplaysOnTop;
-  // Fixed gets its tree first: switching to it from a start in Free would
-  // derive one from the positions
+  // Fixed gets its tree first: switching to it from Free would derive one
+  // from the positions
   if (mode == MdiArranger::Fixed)
     m_arranger->setMode(MdiArranger::DisplaysOnTop);
   m_arranger->setMode(mode);
   // the layout the user made (dividers, swaps); none or a broken one: the rule
-  m_arranger->setLayoutText(cfg->getString("Windows/layout", QString()));
-  m_arranger->setTitleBarsHidden(cfg->getBool("Windows/title-bars-hidden", !free));
+  if (!m_arranger->setLayoutText(get("Windows/layout", QString()).toString()))
+    m_arranger->setLayoutText(QString());   // a broken one: the rule
+  m_arranger->setTitleBarsHidden(get("Windows/title-bars-hidden", !free).toBool());
   if (free)
   {
+    QMap<QString, QString> geometry;
+    for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
+      geometry[w->objectName()] = get("Windows/geometry-" + w->objectName(), QString()).toString();
     // once the window is shown and the area has its size: the automatic
     // layout for a start, then the stored positions on top of it
-    QTimer::singleShot(0, this, [this, cfg]
+    QTimer::singleShot(0, this, [this, geometry]
     {
       m_arranger->arrangeNow();
       for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
       {
-        const QStringList g = cfg->getString("Windows/geometry-" + w->objectName(), QString()).split(' ');
+        const QStringList g = geometry.value(w->objectName()).split(' ');
         if (g.size() == 4)
           w->setGeometry(g[0].toInt(), g[1].toInt(), g[2].toInt(), g[3].toInt());
       }
     });
   }
-  m_displayAction->setChecked(cfg->getBool("Display/show", true));
-  m_meterAction->setChecked(cfg->getBool("Windows/meter", true));
-  action_Graph->setChecked(cfg->getBool("MainWindow/show-graph", false));   // a fresh start is a compact instrument
-  m_readingsAction->setChecked(cfg->getBool("Windows/readings", false));
+  m_displayAction->setChecked(get("Display/show", true).toBool());
+  m_meterAction->setChecked(get("Windows/meter", true).toBool());
+  action_Graph->setChecked(get("MainWindow/show-graph", false).toBool());   // a fresh start is a compact instrument
+  m_readingsAction->setChecked(get("Windows/readings", false).toBool());
   // an unchecked action did not toggle: hide its window explicitly
   for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction })
     qobject_cast<QWidget *>(a->property("window").value<QObject *>())->setVisible(a->isChecked());
@@ -854,25 +911,94 @@ void MainWin::restoreWindows()
   m_arranger->arrange();
 }
 
-void MainWin::saveWindows()
+void MainWin::storeWorkspace(const WorkspaceSet &set)
 {
-  Settings *cfg = m_wid->settings();
   static const char *const modes[] = { "top", "left", "fixed", "free" };
-  cfg->setString("Windows/arrange", modes[m_arranger->mode()]);
-  cfg->setString("Windows/layout", m_arranger->layoutText());
-  cfg->setBool("Windows/title-bars-hidden", m_arranger->titleBarsHidden());
-  cfg->setString("Windows/design", Designs::name(Designs::current()));
+  set("Windows/arrange", QString(modes[m_arranger->mode()]));
+  set("Windows/layout", m_arranger->layoutText());
+  set("Windows/title-bars-hidden", m_arranger->titleBarsHidden());
+  set("Windows/design", Designs::name(Designs::current()));
   if (m_arranger->mode() == MdiArranger::Free)
     for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
     {
       const QRect g = w->geometry();
-      cfg->setString("Windows/geometry-" + w->objectName(),
-                     QString("%1 %2 %3 %4").arg(g.x()).arg(g.y()).arg(g.width()).arg(g.height()));
+      set("Windows/geometry-" + w->objectName(),
+          QString("%1 %2 %3 %4").arg(g.x()).arg(g.y()).arg(g.width()).arg(g.height()));
     }
-  cfg->setBool("Windows/user-sized", m_userSized);
-  cfg->setBool("Windows/meter", m_meterAction->isChecked());
-  cfg->setBool("Windows/readings", m_readingsAction->isChecked());
-  cfg->setBool("MainWindow/show-graph", action_Graph->isChecked());
+  set("Display/show", m_displayAction->isChecked());
+  set("Windows/meter", m_meterAction->isChecked());
+  set("Windows/readings", m_readingsAction->isChecked());
+  set("MainWindow/show-graph", action_Graph->isChecked());
+}
+
+// A workspace file is an ini file with the same keys as the settings, plus
+// the size of the main window.
+static const char *kWorkspaceSuffix = "qtdmm-workspace";
+
+void MainWin::saveWorkspace()
+{
+  Settings *cfg = m_wid->settings();
+  const QString dir = cfg->getString("Windows/workspace-dir",
+                                     QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+  QString file = QFileDialog::getSaveFileName(this, tr("Save workspace"), dir,
+                                              tr("QtDMM workspace (*.%1)").arg(kWorkspaceSuffix));
+  if (file.isEmpty())
+    return;
+  if (QFileInfo(file).suffix().isEmpty())
+    file += QString(".") + kWorkspaceSuffix;
+  QFile::remove(file);   // only our keys in it
+  QSettings ws(file, QSettings::IniFormat);
+  ws.setValue("Workspace/version", 1);
+  ws.setValue("Workspace/size", QString("%1 %2").arg(width()).arg(height()));
+  storeWorkspace([&ws](const QString &key, const QVariant &value) { ws.setValue(key, value); });
+  ws.sync();
+  if (ws.status() != QSettings::NoError)
+  {
+    QMessageBox::warning(this, tr("QtDMM: Save workspace"), tr("Could not write %1.").arg(QDir::toNativeSeparators(file)));
+    return;
+  }
+  cfg->setString("Windows/workspace-dir", QFileInfo(file).absolutePath());
+  Q_EMIT m_wid->error(tr("Workspace saved to %1").arg(QDir::toNativeSeparators(file)));
+}
+
+void MainWin::loadWorkspace()
+{
+  Settings *cfg = m_wid->settings();
+  const QString dir = cfg->getString("Windows/workspace-dir",
+                                     QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+  const QString file = QFileDialog::getOpenFileName(this, tr("Load workspace"), dir,
+                                                    tr("QtDMM workspace (*.%1)").arg(kWorkspaceSuffix));
+  if (file.isEmpty())
+    return;
+  QSettings ws(file, QSettings::IniFormat);
+  if (ws.status() != QSettings::NoError || ws.value("Workspace/version").toInt() < 1)
+  {
+    QMessageBox::warning(this, tr("QtDMM: Load workspace"),
+                         tr("%1 is no QtDMM workspace.").arg(QDir::toNativeSeparators(file)));
+    return;
+  }
+  cfg->setString("Windows/workspace-dir", QFileInfo(file).absolutePath());
+  // the size first: the arrangement fills the area it gets
+  const QStringList size = ws.value("Workspace/size").toString().split(' ');
+  if (size.size() == 2 && !isMaximized() && !isFullScreen())
+  {
+    resize(size[0].toInt(), size[1].toInt());
+    m_userSized = true;   // a size chosen on purpose: no growing
+  }
+  applyWorkspace([&ws](const QString &key, const QVariant &def) -> QVariant
+  {
+    const QVariant v = ws.value(key, def);
+    return def.typeId() == QMetaType::Bool ? QVariant(v.toBool()) : QVariant(v.toString());
+  });
+  // without auto-save the loaded workspace is the one to start with next time
+  if (!m_autoSaveLayout->isChecked())
+  {
+    m_autoSaveLayout->setChecked(true);
+    saveWindows();
+    m_autoSaveLayout->setChecked(false);
+    m_startDisplay = m_displayAction->isChecked();
+  }
+  Q_EMIT m_wid->error(tr("Workspace loaded from %1").arg(QDir::toNativeSeparators(file)));
 }
 
 // ---------------------------------------------------------------- window size

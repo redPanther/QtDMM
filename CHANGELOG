@@ -3,6 +3,8 @@
   automatically ("Displays on top", "Displays on the left"), fixed or freely. In the arranged modes the gaps
   between the windows can be dragged, and Ctrl+drag (or the title bar) swaps two windows; the layout is
   remembered. In Free mode Ctrl+drag moves a window, also one without title bar
+- Workspaces: the window layout can be saved to and loaded from a file (Arrange menu); "Save layout on exit"
+  can be switched off to always start with the same layout
 - Designs System, Silver and Dark; the window grows with the content when a view is shown
 - Colour variants for the LCD (classic, backlight blue, amber, high contrast, custom) and the graph
   (neutral, scope blue, phosphor, chart recorder, custom)

@@ -1513,166 +1513,242 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>&amp;Rozmieść</translation>
     </message>
     <message>
+        <location filename="../../src/mainwin.cpp" line="213"/>
+        <source>L&amp;oad workspace...</source>
+        <translation>&amp;Wczytaj obszar roboczy...</translation>
+    </message>
+    <message>
         <location filename="../../src/mainwin.cpp" line="214"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Load workspace&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Takes a window layout saved with &lt;i&gt;Save workspace&lt;/i&gt;: which windows are shown, the arrangement, title bars, design and the size of the main window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Wczytaj obszar roboczy&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Przywraca układ okien zapisany poleceniem &lt;i&gt;Zapisz obszar roboczy&lt;/i&gt;: które okna są widoczne, rozmieszczenie, paski tytułu, motyw i rozmiar okna głównego.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="219"/>
+        <source>&amp;Save workspace...</source>
+        <translation>&amp;Zapisz obszar roboczy...</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="220"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save workspace&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Writes the window layout to a file: which windows are shown, the arrangement, title bars, design and the size of the main window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Zapisz obszar roboczy&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Zapisuje układ okien do pliku: które okna są widoczne, rozmieszczenie, paski tytułu, motyw i rozmiar okna głównego.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="224"/>
+        <source>Save layout on e&amp;xit</source>
+        <translation>Zapisz układ przy za&amp;mykaniu</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="227"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save layout on exit&lt;/span&gt;&lt;/p&gt;&lt;p&gt;On: QtDMM starts with the window layout it had when it was closed. Off: it starts with the layout last saved while this was on, or the workspace last loaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Zapisz układ przy zamykaniu&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Włączone: QtDMM uruchamia się z układem okien z chwili zamknięcia. Wyłączone: uruchamia się z układem zapisanym ostatnio przy włączonej opcji lub z ostatnio wczytanym obszarem roboczym.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="233"/>
         <source>Arrange the windows</source>
         <translation>Rozmieść okna</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="223"/>
+        <location filename="../../src/mainwin.cpp" line="242"/>
         <source>D&amp;esign</source>
         <translation>&amp;Wygląd</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="225"/>
+        <location filename="../../src/mainwin.cpp" line="244"/>
         <source>&amp;System</source>
         <translation>&amp;Systemowy</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="225"/>
+        <location filename="../../src/mainwin.cpp" line="244"/>
         <source>S&amp;ilver</source>
         <translation>S&amp;rebrny</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="226"/>
+        <location filename="../../src/mainwin.cpp" line="245"/>
         <source>&amp;Dark</source>
         <translation>&amp;Ciemny</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="283"/>
+        <location filename="../../src/mainwin.cpp" line="302"/>
         <source>The SCPI server: other programs can read the meter here (Settings, SCPI server).</source>
         <translation>Serwer SCPI: inne programy mogą tu odczytywać miernik (Ustawienia, Serwer SCPI).</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="370"/>
+        <location filename="../../src/mainwin.cpp" line="389"/>
         <source>Another instance is running.</source>
         <translation>Działa już inna instancja.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="451"/>
+        <location filename="../../src/mainwin.cpp" line="470"/>
         <source>&amp;Full screen</source>
         <translation>&amp;Pełny ekran</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="454"/>
+        <location filename="../../src/mainwin.cpp" line="473"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Full screen&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Use the whole screen for the instruments, e.g. on a lab monitor. F11 again returns to the normal window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Pełny ekran&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Wykorzystaj cały ekran na przyrządy, np. na monitorze laboratoryjnym. Ponowne F11 przywraca zwykłe okno.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="459"/>
+        <location filename="../../src/mainwin.cpp" line="478"/>
         <source>Zoom &amp;in</source>
         <translation>Po&amp;większ</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="462"/>
+        <location filename="../../src/mainwin.cpp" line="481"/>
         <source>Zoom &amp;out</source>
         <translation>Po&amp;mniejsz</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="465"/>
+        <location filename="../../src/mainwin.cpp" line="484"/>
         <source>Show &amp;whole recording</source>
         <translation>Pokaż &amp;całe nagranie</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="468"/>
+        <location filename="../../src/mainwin.cpp" line="487"/>
         <source>Copy graph &amp;image</source>
         <translation>Kopiuj wykres jako &amp;obraz</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="470"/>
+        <location filename="../../src/mainwin.cpp" line="489"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copy graph image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Puts a picture of the recorder graph on the clipboard, ready to paste into a report or a chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Kopiuj wykres jako obraz&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Umieszcza obraz wykresu rejestratora w schowku, gotowy do wklejenia do raportu lub czatu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="525"/>
+        <location filename="../../src/mainwin.cpp" line="544"/>
         <source>Record DMM data</source>
         <translation>Rejestruj dane multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="526"/>
+        <location filename="../../src/mainwin.cpp" line="545"/>
         <source>Multiple instances of QtDMM have been detected.
 Please choose which instance should record.</source>
         <translation>Wykryto wiele instancji QtDMM.
 Wybierz, która instancja ma rejestrować.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="529"/>
+        <location filename="../../src/mainwin.cpp" line="548"/>
         <source>This instance</source>
         <translation>Ta instancja</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="530"/>
+        <location filename="../../src/mainwin.cpp" line="549"/>
         <source>All instances</source>
         <translation>Wszystkie instancje</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="590"/>
+        <location filename="../../src/mainwin.cpp" line="609"/>
         <source>About QtDMM</source>
         <translation>O QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="593"/>
+        <location filename="../../src/mainwin.cpp" line="612"/>
         <source>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;A readout and transient recorder for digital multimeters.&lt;/p&gt;&lt;p&gt;Built with &lt;b&gt;Qt&lt;/b&gt; %2. Licensed under the &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions before 0.9.0 under GPL 2).&lt;/p&gt;&lt;p&gt;0.9.5 onwards: tuxmaster and contributors, see the AUTHORS file.&lt;br&gt;0.9.3 and before: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Source and bug reports: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbols from the &lt;b&gt;Breeze&lt;/b&gt; icon theme of the KDE community (LGPL 3); QtDMM&apos;s own symbols are drawn in its style.&lt;/p&gt;</source>
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Odczyt i rejestrator przebiegów dla multimetrów cyfrowych.&lt;/p&gt;&lt;p&gt;Zbudowany z użyciem &lt;b&gt;Qt&lt;/b&gt; %2. Licencja &lt;b&gt;GNU GPL 3&lt;/b&gt; (wersje przed 0.9.0 na GPL 2).&lt;/p&gt;&lt;p&gt;Od 0.9.5: tuxmaster i współtwórcy, zob. plik AUTHORS.&lt;br&gt;0.9.3 i wcześniejsze: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Strona: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Kontakt: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Kod źródłowy i zgłoszenia błędów: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbole pochodzą z motywu ikon &lt;b&gt;Breeze&lt;/b&gt; społeczności KDE (LGPL 3); własne symbole QtDMM są narysowane w jego stylu.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="610"/>
+        <location filename="../../src/mainwin.cpp" line="629"/>
         <source>Supported devices...</source>
         <translation>Obsługiwane urządzenia…</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="754"/>
+        <location filename="../../src/mainwin.cpp" line="778"/>
         <source>&amp;Hide window</source>
         <translation>&amp;Ukryj okno</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="755"/>
+        <location filename="../../src/mainwin.cpp" line="779"/>
         <source>&amp;Title bar</source>
         <translation>&amp;Pasek tytułu</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="760"/>
+        <location filename="../../src/mainwin.cpp" line="784"/>
         <source>Hide &amp;controls</source>
         <translation>Ukryj &amp;przyciski</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="767"/>
+        <location filename="../../src/mainwin.cpp" line="791"/>
         <source>&amp;LCD colours</source>
         <translation>Kolory &amp;LCD</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="769"/>
+        <location filename="../../src/mainwin.cpp" line="793"/>
         <source>&amp;Classic</source>
         <translation>&amp;Klasyczny</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="769"/>
+        <location filename="../../src/mainwin.cpp" line="793"/>
         <source>&amp;Backlight blue</source>
         <translation>Podświetlenie &amp;niebieskie</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="770"/>
+        <location filename="../../src/mainwin.cpp" line="794"/>
         <source>&amp;Amber</source>
         <translation>&amp;Bursztynowy</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="770"/>
+        <location filename="../../src/mainwin.cpp" line="794"/>
         <source>&amp;High contrast</source>
         <translation>&amp;Wysoki kontrast</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="771"/>
+        <location filename="../../src/mainwin.cpp" line="795"/>
         <source>C&amp;ustom (from the settings)</source>
         <translation>&amp;Własne (z ustawień)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="807"/>
+        <location filename="../../src/mainwin.cpp" line="831"/>
         <source>%1: readings are coming in</source>
         <translation>%1: napływają odczyty</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="808"/>
+        <location filename="../../src/mainwin.cpp" line="832"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: brak odczytu od 3 s</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="943"/>
+        <source>Save workspace</source>
+        <translation>Zapisz obszar roboczy</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="944"/>
+        <location filename="../../src/mainwin.cpp" line="970"/>
+        <source>QtDMM workspace (*.%1)</source>
+        <translation>Obszar roboczy QtDMM (*.%1)</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="957"/>
+        <source>QtDMM: Save workspace</source>
+        <translation>QtDMM: Zapisz obszar roboczy</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="957"/>
+        <source>Could not write %1.</source>
+        <translation>Nie można zapisać %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="961"/>
+        <source>Workspace saved to %1</source>
+        <translation>Obszar roboczy zapisany w %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="969"/>
+        <source>Load workspace</source>
+        <translation>Wczytaj obszar roboczy</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="976"/>
+        <source>QtDMM: Load workspace</source>
+        <translation>QtDMM: Wczytaj obszar roboczy</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="977"/>
+        <source>%1 is no QtDMM workspace.</source>
+        <translation>%1 nie jest obszarem roboczym QtDMM.</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="1001"/>
+        <source>Workspace loaded from %1</source>
+        <translation>Obszar roboczy wczytany z %1</translation>
     </message>
 </context>
 <context>

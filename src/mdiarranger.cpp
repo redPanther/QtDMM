@@ -382,6 +382,14 @@ QString MdiArranger::layoutText() const
 
 bool MdiArranger::setLayoutText(const QString &text)
 {
+  if (text.trimmed().isEmpty())
+  {
+    // back to the rule (Fixed: the rule's tree, kept from then on)
+    m_custom = false;
+    m_hasTree = false;
+    arrange();
+    return true;
+  }
   QStringList names;
   for (QMdiSubWindow *w : m_order)
     names << w->objectName();
