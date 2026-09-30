@@ -186,7 +186,9 @@ QBrush Designs::areaBrush(Design d)
     case Dark:
       return QColor(30, 30, 32);
     default:
-      return g_saved ? g_systemPalette.window().color().darker(115) : QApplication::palette().window().color().darker(115);
+      // the windows' own colour: the gaps between them show no darker
+      // strips that meet in steps at the corners
+      return g_saved ? g_systemPalette.window().color() : QApplication::palette().window().color();
   }
 }
 
