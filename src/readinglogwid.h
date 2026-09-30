@@ -8,6 +8,7 @@
 #include "readinglog.h"
 
 class QCheckBox;
+class QHBoxLayout;
 class QLabel;
 class QSpinBox;
 class QTableView;
@@ -34,8 +35,13 @@ public Q_SLOTS:
   /// separated.
   void copySLOT();
 
+  /// As narrow as the widest of the table's two control groups: in a
+  /// narrow cell they go on two rows (see resizeEvent()).
+  QSize minimumSizeHint() const override;
+
 protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
+  void resizeEvent(QResizeEvent *event) override;
 
 private Q_SLOTS:
   void updateStats();
@@ -53,6 +59,11 @@ private:
   QCheckBox *m_follow;
   QSpinBox *m_maxRows;
   QLabel *m_stats;
+  QWidget *m_barLeft;                     ///< pause and follow
+  QWidget *m_barRight;                    ///< keep, export, clear
+  QHBoxLayout *m_row1;              ///< both groups, or the left one
+  QHBoxLayout *m_row2;              ///< the right one when it does not fit
+  void placeBar();
   QVector<int> m_need;                    ///< width each column needs, only grows
   static constexpr int kMeasureRows = 50;
 };

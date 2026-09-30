@@ -676,267 +676,278 @@ DMM connected and switched on?</source>
     <name>DMMGraph</name>
     <message>
         <location filename="../../src/dmmgraph.cpp" line="116"/>
+        <location filename="../../src/dmmgraph.cpp" line="402"/>
         <source>[sec]</source>
         <translation>[s]</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="176"/>
+        <location filename="../../src/dmmgraph.cpp" line="181"/>
         <source>All</source>
         <translation>Todo</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="176"/>
+        <location filename="../../src/dmmgraph.cpp" line="181"/>
         <source>1 min</source>
         <translation>1 min</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="176"/>
+        <location filename="../../src/dmmgraph.cpp" line="181"/>
         <source>5 min</source>
         <translation>5 min</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="177"/>
+        <location filename="../../src/dmmgraph.cpp" line="182"/>
         <source>30 min</source>
         <translation>30 min</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="187"/>
+        <location filename="../../src/dmmgraph.cpp" line="192"/>
         <source>Show the whole recording, growing with it</source>
         <translation>Mostrar toda la grabación; la ventana crece con ella</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="188"/>
+        <location filename="../../src/dmmgraph.cpp" line="193"/>
         <source>Show the last %1</source>
         <translation>Mostrar los últimos %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="266"/>
+        <location filename="../../src/dmmgraph.cpp" line="271"/>
         <source>QtDMM: %1</source>
         <translation>QtDMM: %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="286"/>
         <location filename="../../src/dmmgraph.cpp" line="291"/>
+        <location filename="../../src/dmmgraph.cpp" line="296"/>
         <source>Sampling start:</source>
         <translation>Inicio del muestreo:</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="287"/>
-        <location filename="../../src/dmmgraph.cpp" line="296"/>
+        <location filename="../../src/dmmgraph.cpp" line="292"/>
+        <location filename="../../src/dmmgraph.cpp" line="301"/>
         <source>Sampling resolution:</source>
         <translation>Resolución del muestreo:</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="299"/>
+        <location filename="../../src/dmmgraph.cpp" line="304"/>
         <source>%1 Seconds</source>
         <translation>%1 segundos</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="825"/>
-        <location filename="../../src/dmmgraph.cpp" line="827"/>
-        <location filename="../../src/dmmgraph.cpp" line="829"/>
-        <location filename="../../src/dmmgraph.cpp" line="831"/>
+        <location filename="../../src/dmmgraph.cpp" line="406"/>
+        <source>[h]</source>
+        <translation>[h]</translation>
+    </message>
+    <message>
+        <location filename="../../src/dmmgraph.cpp" line="411"/>
+        <source>[min]</source>
+        <translation>[min]</translation>
+    </message>
+    <message>
+        <location filename="../../src/dmmgraph.cpp" line="900"/>
+        <location filename="../../src/dmmgraph.cpp" line="902"/>
+        <location filename="../../src/dmmgraph.cpp" line="904"/>
+        <location filename="../../src/dmmgraph.cpp" line="906"/>
         <source>Sampling</source>
         <translation>Muestreo</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="825"/>
-        <location filename="../../src/dmmgraph.cpp" line="827"/>
-        <location filename="../../src/dmmgraph.cpp" line="829"/>
-        <location filename="../../src/dmmgraph.cpp" line="831"/>
+        <location filename="../../src/dmmgraph.cpp" line="900"/>
+        <location filename="../../src/dmmgraph.cpp" line="902"/>
+        <location filename="../../src/dmmgraph.cpp" line="904"/>
+        <location filename="../../src/dmmgraph.cpp" line="906"/>
         <source>Stopped</source>
         <translation>Detenido</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="894"/>
+        <location filename="../../src/dmmgraph.cpp" line="969"/>
         <source>Disconnect</source>
         <translation>Desconectar</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="901"/>
+        <location filename="../../src/dmmgraph.cpp" line="976"/>
         <source>Connect</source>
         <translation>Conectar</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="910"/>
+        <location filename="../../src/dmmgraph.cpp" line="985"/>
         <source>Stop recorder</source>
         <translation>Detener grabador</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="917"/>
+        <location filename="../../src/dmmgraph.cpp" line="992"/>
         <source>Start recorder</source>
         <translation>Iniciar grabador</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="922"/>
+        <location filename="../../src/dmmgraph.cpp" line="997"/>
         <source>Clear graph</source>
         <translation>Borrar gráfica</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="928"/>
+        <location filename="../../src/dmmgraph.cpp" line="1003"/>
         <source>Configure...</source>
         <translation>Configurar…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="932"/>
+        <location filename="../../src/dmmgraph.cpp" line="1007"/>
         <source>Copy image</source>
         <translation>Copiar imagen</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="935"/>
+        <location filename="../../src/dmmgraph.cpp" line="1010"/>
         <source>Export image...</source>
         <translation>Exportar imagen...</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="941"/>
+        <location filename="../../src/dmmgraph.cpp" line="1016"/>
         <source>Graph &amp;colours</source>
         <translation>&amp;Colores de la gráfica</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="950"/>
+        <location filename="../../src/dmmgraph.cpp" line="1025"/>
         <source>&amp;Default: %1</source>
         <translation>&amp;Predeterminado: %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="958"/>
+        <location filename="../../src/dmmgraph.cpp" line="1033"/>
         <source>Export data...</source>
         <translation>Exportar datos…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="962"/>
+        <location filename="../../src/dmmgraph.cpp" line="1037"/>
         <source>Import data...</source>
         <translation>Importar datos…</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1116"/>
+        <location filename="../../src/dmmgraph.cpp" line="1191"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1116"/>
+        <location filename="../../src/dmmgraph.cpp" line="1191"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1116"/>
+        <location filename="../../src/dmmgraph.cpp" line="1191"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1118"/>
+        <location filename="../../src/dmmgraph.cpp" line="1193"/>
         <source>Export data</source>
         <translation>Exportar datos</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1160"/>
+        <location filename="../../src/dmmgraph.cpp" line="1235"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: datos sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1161"/>
+        <location filename="../../src/dmmgraph.cpp" line="1236"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Importing data will overwrite your measured data&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Datos sin guardar&lt;/b&gt;&lt;/font&gt;&lt;p&gt;La importación sobrescribirá sus mediciones.&lt;p&gt;¿Desea exportar antes los datos sin guardar?</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1173"/>
+        <location filename="../../src/dmmgraph.cpp" line="1248"/>
         <source>Export data first</source>
         <translation>Exportar primero</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1177"/>
+        <location filename="../../src/dmmgraph.cpp" line="1252"/>
         <source>Import &amp; overwrite data</source>
         <translation>Importar y sobrescribir</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1188"/>
+        <location filename="../../src/dmmgraph.cpp" line="1263"/>
         <source>Import data</source>
         <translation>Importar datos</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1188"/>
+        <location filename="../../src/dmmgraph.cpp" line="1263"/>
         <source>CSV (*.csv);;All files (*)</source>
         <translation>CSV (*.csv);;Todos los archivos (*)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1389"/>
+        <location filename="../../src/dmmgraph.cpp" line="1464"/>
         <source>Scope blue</source>
         <translation>Osciloscopio azul</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1390"/>
+        <location filename="../../src/dmmgraph.cpp" line="1465"/>
         <source>Phosphor green</source>
         <translation>Fósforo verde</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1391"/>
+        <location filename="../../src/dmmgraph.cpp" line="1466"/>
         <source>Phosphor amber</source>
         <translation>Fósforo ámbar</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1392"/>
+        <location filename="../../src/dmmgraph.cpp" line="1467"/>
         <source>Chart recorder</source>
         <translation>Registrador de papel</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1393"/>
+        <location filename="../../src/dmmgraph.cpp" line="1468"/>
         <source>Custom</source>
         <translation>Personalizado</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1394"/>
+        <location filename="../../src/dmmgraph.cpp" line="1469"/>
         <source>Neutral</source>
         <translation>Neutro</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1726"/>
+        <location filename="../../src/dmmgraph.cpp" line="1804"/>
         <source>Scalable vector graphics (*.svg)</source>
         <translation>Gráfico vectorial escalable (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1726"/>
+        <location filename="../../src/dmmgraph.cpp" line="1804"/>
         <source>PDF (*.pdf)</source>
         <translation>PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1727"/>
+        <location filename="../../src/dmmgraph.cpp" line="1805"/>
         <source>PNG image (*.png)</source>
         <translation>Imagen PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1727"/>
+        <location filename="../../src/dmmgraph.cpp" line="1805"/>
         <source>JPEG image (*.jpg)</source>
         <translation>Imagen JPEG (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1730"/>
+        <location filename="../../src/dmmgraph.cpp" line="1808"/>
         <source>Export image</source>
         <translation>Exportar imagen</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1780"/>
+        <location filename="../../src/dmmgraph.cpp" line="1858"/>
         <source>QtDMM recording, %1</source>
         <translation>Grabación de QtDMM, %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1781"/>
-        <location filename="../../src/dmmgraph.cpp" line="1798"/>
+        <location filename="../../src/dmmgraph.cpp" line="1859"/>
+        <location filename="../../src/dmmgraph.cpp" line="1876"/>
         <source>QtDMM graph</source>
         <translation>Gráfica de QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1782"/>
+        <location filename="../../src/dmmgraph.cpp" line="1860"/>
         <source>%1 values, %2 s per sample, unit %3</source>
         <translation>%1 valores, %2 s por muestra, unidad %3</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1787"/>
-        <location filename="../../src/dmmgraph.cpp" line="1807"/>
-        <location filename="../../src/dmmgraph.cpp" line="1822"/>
+        <location filename="../../src/dmmgraph.cpp" line="1865"/>
+        <location filename="../../src/dmmgraph.cpp" line="1885"/>
+        <location filename="../../src/dmmgraph.cpp" line="1900"/>
         <source>Could not write %1</source>
         <translation>No se pudo escribir %1</translation>
     </message>
     <message>
-        <location filename="../../src/dmmgraph.cpp" line="1826"/>
+        <location filename="../../src/dmmgraph.cpp" line="1904"/>
         <source>Graph written to %1</source>
         <translation>Gráfica escrita en %1</translation>
     </message>
@@ -1403,12 +1414,12 @@ DMM connected and switched on?</source>
         <translation>Pantalla</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="120"/>
+        <location filename="../../src/mainwin.cpp" line="123"/>
         <source>Graph</source>
         <translation>Gráfica</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="139"/>
+        <location filename="../../src/mainwin.cpp" line="142"/>
         <source>&amp;Display</source>
         <translation>&amp;Pantalla</translation>
     </message>
@@ -1418,77 +1429,77 @@ DMM connected and switched on?</source>
         <translation>Instrumento analógico</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="142"/>
+        <location filename="../../src/mainwin.cpp" line="145"/>
         <source>Analog &amp;meter</source>
         <translation>Instrumento &amp;analógico</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="125"/>
+        <location filename="../../src/mainwin.cpp" line="128"/>
         <source>Readings</source>
         <translation>Lecturas</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="140"/>
+        <location filename="../../src/mainwin.cpp" line="143"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Display&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show the reading on the LCD-style digital display.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Pantalla&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Muestra la lectura en la pantalla digital de estilo LCD.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="143"/>
+        <location filename="../../src/mainwin.cpp" line="146"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Analog meter&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show the reading on a moving-coil style instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Instrumento analógico&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Muestra la lectura en un instrumento de bobina móvil.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="145"/>
+        <location filename="../../src/mainwin.cpp" line="148"/>
         <source>&amp;Readings table</source>
         <translation>&amp;Tabla de lecturas</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="146"/>
+        <location filename="../../src/mainwin.cpp" line="149"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Readings table&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Every reading the meter sent, one row each, with time, mode and range - the raw protocol of the session next to the recorder&apos;s graph. Copy rows to a spreadsheet or export them as CSV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Tabla de lecturas&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Cada lectura que envió el multímetro, una fila por valor, con hora, modo y rango: el protocolo en bruto de la sesión junto al gráfico del registrador. Copie filas a una hoja de cálculo o expórtelas como CSV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="171"/>
+        <location filename="../../src/mainwin.cpp" line="174"/>
         <source>&lt;p&gt;Drag a divider between two windows to share the space differently. Ctrl+drag a window (or drag its title bar) onto another one to swap them.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Arrastre un divisor entre dos ventanas para repartir el espacio de otra forma. Arrastre una ventana con Ctrl (o por su barra de título) sobre otra para intercambiarlas.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="173"/>
+        <location filename="../../src/mainwin.cpp" line="176"/>
         <source>Displays on &amp;top</source>
         <translation>Pantallas &amp;arriba</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="174"/>
+        <location filename="../../src/mainwin.cpp" line="177"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Displays on top&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The displays share a strip at the top, the graph takes the rest and the readings table a column on the right; everything follows the window size.&lt;/p&gt;%1&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Pantallas arriba&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Las pantallas comparten una franja arriba, el gráfico ocupa el resto y la tabla de lecturas una columna a la derecha; todo sigue el tamaño de la ventana.&lt;/p&gt;%1&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="178"/>
+        <location filename="../../src/mainwin.cpp" line="181"/>
         <source>Displays on the &amp;left</source>
         <translation>Pantallas a la &amp;izquierda</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="179"/>
+        <location filename="../../src/mainwin.cpp" line="182"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Displays on the left&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The displays share a column on the left, the graph and the readings table take the rest; everything follows the window size.&lt;/p&gt;%1&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Pantallas a la izquierda&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Las pantallas comparten una columna a la izquierda, el gráfico y la tabla de lecturas ocupan el resto; todo sigue el tamaño de la ventana.&lt;/p&gt;%1&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="183"/>
+        <location filename="../../src/mainwin.cpp" line="186"/>
         <source>F&amp;ixed</source>
         <translation>Fi&amp;jo</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="184"/>
+        <location filename="../../src/mainwin.cpp" line="187"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fixed&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Keeps the layout as it is: from Displays on top or on the left as they are, from Free the windows snap into a grid made from their positions. A window shown later gets a place at the edge.&lt;/p&gt;%1&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fijo&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Mantiene la disposición tal como está: desde Pantallas arriba o a la izquierda tal cual, desde Libre las ventanas encajan en una cuadrícula formada a partir de sus posiciones. Una ventana mostrada más tarde obtiene un lugar en el borde.&lt;/p&gt;%1&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="189"/>
+        <location filename="../../src/mainwin.cpp" line="192"/>
         <source>&amp;Free</source>
         <translation>&amp;Libre</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="194"/>
+        <location filename="../../src/mainwin.cpp" line="197"/>
         <source>&amp;Hide title bars</source>
         <translation>&amp;Ocultar barras de título</translation>
     </message>
@@ -1498,255 +1509,255 @@ DMM connected and switched on?</source>
         <translation>Tecla %1 del multímetro: el control remoto aún no está incorporado.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="190"/>
+        <location filename="../../src/mainwin.cpp" line="193"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Free&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Place and size the windows as you like; Ctrl+drag moves a window, also one without title bar.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Libre&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Coloque y dimensione las ventanas como quiera; Ctrl+arrastrar mueve una ventana, también una sin barra de título.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="197"/>
+        <location filename="../../src/mainwin.cpp" line="200"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Hide title bars&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Windows without title bar sit flush next to each other. Right-click the display or the meter for the window&apos;s menu; Ctrl+drag moves a window, in the arranged modes onto another one to swap them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Ocultar barras de título&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Las ventanas sin barra de título quedan juntas unas a otras. Haga clic derecho en la pantalla o en el instrumento para el menú de la ventana; Ctrl+arrastrar mueve una ventana, en los modos organizados sobre otra para intercambiarlas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="205"/>
+        <location filename="../../src/mainwin.cpp" line="208"/>
         <source>&amp;Arrange</source>
         <translation>Organi&amp;zar</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="213"/>
+        <location filename="../../src/mainwin.cpp" line="216"/>
         <source>L&amp;oad workspace...</source>
         <translation>&amp;Cargar espacio de trabajo...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="214"/>
+        <location filename="../../src/mainwin.cpp" line="217"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Load workspace&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Takes a window layout saved with &lt;i&gt;Save workspace&lt;/i&gt;: which windows are shown, the arrangement, title bars, design and the size of the main window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Cargar espacio de trabajo&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Aplica una disposición de ventanas guardada con &lt;i&gt;Guardar espacio de trabajo&lt;/i&gt;: qué ventanas se muestran, la organización, las barras de título, el diseño y el tamaño de la ventana principal.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="219"/>
+        <location filename="../../src/mainwin.cpp" line="222"/>
         <source>&amp;Save workspace...</source>
         <translation>&amp;Guardar espacio de trabajo...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="220"/>
+        <location filename="../../src/mainwin.cpp" line="223"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save workspace&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Writes the window layout to a file: which windows are shown, the arrangement, title bars, design and the size of the main window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Guardar espacio de trabajo&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Escribe la disposición de las ventanas en un archivo: qué ventanas se muestran, la organización, las barras de título, el diseño y el tamaño de la ventana principal.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="224"/>
+        <location filename="../../src/mainwin.cpp" line="227"/>
         <source>Save layout on e&amp;xit</source>
         <translation>Guardar disposición al &amp;salir</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="227"/>
+        <location filename="../../src/mainwin.cpp" line="230"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save layout on exit&lt;/span&gt;&lt;/p&gt;&lt;p&gt;On: QtDMM starts with the window layout it had when it was closed. Off: it starts with the layout last saved while this was on, or the workspace last loaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Guardar disposición al salir&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Activado: QtDMM se inicia con la disposición de ventanas que tenía al cerrarse. Desactivado: se inicia con la última disposición guardada mientras estaba activado, o con el último espacio de trabajo cargado.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="233"/>
+        <location filename="../../src/mainwin.cpp" line="236"/>
         <source>Arrange the windows</source>
         <translation>Organizar las ventanas</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="242"/>
+        <location filename="../../src/mainwin.cpp" line="245"/>
         <source>D&amp;esign</source>
         <translation>Dise&amp;ño</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="244"/>
+        <location filename="../../src/mainwin.cpp" line="247"/>
         <source>&amp;System</source>
         <translation>&amp;Sistema</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="244"/>
+        <location filename="../../src/mainwin.cpp" line="247"/>
         <source>S&amp;ilver</source>
         <translation>&amp;Plata</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="245"/>
+        <location filename="../../src/mainwin.cpp" line="248"/>
         <source>&amp;Dark</source>
         <translation>&amp;Oscuro</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="302"/>
+        <location filename="../../src/mainwin.cpp" line="305"/>
         <source>The SCPI server: other programs can read the meter here (Settings, SCPI server).</source>
         <translation>El servidor SCPI: otros programas pueden leer el multímetro aquí (Preferencias, Servidor SCPI).</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="389"/>
+        <location filename="../../src/mainwin.cpp" line="392"/>
         <source>Another instance is running.</source>
         <translation>Ya hay otra instancia en ejecución.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="470"/>
+        <location filename="../../src/mainwin.cpp" line="473"/>
         <source>&amp;Full screen</source>
         <translation>Pantalla c&amp;ompleta</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="473"/>
+        <location filename="../../src/mainwin.cpp" line="476"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Full screen&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Use the whole screen for the instruments, e.g. on a lab monitor. F11 again returns to the normal window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Pantalla completa&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Usar toda la pantalla para los instrumentos, p. ej. en un monitor de laboratorio. F11 de nuevo vuelve a la ventana normal.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="478"/>
+        <location filename="../../src/mainwin.cpp" line="481"/>
         <source>Zoom &amp;in</source>
         <translation>Acerca&amp;r</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="481"/>
+        <location filename="../../src/mainwin.cpp" line="484"/>
         <source>Zoom &amp;out</source>
         <translation>A&amp;lejar</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="484"/>
+        <location filename="../../src/mainwin.cpp" line="487"/>
         <source>Show &amp;whole recording</source>
         <translation>Mostrar toda la grabació&amp;n</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="487"/>
+        <location filename="../../src/mainwin.cpp" line="490"/>
         <source>Cop&amp;y graph image</source>
         <translation>Copiar gráfico como &amp;imagen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="489"/>
+        <location filename="../../src/mainwin.cpp" line="492"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copy graph image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Puts a picture of the recorder graph on the clipboard, ready to paste into a report or a chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copiar gráfico como imagen&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Coloca una imagen del gráfico de la grabadora en el portapapeles, lista para pegar en un informe o un chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="544"/>
+        <location filename="../../src/mainwin.cpp" line="547"/>
         <source>Record DMM data</source>
         <translation>Grabar datos del multímetro</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="545"/>
+        <location filename="../../src/mainwin.cpp" line="548"/>
         <source>Multiple instances of QtDMM have been detected.
 Please choose which instance should record.</source>
         <translation>Se han detectado varias instancias de QtDMM.
 Elija qué instancia debe grabar.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="548"/>
+        <location filename="../../src/mainwin.cpp" line="551"/>
         <source>This instance</source>
         <translation>Esta instancia</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="549"/>
+        <location filename="../../src/mainwin.cpp" line="552"/>
         <source>All instances</source>
         <translation>Todas las instancias</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="609"/>
+        <location filename="../../src/mainwin.cpp" line="612"/>
         <source>About QtDMM</source>
         <translation>Acerca de QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="612"/>
+        <location filename="../../src/mainwin.cpp" line="615"/>
         <source>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;A readout and transient recorder for digital multimeters.&lt;/p&gt;&lt;p&gt;Built with &lt;b&gt;Qt&lt;/b&gt; %2. Licensed under the &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions before 0.9.0 under GPL 2).&lt;/p&gt;&lt;p&gt;0.9.5 onwards: tuxmaster and contributors, see the AUTHORS file.&lt;br&gt;0.9.3 and before: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Source and bug reports: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbols from the &lt;b&gt;Breeze&lt;/b&gt; icon theme of the KDE community (LGPL 3); QtDMM&apos;s own symbols are drawn in its style.&lt;/p&gt;</source>
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Lectura y registrador de transitorios para multímetros digitales.&lt;/p&gt;&lt;p&gt;Construido con &lt;b&gt;Qt&lt;/b&gt; %2. Bajo licencia &lt;b&gt;GNU GPL 3&lt;/b&gt; (versiones anteriores a 0.9.0 bajo GPL 2).&lt;/p&gt;&lt;p&gt;Desde 0.9.5: tuxmaster y colaboradores, véase el archivo AUTHORS.&lt;br&gt;0.9.3 y anteriores: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Sitio web: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contacto: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Código fuente e informes de errores: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Los símbolos proceden del tema de iconos &lt;b&gt;Breeze&lt;/b&gt; de la comunidad KDE (LGPL 3); los símbolos propios de QtDMM están dibujados en su estilo.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="629"/>
+        <location filename="../../src/mainwin.cpp" line="632"/>
         <source>Supported devices...</source>
         <translation>Dispositivos compatibles…</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="778"/>
+        <location filename="../../src/mainwin.cpp" line="781"/>
         <source>&amp;Hide window</source>
         <translation>&amp;Ocultar ventana</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="779"/>
+        <location filename="../../src/mainwin.cpp" line="782"/>
         <source>&amp;Title bar</source>
         <translation>&amp;Barra de título</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="784"/>
+        <location filename="../../src/mainwin.cpp" line="787"/>
         <source>Hide &amp;controls</source>
         <translation>Ocultar &amp;controles</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="791"/>
+        <location filename="../../src/mainwin.cpp" line="794"/>
         <source>&amp;LCD colours</source>
         <translation>Colores del &amp;LCD</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="793"/>
+        <location filename="../../src/mainwin.cpp" line="796"/>
         <source>&amp;Classic</source>
         <translation>&amp;Clásico</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="793"/>
+        <location filename="../../src/mainwin.cpp" line="796"/>
         <source>&amp;Backlight blue</source>
         <translation>Retroiluminación &amp;azul</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="794"/>
+        <location filename="../../src/mainwin.cpp" line="797"/>
         <source>&amp;Amber</source>
         <translation>Á&amp;mbar</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="794"/>
+        <location filename="../../src/mainwin.cpp" line="797"/>
         <source>&amp;High contrast</source>
         <translation>Alto con&amp;traste</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="795"/>
+        <location filename="../../src/mainwin.cpp" line="798"/>
         <source>C&amp;ustom (from the settings)</source>
         <translation>&amp;Personalizado (de la configuración)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="831"/>
+        <location filename="../../src/mainwin.cpp" line="834"/>
         <source>%1: readings are coming in</source>
         <translation>%1: llegan lecturas</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="832"/>
+        <location filename="../../src/mainwin.cpp" line="835"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: sin lectura desde hace 3 s</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="943"/>
+        <location filename="../../src/mainwin.cpp" line="946"/>
         <source>Save workspace</source>
         <translation>Guardar espacio de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="944"/>
-        <location filename="../../src/mainwin.cpp" line="970"/>
+        <location filename="../../src/mainwin.cpp" line="947"/>
+        <location filename="../../src/mainwin.cpp" line="973"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Espacio de trabajo de QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="957"/>
+        <location filename="../../src/mainwin.cpp" line="960"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Guardar espacio de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="957"/>
+        <location filename="../../src/mainwin.cpp" line="960"/>
         <source>Could not write %1.</source>
         <translation>No se pudo escribir %1.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="961"/>
+        <location filename="../../src/mainwin.cpp" line="964"/>
         <source>Workspace saved to %1</source>
         <translation>Espacio de trabajo guardado en %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="969"/>
+        <location filename="../../src/mainwin.cpp" line="972"/>
         <source>Load workspace</source>
         <translation>Cargar espacio de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="976"/>
+        <location filename="../../src/mainwin.cpp" line="979"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Cargar espacio de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="977"/>
+        <location filename="../../src/mainwin.cpp" line="980"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 no es un espacio de trabajo de QtDMM.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="1001"/>
+        <location filename="../../src/mainwin.cpp" line="1004"/>
         <source>Workspace loaded from %1</source>
         <translation>Espacio de trabajo cargado desde %1</translation>
     </message>
@@ -2219,59 +2230,59 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
     </message>
     <message>
         <location filename="../../src/readinglogwid.cpp" line="56"/>
-        <location filename="../../src/readinglogwid.cpp" line="99"/>
+        <location filename="../../src/readinglogwid.cpp" line="105"/>
         <source>&amp;Export...</source>
         <translation>&amp;Exportar…</translation>
     </message>
     <message>
         <location filename="../../src/readinglogwid.cpp" line="57"/>
-        <location filename="../../src/readinglogwid.cpp" line="102"/>
+        <location filename="../../src/readinglogwid.cpp" line="108"/>
         <source>C&amp;lear</source>
         <translation>&amp;Borrar</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="72"/>
-        <location filename="../../src/readinglogwid.cpp" line="77"/>
+        <location filename="../../src/readinglogwid.cpp" line="76"/>
+        <location filename="../../src/readinglogwid.cpp" line="81"/>
         <source>Pause logging</source>
         <translation>Pausar el registro</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="77"/>
+        <location filename="../../src/readinglogwid.cpp" line="81"/>
         <source>Resume logging</source>
         <translation>Reanudar el registro</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="82"/>
+        <location filename="../../src/readinglogwid.cpp" line="86"/>
         <source>&amp;Follow</source>
         <translation>&amp;Seguir</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="84"/>
+        <location filename="../../src/readinglogwid.cpp" line="88"/>
         <source>Keep the newest reading in view. Scrolling up switches this off.</source>
         <translation>Mantener a la vista la lectura más reciente. Desplazarse hacia arriba lo desactiva.</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="88"/>
+        <location filename="../../src/readinglogwid.cpp" line="94"/>
         <source>Keep</source>
         <translation>Conservar</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="94"/>
+        <location filename="../../src/readinglogwid.cpp" line="100"/>
         <source> rows</source>
         <translation> filas</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="95"/>
+        <location filename="../../src/readinglogwid.cpp" line="101"/>
         <source>How many readings the table keeps; the oldest are dropped.</source>
         <translation>Cuántas lecturas conserva la tabla; las más antiguas se descartan.</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="209"/>
+        <location filename="../../src/readinglogwid.cpp" line="251"/>
         <source>No readings yet.</source>
         <translation>Aún no hay lecturas.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/readinglogwid.cpp" line="217"/>
+        <location filename="../../src/readinglogwid.cpp" line="263"/>
         <source>%n reading(s)</source>
         <translation>
             <numerusform>%n lectura</numerusform>
@@ -2279,28 +2290,43 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
         </translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="219"/>
-        <source>Min %1   Max %2   Mean %3   Span %4</source>
-        <translation>Mín %1   Máx %2   Media %3   Amplitud %4</translation>
+        <location filename="../../src/readinglogwid.cpp" line="265"/>
+        <source>Min %1</source>
+        <translation>Mín %1</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="231"/>
+        <location filename="../../src/readinglogwid.cpp" line="265"/>
+        <source>Max %1</source>
+        <translation>Máx %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/readinglogwid.cpp" line="266"/>
+        <source>Mean %1</source>
+        <translation>Media %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/readinglogwid.cpp" line="266"/>
+        <source>Span %1</source>
+        <translation>Amplitud %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/readinglogwid.cpp" line="277"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="231"/>
+        <location filename="../../src/readinglogwid.cpp" line="277"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="231"/>
+        <location filename="../../src/readinglogwid.cpp" line="277"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/readinglogwid.cpp" line="233"/>
-        <location filename="../../src/readinglogwid.cpp" line="241"/>
+        <location filename="../../src/readinglogwid.cpp" line="279"/>
+        <location filename="../../src/readinglogwid.cpp" line="287"/>
         <source>Export readings</source>
         <translation>Exportar lecturas</translation>
     </message>
