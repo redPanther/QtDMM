@@ -1540,7 +1540,9 @@ void DMMGraph::applyThemeColors()
   m_crosshairHLine->setPen(QPen(cursor));
   m_triggerLine->setPen(QPen(pick(m_startColor, Qt::magenta, start), 1, lineStyle));
   m_externalLine->setPen(QPen(pick(m_externalColor, Qt::cyan, external), 1, lineStyle));
-  m_integrationLine->setPen(QPen(pick(m_intThresholdColor, Qt::darkBlue, intColor()), 1, lineStyle));
+  // dotted: by default it takes the integration curve's colour and must not
+  // pass for a curve (phosphor dashes the curve)
+  m_integrationLine->setPen(QPen(pick(m_intThresholdColor, Qt::darkBlue, intColor()), 1, Qt::DotLine));
   updateXAxisRange();
   setYRange(m_scaleMin, m_scaleMax);
   updateThresholdLinePositions();
