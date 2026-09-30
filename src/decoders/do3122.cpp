@@ -115,7 +115,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderDO3122::decode(const QByteArray &d
         case 0x01u: d_val *= 0.000001; unit = 'u'; break;
         case 0x02u: d_val *= 0.001; unit = 'm'; break;
         case 0x10u: d_val *= 1000000; unit = 'M'; break;
-        case 0x20u: d_val *= 1000; unit = 'K'; break;
+        case 0x20u: d_val *= 1000; unit = 'k'; break;
         default: convOk = false; break;
       }
 
