@@ -130,6 +130,9 @@ public:
   void             setGraphSize(int size, int length);
   /// The recorder behind the graph.
   RecordingStore  *store() const { return m_store; }
+  /// Shows @p store instead of the graph's own one (the MeterController's
+  /// recorder). The graph does not take ownership; the store has to outlive it.
+  void             setStore(RecordingStore *store);
   /// The current reading, every 100 ms: RecordingStore::addValue().
   void             addValue(double v) { m_store->addValue(v); }
   /// Unit of the recorded quantity for the axis label; the SI prefix is
@@ -298,6 +301,7 @@ protected:
   SampleMode       mode() const { return SampleMode(m_store->startMode()); }
   bool             m_connected;
   /// The store's signals: a new sample, discarded or replaced samples.
+  void             connectStore();
   void             onAppended(bool shifted);
   void             onCleared();
   /// The mark lines anew from the store's marks.

@@ -179,6 +179,11 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
   m_cursorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);   // no Leave for the view
   m_cursorLabel->hide();
 
+  connectStore();
+}
+
+void DMMGraph::connectStore()
+{
   connect(m_store, &RecordingStore::appended, this, &DMMGraph::onAppended);
   connect(m_store, &RecordingStore::cleared, this, &DMMGraph::onCleared);
   connect(m_store, &RecordingStore::marksChanged, this, &DMMGraph::syncMarks);
@@ -186,6 +191,20 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
   connect(m_store, &RecordingStore::runningChanged, this, &DMMGraph::running);
   connect(m_store, &RecordingStore::externalTriggered, this, &DMMGraph::externalTriggered);
   connect(m_store, &RecordingStore::alert, this, [] { QApplication::beep(); });
+}
+
+void DMMGraph::setStore(RecordingStore *store)
+{
+  if (!store || store == m_store)
+    return;
+  m_store->disconnect(this);
+  m_store = store;
+  connectStore();
+  // the view shows the new store as it is
+  onCleared();
+  rebuildSeries();
+  syncMarks();
+  emitInfo();
 }
 
 void DMMGraph::timeButtonClicked(int seconds)

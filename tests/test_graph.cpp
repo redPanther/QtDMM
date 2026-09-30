@@ -10,6 +10,7 @@
 #include <QFileInfo>
 
 #include "dmmgraph.h"
+#include "recordingstore.h"
 #include <QChartView>
 #include <QValueAxis>
 #include <QGraphicsSimpleTextItem>
@@ -503,6 +504,30 @@ int main(int argc, char **argv)
     for (int i = 1; i <= 50; i++)
       graph.addValue(i);
     check(running.size() == 3, "length 0: must record until stopped");
+  }
+
+  // --- 5j. a store from outside (the MeterController's recorder): the graph
+  //          shows it, takes what it already holds, and follows its signals ---
+  {
+    RecordingStore store;
+    store.setCapacity(100);
+    store.setStartMode(RecordingStore::Manual);
+    store.start();
+    store.addValue(1);
+    store.addValue(2);
+
+    DMMGraph graph(nullptr, &settings);
+    graph.setStore(&store);
+    check(graph.store() == &store, "setStore: store() must return the new store");
+    check(seriesY(graph, 0) == "1 2",
+          QString("setStore: expected the store's '1 2', got '%1'").arg(seriesY(graph, 0)));
+    store.addValue(3);
+    check(seriesY(graph, 0) == "1 2 3",
+          QString("setStore: expected '1 2 3' after a new sample, got '%1'").arg(seriesY(graph, 0)));
+    graph.stopSLOT();
+    check(!store.isRunning(), "setStore: the graph's stop must reach the shared store");
+    store.clear();
+    check(seriesY(graph, 0).isEmpty(), "setStore: a cleared store must empty the graph");
   }
 
   // --- 6. engineering-prefix export/import: setUnit() must strip a leading

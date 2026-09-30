@@ -71,10 +71,8 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
   connect(this, SIGNAL(sendState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
   connect(m_ctl, &MeterController::error, this, &MainWid::error);
   connect(m_ctl, &MeterController::info, this, &MainWid::info);
-  // the recorder: the sample clock drives it, the readings give each sample
-  // its mode, text and quality
-  connect(m_ctl, &MeterController::sample, ui_graph->store(), &RecordingStore::addValue);
-  connect(m_ctl, &MeterController::reading, ui_graph->store(), &RecordingStore::setReading);
+  // the recorder belongs to the controller; the graph shows it
+  ui_graph->setStore(m_ctl->recorder());
   connect(m_ctl, &MeterController::unitChanged, ui_graph, &DMMGraph::setUnit);
   connect(ui_graph, SIGNAL(info(const QString &)), this, SIGNAL(info(const QString &)));
   connect(ui_graph, SIGNAL(error(const QString &)), this, SIGNAL(error(const QString &)));
@@ -515,7 +513,6 @@ void MainWid::readConfig()
 
 void MainWid::runningSLOT(bool on)
 {
-  m_ctl->setRecording(on);
   Q_EMIT running(on);
 }
 

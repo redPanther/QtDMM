@@ -10,6 +10,7 @@
 #include "dmm.h"
 #include "engnumbervalidator.h"
 #include "mdnsresponder.h"
+#include "recordingstore.h"
 #include "scpiserver.h"
 #include "sharedstatemanager.h"
 #include "siprefix.h"
@@ -19,6 +20,7 @@ MeterController::MeterController(QObject *parent)
   : QObject(parent)
   , m_dmm(new DMM(this))
   , m_alarms(new AlarmManager(this))
+  , m_recorder(new RecordingStore(this))
   , m_scpi(new ScpiServer(this))
   , m_mdns(new MdnsResponder(this))
   , m_external(new QProcess(this))
@@ -26,6 +28,12 @@ MeterController::MeterController(QObject *parent)
   qRegisterMetaType<Reading>();
   connect(m_dmm, &DMM::value, this, &MeterController::valueSLOT);
   connect(m_dmm, &DMM::error, this, &MeterController::error);
+
+  // the recorder: the sample clock drives it, the readings give each sample
+  // its mode, text and quality
+  connect(this, &MeterController::sample, m_recorder, &RecordingStore::addValue);
+  connect(this, &MeterController::reading, m_recorder, &RecordingStore::setReading);
+  connect(m_recorder, &RecordingStore::runningChanged, this, &MeterController::setRecording);
 
   connect(m_alarms, &AlarmManager::raised, this, &MeterController::onAlarmRaised);
   connect(m_alarms, &AlarmManager::cleared, this, [this](int, const Alarm &alarm)
