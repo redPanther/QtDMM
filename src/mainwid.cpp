@@ -576,9 +576,9 @@ void MainWid::startExternalSLOT()
     Q_EMIT error(tr("Launched %1").arg(command));
 }
 
-void MainWid::exitedSLOT(int exitStatus)
+void MainWid::exitedSLOT(int exitCode)
 {
-  Q_EMIT error(tr("%1 terminated with exit code %2.").arg(m_configDlg->externalCommand()).arg(exitStatus));
+  Q_EMIT error(tr("%1 terminated with exit code %2.").arg(m_configDlg->externalCommand()).arg(exitCode));
 }
 
 void MainWid::showTipsSLOT()

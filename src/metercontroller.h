@@ -122,8 +122,8 @@ Q_SIGNALS:
   /// SCPI server state: a short text for the status bar (empty = off) and
   /// a sentence for the settings page.
   void        scpiStatusChanged(const QString &status, const QString &detail);
-  /// The external program exited.
-  void        externalFinished(int exitStatus);
+  /// The external program exited with @p exitCode.
+  void        externalFinished(int exitCode);
 
 private:
   void        valueSLOT(double dval, const QString &val, const QString &unit, const QString &special,

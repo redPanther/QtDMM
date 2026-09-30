@@ -43,9 +43,9 @@ MeterController::MeterController(QObject *parent)
   });
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
 
-  connect(m_external, &QProcess::finished, this, [this](int, QProcess::ExitStatus status)
+  connect(m_external, &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus)
   {
-    Q_EMIT externalFinished(int(status));
+    Q_EMIT externalFinished(exitCode);
   });
 
   startTimer(100);   // recorder sample clock and alarm time base
@@ -310,11 +310,12 @@ void MeterController::updateScpiStatus()
 
 bool MeterController::startExternal(const QString &command)
 {
-  // the command is passed as the only argument of an empty program, as it
-  // always was: QProcess then runs it through the platform's rules
-  m_external->setArguments({command});
-  m_external->start();
-  return m_external->state() == QProcess::Starting;
+  // Qt 6 no longer runs a command line passed as the only argument of an
+  // empty program: split it into program and arguments like the alarms do
+  if (command.trimmed().isEmpty())
+    return false;
+  m_external->startCommand(command);
+  return m_external->waitForStarted(3000);
 }
 
 bool MeterController::externalRunning() const

@@ -175,7 +175,7 @@ protected Q_SLOTS:
   /// Launches the configured external application (threshold trigger).
   void        startExternalSLOT();
   /// The external application exited.
-  void        exitedSLOT(int exitStatus);
+  void        exitedSLOT(int exitCode);
   /// Graph zoom changed; re-applies the window/total size.
   void        zoomedSLOT();
 };
