@@ -119,6 +119,14 @@ public:
   /// The same, but a percentage (unit "%": state of charge, duty cycle) is
   /// always a 0..100 scale, whatever the display count says.
   static double fullScaleFromReading(const QString &value, int counts, const QString &unit);
+  /// Distance of the labelled (major) ticks: a 1-2-5 value for about 5
+  /// (unipolar) or 8 (bipolar) intervals, made coarser until neighbouring
+  /// labels labelWidth px wide fit on an arc labelRadius px from the pivot.
+  /// The ticks sit on multiples of it, counted from 0.
+  static double scaleStep(double fullScale, bool bipolar, double labelRadius, double labelWidth);
+  /// A MIN/MAX readout: value with that many decimals, "—" for NaN, and no
+  /// minus sign on a rounded zero ("-0.00" -> "0.00").
+  static QString readoutString(double value, int decimals);
 
   QSize sizeHint() const override;
   QSize minimumSizeHint() const override;
@@ -162,7 +170,7 @@ private:
   QString m_unitText;   ///< unit of the last reading, with prefix
   double m_minBase = std::numeric_limits<double>::quiet_NaN();
   double m_maxBase = std::numeric_limits<double>::quiet_NaN();
-  int m_decimals = 0;   ///< decimals of the last reading that was not an overload
+  int m_decimals = 0;   ///< most decimals of a reading (not an overload) since reset()
   MeterStyle m_style = MeterStyle::dark();
   ScaleMode m_scaleMode = Auto;
   bool m_bipolar = false;

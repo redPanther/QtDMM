@@ -193,10 +193,12 @@ void MeterWid::setReading(double value, const QString &text, const QString &unit
   m_overload = overload;
   if (!overload)
   {
-    // MIN and MAX use the meter's decimals; "0.L" would say one
+    // MIN and MAX use the meter's decimals ("0.L" would say one); the most
+    // seen since reset(), so a minimum from the 4 V range keeps its three
+    // decimals after a change to the 40 V range
     const QString shown = withoutLeadingZeros(text);
     const int dot = shown.indexOf('.');
-    m_decimals = dot < 0 ? 0 : qBound(0, int(shown.size() - dot - 1), 6);
+    m_decimals = qMax(m_decimals, dot < 0 ? 0 : qBound(0, int(shown.size() - dot - 1), 6));
   }
   m_hold = hold;
 
@@ -262,6 +264,7 @@ void MeterWid::reset()
   m_peak = kNaN;
   m_markMin = kNaN;
   m_markMax = kNaN;
+  m_decimals = 0;
   if (m_scaleMode == Auto && m_bipolar)
   {
     m_bipolar = false;
@@ -364,13 +367,35 @@ QString MeterWid::formatLabel(double v)
   return s;
 }
 
+double MeterWid::scaleStep(double fullScale, bool bipolar, double labelRadius, double labelWidth)
+{
+  const double range = bipolar ? 2.0 * fullScale : fullScale;
+  if (!(range > 0.0))
+    return 1.0;
+  double step = niceStep(range, bipolar ? 8 : 5);
+  const double pxPerUnit = labelRadius * qDegreesToRadians(2.0 * kSweep) / range;
+  // 1 -> 2 -> 5 -> 10 until two neighbouring labels no longer touch
+  for (int guard = 0; guard < 12 && step * pxPerUnit < labelWidth; ++guard)
+  {
+    const double mag = std::pow(10.0, std::floor(std::log10(step) + 1e-9));
+    const double norm = step / mag;
+    step = (norm < 1.5 ? 2.0 : norm < 3.5 ? 5.0 : 10.0) * mag;
+  }
+  return step;
+}
+
 void MeterWid::drawScale(QPainter &p, const Geometry &g) const
 {
   const double R = g.radius;
   const double vMin = m_bipolar ? -m_fullScale : 0.0;
   const double vMax = m_fullScale;
-  const double step = niceStep(vMax - vMin, m_bipolar ? 8 : 5);
-  const int minorsPerMajor = (std::fmod(step / std::pow(10.0, std::floor(std::log10(step))), 2.0) == 0.0) ? 4 : 5;
+  const QFont labelFont = scaledFont(g.fontPx, true);
+  const QFontMetricsF fm(labelFont);
+  // the widest label is one of the ends; a small gap between neighbours
+  const double labelWidth = qMax(fm.horizontalAdvance(formatLabel(vMin)), fm.horizontalAdvance(formatLabel(vMax)))
+                            + g.fontPx * 0.5;
+  const double step = scaleStep(m_fullScale, m_bipolar, R + g.fontPx, labelWidth);
+  const int minorsPerMajor = (std::fmod(std::lround(step / std::pow(10.0, std::floor(std::log10(step) + 1e-9))), 2) == 0) ? 4 : 5;
   const double minor = step / minorsPerMajor;
   auto angleOf = [&](double v) { return angleForValue(v, m_fullScale, m_bipolar); };
 
@@ -400,17 +425,29 @@ void MeterWid::drawScale(QPainter &p, const Geometry &g) const
       band(-vMax, -from);
   }
 
-  // ticks and labels
-  const QFont labelFont = scaledFont(g.fontPx, true);
+  // ticks and labels, on multiples of the step counted from 0 - so 0 is
+  // always labelled, also when the full scale is no multiple of the step
+  // (22 V: -20 ... 20, not -17 ... 18)
   p.setFont(labelFont);
-  const QFontMetricsF fm(labelFont);
   const double majorLen = R * 0.11;
   const double minorLen = R * 0.055;
-  const int nMinor = int(std::lround((vMax - vMin) / minor));
-  for (int i = 0; i <= nMinor; ++i)
+  const long kFrom = long(std::ceil(vMin / minor - 1e-6));
+  const long kTo = long(std::floor(vMax / minor + 1e-6));
+  // the ends of the scale always get a tick; a label only on a major one
+  auto endTick = [&](double v)
   {
-    const double v = vMin + i * minor;
-    const bool major = (i % minorsPerMajor) == 0;
+    if (std::fabs(v / minor - std::lround(v / minor)) < 1e-6)
+      return;   // on the grid, drawn below
+    p.setPen(QPen(m_style.scale, qMax(1.0, R * 0.012), Qt::SolidLine, Qt::FlatCap));
+    p.drawLine(polar(g.pivot, R, angleOf(v)), polar(g.pivot, R - majorLen, angleOf(v)));
+  };
+  endTick(vMax);
+  if (m_bipolar)
+    endTick(vMin);
+  for (long k = kFrom; k <= kTo; ++k)
+  {
+    const double v = k * minor;
+    const bool major = (k % minorsPerMajor) == 0;
     const double a = angleOf(v);
     const bool inRed = std::fabs(v) >= m_style.redZoneFrom * m_fullScale - 1e-9 && v != 0.0;
     const QColor c = inRed ? m_style.redZone.lighter(115) : m_style.scale;
@@ -536,9 +573,18 @@ void MeterWid::readoutRects(const Geometry &g, QRectF *min, QRectF *max) const
 
 QString MeterWid::readoutText(double value) const
 {
+  return readoutString(value, m_decimals);
+}
+
+QString MeterWid::readoutString(double value, int decimals)
+{
   if (std::isnan(value))
     return QStringLiteral("—");
-  return QString::number(value, 'f', m_decimals);
+  QString s = QString::number(value, 'f', decimals);
+  // -0.004 with two decimals is "-0.00"; no sign on a zero (as formatLabel)
+  if (s.startsWith('-') && s.toDouble() == 0.0)
+    s.remove(0, 1);
+  return s;
 }
 
 void MeterWid::drawReadouts(QPainter &p, const Geometry &g) const

@@ -150,10 +150,12 @@ endif()
 add_library(qtdmm_resources OBJECT ${RES_SOURCES} ${QM_FILES} ${UI_HEADERS})
 target_link_libraries(qtdmm_resources PRIVATE Qt6::Core)
 
-## hidapi: distro package on Unix (keeps DEB/RPM/AUR dependencies honest),
-## built from source on Windows where there is no pkg-config and no package
-## manager to rely on. Either way the result is one imported target.
-if(WIN32)
+## hidapi: distro package on Linux/BSD (keeps DEB/RPM/AUR dependencies
+## honest), built from source on Windows and macOS: no package manager to
+## rely on, and on macOS it is linked in statically, so the app bundle needs
+## no Homebrew and gets the same architectures and minimum macOS as the
+## rest. Either way the result is one imported target.
+if(WIN32 OR APPLE)
 	include(FetchContent)
 	FetchContent_Declare(hidapi
 		GIT_REPOSITORY https://github.com/libusb/hidapi.git
@@ -184,7 +186,8 @@ if(APPLE)
 	set(MACOSX_BUNDLE_BUNDLE_NAME "${APP_NAME}")
 	set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
 	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
-	set(CMAKE_OSX_ARCHITECTURES "arm64") #x86_64;
+	# no CMAKE_OSX_ARCHITECTURES default: a local build is for the Mac's own
+	# architecture (Homebrew's Qt has only that one); the CI passes it
 endif()
 
 ## the sources are UTF-8 (unit strings such as "µ" and "Ω"); MSVC would

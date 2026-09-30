@@ -5,9 +5,20 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
-env:
-  BUILD_TYPE: Release
+  workflow_call:   # from release.yml for a version tag
+    inputs:
+      release:
+        description: "also build the universal (arm64 + x86_64) .dmg for the release"
+        type: boolean
+        default: false
+  # by hand (Actions -> macOS test build -> Run workflow) with "release"
+  # ticked: tries the universal release path before a version tag
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "also build the universal (arm64 + x86_64) .dmg"
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -18,16 +29,32 @@ jobs:
       with:
         fetch-depth: 0   # tags and history: the version comes from git describe
 
-    - name: Install dependencies
-      run: |
-        brew update
-        brew install cmake qt@6 hidapi
-        # Make Qt6 CMake config files discoverable
-        echo "/opt/homebrew/opt/qt@6/bin" >> $GITHUB_PATH
+    # The official Qt, not Homebrew's: Homebrew splits Qt into many
+    # prefixes, which macdeployqt cannot resolve, and its bottles only run on
+    # the runner's macOS. This Qt is universal (arm64 + x86_64) and runs on
+    # macOS 13 and later; hidapi is built from source by CMake, as on Windows.
+    # Not 6.8: the open-source 6.8 releases link the AGL framework, which the
+    # current macOS SDK no longer has ("framework 'AGL' not found").
+    # Pushes and PRs build, test and package arm64 only (the runner's
+    # architecture); the universal build doubles every compile, the tests
+    # included, so only a release makes it, without tests.
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.11.*'
+        modules: 'qtserialport qtcharts'
+        cache: true
 
-    - name: Configure and Build
-      working-directory: ${{github.workspace}}/
-      run: ./compile.sh
+    - name: Configure
+      run: >
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DQTDMM_WERROR=ON
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 -DCMAKE_OSX_ARCHITECTURES=arm64
+
+    - name: Build
+      # one job per core: a bare --parallel means make -j without a limit,
+      # which swamps the 3-core runner (the first runs sat in this step for
+      # half an hour)
+      run: cmake --build build --parallel "$(sysctl -n hw.ncpu)"
 
     - name: Check the bundle icon
       working-directory: ${{github.workspace}}/
@@ -36,5 +63,60 @@ jobs:
         test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' build/qtdmm.app/Contents/Info.plist)" = qtdmm.icns
 
     - name: Test
+      run: ctest --test-dir build --output-on-failure
+
+    - name: Build universal (release only)
+      if: inputs.release
+      run: |
+        cmake -S . -B build-universal -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DQTDMM_WERROR=OFF \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+        cmake --build build-universal --parallel "$(sysctl -n hw.ncpu)"
+
+    # The .dmg: Qt and hidapi copied into the bundle (macdeployqt), signed
+    # ad hoc (Apple Silicon refuses to start unsigned code), no Developer ID
+    # and no notarisation - Gatekeeper asks once, see docs/user/troubleshooting.md
+    - name: Package
       working-directory: ${{github.workspace}}/
-      run: ./compile.sh ctest
+      env:
+        BUILD_DIR: ${{ inputs.release && 'build-universal' || 'build' }}
+        DMG: ${{ inputs.release && 'QtDMM-macos-universal.dmg' || 'QtDMM-macos-arm64.dmg' }}
+        ARCHS: ${{ inputs.release && 'arm64 x86_64' || 'arm64' }}
+      run: |
+        rm -rf stage packages && mkdir -p stage packages
+        cp -R "$BUILD_DIR/qtdmm.app" stage/QtDMM.app
+        macdeployqt stage/QtDMM.app -always-overwrite
+        # every library the bundle uses is inside it or part of macOS
+        # file prints an extra "(for architecture ...)" line per slice of a
+        # universal binary; keep one line per file
+        find stage/QtDMM.app -type f -print0 | xargs -0 file | grep Mach-O | grep -v '(for architecture' \
+          | cut -d: -f1 | sort -u > machos.txt
+        wc -l < machos.txt
+        tr '\n' '\0' < machos.txt | xargs -0 otool -L > deps.txt
+        # the check has to see something to be trusted: Qt from the bundle,
+        # Cocoa from macOS
+        grep -q '@rpath/QtCore.framework' deps.txt || { echo "::error::no Qt framework found in the bundle"; exit 1; }
+        grep -q '/System/Library/Frameworks/' deps.txt || { echo "::error::no system framework found"; exit 1; }
+        if grep -E '^[[:space:]]+/' deps.txt | grep -v -E '^[[:space:]]+/(System/Library|usr/lib)/'; then
+          echo "::error::the bundle links against libraries outside the bundle"; exit 1
+        fi
+        archs=$(lipo -archs stage/QtDMM.app/Contents/MacOS/qtdmm); echo "$archs"
+        for a in $ARCHS; do case " $archs " in *" $a "*) ;; *) echo "::error::$a missing in the binary"; exit 1 ;; esac; done
+        codesign --force --deep --sign - stage/QtDMM.app
+        codesign --verify --deep --strict stage/QtDMM.app
+        otool -l stage/QtDMM.app/Contents/MacOS/qtdmm | grep -A3 LC_BUILD_VERSION | grep minos
+        # start test: with the Qt installation moved away, everything
+        # (@rpath frameworks, the cocoa plugin) has to come from the bundle;
+        # --version creates the QApplication first, then exits
+        : "${QT_ROOT_DIR:?install-qt-action sets it}"
+        mv "$QT_ROOT_DIR" "$QT_ROOT_DIR.off"
+        if stage/QtDMM.app/Contents/MacOS/qtdmm --version; then ok=1; else ok=0; fi
+        mv "$QT_ROOT_DIR.off" "$QT_ROOT_DIR"
+        [ $ok -eq 1 ] || { echo "::error::the bundled app does not start"; exit 1; }
+        ln -s /Applications stage/Applications
+        hdiutil create -volname QtDMM -srcfolder stage -ov -format UDZO "packages/$DMG"
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: QtDMM-macos
+        path: packages/*.dmg

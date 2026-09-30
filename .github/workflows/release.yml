@@ -1,7 +1,7 @@
 name: Release
 
 # A version tag (26.1-rc1, 26.1, 26.1.1 - see docs/dev/releasing.md) builds the
-# Linux AppImage and the Windows installer + ZIP with the regular workflows and
+# Linux AppImage, the Windows installer + ZIP and the macOS .dmg with the regular workflows and
 # puts them into a DRAFT release. A maintainer reviews it and publishes it by
 # hand; tags with a suffix (-rc1, -beta1) become pre-releases.
 # When the release already exists (made on GitHub's release page, which also
@@ -20,8 +20,16 @@ jobs:
   windows:
     uses: ./.github/workflows/cmake-windows-platform.yml
 
+  macos:
+    uses: ./.github/workflows/cmake-mac-platform.yml
+    with:
+      release: true
+
+  # Linux and Windows are required; a failed macOS job leaves the release
+  # without the .dmg instead of without any files
   draft:
-    needs: [ linux, windows ]
+    needs: [ linux, windows, macos ]
+    if: ${{ !cancelled() && needs.linux.result == 'success' && needs.windows.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v4
@@ -35,6 +43,11 @@ jobs:
         TAG: ${{ github.ref_name }}
       run: |
         mv dist/QtDMM.AppImage "dist/QtDMM-${TAG}-x86_64.AppImage"
+        if [ -f dist/QtDMM-macos-universal.dmg ]; then
+          mv dist/QtDMM-macos-universal.dmg "dist/QtDMM-${TAG}-macos.dmg"
+        else
+          echo "::warning::no macOS .dmg (the macos job failed); the release goes out without it"
+        fi
         ls -l dist
         if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
           gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
