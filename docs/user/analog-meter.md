@@ -42,7 +42,8 @@ appears while the meter's hold function is active.
 
 ## Style
 
-Two colour schemes are available on the *Appearance* settings page: a dark studio dial
-with a white scale and needle, and a classic ivory dial with black lettering.
+Two colour schemes are available: a dark studio dial with a white scale and needle, and
+a classic ivory dial with black lettering. Choose one with **Meter style** in the
+meter's right-click menu, or on the *Appearance* settings page.
 **Needle inertia** can be switched off to make the needle jump straight to each
 new reading.

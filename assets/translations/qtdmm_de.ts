@@ -1335,73 +1335,73 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
         <translation>Beenden ohne speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="499"/>
+        <location filename="../../src/mainwid.cpp" line="496"/>
         <source>Automatic start at %1</source>
         <translation>Automatisch starten bei %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="501"/>
+        <location filename="../../src/mainwid.cpp" line="498"/>
         <source>Raising threshold %1</source>
         <translation>Grenzwert steigent %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="503"/>
+        <location filename="../../src/mainwid.cpp" line="500"/>
         <source>Falling threshold %1</source>
         <translation>Grenzwert fallend %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="529"/>
+        <location filename="../../src/mainwid.cpp" line="526"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Startfehler&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Programm %1 läuft noch!&lt;p&gt;Wollen Sie es jetzt beenden?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="559"/>
+        <location filename="../../src/mainwid.cpp" line="556"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Startfehler&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Konnte %1 nicht starten</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="576"/>
+        <location filename="../../src/mainwid.cpp" line="573"/>
         <source>Launched %1</source>
         <translation>%1 gestartet</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="581"/>
+        <location filename="../../src/mainwid.cpp" line="578"/>
         <source>%1 terminated with exit code %2.</source>
         <translation>%1 mit dem Rückgabecode %2 beendet.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="621"/>
+        <location filename="../../src/mainwid.cpp" line="618"/>
         <source>calculated</source>
         <translation>berechnet</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="630"/>
+        <location filename="../../src/mainwid.cpp" line="627"/>
         <source>no meter configured</source>
         <translation>kein Multimeter konfiguriert</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="668"/>
+        <location filename="../../src/mainwid.cpp" line="665"/>
         <source>QtDMM alarm: %1</source>
         <translation>QtDMM-Alarm: %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="528"/>
-        <location filename="../../src/mainwid.cpp" line="558"/>
+        <location filename="../../src/mainwid.cpp" line="525"/>
+        <location filename="../../src/mainwid.cpp" line="555"/>
         <source>QtDMM: Launch error</source>
         <translation>QtDMM: Startfehler</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="541"/>
+        <location filename="../../src/mainwid.cpp" line="538"/>
         <source>Yes, kill it!</source>
         <translation>Ja, töten!</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="545"/>
+        <location filename="../../src/mainwid.cpp" line="542"/>
         <source>No, keep running</source>
         <translation>Nein, es laufen lassen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwid.cpp" line="570"/>
+        <location filename="../../src/mainwid.cpp" line="567"/>
         <source>Bummer!</source>
         <translation>Reinfall!</translation>
     </message>
@@ -1702,58 +1702,73 @@ Please choose which instance should record.</translation>
         <translation>&amp;Eigene (aus den Einstellungen)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="834"/>
+        <location filename="../../src/mainwin.cpp" line="811"/>
+        <source>Meter &amp;style</source>
+        <translation>&amp;Stil der Analoganzeige</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="812"/>
+        <source>&amp;Dark studio</source>
+        <translation>&amp;Dunkles Studio</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="812"/>
+        <source>Classic &amp;ivory</source>
+        <translation>Klassisch &amp;Elfenbein</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwin.cpp" line="846"/>
         <source>%1: readings are coming in</source>
         <translation>%1: Messwerte kommen an</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="835"/>
+        <location filename="../../src/mainwin.cpp" line="847"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: seit 3 s kein Messwert</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="946"/>
+        <location filename="../../src/mainwin.cpp" line="958"/>
         <source>Save workspace</source>
         <translation>Arbeitsbereich speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="947"/>
-        <location filename="../../src/mainwin.cpp" line="973"/>
+        <location filename="../../src/mainwin.cpp" line="959"/>
+        <location filename="../../src/mainwin.cpp" line="985"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>QtDMM-Arbeitsbereich (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="960"/>
+        <location filename="../../src/mainwin.cpp" line="972"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Arbeitsbereich speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="960"/>
+        <location filename="../../src/mainwin.cpp" line="972"/>
         <source>Could not write %1.</source>
         <translation>%1 konnte nicht geschrieben werden.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="964"/>
+        <location filename="../../src/mainwin.cpp" line="976"/>
         <source>Workspace saved to %1</source>
         <translation>Arbeitsbereich gespeichert in %1</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="972"/>
+        <location filename="../../src/mainwin.cpp" line="984"/>
         <source>Load workspace</source>
         <translation>Arbeitsbereich laden</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="979"/>
+        <location filename="../../src/mainwin.cpp" line="991"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Arbeitsbereich laden</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="980"/>
+        <location filename="../../src/mainwin.cpp" line="992"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 ist kein QtDMM-Arbeitsbereich.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwin.cpp" line="1004"/>
+        <location filename="../../src/mainwin.cpp" line="1016"/>
         <source>Workspace loaded from %1</source>
         <translation>Arbeitsbereich geladen aus %1</translation>
     </message>

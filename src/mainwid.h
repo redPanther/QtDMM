@@ -69,6 +69,10 @@ public:
   void        setDisplay(DisplayWid *);
   /// The LCD's colours (DisplayWid::LcdVariant), stored as Display/lcd.
   void        setLcdVariant(int variant);
+  /// The analog meter's style from its context menu (0 dark, 1 ivory):
+  /// shown at once, saved, and the Appearance page follows.
+  void        setMeterStyle(int style);
+  int         meterStyle() const;
   /// The analog meter to feed; created and docked by MainWin.
   void        setMeter(MeterWid *);
   /// Table model that gets every reading (MainWin owns it).
@@ -153,6 +157,7 @@ public Q_SLOTS:
   void        instancesChangedSlot(QStringList&);
 
 protected:
+  void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
   MeterController *m_ctl;
   ConfigDlg  *m_configDlg;
   qtdmm::PrintDlg *m_printDlg;

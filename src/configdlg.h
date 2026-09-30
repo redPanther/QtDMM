@@ -155,6 +155,7 @@ public:
   int                   meterScaleMode() const;
   /// 0 dark studio, 1 classic ivory (MeterStyle::dark()/ivory()).
   int                   meterStyle() const;
+  void                  setMeterStyle(int style);
   bool                  meterBallistics() const;
   /// Start of the red zone in percent of full scale.
   int                   meterRedZone() const;

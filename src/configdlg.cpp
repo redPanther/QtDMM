@@ -602,6 +602,11 @@ int ConfigDlg::meterScaleMode() const
   return m_gui->meterScaleMode();
 }
 
+void ConfigDlg::setMeterStyle(int style)
+{
+  m_gui->setMeterStyle(style);
+}
+
 int ConfigDlg::meterStyle() const
 {
   return m_gui->meterStyle();

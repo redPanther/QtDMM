@@ -479,10 +479,7 @@ void MainWid::readConfig()
   if (m_meter)
   {
     m_meter->setDisplayCounts(m_configDlg->display());
-    MeterStyle style = m_configDlg->meterStyle() == 1 ? MeterStyle::ivory() : MeterStyle::dark();
-    style.ballistics = m_configDlg->meterBallistics();
-    style.redZoneFrom = m_configDlg->meterRedZone() / 100.0;
-    m_meter->setStyle(style);
+    applyMeterStyle();
     m_meter->setScaleMode(static_cast<MeterWid::ScaleMode>(
       m_configDlg->meterScaleMode() == 1 ? MeterWid::Unipolar :
       m_configDlg->meterScaleMode() == 2 ? MeterWid::Bipolar : MeterWid::Auto));
@@ -672,6 +669,28 @@ void MainWid::alarmRaised(const Alarm &alarm, const QString &shown, const QStrin
     box->setModal(false);
     box->show();
   }
+}
+
+void MainWid::setMeterStyle(int style)
+{
+  m_configDlg->setMeterStyle(style);
+  m_settings->setInt("Meter/style", style);
+  applyMeterStyle();
+}
+
+int MainWid::meterStyle() const
+{
+  return m_configDlg->meterStyle();
+}
+
+void MainWid::applyMeterStyle()
+{
+  if (!m_meter)
+    return;
+  MeterStyle style = m_configDlg->meterStyle() == 1 ? MeterStyle::ivory() : MeterStyle::dark();
+  style.ballistics = m_configDlg->meterBallistics();
+  style.redZoneFrom = m_configDlg->meterRedZone() / 100.0;
+  m_meter->setStyle(style);
 }
 
 void MainWid::setLcdVariant(int variant)

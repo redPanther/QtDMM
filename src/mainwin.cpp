@@ -806,6 +806,18 @@ void MainWin::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
       connect(a, &QAction::triggered, this, [this, v = v] { m_wid->setLcdVariant(v); });
     }
   }
+  if (win == m_meterWin)
+  {
+    QMenu *style = menu.addMenu(tr("Meter &style"));
+    const std::pair<int, QString> styles[] = { { 0, tr("&Dark studio") }, { 1, tr("Classic &ivory") } };
+    for (const auto &[s, text] : styles)
+    {
+      QAction *a = style->addAction(text);
+      a->setCheckable(true);
+      a->setChecked(m_wid->meterStyle() == s);
+      connect(a, &QAction::triggered, this, [this, s = s] { m_wid->setMeterStyle(s); });
+    }
+  }
   menu.addSeparator();
   menu.addMenu(m_arrangeMenu);
   QAction *chosen = menu.exec(globalPos);

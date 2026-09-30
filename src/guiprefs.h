@@ -52,6 +52,7 @@ public:
   void      setToolbarVisibility(bool, bool, bool, bool);
   int       meterScaleMode() const;   ///< 0 auto, 1 unipolar, 2 bipolar
   int       meterStyle() const;   ///< 0 dark, 1 ivory
+  void      setMeterStyle(int style);
   bool      meterBallistics() const;
   int       meterRedZone() const;   ///< percent of full scale
 
