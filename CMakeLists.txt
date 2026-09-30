@@ -262,11 +262,13 @@ if (NOT WIN32)
 	configure_file(${CMAKE_SOURCE_DIR}/docs/qtdmm.1.in ${CMAKE_BINARY_DIR}/qtdmm.1 @ONLY)
 	execute_process( COMMAND gzip -n -f ${CMAKE_BINARY_DIR}/qtdmm.1 )
 
-	install(FILES assets/qtdmm.desktop DESTINATION share/applications)
-	install(FILES assets/icons/qtdmm_32.png DESTINATION share/icons/hicolor/32x32/apps RENAME qtdmm.png)
-	install(FILES assets/icons/qtdmm_64.png DESTINATION share/icons/hicolor/64x64/apps RENAME qtdmm.png)
-	install(FILES assets/icons/qtdmm_128.png DESTINATION share/icons/hicolor/128x128/apps RENAME qtdmm.png)
-	install(FILES assets/icons/qtdmm.svg DESTINATION share/icons/hicolor/scalable/apps)
+	## desktop file and icon are named after the application id, like the
+	## AppStream component (freedesktop recommends it, Flathub requires it)
+	install(FILES assets/io.github.qtdmm.qtdmm.desktop DESTINATION share/applications)
+	install(FILES assets/icons/qtdmm_32.png DESTINATION share/icons/hicolor/32x32/apps RENAME io.github.qtdmm.qtdmm.png)
+	install(FILES assets/icons/qtdmm_64.png DESTINATION share/icons/hicolor/64x64/apps RENAME io.github.qtdmm.qtdmm.png)
+	install(FILES assets/icons/qtdmm_128.png DESTINATION share/icons/hicolor/128x128/apps RENAME io.github.qtdmm.qtdmm.png)
+	install(FILES assets/icons/qtdmm.svg DESTINATION share/icons/hicolor/scalable/apps RENAME io.github.qtdmm.qtdmm.svg)
 	install(FILES ${CMAKE_BINARY_DIR}/qtdmm.1.gz DESTINATION share/man/man1)
 	## AppStream metadata for software centres, named after the component id
 	install(FILES assets/appimage/qtdmm.appdata.xml DESTINATION share/metainfo RENAME io.github.qtdmm.qtdmm.metainfo.xml)

@@ -170,7 +170,7 @@ if (BUILD_TESTING)
 	## (desktop-file-utils, appstream); no network: screenshot URLs aren't fetched
 	find_program(DESKTOP_FILE_VALIDATE desktop-file-validate)
 	if (DESKTOP_FILE_VALIDATE)
-		add_test(NAME desktop_entry COMMAND ${DESKTOP_FILE_VALIDATE} "${CMAKE_SOURCE_DIR}/assets/qtdmm.desktop")
+		add_test(NAME desktop_entry COMMAND ${DESKTOP_FILE_VALIDATE} "${CMAKE_SOURCE_DIR}/assets/io.github.qtdmm.qtdmm.desktop")
 	endif()
 	find_program(APPSTREAMCLI appstreamcli)
 	if (APPSTREAMCLI)

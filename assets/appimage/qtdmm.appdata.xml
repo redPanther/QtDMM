@@ -29,7 +29,7 @@
     <id>io.github.tuxmaster.qtdmm</id>
   </replaces>
 
-  <launchable type="desktop-id">qtdmm.desktop</launchable>
+  <launchable type="desktop-id">io.github.qtdmm.qtdmm.desktop</launchable>
   <provides>
     <binary>qtdmm</binary>
   </provides>
