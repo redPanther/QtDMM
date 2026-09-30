@@ -4,6 +4,7 @@
 
 #include <QList>
 #include <QObject>
+#include <QPointer>
 #include <QPoint>
 #include <QRect>
 
@@ -79,6 +80,8 @@ private:
   QList<Role> m_roles;             ///< parallel to m_order
   bool m_pending = false;
   QMdiSubWindow *m_pressed = nullptr; ///< Ctrl+press on this window, not moved yet
+  QPointer<QWidget> m_pressWidget;    ///< the widget that got that press
+  bool m_cancelling = false;          ///< sending the widget its cancelling release
   QMdiSubWindow *m_drag = nullptr;    ///< a window being moved with Ctrl+drag
   QPoint m_pressPos;                  ///< global cursor position of the press
   QPoint m_dragOffset;                ///< cursor - window position

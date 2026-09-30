@@ -6,6 +6,9 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QMouseEvent>
+#include <QSignalSpy>
+#include <QToolButton>
+#include <QVBoxLayout>
 #include <QTest>
 
 #include "mdiarranger.h"
@@ -176,6 +179,30 @@ static void testCtrlDrag()
   check(w->pos() == QPoint(90, 80), QString("Ctrl+drag moves the window (at %1,%2)").arg(w->x()).arg(w->y()));
   sendMouse(label, QEvent::MouseButtonRelease, p, Qt::NoButton);
   check(label->presses == 2 && label->releases == 2, "the drag leaves press and release to the widget");
+
+  // a button under the press: Ctrl+click fires it, Ctrl+drag does not (a
+  // meter key would send a command)
+  {
+    auto *box = new QWidget;
+    auto *button = new QToolButton(box);
+    button->setText("key");
+    (new QVBoxLayout(box))->addWidget(button);
+    QMdiSubWindow *bw = area.addSubWindow(box);
+    arranger.addWindow(bw, R::Instrument);
+    bw->show();
+    bw->setGeometry(400, 50, 200, 150);
+    QTest::qWait(50);
+    QSignalSpy clicked(button, &QToolButton::clicked);
+    const QPoint b = button->rect().center();
+    sendMouse(button, QEvent::MouseButtonPress, b, Qt::LeftButton);
+    sendMouse(button, QEvent::MouseButtonRelease, b, Qt::NoButton);
+    check(clicked.size() == 1, "Ctrl+click on a button fires it");
+    sendMouse(button, QEvent::MouseButtonPress, b, Qt::LeftButton);
+    sendMouse(button, QEvent::MouseMove, b + QPoint(40, 30), Qt::LeftButton);
+    sendMouse(button, QEvent::MouseButtonRelease, b, Qt::NoButton);
+    check(bw->pos() == QPoint(440, 80), QString("Ctrl+drag on a button moves the window (at %1,%2)").arg(bw->x()).arg(bw->y()));
+    check(clicked.size() == 1 && !button->isDown(), "Ctrl+drag on a button does not fire it");
+  }
 
   // in the automatic mode Ctrl+drag does nothing
   arranger.setMode(MdiArranger::DisplaysOnTop);

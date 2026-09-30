@@ -249,12 +249,16 @@ bool MdiArranger::eventFilter(QObject *watched, QEvent *event)
       // press itself goes through, so a Ctrl+click still reaches the widget
       // (multiple selection in the table); the move starts after the usual
       // drag distance.
+      if (m_cancelling)
+        break;
       auto *me = static_cast<QMouseEvent *>(event);
       if (m_mode != Free || me->button() != Qt::LeftButton || !(me->modifiers() & Qt::ControlModifier))
         break;
       if (QMdiSubWindow *w = subWindowOf(watched))
       {
         m_pressed = w;
+        if (!m_pressWidget)   // the first delivery is to the widget under the cursor
+          m_pressWidget = qobject_cast<QWidget *>(watched);
         m_pressPos = me->globalPosition().toPoint();
         m_dragOffset = m_pressPos - w->pos();
         w->raise();
@@ -265,7 +269,21 @@ bool MdiArranger::eventFilter(QObject *watched, QEvent *event)
     {
       const QPoint global = static_cast<QMouseEvent *>(event)->globalPosition().toPoint();
       if (m_pressed && !m_drag && (global - m_pressPos).manhattanLength() >= QApplication::startDragDistance())
+      {
         m_drag = m_pressed;
+        // a drag is no click: the widget gets its release far outside, so a
+        // button under the press does not fire (a meter key would send a
+        // command to the meter)
+        if (m_pressWidget)
+        {
+          const QPointF outside(-100000, -100000);
+          QMouseEvent release(QEvent::MouseButtonRelease, outside, m_pressWidget->mapToGlobal(outside),
+                              Qt::LeftButton, Qt::NoButton, static_cast<QMouseEvent *>(event)->modifiers());
+          m_cancelling = true;
+          QApplication::sendEvent(m_pressWidget, &release);
+          m_cancelling = false;
+        }
+      }
       if (m_drag)
       {
         m_drag->move(global - m_dragOffset);
@@ -274,11 +292,19 @@ bool MdiArranger::eventFilter(QObject *watched, QEvent *event)
       break;
     }
     case QEvent::MouseButtonRelease:
-      // the release goes through as well: the widget moved with the cursor,
-      // so it sees press and release on the same spot
+    {
+      // a plain Ctrl+click keeps its release; after a drag the widget had its
+      // release already
+      if (m_cancelling)
+        break;
+      const bool dragged = m_drag;
       m_pressed = nullptr;
+      m_pressWidget = nullptr;
       m_drag = nullptr;
+      if (dragged)
+        return true;
       break;
+    }
     default:
       break;
   }
