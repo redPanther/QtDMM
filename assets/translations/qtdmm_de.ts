@@ -1585,22 +1585,22 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="478"/>
         <source>Zoom &amp;in</source>
-        <translation>Ver&amp;größern</translation>
+        <translation>V&amp;ergrößern</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="481"/>
         <source>Zoom &amp;out</source>
-        <translation>Ver&amp;kleinern</translation>
+        <translation>Verk&amp;leinern</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="484"/>
         <source>Show &amp;whole recording</source>
-        <translation>&amp;Ganze Aufnahme zeigen</translation>
+        <translation>Ganze Aufnahme ze&amp;igen</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="487"/>
-        <source>Copy graph &amp;image</source>
-        <translation>Graph als &amp;Bild kopieren</translation>
+        <source>Cop&amp;y graph image</source>
+        <translation>Graph als Bild k&amp;opieren</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="489"/>
@@ -2027,17 +2027,17 @@ Please choose which instance should record.</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../src/main.cpp" line="125"/>
+        <location filename="../../src/main.cpp" line="127"/>
         <source>protocol debugging information</source>
         <translation>Protokol debugging Informationen</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="126"/>
+        <location filename="../../src/main.cpp" line="128"/>
         <source>sets directory where config files are located</source>
         <translation>setzt das Verzeichnis wo die Konfiguration sich befindet</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="127"/>
+        <location filename="../../src/main.cpp" line="129"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>setzt die &lt;config-id&gt;</translation>
     </message>
@@ -2670,7 +2670,7 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="748"/>
         <source>&amp;Driver:</source>
-        <translation>&amp;Treiber:</translation>
+        <translation>Tre&amp;iber:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="758"/>
@@ -2790,7 +2790,7 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="958"/>
         <source>Noi&amp;se:</source>
-        <translation>Rau&amp;schen:</translation>
+        <translation>Rausc&amp;hen:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="968"/>
@@ -2886,7 +2886,7 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="1018"/>
         <source>&amp;Number of values:</source>
-        <translation>&amp;Anzahl der Werte:</translation>
+        <translation>Anzahl der &amp;Werte:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="1028"/>
@@ -3856,9 +3856,14 @@ Die maximale Auflösung für die Datensammlung liegt bei 1/10 Sekunde, bei Bedar
         <translation>&amp;Konfigurieren</translation>
     </message>
     <message>
+        <location filename="../../src/ui/uimainwin.ui" line="397"/>
+        <source>Direct Hel&amp;p</source>
+        <translation>&amp;Direkte Hilfe</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/uimainwin.ui" line="437"/>
         <source>&amp;About</source>
-        <translation>Ü&amp;ber</translation>
+        <translation>&amp;Über</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="440"/>
@@ -3874,11 +3879,6 @@ Die maximale Auflösung für die Datensammlung liegt bei 1/10 Sekunde, bei Bedar
         <location filename="../../src/ui/uimainwin.ui" line="383"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show tip of the day.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zeigt den Tipp des Tages an.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/uimainwin.ui" line="397"/>
-        <source>&amp;Direct Help</source>
-        <translation>&amp;Direkte Hilfe</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="403"/>
@@ -4089,7 +4089,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="120"/>
         <source>Sample t&amp;ime:</source>
-        <translation>&amp;Messdauer:</translation>
+        <translation>Mess&amp;dauer:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="136"/>
@@ -4332,7 +4332,7 @@ Der Wert kann auch mit einem Suffix wie m, u, n, p, k, M, G oder T angegeben wer
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="292"/>
         <source>Max. &amp;length:</source>
-        <translation>&amp;Maximale Länge:</translation>
+        <translation>Maximale &amp;Länge:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="324"/>

@@ -394,7 +394,7 @@
     <iconset theme="help-whatsthis"/>
    </property>
    <property name="text">
-    <string>&amp;Direct Help</string>
+    <string>Direct Hel&amp;p</string>
    </property>
    <property name="iconText">
     <string>Help</string>

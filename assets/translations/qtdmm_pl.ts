@@ -1410,7 +1410,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="139"/>
         <source>&amp;Display</source>
-        <translation>&amp;Wyświetlacz</translation>
+        <translation>Wyświet&amp;lacz</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="117"/>
@@ -1580,7 +1580,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="470"/>
         <source>&amp;Full screen</source>
-        <translation>&amp;Pełny ekran</translation>
+        <translation>Pełny &amp;ekran</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="473"/>
@@ -1590,7 +1590,7 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="478"/>
         <source>Zoom &amp;in</source>
-        <translation>Po&amp;większ</translation>
+        <translation>Pow&amp;iększ</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="481"/>
@@ -1604,8 +1604,8 @@ Czy multimetr jest podłączony i włączony?</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="487"/>
-        <source>Copy graph &amp;image</source>
-        <translation>Kopiuj wykres jako &amp;obraz</translation>
+        <source>Cop&amp;y graph image</source>
+        <translation>Kopiuj wykres jako ob&amp;raz</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="489"/>
@@ -2072,17 +2072,17 @@ Then log out and back in so the new group membership becomes active.</source>
 Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło działać.</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="125"/>
+        <location filename="../../src/main.cpp" line="127"/>
         <source>protocol debugging information</source>
         <translation>informacje diagnostyczne protokołu</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="126"/>
+        <location filename="../../src/main.cpp" line="128"/>
         <source>sets directory where config files are located</source>
         <translation>ustawia katalog plików konfiguracyjnych</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="127"/>
+        <location filename="../../src/main.cpp" line="129"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>ustawia &lt;config-id&gt;</translation>
     </message>
@@ -2571,7 +2571,7 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="210"/>
         <source>Baud &amp;rate:</source>
-        <translation>&amp;Prędkość (bod):</translation>
+        <translation>Prędkość (bo&amp;d):</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="226"/>
@@ -2826,7 +2826,7 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="891"/>
         <source>Cou&amp;pling:</source>
-        <translation>S&amp;przężenie:</translation>
+        <translation>Sp&amp;rzężenie:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="907"/>
@@ -3818,7 +3818,7 @@ Maksymalna rozdzielczość to 1/10 sekundy, ale można też próbkować raz na t
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="380"/>
         <source>&amp;Tip of the day</source>
-        <translation>&amp;Porada dnia</translation>
+        <translation>Porada &amp;dnia</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="383"/>
@@ -3827,7 +3827,7 @@ Maksymalna rozdzielczość to 1/10 sekundy, ale można też próbkować raz na t
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="397"/>
-        <source>&amp;Direct Help</source>
+        <source>Direct Hel&amp;p</source>
         <translation>Pomoc &amp;bezpośrednia</translation>
     </message>
     <message>
@@ -4045,7 +4045,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="53"/>
         <source>Sample &amp;every:</source>
-        <translation>Próbkuj &amp;co:</translation>
+        <translation>Pró&amp;bkuj co:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="69"/>
@@ -4125,7 +4125,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="263"/>
         <source>&amp;Manual</source>
-        <translation>&amp;Ręczny</translation>
+        <translation>Ręczn&amp;y</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="308"/>
@@ -4278,7 +4278,7 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="111"/>
         <source>&amp;Manual</source>
-        <translation>&amp;Ręczny</translation>
+        <translation>Ręczn&amp;y</translation>
     </message>
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="142"/>

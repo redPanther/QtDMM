@@ -1580,7 +1580,7 @@ DMM connected and switched on?</source>
     <message>
         <location filename="../../src/mainwin.cpp" line="470"/>
         <source>&amp;Full screen</source>
-        <translation>&amp;Pantalla completa</translation>
+        <translation>Pantalla c&amp;ompleta</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="473"/>
@@ -1590,7 +1590,7 @@ DMM connected and switched on?</source>
     <message>
         <location filename="../../src/mainwin.cpp" line="478"/>
         <source>Zoom &amp;in</source>
-        <translation>&amp;Acercar</translation>
+        <translation>Acerca&amp;r</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="481"/>
@@ -1600,11 +1600,11 @@ DMM connected and switched on?</source>
     <message>
         <location filename="../../src/mainwin.cpp" line="484"/>
         <source>Show &amp;whole recording</source>
-        <translation>Mostrar &amp;toda la grabación</translation>
+        <translation>Mostrar toda la grabació&amp;n</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="487"/>
-        <source>Copy graph &amp;image</source>
+        <source>Cop&amp;y graph image</source>
         <translation>Copiar gráfico como &amp;imagen</translation>
     </message>
     <message>
@@ -2071,17 +2071,17 @@ Then log out and back in so the new group membership becomes active.</source>
 Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo tenga efecto.</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="125"/>
+        <location filename="../../src/main.cpp" line="127"/>
         <source>protocol debugging information</source>
         <translation>información de depuración del protocolo</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="126"/>
+        <location filename="../../src/main.cpp" line="128"/>
         <source>sets directory where config files are located</source>
         <translation>establece el directorio de los archivos de configuración</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="127"/>
+        <location filename="../../src/main.cpp" line="129"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>establece &lt;config-id&gt;</translation>
     </message>
@@ -2442,7 +2442,7 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
     <message>
         <location filename="../../src/scpiprefs.cpp" line="52"/>
         <source>&amp;Announce by mDNS (_scpi-raw._tcp), so lxi discover finds it</source>
-        <translation>&amp;Anunciar por mDNS (_scpi-raw._tcp), para que lxi discover lo encuentre</translation>
+        <translation>A&amp;nunciar por mDNS (_scpi-raw._tcp), para que lxi discover lo encuentre</translation>
     </message>
     <message>
         <location filename="../../src/scpiprefs.cpp" line="100"/>
@@ -2589,7 +2589,7 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="374"/>
         <source>Parit&amp;y</source>
-        <translation>Parida&amp;d</translation>
+        <translation>Pa&amp;ridad</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="390"/>
@@ -2614,7 +2614,7 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="416"/>
         <source>&amp;Stop bits:</source>
-        <translation>Bits de &amp;parada:</translation>
+        <translation>Bits de parad&amp;a:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="432"/>
@@ -2724,7 +2724,7 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="748"/>
         <source>&amp;Driver:</source>
-        <translation>&amp;Controlador:</translation>
+        <translation>Con&amp;trolador:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uidmmprefs.ui" line="758"/>
@@ -2961,7 +2961,7 @@ Puede introducir los valores con un sufijo como m, u, n, p, k, M, G, T&lt;br&gt;
     <message>
         <location filename="../../src/ui/uiexecuteprefs.ui" line="126"/>
         <source>&amp;Falling edge</source>
-        <translation>Flanco &amp;descendente</translation>
+        <translation>Flanco d&amp;escendente</translation>
     </message>
     <message>
         <location filename="../../src/ui/uiexecuteprefs.ui" line="171"/>
@@ -3816,7 +3816,7 @@ La resolución máxima es de una décima de segundo, pero también puede muestre
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="380"/>
         <source>&amp;Tip of the day</source>
-        <translation>&amp;Consejo del día</translation>
+        <translation>Conse&amp;jo del día</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="383"/>
@@ -3825,7 +3825,7 @@ La resolución máxima es de una décima de segundo, pero también puede muestre
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="397"/>
-        <source>&amp;Direct Help</source>
+        <source>Direct Hel&amp;p</source>
         <translation>Ayuda &amp;directa</translation>
     </message>
     <message>
@@ -3856,7 +3856,7 @@ La resolución máxima es de una décima de segundo, pero también puede muestre
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="437"/>
         <source>&amp;About</source>
-        <translation>&amp;Acerca de</translation>
+        <translation>Acerca d&amp;e</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="440"/>
@@ -4086,7 +4086,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="120"/>
         <source>Sample t&amp;ime:</source>
-        <translation>&amp;Duración del muestreo:</translation>
+        <translation>Duració&amp;n del muestreo:</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="136"/>
@@ -4224,7 +4224,7 @@ Puede introducir los valores con un sufijo como m, u, n, p, k, M, G, T&lt;br&gt;
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="811"/>
         <source>&amp;Falling edge</source>
-        <translation>Flanco &amp;descendente</translation>
+        <translation>Flanco d&amp;escendente</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="845"/>
@@ -4261,7 +4261,7 @@ Puede introducir los valores con un sufijo como m, u, n, p, k, M, G, T&lt;br&gt;
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="49"/>
         <source>Au&amp;tomatic</source>
-        <translation>Au&amp;tomática</translation>
+        <translation>A&amp;utomática</translation>
     </message>
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="80"/>

@@ -189,4 +189,18 @@ if (BUILD_TESTING)
 	## --output-on-failure would show nothing
 	get_property(ALL_TESTS DIRECTORY PROPERTY TESTS)
 	set_tests_properties(${ALL_TESTS} PROPERTIES ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;PYTHONDONTWRITEBYTECODE=1")
+
+	## Alt letters used twice in a menu or among the widgets shown together
+	## (and doubled keys), in the real program in every language: it starts
+	## offscreen with a config of its own (it writes one, a missing one would
+	## greet with a dialog), checks and quits. The locale comes from LANG only
+	## on Linux and the BSDs; elsewhere this checks the system language. A
+	## dialog waiting for a click must not hold CI: a timeout.
+	foreach(lang en_US de_DE es_ES fr_FR pl_PL)
+		set(_dir "${CMAKE_BINARY_DIR}/mnemonics/${lang}")
+		file(MAKE_DIRECTORY "${_dir}")
+		add_test(NAME mnemonics_${lang} COMMAND ${PROJECT_NAME} --check-mnemonics --config-dir "${_dir}" --config-id check)
+		set_tests_properties(mnemonics_${lang} PROPERTIES TIMEOUT 120 ENVIRONMENT
+			"QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;QT_QPA_PLATFORM=offscreen;LANG=${lang}.UTF-8;LC_ALL=${lang}.UTF-8;LANGUAGE=;QTDMM_IPC_KEY=qtdmm_mnemonics_${lang}")
+	endforeach()
 endif()

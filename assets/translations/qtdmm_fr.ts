@@ -1420,7 +1420,7 @@ Le multimètre est-il branché et allumé ?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="142"/>
         <source>Analog &amp;meter</source>
-        <translation>&amp;Galvanomètre</translation>
+        <translation>Ga&amp;lvanomètre</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="125"/>
@@ -1590,7 +1590,7 @@ Le multimètre est-il branché et allumé ?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="478"/>
         <source>Zoom &amp;in</source>
-        <translation>Zoom &amp;avant</translation>
+        <translation>Zoom ava&amp;nt</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="481"/>
@@ -1600,11 +1600,11 @@ Le multimètre est-il branché et allumé ?</translation>
     <message>
         <location filename="../../src/mainwin.cpp" line="484"/>
         <source>Show &amp;whole recording</source>
-        <translation>Afficher &amp;tout l’enregistrement</translation>
+        <translation>Afficher tout l’&amp;enregistrement</translation>
     </message>
     <message>
         <location filename="../../src/mainwin.cpp" line="487"/>
-        <source>Copy graph &amp;image</source>
+        <source>Cop&amp;y graph image</source>
         <translation>Copier le graphe comme &amp;image</translation>
     </message>
     <message>
@@ -2071,17 +2071,17 @@ Then log out and back in so the new group membership becomes active.</source>
 Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au groupe prenne effet.</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="125"/>
+        <location filename="../../src/main.cpp" line="127"/>
         <source>protocol debugging information</source>
         <translation>informations de débogage du protocole</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="126"/>
+        <location filename="../../src/main.cpp" line="128"/>
         <source>sets directory where config files are located</source>
         <translation>définit le répertoire des fichiers de configuration</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="127"/>
+        <location filename="../../src/main.cpp" line="129"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>définit &lt;config-id&gt;</translation>
     </message>
@@ -2227,7 +2227,7 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
         <location filename="../../src/readinglogwid.cpp" line="57"/>
         <location filename="../../src/readinglogwid.cpp" line="102"/>
         <source>C&amp;lear</source>
-        <translation>&amp;Effacer</translation>
+        <translation>E&amp;ffacer</translation>
     </message>
     <message>
         <location filename="../../src/readinglogwid.cpp" line="72"/>
@@ -2442,7 +2442,7 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
     <message>
         <location filename="../../src/scpiprefs.cpp" line="52"/>
         <source>&amp;Announce by mDNS (_scpi-raw._tcp), so lxi discover finds it</source>
-        <translation>&amp;Annoncer par mDNS (_scpi-raw._tcp), pour que lxi discover le trouve</translation>
+        <translation>A&amp;nnoncer par mDNS (_scpi-raw._tcp), pour que lxi discover le trouve</translation>
     </message>
     <message>
         <location filename="../../src/scpiprefs.cpp" line="100"/>
@@ -2951,7 +2951,7 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
     <message>
         <location filename="../../src/ui/uiexecuteprefs.ui" line="113"/>
         <source>&amp;Raising edge</source>
-        <translation>Front &amp;montant</translation>
+        <translation>Front m&amp;ontant</translation>
     </message>
     <message>
         <location filename="../../src/ui/uiexecuteprefs.ui" line="123"/>
@@ -2961,7 +2961,7 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
     <message>
         <location filename="../../src/ui/uiexecuteprefs.ui" line="126"/>
         <source>&amp;Falling edge</source>
-        <translation>Front &amp;descendant</translation>
+        <translation>Front d&amp;escendant</translation>
     </message>
     <message>
         <location filename="../../src/ui/uiexecuteprefs.ui" line="171"/>
@@ -3796,7 +3796,7 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="349"/>
         <source>&amp;Clear</source>
-        <translation>&amp;Effacer</translation>
+        <translation>E&amp;ffacer</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="352"/>
@@ -3816,7 +3816,7 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="380"/>
         <source>&amp;Tip of the day</source>
-        <translation>&amp;Astuce du jour</translation>
+        <translation>Astuce du &amp;jour</translation>
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="383"/>
@@ -3825,7 +3825,7 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
     </message>
     <message>
         <location filename="../../src/ui/uimainwin.ui" line="397"/>
-        <source>&amp;Direct Help</source>
+        <source>Direct Hel&amp;p</source>
         <translation>Aide &amp;directe</translation>
     </message>
     <message>
@@ -4174,7 +4174,7 @@ Deux possibilités :
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="543"/>
         <source>&amp;Trigger</source>
-        <translation>&amp;Déclenchement</translation>
+        <translation>Dé&amp;clenchement</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="634"/>
@@ -4214,7 +4214,7 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="757"/>
         <source>&amp;Raising edge</source>
-        <translation>Front &amp;montant</translation>
+        <translation>Front m&amp;ontant</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="808"/>
@@ -4224,7 +4224,7 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="811"/>
         <source>&amp;Falling edge</source>
-        <translation>Front &amp;descendant</translation>
+        <translation>Front d&amp;escendant</translation>
     </message>
     <message>
         <location filename="../../src/ui/uirecorderprefs.ui" line="845"/>
@@ -4261,7 +4261,7 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="49"/>
         <source>Au&amp;tomatic</source>
-        <translation>Au&amp;tomatique</translation>
+        <translation>A&amp;utomatique</translation>
     </message>
     <message>
         <location filename="../../src/ui/uiscaleprefs.ui" line="80"/>
