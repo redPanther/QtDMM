@@ -48,6 +48,11 @@ port.
 
 ## Looking at the data
 
+- The buttons at the top right of the graph set the time window: **All**
+  shows the whole recording so far and grows with it, **1 min**, **5 min**
+  and **30 min** show the last minutes. Buttons longer than the sample time
+  are left out. Zooming ends **All**; the window set under
+  **Settings → Scales** stays the start.
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see

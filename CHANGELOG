@@ -1,3 +1,16 @@
+* in development: 26.2 (branch feature/mdi-ui, not released yet)
+- New main window: display, analog meter, graph and readings table are windows in one area, arranged
+  automatically ("Displays on top") or freely (Ctrl+drag moves a window, also one without title bar)
+- Designs System, Silver and Dark; the window grows with the content when a view is shown
+- Colour variants for the LCD (classic, backlight blue, amber, high contrast, custom) and the graph
+  (neutral, scope blue, phosphor, chart recorder, custom)
+- Symbols from the Breeze icon set, light and dark, instead of the XPM icons
+- Graph: time buttons All / 1 min / 5 min / 30 min at the top right
+- Readings table: columns fit their content, the time without the date
+- Meter keys under the display with a fold button (not working yet, for the coming remote control)
+- Update from 26.1: the window layout starts fresh. The analog meter is shown and the readings table is
+  hidden, whatever 26.1 had; the new layout is saved from then on
+
 
 * 29/09/2026 26.1-rc2 (second release candidate for 26.1, fixes after rc1)
 - AppImage: command-line options (--version, --config-id, ...) reach QtDMM again
