@@ -530,6 +530,47 @@ int main(int argc, char **argv)
     check(seriesY(graph, 0).isEmpty(), "setStore: a cleared store must empty the graph");
   }
 
+  // --- 5k. thinning: more samples in the window than pixel columns are drawn
+  //          as a minimum and a maximum per column (a spike survives), the
+  //          store and the export keep every sample, and growing the series
+  //          sample by sample gives what a rebuild gives ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.resize(300, 200);
+    graph.setSampleTime(1);
+    graph.setGraphSize(200, 200);            // 2000 samples in the window
+    graph.setMode(DMMGraph::Manual);
+    graph.startSLOT();
+    const int samples = 2000;
+    for (int i = 0; i < samples; i++)
+      graph.addValue(i == 777 ? 1000.0 : i == 1234 ? -500.0 : (i * 37) % 101);
+
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    const double plotWidth = chart->plotArea().width();
+    const int columns = int(plotWidth > 0 ? plotWidth : graph.width());
+    auto *series = qobject_cast<QXYSeries *>(chart->series().value(0));
+    const int points = series ? series->count() : -1;
+    check(points > 0 && points <= 2 * columns,
+          QString("thinning: expected at most %1 points, got %2").arg(2 * columns).arg(points));
+    check(graph.store()->count() == samples,
+          QString("thinning: the store must keep all %1 samples, has %2").arg(samples).arg(graph.store()->count()));
+    check(int(graph.store()->toRecording().values.size()) == samples, "thinning: the export must have every sample");
+
+    double lo = 1e9, hi = -1e9;
+    if (series)
+      for (const QPointF &p : series->points())
+      {
+        lo = qMin(lo, p.y());
+        hi = qMax(hi, p.y());
+      }
+    check(hi == 1000.0 && lo == -500.0, QString("thinning: spike and dip must be drawn, got %1 .. %2").arg(lo).arg(hi));
+
+    const QString grown = seriesY(graph, 0) + "|" + seriesY(graph, 2);
+    graph.setGraphSize(200, 200);            // rebuilds the series
+    check(grown == seriesY(graph, 0) + "|" + seriesY(graph, 2),
+          "thinning: appended series must equal the rebuilt one");
+  }
+
   // --- 6. engineering-prefix export/import: setUnit() must strip a leading
   //         G or p prefix too (previously only n/u/m/k/M were recognized), and
   //         a value re-imported from a prefix-scaled export (e.g. "2.5;pF")

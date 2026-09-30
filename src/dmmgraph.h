@@ -274,6 +274,9 @@ protected:
 
   QScrollBar      *scrollbar;
   int              m_size;          ///< visible window in samples
+  int              m_bucket = 1;    ///< samples per drawn min/max pair (see bucketSize())
+  int              m_tailData = 0;  ///< points the newest bucket has in the data series (1 or 2)
+  int              m_tailInt = 0;   ///< the same for the integral
   int              m_windowSeconds = 0;   ///< setGraphSize(), for setSampleTime()
   /// @name Time buttons (All / 1 min / 5 min / 30 min) top right in the graph
   /// @{
@@ -302,6 +305,9 @@ protected:
   bool             m_connected;
   /// The store's signals: a new sample, discarded or replaced samples.
   void             connectStore();
+  int              bucketSize() const;
+  int              bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const;
+  void             appendToSeries();
   void             onAppended(bool shifted);
   void             onCleared();
   /// The mark lines anew from the store's marks.

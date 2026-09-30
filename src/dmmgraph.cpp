@@ -332,6 +332,62 @@ void DMMGraph::resizeEvent(QResizeEvent *)
   hideCrosshair();
 
   updateThresholdLinePositions();
+  // the thinning follows the plot's width
+  if (bucketSize() != m_bucket)
+    rebuildSeries();
+}
+
+// Samples per pixel column (1 = every sample is a point). Counted over the
+// window or, while the recording does not fill it yet, over what is there:
+// a short recording in a long window is drawn as it is.
+int DMMGraph::bucketSize() const
+{
+  const double plotWidth = m_chart->plotArea().width();
+  const int columns = qMax(1, int(plotWidth > 0 ? plotWidth : width()));
+  const int shown = qMin(m_size, m_store->count());
+  return qMax(1, (shown + columns - 1) / columns);
+}
+
+// The points of the samples first..last: the sample itself, or with more than
+// one the minimum and the maximum in time order, so a spike survives the
+// thinning. The store keeps every sample; only the drawing is thinned.
+int DMMGraph::bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const
+{
+  const double step = sampleTenths() / 10.0;
+  auto value = [&](int i)
+  {
+    const RecordedPoint &p = m_store->at(i);
+    return integral ? m_integrationOffset + p.integral * m_integrationScale : p.value;
+  };
+  int lo = first, hi = first;
+  double loValue = value(first), hiValue = loValue;
+  for (int i = first + 1; i <= last; i++)
+  {
+    const double v = value(i);
+    if (v < loValue)
+    {
+      loValue = v;
+      lo = i;
+    }
+    if (v > hiValue)
+    {
+      hiValue = v;
+      hi = i;
+    }
+  }
+  if (lo == hi)
+  {
+    out.append(QPointF(lo * step, loValue));
+    return 1;
+  }
+  if (lo > hi)
+  {
+    qSwap(lo, hi);
+    qSwap(loValue, hiValue);
+  }
+  out.append(QPointF(lo * step, loValue));
+  out.append(QPointF(hi * step, hiValue));
+  return 2;
 }
 
 void DMMGraph::rebuildSeries()
@@ -339,21 +395,44 @@ void DMMGraph::rebuildSeries()
   QList<QPointF> points;
   QList<QPointF> intPoints;
   const int count = m_store->count();
-  points.reserve(count);
-  intPoints.reserve(count);
+  m_bucket = bucketSize();
+  points.reserve(count / m_bucket * 2 + 2);
+  intPoints.reserve(count / m_bucket * 2 + 2);
 
-  double step = sampleTenths() / 10.0;
-  for (int i = 0; i < count; i++)
+  m_tailData = m_tailInt = 0;
+  for (int first = 0; first < count; first += m_bucket)
   {
-    const RecordedPoint &p = m_store->at(i);
-    points.append(QPointF(i * step, p.value));
-    intPoints.append(QPointF(i * step, m_integrationOffset + p.integral * m_integrationScale));
+    const int last = qMin(first + m_bucket, count) - 1;
+    m_tailData = bucketPoints(first, last, false, points);
+    m_tailInt = bucketPoints(first, last, true, intPoints);
   }
 
   m_dataSeries->replace(points);
   m_dataPoints->replace(points);
   m_intSeries->replace(intPoints);
   m_intPoints->replace(intPoints);
+}
+
+// The newest sample went into the series: a new bucket adds its point, one
+// that is still filling replaces the points it had.
+void DMMGraph::appendToSeries()
+{
+  const int count = m_store->count();
+  const int first = (count - 1) / m_bucket * m_bucket;
+  if (first != count - 1)
+  {
+    m_dataSeries->removePoints(m_dataSeries->count() - m_tailData, m_tailData);
+    m_dataPoints->removePoints(m_dataPoints->count() - m_tailData, m_tailData);
+    m_intSeries->removePoints(m_intSeries->count() - m_tailInt, m_tailInt);
+    m_intPoints->removePoints(m_intPoints->count() - m_tailInt, m_tailInt);
+  }
+  QList<QPointF> points, intPoints;
+  m_tailData = bucketPoints(first, count - 1, false, points);
+  m_tailInt = bucketPoints(first, count - 1, true, intPoints);
+  m_dataSeries->append(points);
+  m_dataPoints->append(points);
+  m_intSeries->append(intPoints);
+  m_intPoints->append(intPoints);
 }
 
 void DMMGraph::updateXAxisRange()
@@ -685,18 +764,10 @@ void DMMGraph::onAppended(bool shifted)
 
   const bool resFlag = m_autoScale && computeMinMax(p.value);
 
-  if (shifted)
+  if (shifted || bucketSize() != m_bucket)
     rebuildSeries();
   else
-  {
-    const double x = (count - 1) * sampleTenths() / 10.0;
-    m_dataSeries->append(x, p.value);
-    m_dataPoints->append(x, p.value);
-
-    const double intVal = m_integrationOffset + p.integral * m_integrationScale;
-    m_intSeries->append(x, intVal);
-    m_intPoints->append(x, intVal);
-  }
+    appendToSeries();
 
   if (resFlag)
   {
@@ -754,6 +825,7 @@ void DMMGraph::onCleared()
   m_dataPoints->clear();
   m_intSeries->clear();
   m_intPoints->clear();
+  m_tailData = m_tailInt = 0;
 }
 
 void DMMGraph::emitInfo()
