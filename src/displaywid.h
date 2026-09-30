@@ -37,6 +37,10 @@ class DisplayWid : public QWidget
 {
   Q_OBJECT
 public:
+  /// Width/height range the LCD panel keeps; beyond it the panel stays
+  /// centred with room around it.
+  static constexpr double kMinAspect = 1.8;
+  static constexpr double kMaxAspect = 3.2;
   /// The LCD's colours (context menu "LCD colours", Display/lcd). Custom is
   /// the tint from the Appearance page, with dark segments, as before the
   /// variants.

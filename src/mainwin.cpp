@@ -115,6 +115,9 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   m_meter = new MeterWid(this);
   m_wid->setMeter(m_meter);
   m_meterWin = addView(m_meter, tr("Analog meter"), MdiArranger::Instrument, "meter");
+  // no cell bigger than the instruments can fill
+  m_arranger->setContentAspect(m_displayWin, DisplayWid::kMinAspect, DisplayWid::kMaxAspect);
+  m_arranger->setContentAspect(m_meterWin, MeterWid::kMinAspect, MeterWid::kMaxAspect);
   m_wid->setStateManager(m_stateMgr);
 
   m_graphWin = addView(m_wid, tr("Graph"), MdiArranger::Graph, "graph");
@@ -1104,6 +1107,9 @@ void MainWin::updateControls()
   m_fold->setVisible(m_controlsSupported);
   const bool show = m_controlsSupported && !m_fold->isFolded();
   m_controls->setVisible(show);
+  // the keys below the LCD are part of its window
+  m_arranger->setContentAspect(m_displayWin, DisplayWid::kMinAspect, DisplayWid::kMaxAspect,
+                               show ? m_controls->sizeHint().height() + 4 : 0);
   // the first time the keys appear, the window grows for them
   if (show && !m_grown.contains(m_controls))
   {

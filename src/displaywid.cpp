@@ -420,7 +420,7 @@ void DisplayWid::drawAnnunciator(QPainter &p, const QRectF &r, const QString &te
 DisplayWid::Layout DisplayWid::layout() const
 {
   Layout l;
-  l.bezel = PanelFrame::panelRect(QRectF(rect()).adjusted(1, 1, -1, -1), 1.8, 3.2);
+  l.bezel = PanelFrame::panelRect(QRectF(rect()).adjusted(1, 1, -1, -1), kMinAspect, kMaxAspect);
   l.face = PanelFrame::faceRect(l.bezel);
 
   const double fh = l.face.height();

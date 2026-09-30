@@ -240,6 +240,27 @@ static void testLeft()
   check(r[3].left() > r[2].right(), "left: table right of the graph");
 }
 
+// Displays on the left: a cell no taller than its content can fill (the LCD
+// keeps 1.8..3.2), the rest to the analog meter
+static void testFit()
+{
+  const QRect area(0, 0, 1200, 800);
+  const QList<R> roles { R::Instrument, R::Instrument, R::Graph, R::Table };
+  const QList<MdiArranger::Fit> fits { { 1.8, 3.2, 0, 0 }, { 1.3, 2.2, 0, 0 }, {}, {} };
+  const QList<QRect> r = MdiArranger::layout(area, roles, 22, 260, true, fits);
+  checkTiling(area, r, "fit");
+  check(qAbs(r[0].height() - r[0].width() / 1.8) <= 2,
+        QString("fit: LCD cell %1 x %2, as tall as 1.8 allows").arg(r[0].width()).arg(r[0].height()));
+  check(r[1].height() > r[0].height() && r[1].bottom() == area.height() - 7, "fit: the meter takes the rest");
+  // without fits the column is shared evenly, as before
+  const QList<QRect> even = MdiArranger::layout(area, roles, 22, 260, true);
+  check(qAbs(even[0].height() - even[1].height()) <= 1, "no fits: an even share");
+  // on top: the meter keeps at most 2.2 wide, the LCD gets the rest
+  const QList<QRect> top = MdiArranger::layout(QRect(0, 0, 1400, 700), roles, 22, 260, false, fits);
+  check(qAbs(top[1].width() - top[1].height() * 2.2) <= 2 && top[0].width() > top[1].width(),
+        QString("fit on top: LCD %1, meter %2 x %3").arg(top[0].width()).arg(top[1].width()).arg(top[1].height()));
+}
+
 static void testText()
 {
   const QStringList names { "display", "meter", "graph", "readings" };
@@ -461,6 +482,7 @@ int main(int argc, char **argv)
   testWindows();
   testCtrlDrag();
   testLeft();
+  testFit();
   testText();
   testDerive();
   testArranged();

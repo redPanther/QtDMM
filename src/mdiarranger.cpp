@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace
 {
@@ -248,6 +249,7 @@ void MdiArranger::addWindow(QMdiSubWindow *window, Role role)
 {
   m_order << window;
   m_roles << role;
+  m_fits << Fit();
   setTitleBarHidden(window, m_titleBarsHidden);
   connect(window, &QObject::destroyed, this, [this, window]
   {
@@ -256,6 +258,7 @@ void MdiArranger::addWindow(QMdiSubWindow *window, Role role)
     {
       m_order.removeAt(i);
       m_roles.removeAt(i);
+      m_fits.removeAt(i);
       // the leaves are indices: start over
       m_hasTree = false;
       m_treeFor.clear();
@@ -362,6 +365,20 @@ bool MdiArranger::titleBarHidden(const QMdiSubWindow *window)
   return window->property("titleBarHidden").toBool();
 }
 
+void MdiArranger::setContentAspect(QMdiSubWindow *window, double minAspect, double maxAspect, int extraHeight)
+{
+  const int i = int(m_order.indexOf(window));
+  if (i < 0)
+    return;
+  Fit &f = m_fits[i];
+  if (f.minAspect == minAspect && f.maxAspect == maxAspect && f.extraHeight == extraHeight)
+    return;
+  f.minAspect = minAspect;
+  f.maxAspect = maxAspect;
+  f.extraHeight = extraHeight;
+  arrange();
+}
+
 void MdiArranger::setTableWidth(int width)
 {
   if (width == m_tableWidth)
@@ -435,7 +452,7 @@ void MdiArranger::arrangeNow()
 // anything else - and the graph in the rest, with a table in a column on the
 // right.
 MdiArranger::Node MdiArranger::ruleTree(const QRect &area, const QList<Role> &roles, bool left, int headerHeight,
-                                        int tableMinWidth)
+                                        int tableMinWidth, const QList<Fit> &fits)
 {
   const QRect all = area.adjusted(kGap, kGap, -kGap, -kGap);
   QList<int> inst, graphs, tables;
@@ -496,9 +513,70 @@ MdiArranger::Node MdiArranger::ruleTree(const QRect &area, const QList<Role> &ro
     }
   }
   const int per = (n + bestLines - 1) / bestLines;
+  // a line of instruments: no cell bigger than its content can fill (an LCD
+  // in a tall cell leaves a hole), the rest shared by the others
+  const double cross = ((onlyInst ? (left ? all.width() : all.height()) : bestExtent) - kGap * (bestLines - 1))
+                       / bestLines;
+  const double extent = left ? all.height() : all.width();
+  auto fittedLine = [&](const QList<int> &ids)
+  {
+    Node node = line(left ? Qt::Vertical : Qt::Horizontal, ids);
+    if (node.isLeaf() || fits.isEmpty())
+      return node;
+    const size_t n = size_t(ids.size());
+    const double avail = extent - kGap * double(n - 1);
+    std::vector<double> cap;
+    for (int id : ids)
+    {
+      const Fit f = fits.value(id);
+      double c = std::numeric_limits<double>::infinity();
+      if (left && f.minAspect > 0)
+        c = (cross - f.extraWidth) / f.minAspect + f.extraHeight;
+      else if (!left && f.maxAspect > 0)
+        c = (cross - f.extraHeight) * f.maxAspect + f.extraWidth;
+      cap.push_back(qMax(c, 1.0));
+    }
+    // water filling: an equal share, capped; what a capped cell leaves goes
+    // to the others
+    std::vector<double> size(n, 0);
+    std::vector<bool> fixed(n, false);
+    double rest = avail;
+    int open = int(n);
+    for (bool changed = true; changed && open > 0;)
+    {
+      changed = false;
+      const double share = rest / open;
+      for (size_t i = 0; i < n; ++i)
+        if (!fixed[i] && cap[i] < share)
+        {
+          size[i] = cap[i];
+          fixed[i] = true;
+          rest -= cap[i];
+          --open;
+          changed = true;
+        }
+    }
+    for (size_t i = 0; i < n; ++i)
+      if (!fixed[i])
+        size[i] = rest / open;
+    if (open == 0 && rest > 0)
+    {
+      // all full: the rest to the one that minds least - the content that
+      // may be tallest (left) or widest (on top), e.g. the analog meter
+      // rather than the LCD
+      size_t best = 0;
+      for (size_t i = 1; i < n; ++i)
+        if (cap[i] > cap[best])
+          best = i;
+      size[best] += rest;
+    }
+    for (size_t i = 0; i < n; ++i)
+      node.ratios[i] = size[i] / avail;
+    return node;
+  };
   std::vector<Node> lines;
   for (int l = 0; l < bestLines; ++l)
-    lines.push_back(line(left ? Qt::Vertical : Qt::Horizontal, inst.mid(l * per, per)));
+    lines.push_back(fittedLine(inst.mid(l * per, per)));
   const Qt::Orientation outer = left ? Qt::Horizontal : Qt::Vertical;
   Node strip = splitNode(outer, std::move(lines));
   if (onlyInst)
@@ -517,11 +595,12 @@ void MdiArranger::applyTree(const Node &node, const QRect &area, QList<QRect> &r
 }
 
 QList<QRect> MdiArranger::layout(const QRect &area, const QList<Role> &roles, int headerHeight, int tableMinWidth,
-                                 bool left)
+                                 bool left, const QList<Fit> &fits)
 {
   QList<QRect> rects(roles.size());
   if (!roles.isEmpty())
-    applyTree(ruleTree(area, roles, left, headerHeight, tableMinWidth), area.adjusted(kGap, kGap, -kGap, -kGap), rects);
+    applyTree(ruleTree(area, roles, left, headerHeight, tableMinWidth, fits), area.adjusted(kGap, kGap, -kGap, -kGap),
+              rects);
   return rects;
 }
 
@@ -675,9 +754,20 @@ void MdiArranger::doArrange()
   auto byRule = [&](bool left)
   {
     QList<Role> roles;
+    QList<Fit> fits;
     for (int i : visible)
+    {
       roles << m_roles[i];
-    m_root = ruleTree(m_area->viewport()->rect(), roles, left, headerHeight(), tableMinWidth(visible));
+      // the frame and title bar around the content, as they are now
+      Fit f = m_fits[i];
+      if (QWidget *content = m_order[i]->widget())
+      {
+        f.extraWidth += qMax(0, m_order[i]->width() - content->width());
+        f.extraHeight += qMax(0, m_order[i]->height() - content->height());
+      }
+      fits << f;
+    }
+    m_root = ruleTree(m_area->viewport()->rect(), roles, left, headerHeight(), tableMinWidth(visible), fits);
     remapLeaves(m_root, visible);
     m_hasTree = true;
   };

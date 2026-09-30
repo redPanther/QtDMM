@@ -63,6 +63,10 @@ class MeterWid : public QWidget
 {
   Q_OBJECT
 public:
+  /// Width/height range the instrument keeps; beyond it the panel stays
+  /// centred with room around it.
+  static constexpr double kMinAspect = 1.3;
+  static constexpr double kMaxAspect = 2.2;
   /// Where zero sits on the scale.
   enum ScaleMode
   {

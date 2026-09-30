@@ -47,6 +47,17 @@ public:
   enum Mode { DisplaysOnTop, DisplaysOnLeft, Fixed, Free };
   enum Role { Instrument, Graph, Table };
 
+  /// The width/height range a window's content can fill, and the pixels
+  /// around it (frame, title bar, a bar below the content). Outside the
+  /// range the content would leave empty room in its cell.
+  struct Fit
+  {
+    double minAspect = 0;   ///< 0: no limit
+    double maxAspect = 0;   ///< 0: no limit
+    int extraWidth = 0;
+    int extraHeight = 0;
+  };
+
   /// A node of the split tree. A leaf (no kids) holds the index of a window
   /// (in the order added, or in the role list of the static functions).
   struct Node
@@ -85,6 +96,11 @@ public:
   /// Title bar of one window.
   void setTitleBarHidden(QMdiSubWindow *window, bool hidden);
   static bool titleBarHidden(const QMdiSubWindow *window);
+  /// The aspect range of @p window's content (see Fit): in a line of
+  /// instruments a cell gets no more room than its content can fill, the
+  /// rest goes to the others. @p extraHeight: pixels below or above the
+  /// content (the meter keys); the frame is measured.
+  void setContentAspect(QMdiSubWindow *window, double minAspect, double maxAspect, int extraHeight = 0);
   /// The table column in the automatic modes is at least this wide (still
   /// at most half the area): the width the main window grew by for it.
   void setTableWidth(int width);
@@ -107,14 +123,14 @@ public:
   /// The rule tree for the windows with @p roles inside @p area (viewport
   /// coordinates); @p left: the instruments on the left instead of on top.
   static Node ruleTree(const QRect &area, const QList<Role> &roles, bool left, int headerHeight,
-                       int tableMinWidth = 260);
+                       int tableMinWidth = 260, const QList<Fit> &fits = {});
   /// Lays @p node out in @p area: the rect of each leaf (indexed by leaf)
   /// and, if wanted, the dividers.
   static void applyTree(const Node &node, const QRect &area, QList<QRect> &rects,
                         std::vector<Divider> *dividers = nullptr);
   /// The rects the automatic mode gives the windows with @p roles.
   static QList<QRect> layout(const QRect &area, const QList<Role> &roles, int headerHeight,
-                             int tableMinWidth = 260, bool left = false);
+                             int tableMinWidth = 260, bool left = false, const QList<Fit> &fits = {});
   /// A tree from hand-placed rects: cut where the windows (with @p tolerance)
   /// leave a gap, the cut in the middle of the gap. Leaves are the indices
   /// of @p rects.
@@ -168,6 +184,7 @@ private:
   bool m_titleBarsHidden = true;
   QList<QMdiSubWindow *> m_order;
   QList<Role> m_roles;             ///< parallel to m_order
+  QList<Fit> m_fits;               ///< parallel to m_order
   bool m_pending = false;
   int m_tableWidth = 0;            ///< see setTableWidth()
 
