@@ -245,32 +245,39 @@ bool MdiArranger::eventFilter(QObject *watched, QEvent *event)
       break;
     case QEvent::MouseButtonPress:
     {
-      // Free mode: Ctrl+drag moves a window, also one without title bar
+      // Free mode: Ctrl+drag moves a window, also one without title bar. The
+      // press itself goes through, so a Ctrl+click still reaches the widget
+      // (multiple selection in the table); the move starts after the usual
+      // drag distance.
       auto *me = static_cast<QMouseEvent *>(event);
       if (m_mode != Free || me->button() != Qt::LeftButton || !(me->modifiers() & Qt::ControlModifier))
         break;
       if (QMdiSubWindow *w = subWindowOf(watched))
       {
-        m_drag = w;
-        m_dragOffset = me->globalPosition().toPoint() - w->pos();
+        m_pressed = w;
+        m_pressPos = me->globalPosition().toPoint();
+        m_dragOffset = m_pressPos - w->pos();
         w->raise();
-        return true;
       }
       break;
     }
     case QEvent::MouseMove:
+    {
+      const QPoint global = static_cast<QMouseEvent *>(event)->globalPosition().toPoint();
+      if (m_pressed && !m_drag && (global - m_pressPos).manhattanLength() >= QApplication::startDragDistance())
+        m_drag = m_pressed;
       if (m_drag)
       {
-        m_drag->move(static_cast<QMouseEvent *>(event)->globalPosition().toPoint() - m_dragOffset);
+        m_drag->move(global - m_dragOffset);
         return true;
       }
       break;
+    }
     case QEvent::MouseButtonRelease:
-      if (m_drag)
-      {
-        m_drag = nullptr;
-        return true;
-      }
+      // the release goes through as well: the widget moved with the cursor,
+      // so it sees press and release on the same spot
+      m_pressed = nullptr;
+      m_drag = nullptr;
       break;
     default:
       break;

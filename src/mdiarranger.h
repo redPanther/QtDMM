@@ -78,7 +78,9 @@ private:
   QList<QMdiSubWindow *> m_order;
   QList<Role> m_roles;             ///< parallel to m_order
   bool m_pending = false;
-  QMdiSubWindow *m_drag = nullptr; ///< a window being moved with Ctrl+drag
-  QPoint m_dragOffset;             ///< cursor - window position
+  QMdiSubWindow *m_pressed = nullptr; ///< Ctrl+press on this window, not moved yet
+  QMdiSubWindow *m_drag = nullptr;    ///< a window being moved with Ctrl+drag
+  QPoint m_pressPos;                  ///< global cursor position of the press
+  QPoint m_dragOffset;                ///< cursor - window position
   int m_tableWidth = 0;            ///< see setTableWidth()
 };

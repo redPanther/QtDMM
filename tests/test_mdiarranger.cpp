@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QMdiArea>
 #include <QMdiSubWindow>
+#include <QMouseEvent>
 #include <QTest>
 
 #include "mdiarranger.h"
@@ -127,12 +128,72 @@ static void testWindows()
           QString("title bar back on %1").arg(w->objectName()));
 }
 
+// counts the mouse presses and releases a widget gets
+class ClickCounter : public QLabel
+{
+public:
+  using QLabel::QLabel;
+  int presses = 0;
+  int releases = 0;
+
+protected:
+  void mousePressEvent(QMouseEvent *e) override { presses++; QLabel::mousePressEvent(e); }
+  void mouseReleaseEvent(QMouseEvent *e) override { releases++; QLabel::mouseReleaseEvent(e); }
+};
+
+static void sendMouse(QWidget *w, QEvent::Type type, const QPoint &pos, Qt::MouseButtons buttons)
+{
+  QMouseEvent e(type, pos, w->mapToGlobal(pos), Qt::LeftButton, buttons, Qt::ControlModifier);
+  QApplication::sendEvent(w, &e);
+}
+
+// Free mode: Ctrl+click reaches the widget (multiple selection in the table),
+// Ctrl+drag moves the window and still leaves press and release to the widget
+static void testCtrlDrag()
+{
+  QMdiArea area;
+  area.resize(1000, 700);
+  MdiArranger arranger(&area);
+  auto *label = new ClickCounter("t");
+  QMdiSubWindow *w = area.addSubWindow(label);
+  arranger.addWindow(w, R::Table);
+  area.show();
+  arranger.setMode(MdiArranger::Free);
+  w->setGeometry(50, 50, 300, 200);
+  QTest::qWait(50);
+
+  const QPoint p = label->rect().center();
+  sendMouse(label, QEvent::MouseButtonPress, p, Qt::LeftButton);
+  sendMouse(label, QEvent::MouseButtonRelease, p, Qt::NoButton);
+  check(label->presses == 1 && label->releases == 1, "Ctrl+click reaches the widget");
+  check(w->pos() == QPoint(50, 50), "Ctrl+click does not move the window");
+
+  // the window follows the cursor, so the widget-local position stays the same
+  sendMouse(label, QEvent::MouseButtonPress, p, Qt::LeftButton);
+  sendMouse(label, QEvent::MouseMove, p + QPoint(1, 0), Qt::LeftButton);
+  check(w->pos() == QPoint(50, 50), "Ctrl+drag waits for the drag distance");
+  sendMouse(label, QEvent::MouseMove, p + QPoint(40, 30), Qt::LeftButton);
+  check(w->pos() == QPoint(90, 80), QString("Ctrl+drag moves the window (at %1,%2)").arg(w->x()).arg(w->y()));
+  sendMouse(label, QEvent::MouseButtonRelease, p, Qt::NoButton);
+  check(label->presses == 2 && label->releases == 2, "the drag leaves press and release to the widget");
+
+  // in the automatic mode Ctrl+drag does nothing
+  arranger.setMode(MdiArranger::DisplaysOnTop);
+  QTest::qWait(50);
+  const QPoint auto_ = w->pos();
+  sendMouse(label, QEvent::MouseButtonPress, p, Qt::LeftButton);
+  sendMouse(label, QEvent::MouseMove, p + QPoint(40, 30), Qt::LeftButton);
+  sendMouse(label, QEvent::MouseButtonRelease, p + QPoint(40, 30), Qt::NoButton);
+  check(w->pos() == auto_, "Displays on top: Ctrl+drag does not move");
+}
+
 int main(int argc, char **argv)
 {
   qputenv("QT_QPA_PLATFORM", "offscreen");
   QApplication app(argc, argv);
   testLayout();
   testWindows();
+  testCtrlDrag();
   if (failed)
     qWarning() << failed << "check(s) failed";
   else
