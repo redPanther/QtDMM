@@ -7,26 +7,65 @@
 #include <QPointer>
 #include <QPoint>
 #include <QRect>
+#include <QStringList>
+
+#include <vector>
 
 class QMdiArea;
 class QMdiSubWindow;
+class QRubberBand;
+class QWidget;
 
 /// Places the sub-windows of a QMdiArea.
 ///
-/// In the automatic mode ("Displays on top") the instruments share a strip
-/// at the top, the graph takes the rest and a table gets a narrower column
-/// on the right; the layout is redone whenever the area is resized or a
-/// window is shown or hidden. "Free" is the classic MDI; there, windows
-/// without title bar are moved with Ctrl+drag.
+/// Every arrangement is a split tree: a node divides its rect horizontally or
+/// vertically among its children by ratios, a leaf holds one window. The gaps
+/// between the cells are dividers the user can drag.
+///
+/// - "Displays on top" / "Displays on the left" build the tree by a rule: the
+///   instruments share a strip, the graph takes the rest and a table gets a
+///   narrower column. The rule is redone when the area is resized or a window
+///   is shown or hidden - until the user drags a divider or swaps two
+///   windows; then the tree stays (and scales) until the set of windows
+///   changes.
+/// - "Fixed" keeps its tree for good: taken over from an automatic mode, or
+///   derived from the window positions in Free mode. A window shown later
+///   gets a new cell at the edge, a hidden one leaves its space to its
+///   neighbours.
+/// - "Free" is the classic MDI.
+///
+/// Ctrl+drag moves a window, also one without title bar. In the arranged
+/// modes a window dragged (with Ctrl or at its title bar) onto another one
+/// swaps places with it; dropped elsewhere it snaps back.
 ///
 /// Knows nothing about QtDMM's windows or settings: it only sees
-/// sub-windows and their roles, so it can move on unchanged.
+/// sub-windows, their roles and object names, so it can move on unchanged.
 class MdiArranger : public QObject
 {
   Q_OBJECT
 public:
-  enum Mode { DisplaysOnTop, Free };
+  enum Mode { DisplaysOnTop, DisplaysOnLeft, Fixed, Free };
   enum Role { Instrument, Graph, Table };
+
+  /// A node of the split tree. A leaf (no kids) holds the index of a window
+  /// (in the order added, or in the role list of the static functions).
+  struct Node
+  {
+    int leaf = -1;
+    Qt::Orientation orient = Qt::Vertical;   ///< Vertical: kids top to bottom
+    std::vector<Node> kids;
+    std::vector<double> ratios;              ///< parallel to kids, sum 1
+    bool isLeaf() const { return kids.empty(); }
+  };
+  /// The gap between two cells of a split node.
+  struct Divider
+  {
+    std::vector<int> path;   ///< kid indices from the root to the split node
+    int index = 0;           ///< between kids[index] and kids[index + 1]
+    QRect rect;
+    int avail = 0;           ///< pixels the node's ratios share
+    Qt::Orientation orient = Qt::Vertical;
+  };
 
   explicit MdiArranger(QMdiArea *area, QObject *parent = nullptr);
 
@@ -34,8 +73,10 @@ public:
   void addWindow(QMdiSubWindow *window, Role role);
 
   Mode mode() const { return m_mode; }
-  /// Switches the mode; the automatic mode also hides the title bars, Free
-  /// shows them again (both can be changed afterwards).
+  /// Switches the mode. The arranged modes hide the title bars, Free shows
+  /// them again (both can be changed afterwards). Fixed from an automatic
+  /// mode keeps its tree; from Free it derives one from the positions and
+  /// shows it for a moment before the windows snap into it.
   void setMode(Mode mode);
 
   /// Title bars of all windows (true = hidden).
@@ -44,22 +85,55 @@ public:
   /// Title bar of one window.
   void setTitleBarHidden(QMdiSubWindow *window, bool hidden);
   static bool titleBarHidden(const QMdiSubWindow *window);
-  /// The table column in the automatic mode is at least this wide (still
+  /// The table column in the automatic modes is at least this wide (still
   /// at most half the area): the width the main window grew by for it.
   void setTableWidth(int width);
 
+  /// The tree worth keeping as text over the windows' object names - in
+  /// Fixed mode, or once the user changed an automatic layout; empty
+  /// otherwise (the rule applies).
+  QString layoutText() const;
+  /// Takes a tree saved with layoutText(). An automatic mode uses it while
+  /// exactly its windows are shown. False (and nothing changes) when the
+  /// text does not parse or names an unknown window.
+  bool setLayoutText(const QString &text);
 
-  /// The rects the automatic mode gives the visible windows inside @p area
-  /// (in viewport coordinates); a table column is at least @p tableMinWidth
-  /// wide. Public for the tests.
+  /// Milliseconds Fixed from Free shows the new cells before they apply.
+  void setPreviewTime(int ms) { m_previewMs = ms; }
+
+  /// @name The layout engine, static for the tests
+  /// @{
+  /// The rule tree for the windows with @p roles inside @p area (viewport
+  /// coordinates); @p left: the instruments on the left instead of on top.
+  static Node ruleTree(const QRect &area, const QList<Role> &roles, bool left, int headerHeight,
+                       int tableMinWidth = 260);
+  /// Lays @p node out in @p area: the rect of each leaf (indexed by leaf)
+  /// and, if wanted, the dividers.
+  static void applyTree(const Node &node, const QRect &area, QList<QRect> &rects,
+                        std::vector<Divider> *dividers = nullptr);
+  /// The rects the automatic mode gives the windows with @p roles.
   static QList<QRect> layout(const QRect &area, const QList<Role> &roles, int headerHeight,
-                             int tableMinWidth = 260);
+                             int tableMinWidth = 260, bool left = false);
+  /// A tree from hand-placed rects: cut where the windows (with @p tolerance)
+  /// leave a gap, the cut in the middle of the gap. Leaves are the indices
+  /// of @p rects.
+  static Node deriveTree(const QList<QRect> &rects, double tolerance);
+  /// Removes a leaf; its neighbours share its space.
+  static bool removeLeaf(Node &node, int leaf);
+  /// Adds a leaf in a new cell at the bottom (or, @p wide, the right) edge.
+  static void addAtEdge(Node &root, int leaf, bool wide);
+  static Node *findLeaf(Node &node, int leaf);
+  static QList<int> leaves(const Node &node);
+  /// Text form: a name, or H(ratio:child,ratio:child,...) / V(...).
+  static QString toText(const Node &node, const QStringList &names);
+  static bool fromText(const QString &text, const QStringList &names, Node &out);
+  /// @}
 
 public Q_SLOTS:
   /// Lays the windows out again (deferred, once per event loop pass).
   void arrange();
-  /// Lays the windows out by the automatic rule now, in any mode - a start
-  /// in Free mode seeds the positions with it.
+  /// Lays the windows out by the rule of "Displays on top" now, in any
+  /// mode - a start in Free mode seeds the positions with it.
   void arrangeNow();
 
 Q_SIGNALS:
@@ -72,6 +146,21 @@ protected:
 private:
   void doArrange();
   QMdiSubWindow *subWindowOf(QObject *object) const;
+  QList<int> visibleWindows() const;
+  int headerHeight() const;
+  int tableMinWidth(const QList<int> &visible) const;
+  QRect cellArea() const;
+  Node *nodeAt(const std::vector<int> &path);
+  // drag to swap
+  QMdiSubWindow *windowAt(const QPoint &global, const QMdiSubWindow *except) const;
+  void dragMoving(QMdiSubWindow *window, const QPoint &global);
+  void dragDropped(QMdiSubWindow *window, const QPoint &global);
+  // dividers
+  const Divider *dividerAt(const QPoint &viewportPos, int margin) const;
+  bool dividerEvent(QObject *watched, QEvent *event);
+  void showDividerHint(const Divider *divider);
+  // Fixed from Free
+  void showPreview(const QList<QRect> &cells);
 
   QMdiArea *m_area;
   Mode m_mode = DisplaysOnTop;
@@ -79,11 +168,33 @@ private:
   QList<QMdiSubWindow *> m_order;
   QList<Role> m_roles;             ///< parallel to m_order
   bool m_pending = false;
+  int m_tableWidth = 0;            ///< see setTableWidth()
+
+  Node m_root;
+  bool m_hasTree = false;
+  QList<int> m_treeFor;            ///< the windows m_root was made for (sorted)
+  bool m_custom = false;           ///< automatic mode: the user changed the tree
+  std::vector<Divider> m_dividers;
+
+  // Ctrl+drag
   QMdiSubWindow *m_pressed = nullptr; ///< Ctrl+press on this window, not moved yet
   QPointer<QWidget> m_pressWidget;    ///< the widget that got that press
   bool m_cancelling = false;          ///< sending the widget its cancelling release
   QMdiSubWindow *m_drag = nullptr;    ///< a window being moved with Ctrl+drag
   QPoint m_pressPos;                  ///< global cursor position of the press
   QPoint m_dragOffset;                ///< cursor - window position
-  int m_tableWidth = 0;            ///< see setTableWidth()
+  // title bar drag in the arranged modes
+  QMdiSubWindow *m_titleDrag = nullptr;
+  QRect m_titleStart;
+  QRubberBand *m_band = nullptr;      ///< marks the swap target
+
+  // divider drag
+  bool m_divDragging = false;
+  Divider m_divDrag;
+  QPoint m_divLast;
+  bool m_divCursor = false;           ///< the split cursor is set
+  QWidget *m_divHint = nullptr;       ///< highlights the divider under the mouse
+
+  QWidget *m_preview = nullptr;
+  int m_previewMs = 900;
 };
