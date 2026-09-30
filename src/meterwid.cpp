@@ -81,12 +81,6 @@ QFont fittedFont(double px, bool bold, const QString &text, double maxWidth)
   return f;
 }
 
-// the meter's fixed-width text without its leading zeros ("014.87" -> "14.87")
-QString withoutLeadingZeros(QString text)
-{
-  static const QRegularExpression leadingZeros("^([-+]?)0+(?=\\d)");
-  return text.trimmed().remove(' ').replace(leadingZeros, "\\1");
-}
 }
 
 MeterStyle MeterStyle::dark()
@@ -195,7 +189,7 @@ void MeterWid::setReading(double value, const QString &text, const QString &unit
     // MIN and MAX use the meter's decimals ("0.L" would say one); the most
     // seen since reset(), so a minimum from the 4 V range keeps its three
     // decimals after a change to the 40 V range
-    const QString shown = withoutLeadingZeros(text);
+    const QString shown = SiPrefix::withoutLeadingZeros(text);
     const int dot = shown.indexOf('.');
     m_decimals = qMax(m_decimals, dot < 0 ? 0 : qBound(0, int(shown.size() - dot - 1), 6));
   }

@@ -259,18 +259,23 @@ double DisplayWid::drawNumber(QPainter &p, const QPointF &origin, double h, cons
   }
   const int n = cells.size();
 
-  // the minus sits right before the first digit: in the last padding cell
-  // if there is one, otherwise in the dedicated sign cell
-  int minusCell = -1;
-  if (negative && lit)
+  // leading zeros stay dark, as on the meter: "000.00" shows "  0.00"; the
+  // zero before the decimal point (or the last digit) stays lit. Only for
+  // numbers - "0L" keeps its zero.
+  bool number = true;
+  for (QChar ch : cells)
+    number = number && (ch.isDigit() || ch == ' ');
+  if (number)
   {
-    int blanks = 0;
-    while (blanks < n && cells[blanks] == ' ')
-      blanks++;
-    minusCell = blanks > 0 ? blanks - 1 : -1;
+    const int lastInteger = dpAfter >= 0 ? dpAfter : n - 1;
+    for (int i = 0; i < lastInteger && (cells[i] == '0' || cells[i] == ' '); ++i)
+      cells[i] = ' ';
   }
+
+  // the minus always in the sign cell, in front of the field, wherever the
+  // first digit is - as on the meter
   double x = origin.x();
-  drawDigit(p, QPointF(x, origin.y()), h, (negative && lit && minusCell < 0) ? G : 0);
+  drawDigit(p, QPointF(x, origin.y()), h, (negative && lit) ? G : 0);
   x += adv;
 
   // the decimal point takes its slot after the cell it follows; the field is
@@ -278,7 +283,7 @@ double DisplayWid::drawNumber(QPainter &p, const QPointF &origin, double h, cons
   int dpSlot = dpAfter >= 0 ? dpAfter : n - 1;
   for (int i = 0; i < n; ++i)
   {
-    const int mask = i == minusCell ? int(G) : (lit ? segmentsFor(cells[i]) : 0);
+    const int mask = lit ? segmentsFor(cells[i]) : 0;
     drawDigit(p, QPointF(x, origin.y()), h, mask);
     x += adv;
     if (i == dpSlot)
