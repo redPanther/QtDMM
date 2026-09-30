@@ -210,6 +210,8 @@ Q_SIGNALS:
   void             zoomOut(double);
   /// Show the whole recording (key 0).
   void             zoomFit();
+  /// A time button asks for this visible window (seconds).
+  void             windowRequested(int seconds);
   /// A threshold line was dragged with the mouse.
   void             thresholdChanged(DMMGraph::CursorMode, double);
   /// @name Context menu requests, handled by MainWid
@@ -225,9 +227,9 @@ public Q_SLOTS:
   void             clearSLOT();
   /// @name Keyboard zoom/pan, also reachable from MainWin's shortcuts
   /// @{
-  void             zoomInSLOT()  { Q_EMIT zoomIn(1.25); }
-  void             zoomOutSLOT() { Q_EMIT zoomOut(1.25); }
-  void             zoomFitSLOT() { Q_EMIT zoomFit(); }
+  void             zoomInSLOT()  { m_followAll = false; Q_EMIT zoomIn(1.25); }
+  void             zoomOutSLOT() { m_followAll = false; Q_EMIT zoomOut(1.25); }
+  void             zoomFitSLOT() { m_followAll = false; Q_EMIT zoomFit(); }
   /// Shifts the visible window by a fraction of its width (negative = back).
   void             pan(double fraction);
   void             scrollToStart();
@@ -265,6 +267,18 @@ protected:
   int              m_size;          ///< visible window in samples
   int              m_length;        ///< recording length in samples
   int              m_windowSeconds = 0;   ///< setGraphSize(), for setSampleTime()
+  /// @name Time buttons (All / 1 min / 5 min / 30 min) top right in the graph
+  /// @{
+  QWidget         *m_timeBar = nullptr;
+  QList<QToolButton *> m_timeButtons;   ///< property "seconds": 0 = All
+  bool             m_followAll = false;   ///< "All": the window grows with the recording
+  void             timeButtonClicked(int seconds);
+  /// "All": asks for a window that holds the recording so far (plus room
+  /// to grow when @p grow), at least 10 s and at most the recording length.
+  void             requestAll(bool grow);
+  void             updateTimeButtons();
+  void             placeTimeBar();
+  /// @}
   int              m_totalSeconds = 0;
   double           m_scaleMin;
   double           m_scaleMax;

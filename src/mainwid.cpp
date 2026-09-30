@@ -82,6 +82,7 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
   // the meter, which only happens when the dialog closes.
   connect(m_configDlg, &ConfigDlg::applied, this, [this]() { applySLOT(); });
   connect(m_configDlg, SIGNAL(zoomed()), this, SLOT(zoomedSLOT()));
+  connect(ui_graph, &DMMGraph::windowRequested, m_configDlg, &ConfigDlg::setWindowSecondsSLOT);
   connect(m_configDlg, SIGNAL(rejected()), this, SLOT(rejectSLOT()));
   connect(ui_graph, SIGNAL(sampleTime(int)), m_configDlg, SLOT(setSampleTimeSLOT(int)));
   connect(ui_graph, SIGNAL(graphSize(int, int)), m_configDlg, SLOT(setGraphSizeSLOT(int, int)));

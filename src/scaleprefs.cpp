@@ -255,3 +255,11 @@ void ScalePrefs::setGraphSizeSLOT(int size, int length)
   ui_winSize->setValue(size);
   winLength->setValue(length);
 }
+
+void ScalePrefs::setWindowSecondsSLOT(int seconds)
+{
+  seconds = qMin(seconds, totalSeconds());
+  const bool minutes = seconds >= 60 && seconds % 60 == 0;
+  sizeUnit->setCurrentIndex(minutes ? 1 : 0);
+  ui_winSize->setValue(minutes ? seconds / 60 : seconds);
+}

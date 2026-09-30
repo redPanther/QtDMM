@@ -12,6 +12,7 @@
 #include <QChartView>
 #include <QValueAxis>
 #include <QScrollBar>
+#include <QToolButton>
 #include "siprefix.h"
 #include "engnumbervalidator.h"
 #include "settings.h"
@@ -108,6 +109,53 @@ int main(int argc, char **argv)
     QString c2 = readFile(exported2);
     check(!c1.isEmpty() && c1 == c2,
           "round-trip: re-exporting a re-imported file produced different CSV content");
+  }
+
+  // --- 3b. time buttons (All / 1 min / 5 min / 30 min) top right ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(10);   // one sample per second
+    graph.setGraphSize(300, 3600);
+    const QList<QToolButton *> buttons = graph.findChildren<QToolButton *>();
+    auto button = [&](const QString &text) -> QToolButton *
+    {
+      for (QToolButton *b : buttons)
+        if (b->text() == text)
+          return b;
+      return nullptr;
+    };
+    QToolButton *all = button("All"), *one = button("1 min"), *five = button("5 min"), *thirty = button("30 min");
+    check(all && one && five && thirty, "time buttons: All, 1 min, 5 min, 30 min exist");
+    if (all && one && five && thirty)
+    {
+      check(five->isChecked() && !one->isChecked() && !all->isChecked(), "time buttons: a 300 s window marks 5 min");
+      QSignalSpy spy(&graph, &DMMGraph::windowRequested);
+      one->click();
+      check(spy.size() == 1 && spy.last().at(0).toInt() == 60, "time buttons: 1 min asks for a 60 s window");
+      // MainWid applies the request through the settings, like a zoom
+      graph.setGraphSize(60, 3600);
+      check(one->isChecked() && !five->isChecked(), "time buttons: the applied window is marked");
+      graph.setGraphSize(45, 3600);
+      check(!one->isChecked() && !five->isChecked() && !thirty->isChecked(), "time buttons: a zoomed window marks none");
+      graph.setGraphSize(60, 600);
+      check(thirty->isHidden() && !five->isHidden(), "time buttons: 30 min is hidden for a 10 min recording");
+
+      // All: the recording so far (at least 10 s), growing with it
+      spy.clear();
+      graph.setGraphSize(10, 600);
+      all->click();
+      check(all->isChecked(), "time buttons: All stays marked");
+      graph.startSLOT();
+      for (int i = 0; i < 150; ++i)   // 15 samples at 1 s
+        graph.addValue(1.0);
+      bool grew = !spy.isEmpty();
+      for (const QList<QVariant> &args : spy)
+        grew = grew && args.at(0).toInt() > 10 && args.at(0).toInt() <= 600;
+      check(grew, QString("time buttons: All grows the window with the recording (%1 requests)").arg(spy.size()));
+      graph.zoomInSLOT();
+      graph.setGraphSize(8, 600);
+      check(!all->isChecked(), "time buttons: zooming ends All");
+    }
   }
 
   // --- 4. regression test for the CSV-import sample-time bug (dmmgraph.cpp):

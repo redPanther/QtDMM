@@ -201,6 +201,8 @@ public Q_SLOTS:
   /// The graph changed the sample time (recorder page follows).
   void                  setSampleTimeSLOT(int);
   void                  setGraphSizeSLOT(int, int);
+  /// A time button of the graph: the visible window, applied like a zoom.
+  void                  setWindowSecondsSLOT(int seconds);
   void                  setShowTipsSLOT(bool);
   void                  setCurrentTipSLOT(int);
   void                  zoomInSLOT(double);

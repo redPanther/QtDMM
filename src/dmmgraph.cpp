@@ -168,6 +168,73 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
 
   m_popup = new QMenu(this);
   connect(m_popup, SIGNAL(triggered(QAction *)), this, SLOT(popupSLOT(QAction *)));
+
+  // time buttons top right, as in the UI demo: the visible window at a click
+  m_timeBar = new QWidget(m_chartView);
+  auto *bar = new QHBoxLayout(m_timeBar);
+  bar->setContentsMargins(0, 0, 0, 0);
+  bar->setSpacing(2);
+  const QList<QPair<QString, int>> steps = { { tr("All"), 0 }, { tr("1 min"), 60 }, { tr("5 min"), 300 },
+                                             { tr("30 min"), 1800 } };
+  for (const auto &step : steps)
+  {
+    auto *b = new QToolButton(m_timeBar);
+    b->setText(step.first);
+    b->setCheckable(true);
+    b->setAutoRaise(true);
+    b->setFocusPolicy(Qt::NoFocus);
+    b->setCursor(Qt::ArrowCursor);
+    b->setProperty("seconds", step.second);
+    b->setToolTip(step.second == 0 ? tr("Show the whole recording, growing with it")
+                                   : tr("Show the last %1").arg(step.first));
+    connect(b, &QToolButton::clicked, this, [this, b] { timeButtonClicked(b->property("seconds").toInt()); });
+    bar->addWidget(b);
+    m_timeButtons.append(b);
+  }
+  updateTimeButtons();
+}
+
+void DMMGraph::timeButtonClicked(int seconds)
+{
+  m_followAll = (seconds == 0);
+  if (m_followAll)
+    requestAll(false);
+  else if (seconds != m_windowSeconds)
+    Q_EMIT windowRequested(seconds);
+  updateTimeButtons();   // also when nothing changes: undo the click's own toggle
+}
+
+void DMMGraph::requestAll(bool grow)
+{
+  const double recorded = m_pointer * m_sampleTime / 10.0;
+  // growing by a quarter at a time: the window does not change with every sample
+  int target = int(std::ceil(grow ? recorded * 1.25 : recorded));
+  target = qMax(target, 10);
+  if (m_totalSeconds > 0)
+    target = qMin(target, m_totalSeconds);
+  if (target != m_windowSeconds)
+    Q_EMIT windowRequested(target);
+}
+
+void DMMGraph::updateTimeButtons()
+{
+  for (QToolButton *b : m_timeButtons)
+  {
+    const int seconds = b->property("seconds").toInt();
+    // a window longer than the recording is no choice
+    b->setVisible(seconds == 0 || m_totalSeconds <= 0 || seconds <= m_totalSeconds);
+    b->setChecked(seconds == 0 ? m_followAll : !m_followAll && seconds == m_windowSeconds);
+  }
+  placeTimeBar();
+}
+
+void DMMGraph::placeTimeBar()
+{
+  if (!m_timeBar)
+    return;
+  m_timeBar->adjustSize();
+  m_timeBar->move(m_chartView->width() - m_timeBar->width() - 6, 3);
+  m_timeBar->raise();
 }
 
 DMMGraph::~DMMGraph()
@@ -235,6 +302,7 @@ void DMMGraph::resizeEvent(QResizeEvent *)
 {
   m_chartView->setGeometry(0, 0, width(), height() - 16);
   scrollbar->setGeometry(0, height() - 16, width(), 16);
+  placeTimeBar();
 
   // Simpler than tracking/restoring hover state across a resize: just hide it,
   // the next mouse move will reposition it correctly.
@@ -483,6 +551,7 @@ void DMMGraph::setGraphSize(int size, int length)
   rebuildSeries();
   updateXAxisRange();
   updateThresholdLinePositions();
+  updateTimeButtons();
 }
 
 void DMMGraph::setSampleTime(int v)
@@ -625,6 +694,9 @@ void DMMGraph::addValue(double val)
       (*m_arrayInt)[m_pointer] = qMax(val, m_integrationThreshold);
 
     (*m_array)[m_pointer++] = val;
+    // "All": the window grows once the recording fills it
+    if (m_followAll && m_pointer >= m_size)
+      requestAll(true);
     bool resFlag = false;
 
     if (m_autoScale)
@@ -681,7 +753,9 @@ void DMMGraph::setUnit(const QString &unit)
   // room above the plot for the title
   const int h = m_unit.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
                                              + QFontMetricsF(m_yAxis->labelsFont()).height() / 2);
-  m_chart->setMargins(QMargins(4, 4 + h, 4, 4));
+  // and at least as much as the time buttons need, so they sit above the plot
+  const int bar = m_timeBar ? m_timeBar->sizeHint().height() : 0;
+  m_chart->setMargins(QMargins(4, 4 + qMax(h, bar), 4, 4));
   placeYTitle();
 }
 
@@ -1003,6 +1077,7 @@ void DMMGraph::handleChartMouseRelease(QMouseEvent *)
 
 void DMMGraph::handleChartWheel(QWheelEvent *ev)
 {
+  m_followAll = false;
   if (ev->angleDelta().x() < 0 || ev->angleDelta().y() < 0)
     Q_EMIT zoomOut(1.1);
   else
@@ -1406,6 +1481,13 @@ void DMMGraph::applyThemeColors()
     scrollbar->setPalette(pal);
     scrollbar->setAutoFillBackground(true);
   }
+  // the time buttons in the lettering colour, the chosen one framed
+  if (m_timeBar)
+    m_timeBar->setStyleSheet(QString("QToolButton { color: %1; border: 1px solid transparent; border-radius: 2px;"
+                                     " padding: 0px 4px; background: transparent; }"
+                                     " QToolButton:checked { border-color: %1; }"
+                                     " QToolButton:hover { border-color: %2; }")
+                               .arg(labels.name(), QColor(labels.red(), labels.green(), labels.blue(), 110).name(QColor::HexArgb)));
   m_chart->setPlotAreaBackgroundBrush(plot);
   m_chart->setPlotAreaBackgroundVisible(plot.style() != Qt::NoBrush);
   for (QValueAxis *axis : { m_xAxis, m_yAxis })

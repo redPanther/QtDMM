@@ -309,6 +309,12 @@ void ConfigDlg::setSampleTimeSLOT(int sampleTime)
   on_ui_buttonBox_accepted();
 }
 
+void ConfigDlg::setWindowSecondsSLOT(int seconds)
+{
+  m_scale->setWindowSecondsSLOT(seconds);
+  Q_EMIT zoomed();
+}
+
 void ConfigDlg::setGraphSizeSLOT(int size, int length)
 {
   m_scale->setGraphSizeSLOT(size, length);
