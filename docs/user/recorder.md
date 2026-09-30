@@ -46,6 +46,11 @@ their conditions.
 QtDMM disconnects from the meter first so the command can use the serial
 port.
 
+The command is the program followed by its arguments, as in a terminal but
+without a shell: put arguments containing spaces in double quotes. For
+pipes or redirections, call the shell yourself, e.g.
+`sh -c "echo done > /tmp/qtdmm.log"`.
+
 ## Looking at the data
 
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the

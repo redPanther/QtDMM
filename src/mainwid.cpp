@@ -733,13 +733,12 @@ void MainWid::startExternalSLOT()
   if (m_configDlg->disconnectExternal())
     Q_EMIT setConnect(false);
 
-  QStringList args;
-  args.append(m_configDlg->externalCommand());
-  m_external->setArguments(args);
-
-  // mt: call with empty string
-  m_external->start();
-  if (m_external->state() != QProcess::Starting)
+  // Qt 6 no longer runs a command line passed as the only argument of an
+  // empty program: split it into program and arguments like the alarms do
+  const QString command = m_configDlg->externalCommand();
+  if (!command.trimmed().isEmpty())
+    m_external->startCommand(command);
+  if (command.trimmed().isEmpty() || !m_external->waitForStarted(3000))
   {
     QMessageBox question;
     question.setWindowTitle(tr("QtDMM: Launch error"));
@@ -765,7 +764,7 @@ void MainWid::startExternalSLOT()
 
 void MainWid::exitedSLOT()
 {
-  Q_EMIT error(tr("%1 terminated with exit code %2.").arg(m_configDlg->externalCommand()).arg(m_external->exitStatus()));
+  Q_EMIT error(tr("%1 terminated with exit code %2.").arg(m_configDlg->externalCommand()).arg(m_external->exitCode()));
 }
 
 void MainWid::showTipsSLOT()
