@@ -1,4 +1,5 @@
 #include "m9803r.h"
+#include "siprefix.h"
 
 /*
  Reverse engeneered by Matthias Toussaint
@@ -126,7 +127,6 @@ std::optional<DmmDecoder::DmmResponse> DecoderM9803R::decode(const QByteArray &d
         case 0x00:
           m_result.unit = "mV";
           val = insertCommaIT(val, 3);
-          qInfo() << val;
           break;
         case 0x01:
           m_result.unit = "V";
@@ -313,12 +313,9 @@ std::optional<DmmDecoder::DmmResponse> DecoderM9803R::decode(const QByteArray &d
   }
 
   m_result.val    = val.trimmed();
-  // Note: the unit strings above already carry their SI prefix ("mV", "kOhm"),
-  // while dval is taken from the displayed digits without a matching factor, so
-  // dval is in display units here, not the SI base units DmmResponse describes.
-  // Unclear whether that is intended for this decoder - there is no M9803R log
-  // in docs/protocols to check against, so left as-is.
-  m_result.dval   = m_result.val.toDouble();
+  // the unit strings above carry their SI prefix ("mV", "kOhm"); dval is in
+  // base units like every decoder's, so 123.4 mV is 0.1234
+  m_result.dval   = m_result.val.toDouble() * prefixFactor(SiPrefix::split(m_result.unit).prefix);
 
   return m_result;
 }

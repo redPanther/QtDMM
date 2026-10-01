@@ -18,7 +18,7 @@ regression tests.
 
 | Decoder | Protocol (`ReadEvent`) | Devices | Captures in `sources/` | Test vectors |
 |---|---|---|---|---|
-| `ascii.cpp` | `Metex14`, `PeakTech10`, `Voltcraft14Continuous`, `Voltcraft15Continuous`, `Sigrok` | 48 devices (`Sigrok`: the SCPI bench meters of `sigrok_devices.cpp` - Keysight 34465A, Agilent 3440xA/34410A, HP 34401A, Siglent SDM3055 - read through sigrok-cli's `scpi-dmm` driver): Metex M-3xxx/M-46xx/ME-xx, Voltcraft M-36xx/M-46xx/ME-xx/VC 6xx, PeakTech 4xxx/451, Mastech MAS-34x, Radioshack 22-805/RS22-168A, Digitech QM1350, McVoice M-345pro, Sinometer MAS-343 | `metex-22t.log` (Voltcraft ME-22T) | Metex14: yes |
+| `ascii.cpp` | `Metex14`, `PeakTech10`, `Voltcraft14Continuous`, `Voltcraft15Continuous`, `Sigrok` | 48 devices (`Sigrok`: the SCPI bench meters of `sigrok_devices.cpp` - Keysight 34465A, Agilent 3440xA/34410A, HP 34401A, Siglent SDM3055 - read through sigrok-cli's `scpi-dmm` driver): Metex M-3xxx/M-46xx/ME-xx, Voltcraft M-36xx/M-46xx/ME-xx/VC 6xx, PeakTech 4xxx/451, Mastech MAS-34x, Radioshack 22-805/RS22-168A, Digitech QM1350, McVoice M-345pro, Sinometer MAS-343 | `metex-22t.log` (Voltcraft ME-22T), `sigrok-ut61e.log` (Uni-T UT61E through sigrok-cli) | Metex14, Sigrok: yes; PeakTech10: synthetic |
 | `brymen_bm52x.cpp` | `BrymenBM52x`, `BrymenBM82x` | Brymen BM525s, BM829s over the BU-86X adapter (unconfirmed) | — (layout from libsigrok's `bm52x.c`, live readings only) | synthetic |
 | `brymen_bm86x.cpp` | `BrymenBM86x` | Brymen BM867s, BM869s over the BU-86X adapter (unconfirmed) | — (layout from libsigrok's `bm86x.c`) | synthetic |
 | `brymen_bm25x.cpp` | `BrymenBM25x` | Brymen BM250/251/252/257 (unconfirmed) | — (layout from libsigrok's `bm25x.c`) | synthetic |
@@ -30,11 +30,11 @@ regression tests.
 | `fluke45.cpp` | `Fluke45` | Fluke 45 bench meter, RS-232 (unconfirmed) | `fluke_45_users_manual.pdf` (chapter 5; no capture) | yes, built from the manual's tables |
 | `gdm703.cpp` | `GDM703Continuous` | Voltcraft GDM 703/704/705 (unconfirmed; chip WENS98A per the [sigrok IC list](https://sigrok.org/wiki/Multimeter_ICs)) | — (layout from Toussaint's CDMM, `ablage/CDMM`) | synthetic |
 | `dtm0660.cpp` | `DTM0660` | Generic DTM0660 (4000/6000/8000 count) | — (`dtm0660-brochure.pdf` has no serial frame; layout from the decoder, after libsigrok) | synthetic |
-| `m9803r.cpp` | `M9803RContinuous` | ELV M9803R, MASTECH M9803R, McVoice M-980T | — (byte table in the decoder's header, reverse engineered by Toussaint) | synthetic, unprefixed readings only |
+| `m9803r.cpp` | `M9803RContinuous` | ELV M9803R, MASTECH M9803R, McVoice M-980T | — (byte table in the decoder's header, reverse engineered by Toussaint) | synthetic from the byte table, plus frames of a real meter published on the web (one, 4.700 kOhm, corrected for an apparent typo) |
 | `qm1537.cpp` | `QM1537Continuous` | Digitek DT4000ZC, Digitech QM1537, PeakTech 3430, TekPower TP4000ZC, Uni-Trend UT61B/C/D, Vichy VC99 | `UT61BCD.log` | yes |
 | `rs22812.cpp` | `RS22812Continuous` | Radioshack 22-812 | — (layout from [rs22812](https://github.com/syn-net/rs22812) and the sigrok wiki) | synthetic |
 | `vc820.cpp` | `VC820Continuous` | Digitek DT-9062/INO2513, Digitech QM1462/QM1538, HoldPeak HP-90EPC, PeakTech 3330, Tenma 72-7745, Uni-Trend UT60A/UT60E, Voltcraft VC 820/840 | `UT60AE.log` | yes |
-| `vc870.cpp` | `VC870Continuous` | Voltcraft VC 870 | `vc870_protocol.pdf` (frame description, no capture) | yes, synthetic, from the document's tables; resistance above 400 Ohm and the AC ranges left out, see below |
+| `vc870.cpp` | `VC870Continuous` | Voltcraft VC 870 | `vc870_protocol.pdf` (frame description); one frame validated on a real VC870 | yes, one real frame (DCV), the rest synthetic from the document's tables; resistance above 400 Ohm and the AC ranges left out, see below |
 | `victron_ble.cpp` | `VictronBLE` | Victron SmartShunt, BMV-712 Smart, SmartSolar / BlueSolar MPPT, Phoenix Inverter Smart over Bluetooth LE (SmartShunt 500A/50mV, SmartSolar MPPT 100/20 48V and Phoenix Inverter 12V 500VA verified live) | — (bit layouts and test vectors from [victron-ble](https://github.com/keshavdv/victron-ble); AES-CTR decryption tested in `test_victronble`) | yes |
 | `unit_idmm.cpp` | `UniTiDMM` | UNI-T UT60BT over Bluetooth LE GATT (verified live, dial walk against the LCD) | `tmp/ut60bt/walk_all.log` (UT60BT captures); frames and tables from [ble-multimeter](https://github.com/deligent4/ut60bt_multimeter) and [ut61xpy](https://github.com/olegv142/ut61xpy), both in `ablage/` | yes |
 | `unit_idmm.cpp` | `UniTUT61Plus` | UNI-T UT61B+/D+/E+ over the UT-D09 USB-HID cable or the UT-D07B Bluetooth adapter, UT161B/D/E over Bluetooth (unconfirmed) | — (synthetic vectors from UNI-T's app range tables via [unit_ut61eplus](https://github.com/ljakob/unit_ut61eplus), matching [ut61xpy](https://github.com/olegv142/ut61xpy)) | yes, synthetic |
@@ -85,8 +85,14 @@ those devices.
 `voltcraft14.json` and `voltcraft15.json` run the real Metex captures of
 `metex-22t.log` through `Voltcraft14Continuous` and `Voltcraft15Continuous`
 (the same frame layout, the second with a line feed after the carriage
-return). `PeakTech10` and `Sigrok` (the text of sigrok-cli) still have no
-vectors.
+return). `peaktech10.json` is synthetic, built from the PeakTech 451 layout
+(`#`, six characters of value, four of unit); no capture exists yet.
+
+`sigrok.json` runs `sigrok-ut61e.log` through `Sigrok`: the lines of
+sigrok-cli for a Uni-T UT61E, padded the way `SigrokDevice` hands them to the
+decoder. sigrok-cli prints `<channel>: <value> <unit> <flags>` with the same
+unit spelling for every libsigrok driver, so one meter covers the format. The
+capture includes an overload (`inf`) and the continuity mode, which has no unit.
 
 ### Left out of the synthetic fixtures
 
@@ -99,10 +105,9 @@ vector asserts either side until a real meter (or a capture) settles them:
   `vc870_protocol.pdf` reads like 40.000 kOhm there. The AC voltage and
   current ranges are scaled one decade differently from the DC ones; that
   fits 4000-count AC ranges, which the document does not say.
-- `m9803r.cpp`: `dval` is in display units for mV, kOhm, nF and so on (the
-  decoder's own note says so), and the 000.0 Ohm range (mode 4, decimal point
-  0) puts the point after the first digit, not the third as the byte table
-  says. An overload shows as `.0L`.
+- `m9803r.cpp`: the 000.0 Ohm range (mode 4, decimal point 0) puts the point
+  after the first digit, not the third as the byte table says. An overload
+  shows as `.0L`.
 
 ## Provenance
 

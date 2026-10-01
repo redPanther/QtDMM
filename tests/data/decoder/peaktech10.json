@@ -1,0 +1,36 @@
+{
+  "decoder": "PeakTech10",
+  "comment": "SYNTHETIC: frames built by hand from the PeakTech 451 layout Sarah gave (11 bytes, '#', value in bytes 1..6, unit in bytes 7..10, text padded with spaces). Expectations are the readings the frames spell out, not taken from the decoder. No capture from a real PeakTech 451 exists here. Replace with real data when available.",
+  "tests": [
+    {
+      "comment": "12.34 V: '#12.34 V   '",
+      "hex": "23 31 32 2E 33 34 20 56 20 20 20",
+      "expected": {
+        "val": "12.34",
+        "dval": 12.34,
+        "unit": "V",
+        "hold": false
+      }
+    },
+    {
+      "comment": "230.1 V: '#230.1 V   '",
+      "hex": "23 32 33 30 2E 31 20 56 20 20 20",
+      "expected": {
+        "val": "230.1",
+        "dval": 230.1,
+        "unit": "V",
+        "hold": false
+      }
+    },
+    {
+      "comment": "0.623 V: '# 0.623 V  '",
+      "hex": "23 20 30 2E 36 32 33 20 56 20 20",
+      "expected": {
+        "val": "0.623",
+        "dval": 0.623,
+        "unit": "V",
+        "hold": false
+      }
+    }
+  ]
+}

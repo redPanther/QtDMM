@@ -1,0 +1,91 @@
+# sigrok-cli --driver uni-t-ut61e-ser:conn=<port> --continuous
+# Uni-T UT61E, captured 2026-10-01 while turning the rotary switch:
+# resistance (open), mV DC, resistance, capacitance, resistance ->
+# continuity (open: no unit, "0.00 ") -> diode (open), Hz / duty cycle,
+# uA DC/AC. Every line as sigrok-cli printed it, trailing spaces included.
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: -42.39 mV DC
+P1: -112.20 mV DC
+P1: -174.28 mV DC
+P1: inf mV DC
+P1: 0.0 mV DC AUTO
+P1: 0.0 mV DC AUTO
+P1: -0.1 mV DC AUTO
+P1: -0.1 mV DC AUTO
+P1: -0.1 mV DC AUTO
+P1: -0.1 mV DC AUTO
+P1: -0.2 mV DC AUTO
+P1: -0.2 mV DC AUTO
+P1: -0.1 mV DC AUTO
+P1: -0.1 mV DC AUTO
+P1: 0.5 mV DC AUTO
+P1: 0.5 mV DC AUTO
+P1: -0.1 mV DC AUTO
+P1: -8.62 mV DC
+P1: -9.03 mV DC
+P1: -27.69 mV DC
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: 270 pF AUTO
+P1: 270 pF AUTO
+P1: 270 pF AUTO
+P1: 270 pF AUTO
+P1: 270 pF AUTO
+P1: 270 pF AUTO
+P1: 272 pF AUTO
+P1: 330 pF AUTO
+P1: inf MΩ AUTO
+P1: 0.00 
+P1: 0.00 
+P1: inf mV DC DIODE
+P1: inf mV DC DIODE
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: 0.00 
+P1: 0.00 
+P1: 0.00 
+P1: 0.00 
+P1: 0.00 
+P1: 0.00 
+P1: inf mV DC DIODE
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: inf MΩ AUTO
+P1: 523 pF AUTO
+P1: 0.0 Hz AUTO
+P1: inf %
+P1: inf %
+P1: inf %
+P1: 0.00 Hz AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.02 µA AC AUTO
+P1: 0.02 µA AC AUTO
+P1: 0.02 µA AC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO
+P1: 0.00 µA DC AUTO

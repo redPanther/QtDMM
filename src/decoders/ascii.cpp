@@ -55,7 +55,8 @@ bool DecoderAscii::checkFormat(const char* data, size_t idx)
 {
   switch(m_type)
   {
-    case ReadEvent::PeakTech10: return (data[(idx-11+FIFO_LENGTH)%FIFO_LENGTH] == '#');
+    // "#VVVVVVUUUU": complete when the '#' is ten bytes back
+    case ReadEvent::PeakTech10: return (data[(idx-10+FIFO_LENGTH)%FIFO_LENGTH] == '#');
     case ReadEvent::Metex14:
     case ReadEvent::Voltcraft14Continuous: return (data[idx] == 0x0d);
     case ReadEvent::Sigrok:                return (data[idx] == 0x0a);
@@ -79,24 +80,36 @@ size_t DecoderAscii::getPacketLength()
 
 bool DecoderAscii::decodeSigrok(QString str)
 {
-  QStringList list = str.trimmed().split(" ");
-  if (list.size()<3)
+  // "<channel>: <value> <unit> <flags...>". Unitless readings (continuity,
+  // SR_UNIT_BOOLEAN) stop after the value: "P1: 0.00".
+  QStringList list = str.trimmed().split(" ", Qt::SkipEmptyParts);
+  if (list.size()<2)
     return false;
   m_result.val = list[1];
   if (m_result.val == "inf")
-  {
     m_result.val = " OL ";
-  }
+  else if (m_result.val == "-inf")
+    m_result.val = "-OL ";
 
-  m_result.unit = list[2];
+  // libsigrok spells the units the same for every driver; map the ones the
+  // other decoders spell differently, so units compare equal across protocols
+  m_result.unit = list.size() > 2 ? list[2] : QString();
+  m_result.unit.replace(QStringLiteral("Ω"), QStringLiteral("Ohm"));
+  if (m_result.unit == QStringLiteral("°C"))
+    m_result.unit = QStringLiteral("C");
+  else if (m_result.unit == QStringLiteral("°F"))
+    m_result.unit = QStringLiteral("dF");
 
+  // all fields: CalcDevice puts the coupling where sigrok has the channel
+  // ("DC 6 W AUTO"), and no unit or value is spelled like a flag
+  m_result.range = "MANU";
   for(auto const& item : list)
   {
     if (item == "HOLD") m_result.hold = true;
-    if (item == "DC") m_result.special = "DC";
+    else if (item == "AUTO") m_result.range = "AUTO";
+    else if (item == "DC") m_result.special = "DC";
     else if (item == "AC") m_result.special = "AC";
     else if (item == "DIODE") m_result.special = "DI";
-    m_result.range = (item == "AUTO") ? "AUTO" : "MANU";
   }
   return true;
 }

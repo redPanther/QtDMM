@@ -1,7 +1,17 @@
 {
   "decoder": "VC870Continuous",
-  "comment": "SYNTHETIC: frames built by hand from docs/protocols/sources/vc870_protocol.pdf (function and range codes, five ASCII digits per display, status bits). Expectations are worked out from the displayed reading as the ranges table of that document gives it, not taken from the decoder. The 4 kOhm range and the ranges above it (resistance), and the AC voltage and current ranges are left out: the decoder scales them a decade differently from the DC ranges and the document does not say which is right. No capture from a real VC870 exists here. Replace with real data when available.",
+  "comment": "SYNTHETIC: frames built by hand from docs/protocols/sources/vc870_protocol.pdf (function and range codes, five ASCII digits per display, status bits). Expectations are worked out from the displayed reading as the ranges table of that document gives it, not taken from the decoder. The 4 kOhm range and the ranges above it (resistance), and the AC voltage and current ranges are left out: the decoder scales them a decade differently from the DC ranges and the document does not say which is right. The first vector is a real frame, validated on a VC870 against its display (2026-10-01); the others are still synthetic. Replace them with real data when available.",
   "tests": [
+    {
+      "comment": "REAL, validated on a VC870: DCV 4 V range, display 0.1962 V",
+      "hex": "30 30 30 30 31 39 36 32 30 30 30 30 30 30 32 30 30 30 35 30 30 0D 0A",
+      "expected": {
+        "dval": 0.1962,
+        "unit": "V",
+        "special": "DC",
+        "hold": false
+      }
+    },
     {
       "comment": "DCV 4 V range: 1.2345 V",
       "hex": "30 30 30 31 32 33 34 35 30 30 30 30 30 30 30 30 30 30 30 30 30 0D 0A",
