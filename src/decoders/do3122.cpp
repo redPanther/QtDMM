@@ -12,7 +12,9 @@ size_t DecoderDO3122::getPacketLength()
 
 bool DecoderDO3122::checkFormat(const char* data, size_t idx)
 {
-  if (m_type == ReadEvent::DO3122Continuous)
+  // only once a whole frame is in: before that the look-back lands on stale
+  // bytes of the ring
+  if (m_type == ReadEvent::DO3122Continuous && idx >= 21)
   {
     if ((static_cast<uint8_t>(data[(idx - 21 + FIFO_LENGTH) % FIFO_LENGTH]) != 0xAAu)
         || (static_cast<uint8_t>(data[(idx - 20 + FIFO_LENGTH) % FIFO_LENGTH]) != 0x55u)
