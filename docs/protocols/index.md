@@ -18,7 +18,7 @@ regression tests.
 
 | Decoder | Protocol (`ReadEvent`) | Devices | Captures in `sources/` | Test vectors |
 |---|---|---|---|---|
-| `ascii.cpp` | `Metex14`, `PeakTech10`, `Voltcraft14Continuous`, `Voltcraft15Continuous`, `Sigrok` | 48 devices (`Sigrok`: the SCPI bench meters of `sigrok_devices.cpp` - Keysight 34465A, Agilent 3440xA/34410A, HP 34401A, Siglent SDM3055 - read through sigrok-cli's `scpi-dmm` driver): Metex M-3xxx/M-46xx/ME-xx, Voltcraft M-36xx/M-46xx/ME-xx/VC 6xx, PeakTech 4xxx/451, Mastech MAS-34x, Radioshack 22-805/RS22-168A, Digitech QM1350, McVoice M-345pro, Sinometer MAS-343 | `metex-22t.log` (Voltcraft ME-22T) | Metex14: yes |
+| `ascii.cpp` | `Metex14`, `PeakTech10`, `Voltcraft14Continuous`, `Voltcraft15Continuous`, `Sigrok` | 48 devices (`Sigrok`: the SCPI bench meters of `sigrok_devices.cpp` - Keysight 34465A, Agilent 3440xA/34410A, HP 34401A, Siglent SDM3055 - read through sigrok-cli's `scpi-dmm` driver): Metex M-3xxx/M-46xx/ME-xx, Voltcraft M-36xx/M-46xx/ME-xx/VC 6xx, PeakTech 4xxx/451, Mastech MAS-34x, Radioshack 22-805/RS22-168A, Digitech QM1350, McVoice M-345pro, Sinometer MAS-343 | `metex-22t.log` (Voltcraft ME-22T), `sigrok-ut61e.log` (Uni-T UT61E through sigrok-cli) | Metex14, Sigrok: yes |
 | `brymen_bm52x.cpp` | `BrymenBM52x`, `BrymenBM82x` | Brymen BM525s, BM829s over the BU-86X adapter (unconfirmed) | — (layout from libsigrok's `bm52x.c`, live readings only) | synthetic |
 | `brymen_bm86x.cpp` | `BrymenBM86x` | Brymen BM867s, BM869s over the BU-86X adapter (unconfirmed) | — (layout from libsigrok's `bm86x.c`) | synthetic |
 | `brymen_bm25x.cpp` | `BrymenBM25x` | Brymen BM250/251/252/257 (unconfirmed) | — (layout from libsigrok's `bm25x.c`) | synthetic |
@@ -85,8 +85,13 @@ those devices.
 `voltcraft14.json` and `voltcraft15.json` run the real Metex captures of
 `metex-22t.log` through `Voltcraft14Continuous` and `Voltcraft15Continuous`
 (the same frame layout, the second with a line feed after the carriage
-return). `PeakTech10` and `Sigrok` (the text of sigrok-cli) still have no
-vectors.
+return). `PeakTech10` still has no vectors.
+
+`sigrok.json` runs `sigrok-ut61e.log` through `Sigrok`: the lines of
+sigrok-cli for a Uni-T UT61E, padded the way `SigrokDevice` hands them to the
+decoder. sigrok-cli prints `<channel>: <value> <unit> <flags>` with the same
+unit spelling for every libsigrok driver, so one meter covers the format. The
+capture includes an overload (`inf`) and the continuity mode, which has no unit.
 
 ### Left out of the synthetic fixtures
 

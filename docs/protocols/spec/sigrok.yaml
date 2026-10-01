@@ -1,0 +1,100 @@
+protocol: Sigrok
+decoder: src/decoders/ascii.cpp
+devices: [Uni-T UT61E via sigrok-cli uni-t-ut61e-ser]
+frames_per_reading: 1
+unit_map:                      # log spelling -> what the decoder emits
+  "Ω": "Ohm"
+sources:
+  - docs/protocols/sources/sigrok-ut61e.log
+
+# sigrok-cli prints "<channel>: <value> <unit> <flags...>", units are the same
+# for every libsigrok driver. SigrokDevice trims each line and pads it on the
+# left with spaces to 29 bytes plus the line feed, so 'bytes' is that padded
+# frame. A value of "inf" is an overload. The continuity mode has no unit
+# (SR_UNIT_BOOLEAN) and prints "0.00 " for an open circuit.
+vectors:
+  - source_line: "P1: inf MΩ AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 69 6E 66 20 4D CE A9 20 41 55 54 4F 0A
+    reading: {value: "inf", unit: "MΩ", range_mode: auto}
+    expect: {val: " OL "}
+  - source_line: "P1: -42.39 mV DC"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 2D 34 32 2E 33 39 20 6D 56 20 44 43 0A
+    reading: {value: "-42.39", unit: "mV", range_mode: manual}
+    expect: {special: "DC"}
+  - source_line: "P1: -112.20 mV DC"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 2D 31 31 32 2E 32 30 20 6D 56 20 44 43 0A
+    reading: {value: "-112.20", unit: "mV", range_mode: manual}
+    expect: {special: "DC"}
+  - source_line: "P1: -174.28 mV DC"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 2D 31 37 34 2E 32 38 20 6D 56 20 44 43 0A
+    reading: {value: "-174.28", unit: "mV", range_mode: manual}
+    expect: {special: "DC"}
+  - source_line: "P1: inf mV DC"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 69 6E 66 20 6D 56 20 44 43 0A
+    reading: {value: "inf", unit: "mV", range_mode: manual}
+    expect: {special: "DC", val: " OL "}
+  - source_line: "P1: 0.0 mV DC AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 30 2E 30 20 6D 56 20 44 43 20 41 55 54 4F 0A
+    reading: {value: "0.0", unit: "mV", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "P1: -0.1 mV DC AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 2D 30 2E 31 20 6D 56 20 44 43 20 41 55 54 4F 0A
+    reading: {value: "-0.1", unit: "mV", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "P1: -0.2 mV DC AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 2D 30 2E 32 20 6D 56 20 44 43 20 41 55 54 4F 0A
+    reading: {value: "-0.2", unit: "mV", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "P1: 0.5 mV DC AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 30 2E 35 20 6D 56 20 44 43 20 41 55 54 4F 0A
+    reading: {value: "0.5", unit: "mV", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "P1: -8.62 mV DC"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 2D 38 2E 36 32 20 6D 56 20 44 43 0A
+    reading: {value: "-8.62", unit: "mV", range_mode: manual}
+    expect: {special: "DC"}
+  - source_line: "P1: -9.03 mV DC"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 2D 39 2E 30 33 20 6D 56 20 44 43 0A
+    reading: {value: "-9.03", unit: "mV", range_mode: manual}
+    expect: {special: "DC"}
+  - source_line: "P1: -27.69 mV DC"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 2D 32 37 2E 36 39 20 6D 56 20 44 43 0A
+    reading: {value: "-27.69", unit: "mV", range_mode: manual}
+    expect: {special: "DC"}
+  - source_line: "P1: 270 pF AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 32 37 30 20 70 46 20 41 55 54 4F 0A
+    reading: {value: "270", unit: "pF", range_mode: auto}
+  - source_line: "P1: 272 pF AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 32 37 32 20 70 46 20 41 55 54 4F 0A
+    reading: {value: "272", unit: "pF", range_mode: auto}
+  - source_line: "P1: 330 pF AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 33 33 30 20 70 46 20 41 55 54 4F 0A
+    reading: {value: "330", unit: "pF", range_mode: auto}
+  - source_line: "P1: 0.00 "
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 30 2E 30 30 0A
+    reading: {value: "0.00", unit: "", range_mode: manual, function: continuity}
+  - source_line: "P1: inf mV DC DIODE"
+    bytes: 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 69 6E 66 20 6D 56 20 44 43 20 44 49 4F 44 45 0A
+    reading: {value: "inf", unit: "mV", range_mode: manual}
+    expect: {special: "DI", val: " OL "}
+  - source_line: "P1: 523 pF AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 35 32 33 20 70 46 20 41 55 54 4F 0A
+    reading: {value: "523", unit: "pF", range_mode: auto}
+  - source_line: "P1: 0.0 Hz AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 30 2E 30 20 48 7A 20 41 55 54 4F 0A
+    reading: {value: "0.0", unit: "Hz", range_mode: auto}
+  - source_line: "P1: inf %"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 69 6E 66 20 25 0A
+    reading: {value: "inf", unit: "%", range_mode: manual}
+    expect: {val: " OL "}
+  - source_line: "P1: 0.00 Hz AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 20 20 50 31 3A 20 30 2E 30 30 20 48 7A 20 41 55 54 4F 0A
+    reading: {value: "0.00", unit: "Hz", range_mode: auto}
+  - source_line: "P1: 0.00 µA DC AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 50 31 3A 20 30 2E 30 30 20 C2 B5 41 20 44 43 20 41 55 54 4F 0A
+    reading: {value: "0.00", unit: "µA", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "P1: 0.02 µA AC AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 50 31 3A 20 30 2E 30 32 20 C2 B5 41 20 41 43 20 41 55 54 4F 0A
+    reading: {value: "0.02", unit: "µA", range_mode: auto}
+    expect: {special: "AC"}
