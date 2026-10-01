@@ -41,12 +41,14 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
 1. **CHANGELOG**: give the top section its version and date,
    `* 12/10/2026 26.1`.
 2. **AppStream** (`assets/appimage/qtdmm.appdata.xml`): add the release at
-   the top of `<releases>`. Use `type="development"` for a release candidate:
+   the top of `<releases>`. A release candidate gets `type="development"`
+   and a `~` instead of the `-`: AppStream sorts `26.1-rc1` after `26.1`, and
+   the `appstream_metadata` test fails on the order.
 
    ```xml
    <releases>
      <release version="26.1" date="2026-10-12"/>
-     <release version="26.1-rc1" date="2026-10-01" type="development"/>
+     <release version="26.1~rc1" date="2026-10-01" type="development"/>
    </releases>
    ```
 
@@ -71,7 +73,7 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    draft is still made, without the `.dmg`.
    If the release was made on GitHub's release page instead (which creates
    the tag), the workflow adds the files to it and leaves it as it is. Its
-   builds take about half an hour (the universal macOS build is the slowest),
+   builds take about 10 minutes (the universal macOS build is the slowest),
    and until then the release has no binaries.
    Mark a release candidate as a pre-release there by hand.
 7. Check the draft on GitHub: download and start the builds, then write the

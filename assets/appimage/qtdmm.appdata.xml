@@ -40,13 +40,19 @@
   <update_contact>hello@qtdmm.de</update_contact>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="26.1-rc2" date="2026-09-29" type="development">
+    <release version="26.1" date="2026-10-04">
+      <description>
+        <p>QtDMM 26.1, the first release since 0.9.8 (2017): Qt 6, Windows, macOS and FreeBSD builds, more than 150 meters over serial, USB, Bluetooth LE and the network, recorder export to spreadsheets and images, alarms, readings table and an SCPI server. Since the release candidates: MIN and MAX on the analog meter, readings without leading zeros, fixes for several meters and a disk image for macOS.</p>
+      </description>
+      <url>https://github.com/qtdmm/QtDMM/releases/tag/26.1</url>
+    </release>
+    <release version="26.1~rc2" date="2026-09-29" type="development">
       <description>
         <p>Second release candidate for QtDMM 26.1, with the fixes after rc1: command-line options in the AppImage, a settings dialog that fits small screens, the recorder time window, alarm messages, new instances that start with the current settings, a scalable app icon and packaging for Fedora.</p>
       </description>
       <url>https://github.com/qtdmm/QtDMM/releases/tag/26.1-rc2</url>
     </release>
-    <release version="26.1-rc1" date="2026-09-24" type="development">
+    <release version="26.1~rc1" date="2026-09-24" type="development">
       <description>
         <p>First release candidate for QtDMM 26.1, the first release since 0.9.8 (2017): Qt 6, Windows and FreeBSD builds, more than 150 meters over serial, USB, Bluetooth LE and the network, recorder export to spreadsheets and images, alarms, readings table and an SCPI server.</p>
       </description>
