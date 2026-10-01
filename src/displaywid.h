@@ -31,10 +31,28 @@
 /// DC, diode, continuity), the min/max memory, a bar graph and up to three
 /// secondary values are all drawn with QPainter and scale with the widget.
 /// Unlit segments and annunciators stay faintly visible, like on a real LCD.
+struct Reading;
+
 class DisplayWid : public QWidget
 {
   Q_OBJECT
 public:
+  /// Width/height range the LCD panel keeps; beyond it the panel stays
+  /// centred with room around it.
+  static constexpr double kMinAspect = 1.8;
+  static constexpr double kMaxAspect = 3.2;
+  /// The LCD's colours (context menu "LCD colours", Display/lcd). Custom is
+  /// the tint from the Appearance page, with dark segments, as before the
+  /// variants.
+  enum LcdVariant
+  {
+    Classic,        ///< yellow-green reflective LCD, the old default tint
+    BacklightBlue,  ///< negative LCD: light segments on a blue backlight
+    Amber,          ///< amber backlight, dark segments
+    HighContrast,   ///< black on white
+    Custom          ///< the tint from the settings (setFaceColor)
+  };
+
   DisplayWid(QWidget *parent = nullptr);
 
   /// Value text as the meter shows it; id 0 is the main display, 1..3 the
@@ -59,7 +77,29 @@ public:
   void setAuto(bool);
   void setManu(bool);
   /// @}
-  void setFaceColor(const QColor &);   ///< LCD tint
+  /// The tint for Custom (Appearance page); the others bring their own.
+  void setFaceColor(const QColor &);
+  void setLcdVariant(LcdVariant variant);
+  LcdVariant lcdVariant() const { return m_variant; }
+  /// "classic", "blue", "amber", "contrast", "custom"
+  static QString lcdVariantName(LcdVariant variant);
+  static LcdVariant lcdVariantFromName(const QString &name);
+  /// The Appearance page's default tint (Classic's face).
+  static QColor classicFace();
+
+public Q_SLOTS:
+  /// @name Fed by the MeterController
+  /// @{
+  /// A reading: annunciators, value and unit of its line; a held reading
+  /// keeps the old value.
+  void showReading(const Reading &reading);
+  /// A new minimum/maximum for the MIN/MAX row (@p value is not used).
+  void showMinimum(double value, const QString &text, const QString &unit);
+  void showMaximum(double value, const QString &text, const QString &unit);
+  void clearMinMax();
+  /// @}
+
+public:
 
   QSize sizeHint() const override;
   QSize minimumSizeHint() const override;
@@ -109,6 +149,9 @@ private:
 
   QColor m_face;
   QColor m_segment;
+  QColor m_customFace;             ///< setFaceColor()
+  LcdVariant m_variant = Classic;
+  void applyVariant();
   QColor ghost() const;
 
   QString m_value[4];

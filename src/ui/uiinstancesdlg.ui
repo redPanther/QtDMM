@@ -58,8 +58,7 @@
         <string>+</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
-         <normaloff>:/Symbols/add.xpm</normaloff>:/Symbols/add.xpm</iconset>
+        <iconset theme="list-add"/>
        </property>
       </widget>
      </item>
@@ -72,8 +71,7 @@
         <string>-</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
-         <normaloff>:/Symbols/remove.xpm</normaloff>:/Symbols/remove.xpm</iconset>
+        <iconset theme="list-remove"/>
        </property>
        <property name="checkable">
         <bool>true</bool>

@@ -18,9 +18,9 @@ HelpDlg::HelpDlg(Settings *settings, QWidget *parent)
   setupUi(this);
   setWindowFlag(Qt::Window);   // own top-level window, not a modal dialog
 
-  ui_back->setIcon(style()->standardIcon(QStyle::SP_ArrowBack));
-  ui_forward->setIcon(style()->standardIcon(QStyle::SP_ArrowForward));
-  ui_home->setIcon(QPixmap(":/Symbols/help.xpm"));
+  ui_back->setIcon(QIcon::fromTheme("go-previous"));
+  ui_forward->setIcon(QIcon::fromTheme("go-next"));
+  ui_home->setIcon(QIcon::fromTheme("go-home"));
 
   ui_back->setEnabled(false);
   ui_forward->setEnabled(false);

@@ -26,10 +26,10 @@
 
 #include "configitem.h"
 
-ConfigItem::ConfigItem(int id, const QPixmap &pixmap, const QString &label, QListWidget *parent) :
+ConfigItem::ConfigItem(int id, const QIcon &icon, const QString &label, QListWidget *parent) :
   QListWidgetItem(label, parent), m_id(id)
 {
-  setIcon(pixmap);
+  setIcon(icon);
 }
 
 

@@ -119,8 +119,12 @@ int main(int argc, char **argv)
       failed++;
     };
 
-    // simulate reading from port
+    // simulate reading from port. The ring holds stale bytes of earlier
+    // frames, as the reader's does: a checkFormat() that looks back before
+    // the start of the current frame must not see a frame start there
     char fifo[FIFO_LENGTH];
+    for (int k = 0; k < FIFO_LENGTH; ++k)
+      fifo[k] = frame.isEmpty() ? 0 : frame[k % frame.size()];
     char buffer[FIFO_LENGTH];
     const size_t packetLength = decoder->getPacketLength();
     size_t bytesToRead = packetLength;

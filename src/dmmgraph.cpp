@@ -24,11 +24,13 @@
 #include <QtWidgets>
 #include <QPen>
 #include <QRegularExpression>
-#include <QToolTip>
+#include <cmath>
 #include <QSvgGenerator>
 #include <QPdfWriter>
 
 #include "dmmgraph.h"
+
+#include <cmath>
 #include "siprefix.h"
 #include "recordingfile.h"
 #include "settings.h"
@@ -120,6 +122,20 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
 
   m_yAxis = new QValueAxis();
   m_chart->addAxis(m_yAxis, Qt::AlignLeft);
+  m_defaultLabels = m_yAxis->labelsBrush();
+  m_defaultLabelFormat = m_yAxis->labelFormat();
+  m_defaultAxisLine = m_yAxis->linePenColor();
+  m_yTitle = new QGraphicsSimpleTextItem(m_chart);
+  m_yTitle->setFont(m_xAxis->titleFont());
+  m_yTitle->setBrush(m_xAxis->titleBrush());
+  connect(m_chart, &QChart::plotAreaChanged, this, [this](const QRectF &)
+  {
+    placeYTitle();
+    updateCentreTicks();
+    updateXLabels();
+  });
+  m_centreTicks = new QGraphicsPathItem(m_chart);
+  m_centreTicks->setZValue(5);   // above the grid, below the curves' markers
   m_dataSeries->attachAxis(m_yAxis);
   m_dataPoints->attachAxis(m_yAxis);
   m_intSeries->attachAxis(m_yAxis);
@@ -156,6 +172,89 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
 
   m_popup = new QMenu(this);
   connect(m_popup, SIGNAL(triggered(QAction *)), this, SLOT(popupSLOT(QAction *)));
+
+  // time buttons top right, as in the UI demo: the visible window at a click
+  m_timeBar = new QWidget(m_chartView);
+  auto *bar = new QHBoxLayout(m_timeBar);
+  bar->setContentsMargins(0, 0, 0, 0);
+  bar->setSpacing(2);
+  const QList<QPair<QString, int>> steps = { { tr("All"), 0 }, { tr("1 min"), 60 }, { tr("5 min"), 300 },
+                                             { tr("30 min"), 1800 } };
+  for (const auto &step : steps)
+  {
+    auto *b = new QToolButton(m_timeBar);
+    b->setText(step.first);
+    b->setCheckable(true);
+    b->setAutoRaise(true);
+    b->setFocusPolicy(Qt::NoFocus);
+    b->setCursor(Qt::ArrowCursor);
+    b->setProperty("seconds", step.second);
+    b->setToolTip(step.second == 0 ? tr("Show the whole recording, growing with it")
+                                   : tr("Show the last %1").arg(step.first));
+    connect(b, &QToolButton::clicked, this, [this, b] { timeButtonClicked(b->property("seconds").toInt()); });
+    bar->addWidget(b);
+    m_timeButtons.append(b);
+  }
+  updateTimeButtons();
+
+  m_cursorLabel = new QLabel(m_chartView);
+  m_cursorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);   // no Leave for the view
+  m_cursorLabel->hide();
+}
+
+void DMMGraph::timeButtonClicked(int seconds)
+{
+  m_followAll = (seconds == 0);
+  if (m_followAll)
+    requestAll(false);
+  else if (seconds != m_windowSeconds)
+    Q_EMIT windowRequested(seconds);
+  updateTimeButtons();   // also when nothing changes: undo the click's own toggle
+}
+
+void DMMGraph::requestAll(bool grow)
+{
+  const double recorded = m_pointer * m_sampleTime / 10.0;
+  // growing by a quarter at a time: the window does not change with every sample
+  int target = int(std::ceil(grow ? recorded * 1.25 : recorded));
+  target = qMax(target, 10);
+  // whole minutes from one minute on: the settings keep seconds only up to
+  // 99999, an odd value above would be cut and asked for again with every sample
+  if (target > 60)
+    target = (target + 59) / 60 * 60;
+  if (m_totalSeconds > 0)
+    target = qMin(target, m_totalSeconds);
+  if (target != m_windowSeconds)
+    Q_EMIT windowRequested(target);
+}
+
+void DMMGraph::updateTimeButtons()
+{
+  for (QToolButton *b : m_timeButtons)
+  {
+    const int seconds = b->property("seconds").toInt();
+    // a window longer than the recording is no choice
+    b->setVisible(seconds == 0 || m_totalSeconds <= 0 || seconds <= m_totalSeconds);
+    b->setChecked(seconds == 0 ? m_followAll : !m_followAll && seconds == m_windowSeconds);
+  }
+  placeTimeBar();
+}
+
+void DMMGraph::placeTimeBar()
+{
+  if (!m_timeBar)
+    return;
+  m_timeBar->adjustSize();
+  m_timeBar->move(m_chartView->width() - m_timeBar->width() - 6, 3);
+  m_timeBar->raise();
+}
+
+void DMMGraph::hideCrosshair()
+{
+  m_crosshairVLine->setVisible(false);
+  m_crosshairHLine->setVisible(false);
+  if (m_cursorLabel)
+    m_cursorLabel->hide();
 }
 
 DMMGraph::~DMMGraph()
@@ -223,11 +322,11 @@ void DMMGraph::resizeEvent(QResizeEvent *)
 {
   m_chartView->setGeometry(0, 0, width(), height() - 16);
   scrollbar->setGeometry(0, height() - 16, width(), 16);
+  placeTimeBar();
 
   // Simpler than tracking/restoring hover state across a resize: just hide it,
   // the next mouse move will reposition it correctly.
-  m_crosshairVLine->setVisible(false);
-  m_crosshairHLine->setVisible(false);
+  hideCrosshair();
 
   updateThresholdLinePositions();
 }
@@ -257,12 +356,159 @@ void DMMGraph::updateXAxisRange()
   double step = m_sampleTime / 10.0;
   int sv = qMax(0, scrollbar->value());
 
-  m_xAxis->setRange(sv * step, (sv + qMax(1, m_size) - 1) * step);
+  double start = sv * step, end = (sv + qMax(1, m_size) - 1) * step;
+  double div = timeStep((end - start) / 6);   // about 5 ticks
+  if (divisions() && end > start)
+  {
+    // 10 divisions of a time step that cover the window, starting on a
+    // step: 600 s are 10 x 1 min
+    div = timeStep((end - start) / 10);
+    double first = std::floor(start / div) * div;
+    while (first + 10 * div < end - div * 1e-9)
+    {
+      div = timeStep(div * 1.01);
+      first = std::floor(start / div) * div;
+    }
+    start = first;
+    end = first + 10 * div;
+  }
+  m_xAxis->setRange(start, end);
+  // the ticks on whole steps, counted from the start of the recording
+  m_xStep = div;
+  m_xAxis->setTickType(QValueAxis::TicksDynamic);
+  m_xAxis->setTickAnchor(0);
+  m_xAxis->setTickInterval(div);
+  updateXLabels();
+}
+
+double DMMGraph::timeStep(double v)
+{
+  if (!(v > 0) || !std::isfinite(v))
+    return 1;
+  static const double steps[] = { 0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800,
+                                  3600, 7200, 10800, 21600, 43200, 86400 };
+  for (double s : steps)
+    if (s >= v * (1 - 1e-12))
+      return s;
+  return niceStep(v / 86400) * 86400;   // days in 1-2-5
+}
+
+// Seconds, minutes or hours, as the step reads best; the title says which.
+void DMMGraph::updateXLabels()
+{
+  if (!m_xAxis || m_xStep <= 0)
+    return;
+  double unit = 1;
+  QString title = tr("[sec]");
+  if (m_xStep >= 3600 && std::fmod(m_xStep, 3600) == 0)
+  {
+    unit = 3600;
+    title = tr("[h]");
+  }
+  else if (m_xStep >= 60 && std::fmod(m_xStep, 60) == 0)
+  {
+    unit = 60;
+    title = tr("[min]");
+  }
+  if (m_xAxis->titleText() != title)
+    m_xAxis->setTitleText(title);
+
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  QList<double> values;
+  if (max > min && plot.width() > 0)
+    for (double v = std::ceil(min / m_xStep - 1e-9) * m_xStep; v <= max + m_xStep * 1e-9 && values.size() < 200; v += m_xStep)
+      values << v;
+  while (m_xLabels.size() < values.size())
+  {
+    auto *item = new QGraphicsSimpleTextItem(m_chart);
+    item->setZValue(m_yTitle->zValue());
+    m_xLabels << item;
+  }
+  const QFont font = m_xAxis->labelsFont();
+  // Qt's labels start below the axis line and its tick marks
+  const double top = plot.bottom() + 6;
+  for (int i = 0; i < m_xLabels.size(); ++i)
+  {
+    QGraphicsSimpleTextItem *item = m_xLabels[i];
+    item->setVisible(i < values.size());
+    if (i >= values.size())
+      continue;
+    const double v = values[i] / unit;
+    item->setText(QString::number(std::abs(v) < 1e-9 ? 0.0 : v, 'g', 6));
+    item->setFont(font);
+    item->setBrush(m_xLabelColor.isValid() ? QBrush(m_xLabelColor) : m_xAxis->titleBrush());
+    const double x = plot.left() + (values[i] - min) / (max - min) * plot.width();
+    item->setPos(x - item->boundingRect().width() / 2, top);
+  }
+}
+
+double DMMGraph::niceStep(double v)
+{
+  if (!(v > 0) || !std::isfinite(v))
+    return 1;
+  double decade = std::pow(10.0, std::floor(std::log10(v)));
+  for (double m : { 1.0, 2.0, 5.0, 10.0 })
+    if (m * decade >= v * (1 - 1e-12))
+      return m * decade;
+  return 10 * decade;
+}
+
+bool DMMGraph::divisions() const
+{
+  return m_variant == ScopeBlue || phosphor() || m_variant == ChartRecorder;
+}
+
+void DMMGraph::setYRange(double min, double max)
+{
+  if (divisions() && max > min && std::isfinite(min) && std::isfinite(max))
+  {
+    // 8 divisions of a 1-2-5 step; the range grows to whole steps
+    double div = niceStep((max - min) / 8);
+    double first = std::floor(min / div + 1e-9) * div;
+    while (first + 8 * div < max - div * 1e-9)
+    {
+      div = niceStep(div * 1.01);
+      first = std::floor(min / div + 1e-9) * div;
+    }
+    m_yAxis->setRange(first, first + 8 * div);
+  }
+  else
+    m_yAxis->setRange(min, max);
+  updateCentreTicks();
+}
+
+void DMMGraph::updateCentreTicks()
+{
+  if (!phosphor())
+  {
+    m_centreTicks->setPath(QPainterPath());
+    return;
+  }
+  const QRectF pa = m_chart->plotArea();
+  const double cx = pa.center().x(), cy = pa.center().y();
+  QPainterPath path;
+  path.moveTo(pa.left(), cy);
+  path.lineTo(pa.right(), cy);
+  path.moveTo(cx, pa.top());
+  path.lineTo(cx, pa.bottom());
+  const double dx = pa.width() / 50, dy = pa.height() / 40;   // 10 x 8 divisions, 5 ticks each
+  for (int i = 0; i <= 50; ++i)
+  {
+    path.moveTo(pa.left() + i * dx, cy - 3);
+    path.lineTo(pa.left() + i * dx, cy + 3);
+  }
+  for (int i = 0; i <= 40; ++i)
+  {
+    path.moveTo(cx - 3, pa.top() + i * dy);
+    path.lineTo(cx + 3, pa.top() + i * dy);
+  }
+  m_centreTicks->setPath(path);
 }
 
 void DMMGraph::updateSeriesAppearance()
 {
-  m_dataSeries->setPen(QPen(m_dataColor, m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
+  m_dataSeries->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
   m_dataSeries->setVisible(m_lineMode != NoLine);
 
   QScatterSeries::MarkerShape shape = QScatterSeries::MarkerShapeCircle;
@@ -284,10 +530,14 @@ void DMMGraph::updateSeriesAppearance()
 
   m_dataPoints->setMarkerShape(shape);
   m_dataPoints->setMarkerSize(size);
-  m_dataPoints->setColor(m_dataColor);
+  m_dataPoints->setColor(dataColor());
+  // Qt Charts rims the markers in white: dense points turn into a white band
+  m_dataPoints->setBorderColor(dataColor());
   m_dataPoints->setVisible(m_pointMode != NoPoint);
 
-  m_intSeries->setPen(QPen(m_intColor, m_intLineWidth, penStyle(m_intLineMode), Qt::RoundCap, Qt::RoundJoin));
+  // phosphor: one colour, the integration curve dashed when it is a solid line
+  const Qt::PenStyle intStyle = phosphor() && m_intLineMode == Solid ? Qt::DashLine : penStyle(m_intLineMode);
+  m_intSeries->setPen(QPen(intColor(), m_intLineWidth, intStyle, Qt::RoundCap, Qt::RoundJoin));
   m_intSeries->setVisible(m_showIntegration && m_intLineMode != NoLine);
 
   QScatterSeries::MarkerShape intShape = QScatterSeries::MarkerShapeCircle;
@@ -307,7 +557,8 @@ void DMMGraph::updateSeriesAppearance()
 
   m_intPoints->setMarkerShape(intShape);
   m_intPoints->setMarkerSize(intSize);
-  m_intPoints->setColor(m_intColor);
+  m_intPoints->setColor(intColor());
+  m_intPoints->setBorderColor(intColor());
   m_intPoints->setVisible(m_showIntegration && m_intPointMode != NoPoint);
 }
 
@@ -389,6 +640,7 @@ void DMMGraph::setGraphSize(int size, int length)
   rebuildSeries();
   updateXAxisRange();
   updateThresholdLinePositions();
+  updateTimeButtons();
 }
 
 void DMMGraph::setSampleTime(int v)
@@ -529,6 +781,9 @@ void DMMGraph::addValue(double val)
       (*m_arrayInt)[m_pointer] = (m_pointer > 0 ? (*m_arrayInt)[m_pointer - 1] : 0.0) + val;
 
     (*m_array)[m_pointer++] = val;
+    // "All": the window grows once the recording fills it
+    if (m_followAll && m_pointer >= m_size)
+      requestAll(true);
     bool resFlag = false;
 
     if (m_autoScale)
@@ -553,7 +808,7 @@ void DMMGraph::addValue(double val)
 
     if (resFlag)
     {
-      m_yAxis->setRange(m_scaleMin, m_scaleMax);
+      setYRange(m_scaleMin, m_scaleMax);
       updateThresholdLinePositions();
     }
   }
@@ -581,7 +836,24 @@ void DMMGraph::setUnit(const QString &unit)
   // base unit and the prefix is dropped here.
   m_unit = SiPrefix::split(unit).baseUnit;
 
-  m_yAxis->setTitleText(m_unit.isEmpty() ? QString() : QString("[%1]").arg(m_unit));
+  m_yTitle->setText(m_unit.isEmpty() ? QString() : QString("[%1]").arg(m_unit));
+  // room above the plot for the title
+  const int h = m_unit.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
+                                             + QFontMetricsF(m_yAxis->labelsFont()).height() / 2);
+  // and at least as much as the time buttons need, so they sit above the plot
+  const int bar = m_timeBar ? m_timeBar->sizeHint().height() : 0;
+  m_chart->setMargins(QMargins(4, 4 + qMax(h, bar), 4, 4));
+  placeYTitle();
+}
+
+// right-aligned with the axis line, just above the plot area
+void DMMGraph::placeYTitle()
+{
+  const QRectF plot = m_chart->plotArea();
+  const QRectF text = m_yTitle->boundingRect();
+  // the top tick label is centred on the plot's top edge: stay above it
+  const double labelHalf = QFontMetricsF(m_yAxis->labelsFont()).height() / 2;
+  m_yTitle->setPos(qMax(2.0, plot.left() - text.width() - 4), plot.top() - labelHalf - text.height() - 1);
 }
 
 void DMMGraph::clearSLOT()
@@ -662,9 +934,7 @@ bool DMMGraph::eventFilter(QObject *watched, QEvent *event)
         handleChartWheel(static_cast<QWheelEvent *>(event));
         return true;
       case QEvent::Leave:
-        m_crosshairVLine->setVisible(false);
-        m_crosshairHLine->setVisible(false);
-        QToolTip::hideText();
+        hideCrosshair();
         break;
       default:
         break;
@@ -740,6 +1010,22 @@ void DMMGraph::handleChartMousePress(QMouseEvent *ev)
     action = new QAction(tr("Export image..."), m_popup);
     action->setProperty("ID", IDExportImage);
     m_popup->addAction(action);
+
+    // this graph's colours: the default from the settings page, or one of
+    // the variants for this graph only
+    QMenu *colours = m_popup->addMenu(tr("Graph &colours"));
+    auto variant = [this, colours](const QString &text, int v)
+    {
+      QAction *a = colours->addAction(text);
+      a->setProperty("ID", IDColorVariant);
+      a->setProperty("variant", v);
+      a->setCheckable(true);
+      a->setChecked(m_variantOverride == v);
+    };
+    variant(tr("&Default: %1").arg(variantTitle(m_defaultVariant)), -1);
+    colours->addSeparator();
+    for (ColorVariant v : { Neutral, ScopeBlue, PhosphorGreen, PhosphorAmber, ChartRecorder, Custom })
+      variant(variantTitle(v), v);
 
     if (!m_running)
     {
@@ -834,9 +1120,7 @@ void DMMGraph::handleChartMouseMove(QMouseEvent *ev)
 
     if (m_cursorMode != NoCursor || !m_crosshair)
     {
-      m_crosshairVLine->setVisible(false);
-      m_crosshairHLine->setVisible(false);
-      QToolTip::hideText();
+      hideCrosshair();
       return;
     }
 
@@ -858,13 +1142,18 @@ void DMMGraph::handleChartMouseMove(QMouseEvent *ev)
       m_crosshairHLine->setLine(plot.left(), scenePoint.y(), plot.right(), scenePoint.y());
       m_crosshairHLine->setVisible(true);
       QString unit;
-      text += "\n" + QString("%1 %2").arg(formatEngineeringValue(val, &unit)).arg(unit);
+      text += "   " + QString("%1 %2").arg(formatEngineeringValue(val, &unit)).arg(unit);
     }
     else
       m_crosshairHLine->setVisible(false);
 
-    QPoint globalPos = m_chartView->viewport()->mapToGlobal(pos) + QPoint(4, 4);
-    QToolTip::showText(globalPos, text, m_chartView);
+    // fixed above the plot, left-aligned so only its end moves with the text
+    m_cursorLabel->setText(text);
+    m_cursorLabel->adjustSize();
+    const QPoint topLeft = m_chartView->mapFromScene(plot.topLeft());
+    m_cursorLabel->move(topLeft.x() + 4, 3);
+    m_cursorLabel->show();
+    m_cursorLabel->raise();
   }
 }
 
@@ -876,6 +1165,7 @@ void DMMGraph::handleChartMouseRelease(QMouseEvent *)
 
 void DMMGraph::handleChartWheel(QWheelEvent *ev)
 {
+  m_followAll = false;
   if (ev->angleDelta().x() < 0 || ev->angleDelta().y() < 0)
     Q_EMIT zoomOut(1.1);
   else
@@ -1067,7 +1357,7 @@ void DMMGraph::setScale(bool autoScale, bool includeZero, double min, double max
 
   }
 
-  m_yAxis->setRange(m_scaleMin, m_scaleMax);
+  setYRange(m_scaleMin, m_scaleMax);
   updateThresholdLinePositions();
 }
 
@@ -1111,24 +1401,240 @@ void DMMGraph::setColors(const QColor &bg, const QColor &grid,
   m_intColor          = integration;
   m_intThresholdColor = intThreshold;
 
-  m_chart->setBackgroundBrush(m_bgColor);
-  // the scrollbar in the graph's colours: a dark graph gets no light strip
-  QPalette pal = scrollbar->palette();
-  for (QPalette::ColorRole role : { QPalette::Window, QPalette::Base, QPalette::Button })
-    pal.setColor(role, m_bgColor);
-  pal.setColor(QPalette::WindowText, m_gridColor);
-  pal.setColor(QPalette::ButtonText, m_gridColor);
-  scrollbar->setPalette(pal);
-  scrollbar->setAutoFillBackground(true);
-  m_xAxis->setGridLineColor(m_gridColor);
-  m_yAxis->setGridLineColor(m_gridColor);
+  applyThemeColors();
   updateSeriesAppearance();
+}
 
-  m_crosshairVLine->setPen(QPen(m_cursorColor));
-  m_crosshairHLine->setPen(QPen(m_cursorColor));
-  m_triggerLine->setPen(QPen(m_startColor));
-  m_externalLine->setPen(QPen(m_externalColor));
-  m_integrationLine->setPen(QPen(m_intThresholdColor));
+void DMMGraph::setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
+                              const QColor &data)
+{
+  m_themeBackground = background;
+  m_themeGrid = grid;
+  m_themeLabels = labels;
+  m_themeData = data;
+  applyThemeColors();
+  updateSeriesAppearance();
+}
+
+// The curve colour: a colour chosen in the settings stays in every
+// variant; the default blue is replaced by the variant's (or the design's).
+QColor DMMGraph::dataColor() const
+{
+  if (m_variant == Custom || m_dataColor != QColor(Qt::blue))
+    return m_dataColor;
+  switch (m_variant)
+  {
+    case ScopeBlue:     return QColor("#ffe14d");
+    case PhosphorGreen: return QColor::fromHsv(135, 190, 255);
+    case PhosphorAmber: return QColor::fromHsv(38, 230, 255);
+    case ChartRecorder: return QColor("#1f4e9c");
+    default:            return m_themeData.isValid() ? m_themeData : m_dataColor;
+  }
+}
+
+// The same for the integration curve (default dark blue); phosphor keeps
+// one colour and tells the curves apart by brightness and dashes.
+QColor DMMGraph::intColor() const
+{
+  if (m_variant == Custom || m_intColor != QColor(Qt::darkBlue))
+    return m_intColor;
+  switch (m_variant)
+  {
+    case ScopeBlue:     return QColor("#4de8ff");
+    case PhosphorGreen: return QColor::fromHsv(135, 190, 190);
+    case PhosphorAmber: return QColor::fromHsv(38, 230, 190);
+    case ChartRecorder: return QColor("#c0282d");
+    default:            return m_themeData.isValid() ? m_themeData.lighter(140) : m_intColor;
+  }
+}
+
+void DMMGraph::setColorVariant(ColorVariant defaultVariant, int override)
+{
+  m_defaultVariant = defaultVariant;
+  m_variantOverride = override;
+  m_variant = override >= 0 ? static_cast<ColorVariant>(override) : defaultVariant;
+  applyThemeColors();
+  updateSeriesAppearance();
+}
+
+QString DMMGraph::variantTitle(ColorVariant variant)
+{
+  switch (variant)
+  {
+    case ScopeBlue:     return tr("Scope blue");
+    case PhosphorGreen: return tr("Phosphor green");
+    case PhosphorAmber: return tr("Phosphor amber");
+    case ChartRecorder: return tr("Chart recorder");
+    case Custom:        return tr("Custom");
+    default:            return tr("Neutral");
+  }
+}
+
+QString DMMGraph::variantName(ColorVariant variant)
+{
+  switch (variant)
+  {
+    case ScopeBlue:     return "scope";
+    case PhosphorGreen: return "phosphor-green";
+    case PhosphorAmber: return "phosphor-amber";
+    case ChartRecorder: return "recorder";
+    case Custom:        return "custom";
+    default:            return "neutral";
+  }
+}
+
+DMMGraph::ColorVariant DMMGraph::variantFromName(const QString &name)
+{
+  for (ColorVariant v : { ScopeBlue, PhosphorGreen, PhosphorAmber, ChartRecorder, Custom })
+    if (name == variantName(v))
+      return v;
+  return Neutral;
+}
+
+// Background, grid and lettering. Neutral follows the window design (on
+// System the palette), Custom takes the settings page, the others bring
+// their own; the scope-like ones also switch to 10 x 8 divisions.
+void DMMGraph::applyThemeColors()
+{
+  QBrush background, plot(Qt::NoBrush);
+  QPen grid, minor, line;
+  QColor labels;
+  int minors = 0;
+  auto vgrad = [](const QColor &top, const QColor &bottom)
+  {
+    QLinearGradient g(0, 0, 0, 1);
+    g.setCoordinateMode(QGradient::ObjectBoundingMode);
+    g.setColorAt(0, top);
+    g.setColorAt(1, bottom);
+    return QBrush(g);
+  };
+  switch (m_variant)
+  {
+    case ScopeBlue:
+      background = QColor("#0b1633");
+      plot = vgrad(QColor("#16306a"), QColor("#081338"));
+      grid = QPen(QColor(90, 130, 200, 150), 1, Qt::DashLine);
+      line = QPen(QColor("#5a78b0"));
+      labels = QColor("#b9c9e8");
+      break;
+    case PhosphorGreen:
+    case PhosphorAmber:
+    {
+      const bool green = m_variant == PhosphorGreen;
+      background = green ? QColor("#0a0d0a") : QColor("#0d0b08");
+      plot = green ? QColor("#060d08") : QColor("#0e0a04");
+      grid = QPen(green ? QColor(60, 150, 85, 110) : QColor(190, 120, 30, 110), 1);
+      line = grid;
+      labels = green ? QColor("#5fbf78") : QColor("#d99a2b");
+      m_centreTicks->setPen(QPen(green ? QColor(80, 190, 110, 150) : QColor(220, 150, 50, 150), 1));
+      break;
+    }
+    case ChartRecorder:
+      background = QColor("#f4eedb");
+      plot = QColor("#fbf6e6");
+      grid = QPen(QColor(214, 140, 130, 190), 1);
+      minor = QPen(QColor(226, 176, 166, 110), 0.6);
+      line = QPen(QColor(190, 120, 110));
+      labels = QColor("#5a4636");
+      minors = 4;   // millimetre-ish paper
+      break;
+    case Custom:
+      background = m_bgColor;
+      grid = QPen(m_gridColor);
+      line = QPen(m_defaultAxisLine);
+      // lettering that reads on the chosen background
+      labels = m_bgColor.lightness() < 128 ? QColor(220, 220, 220) : QColor(30, 30, 30);
+      break;
+    case Neutral:
+      if (m_themeBackground.style() != Qt::NoBrush)
+      {
+        background = m_themeBackground;
+        grid = QPen(m_themeGrid);
+        labels = m_themeLabels;
+      }
+      else
+      {
+        // the System design: the palette, as the table and the dialogs
+        const QPalette pal = palette();
+        background = pal.base();
+        grid = QPen(pal.color(QPalette::Mid));
+        labels = pal.color(QPalette::Text);
+      }
+      line = QPen(labels);
+      break;
+  }
+  m_chart->setBackgroundBrush(background);
+  // the scrollbar in the graph's colours: a dark graph gets no light strip
+  {
+    QPalette pal = scrollbar->palette();
+    for (QPalette::ColorRole role : { QPalette::Window, QPalette::Base, QPalette::Button })
+      pal.setBrush(role, background);
+    pal.setColor(QPalette::WindowText, labels);
+    pal.setColor(QPalette::ButtonText, labels);
+    scrollbar->setPalette(pal);
+    scrollbar->setAutoFillBackground(true);
+  }
+  // the time buttons in the lettering colour, the chosen one framed
+  if (m_timeBar)
+    m_timeBar->setStyleSheet(QString("QToolButton { color: %1; border: 1px solid transparent; border-radius: 2px;"
+                                     " padding: 0px 4px; background: transparent; }"
+                                     " QToolButton:checked { border-color: %1; }"
+                                     " QToolButton:hover { border-color: %2; }")
+                               .arg(labels.name(), QColor(labels.red(), labels.green(), labels.blue(), 110).name(QColor::HexArgb)));
+  if (m_cursorLabel)
+    m_cursorLabel->setStyleSheet(QString("QLabel { color: %1; background: transparent; }").arg(labels.name()));
+  m_chart->setPlotAreaBackgroundBrush(plot);
+  m_chart->setPlotAreaBackgroundVisible(plot.style() != Qt::NoBrush);
+  for (QValueAxis *axis : { m_xAxis, m_yAxis })
+  {
+    axis->setGridLinePen(grid);
+    axis->setMinorTickCount(minors);
+    axis->setMinorGridLineVisible(minors > 0);
+    if (minors > 0)
+      axis->setMinorGridLinePen(minor);
+    axis->setLabelsBrush(labels);
+    axis->setTitleBrush(labels);
+    axis->setLinePen(line);
+  }
+  // 10 x 8 divisions for the scope-like variants, Qt's default otherwise;
+  // their round steps need no forced decimals. The x ticks are time steps
+  // (updateXAxisRange()), labelled by updateXLabels(): Qt's own x labels
+  // only keep the room for them.
+  m_yAxis->setTickCount(divisions() ? 9 : 5);
+  m_xAxis->setLabelFormat("%.4g");
+  m_yAxis->setLabelFormat(divisions() ? "%.4g" : m_defaultLabelFormat);
+  m_xLabelColor = labels;
+  m_xAxis->setLabelsBrush(Qt::transparent);
+  m_yTitle->setBrush(labels);
+
+  // cursor and threshold lines: a colour chosen in the settings stays,
+  // the defaults follow the variant (a black cursor on phosphor is lost)
+  const bool own = m_variant == Custom;
+  auto pick = [own](const QColor &setting, Qt::GlobalColor def, const QColor &variant)
+  {
+    return own || setting != QColor(def) || !variant.isValid() ? setting : variant;
+  };
+  QColor start, external;
+  switch (m_variant)
+  {
+    case ScopeBlue:     start = QColor("#ff5fd2"); external = QColor("#6dff6d"); break;
+    case PhosphorGreen: start = QColor::fromHsv(135, 190, 160); external = QColor::fromHsv(135, 120, 130); break;
+    case PhosphorAmber: start = QColor::fromHsv(38, 230, 160); external = QColor::fromHsv(38, 150, 130); break;
+    case ChartRecorder: start = QColor("#2e7d32"); external = QColor("#222222"); break;
+    default: break;
+  }
+  const Qt::PenStyle lineStyle = phosphor() ? Qt::DashLine : Qt::SolidLine;
+  const QColor cursor = pick(m_cursorColor, Qt::black, labels);
+  m_crosshairVLine->setPen(QPen(cursor));
+  m_crosshairHLine->setPen(QPen(cursor));
+  m_triggerLine->setPen(QPen(pick(m_startColor, Qt::magenta, start), 1, lineStyle));
+  m_externalLine->setPen(QPen(pick(m_externalColor, Qt::cyan, external), 1, lineStyle));
+  // dotted: by default it takes the integration curve's colour and must not
+  // pass for a curve (phosphor dashes the curve)
+  m_integrationLine->setPen(QPen(pick(m_intThresholdColor, Qt::darkBlue, intColor()), 1, Qt::DotLine));
+  updateXAxisRange();
+  setYRange(m_scaleMin, m_scaleMax);
+  updateThresholdLinePositions();
 }
 
 void DMMGraph::setLineStyle(int lineMode, int pointMode, int intLineMode, int intPointMode)
@@ -1218,6 +1724,10 @@ void DMMGraph::popupSLOT(QAction *action)
       break;
     case IDExportImage:
       exportImageSLOT();
+      break;
+    case IDColorVariant:
+      setColorVariant(m_defaultVariant, action->property("variant").toInt());
+      Q_EMIT colorVariantChanged(m_variantOverride);
       break;
   }
 }

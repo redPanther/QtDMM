@@ -92,6 +92,20 @@ public:
     Integration   ///< integration threshold
   };
 
+  /// The graph's colours (context menu "Graph colours", Graph/variant).
+  /// Each brings background, grid, lettering and curve colours; a curve
+  /// colour chosen in the settings stays. Custom is the colours from the
+  /// settings page, as before the variants.
+  enum ColorVariant
+  {
+    Neutral,         ///< follows the window design
+    ScopeBlue,       ///< oscilloscope, blue screen
+    PhosphorGreen,   ///< green phosphor tube: one colour, 10 x 8 divisions
+    PhosphorAmber,   ///< the same in amber
+    ChartRecorder,   ///< paper and ink
+    Custom           ///< the colours from the settings page
+  };
+
   /// Entries of the context menu.
   enum PopupID
   {
@@ -104,7 +118,8 @@ public:
     IDExportData,
     IDImportData,
     IDCopyImage,
-    IDExportImage
+    IDExportImage,
+    IDColorVariant   ///< property "variant" says which
   };
 
   DMMGraph(QWidget *parent, Settings *settings);
@@ -138,6 +153,28 @@ public:
                              const QColor &data, const QColor &cursor,
                              const QColor &start, const QColor &external,
                              const QColor &integration, const QColor &intThreshold);
+  /// Colours of the window design (background, grid, axis lettering); a
+  /// background of Qt::NoBrush means the colours from the settings. @p data
+  /// replaces the curve colour only while that is the default blue.
+  void             setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
+                                  const QColor &data = QColor());
+  /// The colours in use: @p override for this graph (context menu), or
+  /// the default from the settings page when @p override is -1.
+  void             setColorVariant(ColorVariant defaultVariant, int override = -1);
+  ColorVariant     colorVariant() const { return m_variant; }
+  int              colorOverride() const { return m_variantOverride; }
+  /// "neutral", "scope", "phosphor-green", "phosphor-amber", "recorder", "custom"
+  static QString   variantName(ColorVariant variant);
+  static ColorVariant variantFromName(const QString &name);
+  /// The variant's name in the menus ("Scope blue").
+  static QString   variantTitle(ColorVariant variant);
+  /// The smallest step of the 1-2-5 series (..., 0.5, 1, 2, 5, 10, ...) that
+  /// is at least @p v; the division of the scope variants. Public for the tests.
+  static double    niceStep(double v);
+  /// The smallest time step (..., 1, 2, 5, 10, 15, 30 s, 1, 2, 5, 10, 15,
+  /// 30 min, 1, 2, 3, 6, 12 h, days) that is at least @p v seconds: the
+  /// x division. Public for the tests.
+  static double    timeStep(double v);
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
   /// Draws a vertical mark at the current sample (an alarm raised); marks
@@ -170,10 +207,15 @@ Q_SIGNALS:
   void             sampleTime(int);
   /// The external application threshold was crossed.
   void             externalTriggered();
+  /// The context menu chose this graph's colours: a ColorVariant, or -1
+  /// for the default from the settings page.
+  void             colorVariantChanged(int override);
   void             zoomIn(double);
   void             zoomOut(double);
   /// Show the whole recording (key 0).
   void             zoomFit();
+  /// A time button asks for this visible window (seconds).
+  void             windowRequested(int seconds);
   /// A threshold line was dragged with the mouse.
   void             thresholdChanged(DMMGraph::CursorMode, double);
   /// @name Context menu requests, handled by MainWid
@@ -189,9 +231,9 @@ public Q_SLOTS:
   void             clearSLOT();
   /// @name Keyboard zoom/pan, also reachable from MainWin's shortcuts
   /// @{
-  void             zoomInSLOT()  { Q_EMIT zoomIn(1.25); }
-  void             zoomOutSLOT() { Q_EMIT zoomOut(1.25); }
-  void             zoomFitSLOT() { Q_EMIT zoomFit(); }
+  void             zoomInSLOT()  { m_followAll = false; Q_EMIT zoomIn(1.25); }
+  void             zoomOutSLOT() { m_followAll = false; Q_EMIT zoomOut(1.25); }
+  void             zoomFitSLOT() { m_followAll = false; Q_EMIT zoomFit(); }
   /// Shifts the visible window by a fraction of its width (negative = back).
   void             pan(double fraction);
   void             scrollToStart();
@@ -229,6 +271,22 @@ protected:
   int              m_size;          ///< visible window in samples
   int              m_length;        ///< recording length in samples
   int              m_windowSeconds = 0;   ///< setGraphSize(), for setSampleTime()
+  /// @name Time buttons (All / 1 min / 5 min / 30 min) top right in the graph
+  /// @{
+  QWidget         *m_timeBar = nullptr;
+  QList<QToolButton *> m_timeButtons;   ///< property "seconds": 0 = All
+  /// Time and value under the crosshair, fixed top left above the plot (a
+  /// tooltip window trailed behind the mouse).
+  QLabel          *m_cursorLabel = nullptr;
+  void             hideCrosshair();
+  bool             m_followAll = false;   ///< "All": the window grows with the recording
+  void             timeButtonClicked(int seconds);
+  /// "All": asks for a window that holds the recording so far (plus room
+  /// to grow when @p grow), at least 10 s and at most the recording length.
+  void             requestAll(bool grow);
+  void             updateTimeButtons();
+  void             placeTimeBar();
+  /// @}
   int              m_totalSeconds = 0;
   double           m_scaleMin;
   double           m_scaleMax;
@@ -295,6 +353,40 @@ protected:
   QScatterSeries  *m_intPoints;
   QValueAxis      *m_xAxis;
   QValueAxis      *m_yAxis;
+  /// The y axis title ("[V]"), written horizontally above the axis: turned
+  /// by 90 degrees a "V" reads like ">".
+  QGraphicsSimpleTextItem *m_yTitle;
+  QBrush           m_themeBackground;   ///< Qt::NoBrush: m_bgColor
+  QColor           m_themeGrid;
+  QColor           m_themeLabels;
+  QColor           m_themeData;         ///< proposed curve colour, invalid = none
+  QColor           dataColor() const;   ///< the curve colour in use
+  QColor           intColor() const;    ///< the integration curve colour in use
+  ColorVariant     m_variant = Neutral;          ///< in use
+  ColorVariant     m_defaultVariant = Neutral;   ///< from the settings page
+  int              m_variantOverride = -1;       ///< this graph's choice, -1 = default
+  /// Scope, phosphor and recorder: 10 x 8 divisions of 1-2-5 steps.
+  bool             divisions() const;
+  bool             phosphor() const { return m_variant == PhosphorGreen || m_variant == PhosphorAmber; }
+  /// The y range, widened to 8 whole divisions of 1-2-5 steps when divisions().
+  void             setYRange(double min, double max);
+  /// Phosphor: the centre axes with 5 fine ticks per division.
+  QGraphicsPathItem *m_centreTicks;
+  void             updateCentreTicks();
+  QBrush           m_defaultLabels;     ///< the chart's own label colour
+  QColor           m_defaultAxisLine;   ///< the chart's own axis line colour
+  QString          m_defaultLabelFormat; ///< Qt's, for the variants without divisions
+  void             applyThemeColors();
+  void             placeYTitle();
+  /// @name x labels in s, min or h
+  /// Qt's axis can only print the seconds; its own labels are kept for the
+  /// layout but drawn invisible, these are drawn over them at every tick.
+  /// @{
+  QList<QGraphicsSimpleTextItem *> m_xLabels;
+  double           m_xStep = 0;         ///< seconds between the x ticks
+  QColor           m_xLabelColor;
+  void             updateXLabels();
+  /// @}
   QGraphicsLineItem *m_crosshairVLine;
   QGraphicsLineItem *m_crosshairHLine;
   QGraphicsLineItem *m_triggerLine;

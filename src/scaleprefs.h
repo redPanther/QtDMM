@@ -52,6 +52,8 @@ public Q_SLOTS:
   /// Window = whole recording length (the "show all" zoom).
   void      zoomFitSLOT();
   void      setGraphSizeSLOT(int size, int length);
+  /// Visible window from a time button: whole minutes in minutes, else seconds.
+  void      setWindowSecondsSLOT(int seconds);
 
 };
 

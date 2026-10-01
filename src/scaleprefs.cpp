@@ -40,7 +40,7 @@ ScalePrefs::ScalePrefs(QWidget *parent) : PrefWidget(parent)
   m_description = tr("<b>Here you can configure the vertical scale"
                      " of the recorder and the length (in time)"
                      " of the window.</b>");
-  m_pixmap = new QPixmap(":/Symbols/scale.xpm");
+  m_iconName = "measure";
 
   EngNumberValidator *validator = new EngNumberValidator(this);
 
@@ -49,7 +49,6 @@ ScalePrefs::ScalePrefs(QWidget *parent) : PrefWidget(parent)
 }
 ScalePrefs::~ScalePrefs()
 {
-  delete m_pixmap;
 }
 
 void ScalePrefs::defaultsSLOT()
@@ -255,4 +254,12 @@ void ScalePrefs::setGraphSizeSLOT(int size, int length)
 {
   ui_winSize->setValue(size);
   winLength->setValue(length);
+}
+
+void ScalePrefs::setWindowSecondsSLOT(int seconds)
+{
+  seconds = qMin(seconds, totalSeconds());
+  const bool minutes = seconds >= 60 && seconds % 60 == 0;
+  sizeUnit->setCurrentIndex(minutes ? 1 : 0);
+  ui_winSize->setValue(minutes ? seconds / 60 : seconds);
 }

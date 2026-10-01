@@ -34,7 +34,7 @@ ExecutePrefs::ExecutePrefs(QWidget *parent) : PrefWidget(parent)
   m_label = tr("External application");
   m_description = tr("<b>Here you can configure if an external"
                      " command is to be started and when.</b>");
-  m_pixmap = new QPixmap(":/Symbols/execute.xpm");
+  m_iconName = "system-run";
 
   EngNumberValidator *validator = new EngNumberValidator(this);
 
@@ -44,7 +44,6 @@ ExecutePrefs::ExecutePrefs(QWidget *parent) : PrefWidget(parent)
 }
 ExecutePrefs::~ExecutePrefs()
 {
-  delete m_pixmap;
 }
 
 void ExecutePrefs::defaultsSLOT()

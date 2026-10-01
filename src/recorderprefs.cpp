@@ -39,7 +39,7 @@ RecorderPrefs::RecorderPrefs(QWidget *parent) : PrefWidget(parent)
   m_description = tr("<b>Here you can configure the sampling"
                      " frequency and start options for the"
                      " recorder.</b>");
-  m_pixmap = new QPixmap(":/Symbols/recorder.xpm");
+  m_iconName = "media-record";
 
   EngNumberValidator *validator = new EngNumberValidator(this);
 
@@ -48,7 +48,6 @@ RecorderPrefs::RecorderPrefs(QWidget *parent) : PrefWidget(parent)
 }
 RecorderPrefs::~RecorderPrefs()
 {
-  delete m_pixmap;
 }
 
 void RecorderPrefs::defaultsSLOT()

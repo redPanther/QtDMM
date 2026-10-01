@@ -22,6 +22,7 @@
 #include <QColor>
 #include <QPixmap>
 #include <QTimer>
+#include <limits>
 
 /// Colour set and options of the analog meter (MeterWid).
 struct MeterStyle
@@ -56,10 +57,16 @@ struct MeterStyle
 /// The scale is in the unit the multimeter displays (with SI prefix), the
 /// full scale comes from the display count of the meter - see
 /// fullScaleFromReading(). Values are plain doubles in that unit.
+struct Reading;
+
 class MeterWid : public QWidget
 {
   Q_OBJECT
 public:
+  /// Width/height range the instrument keeps; beyond it the panel stays
+  /// centred with room around it.
+  static constexpr double kMinAspect = 1.3;
+  static constexpr double kMaxAspect = 2.2;
   /// Where zero sits on the scale.
   enum ScaleMode
   {
@@ -82,6 +89,21 @@ public:
   /// Colours and options; the static layers are re-rendered.
   void setStyle(const MeterStyle &style);
   void reset();   ///< peak and Auto-bipolar latch
+
+  /// @name Fed by the MeterController
+  /// The main value of a reading (other ids are ignored): full scale from the
+  /// meter's display count and the decimals shown, the dial label from the
+  /// unit and the coupling, overload from letters in the text.
+  /// @{
+  void setDisplayCounts(int counts) { m_counts = counts; }
+public Q_SLOTS:
+  void showReading(const Reading &reading);
+  /// Min/max memory in SI base units; drawn as marks in display units.
+  void showMinimum(double value, const QString &text, const QString &unit);
+  void showMaximum(double value, const QString &text, const QString &unit);
+  void clearMinMax();
+  /// @}
+public:
 
   ScaleMode scaleMode() const { return m_scaleMode; }
   bool bipolar() const { return m_bipolar; }
@@ -146,6 +168,12 @@ private:
   static QString formatLabel(double v);
   static double niceStep(double range, int targetMajors);
 
+  void applyMinMax();   ///< m_minBase/m_maxBase -> marks and peak
+
+  int m_counts = 4000;
+  QString m_unitText;   ///< unit of the last reading, with prefix
+  double m_minBase = std::numeric_limits<double>::quiet_NaN();
+  double m_maxBase = std::numeric_limits<double>::quiet_NaN();
   int m_decimals = 0;   ///< most decimals of a reading (not an overload) since reset()
   MeterStyle m_style = MeterStyle::dark();
   ScaleMode m_scaleMode = Auto;

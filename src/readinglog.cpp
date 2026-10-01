@@ -1,6 +1,7 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "readinglog.h"
+#include "reading.h"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -65,7 +66,7 @@ QVariant ReadingLog::data(const QModelIndex &index, int role) const
 
   switch (index.column())
   {
-    case Time:  return formatTime(e.when);
+    case Time:  return m_singleDay ? e.when.toString("HH:mm:ss.zzz") : formatTime(e.when);
     case Value: return SiPrefix::withoutLeadingZeros(e.val);   // "000.00" -> "0.00", as the meter shows it
     case Unit:  return e.unit;
     case Mode:  return e.id > 0 ? tr("2nd") + (e.special.isEmpty() ? QString() : " " + modeText(e.special)) : modeText(e.special);
@@ -107,6 +108,18 @@ void ReadingLog::append(const Entry &entry)
   beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
   m_entries.append(entry);
   endInsertRows();
+  updateSingleDay();
+}
+
+void ReadingLog::updateSingleDay()
+{
+  // the rows are in time order: first and last tell whether a day changed
+  const bool single = m_entries.isEmpty() || m_entries.first().when.date() == m_entries.last().when.date();
+  if (single == m_singleDay)
+    return;
+  m_singleDay = single;
+  if (!m_entries.isEmpty())
+    Q_EMIT dataChanged(index(0, Time), index(m_entries.size() - 1, Time), {Qt::DisplayRole});
 }
 
 void ReadingLog::markLast(const QColor &color, const QString &name)
@@ -125,6 +138,7 @@ void ReadingLog::clear()
     return;
   beginResetModel();
   m_entries.clear();
+  m_singleDay = true;
   endResetModel();
 }
 
@@ -137,6 +151,7 @@ void ReadingLog::setMaxRows(int rows)
     beginRemoveRows(QModelIndex(), 0, excess - 1);
     m_entries.remove(0, excess);
     endRemoveRows();
+    updateSingleDay();
   }
 }
 
@@ -187,7 +202,9 @@ QString ReadingLog::toText(const QList<int> &rows) const
     if (r < 0 || r >= m_entries.size())
       continue;
     QStringList cells;
-    for (int c = 0; c < ColumnCount; ++c)
+    // the date stays in the copy: pasted elsewhere the rows lose their context
+    cells << formatTime(m_entries[r].when);
+    for (int c = Time + 1; c < ColumnCount; ++c)
       cells << data(index(r, c), Qt::DisplayRole).toString();
     lines << cells.join('\t');
   }
@@ -238,4 +255,20 @@ bool ReadingLog::writeAny(const QString &path, QString *error) const
                   e.id > 0 ? "2nd " + modeText(e.special) : modeText(e.special), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName});
   }
   return sheet.write(path, *format, error);
+}
+
+void ReadingLog::appendReading(const Reading &r)
+{
+  if (r.id > 0 && r.text.isEmpty())   // a secondary display that is off
+    return;
+  Entry e;
+  e.when = QDateTime::fromMSecsSinceEpoch(r.msecs);
+  e.dval = r.value;
+  e.val = r.text;
+  e.unit = r.unit;
+  e.special = r.special;
+  e.range = r.range;
+  e.hold = r.hold;
+  e.id = r.id;
+  append(e);
 }

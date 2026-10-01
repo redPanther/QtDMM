@@ -252,8 +252,7 @@ You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Exa
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../resources.qrc">
-            <normaloff>:/Symbols/import.xpm</normaloff>:/Symbols/import.xpm</iconset>
+           <iconset theme="document-open"/>
           </property>
           <property name="autoDefault">
            <bool>false</bool>

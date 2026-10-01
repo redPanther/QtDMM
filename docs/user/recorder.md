@@ -53,6 +53,11 @@ pipes or redirections, call the shell yourself, e.g.
 
 ## Looking at the data
 
+- The buttons at the top right of the graph set the time window: **All**
+  shows the whole recording so far and grows with it, **1 min**, **5 min**
+  and **30 min** show the last minutes. Buttons longer than the graph's
+  **Max. length** (**Settings → Scales**) are left out. Zooming ends **All**; the window set under
+  **Settings → Scales** stays the start.
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see
@@ -69,6 +74,23 @@ pipes or redirections, call the shell yourself, e.g.
   sum of the readings above a threshold, scaled and offset as configured — for
   charge or energy over time.
 - **Print** (Ctrl+P) prints the graph with a title and comment.
+
+## Colours
+
+**Settings → Graph → Graph colours** sets the colours of the graph:
+
+- **Neutral** follows the window's design.
+- **Scope blue**, **Phosphor green**, **Phosphor amber** and **Chart
+  recorder** look like an oscilloscope or a paper recorder. They divide the
+  graph into 10 × 8 squares of 1, 2 or 5 units each (1 V, 2 V, 5 V, 10 V,
+  ...), so the visible time and the vertical scale grow to whole squares.
+  The phosphor colours add a fine scale on the centre lines and dash the
+  integration curve.
+- **Custom** uses the colour buttons on the same page.
+
+A curve colour you chose yourself stays in every variant. The graph's
+right-click menu, **Graph colours**, can choose other colours for this graph
+only; *Default* goes back to the setting.
 
 ## Export and import
 

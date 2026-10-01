@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22">
+  <style id="current-color-scheme" type="text/css">.ColorScheme-Text { color:#eff0f1; } .ColorScheme-Highlight { color:#3daee9; }</style>
+  <!-- the automatic arrangement: two instruments on top, the graph below -->
+  <g class="ColorScheme-Text" fill="none" stroke="currentColor" stroke-width="1">
+    <rect x="2.5" y="2.5" width="7" height="6"/>
+    <rect x="12.5" y="2.5" width="7" height="6"/>
+    <rect x="2.5" y="10.5" width="17" height="9"/>
+  </g>
+</svg>

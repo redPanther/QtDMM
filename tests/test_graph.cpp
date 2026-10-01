@@ -12,8 +12,10 @@
 #include "dmmgraph.h"
 #include <QChartView>
 #include <QValueAxis>
+#include <QGraphicsSimpleTextItem>
 #include <QXYSeries>
 #include <QScrollBar>
+#include <QToolButton>
 #include "siprefix.h"
 #include "engnumbervalidator.h"
 #include "settings.h"
@@ -110,6 +112,87 @@ int main(int argc, char **argv)
     QString c2 = readFile(exported2);
     check(!c1.isEmpty() && c1 == c2,
           "round-trip: re-exporting a re-imported file produced different CSV content");
+  }
+
+  // --- 3b. time buttons (All / 1 min / 5 min / 30 min) top right ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(10);   // one sample per second
+    graph.setGraphSize(300, 3600);
+    const QList<QToolButton *> buttons = graph.findChildren<QToolButton *>();
+    auto button = [&](const QString &text) -> QToolButton *
+    {
+      for (QToolButton *b : buttons)
+        if (b->text() == text)
+          return b;
+      return nullptr;
+    };
+    QToolButton *all = button("All"), *one = button("1 min"), *five = button("5 min"), *thirty = button("30 min");
+    check(all && one && five && thirty, "time buttons: All, 1 min, 5 min, 30 min exist");
+    if (all && one && five && thirty)
+    {
+      check(five->isChecked() && !one->isChecked() && !all->isChecked(), "time buttons: a 300 s window marks 5 min");
+      QSignalSpy spy(&graph, &DMMGraph::windowRequested);
+      one->click();
+      check(spy.size() == 1 && spy.last().at(0).toInt() == 60, "time buttons: 1 min asks for a 60 s window");
+      // MainWid applies the request through the settings, like a zoom
+      graph.setGraphSize(60, 3600);
+      check(one->isChecked() && !five->isChecked(), "time buttons: the applied window is marked");
+      graph.setGraphSize(45, 3600);
+      check(!one->isChecked() && !five->isChecked() && !thirty->isChecked(), "time buttons: a zoomed window marks none");
+      graph.setGraphSize(60, 600);
+      check(thirty->isHidden() && !five->isHidden(), "time buttons: 30 min is hidden for a 10 min recording");
+
+      // All: the recording so far (at least 10 s), growing with it
+      spy.clear();
+      graph.setGraphSize(10, 600);
+      all->click();
+      check(all->isChecked(), "time buttons: All stays marked");
+      graph.startSLOT();
+      for (int i = 0; i < 150; ++i)   // 15 samples at 1 s
+        graph.addValue(1.0);
+      bool grew = !spy.isEmpty();
+      for (const QList<QVariant> &args : spy)
+        grew = grew && args.at(0).toInt() > 10 && args.at(0).toInt() <= 600;
+      check(grew, QString("time buttons: All grows the window with the recording (%1 requests)").arg(spy.size()));
+      graph.zoomInSLOT();
+      graph.setGraphSize(8, 600);
+      check(!all->isChecked(), "time buttons: zooming ends All");
+    }
+  }
+
+  // --- 3c. All on a longer recording: from one minute on it asks for whole
+  //         minutes (the settings keep seconds only up to 99999; an odd
+  //         value above was cut and asked for again with every sample) ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(10);   // one sample per second
+    graph.setGraphSize(10, 3600);
+    QToolButton *all = nullptr;
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "All")
+        all = b;
+    check(all, "All on a long recording: button exists");
+    if (all)
+    {
+      all->click();
+      QList<int> requests;
+      // MainWid applies each request through the settings
+      QObject::connect(&graph, &DMMGraph::windowRequested, &graph, [&](int seconds)
+      {
+        requests << seconds;
+        graph.setGraphSize(seconds, 3600);
+      });
+      graph.startSLOT();
+      for (int i = 0; i < 3000; ++i)   // 300 s
+        graph.addValue(1.0);
+      bool minutes = !requests.isEmpty();
+      for (int seconds : requests)
+        minutes = minutes && (seconds <= 60 || seconds % 60 == 0);
+      check(minutes, QString("All on a long recording: whole minutes above 60 s (%1)").arg(
+              [&] { QStringList l; for (int r : requests) l << QString::number(r); return l.join(' '); }()));
+      check(requests.size() < 20, QString("All on a long recording: grows in steps, not per sample (%1 requests)").arg(requests.size()));
+    }
   }
 
   // --- 4. regression test for the CSV-import sample-time bug (dmmgraph.cpp):
@@ -386,6 +469,74 @@ int main(int argc, char **argv)
     check(!image.isNull() && image.size() == QSize(320, 200), "PNG has the requested size");
 
     check(!graph.exportImageFile(tmpDir.filePath("no/such/dir/graph.svg")), "an unwritable path fails");
+  }
+
+  // --- 7c. colour variants: 1-2-5 divisions and 10 x 8 for the scope-like
+  //          ones, names round-trip ---
+  {
+    check(DMMGraph::niceStep(0.3) == 0.5 && DMMGraph::niceStep(1) == 1 && DMMGraph::niceStep(1.01) == 2
+          && DMMGraph::niceStep(4.9) == 5 && DMMGraph::niceStep(6) == 10 && qFuzzyCompare(DMMGraph::niceStep(0.0021), 0.005),
+          "niceStep follows 1-2-5");
+    for (auto v : { DMMGraph::Neutral, DMMGraph::ScopeBlue, DMMGraph::PhosphorGreen, DMMGraph::PhosphorAmber,
+                    DMMGraph::ChartRecorder, DMMGraph::Custom })
+      check(DMMGraph::variantFromName(DMMGraph::variantName(v)) == v, "variant name round-trip " + DMMGraph::variantName(v));
+    check(DMMGraph::variantFromName("nonsense") == DMMGraph::Neutral, "unknown variant is neutral");
+
+    Settings cfg("varianttest", tmpDir.path());
+    DMMGraph graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setScale(false, false, -0.3, 11.7);
+    auto *y = graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first();
+    auto *yAxis = qobject_cast<QValueAxis *>(y);
+    check(qFuzzyCompare(yAxis->min(), -0.3) && qFuzzyCompare(yAxis->max(), 11.7), "neutral keeps the scale as set");
+    graph.setColorVariant(DMMGraph::Neutral, DMMGraph::PhosphorGreen);   // this graph only
+    const double div = (yAxis->max() - yAxis->min()) / 8;
+    check(yAxis->tickCount() == 9 && qFuzzyCompare(div, 2.0) && qFuzzyCompare(yAxis->min(), -2.0),
+          QString("phosphor: 8 divisions of 2 from -2, got %1..%2").arg(yAxis->min()).arg(yAxis->max()));
+    check(graph.colorOverride() == DMMGraph::PhosphorGreen, "the override is kept");
+    graph.setColorVariant(DMMGraph::Custom);   // the default, no override
+    check(graph.colorVariant() == DMMGraph::Custom && graph.colorOverride() == -1, "default without override");
+    check(yAxis->tickCount() == 5 && qFuzzyCompare(yAxis->max(), 11.7), "custom goes back to the plain scale");
+  }
+
+  // --- 7d. the time axis: whole time steps, labelled in s, min or h; the
+  //          scope-like variants make 600 s 10 x 1 min (not 10 x 100 s) ---
+  {
+    check(DMMGraph::timeStep(45) == 60 && DMMGraph::timeStep(61) == 120 && DMMGraph::timeStep(3) == 5
+          && DMMGraph::timeStep(12) == 15 && DMMGraph::timeStep(400) == 600 && DMMGraph::timeStep(2000) == 3600
+          && DMMGraph::timeStep(0.15) == 0.2 && DMMGraph::timeStep(100000) == 172800,
+          "timeStep: 1, 2, 5, 10, 15, 30 s, 1, 2, 5, 10, 15, 30 min, h, days");
+    Settings cfg("timeaxis", tmpDir.path());
+    DMMGraph graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setSampleTime(10);
+    graph.setGraphSize(600, 3600);
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    auto *x = qobject_cast<QValueAxis *>(chart->axes(Qt::Horizontal).first());
+    auto labels = [&]
+    {
+      QStringList out;
+      for (QGraphicsItem *item : chart->childItems())
+        if (auto *t = dynamic_cast<QGraphicsSimpleTextItem *>(item); t && t->isVisible()
+            && t->pos().y() > chart->plotArea().bottom())
+          out << t->text();
+      return out;
+    };
+    check(x->tickType() == QValueAxis::TicksDynamic && x->tickInterval() == 120 && x->titleText() == "[min]",
+          QString("neutral 600 s: a tick every 2 min, got %1 s, '%2'").arg(x->tickInterval()).arg(x->titleText()));
+    check(labels().join(' ') == "0 2 4 6 8", "neutral 600 s: labels 0 2 4 6 8 min, got " + labels().join(' '));
+    graph.setColorVariant(DMMGraph::ScopeBlue);
+    check(x->tickInterval() == 60 && qFuzzyCompare(x->max() - x->min(), 600.0),
+          QString("scope 600 s: 10 x 1 min, got %1 x %2 s").arg((x->max() - x->min()) / x->tickInterval()).arg(x->tickInterval()));
+    check(labels().join(' ') == "0 1 2 3 4 5 6 7 8 9 10", "scope 600 s: labels 0..10 min, got " + labels().join(' '));
+    graph.setGraphSize(20, 3600);
+    check(x->tickInterval() == 2 && x->titleText() == "[sec]", QString("scope 20 s: 10 x 2 s, got %1").arg(x->tickInterval()));
+    graph.setGraphSize(7200, 36000);
+    check(x->tickInterval() == 900 && x->titleText() == "[min]", QString("scope 2 h: 10 x 15 min, got %1").arg(x->tickInterval()));
+    graph.setColorVariant(DMMGraph::Neutral);
+    check(x->tickInterval() == 1800 && x->titleText() == "[min]", QString("neutral 2 h: every 30 min, got %1").arg(x->tickInterval()));
   }
 
   // --- 8. EngNumberValidator: what engValue() writes, value() must read

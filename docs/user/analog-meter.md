@@ -5,10 +5,10 @@ instrument: a dial with a scale on an arc, a needle that swings with the
 inertia of a real meter, a red zone at the top end, boxes with the minimum
 and the maximum, and an overload lamp.
 
-Switch it on with **Analog meter** in the toolbar or in the menu. It
-opens as a panel docked to the right of the graph; drag its title bar to dock
-it on another side or to pull it out as a separate window, and resize it
-freely — the dial, scale and lettering scale with the window.
+Switch it on and off with **Analog meter** in the toolbar or in the menu
+(Ctrl+2). It is one of the windows of the main window, next to the digital
+display (see [Window layout](connecting.md#window-layout)); the dial, scale
+and lettering scale with the window.
 
 ## The scale
 
@@ -42,7 +42,8 @@ appears while the meter's hold function is active.
 
 ## Style
 
-Two colour schemes are available on the *Appearance* settings page: a dark studio dial
-with a white scale and needle, and a classic ivory dial with black lettering.
+Two colour schemes are available: a dark studio dial with a white scale and needle, and
+a classic ivory dial with black lettering. Choose one with **Meter style** in the
+meter's right-click menu, or on the *Appearance* settings page.
 **Needle inertia** can be switched off to make the needle jump straight to each
 new reading.

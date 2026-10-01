@@ -55,8 +55,9 @@ bool DecoderAscii::checkFormat(const char* data, size_t idx)
 {
   switch(m_type)
   {
-    // "#VVVVVVUUUU": complete when the '#' is ten bytes back
-    case ReadEvent::PeakTech10: return (data[(idx-10+FIFO_LENGTH)%FIFO_LENGTH] == '#');
+    // "#VVVVVVUUUU": complete when the '#' is ten bytes back. Only once ten
+    // bytes are in: before that the look-back lands on stale bytes of the ring
+    case ReadEvent::PeakTech10: return idx >= 10 && data[(idx-10+FIFO_LENGTH)%FIFO_LENGTH] == '#';
     case ReadEvent::Metex14:
     case ReadEvent::Voltcraft14Continuous: return (data[idx] == 0x0d);
     case ReadEvent::Sigrok:                return (data[idx] == 0x0a);

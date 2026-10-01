@@ -120,8 +120,7 @@
   </widget>
   <action name="action_Export">
    <property name="icon">
-    <iconset theme="document-save" resource="../resources.qrc">
-     <normaloff>:/Symbols/export.xpm</normaloff>:/Symbols/export.xpm</iconset>
+    <iconset theme="document-save"/>
    </property>
    <property name="text">
     <string>&amp;Export</string>
@@ -141,8 +140,7 @@
   </action>
   <action name="action_Import">
    <property name="icon">
-    <iconset theme="document-open" resource="../resources.qrc">
-     <normaloff>:/Symbols/import.xpm</normaloff>:/Symbols/import.xpm</iconset>
+    <iconset theme="document-open"/>
    </property>
    <property name="text">
     <string>&amp;Import</string>
@@ -162,8 +160,7 @@
   </action>
   <action name="action_Print">
    <property name="icon">
-    <iconset theme="document-print" resource="../resources.qrc">
-     <normaloff>:/Symbols/print.xpm</normaloff>:/Symbols/print.xpm</iconset>
+    <iconset theme="document-print"/>
    </property>
    <property name="text">
     <string>&amp;Print</string>
@@ -183,8 +180,7 @@
   </action>
   <action name="action_Configure">
    <property name="icon">
-    <iconset theme="preferences-system" resource="../resources.qrc">
-     <normaloff>:/Symbols/config.xpm</normaloff>:/Symbols/config.xpm</iconset>
+    <iconset theme="configure"/>
    </property>
    <property name="text">
     <string>&amp;Configure</string>
@@ -201,8 +197,7 @@
   </action>
   <action name="action_Quit">
    <property name="icon">
-    <iconset theme="application-exit" resource="../resources.qrc">
-     <normaloff>:/Symbols/quit.xpm</normaloff>:/Symbols/quit.xpm</iconset>
+    <iconset theme="application-exit"/>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -222,8 +217,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/Symbols/connect_on.xpm</normaloff>:/Symbols/connect_on.xpm</iconset>
+    <iconset theme="network-connect"/>
    </property>
    <property name="text">
     <string>&amp;Connect</string>
@@ -249,8 +243,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/Symbols/graph.xpm</normaloff>:/Symbols/graph.xpm</iconset>
+    <iconset theme="office-chart-line"/>
    </property>
    <property name="text">
     <string>&amp;Graph</string>
@@ -270,8 +263,7 @@
   </action>
   <action name="action_Reset">
    <property name="icon">
-    <iconset theme="view-refresh" resource="../resources.qrc">
-     <normaloff>:/Symbols/reset.xpm</normaloff>:/Symbols/reset.xpm</iconset>
+    <iconset theme="edit-reset"/>
    </property>
    <property name="text">
     <string>&amp;Reset</string>
@@ -308,8 +300,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="media-record" resource="../resources.qrc">
-     <normaloff>:/Symbols/start.xpm</normaloff>:/Symbols/start.xpm</iconset>
+    <iconset theme="media-record"/>
    </property>
    <property name="text">
     <string>&amp;Start</string>
@@ -332,8 +323,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="media-playback-stop" resource="../resources.qrc">
-     <normaloff>:/Symbols/stop.xpm</normaloff>:/Symbols/stop.xpm</iconset>
+    <iconset theme="media-playback-stop"/>
    </property>
    <property name="text">
     <string>S&amp;top</string>
@@ -353,8 +343,7 @@
   </action>
   <action name="action_Clear">
    <property name="icon">
-    <iconset theme="user-trash" resource="../resources.qrc">
-     <normaloff>:/Symbols/clear.xpm</normaloff>:/Symbols/clear.xpm</iconset>
+    <iconset theme="edit-delete"/>
    </property>
    <property name="text">
     <string>&amp;Clear</string>
@@ -402,8 +391,7 @@
   </action>
   <action name="action_Direct_help">
    <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/Symbols/help.xpm</normaloff>:/Symbols/help.xpm</iconset>
+    <iconset theme="help-whatsthis"/>
    </property>
    <property name="text">
     <string>Direct Hel&amp;p</string>
@@ -423,8 +411,7 @@
   </action>
   <action name="action_Help">
    <property name="icon">
-    <iconset theme="help-contents" resource="../resources.qrc">
-     <normaloff>:/Symbols/help.xpm</normaloff>:/Symbols/help.xpm</iconset>
+    <iconset theme="help-contents"/>
    </property>
    <property name="text">
     <string>&amp;Handbook</string>
@@ -444,11 +431,10 @@
   </action>
   <action name="action_About">
    <property name="icon">
-    <iconset theme="help-about" resource="../resources.qrc">
-     <normaloff>:/Symbols/help.xpm</normaloff>:/Symbols/help.xpm</iconset>
+    <iconset theme="help-about"/>
    </property>
    <property name="text">
-    <string>&amp;About</string>
+    <string>A&amp;bout</string>
    </property>
    <property name="whatsThis">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copyright information&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show copyright information and some blurb about QtDMM. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -459,8 +445,7 @@
   </action>
   <action name="action_Menu">
    <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/Symbols/menu.xpm</normaloff>:/Symbols/menu.xpm</iconset>
+    <iconset theme="application-menu"/>
    </property>
    <property name="text">
     <string>Menu</string>
@@ -474,8 +459,7 @@
   </action>
   <action name="action_Instances">
    <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/Symbols/instances.xpm</normaloff>:/Symbols/instances.xpm</iconset>
+    <iconset theme="qtdmm-instances"/>
    </property>
    <property name="text">
     <string>Instances</string>

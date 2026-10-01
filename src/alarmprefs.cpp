@@ -23,7 +23,7 @@ AlarmPrefs::AlarmPrefs(QWidget *parent) : PrefWidget(parent)
   m_label = tr("Alarms");
   m_description = tr("<b>Alarms watch the reading and tell you when it leaves the range you expect:</b> "
                      "a banner over the display, a beep, a popup, a program, the recorder.");
-  m_pixmap = new QPixmap(":/Symbols/alarm.xpm");
+  m_iconName = "notifications";
 
   auto *layout = new QVBoxLayout(this);
   auto *intro = new QLabel(tr("Each alarm watches the main reading. It raises when its condition has held for the "

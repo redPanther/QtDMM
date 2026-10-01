@@ -30,8 +30,7 @@
 
 #include "printdlg.h"
 
-class DMM;
-class QProcess;
+class MeterController;
 class ConfigDlg;
 class DisplayWid;
 class TipDlg;
@@ -39,21 +38,18 @@ class Settings;
 class InstancesDlg;
 class MeterWid;
 class ReadingLog;
-class AlarmManager;
-class AlarmBar;
 struct Alarm;
 class SharedStateManager;
-class ScpiServer;
-class MdnsResponder;
 
-/// The central widget: owns the DMM connection, the settings dialog and the
-/// graph, and routes readings to the display, the meter and the recorder.
+/// The recorder graph (shown in its own MDI window), plus the settings and
+/// the other dialogs.
 ///
-/// MainWin provides the frame (menus, toolbars, docks, status bar) and hooks
-/// its actions up to the *SLOT members here. Readings arrive in valueSLOT();
-/// the sampled value is fed to the graph from timerEvent() at the recorder's
-/// sample rate. External-application triggers, min/max memory and the
-/// dialogs (settings, print, tips, instances) live here as well.
+/// The meter session itself - connection, min/max memory, alarms, SCPI
+/// server, external program - is a MeterController, which MainWid creates.
+/// The views (display, analog meter, readings table, graph) are connected to
+/// its signals here and know nothing of each other. MainWin provides the
+/// frame (menus, toolbars, docks, status bar) and hooks its actions up to
+/// the *SLOT members here.
 class MainWid : public QFrame, private Ui::UIMainWid
 {
   Q_OBJECT
@@ -71,6 +67,12 @@ public:
   bool        saveWindowSize() const;
   /// The LCD panel to feed; created and docked by MainWin.
   void        setDisplay(DisplayWid *);
+  /// The LCD's colours (DisplayWid::LcdVariant), stored as Display/lcd.
+  void        setLcdVariant(int variant);
+  /// The analog meter's style from its context menu (0 dark, 1 ivory):
+  /// shown at once, saved, and the Appearance page follows.
+  void        setMeterStyle(int style);
+  int         meterStyle() const;
   /// The analog meter to feed; created and docked by MainWin.
   void        setMeter(MeterWid *);
   /// Table model that gets every reading (MainWin owns it).
@@ -81,9 +83,6 @@ public:
   void        setConsoleLogging(bool);
   /// Stores the toolbar visibility (display, dmm, graph, file) in the settings.
   void        setToolbarVisibility(bool, bool, bool, bool);
-  /// Shows or hides the recorder graph (recording goes on regardless).
-  void        setGraphVisible(bool);
-  bool        graphVisible() const;
   /// The recorder graph (for the zoom/pan shortcuts in MainWin).
   DMMGraph   *graph() const { return ui_graph; }
   /// False until a meter has been chosen in the settings once; a fresh
@@ -91,6 +90,11 @@ public:
   bool        dmmConfigured() const;
   /// What the window title shows: the model, else the port, else a hint.
   QString     dmmTitle() const;
+  /// The configured port for display ("/dev/ttyUSB0", "BLE AA:BB:...";
+  /// never a Bluetooth key).
+  QString     portName() const;
+  /// The meter session (connection, alarms, SCPI); views connect to it.
+  MeterController *controller() const { return m_ctl; }
   Settings   *settings() const { return m_settings; }
 
 Q_SIGNALS:
@@ -102,6 +106,10 @@ Q_SIGNALS:
   void        error(const QString &);
   /// The "icons with text" preference changed.
   void        useTextLabel(bool);
+  /// The desktop's icon theme first (true) or only the built-in Breeze set.
+  void        systemIcons(bool);
+  /// The configured meter has keys QtDMM can press (ControlBar).
+  void        remoteControl(bool supported);
   /// Asks MainWin to connect/disconnect (drives the Connect action).
   void        setConnect(bool);
   /// Toolbar visibility read from the settings, for MainWin to apply.
@@ -116,9 +124,6 @@ Q_SIGNALS:
   void        scpiStatus(const QString&);
 
 public Q_SLOTS:
-  /// A reading from DMM::value(). Updates display, meter, min/max, the
-  /// external-application thresholds and remembers dval for the sampler.
-  void        valueSLOT(double, const QString &, const QString &, const QString &, const QString &, bool, bool, int);
   /// Clears min/max memory and the meter's peak/auto-bipolar latch.
   void        resetSLOT();
   /// Connect (true) or disconnect (false) the meter.
@@ -152,32 +157,16 @@ public Q_SLOTS:
   void        instancesChangedSlot(QStringList&);
 
 protected:
-  DMM        *m_dmm;
-  double      m_min;
-  double      m_max;
-  QString     m_lastUnit;
+  void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
+  MeterController *m_ctl;
   ConfigDlg  *m_configDlg;
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;
-  QProcess   *m_external;
   DisplayWid *m_display;
+  QColor      m_lcdTint;   ///< the Appearance page's tint last applied
   MeterWid   *m_meter;
-  ReadingLog *m_readingLog = nullptr;
-  AlarmManager *m_alarms;
-  AlarmBar   *m_alarmBar;
-  QString     m_baseUnit;          ///< of the current reading, for the alarms
-  bool        m_overload = false;
-  /// Runs an alarm's actions; the banner is rebuilt from all raised alarms.
-  void        alarmRaised(int index, const Alarm &alarm, double value);
-  void        alarmCleared(int index, const Alarm &alarm);
-  void        updateAlarmBar();
-  SharedStateManager *m_stateMgr;
-  ScpiServer *m_scpi;
-  MdnsResponder *m_mdns;
-  /// Starts/stops the SCPI server as configured and reports its state.
-  void        applyScpi();
-  void        updateScpiStatus();
-  double      m_dval;
+  /// The desktop part of an alarm: beep, raise the window, popup.
+  void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   TipDlg     *m_tipDlg;
   InstancesDlg *m_instancesDlg;
   Settings    *m_settings;
@@ -185,17 +174,13 @@ protected:
 
   /// Applies the settings to DMM, graph, display and meter.
   void        readConfig();
-  /// Derives full scale, coupling label, overload and peak for the meter.
-  void        feedMeter(const QString &val, const QString &unit, const QString &special, bool hold);
   QRect       parentRect() const;
-  /// Sample timer: hands the current value to the graph.
-  void        timerEvent(QTimerEvent *);
 
 protected Q_SLOTS:
   /// Launches the configured external application (threshold trigger).
   void        startExternalSLOT();
   /// The external application exited.
-  void        exitedSLOT();
+  void        exitedSLOT(int exitCode);
   /// Graph zoom changed; re-applies the window/total size.
   void        zoomedSLOT();
 };

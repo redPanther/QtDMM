@@ -17,6 +17,7 @@
 //======================================================================
 
 #include "meterwid.h"
+#include "reading.h"
 #include "siprefix.h"
 #include "panelframe.h"
 
@@ -301,7 +302,7 @@ void MeterWid::stepBallistics()
 MeterWid::Geometry MeterWid::geometry() const
 {
   Geometry g;
-  const QRectF r = PanelFrame::panelRect(QRectF(rect()).adjusted(1, 1, -1, -1), 1.3, 2.2);
+  const QRectF r = PanelFrame::panelRect(QRectF(rect()).adjusted(1, 1, -1, -1), kMinAspect, kMaxAspect);
   g.bezel = r;
   g.face = PanelFrame::faceRect(r);
   const double fh = g.face.height();
@@ -720,4 +721,69 @@ void MeterWid::paintEvent(QPaintEvent *)
   drawLamp(p, g);
   drawMarks(p, g);
   drawNeedle(p, g);
+}
+
+// ---------------------------------------------------------------- MeterController feed
+
+// The analog meter works in the unit the multimeter displays (with prefix),
+// so its full scale follows the display count and the decimals of the
+// reading, exactly like the meter's own bar graph.
+void MeterWid::showReading(const Reading &r)
+{
+  if (r.id != 0)
+    return;
+  const QString &val = r.text;
+  const QString &unit = r.unit;
+  const QString &special = r.special;
+
+  const double fs = fullScaleFromReading(val, m_counts, unit);
+  if (!std::isnan(fs))
+    setFullScale(fs);
+
+  // the unit as the digital display writes it ("kΩ", "°C")
+  QString label = SiPrefix::displayText(unit);
+  if (special == "AC" || special == "DC")
+    label += " " + special;
+  else if (special == "ACDC")
+    label += " AC+DC";
+  else if (special == "DI" || special == "Diode")
+    label += " DIODE";
+  else if (special == "BUZ")
+    label += " CONT";
+
+  m_unitText = unit;
+  const double value = r.overload ? 0.0 : QString(val).remove(' ').toDouble();
+  setReading(value, val, label, r.overload, r.hold);
+  applyMinMax();
+}
+
+void MeterWid::showMinimum(double value, const QString &, const QString &unit)
+{
+  m_minBase = value;
+  m_unitText = unit;
+  applyMinMax();
+}
+
+void MeterWid::showMaximum(double value, const QString &, const QString &unit)
+{
+  m_maxBase = value;
+  m_unitText = unit;
+  applyMinMax();
+}
+
+void MeterWid::clearMinMax()
+{
+  m_minBase = m_maxBase = std::numeric_limits<double>::quiet_NaN();
+  reset();
+}
+
+// min/max memory is kept in SI base units; bring it into display units
+void MeterWid::applyMinMax()
+{
+  const double factor = SiPrefix::factor(SiPrefix::split(m_unitText).prefix);
+  const double minMark = m_minBase / factor;   // NaN stays NaN
+  const double maxMark = m_maxBase / factor;
+  if (!std::isnan(maxMark))
+    setPeak(maxMark);
+  setMinMax(minMark, maxMark);
 }

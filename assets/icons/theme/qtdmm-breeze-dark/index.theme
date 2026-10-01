@@ -1,0 +1,10 @@
+[Icon Theme]
+Name=qtdmm-breeze-dark
+Comment=Breeze symbols used by QtDMM (LGPL-3.0-or-later, KDE)
+Directories=22
+
+[22]
+Size=22
+Type=Scalable
+MinSize=8
+MaxSize=256

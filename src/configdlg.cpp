@@ -127,7 +127,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   connect(m_dmm, &DmmPrefs::showPortsPage, this, [this] { showPage(Ports); });
   m_dmm->setId(ConfigDlg::DMM);
   new ConfigItem(m_dmm->id(),
-                 m_dmm->pixmap(),
+                 m_dmm->icon(),
                  m_dmm->label(),
                  ui_list);
   m_dmm->setCfg(m_settings);
@@ -136,7 +136,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_gui = new GuiPrefs(ui_stack);
   m_gui->setId(ConfigDlg::GUI);
   new ConfigItem(m_gui->id(),
-                 m_gui->pixmap(),
+                 m_gui->icon(),
                  m_gui->label(),
                  ui_list);
   m_gui->setCfg(m_settings);
@@ -145,7 +145,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_graph = new GraphPrefs(ui_stack);
   m_graph->setId(ConfigDlg::Graph);
   new ConfigItem(m_graph->id(),
-                 m_graph->pixmap(),
+                 m_graph->icon(),
                  m_graph->label(),
                  ui_list);
   m_graph->setCfg(m_settings);
@@ -154,7 +154,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_scale = new ScalePrefs(ui_stack);
   m_scale->setId(ConfigDlg::Scale);
   new ConfigItem(m_scale->id(),
-                 m_scale->pixmap(),
+                 m_scale->icon(),
                  m_scale->label(),
                  ui_list);
   m_scale->setCfg(m_settings);
@@ -163,7 +163,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_integration = new IntegrationPrefs(ui_stack);
   m_integration->setId(ConfigDlg::Integration);
   new ConfigItem(m_integration->id(),
-                 m_integration->pixmap(),
+                 m_integration->icon(),
                  m_integration->label(),
                  ui_list);
   m_integration->setCfg(m_settings);
@@ -172,7 +172,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_recorder = new RecorderPrefs(ui_stack);
   m_recorder->setId(ConfigDlg::Recorder);
   new ConfigItem(m_recorder->id(),
-                 m_recorder->pixmap(),
+                 m_recorder->icon(),
                  m_recorder->label(),
                  ui_list);
   m_recorder->setCfg(m_settings);
@@ -181,7 +181,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_ports = new PortsPrefs(ui_stack);
   m_ports->setId(ConfigDlg::Ports);
   new ConfigItem(m_ports->id(),
-                 m_ports->pixmap(),
+                 m_ports->icon(),
                  m_ports->label(),
                  ui_list);
   m_ports->setCfg(m_settings);
@@ -190,7 +190,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_execute = new ExecutePrefs(ui_stack);
   m_execute->setId(ConfigDlg::External);
   new ConfigItem(m_execute->id(),
-                 m_execute->pixmap(),
+                 m_execute->icon(),
                  m_execute->label(),
                  ui_list);
   m_execute->setCfg(m_settings);
@@ -199,7 +199,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_alarms = new AlarmPrefs(ui_stack);
   m_alarms->setId(ConfigDlg::Alarms);
   new ConfigItem(m_alarms->id(),
-                 m_alarms->pixmap(),
+                 m_alarms->icon(),
                  m_alarms->label(),
                  ui_list);
   m_alarms->setCfg(m_settings);
@@ -208,7 +208,7 @@ ConfigDlg::ConfigDlg(Settings* settings, QWidget *parent)
   m_scpi = new ScpiPrefs(ui_stack);
   m_scpi->setId(ConfigDlg::Scpi);
   new ConfigItem(m_scpi->id(),
-                 m_scpi->pixmap(),
+                 m_scpi->icon(),
                  m_scpi->label(),
                  ui_list);
   m_scpi->setCfg(m_settings);
@@ -276,7 +276,7 @@ void ConfigDlg::showPage(ConfigDlg::PageType page)
   if (wid)
   {
     ui_helpText->setText(wid->description());
-    ui_helpPixmap->setPixmap(wid->pixmap());
+    ui_helpPixmap->setPixmap(wid->icon().pixmap(32));
   }
 }
 
@@ -307,6 +307,12 @@ void ConfigDlg::setSampleTimeSLOT(int sampleTime)
 {
   m_recorder->setSampleTimeSLOT(sampleTime);
   on_ui_buttonBox_accepted();
+}
+
+void ConfigDlg::setWindowSecondsSLOT(int seconds)
+{
+  m_scale->setWindowSecondsSLOT(seconds);
+  Q_EMIT zoomed();
 }
 
 void ConfigDlg::setGraphSizeSLOT(int size, int length)
@@ -435,7 +441,7 @@ void ConfigDlg::on_ui_list_currentItemChanged(QListWidgetItem *current, QListWid
   ui_stack->setCurrentIndex(id);
 
   ui_helpText->setText(wid->description());
-  ui_helpPixmap->setPixmap(wid->pixmap());
+  ui_helpPixmap->setPixmap(wid->icon().pixmap(32));
 }
 
 void ConfigDlg::thresholdChangedSLOT(DMMGraph::CursorMode mode, double value)
@@ -546,6 +552,11 @@ bool ConfigDlg::useTextLabel() const
   return m_gui->useTextLabel();
 }
 
+bool ConfigDlg::systemIcons() const
+{
+  return m_gui->systemIcons();
+}
+
 QColor ConfigDlg::displayBgColor() const
 {
   return m_gui->displayBgColor();
@@ -589,6 +600,11 @@ bool ConfigDlg::showDisplay() const
 int ConfigDlg::meterScaleMode() const
 {
   return m_gui->meterScaleMode();
+}
+
+void ConfigDlg::setMeterStyle(int style)
+{
+  m_gui->setMeterStyle(style);
 }
 
 int ConfigDlg::meterStyle() const
@@ -769,6 +785,11 @@ QString ConfigDlg::device() const
 bool ConfigDlg::crosshair() const
 {
   return m_graph->crosshair();
+}
+
+QString ConfigDlg::graphVariant() const
+{
+  return m_graph->variant();
 }
 
 QColor ConfigDlg::bgColor() const
