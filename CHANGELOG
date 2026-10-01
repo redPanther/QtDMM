@@ -1,3 +1,40 @@
+* 04/10/2026 26.1 (the first release since 0.9.8; this section has the changes after rc2, the two release
+  candidates below list everything new before)
+Display and recording
+- Analog meter: MIN and MAX readouts (the left one read CURRENT before), no percent arc, the unit on the dial
+  and written as the digital display does (kΩ, °C), long unit labels such as "V DIODE" fit, the bipolar
+  scale is counted from 0, readouts without "-0"
+- Digital display and readings table: leading zeros of the meter's reading stay dark ("0.00", not
+  "000.00"), the minus always in front of the digits, as on the meter
+- Graph: the background reaches the edges and the scrollbar takes the graph's colours; SVG export fills the
+  requested size; an imported recording shows at once
+- Integration curve starts at 0 (it started at the threshold, a vertical line at the left edge)
+- The external program at a threshold runs again (it did not start since the move to Qt 6)
+- Record button: a red dot instead of the "back to start" arrow
+- Menus and settings: no Alt letter used twice in one menu or page, in all languages
+
+Meters
+- sigrok-cli meters: continuity readings are no longer dropped; resistance and temperature units match the
+  other meters (Ω, °C, °F); auto range is recognised wherever sigrok lists it
+- Mastech/ELV M9803R, McVoice M-980T: values in mV, kΩ, nF and other prefixed ranges reach the recorder and
+  the readings table in base units (123.4 mV was recorded as 123.4 V)
+- PeakTech 451: readings are decoded correctly (the frame was read one byte off)
+- Brymen BM869s/BM867s/BM525s/BM829s, Voltcraft GDM 703-705, Victron: the second value (e.g. Hz next to
+  V AC) shows in the display, not only in the readings table; it no longer carries the main value's mode
+  ("2nd PO"); readings table without empty "2nd" rows (also Voltcraft VC870)
+- Radio Shack 22-812: readings without a prefix (1.234 V, 50.00 Hz) show their unit again;
+  Voltcraft DO3122: kΩ ranges are recognised
+
+Platforms and packaging
+- macOS: disk image (.dmg) for Apple Silicon and Intel, macOS 13 or newer; not signed with an Apple
+  certificate, see the handbook (Troubleshooting) for the first start
+- Desktop file and icons are named after the application id io.github.qtdmm.qtdmm: launchers pinned to the
+  old qtdmm.desktop have to be pinned again
+- API documentation for developers on GitHub Pages (qtdmm.github.io/QtDMM)
+- Tests: decoder fixtures for every decoder (from real captures of a UT61E through sigrok-cli, a VC870 and
+  an M9803R, the rest from the protocol documentation); a check for doubled Alt letters in all languages;
+  CI tests stop after 5 minutes instead of hanging
+
 
 * 29/09/2026 26.1-rc2 (second release candidate for 26.1, fixes after rc1)
 - AppImage: command-line options (--version, --config-id, ...) reach QtDMM again
