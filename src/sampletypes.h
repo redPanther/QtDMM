@@ -105,6 +105,14 @@ enum : quint32
 };
 }
 
+/// "AC", "DC", "AC+DC" or empty: the coupling in @p flags as meters write it.
+inline QString couplingText(quint32 flags)
+{
+  const bool ac = flags & SampleFlag::AC;
+  const bool dc = flags & SampleFlag::DC;
+  return ac && dc ? QStringLiteral("AC+DC") : ac ? QStringLiteral("AC") : dc ? QStringLiteral("DC") : QString();
+}
+
 namespace Quantities
 {
 struct Entry

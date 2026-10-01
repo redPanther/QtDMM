@@ -6,6 +6,7 @@
 
 #include "dmmdecoder.h"
 #include "readevent.h"
+#include "reading.h"
 #include "sampletypes.h"
 
 /// One value of a decoder frame, made uniform: the port it comes from, the
@@ -53,6 +54,10 @@ public:
   /// One value, the fields as DMM::value() delivers them.
   PortSample adaptValue(double dval, const QString &text, const QString &unit, const QString &special,
                         const QString &range, bool hold, bool showBar, bool lowBattery, int id, qint64 wall);
+
+  /// The Reading the views get for @p ps (kern_spezifikation §10: the
+  /// facade until the views take Samples).
+  static Reading reading(const PortSample &ps);
 
 private:
   ReadEvent::DataFormat m_format;

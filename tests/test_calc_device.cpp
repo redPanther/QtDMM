@@ -27,7 +27,7 @@ static SharedStateManager::Reading reading(double value, const QString &unit, qi
   SharedStateManager::Reading r;
   r.value = value;
   r.unit = unit;
-  r.special = "DC";
+  r.port = "voltage.dc";
   r.msecs = now;
   r.valid = valid;
   return r;

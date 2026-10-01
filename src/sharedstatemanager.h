@@ -33,7 +33,7 @@ public:
   {
     double  value = 0;      ///< in SI base units (DmmResponse::dval)
     QString unit;           ///< base unit without prefix, e.g. "V"
-    QString special;        ///< "DC", "AC", ... as the decoder delivers it
+    QString port;           ///< the port key's text form: "voltage.dc", "current.ac" (PortKey)
     qint64  msecs = 0;      ///< QDateTime::currentMSecsSinceEpoch() when published
     bool    valid = false;  ///< false for overload / no numeric value
   };

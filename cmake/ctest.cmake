@@ -30,7 +30,7 @@ if (BUILD_TESTING)
 	add_test(NAME dmmgraph COMMAND ${TEST_GRAPH} "${CMAKE_SOURCE_DIR}/tests/data/graph")
 
 	## the recorder's store on its own: QtCore only, no widgets
-	add_executable(test_recordingstore tests/test_recordingstore.cpp src/recordingstore.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/siprefix.cpp)
+	add_executable(test_recordingstore tests/test_recordingstore.cpp src/recordingstore.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/siprefix.cpp src/readingadapter.cpp)
 	target_include_directories(test_recordingstore PRIVATE src)
 	target_link_libraries(test_recordingstore PRIVATE Qt::Core Qt::Test)
 	add_test(NAME recording_store COMMAND test_recordingstore)
@@ -48,7 +48,7 @@ if (BUILD_TESTING)
 	## the analog meter: angle mapping, full-scale derivation, ballistics and
 	## a headless render check
 	set( TEST_METER test_meter)
-	add_executable(${TEST_METER} MACOSX_BUNDLE tests/test_meter.cpp src/meterwid.cpp src/panelframe.cpp src/siprefix.cpp)
+	add_executable(${TEST_METER} MACOSX_BUNDLE tests/test_meter.cpp src/meterwid.cpp src/panelframe.cpp src/siprefix.cpp src/readingadapter.cpp)
 	target_include_directories(${TEST_METER} PRIVATE src)
 	target_link_libraries(${TEST_METER} PRIVATE Qt6::Widgets Qt::Core Qt::Test)
 	add_test(NAME analog_meter COMMAND ${TEST_METER})

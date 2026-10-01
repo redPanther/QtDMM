@@ -40,7 +40,7 @@ struct LoggedReading
   quint32 flags = 0;        ///< SampleFlag
   QString text;             ///< as the meter showed it ("-006.52", "OL")
   QString unit;             ///< as shown, with the SI prefix ("mV")
-  QString special;          ///< the decoder's mode code ("DC", "DI", "OH", ...), until there is an adapter
+  PortKey port;             ///< what was measured: voltage.dc, resistance, ...
   QString range;            ///< "AUTO", "MANU" or the meter's range text
   int     id = 0;           ///< 0 = main value, 1.. = secondary values
   quint32 alarmArgb = 0;    ///< an alarm raised on this reading (QColor::rgba()), 0 = none

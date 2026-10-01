@@ -211,6 +211,28 @@ PortSample ReadingAdapter::adaptValue(double dval, const QString &text, const QS
   return ps;
 }
 
+Reading ReadingAdapter::reading(const PortSample &ps)
+{
+  Reading r;
+  r.value = ps.sample.value;
+  r.text = ps.sample.text;
+  r.unit = ps.decoderUnit;
+  r.prefix = ps.sample.displayPrefix;
+  r.baseUnit = ps.decoderBaseUnit;
+  r.range = ps.rangeText;
+  r.hold = ps.sample.flags & SampleFlag::Hold;
+  r.showBar = ps.showBar;
+  r.overload = ps.sample.quality == Quality::Overload;
+  r.id = ps.id;
+  r.msecs = ps.sample.wall;
+  r.port = ps.port;
+  r.portUnit = ps.unit;
+  r.flags = ps.sample.flags;
+  r.quality = ps.sample.quality;
+  r.measuringRange = ps.sample.range;
+  return r;
+}
+
 QList<PortSample> ReadingAdapter::adapt(const DmmDecoder::DmmResponse &r, qint64 wall)
 {
   QList<PortSample> out;

@@ -86,7 +86,8 @@ ReadingLog::Entry ReadingLog::entry(int row) const
   e.dval = r.value;
   e.val = r.text;
   e.unit = r.unit;
-  e.special = r.special;
+  e.port = r.port;
+  e.flags = r.flags;
   e.range = r.range;
   e.hold = r.hold();
   e.id = r.id;
@@ -111,17 +112,25 @@ QString ReadingLog::formatTime(const QDateTime &when)
   return when.toString("yyyy-MM-dd HH:mm:ss.zzz");
 }
 
-QString ReadingLog::modeText(const QString &special)
+QString ReadingLog::modeText(const PortKey &port, quint32 flags)
 {
-  // the decoders' codes (see DmmDecoder::DmmResponse::special)
-  if (special == "ACDC") return tr("AC+DC");
-  if (special == "DI")   return tr("Diode");
-  if (special == "BUZ")  return tr("Continuity");
-  if (special == "OH")   return tr("Resistance");
-  if (special == "CA")   return tr("Capacitance");
-  if (special == "FR")   return tr("Frequency");
-  if (special == "TE")   return tr("Temperature");
-  return special;   // AC, DC and anything new
+  if (flags & SampleFlag::Diode)
+    return tr("Diode");
+  const QString coupling = couplingText(flags);
+  if (!coupling.isEmpty())
+    return coupling == QLatin1String("AC+DC") ? tr("AC+DC") : coupling;
+  switch (port.quantity)
+  {
+    case Quantity::Unknown:
+    case Quantity::Voltage:
+    case Quantity::Current:     return QString();
+    case Quantity::Continuity:  return tr("Continuity");
+    case Quantity::Resistance:  return tr("Resistance");
+    case Quantity::Capacitance: return tr("Capacitance");
+    case Quantity::Frequency:   return tr("Frequency");
+    case Quantity::Temperature: return tr("Temperature");
+    default:                    return Quantities::name(port.quantity);
+  }
 }
 
 QVariant ReadingLog::data(const QModelIndex &index, int role) const
@@ -154,7 +163,7 @@ QVariant ReadingLog::data(const QModelIndex &index, int role) const
     }
     case Value: return SiPrefix::withoutLeadingZeros(e.text);   // "000.00" -> "0.00", as the meter shows it
     case Unit:  return e.unit;
-    case Mode:  return e.id > 0 ? tr("2nd") + (e.special.isEmpty() ? QString() : " " + modeText(e.special)) : modeText(e.special);
+    case Mode:  return e.id > 0 ? (tr("2nd") + " " + modeText(e.port, e.flags)).trimmed() : modeText(e.port, e.flags);
     case Range: return e.range;
     case Hold:  return e.hold() ? tr("HOLD") : QString();
   }
@@ -186,7 +195,8 @@ void ReadingLog::append(const Entry &entry)
   r.value = entry.dval;
   r.text = entry.val;
   r.unit = entry.unit;
-  r.special = entry.special;
+  r.port = entry.port;
+  r.flags = entry.flags | (entry.hold ? SampleFlag::Hold : 0u);
   r.range = entry.range;
   r.hold = entry.hold;
   r.id = entry.id;
@@ -305,7 +315,7 @@ bool ReadingLog::write(const QString &path, QString *error) const
     const Entry e = entry(i);
     ts << QString("%1;%2;%3;%4;%5;%6\n")
             .arg(e.when.toString("yyyy-MM-ddTHH:mm:ss,zzz"), SiPrefix::withoutLeadingZeros(e.val), e.unit,
-                 e.id > 0 ? "2nd " + modeText(e.special) : modeText(e.special), e.range, e.hold ? "1" : "0");
+                 e.id > 0 ? ("2nd " + modeText(e.port, e.flags)).trimmed() : modeText(e.port, e.flags), e.range, e.hold ? "1" : "0");
   }
   return true;
 }
@@ -330,7 +340,7 @@ bool ReadingLog::writeAny(const QString &path, QString *error) const
     bool numeric = false;
     const double number = val.toDouble(&numeric);
     sheet.addRow({e.when, numeric ? QVariant(number) : QVariant(val), e.unit,
-                  e.id > 0 ? "2nd " + modeText(e.special) : modeText(e.special), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName});
+                  e.id > 0 ? ("2nd " + modeText(e.port, e.flags)).trimmed() : modeText(e.port, e.flags), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName});
   }
   return sheet.write(path, *format, error);
 }

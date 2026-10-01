@@ -10,6 +10,8 @@
 
 #include <functional>
 
+#include "sampletypes.h"
+
 class QTcpServer;
 class QTcpSocket;
 
@@ -34,7 +36,7 @@ public:
   {
     double value = 0;
     QString unit;      ///< "V", "A", "Ohm" ... without prefix
-    QString special;   ///< "DC", "AC", "DI" ...
+    PortKey port;      ///< what is measured: voltage.dc, current.ac, voltage.diode, ...
     QString range;     ///< "AUTO", "MANU" or the meter's range text
     bool overload = false;
     bool hold = false;

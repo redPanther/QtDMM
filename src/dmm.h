@@ -86,6 +86,8 @@ public:
   /// Seconds between reopen attempts after the port was lost; 0 disables.
   void    setReconnectInterval(int seconds) { m_reconnectSeconds = seconds; }
   bool    isOpen() const;
+  /// The protocol of the current decoder, Invalid before setFormat().
+  ReadEvent::DataFormat format() const { return m_decoder ? m_decoder->getType() : ReadEvent::Invalid; }
   /// Selects the decoder (see DmmDecoder::getInstance()).
   void    setFormat(ReadEvent::DataFormat);
   /// Serial line settings. With @p externalSetup the port is used as is and
@@ -102,6 +104,9 @@ public:
 Q_SIGNALS:
   /// One decoded reading; the parameters mirror DmmDecoder::DmmResponse.
   /// Emitted twice for frames that carry a second value (id2).
+  /// The whole decoded frame, for ReadingAdapter (MeterController); value()
+  /// is the same split into its values.
+  void    response(const DmmDecoder::DmmResponse &response);
   void    value(double dval, const QString &val, const QString &unit, const QString &special,
                 const QString &range, bool hold, bool showBar, int id);
   /// Connection state as a message for the status bar; despite the name

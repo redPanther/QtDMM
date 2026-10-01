@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
   w.setValue(0, "-3.856");
   w.setUnit(0, "mV");
-  w.setMode(0, "DC");
+  w.setMode(0, SampleFlag::DC);
   w.setAuto(true);
   w.setShowBar(true);
   w.setMinValue("-3.900");
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
     n.setDisplayMode(50000, true, true, 1);   // 5 digits
     n.setValue(0, "12.345");
     n.setUnit(0, "MOhm");
-    n.setMode(0, "AC");
+    n.setMode(0, SampleFlag::AC);
     n.setManu(true);
     n.setMinValue("11.111");
     n.setMinUnit("MOhm");
@@ -190,25 +190,25 @@ int main(int argc, char **argv)
   {
     w.setValue(0, "0.L");
     w.setUnit(0, "Ohm");
-    w.setMode(0, "OH");
+    w.setMode(0, 0, Quantity::Resistance);
     w.setHold(true);
     render(w, size).save(QDir(dump).filePath("display_ol.png"));
     w.setHold(false);
     w.setValue(0, "1.234");
     w.setUnit(0, "V");
-    w.setMode(0, "DI");
+    w.setMode(0, SampleFlag::Diode, Quantity::Voltage);
     render(w, size).save(QDir(dump).filePath("display_diode.png"));
     w.setDisplayMode(22000, true, true, 2);
     w.setValue(0, "12.345");
     w.setUnit(0, "V");
-    w.setMode(0, "AC");
+    w.setMode(0, SampleFlag::AC);
     w.setValue(1, "50.02");
     w.setUnit(1, "Hz");
     render(w, size).save(QDir(dump).filePath("display_two_values.png"));
     w.setDisplayMode(4000, false, false, 1);
     w.setValue(0, "3.856");
     w.setUnit(0, "kOhm");
-    w.setMode(0, "OH");
+    w.setMode(0, 0, Quantity::Resistance);
     render(w, QSize(300, 110)).save(QDir(dump).filePath("display_small_plain.png"));
     render(w, QSize(1000, 400)).save(QDir(dump).filePath("display_large_plain.png"));
     w.setFaceColor(QColor(0x20, 0x30, 0x40));
