@@ -211,6 +211,24 @@ int main(int argc, char **argv)
     check(other.rowCount() == 0 && store.readingCount() == 0, "shared store: clear empties it for both");
   }
 
+  // --- 8. the store goes before the log (the main window deletes its views
+  //         one by one): the log falls back to its own store, empty ---
+  {
+    ReadingLog log;
+    log.append(entry(1.0, "1.000", "V", 0));   // stays in its own store
+    QAbstractItemModelTester tester(&log, QAbstractItemModelTester::FailureReportingMode::Warning);
+    {
+      RecordingStore store;
+      log.setStore(&store);
+      log.append(entry(2.0, "2.000", "V", 0));
+      check(log.rowCount() == 1, "store gone: the shared store has the row");
+    }
+    check(log.store() != nullptr && log.rowCount() == 0 && log.stats().count == 0,
+          QString("store gone: the log must be empty, has %1 rows").arg(log.rowCount()));
+    log.append(entry(3.0, "3.000", "V", 0));
+    check(log.rowCount() == 1 && log.entry(0).dval == 3.0, "store gone: the log goes on with its own store");
+  }
+
   if (failed == 0)
     qInfo() << "All reading log tests passed.";
   else

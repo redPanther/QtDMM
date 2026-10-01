@@ -12,7 +12,8 @@
 #include "siprefix.h"
 #include "spreadsheet.h"
 
-ReadingLog::ReadingLog(QObject *parent) : QAbstractTableModel(parent), m_store(new RecordingStore(this))
+ReadingLog::ReadingLog(QObject *parent) :
+  QAbstractTableModel(parent), m_own(new RecordingStore(this)), m_store(m_own)
 {
   connectStore();
 }
@@ -36,6 +37,18 @@ void ReadingLog::connectStore()
   {
     Q_EMIT dataChanged(index(row, 0), index(row, ColumnCount - 1), {Qt::BackgroundRole, Qt::ToolTipRole});
   });
+  // a store from outside may go first (the main window's views are deleted
+  // one after the other): the table falls back to its own, empty one
+  if (m_store != m_own)
+    connect(m_store, &QObject::destroyed, this, [this]
+    {
+      beginResetModel();
+      m_store = m_own;
+      m_own->clearReadings();   // not connected yet: rows from before setStore()
+      connectStore();
+      m_singleDay = allOneDay();
+      endResetModel();
+    });
 }
 
 void ReadingLog::setStore(RecordingStore *store)

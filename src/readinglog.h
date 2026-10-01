@@ -52,7 +52,8 @@ public:
   explicit ReadingLog(QObject *parent = nullptr);
 
   /// Shows the readings of @p store (the MeterController's recorder). The
-  /// row limit and the pause are the store's: set maxRows() after this. Not owned.
+  /// row limit and the pause are the store's: set maxRows() after this. Not
+  /// owned; should it be deleted first, the log shows its own empty store again.
   void setStore(RecordingStore *store);
   RecordingStore *store() const { return m_store; }
 
@@ -105,6 +106,7 @@ public:
   static QString modeText(const QString &special);
 
 private:
+  RecordingStore *m_own;     ///< used until setStore(), and after that store is gone
   RecordingStore *m_store;
   bool m_singleDay = true;
   void connectStore();
