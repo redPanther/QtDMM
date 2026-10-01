@@ -141,6 +141,9 @@ public:
   /// Sample @p i, 0 = the oldest in the ring.
   const RecordedPoint &at(int i) const { return m_ring[(m_head + i) % m_capacity]; }
   const RecordedPoint &last() const { return at(m_count - 1); }
+  /// The sample number of at(0) since the start: grows as the full ring
+  /// drops its oldest, so a sample keeps its number while its index moves.
+  qint64      firstSequence() const { return m_firstSeq; }
   /// When the recording started (for an import: the file's first time stamp).
   QDateTime   startDateTime() const { return m_start; }
   bool        isRunning() const { return m_running; }

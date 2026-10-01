@@ -571,6 +571,45 @@ int main(int argc, char **argv)
           "thinning: appended series must equal the rebuilt one");
   }
 
+  // --- 5l. thinning while the full ring scrolls: a sample stays in its
+  //          bucket, so the drawn minima and maxima of the older samples do
+  //          not change from one new sample to the next ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.resize(300, 200);
+    graph.setSampleTime(1);
+    graph.setGraphSize(200, 200);            // 2001 samples in the ring
+    graph.setMode(DMMGraph::Manual);
+    graph.startSLOT();
+    auto noise = [](int i) { return double((i * 37) % 101); };
+    int i = 0;
+    for (; i < 2500; i++)
+      graph.addValue(noise(i));
+
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    auto *series = qobject_cast<QXYSeries *>(chart->series().value(0));
+    const RecordingStore *store = graph.store();
+    // the drawn points by sample number, without the oldest and the newest
+    // few hundred samples (a bucket falls off or fills there)
+    auto drawn = [&](qint64 from, qint64 to)
+    {
+      QStringList list;
+      for (const QPointF &p : series->points())
+      {
+        const qint64 seq = store->firstSequence() + qRound64(p.x() / 0.1);
+        if (seq >= from && seq < to)
+          list << QString("%1:%2").arg(seq).arg(p.y());
+      }
+      return list.join(' ');
+    };
+    const qint64 from = store->firstSequence() + 200, to = store->firstSequence() + store->count() - 200;
+    const QString before = drawn(from, to);
+    graph.addValue(noise(i));
+    check(store->firstSequence() > 0, "scrolling: the ring must be full and scroll");
+    check(!before.isEmpty() && before == drawn(from, to),
+          "scrolling: the thinned points of the older samples must stay as they were");
+  }
+
   // --- 6. engineering-prefix export/import: setUnit() must strip a leading
   //         G or p prefix too (previously only n/u/m/k/M were recognized), and
   //         a value re-imported from a prefix-scaled export (e.g. "2.5;pF")

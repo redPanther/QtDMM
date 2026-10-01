@@ -348,6 +348,16 @@ int DMMGraph::bucketSize() const
   return qMax(1, (shown + columns - 1) / columns);
 }
 
+// The index of the first sample in the bucket of sample @p i. The buckets
+// count from the start of the recording, not from the ring's oldest sample:
+// while a full ring scrolls, a sample stays in its bucket and the drawn
+// minima and maxima stay put instead of jittering with every new sample.
+int DMMGraph::bucketStart(int i) const
+{
+  const qint64 seq = m_store->firstSequence() + i;
+  return qMax(0, int(seq - seq % m_bucket - m_store->firstSequence()));
+}
+
 // The points of the samples first..last: the sample itself, or with more than
 // one the minimum and the maximum in time order, so a spike survives the
 // thinning. The store keeps every sample; only the drawing is thinned.
@@ -400,11 +410,12 @@ void DMMGraph::rebuildSeries()
   intPoints.reserve(count / m_bucket * 2 + 2);
 
   m_tailData = m_tailInt = 0;
-  for (int first = 0; first < count; first += m_bucket)
+  for (int first = 0; first < count;)
   {
-    const int last = qMin(first + m_bucket, count) - 1;
+    const int last = qMin(bucketStart(first) + m_bucket, count) - 1;
     m_tailData = bucketPoints(first, last, false, points);
     m_tailInt = bucketPoints(first, last, true, intPoints);
+    first = last + 1;
   }
 
   m_dataSeries->replace(points);
@@ -418,7 +429,7 @@ void DMMGraph::rebuildSeries()
 void DMMGraph::appendToSeries()
 {
   const int count = m_store->count();
-  const int first = (count - 1) / m_bucket * m_bucket;
+  const int first = bucketStart(count - 1);
   if (first != count - 1)
   {
     m_dataSeries->removePoints(m_dataSeries->count() - m_tailData, m_tailData);

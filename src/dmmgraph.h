@@ -306,6 +306,7 @@ protected:
   /// The store's signals: a new sample, discarded or replaced samples.
   void             connectStore();
   int              bucketSize() const;
+  int              bucketStart(int i) const;
   int              bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const;
   void             appendToSeries();
   void             onAppended(bool shifted);
