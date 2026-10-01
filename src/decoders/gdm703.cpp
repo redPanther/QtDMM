@@ -4,9 +4,9 @@
 // Voltcraft GDM 703 family (ablage/CDMM/src/dmmclass.cpp): 9600 8N1, DTR,
 // two values per frame. Marked "*": ported from CDMM without a capture.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Voltcraft", "GDM 703 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "GDM 704 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "GDM 705 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 703 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 704 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 705 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
   return true;
 }();
 
@@ -36,14 +36,17 @@ bool DecoderGDM703::parseValue(const QString &value, const QString &prefixUnit, 
   return true;
 }
 
-std::optional<DmmDecoder::DmmResponse> DecoderGDM703::decode(const QByteArray &data, int id)
+std::optional<DmmDecoder::DmmResponse> DecoderGDM703::decode(const QByteArray &data, int /*id*/)
 {
   if (data.size() != 26 || data[0] != 0x02 || data[25] != 0x03)
     return std::nullopt;
   const QString frame = QString::fromLatin1(data);
 
   m_result = {};
-  m_result.id = id;
+  // one frame carries both displays: main is id 0, the second id 1 (and
+  // numValues 2 in the table, so the display shows it)
+  m_result.id = 0;
+  m_result.id2 = 1;
   m_result.range = "";
   m_result.hold = false;
   m_result.showBar = true;
@@ -73,7 +76,6 @@ std::optional<DmmDecoder::DmmResponse> DecoderGDM703::decode(const QByteArray &d
     m_result.dval2 = dval2;
     m_result.val2 = val2;
     m_result.unit2 = unit2;
-    m_result.id2 = 1;
   }
   return m_result;
 }

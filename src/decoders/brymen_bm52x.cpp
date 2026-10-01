@@ -3,8 +3,8 @@
 // Brymen BM52x / BM82x over the BU-86X adapter (libsigrok "brymen-bm52x",
 // "brymen-bm82x", "hid/bu86x"). "*": not confirmed on hardware.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Brymen", "BM525s *", "", 0, ReadEvent::BrymenBM52x, 8, 1, 1, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Brymen", "BM829s *", "", 0, ReadEvent::BrymenBM82x, 8, 1, 1, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM525s *", "", 0, ReadEvent::BrymenBM52x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM829s *", "", 0, ReadEvent::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
   return true;
 }();
 
@@ -78,7 +78,7 @@ QString DecoderBrymenBM52x::digits(const unsigned char *pkt, unsigned char signF
   return text;
 }
 
-std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM52x::decode(const QByteArray &data, int id)
+std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM52x::decode(const QByteArray &data, int /*id*/)
 {
   if (data.size() != 24)
     return std::nullopt;
@@ -88,7 +88,10 @@ std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM52x::decode(const QByteArr
       return std::nullopt;
 
   m_result = {};
-  m_result.id = id;
+  // one frame carries both displays: main is id 0, the second id 1 (and
+  // numValues 2 in the table, so the display shows it)
+  m_result.id = 0;
+  m_result.id2 = 1;
   m_result.showBar = true;
   m_result.hold = (buf[20] & 0x80) != 0;
   m_result.range = (buf[20] & 0x10) ? "AUTO" : "MANU";
@@ -167,7 +170,6 @@ std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM52x::decode(const QByteArr
       m_result.dval2 = value2 * prefixFactor(prefix2);
       m_result.val2 = text2;
       m_result.unit2 = prefix2 + unit2;
-      m_result.id2 = 1;
     }
   }
   m_result.lowBat = (buf[7] & 0x08) != 0;

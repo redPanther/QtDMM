@@ -153,7 +153,7 @@ int main(int argc, char **argv)
           QString("SOC as main value: %1 %2").arg(soc ? soc->val : "-", soc ? soc->unit : "-"));
     check(soc && soc->id2 == 1 && qFuzzyCompare(soc->dval2, -50.0) && soc->unit2 == "Ah", "consumed Ah as second value");
     const auto none = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, "P", "-"), 0);
-    check(none && none->id2 == 0 && none->unit == "W" && qFuzzyCompare(none->dval + 1, 1.0), "power main, no second value");
+    check(none && none->id2 == 1 && none->val2.isEmpty() && none->unit == "W" && qFuzzyCompare(none->dval + 1, 1.0), "power main, no second value");
     check(!decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, "NOPE", "V"), 0).has_value(),
           "unknown field id gives nothing");
     const QList<DecoderVictronBLE::Value> all = DecoderVictronBLE::values(VictronBle::BatteryMonitor, *plain);
