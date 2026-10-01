@@ -126,7 +126,9 @@ void MeterController::valueSLOT(double dval, const QString &val, const QString &
   rd.special = special;
   rd.range = range;
   rd.hold = hold;
-  rd.showBar = showBar;
+  // a bar graph is a share of the display count, which a temperature (no
+  // range) does not fill: 37.2 °C of 50000 counts is an empty bar
+  rd.showBar = showBar && !rd.temperature();
   rd.overload = val.contains(letters);
   rd.id = id;
   rd.msecs = QDateTime::currentMSecsSinceEpoch();

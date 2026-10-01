@@ -175,6 +175,19 @@ double MeterWid::fullScaleFromReading(const QString &value, int counts, const QS
   return fullScaleFromReading(value, counts);
 }
 
+double MeterWid::fullScaleWithoutRange(double value, double current)
+{
+  // the value stays left of the red zone, which starts at 90 % of full scale
+  const double need = std::fabs(value) / 0.9;
+  double fs = 10.0;
+  static const double kSteps[] = {1.0, 2.0, 5.0};
+  for (double decade = 10.0; fs < need && decade < 1e12; decade *= 10.0)
+    for (double s : kSteps)
+      if ((fs = s * decade) >= need)
+        break;
+  return std::isnan(current) ? fs : qMax(fs, current);
+}
+
 void MeterWid::setReading(double value, const QString &text, const QString &unit, bool overload, bool hold)
 {
   if (m_unit != unit)
@@ -259,6 +272,7 @@ void MeterWid::reset()
   m_markMin = kNaN;
   m_markMax = kNaN;
   m_decimals = 0;
+  m_rangelessScale = kNaN;
   if (m_scaleMode == Auto && m_bipolar)
   {
     m_bipolar = false;
@@ -736,9 +750,24 @@ void MeterWid::showReading(const Reading &r)
   const QString &unit = r.unit;
   const QString &special = r.special;
 
-  const double fs = fullScaleFromReading(val, m_counts, unit);
-  if (!std::isnan(fs))
-    setFullScale(fs);
+  if (r.temperature())
+  {
+    // no range: the display count would give 5000 °C for "37.2" at 50000
+    // counts, so the scale follows the values instead
+    if (unit != m_unitText)
+      m_rangelessScale = kNaN;
+    if (!r.overload)
+      m_rangelessScale = fullScaleWithoutRange(QString(val).remove(' ').toDouble(), m_rangelessScale);
+    if (!std::isnan(m_rangelessScale))
+      setFullScale(m_rangelessScale);
+  }
+  else
+  {
+    m_rangelessScale = kNaN;
+    const double fs = fullScaleFromReading(val, m_counts, unit);
+    if (!std::isnan(fs))
+      setFullScale(fs);
+  }
 
   // the unit as the digital display writes it ("kΩ", "°C")
   QString label = SiPrefix::displayText(unit);

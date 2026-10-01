@@ -25,6 +25,15 @@ struct Reading
   bool    overload = false;///< no number: OL, EFLO and the like
   int     id = 0;          ///< 0 = main value, 1..3 = secondary values
   qint64  msecs = 0;       ///< when it arrived (ms since the epoch)
+
+  /// A temperature has no measuring range: the display count says nothing
+  /// about its scale. "F" alone is farad, so only the decoders' "TE" mode
+  /// and the temperature spellings of the unit count.
+  bool temperature() const
+  {
+    return special == QLatin1String("TE") || baseUnit == QLatin1String("C") || baseUnit == QLatin1String("dF")
+           || baseUnit == QStringLiteral("°C") || baseUnit == QStringLiteral("°F");
+  }
 };
 
 Q_DECLARE_METATYPE(Reading)

@@ -12,6 +12,8 @@
 #include <cmath>
 
 #include "meterwid.h"
+#include "reading.h"
+#include <limits>
 
 static int failed = 0;
 
@@ -98,6 +100,55 @@ int main(int argc, char **argv)
   check(std::isnan(MeterWid::fullScaleFromReading("0.L", 4000)), "\"0.L\" is not a number");
   check(std::isnan(MeterWid::fullScaleFromReading("OL", 4000)), "\"OL\" is not a number");
   check(std::isnan(MeterWid::fullScaleFromReading("", 4000)), "empty string is not a number");
+
+  // --- a temperature has no range: the scale follows the values (1-2-5) ---
+  const double none = std::numeric_limits<double>::quiet_NaN();
+  check(near(MeterWid::fullScaleWithoutRange(37.2, none), 50.0), "37.2 -> 50");
+  check(near(MeterWid::fullScaleWithoutRange(46.0, none), 100.0), "46 would be in the red zone of 50 -> 100");
+  check(near(MeterWid::fullScaleWithoutRange(5.0, none), 10.0), "small values: at least 10");
+  check(near(MeterWid::fullScaleWithoutRange(-76.0, none), 100.0), "negative: by magnitude");
+  check(near(MeterWid::fullScaleWithoutRange(950.0, none), 2000.0), "950 -> 2000");
+  check(near(MeterWid::fullScaleWithoutRange(20.0, 100.0), 100.0), "the scale does not shrink");
+  {
+    Reading t;
+    t.special = "TE";
+    t.baseUnit = "C";
+    check(t.temperature(), "TE is a temperature");
+    Reading f;
+    f.baseUnit = "dF";
+    check(f.temperature(), "dF (Fahrenheit) is a temperature");
+    Reading farad;
+    farad.special = "CA";
+    farad.baseUnit = "F";
+    check(!farad.temperature(), "F with CA is farad, not a temperature");
+  }
+  {
+    // a 50000-count meter showing 37.2 °C: 50, not 5000; a voltage keeps the count rule
+    MeterWid m;
+    m.setDisplayCounts(50000);
+    Reading r;
+    r.special = "TE";
+    r.unit = r.baseUnit = "C";
+    r.text = "37.2";
+    m.showReading(r);
+    check(near(m.fullScale(), 50.0), QString("37.2 C @50000 -> 50, got %1").arg(m.fullScale()));
+    r.text = "22.6";
+    m.showReading(r);
+    check(near(m.fullScale(), 50.0), "cooler again: stays at 50");
+    r.text = "81.0";
+    m.showReading(r);
+    check(near(m.fullScale(), 100.0), "81 -> grows to 100");
+    m.reset();
+    r.text = "22.6";
+    m.showReading(r);
+    check(near(m.fullScale(), 50.0), "reset: starts again from the value");
+    Reading v;
+    v.special = "DC";
+    v.unit = v.baseUnit = "V";
+    v.text = "3.8560";
+    m.showReading(v);
+    check(near(m.fullScale(), 5.0), QString("a voltage keeps the count rule (5.0000 @50000), got %1").arg(m.fullScale()));
+  }
   check(std::isnan(MeterWid::fullScaleFromReading("3.856", 0)), "no counts, no scale");
 
   // --- 2b. scale step: 1-2-5, labels do not touch, 0 is a major tick ---
