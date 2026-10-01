@@ -1231,7 +1231,9 @@ bool DMMGraph::importCsvFile(const QString &fileName)
   setUnit(rec->unit);
   m_store->setSampleTime(rec->sampleTimeTenths);
   const int cnt = int(rec->values.size());
-  const int size = int(m_size * sampleTenths());
+  // setGraphSize() counts in seconds, the sample time is in tenths of one
+  const int size = qMax(1, int(std::ceil(m_size * sampleTenths() / 10.0)));
+  const int length = qMax(1, int(std::ceil(cnt * sampleTenths() / 10.0)));
 
   if (cnt > 1)
     Q_EMIT sampleTime(m_store->sampleTime());
@@ -1239,7 +1241,7 @@ bool DMMGraph::importCsvFile(const QString &fileName)
   m_scaleMin =  1e40;
   m_scaleMax = -1e40;
 
-  setGraphSize(size, cnt * m_store->sampleTime());
+  setGraphSize(size, length);
   m_store->load(*rec);
 
   setScale(true, true, 0, 0);
@@ -1251,7 +1253,7 @@ bool DMMGraph::importCsvFile(const QString &fileName)
 
   Q_EMIT error(fileName);
   update();
-  Q_EMIT graphSize(size, cnt * m_store->sampleTime());
+  Q_EMIT graphSize(size, length);
   return true;
 }
 

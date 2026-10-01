@@ -79,6 +79,26 @@ int main(int argc, char **argv)
     check(ok, QString("importCsvFile() failed for fixture '%1'").arg(name));
   }
 
+  // --- 1b. an import sizes the graph in seconds: the signal to the settings
+  //          page and the recorder's capacity follow the recording's length,
+  //          not ten times it ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    QSignalSpy sized(&graph, &DMMGraph::graphSize);
+    check(graph.importCsvFile(dataDir + "/new_larger.csv"), "import size: import failed");
+    const int count = graph.store()->count();
+    const double seconds = count * graph.store()->sampleTime() / 10.0;
+    check(count > 1 && sized.size() == 1, "import size: expected one graphSize signal");
+    if (sized.size() == 1)
+    {
+      const int length = sized.first().at(1).toInt();
+      check(length >= seconds && length < seconds + 1,
+            QString("import size: total length %1 s for a recording of %2 s").arg(length).arg(seconds));
+    }
+    check(graph.store()->capacity() <= count + graph.store()->sampleTime() * 10,
+          QString("import size: capacity %1 for %2 samples").arg(graph.store()->capacity()).arg(count));
+  }
+
   // --- 2. malformed input must be rejected, not crash or half-import ---
   {
     QTemporaryDir badDir;
