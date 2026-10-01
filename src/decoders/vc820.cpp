@@ -104,7 +104,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC820::decode(const QByteArray &da
 
     // create string;
     for (int i = 0; i < 4; ++i)
-      val += vc820Digit(((in[1 + 2 * i] << 4) & 0xf0) | (in[2 + 2 * i] & 0x0f));
+      val += vc820Digit(((quint8(in[1 + 2 * i]) << 4) & 0xf0) | (in[2 + 2 * i] & 0x0f));   // unsigned: a shifted negative char is UB
   }
 
 
