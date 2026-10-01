@@ -1,9 +1,9 @@
 {
   "decoder": "M9803RContinuous",
-  "comment": "SYNTHETIC: frames built by hand from the byte table in the header of src/decoders/m9803r.cpp (Matthias Toussaint's reverse engineering). Only readings without an SI prefix are here: the decoder reports dval in display units for mV, kOhm, nF and so on (see the note at its end), and its 000.0 Ohm range puts the decimal point one place too far left, so both are left out until a meter can settle them. No capture from a real M9803R exists here. Replace with real data when available.",
+  "comment": "Frames from the byte table in the header of src/decoders/m9803r.cpp (Matthias Toussaint's reverse engineering): the first ones built by hand; the ones marked 'web' are frames of a real M9803R as published on the web, with the reading the meter showed (passed on by Sarah, the original source is not recorded). dval is in SI base units (123.4 mV -> 0.1234). The 000.0 Ohm range is left out: the decoder puts the decimal point one place too far left compared with the table, and only a meter can settle it. Replace the hand-built ones with real data when available.",
   "tests": [
     {
-      "comment": "DCV 0.000 V range: 1.234 V, auto",
+      "comment": "DCV 0.000 V range: 1.234 V, auto (the same frame is among the web samples of a real meter)",
       "hex": "00 04 03 02 01 00 01 00 04 0D 0A",
       "expected": {
         "dval": 1.234,
@@ -75,6 +75,55 @@
         "dval": 50.0,
         "unit": "Hz",
         "special": "HZ"
+      }
+    },
+    {
+      "comment": "web, real meter: +12.34 V DC",
+      "hex": "00 04 03 02 01 00 02 00 04 0D 0A",
+      "expected": {
+        "dval": 12.34,
+        "unit": "V",
+        "special": "DC",
+        "range": "AUTO"
+      }
+    },
+    {
+      "comment": "web, real meter: -12.34 V DC",
+      "hex": "08 04 03 02 01 00 02 00 04 0D 0A",
+      "expected": {
+        "dval": -12.34,
+        "unit": "V",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "web, real meter: 123.4 mV DC",
+      "hex": "00 04 03 02 01 00 00 00 04 0D 0A",
+      "expected": {
+        "val": "123.4",
+        "dval": 0.1234,
+        "unit": "mV",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "web, real meter: 0.623 V diode",
+      "hex": "00 03 02 06 00 06 00 00 04 0D 0A",
+      "expected": {
+        "val": "0.623",
+        "dval": 0.623,
+        "unit": "V",
+        "special": "DI"
+      }
+    },
+    {
+      "comment": "web, real meter: 4.700 kOhm. The published frame 00 07 00 07 04 04 02 00 04 0D 0A decodes to 47.07 kOhm under the byte table, most likely a typo in the source; this is the frame the table gives for 4.700 kOhm (digits 0 0 7 4, decimal point 0x01)",
+      "hex": "00 00 00 07 04 04 01 00 04 0D 0A",
+      "expected": {
+        "val": "4.700",
+        "dval": 4700.0,
+        "unit": "kOhm",
+        "special": "OH"
       }
     }
   ]

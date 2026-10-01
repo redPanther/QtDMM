@@ -30,7 +30,7 @@ regression tests.
 | `fluke45.cpp` | `Fluke45` | Fluke 45 bench meter, RS-232 (unconfirmed) | `fluke_45_users_manual.pdf` (chapter 5; no capture) | yes, built from the manual's tables |
 | `gdm703.cpp` | `GDM703Continuous` | Voltcraft GDM 703/704/705 (unconfirmed; chip WENS98A per the [sigrok IC list](https://sigrok.org/wiki/Multimeter_ICs)) | — (layout from Toussaint's CDMM, `ablage/CDMM`) | synthetic |
 | `dtm0660.cpp` | `DTM0660` | Generic DTM0660 (4000/6000/8000 count) | — (`dtm0660-brochure.pdf` has no serial frame; layout from the decoder, after libsigrok) | synthetic |
-| `m9803r.cpp` | `M9803RContinuous` | ELV M9803R, MASTECH M9803R, McVoice M-980T | — (byte table in the decoder's header, reverse engineered by Toussaint) | synthetic, unprefixed readings only |
+| `m9803r.cpp` | `M9803RContinuous` | ELV M9803R, MASTECH M9803R, McVoice M-980T | — (byte table in the decoder's header, reverse engineered by Toussaint) | synthetic from the byte table, plus frames of a real meter published on the web (one, 4.700 kOhm, corrected for an apparent typo) |
 | `qm1537.cpp` | `QM1537Continuous` | Digitek DT4000ZC, Digitech QM1537, PeakTech 3430, TekPower TP4000ZC, Uni-Trend UT61B/C/D, Vichy VC99 | `UT61BCD.log` | yes |
 | `rs22812.cpp` | `RS22812Continuous` | Radioshack 22-812 | — (layout from [rs22812](https://github.com/syn-net/rs22812) and the sigrok wiki) | synthetic |
 | `vc820.cpp` | `VC820Continuous` | Digitek DT-9062/INO2513, Digitech QM1462/QM1538, HoldPeak HP-90EPC, PeakTech 3330, Tenma 72-7745, Uni-Trend UT60A/UT60E, Voltcraft VC 820/840 | `UT60AE.log` | yes |
@@ -104,10 +104,9 @@ vector asserts either side until a real meter (or a capture) settles them:
   `vc870_protocol.pdf` reads like 40.000 kOhm there. The AC voltage and
   current ranges are scaled one decade differently from the DC ones; that
   fits 4000-count AC ranges, which the document does not say.
-- `m9803r.cpp`: `dval` is in display units for mV, kOhm, nF and so on (the
-  decoder's own note says so), and the 000.0 Ohm range (mode 4, decimal point
-  0) puts the point after the first digit, not the third as the byte table
-  says. An overload shows as `.0L`.
+- `m9803r.cpp`: the 000.0 Ohm range (mode 4, decimal point 0) puts the point
+  after the first digit, not the third as the byte table says. An overload
+  shows as `.0L`.
 
 ## Provenance
 
