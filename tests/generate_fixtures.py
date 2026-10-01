@@ -60,6 +60,56 @@ def apply_unit_map(unit, unit_map):
     return unit
 
 
+# The port a reading belongs to (kern_spezifikation §2.3), derived from what
+# the meter displayed: the function where the log names it, else the unit;
+# the coupling only where the quantity has one. Written independently of
+# ReadingAdapter, so a test failure means the two disagree.
+PORT_BY_UNIT = {
+    "V": "voltage", "A": "current", "Ohm": "resistance", "Ω": "resistance", "F": "capacitance",
+    "Hz": "frequency", "RPM": "frequency", "%": "duty_cycle", "S": "conductance", "W": "power",
+    "VA": "apparent_power", "dBm": "power", "dBV": "voltage", "dB": "gain", "s": "time",
+    "C": "temperature", "°C": "temperature", "dF": "temperature", "°F": "temperature",
+    "Ah": "electric_charge", "Wh": "energy",
+}
+PORT_BY_FUNCTION = {
+    "resistance": "resistance", "continuity": "continuity", "diode": "voltage",
+    "temperature": "temperature", "frequency": "frequency", "duty cycle": "duty_cycle",
+    "conductance": "conductance", "capacitance": "capacitance", "pulse width": "pulse_width",
+    "decibel": "power",
+}
+COUPLED = {"voltage", "current", "power", "apparent_power"}
+
+
+# The decoders' mode codes in the hand-curated expectations, where the log
+# line names the coupling but the reading has no coupling field.
+COUPLING_BY_SPECIAL = {"AC": "AC", "DC": "DC", "ACDC": "AC+DC"}
+
+
+def derive_port(reading, expect=None):
+    expect = expect or {}
+    special = expect.get("special", "")
+    flags = reading.get("flags", [])
+    unit = reading["unit"]
+    base = unit
+    if unit not in PORT_BY_UNIT and len(unit) > 1 and unit[0] in PREFIX_FACTOR and unit[1:] in PORT_BY_UNIT:
+        base = unit[1:]
+    function = reading.get("function")
+    if function is None and ("Pieps" in flags or special == "BUZ"):
+        function = "continuity"
+    if function is None and ("Diode" in flags or special in ("DI", "Diode")):
+        function = "diode"
+    quantity = PORT_BY_FUNCTION.get(function) or PORT_BY_UNIT.get(base)
+    if quantity is None:
+        return None
+    parts = [quantity]
+    coupling = reading.get("coupling") or COUPLING_BY_SPECIAL.get(special)
+    if quantity in COUPLED and coupling:
+        parts += {"AC": ["ac"], "DC": ["dc"], "AC+DC": ["ac", "dc"], "ACDC": ["ac", "dc"]}[coupling]
+    if function == "diode":
+        parts.append("diode")
+    return ".".join(parts)
+
+
 def build_case(vector, spec):
     reading = vector["reading"]
     expected = {}
@@ -73,6 +123,9 @@ def build_case(vector, spec):
     if "range_mode" in reading:
         expected["range"] = "AUTO" if reading["range_mode"] == "auto" else "MANU"
     expected["hold"] = "HOLD" in reading.get("flags", [])
+    port = derive_port(reading, vector.get("expect"))
+    if port is not None:
+        expected["port"] = port
 
     # Hand-curated assertions on top of the derived ones (special, val, ...).
     expected.update(vector.get("expect", {}))

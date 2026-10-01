@@ -34,9 +34,11 @@ vectors:
   - source_line: "A+D 0.012 V AUTO 6V"
     bytes: 30 30 30 31 32 3B 38 30 36 0D 0A
     reading: {value: "0.012", unit: "V", coupling: AC+DC, range_mode: auto, range_label: "6V"}
+    expect: {port: "voltage.ac"}   # A+D is not in the frame (the log says so): the bits read AC
   - source_line: "A+D    11 V MAN 1000V"
     bytes: 33 30 30 31 31 3B 38 30 34 0D 0A
     reading: {value: "11", unit: "V", coupling: AC+DC, range_mode: manual, range_label: "1000V"}
+    expect: {port: "voltage.ac"}   # A+D is not in the frame (the log says so): the bits read AC
   - source_line: "0.L MOhm AUTO 60M"
     bytes: 35 36 30 30 30 33 39 30 32 0D 0A
     reading: {value: "0.L", unit: "MOhm", range_mode: auto, range_label: "60M"}
@@ -48,11 +50,13 @@ vectors:
     reading: {value: "0L.", unit: "Ohm", range_mode: manual, range_label: "600"}
   - source_line: "0L Ohm FIX 600"
     bytes: 30 36 30 30 30 35 39 30 30 0D 0A
-    reading: {value: "0L", unit: "Ohm", range_mode: manual, range_label: "600"}
+    reading: {value: "0L", unit: "Ohm", function: continuity, range_mode: manual, range_label: "600"}
+    # the log line does not name the mode; byte 5 has function code 5 (continuity), and "FIX" is its fixed range
     remark: "// Sehr schnelle Datenübertragung!"
   - source_line: ".0L V FIX 6V"
     bytes: 30 32 36 34 37 31 39 30 30 0D 0A
-    reading: {value: ".0L", unit: "V", range_mode: manual, range_label: "6V"}
+    reading: {value: ".0L", unit: "V", function: diode, range_mode: manual, range_label: "6V"}
+    # the log line does not name the mode; byte 5 has function code 1 (diode), and "FIX" is its fixed range
     remark: "// Schnelle Datenübertragung!"
   - source_line: "0.051 nF AUTO 6nF"
     bytes: 30 30 30 35 31 36 38 30 32 0D 0A
@@ -97,6 +101,7 @@ vectors:
   - source_line: "A+D   3.2 mA MAN 600m"
     bytes: 31 30 30 33 32 3F 38 30 34 0D 0A
     reading: {value: "3.2", unit: "mA", coupling: AC+DC, range_mode: manual, range_label: "600m"}
+    expect: {port: "current.ac"}   # A+D is not in the frame (the log says so): the bits read AC
   - source_line: "DC - 0.00 A FIX 10A"
     bytes: 30 30 30 30 30 39 3C 30 38 0D 0A
     reading: {value: "- 0.00", unit: "A", coupling: DC, range_mode: manual, range_label: "10A"}
@@ -104,6 +109,7 @@ vectors:
     bytes: 30 30 30 32 33 39 38 30 34 0D 0A
     reading: {value: "0.23", unit: "A", coupling: AC+DC, range_mode: manual, range_label: "10A"}
     remark: "// obwohl nichts angeschlossen: störempfindlich!!"
+    expect: {port: "current.ac"}   # A+D is not in the frame (the log says so): the bits read AC
 
 skipped:
   - source_line: "A+D 00210 µA MAN 6000µ"

@@ -10,7 +10,8 @@
         "unit": "V",
         "special": "DC",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -21,7 +22,8 @@
         "unit": "mV",
         "special": "DC",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -32,7 +34,8 @@
         "unit": "V",
         "special": "AC",
         "range": "MANU",
-        "hold": true
+        "hold": true,
+        "port": "voltage.ac"
       }
     },
     {
@@ -43,7 +46,8 @@
         "unit": "kOhm",
         "special": "OH",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "resistance"
       }
     },
     {
@@ -54,7 +58,8 @@
         "unit": "nF",
         "special": "CA",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "capacitance"
       }
     },
     {
@@ -65,7 +70,8 @@
         "unit": "Hz",
         "special": "HZ",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "frequency"
       }
     }
   ]

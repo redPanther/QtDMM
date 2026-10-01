@@ -10,7 +10,8 @@
         "dval": 0.0,
         "unit": "V",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -20,7 +21,8 @@
         "dval": -0.0,
         "unit": "V",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -30,7 +32,8 @@
         "dval": -0.0,
         "unit": "V",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -40,7 +43,8 @@
         "dval": 0.0,
         "unit": "V",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -50,7 +54,8 @@
         "dval": -0.0,
         "unit": "V",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -60,7 +65,8 @@
         "dval": 0.014,
         "unit": "V",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "voltage.ac"
       }
     },
     {
@@ -70,7 +76,8 @@
         "dval": 0.012,
         "unit": "V",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "voltage.ac"
       }
     },
     {
@@ -80,7 +87,8 @@
         "dval": 11.0,
         "unit": "V",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "voltage.ac"
       }
     },
     {
@@ -89,7 +97,8 @@
       "expected": {
         "unit": "MOhm",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "resistance"
       }
     },
     {
@@ -98,7 +107,8 @@
       "expected": {
         "unit": "MOhm",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "resistance"
       }
     },
     {
@@ -107,7 +117,8 @@
       "expected": {
         "unit": "Ohm",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "resistance"
       }
     },
     {
@@ -116,7 +127,8 @@
       "expected": {
         "unit": "Ohm",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "continuity"
       }
     },
     {
@@ -125,7 +137,8 @@
       "expected": {
         "unit": "V",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "voltage.diode"
       }
     },
     {
@@ -135,7 +148,8 @@
         "dval": 5.1e-11,
         "unit": "nF",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "capacitance"
       }
     },
     {
@@ -145,7 +159,8 @@
         "dval": 5.1e-11,
         "unit": "nF",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "capacitance"
       }
     },
     {
@@ -155,7 +170,8 @@
         "dval": 0.0,
         "unit": "mF",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "capacitance"
       }
     },
     {
@@ -165,7 +181,8 @@
         "dval": 0.0,
         "unit": "Hz",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "frequency"
       }
     },
     {
@@ -175,7 +192,8 @@
         "dval": 0.0,
         "unit": "Hz",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "frequency"
       }
     },
     {
@@ -185,7 +203,8 @@
         "dval": 0.0,
         "unit": "MHz",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "frequency"
       }
     },
     {
@@ -195,7 +214,8 @@
         "dval": 76.0,
         "unit": "F",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "temperature"
       }
     },
     {
@@ -205,7 +225,8 @@
         "dval": 22.0,
         "unit": "C",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "temperature"
       }
     },
     {
@@ -215,7 +236,8 @@
         "dval": 0.0,
         "unit": "uA",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "current.dc"
       }
     },
     {
@@ -225,7 +247,8 @@
         "dval": -0.0,
         "unit": "uA",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "current.dc"
       }
     },
     {
@@ -235,7 +258,8 @@
         "dval": -0.0,
         "unit": "uA",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "current.dc"
       }
     },
     {
@@ -245,7 +269,8 @@
         "dval": 3.7e-05,
         "unit": "uA",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "current.ac"
       }
     },
     {
@@ -255,7 +280,8 @@
         "dval": -0.0,
         "unit": "mA",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "current.dc"
       }
     },
     {
@@ -265,7 +291,8 @@
         "dval": 0.0032,
         "unit": "mA",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "current.ac"
       }
     },
     {
@@ -275,7 +302,8 @@
         "dval": -0.0,
         "unit": "A",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "current.dc"
       }
     },
     {
@@ -285,7 +313,8 @@
         "dval": 0.23,
         "unit": "A",
         "range": "MANU",
-        "hold": false
+        "hold": false,
+        "port": "current.ac"
       }
     }
   ]

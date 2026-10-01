@@ -14,7 +14,9 @@
         "dval2": 50.0,
         "val2": "50.00",
         "unit2": "Hz",
-        "id2": 1
+        "id2": 1,
+        "port": "voltage.dc",
+        "port2": "frequency"
       }
     },
     {
@@ -27,7 +29,9 @@
         "special": "AC",
         "dval2": 60.0,
         "unit2": "Hz",
-        "id2": 1
+        "id2": 1,
+        "port": "voltage.ac",
+        "port2": "frequency"
       }
     },
     {
@@ -39,7 +43,8 @@
         "unit": "kOhm",
         "special": "OH",
         "id2": 1,
-        "val2": ""
+        "val2": "",
+        "port": "resistance"
       }
     },
     {
@@ -48,7 +53,8 @@
       "expected": {
         "val": " OL ",
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     }
   ]

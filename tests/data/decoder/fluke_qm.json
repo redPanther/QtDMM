@@ -9,6 +9,7 @@
         "dval": 47660.0,
         "unit": "kOhm",
         "hold": false,
+        "port": "resistance",
         "special": "OH",
         "val": "47.66"
       }
@@ -20,6 +21,7 @@
         "dval": -121.43,
         "unit": "V",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC",
         "val": "-121.43"
       }
@@ -30,6 +32,7 @@
       "expected": {
         "unit": "mV",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC",
         "val": "OL"
       }
@@ -41,6 +44,7 @@
         "dval": 1.2345,
         "unit": "V",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC"
       }
     },
@@ -51,6 +55,7 @@
         "dval": 230.1,
         "unit": "V",
         "hold": false,
+        "port": "voltage.ac",
         "special": "AC"
       }
     },
@@ -61,6 +66,7 @@
         "dval": 0.012050000000000002,
         "unit": "mV",
         "hold": false,
+        "port": "voltage.ac.dc",
         "special": "ACDC"
       }
     },
@@ -71,6 +77,7 @@
         "dval": 0.5123,
         "unit": "V",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC"
       }
     },
@@ -81,6 +88,7 @@
         "dval": 1022999.9999999999,
         "unit": "MOhm",
         "hold": false,
+        "port": "resistance",
         "special": "OH"
       }
     },
@@ -91,6 +99,7 @@
         "dval": 120.3,
         "unit": "Ohm",
         "hold": false,
+        "port": "resistance",
         "special": "OH"
       }
     },
@@ -101,6 +110,7 @@
         "dval": 1.234e-08,
         "unit": "nS",
         "hold": false,
+        "port": "conductance",
         "special": "OH"
       }
     },
@@ -111,6 +121,7 @@
         "dval": 9.45e-07,
         "unit": "µF",
         "hold": false,
+        "port": "capacitance",
         "special": "CA"
       }
     },
@@ -121,6 +132,7 @@
         "dval": 23.9,
         "unit": "C",
         "hold": false,
+        "port": "temperature",
         "special": "TE"
       }
     },
@@ -131,6 +143,7 @@
         "dval": 75.0,
         "unit": "dF",
         "hold": false,
+        "port": "temperature",
         "special": "TE"
       }
     },
@@ -141,6 +154,7 @@
         "dval": 0.000979,
         "unit": "µA",
         "hold": false,
+        "port": "current.dc",
         "special": "DC"
       }
     },
@@ -151,6 +165,7 @@
         "dval": 0.001,
         "unit": "mA",
         "hold": false,
+        "port": "current.dc",
         "special": "DC"
       }
     },
@@ -161,6 +176,7 @@
         "dval": 2.345,
         "unit": "A",
         "hold": false,
+        "port": "current.ac",
         "special": "AC"
       }
     },
@@ -171,6 +187,7 @@
         "dval": 63.68,
         "unit": "Hz",
         "hold": false,
+        "port": "frequency",
         "special": "FR"
       }
     },
@@ -181,6 +198,7 @@
         "dval": 12500.0,
         "unit": "kHz",
         "hold": false,
+        "port": "frequency",
         "special": "FR"
       }
     },
@@ -191,6 +209,7 @@
         "dval": 50.0,
         "unit": "%",
         "hold": false,
+        "port": "duty_cycle",
         "special": "FR"
       }
     },
@@ -201,6 +220,7 @@
         "dval": 0.00833,
         "unit": "ms",
         "hold": false,
+        "port": "pulse_width",
         "special": "FR"
       }
     },
@@ -211,6 +231,7 @@
         "dval": -12.3,
         "unit": "dBm",
         "hold": false,
+        "port": "power.ac",
         "special": "AC"
       }
     },
@@ -220,6 +241,7 @@
       "expected": {
         "unit": "Ohm",
         "hold": false,
+        "port": "resistance",
         "special": "OH",
         "val": "OL"
       }
@@ -231,6 +253,7 @@
         "dval": -2.3e-05,
         "unit": "mV",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC",
         "val": "-0.023"
       }
@@ -242,6 +265,7 @@
         "dval": 0.000255,
         "unit": "mV",
         "hold": false,
+        "port": "voltage.ac",
         "special": "AC"
       }
     },
@@ -252,6 +276,7 @@
         "dval": 9.323,
         "unit": "V",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC",
         "val": "9.323"
       }
@@ -262,6 +287,7 @@
       "expected": {
         "unit": "V",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC",
         "val": "OL"
       }
@@ -273,6 +299,7 @@
         "dval": 58.99,
         "unit": "V",
         "hold": false,
+        "port": "voltage.ac",
         "special": "AC"
       }
     },
@@ -283,6 +310,7 @@
         "dval": 63.679,
         "unit": "Hz",
         "hold": false,
+        "port": "frequency",
         "special": "FR"
       }
     },
@@ -293,6 +321,7 @@
         "dval": 0.26239,
         "unit": "mV",
         "hold": false,
+        "port": "voltage.ac",
         "special": "AC",
         "val": "262.39"
       }
@@ -304,6 +333,7 @@
         "dval": 75.0,
         "unit": "dF",
         "hold": false,
+        "port": "temperature",
         "special": "TE"
       }
     },
@@ -314,6 +344,7 @@
         "dval": 23.9,
         "unit": "C",
         "hold": false,
+        "port": "temperature",
         "special": "TE"
       }
     },
@@ -324,6 +355,7 @@
         "dval": 50.75,
         "unit": "Ohm",
         "hold": false,
+        "port": "resistance",
         "special": "OH"
       }
     },
@@ -334,6 +366,7 @@
         "dval": 50.762,
         "unit": "Ohm",
         "hold": false,
+        "port": "resistance",
         "special": "OH"
       }
     },
@@ -343,6 +376,7 @@
       "expected": {
         "unit": "Ohm",
         "hold": false,
+        "port": "resistance",
         "special": "OH",
         "val": "OL"
       }
@@ -354,6 +388,7 @@
         "dval": 9.499999999999999e-07,
         "unit": "µF",
         "hold": false,
+        "port": "capacitance",
         "special": "CA",
         "val": "0.95"
       }
@@ -365,6 +400,7 @@
         "dval": 0.5498,
         "unit": "V",
         "hold": false,
+        "port": "voltage.diode",
         "special": "DI"
       }
     },
@@ -375,6 +411,7 @@
         "dval": 0.2785,
         "unit": "V",
         "hold": false,
+        "port": "voltage.ac.dc",
         "special": "ACDC"
       }
     },
@@ -385,6 +422,7 @@
         "dval": 0.000979,
         "unit": "µA",
         "hold": false,
+        "port": "current.dc",
         "special": "DC",
         "val": "979.0"
       }
@@ -396,6 +434,7 @@
         "dval": 0.001,
         "unit": "mA",
         "hold": false,
+        "port": "current.dc",
         "special": "DC",
         "val": "1.000"
       }
@@ -406,6 +445,7 @@
       "expected": {
         "unit": "A",
         "hold": false,
+        "port": "current.dc",
         "special": "DC",
         "val": "-OL"
       }
@@ -417,6 +457,7 @@
         "dval": 0.0,
         "unit": "Ohm",
         "hold": false,
+        "port": "continuity",
         "special": "BUZ"
       }
     },
@@ -427,6 +468,7 @@
         "dval": 12.5,
         "unit": "Ohm",
         "hold": false,
+        "port": "continuity",
         "special": "BUZ"
       }
     },
@@ -437,6 +479,7 @@
         "dval": 1.234,
         "unit": "S",
         "hold": false,
+        "port": "conductance",
         "special": "OH"
       }
     },
@@ -447,6 +490,7 @@
         "dval": 0.015,
         "unit": "ms",
         "hold": false,
+        "port": "pulse_width",
         "special": "FR",
         "val": "15.0"
       }
@@ -458,6 +502,7 @@
         "dval": 48.2,
         "unit": "%",
         "hold": false,
+        "port": "duty_cycle",
         "special": "FR"
       }
     },
@@ -468,6 +513,7 @@
         "dval": -3.5,
         "unit": "dBm",
         "hold": false,
+        "port": "power.ac",
         "special": "AC"
       }
     }

@@ -5,6 +5,8 @@
 #include <QMetaType>
 #include <QString>
 
+#include "sampletypes.h"
+
 /// One reading as the views get it from the MeterController: made once,
 /// right behind the decoder, from what DMM::value() delivers.
 ///
@@ -37,3 +39,23 @@ struct Reading
 };
 
 Q_DECLARE_METATYPE(Reading)
+
+/// The flags of @p reading, until Reading carries them itself (the step
+/// after ReadingAdapter).
+inline quint32 sampleFlags(const Reading &reading)
+{
+  quint32 flags = 0;
+  if (reading.special == QLatin1String("DC"))
+    flags |= SampleFlag::DC;
+  else if (reading.special == QLatin1String("AC"))
+    flags |= SampleFlag::AC;
+  else if (reading.special == QLatin1String("ACDC"))
+    flags |= SampleFlag::AC | SampleFlag::DC;
+  else if (reading.special == QLatin1String("DI"))
+    flags |= SampleFlag::Diode;
+  if (reading.hold)
+    flags |= SampleFlag::Hold;
+  if (reading.range == QLatin1String("AUTO"))
+    flags |= SampleFlag::Autorange;
+  return flags;
+}

@@ -10,6 +10,7 @@
         "unit": "V",
         "range": "AUTO",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC"
       }
     },
@@ -20,7 +21,8 @@
         "dval": -0.01234,
         "unit": "mV",
         "range": "AUTO",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -31,6 +33,7 @@
         "unit": "V",
         "range": "MANU",
         "hold": false,
+        "port": "voltage.ac",
         "special": "AC"
       }
     },
@@ -41,7 +44,8 @@
         "dval": 0.5,
         "unit": "A",
         "range": "AUTO",
-        "hold": true
+        "hold": true,
+        "port": "current.dc"
       }
     },
     {
@@ -52,6 +56,7 @@
         "unit": "kOhm",
         "range": "AUTO",
         "hold": false,
+        "port": "resistance",
         "special": "OH"
       }
     },
@@ -62,6 +67,7 @@
         "unit": "MOhm",
         "range": "AUTO",
         "hold": false,
+        "port": "resistance",
         "val": " OL "
       }
     },
@@ -73,6 +79,7 @@
         "unit": "nF",
         "range": "AUTO",
         "hold": false,
+        "port": "capacitance",
         "special": "CA"
       }
     },
@@ -84,6 +91,7 @@
         "unit": "kHz",
         "range": "AUTO",
         "hold": false,
+        "port": "frequency",
         "special": "HZ"
       }
     },
@@ -95,6 +103,7 @@
         "unit": "V",
         "range": "AUTO",
         "hold": false,
+        "port": "voltage.diode",
         "special": "DI"
       }
     },
@@ -106,6 +115,7 @@
         "unit": "C",
         "range": "AUTO",
         "hold": false,
+        "port": "temperature",
         "special": "TE"
       }
     },
@@ -117,6 +127,7 @@
         "unit": "C",
         "range": "AUTO",
         "hold": false,
+        "port": "temperature",
         "special": "TE"
       }
     },
@@ -128,6 +139,7 @@
         "unit": "C",
         "range": "AUTO",
         "hold": false,
+        "port": "temperature",
         "special": "TE"
       }
     }

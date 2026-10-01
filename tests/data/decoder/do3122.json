@@ -9,7 +9,8 @@
         "val": "1.234",
         "dval": 1.234,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -19,7 +20,8 @@
         "val": "-123.4",
         "dval": -0.1234,
         "unit": "mV",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -29,7 +31,8 @@
         "val": "230.5",
         "dval": 230.5,
         "unit": "V",
-        "special": "AC"
+        "special": "AC",
+        "port": "voltage.ac"
       }
     },
     {
@@ -38,7 +41,8 @@
       "expected": {
         "dval": 4700.0,
         "unit": "kOhm",
-        "special": ""
+        "special": "",
+        "port": "resistance"
       }
     },
     {
@@ -46,7 +50,8 @@
       "hex": "AA 55 52 24 01 00 5F DF 5F 3D 00 00 00 00 00 00 00 00 00 00 00 80",
       "expected": {
         "dval": 50.0,
-        "unit": "Hz"
+        "unit": "Hz",
+        "port": "frequency"
       }
     },
     {
@@ -54,7 +59,8 @@
       "hex": "AA 55 52 24 01 00 5F 87 36 00 00 00 00 00 00 00 00 00 00 00 A0 00",
       "expected": {
         "dval": 4.7e-06,
-        "unit": "uF"
+        "unit": "uF",
+        "port": "capacitance"
       }
     },
     {
@@ -63,7 +69,8 @@
       "expected": {
         "dval": 0.512,
         "unit": "V",
-        "special": "Diode"
+        "special": "Diode",
+        "port": "voltage.diode"
       }
     },
     {
@@ -73,7 +80,8 @@
         "val": "OL",
         "dval": 0.0,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     }
   ]

@@ -62,7 +62,8 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &da
   {
     case 0x0:formatResultValue(3,"m","V"); break;
     case 0x1:formatResultValue(range,"","V");  m_result.special = "DC"; break;
-    case 0x2:formatResultValue(range,"","V");  m_result.special = "AC"; break;
+    // V AC; byte 7 says whether it is AC+DC (UT71/UT804 "A+D"), keep that
+    case 0x2:formatResultValue(range,"","V");  if (m_result.special != "ACDC") m_result.special = "AC"; break;
     // mV has a single 400.00 range whose code is 0; the code is not the
     // decimal position here as it is for the V ranges.
     case 0x3:formatResultValue(3,"m","V");     m_result.special = "DC"; break;

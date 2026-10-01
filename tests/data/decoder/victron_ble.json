@@ -9,6 +9,7 @@
         "dval": 12.53,
         "unit": "V",
         "hold": false,
+        "port": "voltage.dc",
         "special": "DC",
         "val": "12.53"
       }
@@ -20,6 +21,7 @@
         "dval": 19.0,
         "unit": "W",
         "hold": false,
+        "port": "power.dc",
         "special": "DC",
         "val": "19"
       }
@@ -31,6 +33,7 @@
         "dval": 6.0,
         "unit": "VA",
         "hold": false,
+        "port": "apparent_power.ac",
         "special": "AC",
         "val": "6"
       }
