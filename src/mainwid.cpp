@@ -262,6 +262,16 @@ void MainWid::valueSLOT(double dval, const QString &val, const QString &u, const
      << " hold=" << hold
      << " id=" << id << std::endl;
 */
+  // the meter's secondary display is off: clear it, there is no reading
+  if (id > 0 && val.isEmpty())
+  {
+    m_display->setValue(id, QString());
+    m_display->setUnit(id, QString());
+    m_display->setMode(id, QString());
+    m_display->update();
+    return;
+  }
+
   if (m_readingLog)
   {
     ReadingLog::Entry e;

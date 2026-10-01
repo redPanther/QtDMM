@@ -56,7 +56,10 @@ public:
     double dval2;     ///< optional second value in the same frame (e.g. frequency)
     QString val2;     ///< display form of the second value
     QString unit2;    ///< unit of the second value
-    int id2;          ///< id of the second value, 0 when there is none
+    QString special2; ///< coupling of the second value; empty, not the main value's
+    int id2;          ///< id of the second value, 0 when there is none. A meter
+                      ///< with a secondary display sends id2 = 1 with an empty
+                      ///< val2 when that display is off, so it is cleared
   };
 
   /// Describes one supported meter: what the settings page fills in when the

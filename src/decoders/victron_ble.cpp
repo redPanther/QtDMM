@@ -12,11 +12,11 @@
 // fits 12/24/48 V systems (13.23 V -> 60 V); the chargers show whole watts,
 // 1000 counts = a 1 kW scale.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Victron", "SmartShunt", "", 0, ReadEvent::VictronBLE, 8, 1, 1, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Victron", "BMV-712 Smart *", "", 0, ReadEvent::VictronBLE, 8, 1, 1, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Victron", "SmartSolar MPPT", "", 0, ReadEvent::VictronBLE, 8, 1, 1, 0, 1000, 0, 0, 0});
-  DmmDecoder::addConfig({"Victron", "BlueSolar MPPT *", "", 0, ReadEvent::VictronBLE, 8, 1, 1, 0, 1000, 0, 0, 0});
-  DmmDecoder::addConfig({"Victron", "Phoenix Inverter Smart", "", 0, ReadEvent::VictronBLE, 8, 1, 1, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "SmartShunt", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "BMV-712 Smart *", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "SmartSolar MPPT", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 1000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "BlueSolar MPPT *", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 1000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "Phoenix Inverter Smart", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
   return true;
 }();
 
@@ -42,10 +42,13 @@ Value invalid(const char *id, const QString &unit, const QString &special)
 }
 }
 
-std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArray &data, int id)
+std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArray &data, int /*id*/)
 {
   m_result = {};
-  m_result.id = id;
+  // one frame carries both displays: main is id 0, the second id 1 (and
+  // numValues 2 in the table, so the display shows it)
+  m_result.id = 0;
+  m_result.id2 = 1;
   m_result.showBar = true;
 
   // "<type hex><plaintext hex> [<main> <second>]\n", see VictronBle::frame()
@@ -80,7 +83,6 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
     m_result.dval2 = second->dval;
     m_result.val2 = second->val;
     m_result.unit2 = second->unit;
-    m_result.id2 = 1;
   }
   return m_result;
 }

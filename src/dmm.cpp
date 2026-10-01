@@ -420,7 +420,7 @@ void DMM::readEventSLOT(const QByteArray &data, int id)
   {
     Q_EMIT value(r->dval, r->val, r->unit, r->special, r->range, r->hold, r->showBar, r->id);
     if (r->id2 > 0)
-      Q_EMIT value(r->dval2, r->val2, r->unit2, r->special, r->range, r->hold, r->showBar, r->id2);
+      Q_EMIT value(r->dval2, r->val2, r->unit2, r->special2, r->range, r->hold, r->showBar, r->id2);
     // a calculated value's text comes from CalcDevice::status (which input
     // is missing); only the state is ours
     if (m_portType == PortHandler::PortType::Calc)
