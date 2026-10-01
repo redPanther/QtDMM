@@ -18,6 +18,7 @@
 #include <QStyle>
 #include <QTableView>
 #include <QToolButton>
+#include <QStyleOptionViewItem>
 #include <QVBoxLayout>
 
 #include "siprefix.h"
@@ -39,11 +40,12 @@ ReadingLogWid::ReadingLogWid(QWidget *parent) :
   m_view->verticalHeader()->setDefaultSectionSize(m_view->fontMetrics().height() + 4);
   m_view->verticalHeader()->setVisible(false);
   m_view->horizontalHeader()->setStretchLastSection(false);
-  m_view->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-  // the default is 1000 rows measured per column and per inserted row; the
-  // columns hold fixed-width values, so the newest rows are enough
-  m_view->horizontalHeader()->setResizeContentsPrecision(20);
+  // widths come from fitColumns(): every column as wide as its content, the
+  // rest of the width shared out; a table narrower than that scrolls
+  m_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+  m_view->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
   m_view->horizontalHeader()->setHighlightSections(false);
+  m_view->viewport()->installEventFilter(this);
   m_view->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_view, &QTableView::customContextMenuRequested, this, [this](const QPoint &pos)
   {
@@ -62,50 +64,83 @@ ReadingLogWid::ReadingLogWid(QWidget *parent) :
   m_view->installEventFilter(this);
   layout->addWidget(m_view, 1);
 
-  QHBoxLayout *bar = new QHBoxLayout;
+  // two groups in one row, or - in a narrow cell - on two rows, so no
+  // button is cut off (placeBar())
+  m_barLeft = new QWidget(this);
+  QHBoxLayout *left = new QHBoxLayout(m_barLeft);
+  left->setContentsMargins(0, 0, 0, 0);
   // one button, pause while logging, play while paused
-  m_pause = new QToolButton(this);
+  m_pause = new QToolButton(m_barLeft);
   m_pause->setCheckable(true);
   m_pause->setAutoRaise(true);
   m_pause->setToolTip(tr("Pause logging"));
   connect(m_pause, &QToolButton::toggled, this, [this](bool paused)
   {
     m_log->setPaused(paused);
-    m_pause->setIcon(style()->standardIcon(paused ? QStyle::SP_MediaPlay : QStyle::SP_MediaPause));
+    m_pause->setIcon(QIcon::fromTheme(paused ? "media-playback-start" : "media-playback-pause"));
     m_pause->setToolTip(paused ? tr("Resume logging") : tr("Pause logging"));
   });
-  m_pause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-  bar->addWidget(m_pause);
+  m_pause->setIcon(QIcon::fromTheme("media-playback-pause"));
+  left->addWidget(m_pause);
 
-  m_follow = new QCheckBox(tr("&Follow"), this);
+  m_follow = new QCheckBox(tr("&Follow"), m_barLeft);
   m_follow->setChecked(true);
   m_follow->setToolTip(tr("Keep the newest reading in view. Scrolling up switches this off."));
-  bar->addWidget(m_follow);
+  left->addWidget(m_follow);
 
-  bar->addStretch(1);
-  QLabel *keep = new QLabel(tr("Keep"), this);
-  bar->addWidget(keep);
-  m_maxRows = new QSpinBox(this);
+  m_barRight = new QWidget(this);
+  QHBoxLayout *right = new QHBoxLayout(m_barRight);
+  right->setContentsMargins(0, 0, 0, 0);
+  QLabel *keep = new QLabel(tr("Keep"), m_barRight);
+  right->addWidget(keep);
+  m_maxRows = new QSpinBox(m_barRight);
   m_maxRows->setRange(100, 1000000);
   m_maxRows->setSingleStep(1000);
   m_maxRows->setValue(m_log->maxRows());
   m_maxRows->setSuffix(tr(" rows"));
   m_maxRows->setToolTip(tr("How many readings the table keeps; the oldest are dropped."));
   connect(m_maxRows, qOverload<int>(&QSpinBox::valueChanged), m_log, &ReadingLog::setMaxRows);
-  bar->addWidget(m_maxRows);
+  right->addWidget(m_maxRows);
 
-  QPushButton *exportButton = new QPushButton(tr("&Export..."), this);
+  QPushButton *exportButton = new QPushButton(tr("&Export..."), m_barRight);
   connect(exportButton, &QPushButton::clicked, this, &ReadingLogWid::exportSLOT);
-  bar->addWidget(exportButton);
-  QPushButton *clearButton = new QPushButton(tr("C&lear"), this);
+  right->addWidget(exportButton);
+  QPushButton *clearButton = new QPushButton(tr("C&lear"), m_barRight);
   connect(clearButton, &QPushButton::clicked, this, &ReadingLogWid::clearSLOT);
-  bar->addWidget(clearButton);
-  layout->addLayout(bar);
+  right->addWidget(clearButton);
+
+  m_row1 = new QHBoxLayout;
+  m_row1->addWidget(m_barLeft);
+  m_row1->addStretch(1);
+  m_row1->addWidget(m_barRight);
+  layout->addLayout(m_row1);
+  m_row2 = new QHBoxLayout;
+  m_row2->addStretch(1);
+  layout->addLayout(m_row2);
 
   m_stats = new QLabel(this);
   m_stats->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  m_stats->setWordWrap(true);   // a long line must not dictate the width
   layout->addWidget(m_stats);
 
+  connect(m_log, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &, int first, int last)
+  {
+    measureRows(first, last);
+  });
+  connect(m_log, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &tl, const QModelIndex &br)
+  {
+    // the Time column gained or lost its date: measure it afresh
+    if (tl.column() <= ReadingLog::Time && br.column() >= ReadingLog::Time && br.row() - tl.row() + 1 == m_log->rowCount())
+    {
+      m_need[ReadingLog::Time] = 0;
+      measureRows(qMax(0, m_log->rowCount() - kMeasureRows), m_log->rowCount() - 1);
+    }
+  });
+  connect(m_log, &QAbstractItemModel::modelReset, this, [this]
+  {
+    m_need.fill(0);
+    measureRows(0, -1);
+  });
   connect(m_log, &QAbstractItemModel::rowsInserted, this, &ReadingLogWid::followSLOT);
   connect(m_log, &QAbstractItemModel::rowsInserted, this, &ReadingLogWid::updateStats);
   connect(m_log, &QAbstractItemModel::rowsRemoved, this, &ReadingLogWid::updateStats);
@@ -117,7 +152,79 @@ ReadingLogWid::ReadingLogWid(QWidget *parent) :
         || m_view->verticalScrollBar()->hasFocus())
       m_follow->setChecked(value >= m_view->verticalScrollBar()->maximum());
   });
+  m_need.fill(0, ReadingLog::ColumnCount);
+  measureRows(0, -1);
   updateStats();
+}
+
+void ReadingLogWid::measureRows(int first, int last)
+{
+  // Header and the given rows, measured with the view's own item size hints
+  // (padding and style included). m_need only grows: a column that jumps
+  // back and forth with every reading would be worse than one a bit wide.
+  // Only new rows are measured, so a full table costs nothing per reading.
+  QHeaderView *header = m_view->horizontalHeader();
+  const QStyleOptionViewItem option = [this]
+  {
+    QStyleOptionViewItem o;
+    o.initFrom(m_view);
+    o.font = m_view->font();
+    return o;
+  }();
+  bool grown = false;
+  for (int c = 0; c < ReadingLog::ColumnCount; ++c)
+  {
+    int w = qMax(m_need[c], header->sectionSizeHint(c));
+    for (int r = qMax(first, last - kMeasureRows + 1); r <= last; ++r)
+      w = qMax(w, m_view->itemDelegateForColumn(c) ? m_view->itemDelegateForColumn(c)->sizeHint(option, m_log->index(r, c)).width()
+                                                    : m_view->itemDelegate()->sizeHint(option, m_log->index(r, c)).width());
+    if (w != m_need[c])
+    {
+      m_need[c] = w;
+      grown = true;
+    }
+  }
+  if (grown || first > last)
+    fitColumns();
+}
+
+void ReadingLogWid::fitColumns()
+{
+  int sum = 0;
+  for (int w : m_need)
+    sum += w;
+  const int extra = qMax(0, m_view->viewport()->width() - sum);
+  const int n = ReadingLog::ColumnCount;
+  for (int c = 0; c < n; ++c)
+    m_view->horizontalHeader()->resizeSection(c, m_need[c] + extra / n + (c == n - 1 ? extra % n : 0));
+}
+
+QSize ReadingLogWid::minimumSizeHint() const
+{
+  const QMargins m = layout()->contentsMargins();
+  QSize size = QWidget::minimumSizeHint();
+  size.setWidth(qMax(m_barLeft->sizeHint().width(), m_barRight->sizeHint().width()) + m.left() + m.right());
+  return size;
+}
+
+void ReadingLogWid::resizeEvent(QResizeEvent *event)
+{
+  QWidget::resizeEvent(event);
+  placeBar();
+}
+
+// Both control groups in one row while they fit, else the right one below.
+void ReadingLogWid::placeBar()
+{
+  const QMargins m = layout()->contentsMargins();
+  const int need = m_barLeft->sizeHint().width() + m_row1->spacing() + m_barRight->sizeHint().width()
+                   + m.left() + m.right();
+  const bool wrap = width() < need;
+  QHBoxLayout *target = wrap ? m_row2 : m_row1;
+  if (target->indexOf(m_barRight) >= 0)
+    return;
+  (wrap ? m_row1 : m_row2)->removeWidget(m_barRight);
+  target->addWidget(m_barRight);
 }
 
 int ReadingLogWid::maxRows() const
@@ -132,14 +239,6 @@ void ReadingLogWid::setMaxRows(int rows)
 
 void ReadingLogWid::followSLOT()
 {
-  // A first HOLD or a longer value would stay clipped without a resize, but
-  // resizeColumnsToContents() measures up to resizeContentsPrecision() rows
-  // per column - not the visible ones - which costs tens of milliseconds per
-  // reading once the table has filled up. The precision is lowered in the
-  // constructor; the explicit call is only needed while the table is young,
-  // afterwards the widest value has been seen.
-  if (m_log->rowCount() <= 50)
-    m_view->resizeColumnsToContents();
   if (m_follow->isChecked())
     m_view->scrollToBottom();
 }
@@ -152,16 +251,20 @@ void ReadingLogWid::updateStats()
     m_stats->setText(tr("No readings yet."));
     return;
   }
+  // a line break only between the entries, never inside "Min 6.3 V":
+  // their spaces are no-break spaces, the entries are joined by plain ones
+  const QChar nbsp(0x00a0);
   auto fmt = [&](double v)
   {
     QString prefix;
-    return QString::number(SiPrefix::scale(v, &prefix), 'g', 5) + " " + prefix + s.unit;
+    return QString::number(SiPrefix::scale(v, &prefix), 'g', 5) + nbsp + prefix + s.unit;
   };
-  QString text = tr("%n reading(s)", "", s.count);
+  auto entry = [&](const QString &e) { return QString(e).replace(' ', nbsp); };
+  QStringList entries { entry(tr("%n reading(s)", "", s.count)) };
   if (s.numeric)
-    text += "   " + tr("Min %1   Max %2   Mean %3   Span %4")
-              .arg(fmt(s.min), fmt(s.max), fmt(s.mean), fmt(s.max - s.min));
-  m_stats->setText(text);
+    entries << entry(tr("Min %1").arg(fmt(s.min))) << entry(tr("Max %1").arg(fmt(s.max)))
+            << entry(tr("Mean %1").arg(fmt(s.mean))) << entry(tr("Span %1").arg(fmt(s.max - s.min)));
+  m_stats->setText(entries.join("   "));
 }
 
 void ReadingLogWid::clearSLOT()
@@ -194,6 +297,8 @@ void ReadingLogWid::copySLOT()
 
 bool ReadingLogWid::eventFilter(QObject *watched, QEvent *event)
 {
+  if (watched == m_view->viewport() && event->type() == QEvent::Resize)
+    fitColumns();
   if (watched == m_view && (event->type() == QEvent::ShortcutOverride || event->type() == QEvent::KeyPress))
   {
     QKeyEvent *key = static_cast<QKeyEvent *>(event);

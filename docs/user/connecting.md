@@ -93,17 +93,84 @@ like on the meter itself), the bar graph and, below the value, the minimum
 and maximum since the last **Reset** (Ctrl+R). Min/max reset automatically
 when the meter switches to a different unit.
 
-The display is a panel like the [analog meter](analog-meter.md): drag its
-title bar to dock it on another side of the window or to pull it out as a
-separate window, and resize it — digits and lettering scale with it.
-**Display** in the toolbar or the menu hides and shows it. Bar graph, min/max
-and the LCD tint are set on the *Appearance* settings page.
+The display is a window like the [analog meter](analog-meter.md); digits and
+lettering scale with it. **Display** in the toolbar or the menu (Ctrl+1)
+hides and shows it. Bar graph and min/max are set on the *Appearance*
+settings page.
+
+**LCD colours** in the display's right-click menu: *Classic* (the
+yellow-green of most meters), *Backlight blue* (light segments on blue),
+*Amber*, *High contrast* (black on white) or *Custom*, the tint from the
+*Appearance* page. Changing that tint switches the display to *Custom*.
+
+For meters whose keys QtDMM knows (the UNI-T UT60BT, UT61B+/D+/E+ and
+UT161), a row of the meter's keys sits under the display: SELECT and Hz/%,
+RANGE and AUTO, HOLD, REL, MIN/MAX and PEAK, LIGHT. HOLD and AUTO light up
+as the meter reports them. **Pressing a key does nothing yet** - sending it
+to the meter comes in a later version. The small triangle in the display's
+top right corner, or **Hide controls** in its right-click menu, folds the
+row away.
 
 ## Window layout
 
-A fresh QtDMM starts as a compact instrument: display and analog meter side
-by side, the recorder graph hidden. The **Graph** button in the toolbar
-shows and hides the graph; starting a recording shows it. Both panels can be
-dragged to another side of the window or out into their own windows once
-**Lock panels** in the menu is switched off; positions are remembered. The
-window title names the configured meter.
+The main window holds four windows: the digital display, the analog meter,
+the recorder graph and the [readings table](readings-table.md). The toolbar
+buttons (or Ctrl+1 … Ctrl+4) show and hide them. A fresh QtDMM starts as a
+compact instrument with display and meter only; starting a recording shows
+the graph.
+
+The first start sizes the main window for what it shows. When you switch on
+the graph or the table for the first time, the window grows to make room -
+down for the graph, to the right for the table - up to most of the screen;
+it never shrinks by itself. Once you have sized, maximized or snapped the
+window yourself, it keeps your size. The window title names the configured meter; in the status bar a
+dot blinks green while readings come in and turns grey when none has come
+for three seconds.
+
+**Arrange** in the toolbar (and in the menu) chooses how the windows are
+placed:
+
+- **Displays on top** (the default): display and meter share a strip at the
+  top, the graph takes the space below and the readings table a column on
+  the right. Everything follows the size of the main window.
+- **Displays on the left**: the same with display and meter in a column on
+  the left.
+- **Fixed**: keeps the layout as it is. From *Displays on top* or *on the
+  left* it takes that layout over; from *Free* the windows snap into a grid
+  made from where they are (it shows for a moment first). A window shown
+  later gets a place at the bottom edge, a hidden one leaves its space to its
+  neighbours.
+- **Free**: place and size the windows yourself; QtDMM remembers where they
+  are.
+
+In the arranged modes the gaps between the windows are dividers: drag one to
+share the space differently (the mouse pointer changes on them; they can
+also be taken a few pixels inside a window's edge). Drag a window with
+Ctrl held - or at its title bar - onto another one and the two swap places;
+dropped elsewhere it goes back. A layout changed like this is remembered.
+In *Displays on top* and *on the left* it lasts until a window is shown or
+hidden; then the windows are placed by the rule again.
+
+**Load workspace...** and **Save workspace...** in the same menu keep a
+window layout in a file (`*.qtdmm-workspace`): which windows are shown, the
+arrangement with its dividers, the title bars, the design and the size of
+the main window - for instance one layout for the bench and one for long
+recordings. **Save layout on exit** (on by default) makes QtDMM start with
+the layout it had when it was closed. Switched off, it starts with the
+layout it had when the option was switched off, or with the workspace
+loaded last.
+
+**Hide title bars** (Ctrl+L) takes the title bars away so the windows sit
+flush next to each other - the default for the arranged modes. Right-click
+the display or the meter for its window menu (hide the window, title bar on
+or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
+layouts of versions before 26.1 are not taken over.
+
+**Design** in the menu sets the colours of the window: *System* (the look of
+your desktop), *Silver* (brushed aluminium) or *Dark*. The readings table
+and a graph in the colours *Neutral* follow; the LCD colours, the graph's
+colours and the style of the analog meter are chosen separately.
+
+The symbols are KDE's Breeze icons, light or dark to match the window. On
+Linux, **Settings → Appearance → Use the desktop's icon theme** takes the
+symbols from your desktop's icon theme where it has them.

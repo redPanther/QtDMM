@@ -101,6 +101,7 @@ public:
   double                scaleMax() const;
   bool                  automaticScale() const;
   bool                  includeZero() const;
+  QString               graphVariant() const;   ///< GraphPrefs::variant()
   QColor                bgColor() const;
   QColor                gridColor() const;
   QColor                dataColor() const;
@@ -140,6 +141,7 @@ public:
   bool                  saveWindowSize() const;
   bool                  alertUnsavedData() const;
   bool                  useTextLabel() const;
+  bool                  systemIcons() const;
   bool                  showTip() const;
   int                   currentTipId() const;
   bool                  showDmmToolbar() const;
@@ -153,6 +155,7 @@ public:
   int                   meterScaleMode() const;
   /// 0 dark studio, 1 classic ivory (MeterStyle::dark()/ivory()).
   int                   meterStyle() const;
+  void                  setMeterStyle(int style);
   bool                  meterBallistics() const;
   /// Start of the red zone in percent of full scale.
   int                   meterRedZone() const;
@@ -199,6 +202,8 @@ public Q_SLOTS:
   /// The graph changed the sample time (recorder page follows).
   void                  setSampleTimeSLOT(int);
   void                  setGraphSizeSLOT(int, int);
+  /// A time button of the graph: the visible window, applied like a zoom.
+  void                  setWindowSecondsSLOT(int seconds);
   void                  setShowTipsSLOT(bool);
   void                  setCurrentTipSLOT(int);
   void                  zoomInSLOT(double);

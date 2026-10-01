@@ -93,9 +93,6 @@
        </property>
        <item>
         <widget class="QLabel" name="ui_logo">
-         <property name="pixmap">
-          <pixmap resource="../resources.qrc">:/Symbols/dmm.xpm</pixmap>
-         </property>
          <property name="scaledContents">
           <bool>true</bool>
          </property>

@@ -18,7 +18,7 @@ ScpiPrefs::ScpiPrefs(QWidget *parent) : PrefWidget(parent)
   m_label = tr("SCPI server");
   m_description = tr("<b>Lets other programs read the meter over the network:</b> QtDMM answers "
                      "SCPI queries (*IDN?, READ?, ...) on a TCP port, like a bench instrument.");
-  m_pixmap = new QPixmap(":/Symbols/scpi.xpm");
+  m_iconName = "network-server";
 
   auto *layout = new QVBoxLayout(this);
   auto *intro = new QLabel(tr("With the server on, lxi-tools, LabVIEW, PyVISA or a "

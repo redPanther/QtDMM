@@ -10,7 +10,7 @@ PortsPrefs::PortsPrefs(QWidget *parent) : PrefWidget(parent)
   m_label = tr("Special ports");
   m_description = tr("<b>Here you can configure custom ports"
                      " for RFC2217 and SIGROK.</b>");
-  m_pixmap = new QPixmap(":/Symbols/connect_icon.xpm");
+  m_iconName = "network-wired";
 
   m_portEdits = {
     ui_customPort0, ui_customPort1, ui_customPort2, ui_customPort3,
@@ -93,7 +93,6 @@ void PortsPrefs::on_ui_bridgeAdd_clicked()
 
 PortsPrefs::~PortsPrefs()
 {
-  delete m_pixmap;
 }
 
 QStringList PortsPrefs::customPortList()

@@ -33,7 +33,7 @@ class Settings;
 /// A page owns a group of settings keys. It loads them into its widgets in
 /// defaultsSLOT(), writes the widgets back with applySLOT() and resets to the
 /// built-in values with factoryDefaultsSLOT(). ConfigDlg lists the pages by
-/// label() and pixmap() and calls the three slots for all pages at once.
+/// label() and icon() and calls the three slots for all pages at once.
 class PrefWidget : public QWidget
 {
   Q_OBJECT
@@ -42,7 +42,8 @@ public:
   /// Category name shown in the dialog's list.
   QString label() const { return m_label; }
   QString description() const { return m_description; }
-  QPixmap pixmap() const { return *m_pixmap; }
+  /// The page's symbol, from the icon theme (follows the design).
+  QIcon   icon() const { return QIcon::fromTheme(m_iconName); }
   /// Page id = ConfigDlg::PageType, also the index in the page stack.
   void    setId(int id) { m_id = id; }
   int     id() const { return m_id; }
@@ -60,7 +61,7 @@ protected:
   Settings *m_cfg;
   QString   m_label;
   QString   m_description;
-  QPixmap  *m_pixmap;
+  QString   m_iconName;   ///< icon theme name, see icon()
   int       m_id;
 };
 

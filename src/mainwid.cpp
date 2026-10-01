@@ -27,19 +27,16 @@
 #include <cmath>
 
 #include "mainwid.h"
+#include "controlbar.h"
 #include "dmmgraph.h"
 #include "configdlg.h"
 #include "dmm.h"
+#include "metercontroller.h"
 #include "displaywid.h"
 #include "meterwid.h"
 #include "readinglog.h"
 #include "alarm.h"
-#include "alarmbar.h"
-#include "scpiserver.h"
-#include "mdnsresponder.h"
-#include <QHostInfo>
 #include "siprefix.h"
-#include "engnumbervalidator.h"
 #include "tipdlg.h"
 #include "settings.h"
 #include "instancesdlg.h"
@@ -48,19 +45,16 @@
 
 
 MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  QFrame(parent),
-  m_min(1.0E20),
-  m_max(-1.0E20),
-  m_display(0),
+  m_display(nullptr),
   m_meter(nullptr),
-  m_stateMgr(nullptr),
-  m_dval(0.0),
-  m_tipDlg(0)
+  m_tipDlg(nullptr)
 {
   setupUi(this);
   setWindowIcon(QPixmap(":/Symbols/icon.xpm"));
 
-  m_dmm = new DMM(this);
-  m_external = new QProcess(this);
+  // the meter session: connection, min/max, alarms, SCPI, external program
+  m_ctl = new MeterController(this);
+  m_ctl->setInstanceId(instance_id.isEmpty() ? QString("default") : instance_id);
 
   m_instanceId = instance_id;
   m_settings  = new Settings(instance_id, config_path, this);
@@ -75,9 +69,10 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
 
   connect(m_instancesDlg, SIGNAL(writeState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
   connect(this, SIGNAL(sendState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
-  connect(m_dmm, SIGNAL(value(double, const QString &, const QString &, const QString &, const QString &, bool, bool, int)),
-          this,  SLOT(valueSLOT(double, const QString &, const QString &, const QString &, const QString &, bool, bool, int)));
-  connect(m_dmm, SIGNAL(error(const QString &)), this, SIGNAL(error(const QString &)));
+  connect(m_ctl, &MeterController::error, this, &MainWid::error);
+  connect(m_ctl, &MeterController::info, this, &MainWid::info);
+  connect(m_ctl, &MeterController::sample, ui_graph, &DMMGraph::addValue);
+  connect(m_ctl, &MeterController::unitChanged, ui_graph, &DMMGraph::setUnit);
   connect(ui_graph, SIGNAL(info(const QString &)), this, SIGNAL(info(const QString &)));
   connect(ui_graph, SIGNAL(error(const QString &)), this, SIGNAL(error(const QString &)));
   connect(ui_graph, SIGNAL(running(bool)), this, SLOT(runningSLOT(bool)));
@@ -87,11 +82,19 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
   // the meter, which only happens when the dialog closes.
   connect(m_configDlg, &ConfigDlg::applied, this, [this]() { applySLOT(); });
   connect(m_configDlg, SIGNAL(zoomed()), this, SLOT(zoomedSLOT()));
+  connect(ui_graph, &DMMGraph::windowRequested, m_configDlg, &ConfigDlg::setWindowSecondsSLOT);
   connect(m_configDlg, SIGNAL(rejected()), this, SLOT(rejectSLOT()));
   connect(ui_graph, SIGNAL(sampleTime(int)), m_configDlg, SLOT(setSampleTimeSLOT(int)));
   connect(ui_graph, SIGNAL(graphSize(int, int)), m_configDlg, SLOT(setGraphSizeSLOT(int, int)));
   connect(ui_graph, SIGNAL(externalTriggered()), this, SLOT(startExternalSLOT()));
-  connect(m_external, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(exitedSLOT()));
+  // this graph's own colours from its context menu (empty = the default
+  // from the settings page, applied in readConfig())
+  connect(ui_graph, &DMMGraph::colorVariantChanged, this, [this](int v)
+  {
+    m_settings->setString("Windows/graph-variant",
+                          v < 0 ? QString() : DMMGraph::variantName(static_cast<DMMGraph::ColorVariant>(v)));
+  });
+  connect(m_ctl, &MeterController::externalFinished, this, &MainWid::exitedSLOT);
   connect(ui_graph, SIGNAL(configure()), this, SLOT(configSLOT()));
   connect(ui_graph, SIGNAL(exportData()), this, SLOT(exportSLOT()));
   connect(ui_graph, SIGNAL(importData()), this, SLOT(importSLOT()));
@@ -106,42 +109,40 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
 
   ui_graph->setSettings(m_settings);
 
-  // Not resetSLOT() here: it writes to m_display, which MainWin only hands us
-  // later via setDisplay(). The min/max seeds live in the init list instead.
   m_settings->save();
   Q_EMIT sendState("UPDATE_INSTANCES_"+QString::number(QDateTime::currentMSecsSinceEpoch()));
-  startTimer(100);
 
-  // alarms: the manager judges every reading, the banner sits above the graph
-  m_alarms = new AlarmManager(this);
-  m_alarmBar = new AlarmBar(this);
-  if (auto *box = qobject_cast<QBoxLayout *>(layout()))
-    box->insertWidget(0, m_alarmBar);
-  connect(m_alarms, &AlarmManager::raised, this, &MainWid::alarmRaised);
-  connect(m_alarms, &AlarmManager::cleared, this, &MainWid::alarmCleared);
-  connect(m_alarmBar, &AlarmBar::acknowledged, this, [this]
+  // alarms: the controller judges every reading and runs the program; beep,
+  // popup and raising the window are UI (the banner is MainWin's)
+  connect(m_ctl, &MeterController::alarmRaised, this, &MainWid::alarmRaised);
+  connect(m_ctl, &MeterController::recordingRequested, this, [this](bool start)
   {
-    m_alarms->acknowledgeAll();
-    updateAlarmBar();
+    if (start)
+      startSLOT();
+    else
+      stopSLOT();
   });
-  m_alarms->setAlarms(m_configDlg->alarms());
+  connect(m_ctl, &MeterController::markRequested, this, [this](const QColor &color, const QString &name, bool graph, bool)
+  {
+    if (graph)
+      ui_graph->addMark(color, Alarm::title(name));
+  });
+  m_ctl->setAlarms(m_configDlg->alarms());
 
   // SCPI server: the meter as a network instrument (applyScpi() starts it)
-  m_scpi = new ScpiServer(this);
-  m_mdns = new MdnsResponder(this);
-  connect(m_scpi, &ScpiServer::startRecording, this, &MainWid::startSLOT);
-  connect(m_scpi, &ScpiServer::stopRecording, this, &MainWid::stopSLOT);
-  connect(m_scpi, &ScpiServer::connectRequested, this, [this](bool on)
+  connect(m_ctl, &MeterController::connectRequested, this, [this](bool on)
   {
-    if (on == m_dmm->isOpen())
-      return;
     Q_EMIT setConnect(on);
     Q_EMIT connectDMM(on);
     connectSLOT(on);
   });
-  connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
+  connect(m_ctl, &MeterController::scpiStatusChanged, this, [this](const QString &status, const QString &detail)
+  {
+    Q_EMIT scpiStatus(status);
+    m_configDlg->setScpiStatus(detail);
+  });
   // HCOPy:SDUMp:DATA? - the main window as the "instrument screen"
-  m_scpi->setScreenshotSource([this](const QByteArray &format) -> QByteArray
+  m_ctl->setScreenshotSource([this](const QByteArray &format) -> QByteArray
   {
     QWidget *top = window() ? window() : this;
     const QPixmap shot = top->grab();
@@ -159,22 +160,47 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
 
 void MainWid::setConsoleLogging(bool on)
 {
-  m_dmm->setConsoleLogging(on);
+  m_ctl->dmm()->setConsoleLogging(on);
 }
 
 void MainWid::setDisplay(DisplayWid *display)
 {
   m_display = display;
+  // the LCD's colours; a config from before the variants lands on Classic
+  // when its tint is the old default, on Custom (its own tint) otherwise
+  QString lcd = m_settings->getString("Display/lcd");
+  if (lcd.isEmpty())
+    lcd = m_settings->getColor("Display/display-background", DisplayWid::classicFace()) == DisplayWid::classicFace()
+            ? "classic" : "custom";
+  display->setLcdVariant(DisplayWid::lcdVariantFromName(lcd));
+  connect(m_ctl, &MeterController::reading, display, &DisplayWid::showReading);
+  connect(m_ctl, &MeterController::minimumChanged, display, &DisplayWid::showMinimum);
+  connect(m_ctl, &MeterController::maximumChanged, display, &DisplayWid::showMaximum);
+  connect(m_ctl, &MeterController::minMaxReset, display, &DisplayWid::clearMinMax);
 }
 
 void MainWid::setMeter(MeterWid *meter)
 {
   m_meter = meter;
+  connect(m_ctl, &MeterController::reading, meter, &MeterWid::showReading);
+  connect(m_ctl, &MeterController::minimumChanged, meter, &MeterWid::showMinimum);
+  connect(m_ctl, &MeterController::maximumChanged, meter, &MeterWid::showMaximum);
+  connect(m_ctl, &MeterController::minMaxReset, meter, &MeterWid::clearMinMax);
+}
+
+void MainWid::setReadingLog(ReadingLog *log)
+{
+  connect(m_ctl, &MeterController::reading, log, &ReadingLog::appendReading);
+  connect(m_ctl, &MeterController::markRequested, log, [log](const QColor &color, const QString &name, bool, bool table)
+  {
+    if (table)
+      log->markLast(color, name);
+  });
 }
 
 bool MainWid::closeWin()
 {
-  m_dmm->close();
+  m_ctl->connectMeter(false);
   m_configDlg->setWinRect(parentRect());
   m_configDlg->on_ui_buttonBox_accepted();
 
@@ -238,219 +264,42 @@ bool MainWid::saveWindowSize() const
 
 QRect MainWid::parentRect() const
 {
-  QRect fRect = parentWidget()->frameGeometry();
-  QRect rect  = parentWidget()->rect();
+  // the main window: MainWid itself sits inside an MDI window now
+  QRect fRect = window()->frameGeometry();
+  QRect rect  = window()->rect();
 
   return QRect(fRect.x(), fRect.y(), rect.width(), rect.height());
 }
 
-void MainWid::timerEvent(QTimerEvent *)
-{
-  ui_graph->addValue(m_dval);
-  m_alarms->tick(QDateTime::currentMSecsSinceEpoch());
-}
-
-void MainWid::valueSLOT(double dval, const QString &val, const QString &u, const QString &s, const QString &r, bool hold, bool showBar, int id)
-{
-/*
-  std::cerr << "valueSLOT " << dval
-     << " val=" << val.toLocal8Bit().data()
-     << " u=" << u.toLocal8Bit().data()
-     << " s=" << s.toLocal8Bit().data()
-     << " r=" << r.toLocal8Bit().data()
-     << " showBar=" << showBar
-     << " hold=" << hold
-     << " id=" << id << std::endl;
-*/
-  // the meter's secondary display is off: clear it, there is no reading
-  if (id > 0 && val.isEmpty())
-  {
-    m_display->setValue(id, QString());
-    m_display->setUnit(id, QString());
-    m_display->setMode(id, QString());
-    m_display->update();
-    return;
-  }
-
-  if (m_readingLog)
-  {
-    ReadingLog::Entry e;
-    e.when = QDateTime::currentDateTime();
-    e.dval = dval;
-    e.val = val;
-    e.unit = u;
-    e.special = s;
-    e.range = r;
-    e.hold = hold;
-    e.id = id;
-    m_readingLog->append(e);
-  }
-
-  m_display->setHold(hold);
-  if (r == "AUTO") m_display->setAuto(true);
-  if (r == "MANU") m_display->setManu(true);
-
-  m_display->setShowBar(showBar);
-  m_display->setMode(id, s);
-
-
-  if (!hold)
-  {
-    m_display->setValue(id, val);
-    m_display->setUnit(id, u);
-
-    if (id == 0)
-    {
-      if (m_lastUnit != u)
-      {
-        resetSLOT();
-        ui_graph->setUnit(u);
-      }
-      m_lastUnit = u;
-
-      if (dval > m_max)
-      {
-        m_max = dval;
-        m_display->setMaxUnit(u);
-        m_display->setMaxValue(val);
-      }
-
-      if (dval < m_min)
-      {
-        m_min = dval;
-        m_display->setMinUnit(u);
-        m_display->setMinValue(val);
-      }
-
-      m_dval = dval;
-    }
-  }
-
-  if (id == 0)
-  {
-    feedMeter(val, u, s, hold);
-
-    static const QRegularExpression alarmLetters("[A-Za-z]");
-    m_overload = val.contains(alarmLetters);
-    m_baseUnit = SiPrefix::split(u).baseUnit;
-    m_alarms->feed(dval, m_overload, QDateTime::currentMSecsSinceEpoch());
-
-    // let the other instances see this value (calculated values, P = U * I)
-    if (m_stateMgr)
-    {
-      SharedStateManager::Reading reading;
-      reading.value = dval;
-      reading.unit = SiPrefix::split(u).baseUnit;
-      reading.special = s;
-      reading.msecs = QDateTime::currentMSecsSinceEpoch();
-      reading.valid = !hold && !val.contains(QRegularExpression("[A-Za-z]"));
-      m_stateMgr->publishReading(reading);
-    }
-  }
-
-  if (m_scpi)
-  {
-    ScpiServer::Reading reading;
-    reading.value = dval;
-    reading.unit = SiPrefix::split(u).baseUnit;
-    reading.special = s;
-    reading.range = r;
-    reading.hold = hold;
-    reading.overload = val.contains(QRegularExpression("[A-Za-z]"));
-    reading.valid = true;
-    reading.msecs = QDateTime::currentMSecsSinceEpoch();
-    m_scpi->setReading(id, reading);
-  }
-
-  m_display->update();
-}
-
-void MainWid::setReadingLog(ReadingLog *log)
-{
-  m_readingLog = log;
-}
-
 void MainWid::setStateManager(SharedStateManager *mgr)
 {
-  m_stateMgr = mgr;
-  m_dmm->setStateManager(mgr);
+  m_ctl->setStateManager(mgr);
   m_configDlg->setStateManager(mgr);
   m_instancesDlg->setStateManager(mgr);
 }
 
-// The analog meter works in the unit the multimeter displays (with prefix),
-// so its full scale follows the display count and the decimals of the
-// reading, exactly like the meter's own bar graph.
-void MainWid::feedMeter(const QString &val, const QString &unit, const QString &special, bool hold)
-{
-  if (!m_meter)
-    return;
-
-  static const QRegularExpression letters("[A-Za-z]");
-  const bool overload = val.contains(letters);
-
-  const double fs = MeterWid::fullScaleFromReading(val, m_configDlg->display(), unit);
-  if (!std::isnan(fs))
-    m_meter->setFullScale(fs);
-
-  // the unit as the digital display writes it ("kΩ", "°C")
-  QString label = SiPrefix::displayText(unit);
-  if (special == "AC" || special == "DC")
-    label += " " + special;
-  else if (special == "ACDC")
-    label += " AC+DC";
-  else if (special == "DI" || special == "Diode")
-    label += " DIODE";
-  else if (special == "BUZ")
-    label += " CONT";
-
-  const double value = overload ? 0.0 : QString(val).remove(' ').toDouble();
-  m_meter->setReading(value, val, label, overload, hold);
-
-  // min/max memory is kept in SI base units; bring it into display units
-  const double factor = SiPrefix::factor(SiPrefix::split(unit).prefix);
-  const double minMark = m_min < 1.0E19 ? m_min / factor : std::nan("");
-  const double maxMark = m_max > -1.0E19 ? m_max / factor : std::nan("");
-  if (!std::isnan(maxMark))
-    m_meter->setPeak(maxMark);
-  m_meter->setMinMax(minMark, maxMark);
-}
-
 void MainWid::resetSLOT()
 {
-  m_min =  1.0E20;
-  m_max = -1.0E20;
-  if (m_meter)
-    m_meter->reset();
-
-  m_display->setMinValue("");
-  m_display->setMaxValue("");
-  m_display->setMinUnit("");
-  m_display->setMaxUnit("");
-  m_display->update();
+  m_ctl->resetMinMax();
 }
 
 void MainWid::connectSLOT(bool on)
 {
   if (on)
   {
-    if (m_dmm->open())
+    if (m_ctl->connectMeter(true))
       ui_graph->clearSLOT();
     else
       Q_EMIT setConnect(false);   // the port could not be opened: button back to "off"
   }
   else
   {
-    m_dmm->close();
+    m_ctl->connectMeter(false);
     ui_graph->stopSLOT();
   }
 
   m_configDlg->connectSLOT(on);
-
   ui_graph->connectSLOT(on);
-  m_scpi->setConnected(m_dmm->isOpen());
-  // a "no readings" alarm watches a connected meter, so its clock starts here
-  m_alarms->setConnected(m_dmm->isOpen(), QDateTime::currentMSecsSinceEpoch());
 }
 
 void MainWid::quitSLOT()
@@ -498,11 +347,15 @@ void MainWid::rejectSLOT()
 void MainWid::applySLOT()
 {
   readConfig();
-  m_alarms->setAlarms(m_configDlg->alarms());
-  updateAlarmBar();
+  m_ctl->setAlarms(m_configDlg->alarms());
   ui_graph->setAlertUnsaved(m_configDlg->alertUnsavedData());
-  m_dmm->setName(m_configDlg->dmmName());
-  applyScpi();
+  m_ctl->setModel(m_configDlg->dmmName());
+  ScpiConfig scpi;
+  scpi.enabled = m_configDlg->scpiEnabled();
+  scpi.allInterfaces = m_configDlg->scpiAllInterfaces();
+  scpi.port = quint16(m_configDlg->scpiPort());
+  scpi.mdns = m_configDlg->scpiMdns();
+  m_ctl->applyScpi(scpi);
   Q_EMIT configChanged();
 
   if ((sender() == m_configDlg))
@@ -556,19 +409,20 @@ void MainWid::stopSLOT()
 
 void MainWid::readConfig()
 {
+  DMM *dmm = m_ctl->dmm();
   bool reopen = false;
 
-  if (m_dmm->isOpen())
+  if (dmm->isOpen())
   {
-    m_dmm->close();
+    dmm->close();
     reopen = true;
   }
 
-  m_dmm->setDmmInfo(m_configDlg->dmmInfo());
-  m_dmm->setDevice(m_configDlg->device());
-  m_dmm->setSpeed(m_configDlg->speed());
-  m_dmm->setFormat(m_configDlg->format());
-  m_dmm->setPortSettings(static_cast<QSerialPort::DataBits>(m_configDlg->bits()), static_cast<QSerialPort::StopBits>(m_configDlg->stopBits()),
+  dmm->setDmmInfo(m_configDlg->dmmInfo());
+  dmm->setDevice(m_configDlg->device());
+  dmm->setSpeed(m_configDlg->speed());
+  dmm->setFormat(m_configDlg->format());
+  dmm->setPortSettings(static_cast<QSerialPort::DataBits>(m_configDlg->bits()), static_cast<QSerialPort::StopBits>(m_configDlg->stopBits()),
                          m_configDlg->parity(), m_configDlg->externalSetup(), m_configDlg->rts(), m_configDlg->dtr() );
 
   // the sample time first: setGraphSize() counts the window in samples, and
@@ -589,6 +443,11 @@ void MainWid::readConfig()
                      m_configDlg->scaleMin(),
                      m_configDlg->scaleMax());
 
+  {
+    const QString own = m_settings->getString("Windows/graph-variant");
+    ui_graph->setColorVariant(DMMGraph::variantFromName(m_configDlg->graphVariant()),
+                              own.isEmpty() ? -1 : int(DMMGraph::variantFromName(own)));
+  }
   ui_graph->setColors(m_configDlg->bgColor(),
                       m_configDlg->gridColor(),
                       m_configDlg->dataColor(),
@@ -607,17 +466,20 @@ void MainWid::readConfig()
                          m_configDlg->intLineMode(),
                          m_configDlg->intPointMode());
 
-  m_display->setFaceColor(m_configDlg->displayBgColor());
+  // a tint changed on the Appearance page is meant to be seen: Custom
+  const QColor tint = m_configDlg->displayBgColor();
+  if (m_lcdTint.isValid() && tint != m_lcdTint && m_display->lcdVariant() != DisplayWid::Custom)
+    setLcdVariant(DisplayWid::Custom);
+  m_lcdTint = tint;
+  m_display->setFaceColor(tint);
   m_display->setDisplayMode(m_configDlg->display(), m_configDlg->showMinMax(),
                             m_configDlg->showBar(), m_configDlg->numValues());
-  m_dmm->setNumValues(m_configDlg->numValues());
+  dmm->setNumValues(m_configDlg->numValues());
 
   if (m_meter)
   {
-    MeterStyle style = m_configDlg->meterStyle() == 1 ? MeterStyle::ivory() : MeterStyle::dark();
-    style.ballistics = m_configDlg->meterBallistics();
-    style.redZoneFrom = m_configDlg->meterRedZone() / 100.0;
-    m_meter->setStyle(style);
+    m_meter->setDisplayCounts(m_configDlg->display());
+    applyMeterStyle();
     m_meter->setScaleMode(static_cast<MeterWid::ScaleMode>(
       m_configDlg->meterScaleMode() == 1 ? MeterWid::Unipolar :
       m_configDlg->meterScaleMode() == 2 ? MeterWid::Bipolar : MeterWid::Auto));
@@ -637,85 +499,34 @@ void MainWid::readConfig()
   else if (m_configDlg->sampleMode() == DMMGraph::Falling)
     Q_EMIT info(tr("Falling threshold %1").arg(m_configDlg->fallingThreshold()));
   Q_EMIT useTextLabel(m_configDlg->useTextLabel());
+  Q_EMIT systemIcons(m_configDlg->systemIcons());
+  Q_EMIT remoteControl(ControlBar::supported(m_configDlg->dmmInfo()));
   Q_EMIT toolbarVisibility(m_configDlg->showDisplay(),
                            m_configDlg->showDmmToolbar(),
                            m_configDlg->showGraphToolbar(),
                            m_configDlg->showFileToolbar());
 
   if (reopen)
-    m_dmm->open();
+    dmm->open();
 }
 
 void MainWid::runningSLOT(bool on)
 {
-  m_scpi->setRecording(on);
+  m_ctl->setRecording(on);
   Q_EMIT running(on);
-}
-
-void MainWid::applyScpi()
-{
-  m_scpi->setModel(m_configDlg->dmmName());
-  const bool wanted = m_configDlg->scpiEnabled();
-  const QHostAddress address = m_configDlg->scpiAllInterfaces() ? QHostAddress::Any : QHostAddress::LocalHost;
-  const quint16 port = quint16(m_configDlg->scpiPort());
-  // keep a running server when nothing about it changed: clients stay
-  const bool same = m_scpi->isListening() && m_scpi->address() == address
-                    && m_scpi->port() >= port && m_scpi->port() < port + 10;
-  if (!wanted)
-  {
-    m_mdns->stop();
-    m_scpi->stop();
-  }
-  else if (!same)
-  {
-    m_mdns->stop();
-    if (!m_scpi->start(address, port))
-      Q_EMIT error(tr("SCPI server: %1").arg(m_scpi->errorString()));
-  }
-  if (m_scpi->isListening() && m_configDlg->scpiMdns() && !m_mdns->isActive())
-  {
-    QMap<QString, QString> txt;
-    txt["txtvers"] = "1";
-    txt["model"] = m_configDlg->dmmName();
-    txt["version"] = APP_VERSION;
-    txt["instance"] = m_instanceId;
-    const QString instance = QString("QtDMM %1").arg(m_instanceId == "default"
-                                                     ? QHostInfo::localHostName() : m_instanceId);
-    m_mdns->start("_scpi-raw._tcp", instance, m_scpi->port(), txt);
-  }
-  else if (!m_configDlg->scpiMdns())
-    m_mdns->stop();
-  updateScpiStatus();
-}
-
-void MainWid::updateScpiStatus()
-{
-  if (!m_scpi->isListening())
-  {
-    Q_EMIT scpiStatus(QString());
-    m_configDlg->setScpiStatus(tr("The server is not running."));
-    return;
-  }
-  const QString where = m_scpi->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
-  const int n = m_scpi->clientCount();
-  const QString clients = n == 1 ? tr("1 client") : tr("%1 clients").arg(n);
-  Q_EMIT scpiStatus(tr("SCPI %1:%2 (%3)").arg(where).arg(m_scpi->port()).arg(clients));
-  QString text = tr("Listening on %1, port %2, %3 connected.").arg(where).arg(m_scpi->port()).arg(clients);
-  if (m_mdns->isActive())
-    text += ' ' + tr("Announced as \"%1\".").arg(m_mdns->instanceName());
-  m_configDlg->setScpiStatus(text);
 }
 
 void MainWid::startExternalSLOT()
 {
-  if (m_external->state() == QProcess::Running)
+  const QString command = m_configDlg->externalCommand();
+  if (m_ctl->externalRunning())
   {
     QMessageBox question;
     question.setWindowTitle(tr("QtDMM: Launch error"));
     question.setText(tr("<font size=+2><b>Launch error</b></font><p>"
                         "Application %1 is still running!<p>"
                         "Do you want to kill it now?")
-                     .arg(m_configDlg->externalCommand()));
+                     .arg(command));
     question.setIcon(QMessageBox::Information);
     question.setIconPixmap(QPixmap(":/Symbols/icon.xpm"));
 
@@ -730,30 +541,20 @@ void MainWid::startExternalSLOT()
     if (noButton)
       noButton->setText(tr("No, keep running"));
 
-    switch (question.exec())
-    {
-      case QMessageBox::Yes:
-        m_external->kill();
-        break;
-      default:
-        return;
-    }
+    if (question.exec() != QMessageBox::Yes)
+      return;
+    m_ctl->killExternal();
   }
 
   if (m_configDlg->disconnectExternal())
     Q_EMIT setConnect(false);
 
-  // Qt 6 no longer runs a command line passed as the only argument of an
-  // empty program: split it into program and arguments like the alarms do
-  const QString command = m_configDlg->externalCommand();
-  if (!command.trimmed().isEmpty())
-    m_external->startCommand(command);
-  if (command.trimmed().isEmpty() || !m_external->waitForStarted(3000))
+  if (!m_ctl->startExternal(command))
   {
     QMessageBox question;
     question.setWindowTitle(tr("QtDMM: Launch error"));
     question.setText(tr("<font size=+2><b>Launch error</b></font><p>"
-                        "Couldn't launch %1").arg(m_configDlg->externalCommand()));
+                        "Couldn't launch %1").arg(command));
     question.setIcon(QMessageBox::Information);
     question.setIconPixmap(QPixmap(":/Symbols/icon.xpm"));
 
@@ -769,12 +570,12 @@ void MainWid::startExternalSLOT()
     question.exec();
   }
   else
-    Q_EMIT error(tr("Launched %1").arg(m_configDlg->externalCommand()));
+    Q_EMIT error(tr("Launched %1").arg(command));
 }
 
-void MainWid::exitedSLOT()
+void MainWid::exitedSLOT(int exitCode)
 {
-  Q_EMIT error(tr("%1 terminated with exit code %2.").arg(m_configDlg->externalCommand()).arg(m_external->exitCode()));
+  Q_EMIT error(tr("%1 terminated with exit code %2.").arg(m_configDlg->externalCommand()).arg(exitCode));
 }
 
 void MainWid::showTipsSLOT()
@@ -794,22 +595,6 @@ void MainWid::showTipsSLOT()
   m_tipDlg->show();
 }
 
-void MainWid::setGraphVisible(bool on)
-{
-  ui_graph->setVisible(on);
-  // the graph is all this frame shows; without it collapse the frame so the
-  // panels get the space and no empty strip remains
-  setFrameShape(on ? QFrame::StyledPanel : QFrame::NoFrame);
-  setMaximumHeight(on ? QWIDGETSIZE_MAX : 0);
-  m_settings->setBool("MainWindow/show-graph", on);
-  m_settings->save();
-}
-
-bool MainWid::graphVisible() const
-{
-  return m_settings->getBool("MainWindow/show-graph", false);
-}
-
 bool MainWid::dmmConfigured() const
 {
   // DMM/configured is set when the settings dialog is confirmed with OK (or
@@ -820,6 +605,20 @@ bool MainWid::dmmConfigured() const
     return true;
   const QString model = m_settings->getString("DMM/model");
   return !model.isEmpty() && model != "Manual";
+}
+
+QString MainWid::portName() const
+{
+  // a Bluetooth port string carries the encryption key: never show it
+  const QString device = m_configDlg->device().simplified();
+  const QString type = device.section(' ', 0, 0).toLower();
+  if (type == "ble" || type == "blegatt")
+    return "BLE " + device.section(' ', 1, 1);
+  if (type == "calc")
+    return tr("calculated");
+  if (type == "serial")
+    return device.section(' ', 1);   // "SERIAL /dev/ttyUSB0": the port alone
+  return device;
 }
 
 QString MainWid::dmmTitle() const
@@ -849,12 +648,10 @@ void MainWid::instancesChangedSlot(QStringList& instances)
 
 // ---------------------------------------------------------------- alarms
 
-void MainWid::alarmRaised(int, const Alarm &alarm, double value)
+// The controller has reported the alarm and run its program; what is left
+// needs the desktop: beep, raise the window, pop up a box.
+void MainWid::alarmRaised(const Alarm &alarm, const QString &shown, const QString &text)
 {
-  const QString shown = m_overload ? QStringLiteral("OL") : EngNumberValidator::engValue(value) + m_baseUnit;
-  const QString text = alarm.message.isEmpty() ? alarm.describe(m_baseUnit) : alarm.message;
-  Q_EMIT error(tr("%1: %2 (%3)").arg(Alarm::title(alarm.name), text, shown));
-
   if (alarm.beep)
     QApplication::beep();
   if (alarm.raiseWindow && window())
@@ -862,26 +659,6 @@ void MainWid::alarmRaised(int, const Alarm &alarm, double value)
     window()->raise();
     window()->activateWindow();
     QApplication::alert(window());
-  }
-  if (alarm.recorder == Alarm::RecorderStart)
-    startSLOT();
-  else if (alarm.recorder == Alarm::RecorderStop)
-    stopSLOT();
-  if (alarm.markGraph)
-    ui_graph->addMark(alarm.color, Alarm::title(alarm.name));
-  if (alarm.markTable && m_readingLog)
-    m_readingLog->markLast(alarm.color, alarm.name);
-  if (!alarm.command.isEmpty())
-  {
-    QString cmd = alarm.command;
-    cmd.replace("%v", EngNumberValidator::engText(value)).replace("%u", m_baseUnit).replace("%n", alarm.name);
-    QStringList args = QProcess::splitCommand(cmd);
-    if (!args.isEmpty())
-    {
-      const QString program = args.takeFirst();
-      if (!QProcess::startDetached(program, args))
-        Q_EMIT error(tr("%1: could not run %2").arg(Alarm::title(alarm.name), program));
-    }
   }
   if (alarm.popup)
   {
@@ -892,30 +669,33 @@ void MainWid::alarmRaised(int, const Alarm &alarm, double value)
     box->setModal(false);
     box->show();
   }
-  updateAlarmBar();
 }
 
-void MainWid::alarmCleared(int, const Alarm &alarm)
+void MainWid::setMeterStyle(int style)
 {
-  Q_EMIT info(tr("%1 cleared").arg(Alarm::title(alarm.name)));
-  updateAlarmBar();
+  m_configDlg->setMeterStyle(style);
+  m_settings->setInt("Meter/style", style);
+  applyMeterStyle();
 }
 
-// One line per raised alarm (acknowledged ones are silent), on the colour
-// of the first one.
-void MainWid::updateAlarmBar()
+int MainWid::meterStyle() const
 {
-  QStringList lines;
-  QColor color;
-  const QList<Alarm> &list = m_alarms->alarms();
-  for (int i = 0; i < list.size(); ++i)
-  {
-    if (m_alarms->state(i) != AlarmManager::Raised || !list[i].banner)
-      continue;
-    const Alarm &al = list[i];
-    lines << QString("%1: %2").arg(al.name, al.message.isEmpty() ? al.describe(m_baseUnit) : al.message);
-    if (!color.isValid())
-      color = al.color;
-  }
-  m_alarmBar->setAlarms(lines.join('\n'), color);
+  return m_configDlg->meterStyle();
+}
+
+void MainWid::applyMeterStyle()
+{
+  if (!m_meter)
+    return;
+  MeterStyle style = m_configDlg->meterStyle() == 1 ? MeterStyle::ivory() : MeterStyle::dark();
+  style.ballistics = m_configDlg->meterBallistics();
+  style.redZoneFrom = m_configDlg->meterRedZone() / 100.0;
+  m_meter->setStyle(style);
+}
+
+void MainWid::setLcdVariant(int variant)
+{
+  const auto v = static_cast<DisplayWid::LcdVariant>(variant);
+  m_display->setLcdVariant(v);
+  m_settings->setString("Display/lcd", DisplayWid::lcdVariantName(v));
 }

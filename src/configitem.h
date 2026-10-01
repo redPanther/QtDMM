@@ -29,7 +29,7 @@
 class ConfigItem : public QListWidgetItem
 {
 public:
-  ConfigItem(int id, const QPixmap &, const QString &label, QListWidget *parent);
+  ConfigItem(int id, const QIcon &icon, const QString &label, QListWidget *parent);
   int id() const { return m_id; }
 
 protected:
