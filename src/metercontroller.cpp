@@ -10,6 +10,7 @@
 #include "dmm.h"
 #include "engnumbervalidator.h"
 #include "mdnsresponder.h"
+#include "recordingstore.h"
 #include "scpiserver.h"
 #include "sharedstatemanager.h"
 #include "siprefix.h"
@@ -19,6 +20,7 @@ MeterController::MeterController(QObject *parent)
   : QObject(parent)
   , m_dmm(new DMM(this))
   , m_alarms(new AlarmManager(this))
+  , m_recorder(new RecordingStore(this))
   , m_scpi(new ScpiServer(this))
   , m_mdns(new MdnsResponder(this))
   , m_external(new QProcess(this))
@@ -26,6 +28,12 @@ MeterController::MeterController(QObject *parent)
   qRegisterMetaType<Reading>();
   connect(m_dmm, &DMM::value, this, &MeterController::valueSLOT);
   connect(m_dmm, &DMM::error, this, &MeterController::error);
+
+  // the recorder: the sample clock drives it, the readings give each sample
+  // its mode, text and quality
+  connect(this, &MeterController::sample, m_recorder, &RecordingStore::addValue);
+  connect(this, &MeterController::reading, m_recorder, &RecordingStore::setReading);
+  connect(m_recorder, &RecordingStore::runningChanged, this, &MeterController::setRecording);
 
   connect(m_alarms, &AlarmManager::raised, this, &MeterController::onAlarmRaised);
   connect(m_alarms, &AlarmManager::cleared, this, [this](int, const Alarm &alarm)
@@ -118,7 +126,9 @@ void MeterController::valueSLOT(double dval, const QString &val, const QString &
   rd.special = special;
   rd.range = range;
   rd.hold = hold;
-  rd.showBar = showBar;
+  // a bar graph is a share of the display count, which a temperature (no
+  // range) does not fill: 37.2 °C of 50000 counts is an empty bar
+  rd.showBar = showBar && !rd.temperature();
   rd.overload = val.contains(letters);
   rd.id = id;
   rd.msecs = QDateTime::currentMSecsSinceEpoch();

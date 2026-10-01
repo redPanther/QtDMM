@@ -71,7 +71,8 @@ MainWid::MainWid(QString instance_id, QString config_path, QWidget *parent) :  Q
   connect(this, SIGNAL(sendState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
   connect(m_ctl, &MeterController::error, this, &MainWid::error);
   connect(m_ctl, &MeterController::info, this, &MainWid::info);
-  connect(m_ctl, &MeterController::sample, ui_graph, &DMMGraph::addValue);
+  // the recorder belongs to the controller; the graph shows it
+  ui_graph->setStore(m_ctl->recorder());
   connect(m_ctl, &MeterController::unitChanged, ui_graph, &DMMGraph::setUnit);
   connect(ui_graph, SIGNAL(info(const QString &)), this, SIGNAL(info(const QString &)));
   connect(ui_graph, SIGNAL(error(const QString &)), this, SIGNAL(error(const QString &)));
@@ -190,7 +191,9 @@ void MainWid::setMeter(MeterWid *meter)
 
 void MainWid::setReadingLog(ReadingLog *log)
 {
-  connect(m_ctl, &MeterController::reading, log, &ReadingLog::appendReading);
+  // the table shows the recorder's readings series: the controller feeds it
+  // whether or not a table exists
+  log->setStore(m_ctl->recorder());
   connect(m_ctl, &MeterController::markRequested, log, [log](const QColor &color, const QString &name, bool, bool table)
   {
     if (table)
@@ -512,7 +515,6 @@ void MainWid::readConfig()
 
 void MainWid::runningSLOT(bool on)
 {
-  m_ctl->setRecording(on);
   Q_EMIT running(on);
 }
 

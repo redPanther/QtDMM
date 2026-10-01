@@ -123,8 +123,8 @@ MainWin::MainWin(QCommandLineParser &parser, QWidget *parent)
   m_graphWin = addView(m_wid, tr("Graph"), MdiArranger::Graph, "graph");
 
   m_readings = new ReadingLogWid(this);
+  m_wid->setReadingLog(m_readings->log());   // the row limit is the store's: set it after
   m_readings->setMaxRows(m_wid->settings()->getInt("ReadingLog/max-rows", 10000));
-  m_wid->setReadingLog(m_readings->log());
   m_readingsWin = addView(m_readings, tr("Readings"), MdiArranger::Table, "readings");
 
   // right-click on display or meter: the window's menu (also without title bar)

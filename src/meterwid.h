@@ -123,6 +123,11 @@ public:
   /// The same, but a percentage (unit "%": state of charge, duty cycle) is
   /// always a 0..100 scale, whatever the display count says.
   static double fullScaleFromReading(const QString &value, int counts, const QString &unit);
+  /// Full scale for a value without a measuring range (a temperature): the
+  /// next step of 10, 20, 50, 100, ... that keeps @p value below the red
+  /// zone, and never less than @p current (NaN: none yet), so the scale only
+  /// grows while the readings stay in that unit.
+  static double fullScaleWithoutRange(double value, double current);
   /// Distance of the labelled (major) ticks: a 1-2-5 value for about 5
   /// (unipolar) or 8 (bipolar) intervals, made coarser until neighbouring
   /// labels labelWidth px wide fit on an arc labelRadius px from the pivot.
@@ -175,6 +180,7 @@ private:
   double m_minBase = std::numeric_limits<double>::quiet_NaN();
   double m_maxBase = std::numeric_limits<double>::quiet_NaN();
   int m_decimals = 0;   ///< most decimals of a reading (not an overload) since reset()
+  double m_rangelessScale = std::numeric_limits<double>::quiet_NaN();   ///< grown scale of a temperature, NaN otherwise
   MeterStyle m_style = MeterStyle::dark();
   ScaleMode m_scaleMode = Auto;
   bool m_bipolar = false;

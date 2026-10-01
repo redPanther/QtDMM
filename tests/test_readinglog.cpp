@@ -10,6 +10,7 @@
 
 #include "readinglog.h"
 #include "reading.h"
+#include "recordingstore.h"
 
 static int failed = 0;
 
@@ -161,6 +162,71 @@ int main(int argc, char **argv)
     check(log.writeAny(tmp.filePath("r.ods"), &err), "ods: " + err);
     check(log.writeAny(tmp.filePath("r2.csv"), &err), "csv through writeAny: " + err);
     check(!empty.writeAny(tmp.filePath("e.ods"), &err), "empty refuses");
+  }
+
+  // --- 7. a thin model over a store: two logs of one store see the same
+  //         rows, the limit and the pause are the store's, and the table
+  //         follows a series that is independent of the recording ---
+  {
+    RecordingStore store;
+    ReadingLog mine;
+    mine.append(entry(1.0, "1.000", "V", 0));   // goes to its own store
+    mine.setStore(&store);
+    check(mine.rowCount() == 0 && mine.store() == &store, "setStore: the log shows the new store, empty");
+    mine.setMaxRows(2);
+    check(store.readingCapacity() == 2, "setStore: the limit is the store's");
+    QAbstractItemModelTester shared(&mine, QAbstractItemModelTester::FailureReportingMode::Warning);
+
+    ReadingLog other;
+    other.setStore(&store);
+    int rowsSeen = 0;
+    QObject::connect(&other, &QAbstractItemModel::rowsInserted, [&] { ++rowsSeen; });
+
+    Reading r;
+    r.value = 0.0122;
+    r.text = "12.2";
+    r.unit = "mV";
+    r.special = "DC";
+    r.range = "AUTO";
+    r.msecs = QDateTime(QDate(2026, 9, 21), QTime(14, 3, 5, 250)).toMSecsSinceEpoch();
+    store.setReading(r);   // the recorder's feed, as the MeterController makes it
+    store.setReading(r);
+    store.setReading(r);
+    check(mine.rowCount() == 2 && other.rowCount() == 2 && rowsSeen == 3,
+          QString("shared store: %1 and %2 rows").arg(mine.rowCount()).arg(other.rowCount()));
+    check(mine.data(mine.index(0, ReadingLog::Value)).toString() == "12.2" &&
+          mine.data(mine.index(0, ReadingLog::Time)).toString() == "14:03:05.250",
+          "shared store: the cells come from the store's row");
+
+    mine.markLast(QColor("#d82222"), "Alarm 1");
+    check(other.data(other.index(1, 0), Qt::ToolTipRole).toString() == "Alarm 1" &&
+          other.data(other.index(1, 0), Qt::BackgroundRole).value<QColor>().alpha() == 70,
+          "shared store: the mark shows in the other view");
+
+    other.setPaused(true);
+    store.setReading(r);
+    check(mine.rowCount() == 2 && mine.isPaused(), "shared store: the pause is the store's");
+    other.setPaused(false);
+    mine.clear();
+    check(other.rowCount() == 0 && store.readingCount() == 0, "shared store: clear empties it for both");
+  }
+
+  // --- 8. the store goes before the log (the main window deletes its views
+  //         one by one): the log falls back to its own store, empty ---
+  {
+    ReadingLog log;
+    log.append(entry(1.0, "1.000", "V", 0));   // stays in its own store
+    QAbstractItemModelTester tester(&log, QAbstractItemModelTester::FailureReportingMode::Warning);
+    {
+      RecordingStore store;
+      log.setStore(&store);
+      log.append(entry(2.0, "2.000", "V", 0));
+      check(log.rowCount() == 1, "store gone: the shared store has the row");
+    }
+    check(log.store() != nullptr && log.rowCount() == 0 && log.stats().count == 0,
+          QString("store gone: the log must be empty, has %1 rows").arg(log.rowCount()));
+    log.append(entry(3.0, "3.000", "V", 0));
+    check(log.rowCount() == 1 && log.entry(0).dval == 3.0, "store gone: the log goes on with its own store");
   }
 
   if (failed == 0)

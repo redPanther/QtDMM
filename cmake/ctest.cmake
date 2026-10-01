@@ -19,9 +19,15 @@ if (BUILD_TESTING)
 	endforeach()
 
 	set( TEST_GRAPH test_graph)
-	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/dmmgraph.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/settings.cpp src/siprefix.cpp src/engnumbervalidator.cpp)
+	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/dmmgraph.cpp src/recordingstore.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/settings.cpp src/siprefix.cpp src/engnumbervalidator.cpp)
 	target_link_libraries(${TEST_GRAPH} PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Charts Qt6::Svg Qt::Core Qt::Test)
 	add_test(NAME dmmgraph COMMAND ${TEST_GRAPH} "${CMAKE_SOURCE_DIR}/tests/data/graph")
+
+	## the recorder's store on its own: QtCore only, no widgets
+	add_executable(test_recordingstore tests/test_recordingstore.cpp src/recordingstore.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/siprefix.cpp)
+	target_include_directories(test_recordingstore PRIVATE src)
+	target_link_libraries(test_recordingstore PRIVATE Qt::Core Qt::Test)
+	add_test(NAME recording_store COMMAND test_recordingstore)
 
 	## the handbook: same compiled resources as the application, so the test
 	## sees exactly the pages the user gets under :/Help/
@@ -119,7 +125,7 @@ if (BUILD_TESTING)
 
 	## the readings table model, without its widget
 	set( TEST_READINGLOG test_readinglog)
-	add_executable(${TEST_READINGLOG} MACOSX_BUNDLE tests/test_readinglog.cpp src/readinglog.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/siprefix.cpp)
+	add_executable(${TEST_READINGLOG} MACOSX_BUNDLE tests/test_readinglog.cpp src/readinglog.cpp src/recordingstore.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/siprefix.cpp)
 	target_include_directories(${TEST_READINGLOG} PRIVATE src)
 	target_link_libraries(${TEST_READINGLOG} PRIVATE Qt6::Gui Qt::Core Qt::Test)
 	add_test(NAME reading_log COMMAND ${TEST_READINGLOG})

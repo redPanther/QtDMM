@@ -42,49 +42,28 @@ DMMGraph::DMMGraph(QWidget *parent): DMMGraph(parent, Q_NULLPTR)
 DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
   QWidget(parent),
   m_size(600),
-  m_length(3600),
   m_scaleMin(0),
   m_scaleMax(0),
   m_autoScale(true),
-  m_pointer(0),
-  m_sampleTime(1),
-  m_sampleLength(0),
-  m_running(false),
   m_connected(false),
-  m_sampleCounter(0),
-  m_mode(DMMGraph::Manual),
-  m_sum(0.0),
-  m_first(true),
   m_mouseDown(false),
   m_mousePan(false),
   m_cursorMode(NoCursor),
-  m_raisingThreshold(0.0),
-  m_fallingThreshold(0.0),
-  m_lastVal(0.0),
-  m_lastValValid(false),
   m_lineWidth(2),
   m_intLineWidth(2),
-  m_dirty(false),
   m_alertUnsaved(true),
-  m_startExternal(false),
-  m_externalFalling(false),
-  m_externalThreshold(0.0),
-  m_externalStarted(false),
   m_crosshair(true),
   m_pointMode(Circle),
   m_intPointMode(Square),
   m_lineMode(Solid),
   m_intLineMode(NoLine),
   m_integrationScale(1.0),
-  m_integrationThreshold(0.0),
   m_integrationOffset(0.0),
   m_showIntegration(false),
   m_includeZero(false)
 {
   m_cfg = settings;
-  // mt: changed from QArray to QVector
-  m_array    = new QVector<double> (m_length);
-  m_arrayInt = new QVector<double> (m_length);
+  m_store = new RecordingStore(this);
 
   scrollbar = new QScrollBar(Qt::Horizontal, this);
   scrollbar->setGeometry(0, height() - 16, width(), 16);
@@ -93,7 +72,6 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
 
   connect(scrollbar, &QScrollBar::valueChanged, this, [this](int) { updateXAxisRange(); updateMarkPositions(); });
 
-  m_remainingLength = m_sampleLength;
   emitInfo();
 
   m_chart = new QChart();
@@ -200,6 +178,33 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
   m_cursorLabel = new QLabel(m_chartView);
   m_cursorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);   // no Leave for the view
   m_cursorLabel->hide();
+
+  connectStore();
+}
+
+void DMMGraph::connectStore()
+{
+  connect(m_store, &RecordingStore::appended, this, &DMMGraph::onAppended);
+  connect(m_store, &RecordingStore::cleared, this, &DMMGraph::onCleared);
+  connect(m_store, &RecordingStore::marksChanged, this, &DMMGraph::syncMarks);
+  connect(m_store, &RecordingStore::progressChanged, this, &DMMGraph::emitInfo);
+  connect(m_store, &RecordingStore::runningChanged, this, &DMMGraph::running);
+  connect(m_store, &RecordingStore::externalTriggered, this, &DMMGraph::externalTriggered);
+  connect(m_store, &RecordingStore::alert, this, [] { QApplication::beep(); });
+}
+
+void DMMGraph::setStore(RecordingStore *store)
+{
+  if (!store || store == m_store)
+    return;
+  m_store->disconnect(this);
+  m_store = store;
+  connectStore();
+  // the view shows the new store as it is
+  onCleared();
+  rebuildSeries();
+  syncMarks();
+  emitInfo();
 }
 
 void DMMGraph::timeButtonClicked(int seconds)
@@ -214,7 +219,7 @@ void DMMGraph::timeButtonClicked(int seconds)
 
 void DMMGraph::requestAll(bool grow)
 {
-  const double recorded = m_pointer * m_sampleTime / 10.0;
+  const double recorded = m_store->count() * sampleTenths() / 10.0;
   // growing by a quarter at a time: the window does not change with every sample
   int target = int(std::ceil(grow ? recorded * 1.25 : recorded));
   target = qMax(target, 10);
@@ -259,8 +264,6 @@ void DMMGraph::hideCrosshair()
 
 DMMGraph::~DMMGraph()
 {
-  delete m_array;
-  delete m_arrayInt;
 }
 
 void DMMGraph::print(QPrinter *prt, const QString &title, const QString &comment)
@@ -295,13 +298,13 @@ void DMMGraph::print(QPrinter *prt, const QString &title, const QString &comment
   p.drawText(0, tRect.height() + 10, maxWidth, tHeight, Qt::AlignLeft | Qt::AlignVCenter,
              tr("Sampling start:"));
   p.drawText(maxWidth + 10, tRect.height() + 10, w - maxWidth - 10, tHeight, Qt::AlignLeft | Qt::AlignVCenter,
-             m_graphStartDateTime.toString());
+             m_store->startDateTime().toString());
 
   p.drawText(0, tRect.height() + 10 + tHeight, maxWidth, tHeight, Qt::AlignLeft | Qt::AlignVCenter,
              tr("Sampling resolution:"));
   p.drawText(maxWidth + 10, tRect.height() + 10 + tHeight,
              w - maxWidth - 10, tHeight, Qt::AlignLeft | Qt::AlignVCenter,
-             tr("%1 Seconds").arg(m_sampleTime));
+             tr("%1 Seconds").arg(sampleTenths()));
 
   //p.setFont( QFont( "Helvetica", 10 ));
 
@@ -329,20 +332,90 @@ void DMMGraph::resizeEvent(QResizeEvent *)
   hideCrosshair();
 
   updateThresholdLinePositions();
+  // the thinning follows the plot's width
+  if (bucketSize() != m_bucket)
+    rebuildSeries();
+}
+
+// Samples per pixel column (1 = every sample is a point). Counted over the
+// window or, while the recording does not fill it yet, over what is there:
+// a short recording in a long window is drawn as it is.
+int DMMGraph::bucketSize() const
+{
+  const double plotWidth = m_chart->plotArea().width();
+  const int columns = qMax(1, int(plotWidth > 0 ? plotWidth : width()));
+  const int shown = qMin(m_size, m_store->count());
+  return qMax(1, (shown + columns - 1) / columns);
+}
+
+// The index of the first sample in the bucket of sample @p i. The buckets
+// count from the start of the recording, not from the ring's oldest sample:
+// while a full ring scrolls, a sample stays in its bucket and the drawn
+// minima and maxima stay put instead of jittering with every new sample.
+int DMMGraph::bucketStart(int i) const
+{
+  const qint64 seq = m_store->firstSequence() + i;
+  return qMax(0, int(seq - seq % m_bucket - m_store->firstSequence()));
+}
+
+// The points of the samples first..last: the sample itself, or with more than
+// one the minimum and the maximum in time order, so a spike survives the
+// thinning. The store keeps every sample; only the drawing is thinned.
+int DMMGraph::bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const
+{
+  const double step = sampleTenths() / 10.0;
+  auto value = [&](int i)
+  {
+    const RecordedPoint &p = m_store->at(i);
+    return integral ? m_integrationOffset + p.integral * m_integrationScale : p.value;
+  };
+  int lo = first, hi = first;
+  double loValue = value(first), hiValue = loValue;
+  for (int i = first + 1; i <= last; i++)
+  {
+    const double v = value(i);
+    if (v < loValue)
+    {
+      loValue = v;
+      lo = i;
+    }
+    if (v > hiValue)
+    {
+      hiValue = v;
+      hi = i;
+    }
+  }
+  if (lo == hi)
+  {
+    out.append(QPointF(lo * step, loValue));
+    return 1;
+  }
+  if (lo > hi)
+  {
+    qSwap(lo, hi);
+    qSwap(loValue, hiValue);
+  }
+  out.append(QPointF(lo * step, loValue));
+  out.append(QPointF(hi * step, hiValue));
+  return 2;
 }
 
 void DMMGraph::rebuildSeries()
 {
   QList<QPointF> points;
   QList<QPointF> intPoints;
-  points.reserve(m_pointer);
-  intPoints.reserve(m_pointer);
+  const int count = m_store->count();
+  m_bucket = bucketSize();
+  points.reserve(count / m_bucket * 2 + 2);
+  intPoints.reserve(count / m_bucket * 2 + 2);
 
-  double step = m_sampleTime / 10.0;
-  for (int i = 0; i < m_pointer; i++)
+  m_tailData = m_tailInt = 0;
+  for (int first = 0; first < count;)
   {
-    points.append(QPointF(i * step, (*m_array)[i]));
-    intPoints.append(QPointF(i * step, m_integrationOffset + (*m_arrayInt)[i] * m_integrationScale));
+    const int last = qMin(bucketStart(first) + m_bucket, count) - 1;
+    m_tailData = bucketPoints(first, last, false, points);
+    m_tailInt = bucketPoints(first, last, true, intPoints);
+    first = last + 1;
   }
 
   m_dataSeries->replace(points);
@@ -351,9 +424,31 @@ void DMMGraph::rebuildSeries()
   m_intPoints->replace(intPoints);
 }
 
+// The newest sample went into the series: a new bucket adds its point, one
+// that is still filling replaces the points it had.
+void DMMGraph::appendToSeries()
+{
+  const int count = m_store->count();
+  const int first = bucketStart(count - 1);
+  if (first != count - 1)
+  {
+    m_dataSeries->removePoints(m_dataSeries->count() - m_tailData, m_tailData);
+    m_dataPoints->removePoints(m_dataPoints->count() - m_tailData, m_tailData);
+    m_intSeries->removePoints(m_intSeries->count() - m_tailInt, m_tailInt);
+    m_intPoints->removePoints(m_intPoints->count() - m_tailInt, m_tailInt);
+  }
+  QList<QPointF> points, intPoints;
+  m_tailData = bucketPoints(first, count - 1, false, points);
+  m_tailInt = bucketPoints(first, count - 1, true, intPoints);
+  m_dataSeries->append(points);
+  m_dataPoints->append(points);
+  m_intSeries->append(intPoints);
+  m_intPoints->append(intPoints);
+}
+
 void DMMGraph::updateXAxisRange()
 {
-  double step = m_sampleTime / 10.0;
+  double step = sampleTenths() / 10.0;
   int sv = qMax(0, scrollbar->value());
 
   double start = sv * step, end = (sv + qMax(1, m_size) - 1) * step;
@@ -564,8 +659,8 @@ void DMMGraph::updateSeriesAppearance()
 
 void DMMGraph::updateThresholdLinesVisibility()
 {
-  m_triggerLine->setVisible(m_mode == Raising || m_mode == Falling);
-  m_externalLine->setVisible(m_startExternal);
+  m_triggerLine->setVisible(mode() == Raising || mode() == Falling);
+  m_externalLine->setVisible(m_store->externalOn());
   m_integrationLine->setVisible(m_showIntegration);
 
   updateThresholdLinePositions();
@@ -583,38 +678,47 @@ void DMMGraph::updateThresholdLinePositions()
     item->setLine(plot.left(), y, plot.right(), y);
   };
 
-  positionLine(m_triggerLine, m_mode == Raising ? m_raisingThreshold : m_fallingThreshold);
-  positionLine(m_externalLine, m_externalThreshold);
-  positionLine(m_integrationLine, m_integrationThreshold);
+  positionLine(m_triggerLine, mode() == Raising ? m_store->raisingThreshold() : m_store->fallingThreshold());
+  positionLine(m_externalLine, m_store->externalThreshold());
+  positionLine(m_integrationLine, m_store->integrationThreshold());
   updateMarkPositions();
 }
 
 void DMMGraph::addMark(const QColor &color, const QString &name)
 {
-  Mark m;
-  m.sample = qMax(0, m_pointer - 1);
-  m.name = name;
-  m.line = new QGraphicsLineItem(m_chart);
-  m.line->setPen(QPen(color, 2, Qt::DashLine));
-  m.line->setZValue(999);
-  m.line->setToolTip(name);
-  m_marks << m;
+  m_store->addMark(color.rgba(), name);
+}
+
+void DMMGraph::syncMarks()
+{
+  qDeleteAll(m_marks);
+  m_marks.clear();
+  for (const RecordingStore::Mark &m : m_store->marks())
+  {
+    auto *line = new QGraphicsLineItem(m_chart);
+    line->setPen(QPen(QColor::fromRgba(m.color), 2, Qt::DashLine));
+    line->setZValue(999);
+    line->setToolTip(m.name);
+    m_marks << line;
+  }
   updateMarkPositions();
 }
 
 void DMMGraph::updateMarkPositions()
 {
   const QRectF plot = m_chart->plotArea();
-  const double step = m_sampleTime / 10.0;
-  for (const Mark &m : m_marks)
+  const double step = sampleTenths() / 10.0;
+  const QList<RecordingStore::Mark> marks = m_store->marks();
+  for (int i = 0; i < m_marks.size() && i < marks.size(); i++)
   {
-    const double x = m.sample * step;
+    QGraphicsLineItem *line = m_marks[i];
+    const double x = marks[i].index * step;
     const bool inView = x >= m_xAxis->min() && x <= m_xAxis->max();
-    m.line->setVisible(inView);
+    line->setVisible(inView);
     if (!inView)
       continue;
     const double px = m_chart->mapToPosition(QPointF(x, m_yAxis->min()), m_dataSeries).x();
-    m.line->setLine(px, plot.top(), px, plot.bottom());
+    line->setLine(px, plot.top(), px, plot.bottom());
   }
 }
 
@@ -622,18 +726,15 @@ void DMMGraph::setGraphSize(int size, int length)
 {
   m_windowSeconds = size;
   m_totalSeconds = length;
-  m_size = static_cast<int>((static_cast<double>(size) / m_sampleTime * 10.));
-  m_length = static_cast<int>((static_cast<double>(length) / m_sampleTime * 10. + 1));
+  m_size = static_cast<int>((static_cast<double>(size) / sampleTenths() * 10.));
+  const int samples = static_cast<int>((static_cast<double>(length) / sampleTenths() * 10. + 1));
 
   scrollbar->setMinimum(0);
-  scrollbar->setMaximum(m_length - 1 - m_size);
+  scrollbar->setMaximum(samples - 1 - m_size);
   scrollbar->setSingleStep((m_size - 1) / 10);
   scrollbar->setPageStep(m_size);
 
-  m_array->resize(m_length);
-  m_arrayInt->resize(m_length);
-  if (m_pointer >= m_length)
-    m_pointer = m_length - 1;
+  m_store->setCapacity(samples);
 
   emitInfo();
 
@@ -645,188 +746,44 @@ void DMMGraph::setGraphSize(int size, int length)
 
 void DMMGraph::setSampleTime(int v)
 {
-  if (v <= 0 || v == m_sampleTime)
+  if (v <= 0 || v == m_store->sampleTime())
     return;
-  m_sampleTime = v;
-  // m_size and m_length count samples of the old sample time
+  m_store->setSampleTime(v);
+  // m_size and the store's capacity count samples of the old sample time
   if (m_windowSeconds > 0)
     setGraphSize(m_windowSeconds, m_totalSeconds);
 }
 
 void DMMGraph::startSLOT()
 {
-  m_sampleCounter = 0;
-  m_sum = 0;
-  clearSLOT();
-  m_running = true;
-
-  m_remainingLength = m_sampleLength;
-  m_pointer = 0;
-
-  emitInfo();
-  Q_EMIT running(true);
-
-  m_graphStartDateTime = QDateTime::currentDateTime();
-  m_externalStarted = false;
-
-  (*m_arrayInt)[0] = 0;
+  m_store->start();
 }
 
 void DMMGraph::stopSLOT()
 {
-  m_running = false;
-
-  emitInfo();
-  Q_EMIT running(false);
+  m_store->stop();
 }
 
-void DMMGraph::addValue(double val)
+void DMMGraph::onAppended(bool shifted)
 {
-  if (m_mode == DMMGraph::Time && !m_running)
+  const int count = m_store->count();
+  const RecordedPoint &p = m_store->last();
+
+  // "All": the window grows once the recording fills it
+  if (m_followAll && count >= m_size)
+    requestAll(true);
+
+  const bool resFlag = m_autoScale && computeMinMax(p.value);
+
+  if (shifted || bucketSize() != m_bucket)
+    rebuildSeries();
+  else
+    appendToSeries();
+
+  if (resFlag)
   {
-    // we may miss the start due to aliasing otherwise
-    int diff = m_startTime.secsTo(QTime::currentTime());
-
-    if (diff >= 0 && diff < 2)
-    {
-      qApp->beep();
-      startSLOT();
-    }
-  }
-
-  if (m_mode == DMMGraph::Raising && !m_running)
-  {
-    if (m_lastValValid)
-    {
-      if (m_lastVal < m_raisingThreshold && val >= m_raisingThreshold)
-      {
-        qApp->beep();
-        startSLOT();
-      }
-    }
-  }
-
-  if (m_mode == DMMGraph::Falling && !m_running)
-  {
-    if (m_lastValValid)
-    {
-      if (m_lastVal > m_fallingThreshold && val <= m_fallingThreshold)
-      {
-        qApp->beep();
-        startSLOT();
-      }
-    }
-  }
-
-  if (!m_externalStarted && m_running && m_startExternal)
-  {
-    if (m_externalFalling &&
-        m_lastVal > m_externalThreshold &&
-        val <= m_externalThreshold)
-    {
-      m_externalStarted = true;
-      Q_EMIT externalTriggered();
-    }
-    else if (!m_externalFalling &&
-             m_lastVal < m_externalThreshold &&
-             val >= m_externalThreshold)
-    {
-      m_externalStarted = true;
-      Q_EMIT externalTriggered();
-    }
-  }
-
-  m_lastValValid = true;
-  m_lastVal = val;
-
-  if (!m_running)
-    return;
-
-  m_sum += val;
-
-  if (0 == m_sampleCounter)
-  {
-    m_dirty = true;
-
-    if (!m_first)
-      val = m_sum / static_cast<double>(m_sampleTime);
-    m_first = false;
-    m_sum = 0.0;
-
-    bool shifted = m_pointer >= m_length;
-
-    if (shifted)
-    {
-      for (int i = 1; i < m_length; i++)
-      {
-        (*m_array)[i - 1] = (*m_array)[i];
-        (*m_arrayInt)[i - 1] = (*m_arrayInt)[i];
-      }
-      m_pointer = m_length - 1;
-      // the marks slide along with the data; the oldest falls off
-      for (int i = m_marks.size() - 1; i >= 0; --i)
-        if (--m_marks[i].sample < 0)
-        {
-          delete m_marks[i].line;
-          m_marks.removeAt(i);
-        }
-    }
-
-    // integration: the running sum of the readings above the threshold, back
-    // to 0 at or below it (the first sample, too: it used to start at the
-    // threshold itself, a spike at the left edge)
-    if (val <= m_integrationThreshold)
-      (*m_arrayInt)[m_pointer] = 0.0;
-    else
-      (*m_arrayInt)[m_pointer] = (m_pointer > 0 ? (*m_arrayInt)[m_pointer - 1] : 0.0) + val;
-
-    (*m_array)[m_pointer++] = val;
-    // "All": the window grows once the recording fills it
-    if (m_followAll && m_pointer >= m_size)
-      requestAll(true);
-    bool resFlag = false;
-
-    if (m_autoScale)
-    {
-      resFlag = computeMinMax(val);
-      //cerr << "val=" << val << " min=" << m_scaleMin << " max=" << m_scaleMax << endl;
-
-    }
-
-    if (shifted)
-      rebuildSeries();
-    else
-    {
-      double x = (m_pointer - 1) * m_sampleTime / 10.0;
-      m_dataSeries->append(x, val);
-      m_dataPoints->append(x, val);
-
-      double intVal = m_integrationOffset + (*m_arrayInt)[m_pointer - 1] * m_integrationScale;
-      m_intSeries->append(x, intVal);
-      m_intPoints->append(x, intVal);
-    }
-
-    if (resFlag)
-    {
-      setYRange(m_scaleMin, m_scaleMax);
-      updateThresholdLinePositions();
-    }
-  }
-
-  m_sampleCounter++;
-  m_remainingLength = qMax(0, m_remainingLength - 1);
-
-  if (m_sampleCounter == m_sampleTime)
-  {
-    m_sampleCounter = 0;
-    emitInfo();
-  }
-
-  if (0 == m_remainingLength && m_sampleLength != 0)
-  {
-    qApp->beep();
-    stopSLOT();
-    return;
+    setYRange(m_scaleMin, m_scaleMax);
+    updateThresholdLinePositions();
   }
 }
 
@@ -834,11 +791,12 @@ void DMMGraph::setUnit(const QString &unit)
 {
   // Values arrive in SI base units (see DmmResponse), so the axis shows the
   // base unit and the prefix is dropped here.
-  m_unit = SiPrefix::split(unit).baseUnit;
+  const QString base = SiPrefix::split(unit).baseUnit;
+  m_store->setUnit(base);
 
-  m_yTitle->setText(m_unit.isEmpty() ? QString() : QString("[%1]").arg(m_unit));
+  m_yTitle->setText(base.isEmpty() ? QString() : QString("[%1]").arg(base));
   // room above the plot for the title
-  const int h = m_unit.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
+  const int h = base.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
                                              + QFontMetricsF(m_yAxis->labelsFont()).height() / 2);
   // and at least as much as the time buttons need, so they sit above the plot
   const int bar = m_timeBar ? m_timeBar->sizeHint().height() : 0;
@@ -858,10 +816,11 @@ void DMMGraph::placeYTitle()
 
 void DMMGraph::clearSLOT()
 {
-  m_pointer = 0;
-  for (const Mark &m : m_marks)
-    delete m.line;
-  m_marks.clear();
+  m_store->clear();
+}
+
+void DMMGraph::onCleared()
+{
   if (m_autoScale)
   {
     if (m_includeZero)
@@ -873,19 +832,19 @@ void DMMGraph::clearSLOT()
     }
   }
 
-  m_graphStartDateTime = QDateTime::currentDateTime();
-  m_first = true;
-  m_dirty = false;
-
   m_dataSeries->clear();
   m_dataPoints->clear();
   m_intSeries->clear();
   m_intPoints->clear();
+  m_tailData = m_tailInt = 0;
 }
 
 void DMMGraph::emitInfo()
 {
-  int seconds = m_remainingLength / 10;
+  const int seconds = m_store->remainingLength() / 10;
+  const int pointer = m_store->count();
+  const int length = m_store->capacity();
+  const bool running = m_store->isRunning();
 
   int w = seconds / 60 / 60 / 24 / 7;
   int d = (seconds / 60 / 60 / 24) % 7;
@@ -896,14 +855,14 @@ void DMMGraph::emitInfo()
   QString txt;
 
   if (w)
-    txt = QString("%1/%2 - %3week%4 %5day&6 %7:%8:%9 - %10").arg(m_pointer).arg(m_length).arg(w).arg((w > 1 ? "s" : "")).arg(d).arg((d > 1 ? "s" : "")).arg(h).arg(m).arg(s)
-          .arg(m_running ? tr("Sampling") : tr("Stopped"));
+    txt = QString("%1/%2 - %3week%4 %5day&6 %7:%8:%9 - %10").arg(pointer).arg(length).arg(w).arg((w > 1 ? "s" : "")).arg(d).arg((d > 1 ? "s" : "")).arg(h).arg(m).arg(s)
+          .arg(running ? tr("Sampling") : tr("Stopped"));
   else if (d)
-    txt = QString("%1/%2 - %3day%4 %5:%6:%7 - %8").arg(m_pointer).arg(m_length).arg(d).arg((d > 1 ? "s" : "")).arg(h).arg(m).arg(s).arg(m_running ? tr("Sampling") : tr("Stopped"));
+    txt = QString("%1/%2 - %3day%4 %5:%6:%7 - %8").arg(pointer).arg(length).arg(d).arg((d > 1 ? "s" : "")).arg(h).arg(m).arg(s).arg(running ? tr("Sampling") : tr("Stopped"));
   else if (h)
-    txt = QString("%1/%2 - %3:%4:%5 - %6").arg(m_pointer).arg(m_length).arg(h).arg(m).arg(s).arg(m_running ? tr("Sampling") : tr("Stopped"));
+    txt = QString("%1/%2 - %3:%4:%5 - %6").arg(pointer).arg(length).arg(h).arg(m).arg(s).arg(running ? tr("Sampling") : tr("Stopped"));
   else
-    txt = QString("%1/%2 - %3:%4 - %5").arg(m_pointer).arg(m_length).arg(m).arg(s).arg(m_running ? tr("Sampling") : tr("Stopped"));
+    txt = QString("%1/%2 - %3:%4 - %5").arg(pointer).arg(length).arg(m).arg(s).arg(running ? tr("Sampling") : tr("Stopped"));
   Q_EMIT info(txt);
 }
 
@@ -980,7 +939,7 @@ void DMMGraph::handleChartMousePress(QMouseEvent *ev)
     }
     m_popup->addSeparator();
 
-    if (m_running)
+    if (m_store->isRunning())
     {
       QAction *action = new QAction(tr("Stop recorder"), m_popup);
       action->setProperty("ID", IDStopRecorder);
@@ -1027,7 +986,7 @@ void DMMGraph::handleChartMousePress(QMouseEvent *ev)
     for (ColorVariant v : { Neutral, ScopeBlue, PhosphorGreen, PhosphorAmber, ChartRecorder, Custom })
       variant(variantTitle(v), v);
 
-    if (!m_running)
+    if (!m_store->isRunning())
     {
       m_popup->addSeparator();
       QAction *action = new QAction(tr("Export data..."), m_popup);
@@ -1057,7 +1016,7 @@ void DMMGraph::handleChartMouseMove(QMouseEvent *ev)
 
     double pixelsPerSecond = plot.width() / range;
     double dxSeconds = (m_mpos.x() - pos.x()) / pixelsPerSecond;
-    double dxSamples = dxSeconds / (m_sampleTime / 10.0);
+    double dxSamples = dxSeconds / (sampleTenths() / 10.0);
 
     if (fabs(dxSamples) >= 1)
     {
@@ -1076,14 +1035,14 @@ void DMMGraph::handleChartMouseMove(QMouseEvent *ev)
     switch (m_cursorMode)
     {
       case Trigger:
-        if (m_mode == Raising) m_raisingThreshold = value;
-        else                   m_fallingThreshold = value;
+        if (mode() == Raising) m_store->setRaisingThreshold(value);
+        else                   m_store->setFallingThreshold(value);
         break;
       case External:
-        m_externalThreshold = value;
+        m_store->setExternalThreshold(value);
         break;
       case Integration:
-        m_integrationThreshold = value;
+        m_store->setIntegrationThreshold(value);
         break;
       case NoCursor:
         break;
@@ -1131,13 +1090,13 @@ void DMMGraph::handleChartMouseMove(QMouseEvent *ev)
     m_crosshairVLine->setVisible(true);
 
     double xValue = m_chart->mapToValue(QPointF(x, scenePos.y()), m_dataSeries).x();
-    int idx = qRound(xValue / (m_sampleTime / 10.0));
+    int idx = qRound(xValue / (sampleTenths() / 10.0));
 
-    QString text = m_graphStartDateTime.time().addSecs(idx * m_sampleTime / 10).toString();
+    QString text = m_store->startDateTime().time().addSecs(int(idx * sampleTenths() / 10)).toString();
 
-    if (idx >= 0 && idx < m_pointer)
+    if (idx >= 0 && idx < m_store->count())
     {
-      double val = (*m_array)[idx];
+      double val = m_store->at(idx).value;
       QPointF scenePoint = m_chart->mapToPosition(QPointF(xValue, val), m_dataSeries);
       m_crosshairHLine->setLine(plot.left(), scenePoint.y(), plot.right(), scenePoint.y());
       m_crosshairHLine->setVisible(true);
@@ -1177,7 +1136,7 @@ QString DMMGraph::formatEngineeringValue(double value, QString *unit) const
   QString prefix;
   const QString text = SiPrefix::format(value, &prefix);
   if (unit)
-    *unit = prefix + m_unit;
+    *unit = prefix + m_store->unit();
   return text;
 }
 
@@ -1203,33 +1162,24 @@ bool DMMGraph::exportDataSLOT()
 
 bool DMMGraph::exportCsvFile(const QString &fileName)
 {
-  if (m_pointer <= 0)
+  if (m_store->count() <= 0)
     return false;
 
   m_cfg->setString("QtDMM/LastUsesPath", QDir().absoluteFilePath(fileName));
 
-  Recording rec;
-  rec.start = m_graphStartDateTime;
-  rec.sampleTimeTenths = m_sampleTime;
-  rec.unit = m_unit;
-  rec.values.reserve(m_pointer);
-  for (int i = 0; i < m_pointer; i++)
-    rec.values << (*m_array)[i];
-
   QString err;
-  if (!RecordingFile::writeAny(rec, fileName, &err))
+  if (!m_store->write(fileName, &err))
   {
     Q_EMIT error(err);
     return false;
   }
-  m_dirty = false;
   return true;
 }
 
 
 void DMMGraph::importDataSLOT()
 {
-  if (m_dirty && m_alertUnsaved)
+  if (m_store->dirty() && m_alertUnsaved)
   {
     QMessageBox question;
     question.setWindowTitle(tr("QtDMM: Unsaved data"));
@@ -1279,24 +1229,20 @@ bool DMMGraph::importCsvFile(const QString &fileName)
   }
 
   setUnit(rec->unit);
-  m_graphStartDateTime = rec->start;
-  m_sampleTime = rec->sampleTimeTenths;
-  const int cnt = rec->values.size();
-  const int size = m_size * m_sampleTime;
+  m_store->setSampleTime(rec->sampleTimeTenths);
+  const int cnt = int(rec->values.size());
+  const int size = int(m_size * sampleTenths());
 
   if (cnt > 1)
-    Q_EMIT sampleTime(m_sampleTime);
+    Q_EMIT sampleTime(m_store->sampleTime());
 
   m_scaleMin =  1e40;
   m_scaleMax = -1e40;
 
-  setGraphSize(size, cnt * m_sampleTime);
-  for (int i = 0; i < cnt; i++)
-    (*m_array)[i] = rec->values[i];
+  setGraphSize(size, cnt * m_store->sampleTime());
+  m_store->load(*rec);
 
-  m_sampleCounter = m_pointer = cnt;
   setScale(true, true, 0, 0);
-  m_dirty = false;
   // setGraphSize() above built the series before the values were in; the
   // graph shows the import by itself, not only after MainWid applies the
   // new size
@@ -1305,22 +1251,21 @@ bool DMMGraph::importCsvFile(const QString &fileName)
 
   Q_EMIT error(fileName);
   update();
-  Q_EMIT graphSize(size, cnt * m_sampleTime);
+  Q_EMIT graphSize(size, cnt * m_store->sampleTime());
   return true;
 }
 
 
 void DMMGraph::setThresholds(double falling, double raising)
 {
-  m_fallingThreshold = falling;
-  m_raisingThreshold = raising;
+  m_store->setThresholds(falling, raising);
 
   updateThresholdLinesVisibility();
 }
 
 void DMMGraph::setMode(DMMGraph::SampleMode mode)
 {
-  m_mode = mode;
+  m_store->setStartMode(RecordingStore::StartMode(mode));
 
   updateThresholdLinesVisibility();
 }
@@ -1348,9 +1293,9 @@ void DMMGraph::setScale(bool autoScale, bool includeZero, double min, double max
     }
 
 
-    for (int i = 0; i < m_pointer; i++)
+    for (int i = 0; i < m_store->count(); i++)
     {
-      const double val = (*m_array)[i];
+      const double val = m_store->at(i).value;
       computeMinMax(val);
     }
 
@@ -1657,9 +1602,7 @@ void DMMGraph::setLine(int d, int i)
 
 void DMMGraph::setExternal(bool on, bool falling, double threshold)
 {
-  m_startExternal = on;
-  m_externalFalling = falling;
-  m_externalThreshold = threshold;
+  m_store->setExternal(on, falling, threshold);
 
   updateThresholdLinesVisibility();
 }
@@ -1682,7 +1625,7 @@ void DMMGraph::setIntegration(bool showInt, double sc, double th, double off)
 {
   m_showIntegration = showInt;
   m_integrationScale = sc;
-  m_integrationThreshold = th;
+  m_store->setIntegrationThreshold(th);
   m_integrationOffset = off;
 
   rebuildSeries();
@@ -1854,11 +1797,11 @@ bool DMMGraph::writeImage(const QString &fileName, QSize size)
     svg.setFileName(fileName);
     svg.setSize(size);
     svg.setViewBox(QRect(QPoint(0, 0), size));
-    svg.setTitle(m_graphStartDateTime.isValid()
-                 ? tr("QtDMM recording, %1").arg(m_graphStartDateTime.toString(Qt::ISODate))
+    svg.setTitle(m_store->startDateTime().isValid()
+                 ? tr("QtDMM recording, %1").arg(m_store->startDateTime().toString(Qt::ISODate))
                  : tr("QtDMM graph"));
     svg.setDescription(tr("%1 values, %2 s per sample, unit %3")
-                       .arg(m_pointer).arg(m_sampleTime / 10.0).arg(m_unit));
+                       .arg(m_store->count()).arg(sampleTenths() / 10.0).arg(m_store->unit()));
     QPainter p;
     if (!p.begin(&svg))
     {

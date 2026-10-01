@@ -10,6 +10,7 @@
 #include <QFileInfo>
 
 #include "dmmgraph.h"
+#include "recordingstore.h"
 #include <QChartView>
 #include <QValueAxis>
 #include <QGraphicsSimpleTextItem>
@@ -306,6 +307,307 @@ int main(int argc, char **argv)
     graph.setSampleTime(10);         // unchanged: nothing to do
     graph.setGraphSize(300, 3600);
     check(qAbs(x->max() - x->min() - 299) < 1.5, QString("300 s window, got %1 s").arg(x->max() - x->min()));
+  }
+
+  // --- 5c-5i: the recorder behind addValue(), pinned down before it moves
+  //            out of the widget (RecordingStore). Only the public API is
+  //            used, so these run unchanged against the split graph. ---
+
+  // y values of series @p index (0 data line, 2 integration) as "1 4 8"
+  auto seriesY = [](DMMGraph &graph, int index) -> QString
+  {
+    const QList<QAbstractSeries *> series = graph.findChild<QChartView *>()->chart()->series();
+    auto *s = series.size() > index ? qobject_cast<QXYSeries *>(series[index]) : nullptr;
+    QStringList got;
+    if (s)
+      for (const QPointF &p : s->points())
+        got << QString::number(p.y());
+    return got.join(' ');
+  };
+  auto seriesX = [](DMMGraph &graph) -> QString
+  {
+    auto *s = qobject_cast<QXYSeries *>(graph.findChild<QChartView *>()->chart()->series().value(0));
+    QStringList got;
+    if (s)
+      for (const QPointF &p : s->points())
+        got << QString::number(p.x());
+    return got.join(' ');
+  };
+
+  // --- 5c. averaging over the sample time: the first sample is stored as it
+  //          came, every later one is the mean of the readings of its sample
+  //          period (the one that closes the period included) ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(2);          // one sample per 0.2 s = per 2 readings
+    graph.setGraphSize(100, 100);
+    graph.setMode(DMMGraph::Manual);
+    graph.startSLOT();
+    for (double v : { 1.0, 3.0, 5.0, 7.0, 9.0 })
+      graph.addValue(v);
+    check(seriesY(graph, 0) == "1 4 8",
+          QString("averaging: expected '1 4 8', got '%1'").arg(seriesY(graph, 0)));
+    check(seriesX(graph) == "0 0.2 0.4",
+          QString("averaging: expected x '0 0.2 0.4', got '%1'").arg(seriesX(graph)));
+    // not recording: readings pass by
+    graph.stopSLOT();
+    graph.addValue(100);
+    graph.addValue(100);
+    check(seriesY(graph, 0) == "1 4 8", "averaging: stopped recorder must not store");
+  }
+
+  // --- 5d. start trigger, rising: starts on the reading that crosses the
+  //          threshold from below and records it as the first sample; the
+  //          very first reading (nothing to compare with) never triggers ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(1);
+    graph.setGraphSize(100, 100);
+    graph.setThresholds(0.0, 1.0);
+    graph.setMode(DMMGraph::Raising);
+    QSignalSpy running(&graph, &DMMGraph::running);
+    graph.addValue(1.5);             // first reading, above: no start
+    graph.addValue(0.5);
+    graph.addValue(0.8);
+    check(running.isEmpty(), "rising trigger: started before the crossing");
+    graph.addValue(1.0);             // crosses (>=)
+    check(running.size() == 1 && running.first().first().toBool(), "rising trigger: did not start on the crossing");
+    graph.addValue(2.0);
+    check(seriesY(graph, 0) == "1 2", QString("rising trigger: expected '1 2', got '%1'").arg(seriesY(graph, 0)));
+  }
+
+  // --- 5e. start trigger, falling ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(1);
+    graph.setGraphSize(100, 100);
+    graph.setThresholds(-1.0, 5.0);
+    graph.setMode(DMMGraph::Falling);
+    QSignalSpy running(&graph, &DMMGraph::running);
+    graph.addValue(-2.0);            // first reading, below: no start
+    graph.addValue(0.0);
+    graph.addValue(-0.5);
+    check(running.isEmpty(), "falling trigger: started before the crossing");
+    graph.addValue(-1.0);            // crosses (<=)
+    graph.addValue(-3.0);
+    check(running.size() == 1, "falling trigger: did not start on the crossing");
+    check(seriesY(graph, 0) == "-1 -3", QString("falling trigger: expected '-1 -3', got '%1'").arg(seriesY(graph, 0)));
+  }
+
+  // --- 5f. start trigger, clock time: starts within two seconds after the
+  //          start time (a reading may miss the exact second), not before ---
+  {
+    DMMGraph later(nullptr, &settings);
+    later.setGraphSize(100, 100);
+    later.setStartTime(QTime::currentTime().addSecs(120));
+    later.setMode(DMMGraph::Time);
+    QSignalSpy notYet(&later, &DMMGraph::running);
+    later.addValue(1.0);
+    check(notYet.isEmpty(), "time trigger: started before the start time");
+
+    DMMGraph now(nullptr, &settings);
+    now.setGraphSize(100, 100);
+    now.setStartTime(QTime::currentTime());
+    now.setMode(DMMGraph::Time);
+    QSignalSpy started(&now, &DMMGraph::running);
+    now.addValue(1.0);
+    check(started.size() == 1, "time trigger: did not start at the start time");
+  }
+
+  // --- 5g. external program threshold: once per recording, in the chosen
+  //          direction, only while recording ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(1);
+    graph.setGraphSize(100, 100);
+    graph.setMode(DMMGraph::Manual);
+    graph.setExternal(true, false, 2.0);
+    QSignalSpy ext(&graph, &DMMGraph::externalTriggered);
+    graph.addValue(1.0);
+    graph.addValue(3.0);             // crosses, but not recording
+    check(ext.isEmpty(), "external: fired while not recording");
+    graph.startSLOT();
+    graph.addValue(1.0);
+    graph.addValue(3.0);
+    check(ext.size() == 1, QString("external rising: expected 1 trigger, got %1").arg(ext.size()));
+    graph.addValue(1.0);
+    graph.addValue(3.0);
+    check(ext.size() == 1, "external: fired twice in one recording");
+    graph.startSLOT();               // a new recording arms it again
+    graph.addValue(1.0);
+    graph.addValue(3.0);
+    check(ext.size() == 2, "external: not re-armed by a new recording");
+
+    graph.setExternal(true, true, 2.0);   // falling
+    graph.startSLOT();
+    graph.addValue(3.0);
+    graph.addValue(2.5);
+    check(ext.size() == 2, "external falling: fired above the threshold");
+    graph.addValue(2.0);
+    check(ext.size() == 3, "external falling: did not fire on the crossing");
+  }
+
+  // --- 5h. integral and marks when the buffer overflows: the data slides
+  //          left, the integral keeps summing on the shifted data, a mark
+  //          moves with its sample and falls off with it ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(1);
+    graph.setGraphSize(1, 1);        // 1 s = 11 samples of 0.1 s
+    graph.setIntegration(true, 1.0, 0.0, 0.0);
+    graph.setMode(DMMGraph::Manual);
+    graph.startSLOT();
+    for (int i = 1; i <= 5; i++)
+      graph.addValue(i);
+    graph.addMark(Qt::red, "m");     // on sample 4 (the value 5)
+    check(graph.markCount() == 1, "marks: addMark() did not add");
+    for (int i = 6; i <= 11; i++)
+      graph.addValue(i);             // buffer full, nothing shifted yet
+    check(seriesY(graph, 0) == "1 2 3 4 5 6 7 8 9 10 11",
+          QString("overflow: before the shift got '%1'").arg(seriesY(graph, 0)));
+    for (int i = 12; i <= 15; i++)
+      graph.addValue(i);             // four shifts: the mark is on sample 0
+    check(seriesY(graph, 0) == "5 6 7 8 9 10 11 12 13 14 15",
+          QString("overflow: after the shift got '%1'").arg(seriesY(graph, 0)));
+    check(seriesX(graph).startsWith("0 0.1 ") && seriesX(graph).endsWith(" 1"),
+          QString("overflow: x must restart at 0, got '%1'").arg(seriesX(graph)));
+    check(graph.markCount() == 1, "marks: fell off too early");
+    // the integral: 1+...+15 at the end, the shifted cells keep their sums
+    check(seriesY(graph, 2) == "15 21 28 36 45 55 66 78 91 105 120",
+          QString("overflow: integral got '%1'").arg(seriesY(graph, 2)));
+    graph.addValue(16);              // the mark's sample leaves the buffer
+    check(graph.markCount() == 0, "marks: still there after its sample left the buffer");
+    graph.addMark(Qt::red, "m2");
+    graph.clearSLOT();
+    check(graph.markCount() == 0, "marks: clearSLOT() kept a mark");
+  }
+
+  // --- 5i. recording length: stops on its own after setSampleLength()
+  //          (tenths of a second of readings); 0 records until stopped ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.setSampleTime(1);
+    graph.setGraphSize(100, 100);
+    graph.setSampleLength(5);
+    graph.setMode(DMMGraph::Manual);
+    QSignalSpy running(&graph, &DMMGraph::running);
+    graph.startSLOT();
+    for (int i = 1; i <= 8; i++)
+      graph.addValue(i);
+    check(running.size() == 2 && !running.last().first().toBool(),
+          QString("length: expected start and stop, got %1 signals").arg(running.size()));
+    check(seriesY(graph, 0) == "1 2 3 4 5",
+          QString("length: expected '1 2 3 4 5', got '%1'").arg(seriesY(graph, 0)));
+
+    graph.setSampleLength(0);
+    graph.startSLOT();
+    for (int i = 1; i <= 50; i++)
+      graph.addValue(i);
+    check(running.size() == 3, "length 0: must record until stopped");
+  }
+
+  // --- 5j. a store from outside (the MeterController's recorder): the graph
+  //          shows it, takes what it already holds, and follows its signals ---
+  {
+    RecordingStore store;
+    store.setCapacity(100);
+    store.setStartMode(RecordingStore::Manual);
+    store.start();
+    store.addValue(1);
+    store.addValue(2);
+
+    DMMGraph graph(nullptr, &settings);
+    graph.setStore(&store);
+    check(graph.store() == &store, "setStore: store() must return the new store");
+    check(seriesY(graph, 0) == "1 2",
+          QString("setStore: expected the store's '1 2', got '%1'").arg(seriesY(graph, 0)));
+    store.addValue(3);
+    check(seriesY(graph, 0) == "1 2 3",
+          QString("setStore: expected '1 2 3' after a new sample, got '%1'").arg(seriesY(graph, 0)));
+    graph.stopSLOT();
+    check(!store.isRunning(), "setStore: the graph's stop must reach the shared store");
+    store.clear();
+    check(seriesY(graph, 0).isEmpty(), "setStore: a cleared store must empty the graph");
+  }
+
+  // --- 5k. thinning: more samples in the window than pixel columns are drawn
+  //          as a minimum and a maximum per column (a spike survives), the
+  //          store and the export keep every sample, and growing the series
+  //          sample by sample gives what a rebuild gives ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.resize(300, 200);
+    graph.setSampleTime(1);
+    graph.setGraphSize(200, 200);            // 2000 samples in the window
+    graph.setMode(DMMGraph::Manual);
+    graph.startSLOT();
+    const int samples = 2000;
+    for (int i = 0; i < samples; i++)
+      graph.addValue(i == 777 ? 1000.0 : i == 1234 ? -500.0 : (i * 37) % 101);
+
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    const double plotWidth = chart->plotArea().width();
+    const int columns = int(plotWidth > 0 ? plotWidth : graph.width());
+    auto *series = qobject_cast<QXYSeries *>(chart->series().value(0));
+    const int points = series ? series->count() : -1;
+    check(points > 0 && points <= 2 * columns,
+          QString("thinning: expected at most %1 points, got %2").arg(2 * columns).arg(points));
+    check(graph.store()->count() == samples,
+          QString("thinning: the store must keep all %1 samples, has %2").arg(samples).arg(graph.store()->count()));
+    check(int(graph.store()->toRecording().values.size()) == samples, "thinning: the export must have every sample");
+
+    double lo = 1e9, hi = -1e9;
+    if (series)
+      for (const QPointF &p : series->points())
+      {
+        lo = qMin(lo, p.y());
+        hi = qMax(hi, p.y());
+      }
+    check(hi == 1000.0 && lo == -500.0, QString("thinning: spike and dip must be drawn, got %1 .. %2").arg(lo).arg(hi));
+
+    const QString grown = seriesY(graph, 0) + "|" + seriesY(graph, 2);
+    graph.setGraphSize(200, 200);            // rebuilds the series
+    check(grown == seriesY(graph, 0) + "|" + seriesY(graph, 2),
+          "thinning: appended series must equal the rebuilt one");
+  }
+
+  // --- 5l. thinning while the full ring scrolls: a sample stays in its
+  //          bucket, so the drawn minima and maxima of the older samples do
+  //          not change from one new sample to the next ---
+  {
+    DMMGraph graph(nullptr, &settings);
+    graph.resize(300, 200);
+    graph.setSampleTime(1);
+    graph.setGraphSize(200, 200);            // 2001 samples in the ring
+    graph.setMode(DMMGraph::Manual);
+    graph.startSLOT();
+    auto noise = [](int i) { return double((i * 37) % 101); };
+    int i = 0;
+    for (; i < 2500; i++)
+      graph.addValue(noise(i));
+
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    auto *series = qobject_cast<QXYSeries *>(chart->series().value(0));
+    const RecordingStore *store = graph.store();
+    // the drawn points by sample number, without the oldest and the newest
+    // few hundred samples (a bucket falls off or fills there)
+    auto drawn = [&](qint64 from, qint64 to)
+    {
+      QStringList list;
+      for (const QPointF &p : series->points())
+      {
+        const qint64 seq = store->firstSequence() + qRound64(p.x() / 0.1);
+        if (seq >= from && seq < to)
+          list << QString("%1:%2").arg(seq).arg(p.y());
+      }
+      return list.join(' ');
+    };
+    const qint64 from = store->firstSequence() + 200, to = store->firstSequence() + store->count() - 200;
+    const QString before = drawn(from, to);
+    graph.addValue(noise(i));
+    check(store->firstSequence() > 0, "scrolling: the ring must be full and scroll");
+    check(!before.isEmpty() && before == drawn(from, to),
+          "scrolling: the thinned points of the older samples must stay as they were");
   }
 
   // --- 6. engineering-prefix export/import: setUnit() must strip a leading

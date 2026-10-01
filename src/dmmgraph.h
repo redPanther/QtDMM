@@ -32,19 +32,20 @@
 #include <QValueAxis>
 #include <QGraphicsLineItem>
 
+#include "recordingstore.h"
+
 class Settings;
 
-/// The recorder: samples the reading, keeps the recorded curve and plots it.
+/// The recorder's view: plots the curve a RecordingStore keeps.
 ///
-/// MainWid calls addValue() ten times a second with the current reading;
-/// while recording the values are averaged over the sample time and stored
-/// in a ring of @c m_length samples, of which a window of @c m_size is shown
-/// (scrollable). Recording starts manually, at a clock time or when the
-/// reading crosses a threshold (SampleMode), and can trigger the external
-/// application the same way (setExternal()). An integration curve (running
-/// sum above a threshold) is kept alongside. Rendering uses Qt Charts; the
+/// The store does the recording (sampling, triggers, integral, marks, the
+/// ring); the graph shows a window of @c m_size samples of it (scrollable),
+/// scales the y axis, and draws the integral with its scale and offset, the
+/// cursor and threshold lines and the marks. Rendering uses Qt Charts; the
 /// cursor and threshold lines are QGraphicsLineItems on top of the chart.
-/// Data can be exported/imported as CSV and printed.
+/// The recorder settings (setSampleTime(), setMode(), setThresholds(), ...)
+/// and addValue() are passed on to the store, so the graph can still be
+/// driven as a whole. Data can be exported/imported as CSV and printed.
 ///
 /// Times are in tenths of a second internally: a sample time of 5 means
 /// one stored sample per 0.5 s.
@@ -127,9 +128,13 @@ public:
   ~DMMGraph();
   /// Visible window and total recording length, both in seconds.
   void             setGraphSize(int size, int length);
-  /// The current reading; called every 100 ms. Handles the start triggers
-  /// and, while recording, averaging and storing.
-  void             addValue(double);
+  /// The recorder behind the graph.
+  RecordingStore  *store() const { return m_store; }
+  /// Shows @p store instead of the graph's own one (the MeterController's
+  /// recorder). The graph does not take ownership; the store has to outlive it.
+  void             setStore(RecordingStore *store);
+  /// The current reading, every 100 ms: RecordingStore::addValue().
+  void             addValue(double v) { m_store->addValue(v); }
   /// Unit of the recorded quantity for the axis label; the SI prefix is
   /// stripped because values arrive in base units (see DmmDecoder::DmmResponse).
   void             setUnit(const QString &);
@@ -139,9 +144,9 @@ public:
   void             setSampleTime(int v);
   /// Recording duration in tenths of a second after which recording stops
   /// on its own (0 = until stopped).
-  void             setSampleLength(int v) { m_sampleLength = v; }
+  void             setSampleLength(int v) { m_store->setSampleLength(v); }
   /// Clock time for SampleMode::Time.
-  void             setStartTime(const QTime &time) { m_startTime = time; }
+  void             setStartTime(const QTime &time) { m_store->setStartTime(time); }
   void             setMode(DMMGraph::SampleMode mode);
   /// Prints the curve with title and comment.
   void             print(QPrinter *prt, const QString &, const QString &);
@@ -180,12 +185,12 @@ public:
   /// Draws a vertical mark at the current sample (an alarm raised); marks
   /// move with the data and go with clearSLOT().
   void             addMark(const QColor &color, const QString &name);
-  int              markCount() const { return m_marks.size(); }
+  int              markCount() const { return int(m_marks.size()); }
   /// External application trigger: fire externalTriggered() once per
   /// recording when the reading crosses @p threshold in the given direction.
   void             setExternal(bool on, bool falling = false, double threshold = 0);
   /// Unsaved recorded data in memory.
-  bool             dirty() const { return m_dirty; }
+  bool             dirty() const { return m_store->dirty(); }
   void             setAlertUnsaved(bool on) { m_alertUnsaved = on; }
   void             setCrosshair(bool on) { m_crosshair = on; }
   /// LineMode and PointMode for the data and the integration curve.
@@ -269,7 +274,9 @@ protected:
 
   QScrollBar      *scrollbar;
   int              m_size;          ///< visible window in samples
-  int              m_length;        ///< recording length in samples
+  int              m_bucket = 1;    ///< samples per drawn min/max pair (see bucketSize())
+  int              m_tailData = 0;  ///< points the newest bucket has in the data series (1 or 2)
+  int              m_tailInt = 0;   ///< the same for the integral
   int              m_windowSeconds = 0;   ///< setGraphSize(), for setSampleTime()
   /// @name Time buttons (All / 1 min / 5 min / 30 min) top right in the graph
   /// @{
@@ -291,29 +298,25 @@ protected:
   double           m_scaleMin;
   double           m_scaleMax;
   bool             m_autoScale;
-  QVector<double> *m_array;	// mt: changed from QArray to QVector
-  QVector<double> *m_arrayInt;	// mt: changed from QArray to QVector
-  int              m_pointer;
-  QString          m_unit;
-  double           m_sampleTime;
-  int              m_sampleLength;
-  bool             m_running;
+  RecordingStore  *m_store;
+  /// Sample time in tenths of a second, as double for the x arithmetic.
+  double           sampleTenths() const { return m_store->sampleTime(); }
+  SampleMode       mode() const { return SampleMode(m_store->startMode()); }
   bool             m_connected;
-  int              m_sampleCounter;
-  int              m_remainingLength;
-  SampleMode       m_mode;
-  QTime            m_startTime;
-  QDateTime        m_graphStartDateTime;
-  double           m_sum;
-  bool             m_first;
+  /// The store's signals: a new sample, discarded or replaced samples.
+  void             connectStore();
+  int              bucketSize() const;
+  int              bucketStart(int i) const;
+  int              bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const;
+  void             appendToSeries();
+  void             onAppended(bool shifted);
+  void             onCleared();
+  /// The mark lines anew from the store's marks.
+  void             syncMarks();
   QPoint           m_mpos;
   bool             m_mouseDown;
   bool             m_mousePan;
   CursorMode       m_cursorMode;
-  double           m_raisingThreshold;
-  double           m_fallingThreshold;
-  double           m_lastVal;
-  bool             m_lastValValid;
   QColor           m_bgColor;
   QColor           m_gridColor;
   QColor           m_dataColor;
@@ -324,19 +327,13 @@ protected:
   QColor           m_intThresholdColor;
   int              m_lineWidth;
   int              m_intLineWidth;
-  bool             m_dirty;
   bool             m_alertUnsaved;
-  bool             m_startExternal;
-  bool             m_externalFalling;
-  double           m_externalThreshold;
-  bool             m_externalStarted;
   bool             m_crosshair;
   PointMode        m_pointMode;
   PointMode        m_intPointMode;
   LineMode         m_lineMode;
   LineMode         m_intLineMode;
   double           m_integrationScale;
-  double           m_integrationThreshold;
   double           m_integrationOffset;
   bool             m_showIntegration;
   bool             m_includeZero;
@@ -392,9 +389,9 @@ protected:
   QGraphicsLineItem *m_triggerLine;
   QGraphicsLineItem *m_externalLine;
   QGraphicsLineItem *m_integrationLine;
-  /// Alarm marks: a vertical line at the sample the alarm raised on.
-  struct Mark { int sample; QGraphicsLineItem *line; QString name; };
-  QList<Mark>      m_marks;
+  /// Alarm marks: a vertical line at the sample the alarm raised on, one
+  /// per RecordingStore::marks() in the same order.
+  QList<QGraphicsLineItem *> m_marks;
   void             updateMarkPositions();
 
   void             resizeEvent(QResizeEvent *)Q_DECL_OVERRIDE;

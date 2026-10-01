@@ -15,6 +15,7 @@ class QProcess;
 class ScpiServer;
 class MdnsResponder;
 class SharedStateManager;
+class RecordingStore;
 
 /// What the SCPI server should do (from the settings page).
 struct ScpiConfig
@@ -43,6 +44,9 @@ public:
 
   /// The connection; the settings page configures its port and protocol.
   DMM        *dmm() const { return m_dmm; }
+  /// The recorder: the sample clock and the readings feed it from here on,
+  /// views (the graph) show it. SCPI learns when it starts or stops.
+  RecordingStore *recorder() const { return m_recorder; }
   /// Readings are published to the other instances through @p mgr.
   void        setStateManager(SharedStateManager *mgr);
   /// This instance's id (--config-id), part of the mDNS name.
@@ -135,6 +139,7 @@ private:
 
   DMM                *m_dmm;
   AlarmManager       *m_alarms;
+  RecordingStore     *m_recorder;
   ScpiServer         *m_scpi;
   MdnsResponder      *m_mdns;
   QProcess           *m_external;
