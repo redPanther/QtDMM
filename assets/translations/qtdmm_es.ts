@@ -2733,39 +2733,6 @@ Su antigua configuración ~/.qtdmmrc se ha renombrado a ~/.qtdmmrc.old.</transla
     </message>
 </context>
 <context>
-    <name>TipDlg</name>
-    <message>
-        <location filename="../../src/ui/dialogs/tipdlg.cpp" line="31"/>
-        <source>&lt;font size=+2&gt;Welcome&lt;/font&gt;&lt;p&gt;QtDMM is a small DMM (Digital Multi Meter) readout software for Linux/UNIX and since version 0.8.11 for Mac OSX. Windows is also supported since 0.9.5. If you don&apos;t want to see the tips of the day you can switch them of with the checkbox below this text. The tips can be switched on again at any time in the preferences dialog.</source>
-        <translation>&lt;font size=+2&gt;Bienvenido&lt;/font&gt;&lt;p&gt;QtDMM es un pequeño programa de lectura para multímetros digitales en Linux/UNIX, desde la versión 0.8.11 en Mac OS X y desde 0.9.5 en Windows. Si no desea ver los consejos del día, desactívelos con la casilla bajo este texto. Puede volver a activarlos en cualquier momento en las preferencias.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/tipdlg.cpp" line="40"/>
-        <source>&lt;font size=+2&gt;QtDMM can&apos;t connect?&lt;/font&gt;&lt;p&gt;Make sure you have read/write permission for the device the multimeter is connected to. On Linux make sure you are in&lt;br&gt; dailout&lt;br&gt; group. For Windows check the group policies.</source>
-        <translation>&lt;font size=+2&gt;¿QtDMM no se conecta?&lt;/font&gt;&lt;p&gt;Asegúrese de tener permiso de lectura/escritura sobre el dispositivo al que está conectado el multímetro. En Linux, compruebe que pertenece al grupo&lt;br&gt; dialout.&lt;br&gt; En Windows, revise las directivas de grupo.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/tipdlg.cpp" line="45"/>
-        <source>&lt;font size=+2&gt;Quick help&lt;/font&gt;&lt;p&gt;Click on the context help button in the titlebar of the window. You can click any of the controls or windows of QtDMM to get context sensitive help. This works in all windows of QtDMM. Most newer windowmangers support this feature. </source>
-        <translation>&lt;font size=+2&gt;Ayuda rápida&lt;/font&gt;&lt;p&gt;Pulse el botón de ayuda contextual en la barra de título de la ventana y luego cualquier control o ventana de QtDMM para obtener ayuda contextual. Funciona en todas las ventanas de QtDMM. La mayoría de los gestores de ventanas modernos lo admiten. </translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/tipdlg.cpp" line="51"/>
-        <source>&lt;font size=+2&gt;Preferences&lt;/font&gt;&lt;p&gt;To configure QtDMM go to the preferences dialog. The preferences dialog can be reached by &lt;b&gt;File-&gt;Configure&lt;/b&gt;</source>
-        <translation>&lt;font size=+2&gt;Preferencias&lt;/font&gt;&lt;p&gt;Para configurar QtDMM abra el diálogo de preferencias mediante &lt;b&gt;Archivo-&gt;Configurar&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/tipdlg.cpp" line="55"/>
-        <source>&lt;font size=+2&gt;Measuring averaged values&lt;/font&gt;&lt;p&gt;If you want averaged values just increase the&quot;Sample every&quot; value in the Recorder settings. If you set it to 10sec and your DMM gives a value approx. every second, you&apos;ll get the average of the ten last measurements in the graph</source>
-        <translation>&lt;font size=+2&gt;Medir valores promediados&lt;/font&gt;&lt;p&gt;Si desea valores promediados, aumente el valor «Muestrear cada» en los ajustes del registrador. Con 10 s y un multímetro que entrega un valor por segundo aproximadamente, la gráfica mostrará la media de las diez últimas mediciones</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/tipdlg.cpp" line="62"/>
-        <source>&lt;font size=+2&gt;Configuration file&lt;/font&gt;&lt;p&gt;QtDMM writes a small configuration file (/QtDMM/QtDMM.conf). The path of it is platfom depend. It contains informations about window settings and other preferences. If you want to get rid of QtDMM don&apos;t forget to remove this file too.&lt;/font&gt;</source>
-        <translation>&lt;font size=+2&gt;Archivo de configuración&lt;/font&gt;&lt;p&gt;QtDMM escribe un pequeño archivo de configuración (/QtDMM/QtDMM.conf), cuya ruta depende de la plataforma. Contiene los ajustes de ventana y otras preferencias. Si desinstala QtDMM, no olvide borrar también este archivo.&lt;/font&gt;</translation>
-    </message>
-</context>
-<context>
     <name>UIExecutePrefs</name>
     <message>
         <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="23"/>
