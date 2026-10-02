@@ -193,6 +193,9 @@ void GraphWidget::connectStore()
   connect(m_store, &RecordingStore::runningChanged, this, &GraphWidget::running);
   connect(m_store, &RecordingStore::externalTriggered, this, &GraphWidget::externalTriggered);
   connect(m_store, &RecordingStore::alert, this, [] { QApplication::beep(); });
+  // the axis names the recording's unit, which a new one may change
+  connect(m_store, &RecordingStore::cleared, this, &GraphWidget::showUnit);
+  connect(m_store, &RecordingStore::loaded, this, &GraphWidget::showUnit);
 }
 
 void GraphWidget::setStore(RecordingStore *store)
@@ -204,6 +207,7 @@ void GraphWidget::setStore(RecordingStore *store)
   connectStore();
   // the view shows the new store as it is
   onCleared();
+  showUnit();
   rebuildSeries();
   syncMarks();
   emitInfo();
@@ -845,9 +849,15 @@ void GraphWidget::setUnit(const QString &unit)
 {
   // Values arrive in SI base units (see DmmResponse), so the axis shows the
   // base unit and the prefix is dropped here.
-  const QString base = SiPrefix::split(unit).baseUnit;
-  m_store->setUnit(base);
+  m_store->setUnit(SiPrefix::split(unit).baseUnit);
+  showUnit();
+}
 
+// The axis title: the unit of the recorded values (a recording keeps its
+// unit when the meter changes to another one).
+void GraphWidget::showUnit()
+{
+  const QString base = m_store->unit();
   m_yTitle->setText(base.isEmpty() ? QString() : QString("[%1]").arg(base));
   // room above the plot for the title
   const int h = base.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()

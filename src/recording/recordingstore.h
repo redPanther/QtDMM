@@ -128,8 +128,10 @@ public:
   /// Values at or below it reset the integral to 0.
   void        setIntegrationThreshold(double v) { m_integrationThreshold = v; }
   double      integrationThreshold() const { return m_integrationThreshold; }
-  /// Unit of the recorded values, without SI prefix ("V").
-  void        setUnit(const QString &baseUnit) { m_unit = baseUnit; }
+  /// Unit of the recorded values, without SI prefix ("V"). While the store
+  /// holds samples their unit stays; a new one applies from the next
+  /// start() or clear() on.
+  void        setUnit(const QString &baseUnit);
   QString     unit() const { return m_unit; }
   /// A reading older than this (ms) makes the sample Stale.
   void        setStaleAfter(int ms) { m_staleMs = ms; }
@@ -214,6 +216,10 @@ Q_SIGNALS:
   void        marksChanged();
   /// A trigger started or the length stopped the recording: the UI beeps.
   void        alert();
+  /// The meter measures something else than the recording now (@p from
+  /// "Voltage DC (V)", @p to "Resistance (Ω)", or °F after °C), so the
+  /// recording stopped: one recording never mixes two quantities or units.
+  void        functionChanged(const QString &from, const QString &to);
 
   /// The readings series, before and after each change: rows @p first to
   /// @p last are about to come or go (the oldest ones when the series is full).
@@ -227,6 +233,7 @@ Q_SIGNALS:
   void        readingMarked(int row);
 
 private:
+  static QString describe(const PortKey &port, const QString &baseUnit);
   RecordedPoint &slot(int i) { return m_ring[(m_head + i) % m_capacity]; }
   /// The ring in order, oldest first, starting at index 0.
   void        linearize();
@@ -266,6 +273,10 @@ private:
   /// The newest main reading and the worst quality in the current period.
   Reading     m_reading;
   bool        m_haveReading = false;
+  QString     m_nextUnit;        ///< setUnit() while samples are held
+  bool        m_unitPending = false;
+  PortKey     m_recordPort;      ///< what this recording measures, from its first value
+  QString     m_recordBaseUnit;  ///< and in which unit (°C or °F)
   Quality     m_periodQuality = Quality::Valid;
   int         m_staleMs = 3000;
   Quality     currentQuality() const;

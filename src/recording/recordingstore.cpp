@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "recording/recordingstore.h"
 
+#include "core/siprefix.h"
+
 RecordingStore::RecordingStore(QObject *parent) :
   QObject(parent),
   m_start(QDateTime::currentDateTime())
@@ -88,6 +90,9 @@ bool RecordingStore::write(const QString &path, QString *error)
 void RecordingStore::load(const Recording &rec)
 {
   m_start = rec.start;
+  m_unit = rec.unit;
+  m_unitPending = false;
+  m_recordPort = PortKey();
   m_sampleTime = qMax(1, rec.sampleTimeTenths);
   const int cnt = int(rec.values.size());
   if (cnt > m_capacity)
@@ -120,6 +125,34 @@ Quality RecordingStore::currentQuality() const
   return Quality::Valid;
 }
 
+// "Voltage DC (V)", "Temperature (°F)": what a recording measures, for the UI
+QString RecordingStore::describe(const PortKey &port, const QString &baseUnit)
+{
+  QString text = Quantities::name(port.quantity);
+  if (port.defining & (SampleFlag::AC | SampleFlag::DC))
+    text += ' ' + couplingText(port.defining);
+  const QString unit = SiPrefix::displayText(baseUnit);
+  if (!unit.isEmpty())
+    text += QString(" (%1)").arg(unit);
+  return text;
+}
+
+void RecordingStore::setUnit(const QString &baseUnit)
+{
+  // the samples keep the unit they were recorded in: switching the meter
+  // from V to Ohm after a recording must not relabel it
+  if (m_count > 0)
+  {
+    m_nextUnit = baseUnit;
+    m_unitPending = baseUnit != m_unit;
+  }
+  else
+  {
+    m_unit = baseUnit;
+    m_unitPending = false;
+  }
+}
+
 void RecordingStore::setReading(const Reading &reading)
 {
   logReading(reading);
@@ -127,6 +160,24 @@ void RecordingStore::setReading(const Reading &reading)
     return;
   m_reading = reading;
   m_haveReading = true;
+
+  // one recording, one quantity: the first value says which; another port
+  // (V DC -> Ohm, DC -> AC) or another unit (°C -> °F) stops it. A prefix
+  // (mV -> V) is no change, and an overload or a value without a known
+  // quantity says nothing about the function.
+  if (!m_running || reading.overload || reading.port.quantity == Quantity::Unknown)
+    return;
+  if (!m_recordPort.isValid())
+  {
+    m_recordPort = reading.port;
+    m_recordBaseUnit = reading.baseUnit;
+  }
+  else if (reading.port != m_recordPort || reading.baseUnit != m_recordBaseUnit)
+  {
+    const QString from = describe(m_recordPort, m_recordBaseUnit);
+    stop();
+    Q_EMIT functionChanged(from, describe(reading.port, reading.baseUnit));
+  }
 }
 
 void RecordingStore::start()
@@ -155,6 +206,13 @@ void RecordingStore::clear()
 {
   m_head = 0;
   m_count = 0;
+  m_recordPort = PortKey();
+  m_recordBaseUnit.clear();
+  if (m_unitPending)
+  {
+    m_unit = m_nextUnit;
+    m_unitPending = false;
+  }
   m_firstSeq = 0;
   const bool hadMarks = !m_marks.isEmpty();
   m_marks.clear();

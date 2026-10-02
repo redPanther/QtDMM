@@ -689,6 +689,28 @@ int main(int argc, char **argv)
     check(lines(thin) == thinGrown, "gaps thinned: rebuilt = grown");
   }
 
+  // --- 5n. the axis names the recording's unit: a meter switched from V to
+  //          Ohm after a recording does not relabel it; a new one does ---
+  {
+    auto yTitle = [](GraphWidget &graph)
+    {
+      for (QGraphicsItem *item : graph.findChild<QChartView *>()->chart()->childItems())
+        if (auto *text = dynamic_cast<QGraphicsSimpleTextItem *>(item); text && text->text().startsWith('['))
+          return text->text();
+      return QString();
+    };
+    GraphWidget graph(nullptr, &settings);
+    graph.setUnit("mV");
+    graph.setMode(GraphWidget::Manual);
+    graph.startSLOT();
+    graph.addValue(0.5);
+    graph.stopSLOT();
+    graph.setUnit("kOhm");
+    check(yTitle(graph) == "[V]" && graph.store()->unit() == "V", "unit: the recorded V stay V, got " + yTitle(graph));
+    graph.startSLOT();
+    check(yTitle(graph) == "[Ohm]", "unit: a new recording is in Ohm, got " + yTitle(graph));
+  }
+
   // --- 6. engineering-prefix export/import: setUnit() must strip a leading
   //         G or p prefix too (previously only n/u/m/k/M were recognized), and
   //         a value re-imported from a prefix-scaled export (e.g. "2.5;pF")
