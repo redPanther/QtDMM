@@ -43,6 +43,23 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="ui_iconSetLabel">
+        <property name="text">
+         <string>Symbols</string>
+        </property>
+        <property name="buddy">
+         <cstring>ui_iconSet</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="ui_iconSet">
+        <property name="toolTip">
+         <string>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM's coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM's own symbols and what the theme lacks come from the coloured set.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="ui_designSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -572,16 +589,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="ui_systemIcons">
-          <property name="whatsThis">
-           <string>Use the icon theme of your desktop for the symbols QtDMM shares with other programs. QtDMM's own symbols and anything the theme lacks come from the built-in Breeze set. Off: all symbols from the built-in set, light or dark to match the design.</string>
-          </property>
-          <property name="text">
-           <string>Use the desktop's icon theme</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="Spacer3_4_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -782,16 +789,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="ui_tipOfTheDay">
-     <property name="text">
-      <string>Show tip of the day</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
     <spacer name="Spacer1_5">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -830,11 +827,9 @@
   <tabstop>ui_saveWindowPos</tabstop>
   <tabstop>ui_saveWindowSize</tabstop>
   <tabstop>ui_textLabel</tabstop>
-  <tabstop>ui_systemIcons</tabstop>
   <tabstop>ui_dmmToolBar</tabstop>
   <tabstop>ui_graphToolBar</tabstop>
   <tabstop>ui_fileToolBar</tabstop>
-  <tabstop>ui_tipOfTheDay</tabstop>
  </tabstops>
  <includes>
   <include location="global">ui/settings/settingspage.h</include>

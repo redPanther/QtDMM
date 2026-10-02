@@ -105,8 +105,8 @@ Q_SIGNALS:
   void        error(const QString &);
   /// The "icons with text" preference changed.
   void        useTextLabel(bool);
-  /// The desktop's icon theme first (true) or only the built-in Breeze set.
-  void        systemIcons(bool);
+  /// The symbols chosen: "colored", "plain" or "system" (Designs::IconSet).
+  void        iconSet(const QString &set);
   /// The configured meter has keys QtDMM can press (ControlBar).
   void        remoteControl(bool supported);
   /// Asks MainWindow to connect/disconnect (drives the Connect action).

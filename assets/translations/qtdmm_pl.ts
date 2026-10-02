@@ -797,7 +797,7 @@
     <message>
         <location filename="../../src/ui/views/graphwidget.cpp" line="1165"/>
         <source>no value</source>
-        <translation type="unfinished"></translation>
+        <translation>brak wartości</translation>
     </message>
     <message>
         <location filename="../../src/ui/views/graphwidget.cpp" line="1220"/>
@@ -936,29 +936,40 @@
 <context>
     <name>GuiPrefs</name>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="34"/>
-        <source>System</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="35"/>
-        <source>Silver</source>
-        <translation type="unfinished"></translation>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="46"/>
+        <source>System</source>
+        <translation>Systemowy</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="36"/>
-        <source>Dark</source>
-        <translation type="unfinished"></translation>
+        <source>Silver</source>
+        <translation>Srebrny</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="37"/>
+        <source>Dark</source>
+        <translation>Ciemny</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="38"/>
         <source>Appearance</source>
         <translation>Wygląd</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="38"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="39"/>
         <source>&lt;b&gt;Here you can configure QtDMM&apos;s visual appearance and behaviour.&lt;/b&gt;</source>
         <translation>&lt;b&gt;Tutaj ustawisz wygląd i zachowanie QtDMM.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="42"/>
+        <source>Coloured</source>
+        <translation>Kolorowe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="43"/>
+        <source>Plain</source>
+        <translation>Proste</translation>
     </message>
 </context>
 <context>
@@ -972,93 +983,93 @@
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="217"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="212"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: niezapisane dane</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="218"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="213"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. If you quit now it will be lost.&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Niezapisane dane&lt;/b&gt;&lt;/font&gt;&lt;p&gt;W pamięci są jeszcze niezapisane pomiary. Jeśli teraz zakończysz, zostaną utracone.&lt;p&gt;Czy najpierw je wyeksportować?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="233"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="228"/>
         <source>Export data first</source>
         <translation>Najpierw eksportuj</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="237"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="232"/>
         <source>Quit without saving</source>
         <translation>Zakończ bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="502"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="497"/>
         <source>Automatic start at %1</source>
         <translation>Automatyczny start o %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="504"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="499"/>
         <source>Raising threshold %1</source>
         <translation>Próg narastający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="506"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="501"/>
         <source>Falling threshold %1</source>
         <translation>Próg opadający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="530"/>
-        <location filename="../../src/ui/instancewidget.cpp" line="560"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="525"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="555"/>
         <source>QtDMM: Launch error</source>
         <translation>QtDMM: błąd uruchamiania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="531"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="526"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Błąd uruchamiania&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Aplikacja %1 wciąż działa!&lt;p&gt;Czy zakończyć ją teraz?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="543"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="538"/>
         <source>Yes, kill it!</source>
         <translation>Tak, zakończ</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="547"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="542"/>
         <source>No, keep running</source>
         <translation>Nie, zostaw</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="561"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="556"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Błąd uruchamiania&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Nie udało się uruchomić %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="572"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="567"/>
         <source>Bummer!</source>
         <translation>Szkoda!</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="578"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="573"/>
         <source>Launched %1</source>
         <translation>Uruchomiono %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="583"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="578"/>
         <source>%1 terminated with exit code %2.</source>
         <translation>%1 zakończył się kodem %2.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="623"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="601"/>
         <source>calculated</source>
         <translation>obliczony</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="632"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="610"/>
         <source>no meter configured</source>
         <translation>nie skonfigurowano multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="670"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="648"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarm QtDMM: %1</translation>
     </message>
@@ -1359,7 +1370,7 @@
         <translation>Serwer SCPI: inne programy mogą tu odczytywać miernik (Ustawienia, Serwer SCPI).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="399"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="400"/>
         <source>Another instance is running.</source>
         <translation>Działa już inna instancja.</translation>
     </message>
@@ -1436,118 +1447,118 @@ Wybierz, która instancja ma rejestrować.</translation>
         <translation>Obsługiwane urządzenia…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="788"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="787"/>
         <source>&amp;Hide window</source>
         <translation>&amp;Ukryj okno</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="789"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="788"/>
         <source>&amp;Title bar</source>
         <translation>Pasek &amp;tytułu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="794"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="793"/>
         <source>Hide &amp;controls</source>
         <translation>Ukryj &amp;przyciski</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="801"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="800"/>
         <source>&amp;LCD colours</source>
         <translation>Kolory &amp;LCD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="803"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="802"/>
         <source>&amp;Classic</source>
         <translation>&amp;Klasyczny</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="803"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="802"/>
         <source>&amp;Backlight blue</source>
         <translation>Podświetlenie &amp;niebieskie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="804"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="803"/>
         <source>&amp;Amber</source>
         <translation>&amp;Bursztynowy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="804"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="803"/>
         <source>&amp;High contrast</source>
         <translation>Wysoki k&amp;ontrast</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="805"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="804"/>
         <source>C&amp;ustom (from the settings)</source>
         <translation>&amp;Własne (z ustawień)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="818"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="817"/>
         <source>Meter &amp;style</source>
         <translation>&amp;Styl miernika</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="819"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="818"/>
         <source>&amp;Dark studio</source>
         <translation>&amp;Ciemne studio</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="819"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="818"/>
         <source>Classic &amp;ivory</source>
         <translation>&amp;Klasyczna kość słoniowa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="853"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="852"/>
         <source>%1: readings are coming in</source>
         <translation>%1: napływają odczyty</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="854"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="853"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: brak odczytu od 3 s</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="965"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="964"/>
         <source>Save workspace</source>
         <translation>Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="966"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="992"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="965"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="991"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Obszar roboczy QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="979"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="978"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="979"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="978"/>
         <source>Could not write %1.</source>
         <translation>Nie można zapisać %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="983"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="982"/>
         <source>Workspace saved to %1</source>
         <translation>Obszar roboczy zapisany w %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="991"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="990"/>
         <source>Load workspace</source>
         <translation>Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="998"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="997"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="999"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="998"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 nie jest obszarem roboczym QtDMM.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1023"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1022"/>
         <source>Workspace loaded from %1</source>
         <translation>Obszar roboczy wczytany z %1</translation>
     </message>
@@ -1652,12 +1663,12 @@ Czy multimetr jest podłączony i włączony?</translation>
     <message>
         <location filename="../../src/service/metercontroller.cpp" line="41"/>
         <source>Recording stopped: the meter measures %2 now, not %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nagrywanie zatrzymane: miernik mierzy teraz %2, a nie %1</translation>
     </message>
     <message>
         <location filename="../../src/service/metercontroller.cpp" line="42"/>
         <source>Function changed</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmiana funkcji</translation>
     </message>
     <message>
         <location filename="../../src/service/metercontroller.cpp" line="48"/>
@@ -2113,192 +2124,192 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
     <message>
         <location filename="../../src/core/sampletypes.h" line="128"/>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>Nieznana</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="129"/>
         <source>Voltage</source>
-        <translation type="unfinished"></translation>
+        <translation>Napięcie</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="130"/>
         <source>Current</source>
-        <translation type="unfinished"></translation>
+        <translation>Prąd</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="131"/>
         <source>Resistance</source>
-        <translation type="unfinished">Rezystancja</translation>
+        <translation>Rezystancja</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="132"/>
         <source>Capacitance</source>
-        <translation type="unfinished">Pojemność</translation>
+        <translation>Pojemność</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="133"/>
         <source>Temperature</source>
-        <translation type="unfinished">Temperatura</translation>
+        <translation>Temperatura</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="134"/>
         <source>Frequency</source>
-        <translation type="unfinished">Częstotliwość</translation>
+        <translation>Częstotliwość</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="135"/>
         <source>Duty cycle</source>
-        <translation type="unfinished"></translation>
+        <translation>Współczynnik wypełnienia</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="136"/>
         <source>Continuity</source>
-        <translation type="unfinished">Ciągłość</translation>
+        <translation>Ciągłość</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="137"/>
         <source>Pulse width</source>
-        <translation type="unfinished"></translation>
+        <translation>Szerokość impulsu</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="138"/>
         <source>Conductance</source>
-        <translation type="unfinished"></translation>
+        <translation>Konduktancja</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="139"/>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Moc</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="140"/>
         <source>Gain</source>
-        <translation type="unfinished"></translation>
+        <translation>Wzmocnienie</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="141"/>
         <source>Sound pressure level</source>
-        <translation type="unfinished"></translation>
+        <translation>Poziom ciśnienia akustycznego</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="142"/>
         <source>Carbon monoxide</source>
-        <translation type="unfinished"></translation>
+        <translation>Tlenek węgla</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="143"/>
         <source>Relative humidity</source>
-        <translation type="unfinished"></translation>
+        <translation>Wilgotność względna</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="144"/>
         <source>Time</source>
-        <translation type="unfinished">Czas</translation>
+        <translation>Czas</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="145"/>
         <source>Wind speed</source>
-        <translation type="unfinished"></translation>
+        <translation>Prędkość wiatru</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="146"/>
         <source>Pressure</source>
-        <translation type="unfinished"></translation>
+        <translation>Ciśnienie</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="147"/>
         <source>Parallel inductance</source>
-        <translation type="unfinished"></translation>
+        <translation>Indukcyjność równoległa</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="148"/>
         <source>Parallel capacitance</source>
-        <translation type="unfinished"></translation>
+        <translation>Pojemność równoległa</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="149"/>
         <source>Parallel resistance</source>
-        <translation type="unfinished"></translation>
+        <translation>Rezystancja równoległa</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="150"/>
         <source>Series inductance</source>
-        <translation type="unfinished"></translation>
+        <translation>Indukcyjność szeregowa</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="151"/>
         <source>Series capacitance</source>
-        <translation type="unfinished"></translation>
+        <translation>Pojemność szeregowa</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="152"/>
         <source>Series resistance</source>
-        <translation type="unfinished"></translation>
+        <translation>Rezystancja szeregowa</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="153"/>
         <source>Dissipation factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Współczynnik strat</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="154"/>
         <source>Quality factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Dobroć</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="155"/>
         <source>Phase angle</source>
-        <translation type="unfinished"></translation>
+        <translation>Kąt fazowy</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="156"/>
         <source>Difference</source>
-        <translation type="unfinished"></translation>
+        <translation>Różnica</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="157"/>
         <source>Count</source>
-        <translation type="unfinished"></translation>
+        <translation>Zliczenia</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="158"/>
         <source>Power factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Współczynnik mocy</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="159"/>
         <source>Apparent power</source>
-        <translation type="unfinished"></translation>
+        <translation>Moc pozorna</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="160"/>
         <source>Mass</source>
-        <translation type="unfinished"></translation>
+        <translation>Masa</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="161"/>
         <source>Harmonic ratio</source>
-        <translation type="unfinished"></translation>
+        <translation>Zawartość harmonicznych</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="162"/>
         <source>Energy</source>
-        <translation type="unfinished"></translation>
+        <translation>Energia</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="163"/>
         <source>Electric charge</source>
-        <translation type="unfinished"></translation>
+        <translation>Ładunek elektryczny</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="164"/>
         <source>State of charge</source>
-        <translation type="unfinished">Stan naładowania</translation>
+        <translation>Stan naładowania</translation>
     </message>
     <message>
         <location filename="../../src/core/sampletypes.h" line="165"/>
         <source>Time to go</source>
-        <translation type="unfinished">Pozostały czas</translation>
+        <translation>Pozostały czas</translation>
     </message>
 </context>
 <context>
@@ -2991,196 +3002,191 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="35"/>
         <source>Design</source>
-        <translation type="unfinished"></translation>
+        <translation>Wygląd</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="41"/>
         <source>The look of the whole window: the colours of the desktop (System), brushed metal (Silver) or dark. The same as Design in the menu.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wygląd całego okna: kolory pulpitu (Systemowy), szczotkowany metal (Srebrny) lub ciemny. To samo co Wygląd w menu.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="48"/>
+        <source>Symbols</source>
+        <translation>Symbole</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="58"/>
-        <source>Digital display (LCD)</source>
-        <translation type="unfinished"></translation>
+        <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the coloured set.</source>
+        <translation>&lt;b&gt;Kolorowe&lt;/b&gt;: kolorowe symbole QtDMM (Oxygen). &lt;b&gt;Proste&lt;/b&gt;: jednobarwne symbole (Breeze), jasne lub ciemne zależnie od wyglądu. &lt;b&gt;Systemowy&lt;/b&gt;: motyw ikon pulpitu, jeśli istnieje; własne symbole QtDMM i to, czego brakuje w motywie, pochodzą z zestawu kolorowego.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="96"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="75"/>
+        <source>Digital display (LCD)</source>
+        <translation>Wyświetlacz cyfrowy (LCD)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="113"/>
         <source>Show bargraph</source>
         <translation>Pokaż bargraf</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="141"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="158"/>
         <source>Show Min/Max</source>
         <translation>Pokaż min/maks</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="175"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="192"/>
         <source>Show</source>
         <translation>Pokaż</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="214"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="231"/>
         <source>Tint of the LCD face of the digital display. The default is a classic greenish LCD.</source>
         <translation>Odcień powierzchni LCD wyświetlacza cyfrowego. Domyślnie klasyczny zielonkawy LCD.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="227"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="244"/>
         <source>LCD &amp;colour</source>
         <translation>&amp;Kolor LCD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="248"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="265"/>
         <source>Analog meter</source>
         <translation>Miernik analogowy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="266"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="283"/>
         <source>Scale</source>
         <translation>Skala</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="273"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="290"/>
         <source>How the analog meter lays out its scale. &lt;b&gt;Automatic&lt;/b&gt; starts with zero at the left and switches to a centre-zero scale as soon as a clearly negative reading arrives (until the min/max memory is reset). &lt;b&gt;Zero left&lt;/b&gt; and &lt;b&gt;Centre zero&lt;/b&gt; fix one layout.</source>
         <translation>Jak miernik analogowy rozkłada skalę. &lt;b&gt;Automatycznie&lt;/b&gt; zaczyna z zerem po lewej i przechodzi na zero pośrodku, gdy pojawi się wyraźnie ujemny odczyt (do zerowania pamięci min/maks). &lt;b&gt;Zero po lewej&lt;/b&gt; i &lt;b&gt;Zero pośrodku&lt;/b&gt; ustalają jeden układ.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="277"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="294"/>
         <source>Automatic</source>
         <translation>Automatycznie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="282"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="299"/>
         <source>Zero left</source>
         <translation>Zero po lewej</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="287"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="304"/>
         <source>Centre zero</source>
         <translation>Zero pośrodku</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="295"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="312"/>
         <source>Style</source>
         <translation>Styl</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="302"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="319"/>
         <source>Colour scheme of the analog meter: a dark studio dial with a white scale, or a classic ivory dial with a black scale.</source>
         <translation>Kolorystyka miernika analogowego: ciemna studyjna tarcza z białą skalą lub klasyczna tarcza w kolorze kości słoniowej z czarną skalą.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="306"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="323"/>
         <source>Dark studio</source>
         <translation>Ciemne studio</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="311"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="328"/>
         <source>Classic ivory</source>
         <translation>Klasyczna kość słoniowa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="319"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="336"/>
         <source>Move the needle with the inertia of a real moving-coil instrument instead of jumping to each new reading.</source>
         <translation>Poruszaj wskazówką z bezwładnością prawdziwego przyrządu zamiast przeskakiwać do każdego nowego odczytu.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="322"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="339"/>
         <source>Needle inertia</source>
         <translation>Bezwładność wskazówki</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="329"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="346"/>
         <source>Red zone from</source>
         <translation>Strefa czerwona od</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="336"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="353"/>
         <source>Start of the red zone at the top end of the scale, as a percentage of full scale.</source>
         <translation>Początek strefy czerwonej na górnym końcu skali, w procentach pełnej skali.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="339"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="356"/>
         <source> %</source>
         <translation> %</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="358"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="375"/>
         <source>At program exit</source>
         <translation>Przy zamykaniu programu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="396"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="413"/>
         <source>When this option is checked QtDMM will alert you if you are going to overwrite or loose unsaved data (import, quit).</source>
         <translation>Gdy ta opcja jest zaznaczona, QtDMM ostrzeże przed nadpisaniem lub utratą niezapisanych danych (import, zakończenie).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="399"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="416"/>
         <source>Alert unsaved data</source>
         <translation>Ostrzegaj o niezapisanych danych</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="444"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="492"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="461"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="509"/>
         <source>When this option is checked the window position and size saved and restored in the next session.</source>
         <translation>Gdy ta opcja jest zaznaczona, położenie i rozmiar okna są zapisywane i przywracane w następnej sesji.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="447"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="464"/>
         <source>Save window position</source>
         <translation>Zapisz położenie okna</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="495"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="512"/>
         <source>Save window size</source>
         <translation>Zapisz rozmiar okna</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="526"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="543"/>
         <source>Toolbar</source>
         <translation>Pasek narzędzi</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="564"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="622"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="670"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="753"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="581"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="629"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="677"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="760"/>
         <source>Check this if you want text labels in the toolbar.</source>
         <translation>Zaznacz, aby pokazywać etykiety tekstowe na pasku narzędzi.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="567"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="584"/>
         <source>Icons with text label</source>
         <translation>Ikony z etykietą</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="577"/>
-        <source>Use the icon theme of your desktop for the symbols QtDMM shares with other programs. QtDMM&apos;s own symbols and anything the theme lacks come from the built-in Breeze set. Off: all symbols from the built-in set, light or dark to match the design.</source>
-        <translation>Używaj motywu ikon pulpitu dla symboli, które QtDMM dzieli z innymi programami. Własne symbole QtDMM i to, czego brakuje w motywie, pochodzą z wbudowanego zestawu Breeze. Wyłączone: wszystkie symbole z wbudowanego zestawu, jasne lub ciemne zależnie od wyglądu.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="580"/>
-        <source>Use the desktop&apos;s icon theme</source>
-        <translation>Używaj motywu ikon pulpitu</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="625"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="632"/>
         <source>DMM toolbar</source>
         <translation>Pasek multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="673"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="680"/>
         <source>File toolbar</source>
         <translation>Pasek pliku</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="756"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="763"/>
         <source>Graph toolbar</source>
         <translation>Pasek wykresu</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="787"/>
-        <source>Show tip of the day</source>
-        <translation>Pokazuj poradę dnia</translation>
     </message>
 </context>
 <context>
@@ -3497,8 +3503,8 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="103"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="451"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="454"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="437"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="440"/>
         <source>Menu</source>
         <translation>Menu</translation>
     </message>
@@ -3666,72 +3672,62 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
         <translation>K&amp;onfiguruj</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="380"/>
-        <source>&amp;Tip of the day</source>
-        <translation>Porada &amp;dnia</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="383"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show tip of the day.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pokaż poradę dnia.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="397"/>
         <source>Direct Hel&amp;p</source>
         <translation>Pomoc &amp;bezpośrednia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="400"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="386"/>
         <source>Help</source>
         <translation>Pomoc</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="403"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="389"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Direct Help&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter the direct help mode. You have done this already when reading this text :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Pomoc bezpośrednia&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Włącza tryb pomocy bezpośredniej. Właśnie to zrobiłeś, skoro czytasz ten tekst :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="417"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="403"/>
         <source>&amp;Handbook</source>
         <translation>&amp;Podręcznik</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="420"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="406"/>
         <source>Handbook</source>
         <translation>Podręcznik</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="423"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="409"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Handbook&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the QtDMM handbook: connecting a meter, the recorder, troubleshooting and the list of supported devices.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Podręcznik&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Otwiera podręcznik QtDMM: podłączanie multimetru, rejestrator, rozwiązywanie problemów i lista obsługiwanych urządzeń.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="437"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="423"/>
         <source>A&amp;bout</source>
         <translation>&amp;O programie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="440"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="426"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copyright information&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show copyright information and some blurb about QtDMM. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Informacje o prawach autorskich&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Pokazuje prawa autorskie i kilka słów o QtDMM. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="457"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="443"/>
         <source>Ctrl+M</source>
         <translation>Ctrl+M</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="465"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="451"/>
         <source>Instances</source>
         <translation>Instancje</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="468"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="454"/>
         <source>Instance Manager</source>
         <translation>Menedżer instancji</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="471"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="457"/>
         <source>Ctrl+N</source>
         <translation>Ctrl+N</translation>
     </message>
@@ -4612,54 +4608,6 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
         <location filename="../../src/ui/forms/uisettingsdialog.ui" line="155"/>
         <source>&amp;Factory defaults</source>
         <translation>Ustawienia &amp;fabryczne</translation>
-    </message>
-</context>
-<context>
-    <name>UITipDlg</name>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="17"/>
-        <source>QtDMM: Tip of the day</source>
-        <translation>QtDMM: porada dnia</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="147"/>
-        <source>&lt;font size=+1&gt;&lt;b&gt;Don&apos;t show tips again&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Check this if you don&apos;t want to see the tip of the day at startup. You can activate the tips at any time in the preferences again.</source>
-        <translation>&lt;font size=+1&gt;&lt;b&gt;Nie pokazuj więcej porad&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Zaznacz, jeśli nie chcesz widzieć porady dnia przy starcie. Porady można w każdej chwili włączyć ponownie w ustawieniach.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="150"/>
-        <source>Don&apos;t show tips again</source>
-        <translation>Nie pokazuj więcej porad</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="163"/>
-        <source>&lt;font size=+1&gt;&lt;b&gt;Previous&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Go to previous tip.</source>
-        <translation>&lt;font size=+1&gt;&lt;b&gt;Poprzednia&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Poprzednia porada.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="166"/>
-        <source>&amp;Previous</source>
-        <translation>&amp;Poprzedni</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="182"/>
-        <source>&lt;font size=+1&gt;&lt;b&gt;Next&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Go to next tip.</source>
-        <translation>&lt;font size=+1&gt;&lt;b&gt;Następna&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Następna porada.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="185"/>
-        <source>&amp;Next</source>
-        <translation>&amp;Następny</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="211"/>
-        <source>&lt;font size=+1&gt;&lt;b&gt;Close&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Close this dialog.</source>
-        <translation>&lt;font size=+1&gt;&lt;b&gt;Zamknij&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Zamknij to okno.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uitipdlg.ui" line="214"/>
-        <source>&amp;Close</source>
-        <translation>&amp;Zamknij</translation>
     </message>
 </context>
 <context>

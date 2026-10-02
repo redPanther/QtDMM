@@ -113,7 +113,7 @@ then
 	# name (the application id)
 	rm -f AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.metainfo.xml
 	cp -v ../assets/io.github.qtdmm.qtdmm.desktop AppDir
-	cp -v ../assets/icons/qtdmm.svg AppDir/io.github.qtdmm.qtdmm.svg
+	cp -v ../assets/icons/app/qtdmm.svg AppDir/io.github.qtdmm.qtdmm.svg
 	cp -v ../assets/appimage/qtdmm.appdata.xml AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.appdata.xml
 	# pass the command line on (--version, --config-id, ...); quoted, as the
 	# AppImage may be mounted below a path with spaces

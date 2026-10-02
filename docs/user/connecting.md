@@ -172,6 +172,8 @@ aluminium) or *Dark* (the default). The readings table
 and a graph in the colours *Neutral* follow; the LCD colours, the graph's
 colours and the style of the analog meter are chosen separately.
 
-The symbols are KDE's Breeze icons, light or dark to match the window. On
-Linux, **Settings → Appearance → Use the desktop's icon theme** takes the
-symbols from your desktop's icon theme where it has them.
+**Settings → Appearance → Symbols** chooses the toolbar and menu symbols:
+*Coloured* (KDE's Oxygen icons, the default), *Plain* (KDE's monochrome Breeze
+icons, light or dark to match the window) or, on Linux and BSD where the
+desktop has an icon theme, *System* - your desktop's symbols, with the
+coloured set for QtDMM's own symbols and anything the theme lacks.

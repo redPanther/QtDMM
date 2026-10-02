@@ -112,18 +112,26 @@ XLSX/ODS export - the ZIP container itself is written by
 `SpreadsheetWriter`, since LibreOffice rejects miniz's data descriptors on
 the ODS mimetype entry).
 
-The symbols come from KDE's **Breeze** icon theme (LGPL-3.0-or-later, license in
-`assets/icons/theme/LICENSE.breeze`). `tools/update_icons.py` copies the ones
-QtDMM uses from an installed Breeze into two icon themes, `qtdmm-breeze` and
-`qtdmm-breeze-dark`, and adds QtDMM's own symbols from `assets/icons/own/`
-(DMM, display, analog meter, integration, instances, arrange). The themes
-are compiled into the resources (`:/icons`), and the code asks for symbols
-by name with `QIcon::fromTheme()`. `Designs` picks the light or the dark set
-by the window colour. On Linux, *Appearance → Use the desktop's icon theme*
-puts the desktop's theme first and keeps the built-in set as the fallback.
-To use a new symbol, add its Breeze name to `BREEZE` in the script (or an SVG
-to `own/`, drawn with `currentColor` like Breeze), run it and commit the
-result.
+The symbols come in three icon themes under `assets/icons/sets/`, compiled
+into the resources (`:/icons`); the code asks for symbols by name with
+`QIcon::fromTheme()`:
+
+- `qtdmm-oxygen` - KDE's **Oxygen**, coloured PNGs in 16 to 48 px, the default
+  (*Appearance → Symbols → Coloured*).
+- `qtdmm-breeze`, `qtdmm-breeze-dark` - KDE's **Breeze**, monochrome SVG
+  (*Plain*); `Designs` picks light or dark by the window colour.
+
+Both are LGPL-3.0-or-later (`assets/icons/sets/LICENSE.breeze`, `LICENSE.oxygen`).
+*System* (Linux/BSD, when the desktop has an icon theme) puts the desktop's
+theme first, with the Oxygen set as the fallback. `tools/update_icons.py`
+copies the names in `NAMES` from installed Breeze and Oxygen themes (Oxygen
+lacks five of them under that name: `OXYGEN_ALIAS`) and adds QtDMM's own
+symbols from `assets/icons/own/<style>/`: `own/breeze/` as SVG drawn with
+`currentColor`, `own/oxygen/` as SVG or 32 px PNG (DMM, display, analog
+meter, integration, instances, arrange); a symbol `own/oxygen/` lacks is taken
+from `own/breeze/`. To use a new symbol, add its name to `NAMES` (or files to
+`own/`), run the script and commit the result. The program icon lives in
+`assets/icons/app/`.
 
 The Bluetooth LE port (`src/device/transports/ble.cpp`) needs Qt6 Bluetooth and
 is optional: CMake option `QTDMM_WITH_BLE` (on when the module is found;

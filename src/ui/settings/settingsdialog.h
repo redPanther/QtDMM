@@ -141,8 +141,7 @@ public:
   bool                  saveWindowSize() const;
   bool                  alertUnsavedData() const;
   bool                  useTextLabel() const;
-  bool                  systemIcons() const;
-  bool                  showTip() const;
+  QString               iconSet() const;
   int                   currentTipId() const;
   bool                  showDmmToolbar() const;
   bool                  showGraphToolbar() const;
@@ -204,7 +203,6 @@ public Q_SLOTS:
   void                  setGraphSizeSLOT(int, int);
   /// A time button of the graph: the visible window, applied like a zoom.
   void                  setWindowSecondsSLOT(int seconds);
-  void                  setShowTipsSLOT(bool);
   void                  setCurrentTipSLOT(int);
   void                  zoomInSLOT(double);
   void                  zoomOutSLOT(double);
@@ -218,7 +216,6 @@ Q_SIGNALS:
   /// OK pressed: settings saved, dialog closes.
   void                  accepted();
   void                  rejected();
-  void                  showTips(bool);
   /// Window/total size changed on the graph page.
   void                  zoomed();
 

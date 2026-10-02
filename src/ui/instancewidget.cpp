@@ -500,7 +500,7 @@ void InstanceWidget::readConfig()
   else if (m_configDlg->sampleMode() == GraphWidget::Falling)
     Q_EMIT info(tr("Falling threshold %1").arg(m_configDlg->fallingThreshold()));
   Q_EMIT useTextLabel(m_configDlg->useTextLabel());
-  Q_EMIT systemIcons(m_configDlg->systemIcons());
+  Q_EMIT iconSet(m_configDlg->iconSet());
   Q_EMIT remoteControl(ControlBar::supported(m_configDlg->dmmInfo()));
   Q_EMIT toolbarVisibility(m_configDlg->showDisplay(),
                            m_configDlg->showDmmToolbar(),

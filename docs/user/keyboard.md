@@ -28,7 +28,6 @@ share the space differently.
 | Ctrl+M | Open the menu |
 | F1 | This handbook |
 | Shift+F1 | Direct help — then click any control for an explanation |
-| Ctrl+T | Tip of the day |
 | Ctrl+Q | Quit |
 
 ## Windows
@@ -97,9 +96,3 @@ While the table has the focus:
 | Ctrl+F | Add a calculated instance (ƒ) |
 | Esc | Close |
 
-## Tip of the day
-
-| Key | Action |
-|---|---|
-| ← / → | Previous / next tip |
-| Esc | Close |

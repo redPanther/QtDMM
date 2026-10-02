@@ -8,7 +8,9 @@
 - Designs System, Silver and Dark; the window grows with the content when a view is shown
 - Colour variants for the LCD (classic, backlight blue, amber, high contrast, custom) and the graph
   (neutral, scope blue, phosphor, chart recorder, custom)
-- Symbols from the Breeze icon set, light and dark, instead of the XPM icons
+- Symbols: coloured (KDE's Oxygen, the default), plain (KDE's Breeze, light and dark) or, on Linux and BSD,
+  the desktop's icon theme - Settings, Appearance, Symbols. They replace the XPM icons
+- The tip-of-the-day dialog is gone
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
 - Meter keys under the display with a fold button (not working yet, for the coming remote control)
