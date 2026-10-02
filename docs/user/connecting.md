@@ -176,4 +176,4 @@ colours and the style of the analog meter are chosen separately.
 *Coloured* (KDE's Oxygen icons, the default), *Plain* (KDE's monochrome Breeze
 icons, light or dark to match the window) or, on Linux and BSD where the
 desktop has an icon theme, *System* - your desktop's symbols, with the
-coloured set for QtDMM's own symbols and anything the theme lacks.
+plain set for QtDMM's own symbols and anything the theme lacks.

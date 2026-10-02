@@ -49,7 +49,7 @@ namespace Designs
   /// - Plain: monochrome Breeze (:/icons/qtdmm-breeze, -dark), light or dark
   ///   to match the palette
   /// - SystemIcons: the desktop's icon theme (Linux/BSD, where there is
-  ///   one), the coloured set filling the gaps - QtDMM's own symbols are
+  ///   one), the plain set filling the gaps - QtDMM's own symbols are
   ///   only there
   enum IconSet { SystemIcons, Plain, Coloured };
   /// "system", "plain", "colored" - the settings value (Icons/set).
@@ -62,6 +62,6 @@ namespace Designs
   void setIconSet(IconSet set);
   IconSet iconSet();
   /// The built-in set in use ("qtdmm-oxygen", "qtdmm-breeze" or
-  /// "qtdmm-breeze-dark"); the fallback under SystemIcons.
+  /// "qtdmm-breeze-dark"); under SystemIcons the plain one, as the fallback.
   QString iconTheme();
 }

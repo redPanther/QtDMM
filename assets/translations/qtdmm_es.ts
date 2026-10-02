@@ -3014,8 +3014,8 @@ Puede introducir los valores con un sufijo como m, u, n, p, k, M, G, T&lt;br&gt;
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="58"/>
-        <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the coloured set.</source>
-        <translation>&lt;b&gt;En color&lt;/b&gt;: los símbolos en color de QtDMM (Oxygen). &lt;b&gt;Sencillo&lt;/b&gt;: símbolos monocromos (Breeze), claros u oscuros según el diseño. &lt;b&gt;Sistema&lt;/b&gt;: el tema de iconos de su escritorio, si lo tiene; los símbolos propios de QtDMM y lo que falte en el tema vienen del conjunto en color.</translation>
+        <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the plain set.</source>
+        <translation>&lt;b&gt;En color&lt;/b&gt;: los símbolos en color de QtDMM (Oxygen). &lt;b&gt;Sencillo&lt;/b&gt;: símbolos monocromos (Breeze), claros u oscuros según el diseño. &lt;b&gt;Sistema&lt;/b&gt;: el tema de iconos de su escritorio, si lo tiene; los símbolos propios de QtDMM y lo que falte en el tema vienen del conjunto sencillo.</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="75"/>

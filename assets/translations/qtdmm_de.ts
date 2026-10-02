@@ -3015,8 +3015,8 @@ Der Wert kann auch mit einem Suffix wie m, u, n, p, k, M, G oder T angegeben wer
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="58"/>
-        <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the coloured set.</source>
-        <translation>&lt;b&gt;Farbig&lt;/b&gt;: die farbigen Symbole von QtDMM (Oxygen). &lt;b&gt;Schlicht&lt;/b&gt;: einfarbige Symbole (Breeze), hell oder dunkel passend zum Design. &lt;b&gt;System&lt;/b&gt;: das Symbolthema Ihres Desktops, sofern vorhanden; die eigenen Symbole von QtDMM und was dem Thema fehlt, kommen aus dem farbigen Satz.</translation>
+        <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the plain set.</source>
+        <translation>&lt;b&gt;Farbig&lt;/b&gt;: die farbigen Symbole von QtDMM (Oxygen). &lt;b&gt;Schlicht&lt;/b&gt;: einfarbige Symbole (Breeze), hell oder dunkel passend zum Design. &lt;b&gt;System&lt;/b&gt;: das Symbolthema Ihres Desktops, sofern vorhanden; die eigenen Symbole von QtDMM und was dem Thema fehlt, kommen aus dem schlichten Satz.</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="75"/>
