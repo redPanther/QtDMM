@@ -58,10 +58,12 @@ int main(int argc, char **argv)
     check(p.quality == Quality::Valid, "sample: quality not Valid");
     check(qIsNaN(p.rangeFull), "sample: range full scale should be unknown (NaN)");
 
+    store.start();   // another function is another recording (5c)
     store.setReading(reading(0.005, "5.000", "ACDC", true, "MANU"));
     store.addValue(0.005);
     check(store.last().flags == (SampleFlag::AC | SampleFlag::DC | SampleFlag::Hold),
           QString("sample: ACDC + hold flags 0x%1").arg(store.last().flags, 0, 16));
+    store.start();
     store.setReading(reading(0.6, "0.600", "DI"));
     store.addValue(0.6);
     check(store.last().flags == (SampleFlag::Diode | SampleFlag::Autorange), "sample: diode flag");
@@ -214,6 +216,62 @@ int main(int argc, char **argv)
     check(!trig.isRunning(), "gap: a NaN crosses no threshold");
     trig.addValue(2);
     check(trig.isRunning(), "gap: 0, gap, 2 crosses 1");
+  }
+
+  // --- 5c. one recording, one function: another port (V DC -> Ohm, DC ->
+  //          AC) or unit (°C -> °F) stops it and says so; a prefix (mV ->
+  //          V), an overload or hold do not. The samples keep their unit ---
+  {
+    auto rd = [](const QString &text, const QString &unit, const QString &special)
+    {
+      static ReadingAdapter adapter;
+      return ReadingAdapter::reading(adapter.adaptValue(text.toDouble(), text, unit, special, "AUTO", false, true,
+                                                        false, 0, QDateTime::currentMSecsSinceEpoch()));
+    };
+    RecordingStore store;
+    store.setCapacity(100);
+    store.setUnit("V");
+    QSignalSpy changed(&store, &RecordingStore::functionChanged);
+    store.start();
+    store.setReading(rd("12.34", "mV", "DC"));
+    store.addValue(0.01234);
+    store.setReading(rd("1.234", "V", "DC"));   // a prefix
+    store.setReading(rd("OL", "V", "DC"));
+    store.setReading(rd("OL", "", ""));         // an overload without a unit
+    store.addValue(1.234);
+    check(store.isRunning() && changed.isEmpty(), "function: mV -> V, OL: the recording goes on");
+
+    store.setUnit("Ohm");                       // MeterController: unitChanged before the reading
+    check(store.unit() == "V", "function: the samples keep their unit");
+    store.setReading(rd("4.700", "kOhm", "OH"));
+    check(!store.isRunning() && changed.size() == 1, "function: V DC -> Ohm stops the recording");
+    if (!changed.isEmpty())
+      check(changed[0][0].toString() == "Voltage DC (V)" && changed[0][1].toString() == "Resistance (Ω)",
+            "function: says what changed, got " + changed[0][0].toString() + " -> " + changed[0][1].toString());
+    check(store.count() == 2 && store.unit() == "V" && store.toRecording().unit == "V",
+          "function: the stopped recording and its export stay in V");
+    store.start();
+    check(store.unit() == "Ohm" && store.count() == 0, "function: the next recording is in Ohm");
+
+    store.setUnit("V");
+    store.start();
+    store.setReading(rd("1.000", "V", "DC"));
+    store.addValue(1);
+    store.setReading(rd("1.000", "V", "AC"));
+    check(!store.isRunning() && changed.size() == 2, "function: DC -> AC is another function");
+
+    store.setUnit("C");
+    store.start();
+    store.setReading(rd("21.5", "C", "TE"));
+    store.addValue(21.5);
+    store.setReading(rd("70.7", "dF", "TE"));
+    check(!store.isRunning() && changed.size() == 3, "function: °C -> °F (one port, two units) stops it");
+
+    store.start();
+    store.setReading(rd("21.5", "C", "TE"));
+    store.stop();
+    store.setReading(rd("1.000", "V", "DC"));
+    check(changed.size() == 3, "function: no recording, nothing to stop");
   }
 
   // --- 2. the readings series: every reading of every value, whether or

@@ -382,6 +382,7 @@ protected:
   QString          m_defaultLabelFormat; ///< Qt's, for the variants without divisions
   void             applyThemeColors();
   void             placeYTitle();
+  void             showUnit();
   /// @name x labels in s, min or h
   /// Qt's axis can only print the seconds; its own labels are kept for the
   /// layout but drawn invisible, these are drawn over them at every tick.

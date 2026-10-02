@@ -34,6 +34,13 @@ MeterController::MeterController(QObject *parent)
   connect(this, &MeterController::sample, m_recorder, &RecordingStore::addValue);
   connect(this, &MeterController::reading, m_recorder, &RecordingStore::setReading);
   connect(m_recorder, &RecordingStore::runningChanged, this, &MeterController::setRecording);
+  // another function at the meter ended the recording: say so, and mark
+  // where in the graph
+  connect(m_recorder, &RecordingStore::functionChanged, this, [this](const QString &from, const QString &to)
+  {
+    Q_EMIT error(tr("Recording stopped: the meter measures %2 now, not %1").arg(from, to));
+    Q_EMIT markRequested(QColor(0xff, 0x8c, 0x00), tr("Function changed"), true, false);
+  });
 
   connect(m_alarms, &AlarmManager::raised, this, &MeterController::onAlarmRaised);
   connect(m_alarms, &AlarmManager::cleared, this, [this](int, const Alarm &alarm)
