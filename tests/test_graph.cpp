@@ -861,6 +861,24 @@ int main(int argc, char **argv)
     check(x->tickInterval() == 1800 && x->titleText() == "[min]", QString("neutral 2 h: every 30 min, got %1").arg(x->tickInterval()));
   }
 
+  // --- 7e. no value yet: the auto scale has no range (+-1e40, or 0..0
+  //          with "include zero"), the axis still gets one, so grid and
+  //          labels are there before the first reading ---
+  {
+    Settings cfg("emptyscale", tmpDir.path());
+    DMMGraph graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    auto *yAxis = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first());
+    for (bool includeZero : { false, true })
+    {
+      graph.setScale(true, includeZero, 0, 0);
+      graph.clearSLOT();
+      check(yAxis->min() == 0 && yAxis->max() == 1,
+            QString("empty, include zero %1: 0..1, got %2..%3")
+              .arg(includeZero).arg(yAxis->min()).arg(yAxis->max()));
+    }
+  }
+
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
   //         back. engValue() emits "µ" while value() used to recognise only
   //         "u", so micro thresholds silently lost their factor. ---

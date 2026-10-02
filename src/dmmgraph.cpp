@@ -556,6 +556,22 @@ bool DMMGraph::divisions() const
 
 void DMMGraph::setYRange(double min, double max)
 {
+  // a range without width - no value yet (the auto scale starts at
+  // +-1e40, or 0..0 with "include zero"), or one value that stays the same
+  // (0 V on a shorted input) - draws no grid and no labels: show 0..1
+  // while there is no value, else a tenth of the value around it (0: +-1)
+  const bool noWidth = !std::isfinite(min) || !std::isfinite(max) || !(max > min);
+  if (noWidth && (m_store->count() == 0 || !std::isfinite(min) || !std::isfinite(max) || min > max))
+  {
+    min = 0;
+    max = 1;
+  }
+  else if (max == min)
+  {
+    const double half = min == 0 ? 1.0 : std::abs(min) * 0.1;
+    min -= half;
+    max += half;
+  }
   if (divisions() && max > min && std::isfinite(min) && std::isfinite(max))
   {
     // 8 divisions of a 1-2-5 step; the range grows to whole steps
