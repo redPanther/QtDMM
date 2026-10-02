@@ -31,6 +31,9 @@
 GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
 {
   setupUi(this);
+  ui_design->addItem(tr("System"), QString("system"));
+  ui_design->addItem(tr("Silver"), QString("silver"));
+  ui_design->addItem(tr("Dark"), QString("dark"));
   m_label = tr("Appearance");
   m_description = tr("<b>Here you can configure QtDMM's visual"
                      " appearance and behaviour.</b>");
@@ -45,6 +48,7 @@ GuiPrefs::~GuiPrefs()
 
 void GuiPrefs::defaultsSLOT()
 {
+  ui_design->setCurrentIndex(qMax(0, ui_design->findData(m_cfg->getString("Windows/design", "dark"))));
   ui_saveWindowPos->setChecked(m_cfg->getBool("Save/window-pos", true));
   ui_saveWindowSize->setChecked(m_cfg->getBool("Save/window-size", true));
 
@@ -57,7 +61,7 @@ void GuiPrefs::defaultsSLOT()
     m_cfg->save();
   }
   ui_showBar->setChecked(m_cfg->getBool("Display/display-bar", true));
-  ui_showMinMax->setChecked(m_cfg->getBool("Display/display-min-max", true));
+  ui_showMinMax->setChecked(m_cfg->getBool("Display/display-min-max", false));
 
   ui_alertUnsavedData->setChecked(m_cfg->getBool("Alert/unsaved-file", true));
   ui_textLabel->setChecked(m_cfg->getBool("Icons/text-label", false));
@@ -70,13 +74,14 @@ void GuiPrefs::defaultsSLOT()
   ui_tipOfTheDay->setChecked(m_cfg->getBool("QtDMM/show-tip", true));
 
   ui_meterScale->setCurrentIndex(qBound(0, m_cfg->getInt("Meter/scale-mode", 0), 2));
-  ui_meterStyle->setCurrentIndex(qBound(0, m_cfg->getInt("Meter/style", 0), 1));
+  ui_meterStyle->setCurrentIndex(qBound(0, m_cfg->getInt("Meter/style", 1), 1));
   ui_meterBallistics->setChecked(m_cfg->getBool("Meter/ballistics", true));
   ui_meterRedZone->setValue(qBound(50, m_cfg->getInt("Meter/red-zone", 90), 100));
 }
 
 void GuiPrefs::factoryDefaultsSLOT()
 {
+  ui_design->setCurrentIndex(ui_design->findData(QString("dark")));
   ui_saveWindowPos->setChecked(true);
   ui_saveWindowSize->setChecked(true);
 
@@ -84,7 +89,7 @@ void GuiPrefs::factoryDefaultsSLOT()
   ui_bgColorDisplay->setColor(QColor(0xda, 0xdc, 0x77));
 
   ui_showBar->setChecked(true);
-  ui_showMinMax->setChecked(true);
+  ui_showMinMax->setChecked(false);
 
   ui_alertUnsavedData->setChecked(true);
   ui_textLabel->setChecked(false);
@@ -97,7 +102,7 @@ void GuiPrefs::factoryDefaultsSLOT()
   ui_tipOfTheDay->setChecked(true);
 
   ui_meterScale->setCurrentIndex(0);
-  ui_meterStyle->setCurrentIndex(0);
+  ui_meterStyle->setCurrentIndex(1);   // classic ivory
   ui_meterBallistics->setChecked(true);
   ui_meterRedZone->setValue(90);
 }
@@ -121,6 +126,7 @@ void GuiPrefs::applySLOT()
   m_cfg->setColor("Display/display-background", ui_bgColorDisplay->color());
   m_cfg->setBool("Display/display-bar", showBar());
   m_cfg->setBool("Display/display-min-max", showMinMax());
+  m_cfg->setString("Windows/design", ui_design->currentData().toString());
   m_cfg->setBool("Alert/unsaved-file", alertUnsavedData());
   m_cfg->setBool("Icons/text-label", useTextLabel());
   m_cfg->setBool("Icons/system-theme", systemIcons());

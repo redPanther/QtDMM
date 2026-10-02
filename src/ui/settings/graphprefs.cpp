@@ -94,7 +94,7 @@ void GraphPrefs::defaultsSLOT()
   // them as Custom
   QString variant = m_cfg->getString("Graph/variant");
   if (variant.isEmpty())
-    variant = m_cfg->getString("Graph/background").isEmpty() ? "neutral" : "custom";
+    variant = m_cfg->getString("Graph/background").isEmpty() ? "scope" : "custom";
   m_variant->setCurrentIndex(qMax(0, m_variant->findData(variant)));
   ui_lineMode->setCurrentIndex(m_cfg->getInt("Graph/line-mode", 1));
   ui_pointMode->setCurrentIndex(m_cfg->getInt("Graph/point-mode"));
@@ -112,7 +112,7 @@ void GraphPrefs::factoryDefaultsSLOT()
   ui_cursorColor->setColor(Qt::black);
   ui_startColor->setColor(Qt::magenta);   // mt: removed .rgb()
   ui_extColor->setColor(Qt::cyan);   // mt: removed .rgb()
-  m_variant->setCurrentIndex(0);
+  m_variant->setCurrentIndex(qMax(0, m_variant->findData(QString("scope"))));
   ui_lineMode->setCurrentIndex(1);
   ui_pointMode->setCurrentIndex(0);
   ui_lineWidth->setValue(2);

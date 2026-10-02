@@ -30,9 +30,32 @@
     <number>10</number>
    </property>
    <item>
+    <widget class="QGroupBox" name="ui_designBox">
+     <property name="title">
+      <string>Design</string>
+     </property>
+     <layout class="QHBoxLayout" name="ui_designLayout">
+      <item>
+       <widget class="QComboBox" name="ui_design">
+        <property name="toolTip">
+         <string>The look of the whole window: the colours of the desktop (System), brushed metal (Silver) or dark. The same as in the View menu.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="ui_designSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="GroupBox4">
      <property name="title">
-      <string>Display</string>
+      <string>Digital display (LCD)</string>
      </property>
      <layout class="QGridLayout">
       <property name="leftMargin">
