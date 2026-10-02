@@ -1,0 +1,69 @@
+//======================================================================
+// File:		guiprefs.h
+// Author:	Matthias Toussaint
+// Created:	Sat Oct 19 15:29:05 CEST 2002
+//----------------------------------------------------------------------
+// This file is part of QtDMM.
+//
+// QtDMM is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License version 3
+// as published by the Free Software Foundation.
+//
+// QtDMM is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//----------------------------------------------------------------------
+// Copyright (c) 2002 Matthias Toussaint
+//======================================================================
+
+#pragma once
+
+#include <QtGui>
+#include "ui_uiguiprefs.h"
+
+/// Settings page "Appearance": window and toolbar options, the LCD display
+/// (colour, bar graph, min/max) and the analog meter (scale mode, style,
+/// ballistics, red zone), tips at start-up.
+class GuiPrefs : public SettingsPage, private Ui::UIGuiPrefs
+{
+  Q_OBJECT
+public:
+  GuiPrefs(QWidget *parent = Q_NULLPTR);
+  ~GuiPrefs();
+  bool      showTip() const;
+  bool      showBar() const;
+  bool      showMinMax() const;
+  bool      alertUnsavedData() const;
+  bool      useTextLabel() const;
+  /// Symbols from the desktop's icon theme first (Linux, Designs::setSystemIcons).
+  bool      systemIcons() const;
+  QColor    displayBgColor() const;
+  bool      saveWindowPosition() const;
+  bool      saveWindowSize() const;
+  void      on_ui_tipOfTheDay_toggled(bool on);
+  bool      showDmmToolbar() const;
+  bool      showGraphToolbar() const;
+  bool      showFileToolbar() const;
+  bool      showDisplay() const;
+  void      setToolbarVisibility(bool, bool, bool, bool);
+  int       meterScaleMode() const;   ///< 0 auto, 1 unipolar, 2 bipolar
+  int       meterStyle() const;   ///< 0 dark, 1 ivory
+  void      setMeterStyle(int style);
+  bool      meterBallistics() const;
+  int       meterRedZone() const;   ///< percent of full scale
+
+Q_SIGNALS:
+  void      showTips(bool);
+
+public Q_SLOTS:
+  virtual void defaultsSLOT();
+  virtual void factoryDefaultsSLOT();
+  virtual void applySLOT();
+
+};
+
+

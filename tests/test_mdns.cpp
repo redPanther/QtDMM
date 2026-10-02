@@ -11,7 +11,7 @@
 #include <QtNetwork>
 #include <QtTest>
 
-#include "mdnsbrowser.h"
+#include "service/mdnsbrowser.h"
 
 static int failed = 0;
 

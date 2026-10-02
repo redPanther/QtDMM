@@ -1,7 +1,7 @@
 # Protocols
 
 Every supported meter speaks one of the wire protocols below, each handled by one
-decoder class in `src/decoders/`. This section collects what is known about
+decoder class in `src/device/decoders/`. This section collects what is known about
 those protocols, where that knowledge comes from, and how it is turned into
 regression tests.
 
@@ -16,7 +16,7 @@ regression tests.
 
 ## Decoders, devices and sources
 
-| Decoder | Protocol (`ReadEvent`) | Devices | Captures in `sources/` | Test vectors |
+| Decoder | Protocol (`FrameFormat`) | Devices | Captures in `sources/` | Test vectors |
 |---|---|---|---|---|
 | `ascii.cpp` | `Metex14`, `PeakTech10`, `Voltcraft14Continuous`, `Voltcraft15Continuous`, `Sigrok` | 48 devices (`Sigrok`: the SCPI bench meters of `sigrok_devices.cpp` - Keysight 34465A, Agilent 3440xA/34410A, HP 34401A, Siglent SDM3055 - read through sigrok-cli's `scpi-dmm` driver): Metex M-3xxx/M-46xx/ME-xx, Voltcraft M-36xx/M-46xx/ME-xx/VC 6xx, PeakTech 4xxx/451, Mastech MAS-34x, Radioshack 22-805/RS22-168A, Digitech QM1350, McVoice M-345pro, Sinometer MAS-343 | `metex-22t.log` (Voltcraft ME-22T), `sigrok-ut61e.log` (Uni-T UT61E through sigrok-cli) | Metex14, Sigrok: yes; PeakTech10: synthetic |
 | `brymen_bm52x.cpp` | `BrymenBM52x`, `BrymenBM82x` | Brymen BM525s, BM829s over the BU-86X adapter (unconfirmed) | — (layout from libsigrok's `bm52x.c`, live readings only) | synthetic |
@@ -48,7 +48,7 @@ everything since the previous frame to the decoder (`getPacketLength()` 0),
 which takes the last line.
 
 `VictronBLE` is not a serial protocol at all: `BleAdvertisementDevice`
-decrypts each Bluetooth advertisement (`src/victronble.cpp`, AES-128-CTR
+decrypts each Bluetooth advertisement (`src/device/victronble.cpp`, AES-128-CTR
 with the key from VictronConnect) and hands the decoder one text line - the
 readout type and the plaintext as hex - so the decoder stays a pure
 bit-field parser that the fixtures can exercise.

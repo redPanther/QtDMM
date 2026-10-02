@@ -1,7 +1,7 @@
 # Supported devices
 
 Every meter QtDMM can decode, taken from the decoder registrations in
-`src/decoders/` (this page is generated from them by
+`src/device/decoders/` (this page is generated from them by
 `tests/generate_docs.py`). Choosing one of these models on the Multimeter
 settings page fills in the serial parameters below; meters not listed can
 often be used with *Manual settings* if they speak one of the listed

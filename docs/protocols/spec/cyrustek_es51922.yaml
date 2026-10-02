@@ -1,5 +1,5 @@
 protocol: CyrustekES51922
-decoder: src/decoders/cyrustek_es51922.cpp
+decoder: src/device/decoders/cyrustek_es51922.cpp
 devices: [Uni-Trend UT61E, Wintex TD2200]
 frames_per_reading: 1
 unit_map:                      # log spelling -> what the decoder emits

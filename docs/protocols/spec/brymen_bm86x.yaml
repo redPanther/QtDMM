@@ -1,5 +1,5 @@
 protocol: BrymenBM86x
-decoder: src/decoders/brymen_bm86x.cpp
+decoder: src/device/decoders/brymen_bm86x.cpp
 devices: [Brymen BM867s, Brymen BM869s]
 frames_per_reading: 1
 sources:

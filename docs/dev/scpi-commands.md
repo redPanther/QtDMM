@@ -1,7 +1,7 @@
 # SCPI command reference
 
 Everything the [SCPI server](../user/scpi-server.md) understands, as
-implemented in `src/scpiserver.cpp` (`ScpiServer::handle()`) and checked by
+implemented in `src/service/scpiserver.cpp` (`ScpiServer::handle()`) and checked by
 `tests/test_scpi.cpp`. The server is an instrument that only *reports*: no
 command changes what the meter measures.
 

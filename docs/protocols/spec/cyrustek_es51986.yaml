@@ -1,5 +1,5 @@
 protocol: CyrustekES51986
-decoder: src/decoders/cyrustek_es51986.cpp
+decoder: src/device/decoders/cyrustek_es51986.cpp
 devices: [Iso-Tech IDM 73, Tenma 72-1016, Uni-Trend UT803]
 frames_per_reading: 2
 unit_map:                      # log spelling -> what the decoder emits

@@ -1,5 +1,5 @@
 {
-  "_comment": "USB-HID meter cables: the chip table and the report layouts, shared by QtDMM (src/portdevices/hidserial.cpp, tests/test_hid.cpp) and qtdmm-bridge (tools/qtdmm-bridge/qtdmm_bridge.py, tests/test_bridge.py). generate_docs.py --check verifies both tables against this file. Bytes are hex, 'expect: null' means a malformed report.",
+  "_comment": "USB-HID meter cables: the chip table and the report layouts, shared by QtDMM (src/device/transports/hidserial.cpp, tests/test_hid.cpp) and qtdmm-bridge (tools/qtdmm-bridge/qtdmm_bridge.py, tests/test_bridge.py). generate_docs.py --check verifies both tables against this file. Bytes are hex, 'expect: null' means a malformed report.",
   "cables": [
     {"vid": "04fa", "pid": "2490", "chip": "CH9325", "name": "Hoitek HE2325U (UT-D04 type)"},
     {"vid": "1a86", "pid": "e008", "chip": "CH9325", "name": "WCH CH9325 (UT-D04, UT803, ...)"},

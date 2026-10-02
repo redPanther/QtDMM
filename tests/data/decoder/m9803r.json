@@ -1,6 +1,6 @@
 {
   "decoder": "M9803RContinuous",
-  "comment": "Frames from the byte table in the header of src/decoders/m9803r.cpp (Matthias Toussaint's reverse engineering): the first ones built by hand; the ones marked 'web' are frames of a real M9803R as published on the web, with the reading the meter showed (passed on by Sarah, the original source is not recorded). dval is in SI base units (123.4 mV -> 0.1234). The 000.0 Ohm range is left out: the decoder puts the decimal point one place too far left compared with the table, and only a meter can settle it. Replace the hand-built ones with real data when available.",
+  "comment": "Frames from the byte table in the header of src/device/decoders/m9803r.cpp (Matthias Toussaint's reverse engineering): the first ones built by hand; the ones marked 'web' are frames of a real M9803R as published on the web, with the reading the meter showed (passed on by Sarah, the original source is not recorded). dval is in SI base units (123.4 mV -> 0.1234). The 000.0 Ohm range is left out: the decoder puts the decimal point one place too far left compared with the table, and only a meter can settle it. Replace the hand-built ones with real data when available.",
   "tests": [
     {
       "comment": "DCV 0.000 V range: 1.234 V, auto (the same frame is among the web samples of a real meter)",

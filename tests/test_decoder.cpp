@@ -7,9 +7,9 @@
 #include <QtTest>
 #include <QRegularExpression>
 
-#include "dmmdecoder.h"
-#include "protocols.h"
-#include "readingadapter.h"
+#include "device/dmmdecoder.h"
+#include "device/protocols.h"
+#include "core/readingadapter.h"
 
 QByteArray parseHexStringToByteArray(const QString &hexString)
 {
@@ -34,9 +34,9 @@ int main(int argc, char **argv)
     // the protocol table: one row per enum value, names round-trip, every
     // factory delivers a decoder of its own type
     int problems = 0;
-    for (int i = 0; i < ReadEvent::EndOfList; ++i)
+    for (int i = 0; i < FrameFormat::EndOfList; ++i)
     {
-      const auto df = static_cast<ReadEvent::DataFormat>(i);
+      const auto df = static_cast<FrameFormat::DataFormat>(i);
       const ProtocolInfo *p = protocolInfo(df);
       if (!p)
       {
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
         ++problems;
         continue;
       }
-      if (ReadEvent::fromString(ReadEvent::toString(df)) != df || ReadEvent::toString(df) != QLatin1String(p->name))
+      if (FrameFormat::fromString(FrameFormat::toString(df)) != df || FrameFormat::toString(df) != QLatin1String(p->name))
       {
         qWarning() << "name does not round-trip for" << p->name;
         ++problems;
@@ -56,12 +56,12 @@ int main(int argc, char **argv)
         ++problems;
       }
     }
-    if (protocols().size() != size_t(ReadEvent::EndOfList))
+    if (protocols().size() != size_t(FrameFormat::EndOfList))
     {
-      qWarning() << "table has" << protocols().size() << "rows for" << int(ReadEvent::EndOfList) << "enum values";
+      qWarning() << "table has" << protocols().size() << "rows for" << int(FrameFormat::EndOfList) << "enum values";
       ++problems;
     }
-    if (ReadEvent::fromString("NoSuchProtocol") != ReadEvent::Invalid || DmmDecoder::getInstance(ReadEvent::Invalid))
+    if (FrameFormat::fromString("NoSuchProtocol") != FrameFormat::Invalid || DmmDecoder::getInstance(FrameFormat::Invalid))
     {
       qWarning() << "unknown names must give Invalid / no decoder";
       ++problems;
@@ -237,7 +237,7 @@ int main(int argc, char **argv)
   }
 
   // Frame alignment invariant: feeding N readings' worth of frames through the
-  // same ring buffer ReaderThread uses must yield exactly N detections. The
+  // same ring buffer FrameReader uses must yield exactly N detections. The
   // per-case loop above retries the same frame up to 5 times, so it cannot tell
   // a correct guard from one that silently drops readings.
   //

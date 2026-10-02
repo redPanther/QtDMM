@@ -9,8 +9,8 @@
 #include <QDebug>
 #include <cmath>
 
-#include "readingadapter.h"
-#include "stalerule.h"
+#include "core/readingadapter.h"
+#include "core/stalerule.h"
 
 static int failed = 0;
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 
   // --- protocol: a Victron's % and min ---
   {
-    ReadingAdapter v(ReadEvent::VictronBLE);
+    ReadingAdapter v(FrameFormat::VictronBLE);
     check(v.adaptValue(71.5, "71.5", "%", "DC", "", false, true, false, 0, 0).port.toString() == "state_of_charge",
           "Victron %: state of charge, no DC");
     check(v.adaptValue(300, "300", "min", "DC", "", false, true, false, 0, 0).port.quantity == Quantity::TimeToGo,

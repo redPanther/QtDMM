@@ -1,5 +1,5 @@
 protocol: VictronBLE
-decoder: src/decoders/victron_ble.cpp
+decoder: src/device/decoders/victron_ble.cpp
 devices: [Victron SmartShunt, Victron BMV-712 Smart, Victron SmartSolar MPPT, Victron BlueSolar MPPT, Victron Phoenix Inverter Smart]
 frames_per_reading: 1
 sources:

@@ -2,7 +2,7 @@
 """Generate the documents that must not drift from their source.
 
 1. docs/user/supported-devices.md - the device table, read off the
-   DmmDecoder::addConfig({...}) registrations in src/decoders/*.cpp. Those calls
+   DmmDecoder::addConfig({...}) registrations in src/device/decoders/*.cpp. Those calls
    are the only thing that decides what the settings dialog offers, so the
    documentation is derived from them rather than maintained by hand.
 
@@ -21,45 +21,45 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-DECODER_DIR = REPO / "src" / "decoders"
+DECODER_DIR = REPO / "src" / "device" / "decoders"
 DOCS = REPO / "docs"
 DEVICES_MD = DOCS / "user" / "supported-devices.md"
 README = REPO / "README.md"
 
-# {"Vendor", "Model", "", baud, ReadEvent::Proto, bits, stopBits, numValues,
+# {"Vendor", "Model", "", baud, FrameFormat::Proto, bits, stopBits, numValues,
 #  parity, display, externalSetup, rts, dtr}
 ADD_CONFIG = re.compile(
     r'addConfig\(\s*\{\s*"(?P<vendor>[^"]*)"\s*,\s*"(?P<model>[^"]*)"\s*,\s*"[^"]*"\s*,'
-    r'\s*(?P<baud>\d+)\s*,\s*ReadEvent::(?P<protocol>\w+)\s*,\s*(?P<bits>\d)\s*,'
+    r'\s*(?P<baud>\d+)\s*,\s*FrameFormat::(?P<protocol>\w+)\s*,\s*(?P<bits>\d)\s*,'
     r'\s*(?P<stop>\d)\s*,\s*(?P<values>\d+)\s*,\s*(?P<parity>\d)\s*,\s*(?P<counts>\d+)\s*,'
     r'\s*(?P<ext>\d)\s*,\s*(?P<rts>\d)\s*,\s*(?P<dtr>\d)')
 PARITY = {"0": "N", "1": "E", "2": "O"}
 
 # The chip behind a protocol, where it is known: lets a user match an
 # unlisted meter to a protocol. Read from the protocol table in
-# src/protocols.cpp - one row per line:
-#   { ReadEvent::<Id>, "<Name>", QT_TRANSLATE_NOOP("Protocols", "<text>"), "<chip>", "<transport>", make<...> },
+# src/device/protocols.cpp - one row per line:
+#   { FrameFormat::<Id>, "<Name>", QT_TRANSLATE_NOOP("Protocols", "<text>"), "<chip>", "<transport>", make<...> },
 PROTOCOL_ROW = re.compile(
-    r'\{\s*ReadEvent::(?P<id>\w+)\s*,\s*"(?P<name>\w+)"\s*,\s*QT_TRANSLATE_NOOP\("Protocols",\s*"(?P<text>[^"]*)"\)'
+    r'\{\s*FrameFormat::(?P<id>\w+)\s*,\s*"(?P<name>\w+)"\s*,\s*QT_TRANSLATE_NOOP\("Protocols",\s*"(?P<text>[^"]*)"\)'
     r'\s*,\s*"(?P<chip>[^"]*)"\s*,\s*"(?P<transport>[^"]*)"\s*,\s*make<(?P<decoder>\w+)>')
 
 
 def protocol_table():
-    """{name: {"id", "text", "chip", "decoder"}} from src/protocols.cpp."""
-    text = (REPO / "src" / "protocols.cpp").read_text(encoding="utf-8")
+    """{name: {"id", "text", "chip", "decoder"}} from src/device/protocols.cpp."""
+    text = (REPO / "src" / "device" / "protocols.cpp").read_text(encoding="utf-8")
     rows = {}
     for m in PROTOCOL_ROW.finditer(text):
         rows[m.group("name")] = {"id": m.group("id"), "text": m.group("text"),
                                  "chip": m.group("chip"), "transport": m.group("transport"),
                                  "decoder": m.group("decoder")}
     if not rows:
-        sys.exit("no protocol rows found in src/protocols.cpp - format changed?")
+        sys.exit("no protocol rows found in src/device/protocols.cpp - format changed?")
     return rows
 
 
 CHIP = {name: row["chip"] for name, row in protocol_table().items() if row["chip"]}
 # How a meter is reached when it has no baud rate - "Bluetooth LE",
-# "USB-HID (BU-86X)", "sigrok-cli" - straight from src/protocols.cpp, so a
+# "USB-HID (BU-86X)", "sigrok-cli" - straight from src/device/protocols.cpp, so a
 # new backend is declared next to its protocol rather than guessed here.
 TRANSPORT = {name: row["transport"] for name, row in protocol_table().items() if row["transport"]}
 
@@ -122,7 +122,7 @@ def render_devices(rows):
         "# Supported devices",
         "",
         "Every meter QtDMM can decode, taken from the decoder registrations in",
-        "`src/decoders/` (this page is generated from them by",
+        "`src/device/decoders/` (this page is generated from them by",
         "`tests/generate_docs.py`). Choosing one of these models on the Multimeter",
         "settings page fills in the serial parameters below; meters not listed can",
         "often be used with *Manual settings* if they speak one of the listed",
@@ -208,21 +208,21 @@ def render_readme(devices_md):
 
 
 def protocol_drift():
-    """Every ReadEvent::DataFormat value before EndOfList must have exactly
-    one row in src/protocols.cpp, with the enum id as its name."""
-    header = (REPO / "src" / "readevent.h").read_text(encoding="utf-8")
+    """Every FrameFormat::DataFormat value before EndOfList must have exactly
+    one row in src/device/protocols.cpp, with the enum id as its name."""
+    header = (REPO / "src" / "device" / "frameformat.h").read_text(encoding="utf-8")
     body = header[header.index("enum DataFormat"):header.index("EndOfList")]
     enum_ids = [m.group(1) for m in re.finditer(r"^\s*(\w+)\s*(?:=\s*-?\d+)?\s*,", body, re.M) if m.group(1) != "Invalid"]
     rows = protocol_table()
     problems = []
     for e in enum_ids:
         if e not in rows:
-            problems.append(f"ReadEvent::{e} has no row in src/protocols.cpp")
+            problems.append(f"FrameFormat::{e} has no row in src/device/protocols.cpp")
     for name, row in rows.items():
         if row["id"] != name:
             problems.append(f"protocols.cpp row {name}: enum id {row['id']} differs from the name")
         if row["id"] not in enum_ids:
-            problems.append(f"protocols.cpp row {name}: ReadEvent::{row['id']} is not in the enum")
+            problems.append(f"protocols.cpp row {name}: FrameFormat::{row['id']} is not in the enum")
     return problems
 
 
@@ -233,7 +233,7 @@ def transport_drift():
     for r in devices():
         if r["serial"] == "?":
             problems.append(f'{r["vendor"]} {r["model"]} ({r["protocol"]}) has no baud rate and its '
-                            f'protocol row in src/protocols.cpp has no transport')
+                            f'protocol row in src/device/protocols.cpp has no transport')
         # a protocol may be reached both ways - the UT61E+ over the UT-D09 USB
         # cable (a baud rate) or the UT-D07B Bluetooth adapter (baud 0) - so a
         # baud rate next to a transport is not an error
@@ -242,7 +242,7 @@ def transport_drift():
 
 def hid_cable_drift():
     """The HID cable table exists three times: tests/data/hid_cables.json (the
-    truth both test suites read), kCables in src/portdevices/hidserial.cpp and
+    truth both test suites read), kCables in src/device/transports/hidserial.cpp and
     HID_CABLES in tools/qtdmm-bridge/qtdmm_bridge.py. Returns the problems."""
     import json
 
@@ -250,7 +250,7 @@ def hid_cable_drift():
              for c in json.loads((REPO / "tests" / "data" / "hid_cables.json").read_text(encoding="utf-8"))["cables"]}
     cpp = {}
     for m in re.finditer(r"\{\s*0x([0-9a-fA-F]{4}),\s*0x([0-9a-fA-F]{4}),\s*HIDSerialDevice::Chip::(\w+)\s*\}",
-                         (REPO / "src" / "portdevices" / "hidserial.cpp").read_text(encoding="utf-8")):
+                         (REPO / "src" / "device" / "transports" / "hidserial.cpp").read_text(encoding="utf-8")):
         cpp[(m.group(1).lower(), m.group(2).lower())] = m.group(3)
     py = {}
     for m in re.finditer(r"\(0x([0-9a-fA-F]{4}),\s*0x([0-9a-fA-F]{4})\):\s*\(\"(\w+)\"",

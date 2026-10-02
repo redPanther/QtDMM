@@ -1,5 +1,5 @@
 protocol: Metex14
-decoder: src/decoders/ascii.cpp
+decoder: src/device/decoders/ascii.cpp
 devices: [Voltcraft ME-22T]
 frames_per_reading: 1
 unit_map:                      # log spelling -> what the decoder emits

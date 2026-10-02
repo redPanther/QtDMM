@@ -1,5 +1,5 @@
 protocol: UniTiDMM
-decoder: src/decoders/unit_idmm.cpp
+decoder: src/device/decoders/unit_idmm.cpp
 devices: [UNI-T UT60BT]
 frames_per_reading: 1
 unit_map:                      # spec spelling -> what the decoder emits

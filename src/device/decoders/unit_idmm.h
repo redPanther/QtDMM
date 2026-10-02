@@ -1,0 +1,45 @@
+// Copyright (c) 2026 The QtDMM developers
+// SPDX-License-Identifier: GPL-3.0-or-later
+#pragma once
+
+#include "device/dmmdecoder.h"
+
+/// UNI-T "iDMM" protocol of the Bluetooth meters (UT60BT, UT161A-E) and of the
+/// UT61B+/D+/E+: `AB CD`-framed packets, over Bluetooth LE a Microchip/ISSC
+/// "Transparent UART" GATT service (BleGattDevice; UT60BT built in, UT-D07B
+/// adapter for the UT61x+), over USB the UT-D09 HID UART cable at 9600 8N1.
+///
+/// Two protocol rows share this class: UniTiDMM (UT60BT, UT161) and
+/// UniTUT61Plus (UT61B+/D+/E+), which differ only in the range tables - see
+/// the tables in the .cpp.
+///
+/// QtDMM polls: every request `AB CD 03 5E 01 D9` ('^') is answered by one
+/// 19-byte measurement frame
+///
+///     AB CD 10 | fn | range | 7 x ASCII display | bar hi | bar lo |
+///     flags A | flags B | flags C | checksum (16 bit BE sum of bytes 0..16)
+///
+/// fn selects the function (DCV, OHM, ...), range an ASCII digit that, with
+/// fn, gives unit and prefix; the display string carries sign and decimal
+/// point exactly as on the LCD. Other frames (the 11-byte name answer) fail
+/// the length/checksum test and are skipped.
+///
+/// Spec with vectors in docs/protocols/spec/unit_idmm.yaml. Sources:
+/// ble-multimeter (docs/protocols/uni-t.md, hardware-verified on a UT60BTk)
+/// and ut61xpy (adapters/ut61xp.py), both in ablage/.
+class DecoderUniTiDMM : public DmmDecoder
+{
+  Q_OBJECT
+public:
+  DecoderUniTiDMM(FrameFormat::DataFormat df) : DmmDecoder(df) { m_name = "UniTiDMM"; }
+
+  std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
+  QByteArray pollRequest() const override;
+  bool checkFormat(const char *data, size_t idx) override;
+  size_t getPacketLength() override { return kFrameLength; }
+
+  static constexpr int kFrameLength = 19;
+  /// True when @p frame (kFrameLength bytes) has the header, the length byte
+  /// and a matching checksum.
+  static bool frameValid(const unsigned char *frame);
+};

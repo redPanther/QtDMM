@@ -1,6 +1,6 @@
 {
   "decoder": "DTM0660",
-  "comment": "SYNTHETIC: frames built by hand from the layout in src/decoders/dtm0660.cpp (which follows libsigrok's dtm0660 parser): 15 bytes with the index in the high nibble, seven-segment digits, flag bits. docs/protocols/sources/dtm0660-brochure.pdf is the chip's brochure, which does not give the serial frame. Expectations are worked out from the displayed reading. No capture from a real DTM0660 meter exists here. Replace with real data when available.",
+  "comment": "SYNTHETIC: frames built by hand from the layout in src/device/decoders/dtm0660.cpp (which follows libsigrok's dtm0660 parser): 15 bytes with the index in the high nibble, seven-segment digits, flag bits. docs/protocols/sources/dtm0660-brochure.pdf is the chip's brochure, which does not give the serial frame. Expectations are worked out from the displayed reading. No capture from a real DTM0660 meter exists here. Replace with real data when available.",
   "tests": [
     {
       "comment": "1.234 V DC",

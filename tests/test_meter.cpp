@@ -11,8 +11,8 @@
 #include <QTest>
 #include <cmath>
 
-#include "meterwid.h"
-#include "readingadapter.h"
+#include "ui/views/analogmeter.h"
+#include "core/readingadapter.h"
 #include <limits>
 
 static int failed = 0;
@@ -31,7 +31,7 @@ static bool near(double a, double b, double eps = 1e-6)
   return std::fabs(a - b) <= eps;
 }
 
-static QImage render(MeterWid &w, const QSize &size)
+static QImage render(AnalogMeter &w, const QSize &size)
 {
   w.resize(size);
   QImage img(size, QImage::Format_ARGB32_Premultiplied);
@@ -66,22 +66,22 @@ int main(int argc, char **argv)
   QApplication app(argc, argv);
 
   // --- 1. angle mapping ---
-  check(near(MeterWid::angleForValue(0.0, 4.0, false), -45.0), "unipolar: 0 -> -45 deg");
-  check(near(MeterWid::angleForValue(4.0, 4.0, false), 45.0), "unipolar: FS -> +45 deg");
-  check(near(MeterWid::angleForValue(2.0, 4.0, false), 0.0), "unipolar: FS/2 -> 0 deg");
-  check(near(MeterWid::angleForValue(-0.2, 4.0, false), -49.5), "unipolar: -5% FS -> left stop");
-  check(near(MeterWid::angleForValue(-1.0, 4.0, false), -49.5), "unipolar: far negative clamps at the stop");
-  check(near(MeterWid::angleForValue(9.0, 4.0, false), 49.5), "unipolar: over range clamps at the right stop");
-  check(near(MeterWid::angleForValue(0.0, 4.0, true), 0.0), "bipolar: 0 -> 0 deg");
-  check(near(MeterWid::angleForValue(-4.0, 4.0, true), -45.0), "bipolar: -FS -> -45 deg");
-  check(near(MeterWid::angleForValue(4.0, 4.0, true), 45.0), "bipolar: +FS -> +45 deg");
-  check(near(MeterWid::angleForValue(1.0, 0.0, false), -45.0), "no full scale: rests at the left");
+  check(near(AnalogMeter::angleForValue(0.0, 4.0, false), -45.0), "unipolar: 0 -> -45 deg");
+  check(near(AnalogMeter::angleForValue(4.0, 4.0, false), 45.0), "unipolar: FS -> +45 deg");
+  check(near(AnalogMeter::angleForValue(2.0, 4.0, false), 0.0), "unipolar: FS/2 -> 0 deg");
+  check(near(AnalogMeter::angleForValue(-0.2, 4.0, false), -49.5), "unipolar: -5% FS -> left stop");
+  check(near(AnalogMeter::angleForValue(-1.0, 4.0, false), -49.5), "unipolar: far negative clamps at the stop");
+  check(near(AnalogMeter::angleForValue(9.0, 4.0, false), 49.5), "unipolar: over range clamps at the right stop");
+  check(near(AnalogMeter::angleForValue(0.0, 4.0, true), 0.0), "bipolar: 0 -> 0 deg");
+  check(near(AnalogMeter::angleForValue(-4.0, 4.0, true), -45.0), "bipolar: -FS -> -45 deg");
+  check(near(AnalogMeter::angleForValue(4.0, 4.0, true), 45.0), "bipolar: +FS -> +45 deg");
+  check(near(AnalogMeter::angleForValue(1.0, 0.0, false), -45.0), "no full scale: rests at the left");
   {
     double last = -100;
     bool monotonic = true;
     for (double v = -0.5; v <= 4.5; v += 0.01)
     {
-      const double a = MeterWid::angleForValue(v, 4.0, false);
+      const double a = AnalogMeter::angleForValue(v, 4.0, false);
       monotonic = monotonic && a >= last;
       last = a;
     }
@@ -89,26 +89,26 @@ int main(int argc, char **argv)
   }
 
   // --- 2. full scale from the reading string ---
-  check(near(MeterWid::fullScaleFromReading("3.856", 4000), 4.0), "\"3.856\" @4000 -> 4");
-  check(near(MeterWid::fullScaleFromReading(" 385.6", 4000), 400.0), "\"385.6\" @4000 -> 400");
-  check(near(MeterWid::fullScaleFromReading("-1234", 2000), 2000.0), "\"-1234\" @2000 -> 2000");
-  check(near(MeterWid::fullScaleFromReading("71.5", 6000, "%"), 100.0), "a percentage is a 0..100 scale (SOC \"71.5\" @6000)");
-  check(near(MeterWid::fullScaleFromReading("50.0", 4000, "%"), 100.0), "duty cycle too");
-  check(near(MeterWid::fullScaleFromReading("3.856", 4000, "V"), 4.0), "other units keep the count rule");
-  check(near(MeterWid::fullScaleFromReading("0.000", 6000), 6.0), "\"0.000\" @6000 -> 6");
-  check(near(MeterWid::fullScaleFromReading("19.99", 2000), 20.0), "\"19.99\" @2000 -> 20");
-  check(std::isnan(MeterWid::fullScaleFromReading("0.L", 4000)), "\"0.L\" is not a number");
-  check(std::isnan(MeterWid::fullScaleFromReading("OL", 4000)), "\"OL\" is not a number");
-  check(std::isnan(MeterWid::fullScaleFromReading("", 4000)), "empty string is not a number");
+  check(near(AnalogMeter::fullScaleFromReading("3.856", 4000), 4.0), "\"3.856\" @4000 -> 4");
+  check(near(AnalogMeter::fullScaleFromReading(" 385.6", 4000), 400.0), "\"385.6\" @4000 -> 400");
+  check(near(AnalogMeter::fullScaleFromReading("-1234", 2000), 2000.0), "\"-1234\" @2000 -> 2000");
+  check(near(AnalogMeter::fullScaleFromReading("71.5", 6000, "%"), 100.0), "a percentage is a 0..100 scale (SOC \"71.5\" @6000)");
+  check(near(AnalogMeter::fullScaleFromReading("50.0", 4000, "%"), 100.0), "duty cycle too");
+  check(near(AnalogMeter::fullScaleFromReading("3.856", 4000, "V"), 4.0), "other units keep the count rule");
+  check(near(AnalogMeter::fullScaleFromReading("0.000", 6000), 6.0), "\"0.000\" @6000 -> 6");
+  check(near(AnalogMeter::fullScaleFromReading("19.99", 2000), 20.0), "\"19.99\" @2000 -> 20");
+  check(std::isnan(AnalogMeter::fullScaleFromReading("0.L", 4000)), "\"0.L\" is not a number");
+  check(std::isnan(AnalogMeter::fullScaleFromReading("OL", 4000)), "\"OL\" is not a number");
+  check(std::isnan(AnalogMeter::fullScaleFromReading("", 4000)), "empty string is not a number");
 
   // --- a temperature has no range: the scale follows the values (1-2-5) ---
   const double none = std::numeric_limits<double>::quiet_NaN();
-  check(near(MeterWid::fullScaleWithoutRange(37.2, none), 50.0), "37.2 -> 50");
-  check(near(MeterWid::fullScaleWithoutRange(46.0, none), 100.0), "46 would be in the red zone of 50 -> 100");
-  check(near(MeterWid::fullScaleWithoutRange(5.0, none), 10.0), "small values: at least 10");
-  check(near(MeterWid::fullScaleWithoutRange(-76.0, none), 100.0), "negative: by magnitude");
-  check(near(MeterWid::fullScaleWithoutRange(950.0, none), 2000.0), "950 -> 2000");
-  check(near(MeterWid::fullScaleWithoutRange(20.0, 100.0), 100.0), "the scale does not shrink");
+  check(near(AnalogMeter::fullScaleWithoutRange(37.2, none), 50.0), "37.2 -> 50");
+  check(near(AnalogMeter::fullScaleWithoutRange(46.0, none), 100.0), "46 would be in the red zone of 50 -> 100");
+  check(near(AnalogMeter::fullScaleWithoutRange(5.0, none), 10.0), "small values: at least 10");
+  check(near(AnalogMeter::fullScaleWithoutRange(-76.0, none), 100.0), "negative: by magnitude");
+  check(near(AnalogMeter::fullScaleWithoutRange(950.0, none), 2000.0), "950 -> 2000");
+  check(near(AnalogMeter::fullScaleWithoutRange(20.0, 100.0), 100.0), "the scale does not shrink");
   {
     // a 50000-count meter showing 37.2 °C: 50, not 5000; a voltage keeps the count rule
     ReadingAdapter adapter;
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
     {
       return ReadingAdapter::reading(adapter.adaptValue(text.toDouble(), text, unit, special, "AUTO", false, true, false, 0, 0));
     };
-    MeterWid m;
+    AnalogMeter m;
     m.setDisplayCounts(50000);
     Reading r = reading("37.2", "C", "TE");
     check(r.temperature(), "C with TE is a temperature");
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
     m.showReading(reading("3.8560", "V", "DC"));
     check(near(m.fullScale(), 5.0), QString("a voltage keeps the count rule (5.0000 @50000), got %1").arg(m.fullScale()));
   }
-  check(std::isnan(MeterWid::fullScaleFromReading("3.856", 0)), "no counts, no scale");
+  check(std::isnan(AnalogMeter::fullScaleFromReading("3.856", 0)), "no counts, no scale");
 
   // --- 2b. scale step: 1-2-5, labels do not touch, 0 is a major tick ---
   {
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
       {
         // a label is about as wide as "-1000" in a 20 px bold font
         const double labelWidth = 11.0 * QString::number(bipolar ? -fs : fs).size() + 10.0;
-        const double step = MeterWid::scaleStep(fs, bipolar, radius, labelWidth);
+        const double step = AnalogMeter::scaleStep(fs, bipolar, radius, labelWidth);
         const double mag = std::pow(10.0, std::floor(std::log10(step) + 1e-9));
         const long mant = std::lround(step / mag);
         const QString what = QString("FS %1 %2: step %3").arg(fs).arg(bipolar ? "bipolar" : "unipolar").arg(step);
@@ -156,23 +156,23 @@ int main(int argc, char **argv)
       }
     // the review cases (R4-03): 22 V bipolar is labelled -20 ... 20 in steps
     // of 5 or 10 (0 included), 500 bipolar no longer crowds eleven labels
-    const double s22 = MeterWid::scaleStep(22.0, true, radius, 40.0);
+    const double s22 = AnalogMeter::scaleStep(22.0, true, radius, 40.0);
     check(near(std::fmod(20.0, s22), 0.0), QString("22 V bipolar: step %1 divides 20").arg(s22));
-    check(MeterWid::scaleStep(500.0, true, radius, 55.0) >= 200.0 - 1e-9, "500 bipolar: step 200 or more");
+    check(AnalogMeter::scaleStep(500.0, true, radius, 55.0) >= 200.0 - 1e-9, "500 bipolar: step 200 or more");
   }
 
   // --- 2c. MIN/MAX readouts ---
-  check(MeterWid::readoutString(-0.004, 2) == "0.00", "a rounded zero has no minus sign (R4-04)");
-  check(MeterWid::readoutString(-0.004, 3) == "-0.004", "a small negative value keeps its sign");
-  check(MeterWid::readoutString(3.856, 3) == "3.856", "three decimals");
-  check(MeterWid::readoutString(-1.5, 1) == "-1.5", "negative value");
-  check(MeterWid::readoutString(std::nan(""), 2) == QStringLiteral("—"), "no value: a dash");
+  check(AnalogMeter::readoutString(-0.004, 2) == "0.00", "a rounded zero has no minus sign (R4-04)");
+  check(AnalogMeter::readoutString(-0.004, 3) == "-0.004", "a small negative value keeps its sign");
+  check(AnalogMeter::readoutString(3.856, 3) == "3.856", "three decimals");
+  check(AnalogMeter::readoutString(-1.5, 1) == "-1.5", "negative value");
+  check(AnalogMeter::readoutString(std::nan(""), 2) == QStringLiteral("—"), "no value: a dash");
 
   // --- 3. ballistics: converges, bounded overshoot, timer stops ---
   {
-    MeterWid w;
+    AnalogMeter w;
     w.setFullScale(4.0);
-    w.setScaleMode(MeterWid::Unipolar);
+    w.setScaleMode(AnalogMeter::Unipolar);
     w.setReading(0.0, "0.000", "V DC", false, false);
     QTest::qWait(1500);
     check(w.isSettled(), "needle settles at rest after 1.5 s");
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
     check(maxAngle > 0.0, "slightly under-damped: some overshoot is expected");
 
     // without ballistics the needle jumps
-    MeterStyle s = MeterStyle::dark();
+    AnalogMeterStyle s = AnalogMeterStyle::dark();
     s.ballistics = false;
     w.setStyle(s);
     w.setReading(4.0, "4.000", "V DC", false, false);
@@ -201,12 +201,12 @@ int main(int argc, char **argv)
 
   // --- 4. auto scale mode latches to bipolar on a negative reading ---
   {
-    MeterWid w;
-    MeterStyle s = MeterStyle::dark();
+    AnalogMeter w;
+    AnalogMeterStyle s = AnalogMeterStyle::dark();
     s.ballistics = false;
     w.setStyle(s);
     w.setFullScale(4.0);
-    w.setScaleMode(MeterWid::Auto);
+    w.setScaleMode(AnalogMeter::Auto);
     w.setReading(1.0, "1.000", "V DC", false, false);
     check(!w.bipolar(), "auto: positive readings keep the unipolar scale");
     w.setReading(-0.1, "-0.100", "V DC", false, false);
@@ -217,10 +217,10 @@ int main(int argc, char **argv)
     check(w.bipolar(), "auto: bipolar is latched");
     w.reset();
     check(!w.bipolar(), "reset() releases the latch");
-    w.setScaleMode(MeterWid::Bipolar);
+    w.setScaleMode(AnalogMeter::Bipolar);
     w.setReading(-1.0, "-1.000", "V DC", false, false);
     check(w.bipolar(), "explicit bipolar");
-    w.setScaleMode(MeterWid::Unipolar);
+    w.setScaleMode(AnalogMeter::Unipolar);
     w.setReading(-1.0, "-1.000", "V DC", false, false);
     check(!w.bipolar(), "explicit unipolar ignores negative readings");
   }
@@ -229,19 +229,19 @@ int main(int argc, char **argv)
   {
     const QString dump = qEnvironmentVariable("TEST_METER_DUMP");
     const QSize size(480, 270);
-    MeterWid w;
-    MeterStyle s = MeterStyle::dark();
+    AnalogMeter w;
+    AnalogMeterStyle s = AnalogMeterStyle::dark();
     s.ballistics = false;
     w.setStyle(s);
     w.setFullScale(4.0);
-    w.setScaleMode(MeterWid::Unipolar);
+    w.setScaleMode(AnalogMeter::Unipolar);
     w.setReading(2.0, "2.000", "V DC", false, false);
     w.setPeak(3.5);
     QImage half = render(w, size);
     check(!half.isNull() && half.size() == size, "renders to an image");
     if (!dump.isEmpty()) half.save(QDir(dump).filePath("meter_dark_half.png"));
 
-    // rough geometry, mirrors MeterWid::geometry()
+    // rough geometry, mirrors AnalogMeter::geometry()
     const double bezelW = qMax(4.0, (size.height() - 2) * 0.06);
     const double fh = size.height() - 2 - 2 * bezelW;
     const double fw = size.width() - 2 - 2 * bezelW;
@@ -279,7 +279,7 @@ int main(int argc, char **argv)
     {
       auto markColor = [&](const QImage &img, double value, bool wantGreen)
       {
-        const double a = MeterWid::angleForValue(value, 4.0, false) * M_PI / 180.0;
+        const double a = AnalogMeter::angleForValue(value, 4.0, false) * M_PI / 180.0;
         for (double f = 0.90; f <= 0.98; f += 0.01)
         {
           const QPoint pt(int(pivot.x() + radius * f * std::sin(a)), int(pivot.y() - radius * f * std::cos(a)));
@@ -309,15 +309,15 @@ int main(int argc, char **argv)
       render(w, size).save(QDir(dump).filePath("meter_dark_ol.png"));
       w.setReading(1.234, "1.234", "V DC", false, true);
       render(w, size).save(QDir(dump).filePath("meter_dark_hold.png"));
-      w.setScaleMode(MeterWid::Bipolar);
+      w.setScaleMode(AnalogMeter::Bipolar);
       w.setReading(-1.5, "-1.500", "V DC", false, false);
       render(w, size).save(QDir(dump).filePath("meter_dark_bipolar.png"));
-      w.setScaleMode(MeterWid::Unipolar);
+      w.setScaleMode(AnalogMeter::Unipolar);
       w.setFullScale(400.0);
       w.setReading(385.6, "385.6", "mV AC", false, false);
       w.setPeak(391.2);
       render(w, size).save(QDir(dump).filePath("meter_dark_400mv.png"));
-      MeterStyle iv = MeterStyle::ivory();
+      AnalogMeterStyle iv = AnalogMeterStyle::ivory();
       iv.ballistics = false;
       w.setStyle(iv);
       w.setFullScale(4.0);
@@ -327,7 +327,7 @@ int main(int argc, char **argv)
       render(w, QSize(960, 540)).save(QDir(dump).filePath("meter_ivory_large.png"));
       render(w, QSize(240, 135)).save(QDir(dump).filePath("meter_ivory_small.png"));
       // issue #143: BM869s, 500 mV range, low reading, long unit labels
-      MeterStyle dk = MeterStyle::dark();
+      AnalogMeterStyle dk = AnalogMeterStyle::dark();
       dk.ballistics = false;
       w.setStyle(dk);
       w.reset();

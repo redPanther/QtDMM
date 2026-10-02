@@ -1,7 +1,7 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// DMM's connection state machine against a fake RFC 2217 server: Connecting
+// MeterConnection's connection state machine against a fake RFC 2217 server: Connecting
 // until the first frame, Connected while frames arrive, Timeout when they
 // stop, Error when the server goes away, reconnect when it is back, and a
 // refused connection reported with its reason. Finally a polled,
@@ -10,7 +10,7 @@
 #include <QtCore>
 #include <QtNetwork>
 
-#include "dmm.h"
+#include "device/meterconnection.h"
 
 static int failed = 0;
 
@@ -40,15 +40,15 @@ static bool waitFor(const std::function<bool()> &cond, int ms)
   return cond();
 }
 
-static const char *name(DMM::LinkState s)
+static const char *name(MeterConnection::LinkState s)
 {
   switch (s)
   {
-    case DMM::LinkState::Closed: return "Closed";
-    case DMM::LinkState::Connecting: return "Connecting";
-    case DMM::LinkState::Connected: return "Connected";
-    case DMM::LinkState::Timeout: return "Timeout";
-    case DMM::LinkState::Error: return "Error";
+    case MeterConnection::LinkState::Closed: return "Closed";
+    case MeterConnection::LinkState::Connecting: return "Connecting";
+    case MeterConnection::LinkState::Connected: return "Connected";
+    case MeterConnection::LinkState::Timeout: return "Timeout";
+    case MeterConnection::LinkState::Error: return "Error";
   }
   return "?";
 }
@@ -62,29 +62,29 @@ int main(int argc, char **argv)
   QTcpSocket *peer = nullptr;
   QObject::connect(&server, &QTcpServer::newConnection, [&] { peer = server.nextPendingConnection(); });
 
-  DMM dmm(nullptr);
+  MeterConnection dmm(nullptr);
   DmmDecoder::DMMInfo info;
   info.baud = 9600;
   info.bits = 8;
   dmm.setDmmInfo(info);
-  dmm.setFormat(ReadEvent::Sigrok);
+  dmm.setFormat(FrameFormat::Sigrok);
   dmm.setTimeout(500);
   dmm.setReconnectInterval(1);
 
-  QList<DMM::LinkState> states;
+  QList<MeterConnection::LinkState> states;
   QStringList messages;
-  QObject::connect(&dmm, &DMM::linkStateChanged, [&](DMM::LinkState s, const QString &m)
+  QObject::connect(&dmm, &MeterConnection::linkStateChanged, [&](MeterConnection::LinkState s, const QString &m)
   {
     states << s;
     messages << m;
   });
   int readings = 0;
-  QObject::connect(&dmm, &DMM::value, [&] { ++readings; });
+  QObject::connect(&dmm, &MeterConnection::value, [&] { ++readings; });
 
   // --- 1. open -> Connecting; first frame -> Connected ---
   dmm.setDevice(QString("RFC2217 127.0.0.1:%1").arg(server.serverPort()));
   check(dmm.open(), "open() succeeds");
-  check(dmm.linkState() == DMM::LinkState::Connecting, "Connecting right after open()");
+  check(dmm.linkState() == MeterConnection::LinkState::Connecting, "Connecting right after open()");
   check(waitFor([&] { return peer != nullptr; }, 2000), "client connected to the fake server");
   if (peer)
   {
@@ -93,13 +93,13 @@ int main(int argc, char **argv)
     peer->write(frame("1.235"));
     peer->flush();
   }
-  check(waitFor([&] { return dmm.linkState() == DMM::LinkState::Connected; }, 2000),
+  check(waitFor([&] { return dmm.linkState() == MeterConnection::LinkState::Connected; }, 2000),
         QString("Connected after the first frame (is %1)").arg(name(dmm.linkState())));
   check(readings >= 1, "reading emitted");
   check(dmm.errorString().startsWith("Connected"), "status text: " + dmm.errorString());
 
   // --- 2. frames stop -> Timeout; frames resume -> Connected ---
-  check(waitFor([&] { return dmm.linkState() == DMM::LinkState::Timeout; }, 3000),
+  check(waitFor([&] { return dmm.linkState() == MeterConnection::LinkState::Timeout; }, 3000),
         QString("Timeout after %1 ms of silence (is %2)").arg(dmm.timeout()).arg(name(dmm.linkState())));
   check(dmm.errorString().contains("Timeout"), "timeout text: " + dmm.errorString());
   if (peer)
@@ -107,29 +107,29 @@ int main(int argc, char **argv)
     peer->write(frame("2.000"));
     peer->flush();
   }
-  check(waitFor([&] { return dmm.linkState() == DMM::LinkState::Connected; }, 2000), "back to Connected");
+  check(waitFor([&] { return dmm.linkState() == MeterConnection::LinkState::Connected; }, 2000), "back to Connected");
 
   // --- 3. server drops the connection -> Error; server still there -> reconnect ---
   QTcpSocket *old = peer;
   peer = nullptr;
   if (old)
     old->disconnectFromHost();
-  check(waitFor([&] { return dmm.linkState() == DMM::LinkState::Error; }, 3000),
+  check(waitFor([&] { return dmm.linkState() == MeterConnection::LinkState::Error; }, 3000),
         QString("Error after the server closed (is %1)").arg(name(dmm.linkState())));
   check(dmm.errorString().contains("Lost connection"), "loss text: " + dmm.errorString());
   check(waitFor([&] { return peer != nullptr; }, 4000), "reconnected within the retry interval");
-  check(dmm.linkState() == DMM::LinkState::Connecting, "Connecting again after reconnect");
+  check(dmm.linkState() == MeterConnection::LinkState::Connecting, "Connecting again after reconnect");
   if (peer)
   {
     peer->readAll();
     peer->write(frame("3.000"));
     peer->flush();
   }
-  check(waitFor([&] { return dmm.linkState() == DMM::LinkState::Connected; }, 2000), "Connected after reconnect");
+  check(waitFor([&] { return dmm.linkState() == MeterConnection::LinkState::Connected; }, 2000), "Connected after reconnect");
 
   // --- 4. close() -> Closed, no reconnect ---
   dmm.close();
-  check(dmm.linkState() == DMM::LinkState::Closed, "Closed after close()");
+  check(dmm.linkState() == MeterConnection::LinkState::Closed, "Closed after close()");
   check(!dmm.isOpen(), "port closed");
   const int before = states.size();
   waitFor([] { return false; }, 1500);
@@ -138,23 +138,23 @@ int main(int argc, char **argv)
   // --- 5. nobody listening -> Error with the socket's reason ---
   const quint16 deadPort = server.serverPort();
   server.close();
-  DMM refused(nullptr);
+  MeterConnection refused(nullptr);
   refused.setDmmInfo(info);
-  refused.setFormat(ReadEvent::Sigrok);
+  refused.setFormat(FrameFormat::Sigrok);
   refused.setReconnectInterval(0);
   refused.setDevice(QString("RFC2217 127.0.0.1:%1").arg(deadPort));
   check(refused.open(), "open() itself succeeds (connect is asynchronous)");
   // Windows reports a refused loopback connect only after its SYN retries (~3 s)
-  check(waitFor([&] { return refused.linkState() == DMM::LinkState::Error; }, 15000),
+  check(waitFor([&] { return refused.linkState() == MeterConnection::LinkState::Error; }, 15000),
         QString("refused connection -> Error (is %1)").arg(name(refused.linkState())));
   check(!refused.errorString().isEmpty() && refused.errorString().contains("Lost connection"),
         "reason reported: " + refused.errorString());
   refused.close();
 
   // --- 6. malformed address fails open() at once ---
-  DMM bad(nullptr);
+  MeterConnection bad(nullptr);
   bad.setDmmInfo(info);
-  bad.setFormat(ReadEvent::Sigrok);
+  bad.setFormat(FrameFormat::Sigrok);
   bad.setDevice("RFC2217 nonsense");
   check(!bad.open(), "open() fails for an address without port");
   check(bad.errorString().contains("host:port"), "malformed address text: " + bad.errorString());
@@ -185,16 +185,16 @@ int main(int argc, char **argv)
       });
     });
 
-    DMM meter(nullptr);
+    MeterConnection meter(nullptr);
     DmmDecoder::DMMInfo flukeInfo;
     flukeInfo.baud = 115200;
     flukeInfo.bits = 8;
     meter.setDmmInfo(flukeInfo);
-    meter.setFormat(ReadEvent::FlukeQM);
+    meter.setFormat(FrameFormat::FlukeQM);
     meter.setDevice(QString("RFC2217 127.0.0.1:%1").arg(fluke.serverPort()));
     double lastValue = 0;
     QString lastVal, lastUnit;
-    QObject::connect(&meter, &DMM::value, [&](double dval, const QString &val, const QString &unit)
+    QObject::connect(&meter, &MeterConnection::value, [&](double dval, const QString &val, const QString &unit)
     {
       lastValue = dval;
       lastVal = val;
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
     check(waitFor([&] { return lastUnit == "mV"; }, 4000), "reading decoded from the split answer");
     check(lastVal == "-0.023" && qFuzzyCompare(lastValue + 1, -0.000023 + 1),
           "reading is -0.023 mV: " + lastVal + " " + lastUnit);
-    check(meter.linkState() == DMM::LinkState::Connected, "fluke Connected");
+    check(meter.linkState() == MeterConnection::LinkState::Connected, "fluke Connected");
     check(waitFor([&] { return polls >= 2; }, 4000), "polled again");
     meter.close();
   }
@@ -235,16 +235,16 @@ int main(int argc, char **argv)
       });
     });
 
-    DMM meter(nullptr);
+    MeterConnection meter(nullptr);
     DmmDecoder::DMMInfo benchInfo;
     benchInfo.baud = 9600;
     benchInfo.bits = 8;
     meter.setDmmInfo(benchInfo);
-    meter.setFormat(ReadEvent::Fluke45);
+    meter.setFormat(FrameFormat::Fluke45);
     meter.setDevice(QString("RFC2217 127.0.0.1:%1").arg(bench.serverPort()));
     int readings45 = 0;
     QString lastVal, lastUnit;
-    QObject::connect(&meter, &DMM::value, [&](double, const QString &val, const QString &unit)
+    QObject::connect(&meter, &MeterConnection::value, [&](double, const QString &val, const QString &unit)
     {
       ++readings45;
       lastVal = val;
@@ -253,13 +253,13 @@ int main(int argc, char **argv)
     check(meter.open(), "fluke 45 open()");
     check(waitFor([&] { return polls >= 2 && readings45 >= 2; }, 6000), "fluke 45 polled twice, two readings");
     check(lastVal == "12.345" && lastUnit == "MOhm", "fluke 45 reading 12.345 MOhm: " + lastVal + " " + lastUnit);
-    check(meter.linkState() == DMM::LinkState::Connected && !meter.errorString().startsWith("Error"),
+    check(meter.linkState() == MeterConnection::LinkState::Connected && !meter.errorString().startsWith("Error"),
           "fluke 45 Connected without error text: " + meter.errorString());
     meter.close();
   }
 
   if (failed == 0)
-    qInfo() << "All DMM link state tests passed.";
+    qInfo() << "All MeterConnection link state tests passed.";
   else
     qWarning() << failed << "DMM link state test(s) failed.";
   return failed == 0 ? 0 : 1;

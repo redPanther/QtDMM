@@ -15,7 +15,7 @@ look.
 
 Usage:
   import_protocol_log.py docs/protocols/sources/UT61E.log \\
-      --protocol CyrustekES51922 --decoder src/decoders/cyrustek_es51922.cpp \\
+      --protocol CyrustekES51922 --decoder src/device/decoders/cyrustek_es51922.cpp \\
       --devices "Uni-Trend UT61E" "Wintex TD2200" --packet-length 14 \\
       > docs/protocols/spec/cyrustek_es51922.yaml
 """
@@ -130,7 +130,7 @@ def render_reading(reading):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("log", type=Path)
-    ap.add_argument("--protocol", required=True, help="ReadEvent::DataFormat name")
+    ap.add_argument("--protocol", required=True, help="FrameFormat::DataFormat name")
     ap.add_argument("--decoder", required=True, help="path of the decoder source")
     ap.add_argument("--devices", nargs="*", default=[])
     ap.add_argument("--frames-per-reading", type=int, default=1)

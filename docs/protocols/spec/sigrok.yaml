@@ -1,5 +1,5 @@
 protocol: Sigrok
-decoder: src/decoders/ascii.cpp
+decoder: src/device/decoders/ascii.cpp
 devices: [Uni-T UT61E via sigrok-cli uni-t-ut61e-ser]
 frames_per_reading: 1
 unit_map:                      # log spelling -> what the decoder emits

@@ -10,9 +10,9 @@
 #include <QtNetwork>
 #include <QtTest>
 
-#include "mdnsbrowser.h"
-#include "mdnsresponder.h"
-#include "scpiserver.h"
+#include "service/mdnsbrowser.h"
+#include "service/mdnsresponder.h"
+#include "service/scpiserver.h"
 
 static int failed = 0;
 

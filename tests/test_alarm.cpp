@@ -6,8 +6,8 @@
 
 #include <QtCore>
 
-#include "alarm.h"
-#include "engnumbervalidator.h"
+#include "core/alarm.h"
+#include "ui/engnumbervalidator.h"
 
 static int failed = 0;
 

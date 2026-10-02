@@ -1,5 +1,5 @@
 protocol: Fluke45
-decoder: src/decoders/fluke45.cpp
+decoder: src/device/decoders/fluke45.cpp
 devices: [Fluke 45]
 frames_per_reading: 1
 unit_map:                      # spec spelling -> what the decoder emits

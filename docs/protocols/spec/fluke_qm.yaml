@@ -1,5 +1,5 @@
 protocol: FlukeQM
-decoder: src/decoders/fluke_qm.cpp
+decoder: src/device/decoders/fluke_qm.cpp
 devices: [Fluke 87-IV, Fluke 89-IV, Fluke 187, Fluke 189, Fluke 287, Fluke 289]
 frames_per_reading: 1
 unit_map:                      # spec spelling -> what the decoder emits

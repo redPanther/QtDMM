@@ -7,9 +7,9 @@
 #include <QDebug>
 #include <cmath>
 
-#include "sharedstatemanager.h"
-#include "portdevices/calc.h"
-#include "dmmdecoder.h"
+#include "service/sharedstatemanager.h"
+#include "device/transports/calc.h"
+#include "device/dmmdecoder.h"
 
 static int failed = 0;
 
@@ -33,10 +33,10 @@ static SharedStateManager::Reading reading(double value, const QString &unit, qi
   return r;
 }
 
-// runs the 30-byte line through DecoderAscii exactly like ReaderThread does
+// runs the 30-byte line through DecoderAscii exactly like FrameReader does
 static std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &line)
 {
-  auto decoder = DmmDecoder::getInstance(ReadEvent::Sigrok);
+  auto decoder = DmmDecoder::getInstance(FrameFormat::Sigrok);
   if (!decoder || line.size() != int(decoder->getPacketLength()))
     return std::nullopt;
   if (!decoder->checkFormat(line.constData(), line.size() - 1))
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   check(u.registerInstance() && i.registerInstance() && p.registerInstance() && odd.registerInstance(), "all register");
 
   DmmDecoder::DMMInfo info;
-  info.protocol = ReadEvent::Sigrok;
+  info.protocol = FrameFormat::Sigrok;
   info.display = 40000;
   const qint64 now = QDateTime::currentMSecsSinceEpoch();
 
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
   {
     bool found = false;
     for (const auto &cfg : DmmDecoder::getDeviceConfigurations())
-      if (cfg.vendor == "QtDMM" && cfg.model == "Calculated value" && cfg.protocol == ReadEvent::Sigrok)
+      if (cfg.vendor == "QtDMM" && cfg.model == "Calculated value" && cfg.protocol == FrameFormat::Sigrok)
         found = true;
     check(found, "QtDMM / Calculated value is a registered model with the Sigrok protocol");
   }
