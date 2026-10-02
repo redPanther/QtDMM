@@ -37,9 +37,9 @@ struct Meaning
 // What a value measures, from the decoder's base unit and mode code. The
 // unit decides first; the mode code where the unit is ambiguous or missing
 // (kern_spezifikation §2.1: "aus der Einheit").
-Meaning meaning(const QString &base, const QString &mode, ReadEvent::DataFormat format)
+Meaning meaning(const QString &base, const QString &mode, FrameFormat::DataFormat format)
 {
-  const bool victron = format == ReadEvent::VictronBLE;
+  const bool victron = format == FrameFormat::VictronBLE;
 
   if (mode == QLatin1String("DI"))
     return { Quantity::Voltage, QStringLiteral("V") };

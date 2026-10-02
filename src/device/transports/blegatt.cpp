@@ -30,13 +30,13 @@ const QBluetoothUuid kIsscWriteFallback(QStringLiteral("49535343-6daa-4d02-abf6-
 constexpr int kConnectTimeoutMs = 20000;
 }
 
-std::optional<BleGattDevice::Profile> BleGattDevice::profile(ReadEvent::DataFormat format)
+std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFormat format)
 {
   switch (format)
   {
-    case ReadEvent::UniTiDMM:
+    case FrameFormat::UniTiDMM:
       return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT60BT" } };
-    case ReadEvent::UniTUT61Plus:   // UT161 built in; UT61B+/D+/E+ through the UT-D07B adapter
+    case FrameFormat::UniTUT61Plus:   // UT161 built in; UT61B+/D+/E+ through the UT-D07B adapter
       return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT161", "UT-D07" } };
     default:
       return std::nullopt;
@@ -270,7 +270,7 @@ void BleGattDevice::sendPoll()
   m_service->writeCharacteristic(m_writeChar, m_lastPoll, mode);
 }
 
-QStringList BleGattDevice::scan(ReadEvent::DataFormat format, int ms)
+QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms)
 {
   const auto p = profile(format);
   if (!p)

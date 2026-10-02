@@ -15,7 +15,7 @@ class SharedStateManager;
 /// The inputs come from SharedStateManager::readings(); every poll interval
 /// the formula is evaluated and the result is offered as a sigrok-style
 /// text line ("DC 6.02 W AUTO", padded to 30 bytes like SigrokDevice does),
-/// so the ASCII decoder (ReadEvent::Sigrok) and everything after it work
+/// so the ASCII decoder (FrameFormat::Sigrok) and everything after it work
 /// unchanged. Instance ids are the variables; a hyphen in an id can be
 /// written as an underscore in the formula. The variable t is reserved: the
 /// seconds since the device was opened, which together with sin(), rand()
@@ -92,7 +92,7 @@ private:
   QString m_source;             ///< formula text from the device string
   std::optional<CalcExpr> m_expr;
   QTimer m_timer;
-  QByteArray m_pending;         ///< the line not yet read by ReaderThread
+  QByteArray m_pending;         ///< the line not yet read by FrameReader
   QString m_lastStatus;
   bool m_statusSent = false;    ///< the first tick always reports
 };

@@ -67,7 +67,7 @@ ControlBar::ControlBar(QWidget *parent) :
 
 bool ControlBar::supported(const DmmDecoder::DMMInfo &info)
 {
-  return info.protocol == ReadEvent::UniTiDMM || info.protocol == ReadEvent::UniTUT61Plus;
+  return info.protocol == FrameFormat::UniTiDMM || info.protocol == FrameFormat::UniTUT61Plus;
 }
 
 void ControlBar::setConnected(bool connected)

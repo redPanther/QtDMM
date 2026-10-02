@@ -4,8 +4,8 @@
 
 static const bool registered = []()
 {
-  DmmDecoder::addConfig({"PeakTech", "3315", "",  2400,  ReadEvent::CyrustekES51962, 7, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT70B", "",  2400,  ReadEvent::CyrustekES51962, 7, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "3315", "",  2400,  FrameFormat::CyrustekES51962, 7, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT70B", "",  2400,  FrameFormat::CyrustekES51962, 7, 1, 1, 0, 4000, 0, 0, 1});
   return true;
 }();
 
@@ -16,12 +16,12 @@ bool DecoderCyrusTekES51962::checkFormat(const char *data, size_t idx)
   // so skipping the first copy's terminator at idx == 10 and matching only the
   // second at idx == 21 gives one reading per measurement. Do not "simplify"
   // this to getPacketLength() - unlike vc940, this protocol duplicates frames.
-  return (m_type == ReadEvent::CyrustekES51962 && idx >= 12 && data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+  return (m_type == FrameFormat::CyrustekES51962 && idx >= 12 && data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
 }
 
 size_t DecoderCyrusTekES51962::getPacketLength()
 {
-  return (m_type == ReadEvent::CyrustekES51962 ? 11 : 0);
+  return (m_type == FrameFormat::CyrustekES51962 ? 11 : 0);
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51962::decode(const QByteArray &data, int id)

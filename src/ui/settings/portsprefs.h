@@ -12,7 +12,7 @@
 /// Settings page "Special ports": user-defined port entries (type + address,
 /// e.g. RFC2217 host:port or a sigrok driver string) added to the port list
 /// of the multimeter page, and the path of sigrok-cli.
-class PortsPrefs : public PrefWidget, private Ui::UIPortsPrefs
+class PortsPrefs : public SettingsPage, private Ui::UIPortsPrefs
 {
   Q_OBJECT
 public:

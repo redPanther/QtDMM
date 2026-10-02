@@ -1,14 +1,14 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ReadingLog: the readings table model without its widget. Ring behaviour,
+// ReadingsModel: the readings table model without its widget. Ring behaviour,
 // model signals (QAbstractItemModelTester watches the contracts), the
 // statistics line, tab text for the clipboard and the CSV export.
 
 #include <QtCore>
 #include <QAbstractItemModelTester>
 
-#include "recording/readinglog.h"
+#include "recording/readingsmodel.h"
 #include "core/reading.h"
 #include "recording/recordingstore.h"
 
@@ -23,9 +23,9 @@ static void check(bool cond, const QString &what)
   }
 }
 
-static ReadingLog::Entry entry(double dval, const QString &val, const QString &unit, int secs, int id = 0)
+static ReadingsModel::Entry entry(double dval, const QString &val, const QString &unit, int secs, int id = 0)
 {
-  ReadingLog::Entry e;
+  ReadingsModel::Entry e;
   e.when = QDateTime(QDate(2026, 9, 21), QTime(14, 3, 5, 250)).addSecs(secs);
   e.dval = dval;
   e.val = val;
@@ -40,7 +40,7 @@ static ReadingLog::Entry entry(double dval, const QString &val, const QString &u
 int main(int argc, char **argv)
 {
   QCoreApplication app(argc, argv);
-  ReadingLog log;
+  ReadingsModel log;
   QAbstractItemModelTester tester(&log, QAbstractItemModelTester::FailureReportingMode::Warning);
 
   int inserted = 0, removed = 0, resets = 0;
@@ -49,20 +49,20 @@ int main(int argc, char **argv)
   QObject::connect(&log, &QAbstractItemModel::modelReset, [&] { ++resets; });
 
   // --- 1. rows and cells ---
-  check(log.rowCount() == 0 && log.columnCount() == ReadingLog::ColumnCount, "empty model");
+  check(log.rowCount() == 0 && log.columnCount() == ReadingsModel::ColumnCount, "empty model");
   log.append(entry(1.234, "1.234", "V", 0));
   log.append(entry(0.0122, "12.2", "mV", 1));
   log.append(entry(0, " OL ", "V", 2));
   log.append(entry(50.0, "50.0", "Hz", 3, 1));   // a secondary value
   check(log.rowCount() == 4 && inserted == 4, "four rows appended");
-  check(log.isSingleDay() && log.data(log.index(0, ReadingLog::Time)).toString() == "14:03:05.250",
-        "time cell without the date while all rows are from one day: " + log.data(log.index(0, ReadingLog::Time)).toString());
-  check(log.data(log.index(1, ReadingLog::Value)).toString() == "12.2", "value cell");
-  check(log.data(log.index(1, ReadingLog::Unit)).toString() == "mV", "unit cell");
-  check(log.data(log.index(2, ReadingLog::Value)).toString() == "OL", "overload cell is trimmed");
-  check(log.data(log.index(3, ReadingLog::Mode)).toString().startsWith("2nd"), "secondary value marked");
-  check(log.data(log.index(1, ReadingLog::Value), ReadingLog::DvalRole).toDouble() == 0.0122, "dval role");
-  check(log.headerData(ReadingLog::Value, Qt::Horizontal).toString() == "Value", "header");
+  check(log.isSingleDay() && log.data(log.index(0, ReadingsModel::Time)).toString() == "14:03:05.250",
+        "time cell without the date while all rows are from one day: " + log.data(log.index(0, ReadingsModel::Time)).toString());
+  check(log.data(log.index(1, ReadingsModel::Value)).toString() == "12.2", "value cell");
+  check(log.data(log.index(1, ReadingsModel::Unit)).toString() == "mV", "unit cell");
+  check(log.data(log.index(2, ReadingsModel::Value)).toString() == "OL", "overload cell is trimmed");
+  check(log.data(log.index(3, ReadingsModel::Mode)).toString().startsWith("2nd"), "secondary value marked");
+  check(log.data(log.index(1, ReadingsModel::Value), ReadingsModel::DvalRole).toDouble() == 0.0122, "dval role");
+  check(log.headerData(ReadingsModel::Value, Qt::Horizontal).toString() == "Value", "header");
   {
     // a meter whose secondary display is off sends an empty second value:
     // the display clears it, the log does not take it
@@ -77,28 +77,28 @@ int main(int argc, char **argv)
   // --- 1b. a day change brings the date into every row, and it goes again
   //         when the rows of the first day have been dropped ---
   {
-    ReadingLog days;
+    ReadingsModel days;
     int timeChanges = 0;
     QObject::connect(&days, &QAbstractItemModel::dataChanged, [&](const QModelIndex &tl, const QModelIndex &br)
     {
-      if (tl.column() == ReadingLog::Time && br.column() == ReadingLog::Time && tl.row() == 0)
+      if (tl.column() == ReadingsModel::Time && br.column() == ReadingsModel::Time && tl.row() == 0)
         ++timeChanges;
     });
     days.append(entry(1.0, "1.000", "V", 0));
     days.append(entry(2.0, "2.000", "V", 86400));   // the next day
     check(!days.isSingleDay() && timeChanges == 1, "the second day switches the dates on");
-    check(days.data(days.index(0, ReadingLog::Time)).toString() == "2026-09-21 14:03:05.250", "time cell with date");
-    check(days.data(days.index(1, ReadingLog::Time)).toString() == "2026-09-22 14:03:05.250", "next day's cell");
+    check(days.data(days.index(0, ReadingsModel::Time)).toString() == "2026-09-21 14:03:05.250", "time cell with date");
+    check(days.data(days.index(1, ReadingsModel::Time)).toString() == "2026-09-22 14:03:05.250", "next day's cell");
     days.setMaxRows(1);
     check(days.isSingleDay() && timeChanges == 2, "one day left: the dates go");
-    check(days.data(days.index(0, ReadingLog::Time)).toString() == "14:03:05.250", "time only again");
+    check(days.data(days.index(0, ReadingsModel::Time)).toString() == "14:03:05.250", "time only again");
     days.append(entry(3.0, "3.000", "V", 90000));
     days.clear();
     check(days.isSingleDay(), "cleared log is single-day");
   }
 
   // --- 2. statistics skip overloads and secondary values ---
-  ReadingLog::Stats s = log.stats();
+  ReadingsModel::Stats s = log.stats();
   check(s.count == 4 && s.numeric == 2, QString("stats count %1 numeric %2").arg(s.count).arg(s.numeric));
   check(qFuzzyCompare(s.min, 0.0122) && qFuzzyCompare(s.max, 1.234), "stats min/max");
   check(qFuzzyCompare(s.mean, (1.234 + 0.0122) / 2), "stats mean");
@@ -107,10 +107,10 @@ int main(int argc, char **argv)
   // --- 3. ring: the oldest rows go ---
   log.setMaxRows(3);
   check(log.rowCount() == 3 && removed == 1, "shrinking maxRows trims the oldest");
-  check(log.data(log.index(0, ReadingLog::Value)).toString() == "12.2", "first row is now the second reading");
+  check(log.data(log.index(0, ReadingsModel::Value)).toString() == "12.2", "first row is now the second reading");
   log.append(entry(2.0, "2.000", "V", 4));
   check(log.rowCount() == 3 && removed == 2, "append at the limit drops one");
-  check(log.data(log.index(2, ReadingLog::Value)).toString() == "2.000", "newest row is last");
+  check(log.data(log.index(2, ReadingsModel::Value)).toString() == "2.000", "newest row is last");
   log.setMaxRows(0);
   check(log.maxRows() == 1 && log.rowCount() == 1, "maxRows is at least 1");
   log.setMaxRows(1000);
@@ -127,8 +127,8 @@ int main(int argc, char **argv)
   //          meter shows it (table, copy and export) ---
   log.append(entry(0.0, "000.00", "mV", 6));
   log.append(entry(-0.0293, "-029.30", "mV", 7));
-  check(log.data(log.index(2, ReadingLog::Value)).toString() == "0.00", "000.00 -> 0.00");
-  check(log.data(log.index(3, ReadingLog::Value)).toString() == "-29.30", "-029.30 -> -29.30");
+  check(log.data(log.index(2, ReadingsModel::Value)).toString() == "0.00", "000.00 -> 0.00");
+  check(log.data(log.index(3, ReadingsModel::Value)).toString() == "-29.30", "-029.30 -> -29.30");
 
   // --- 4. clipboard text ---
   log.clear();
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
   const QStringList csv = QString::fromUtf8(f.readAll()).split('\n', Qt::SkipEmptyParts);
   check(csv.size() == 3 && csv[0] == "timestamp;value;unit;mode;range;hold", "csv header: " + csv.value(0));
   check(csv[1] == "2026-09-21T14:03:05,250;1.000;V;DC;AUTO;0", "csv row: " + csv.value(1));
-  ReadingLog empty;
+  ReadingsModel empty;
   check(!empty.write(path, &error) && !error.isEmpty(), "empty log refuses to export");
   check(!log.write(tmp.filePath("no/such/dir/x.csv"), &error), "unwritable path fails");
 
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
   //         follows a series that is independent of the recording ---
   {
     RecordingStore store;
-    ReadingLog mine;
+    ReadingsModel mine;
     mine.append(entry(1.0, "1.000", "V", 0));   // goes to its own store
     mine.setStore(&store);
     check(mine.rowCount() == 0 && mine.store() == &store, "setStore: the log shows the new store, empty");
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
     check(store.readingCapacity() == 2, "setStore: the limit is the store's");
     QAbstractItemModelTester shared(&mine, QAbstractItemModelTester::FailureReportingMode::Warning);
 
-    ReadingLog other;
+    ReadingsModel other;
     other.setStore(&store);
     int rowsSeen = 0;
     QObject::connect(&other, &QAbstractItemModel::rowsInserted, [&] { ++rowsSeen; });
@@ -196,8 +196,8 @@ int main(int argc, char **argv)
     store.setReading(r);
     check(mine.rowCount() == 2 && other.rowCount() == 2 && rowsSeen == 3,
           QString("shared store: %1 and %2 rows").arg(mine.rowCount()).arg(other.rowCount()));
-    check(mine.data(mine.index(0, ReadingLog::Value)).toString() == "12.2" &&
-          mine.data(mine.index(0, ReadingLog::Time)).toString() == "14:03:05.250",
+    check(mine.data(mine.index(0, ReadingsModel::Value)).toString() == "12.2" &&
+          mine.data(mine.index(0, ReadingsModel::Time)).toString() == "14:03:05.250",
           "shared store: the cells come from the store's row");
 
     mine.markLast(QColor("#d82222"), "Alarm 1");
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
   // --- 8. the store goes before the log (the main window deletes its views
   //         one by one): the log falls back to its own store, empty ---
   {
-    ReadingLog log;
+    ReadingsModel log;
     log.append(entry(1.0, "1.000", "V", 0));   // stays in its own store
     QAbstractItemModelTester tester(&log, QAbstractItemModelTester::FailureReportingMode::Warning);
     {

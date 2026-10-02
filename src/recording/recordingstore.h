@@ -68,7 +68,7 @@ struct LoggedReading
 /// table). Its signals come in pairs around every change, so a table model
 /// can turn them into begin/end calls one to one.
 ///
-/// DMMGraph shows the store and follows its signals; it keeps only what is
+/// GraphWidget shows the store and follows its signals; it keeps only what is
 /// a matter of display (window, zoom, scale, colours, the integral's scale
 /// and offset). Only QtCore, so it can be tested on its own.
 ///
@@ -78,7 +78,7 @@ class RecordingStore : public QObject
 {
   Q_OBJECT
 public:
-  /// How recording is started; the same numbers as DMMGraph::SampleMode.
+  /// How recording is started; the same numbers as GraphWidget::SampleMode.
   enum StartMode
   {
     Manual = 0,   ///< start()

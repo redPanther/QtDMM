@@ -130,7 +130,7 @@ def render_reading(reading):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("log", type=Path)
-    ap.add_argument("--protocol", required=True, help="ReadEvent::DataFormat name")
+    ap.add_argument("--protocol", required=True, help="FrameFormat::DataFormat name")
     ap.add_argument("--decoder", required=True, help="path of the decoder source")
     ap.add_argument("--devices", nargs="*", default=[])
     ap.add_argument("--frames-per-reading", type=int, default=1)

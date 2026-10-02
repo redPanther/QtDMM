@@ -5,17 +5,17 @@
 #include <QByteArray>
 #include <optional>
 
-#include "device/readevent.h"
+#include "device/frameformat.h"
 
 /// Base class of all protocol decoders and registry of the supported meters.
 ///
 /// A decoder turns one frame of meter bytes into a DmmResponse. Each protocol
-/// (ReadEvent::DataFormat) has one subclass in src/decoders/; that file also
+/// (FrameFormat::DataFormat) has one subclass in src/decoders/; that file also
 /// registers the meters speaking the protocol with addConfig() from a static
 /// initialiser, so adding a meter is a one-line change there and the
 /// supported-devices page (tests/generate_docs.py) picks it up.
 ///
-/// How a frame reaches decode(): ReaderThread feeds every received byte into
+/// How a frame reaches decode(): FrameReader feeds every received byte into
 /// a ring buffer and calls checkFormat() on it; once that returns true the
 /// last getPacketLength() bytes are handed to decode().
 ///
@@ -33,8 +33,8 @@ public:
   ///   - val, unit: display form, unit carries the SI prefix ("1.234", "kOhm")
   ///   - dval: the same measurement in SI *base* units (1234.0)
   ///
-  /// DisplayWid shows val+unit verbatim, while DMMGraph plots dval and strips
-  /// the prefix off the unit for its axis label (DMMGraph::setUnit). A decoder
+  /// LcdWidget shows val+unit verbatim, while GraphWidget plots dval and strips
+  /// the prefix off the unit for its axis label (GraphWidget::setUnit). A decoder
   /// that leaves dval unscaled therefore records values whose magnitude jumps
   /// by the prefix factor whenever the meter changes range.
   ///
@@ -71,7 +71,7 @@ public:
     QString model;
     QString name;                      ///< "vendor model", filled in by addConfig()
     int   baud{0};                     ///< 600 ... 19200
-    ReadEvent::DataFormat protocol{ReadEvent::Invalid}; ///< which decoder handles the meter
+    FrameFormat::DataFormat protocol{FrameFormat::Invalid}; ///< which decoder handles the meter
     int   bits{8};                     ///< data bits, 5..8
     int   stopBits{1};                 ///< 1 or 2
     int   numValues{1};                ///< frames per reading, for meters that send several lines
@@ -84,7 +84,7 @@ public:
     QString sigrokDriver{""};          ///< libsigrok driver of a bench meter read through sigrok-cli ("scpi-dmm"), empty otherwise
   };
 
-  explicit DmmDecoder(ReadEvent::DataFormat df);
+  explicit DmmDecoder(FrameFormat::DataFormat df);
   virtual ~DmmDecoder() = default;
   /// Fixed length of one frame in bytes. 0 means variable length: the frame
   /// is everything received since the previous one (a line protocol whose
@@ -95,7 +95,7 @@ public:
   /// terminator and the high nibbles of the VC820-style byte counters).
   virtual bool                       checkFormat(const char* data, size_t len) = 0; // TBD use qbytearray or similar instead for data
   /// Bytes to send to the meter to make it emit a frame; empty for meters
-  /// that stream on their own. ReaderThread writes it once per read cycle.
+  /// that stream on their own. FrameReader writes it once per read cycle.
   virtual QByteArray pollRequest() const { return QByteArray(); }
   /// Decodes one frame (getPacketLength() bytes, or a variable-length one
   /// with its terminator). @p id tells which of
@@ -103,7 +103,7 @@ public:
   /// corrupt; the caller then keeps the previous reading.
   virtual std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) = 0;
 
-  ReadEvent::DataFormat getType() { return m_type; };
+  FrameFormat::DataFormat getType() { return m_type; };
   /// Short protocol name for --debug output and the device table.
   QString name() const { return m_name; };
 
@@ -115,9 +115,9 @@ public:
   /// trailing " *" (not yet confirmed on hardware) is ignored, so a saved
   /// setting keeps its meter when the mark goes away after a confirmation.
   static bool                        sameModel(const QString &a, const QString &b);
-  /// Factory: the decoder for a protocol, null for ReadEvent::Invalid.
-  static std::shared_ptr<DmmDecoder> getInstance(ReadEvent::DataFormat df);
-  /// Factory by protocol name (ReadEvent::toString()).
+  /// Factory: the decoder for a protocol, null for FrameFormat::Invalid.
+  static std::shared_ptr<DmmDecoder> getInstance(FrameFormat::DataFormat df);
+  /// Factory by protocol name (FrameFormat::toString()).
   static std::shared_ptr<DmmDecoder> getInstance(QString df);
 
 
@@ -144,7 +144,7 @@ protected:
 
   static std::vector<DMMInfo> *m_configurations;
   DmmResponse m_result;
-  ReadEvent::DataFormat m_type;
+  FrameFormat::DataFormat m_type;
   QString m_name;
 };
 

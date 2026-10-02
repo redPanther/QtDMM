@@ -21,7 +21,7 @@ class DecoderFlukeQM : public DmmDecoder
 {
   Q_OBJECT
 public:
-  DecoderFlukeQM(ReadEvent::DataFormat df) : DmmDecoder(df) { m_name = "FlukeQM"; }
+  DecoderFlukeQM(FrameFormat::DataFormat df) : DmmDecoder(df) { m_name = "FlukeQM"; }
 
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   QByteArray pollRequest() const override { return QByteArrayLiteral("QM\r"); }

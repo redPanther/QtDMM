@@ -41,7 +41,7 @@ public:
 
 Q_SIGNALS:
   void      showTips(bool);
-  /// Tip index changed; ConfigDlg stores it so the next start continues.
+  /// Tip index changed; SettingsDialog stores it so the next start continues.
   void      currentTip(int);
 
 public Q_SLOTS:

@@ -78,21 +78,21 @@ Byte 8: Auto/Manu
 */
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"ELV", "M9803R", "", 9600, ReadEvent::M9803RContinuous, 7, 1, 1, 1, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"MASTECH", "M9803R", "", 9600, ReadEvent::M9803RContinuous, 7, 1, 1, 1, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"McVoice", "M-980T", "", 9600, ReadEvent::M9803RContinuous, 7, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"ELV", "M9803R", "", 9600, FrameFormat::M9803RContinuous, 7, 1, 1, 1, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"MASTECH", "M9803R", "", 9600, FrameFormat::M9803RContinuous, 7, 1, 1, 1, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"McVoice", "M-980T", "", 9600, FrameFormat::M9803RContinuous, 7, 1, 1, 0, 4000, 0, 0, 1});
   return true;
 }();
 
 size_t DecoderM9803R::getPacketLength()
 {
-  return  (m_type == ReadEvent::M9803RContinuous ? 11 : 0);
+  return  (m_type == FrameFormat::M9803RContinuous ? 11 : 0);
 }
 
 
 bool DecoderM9803R::checkFormat(const char* data, size_t idx)
 {
-  return (m_type==ReadEvent::M9803RContinuous && idx >= 10 && data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+  return (m_type==FrameFormat::M9803RContinuous && idx >= 10 && data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
 }
 
 

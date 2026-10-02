@@ -5,7 +5,7 @@
 #include <QList>
 
 #include "device/dmmdecoder.h"
-#include "device/readevent.h"
+#include "device/frameformat.h"
 #include "core/reading.h"
 #include "core/sampletypes.h"
 
@@ -36,11 +36,11 @@ struct PortSample
 class ReadingAdapter
 {
 public:
-  explicit ReadingAdapter(ReadEvent::DataFormat format = ReadEvent::Invalid) : m_format(format) {}
+  explicit ReadingAdapter(FrameFormat::DataFormat format = FrameFormat::Invalid) : m_format(format) {}
 
   /// The protocol: a few units mean something else on some meters (a
   /// Victron's "%" is the battery's state of charge, not a duty cycle).
-  void setFormat(ReadEvent::DataFormat format) { m_format = format; }
+  void setFormat(FrameFormat::DataFormat format) { m_format = format; }
   /// The meter's display count (DMMInfo::display), for Range::full and the
   /// bar graph; 0 when not known.
   void setCounts(int counts) { m_counts = counts; }
@@ -51,7 +51,7 @@ public:
   /// it.
   QList<PortSample> adapt(const DmmDecoder::DmmResponse &response, qint64 wall);
 
-  /// One value, the fields as DMM::value() delivers them.
+  /// One value, the fields as MeterConnection::value() delivers them.
   PortSample adaptValue(double dval, const QString &text, const QString &unit, const QString &special,
                         const QString &range, bool hold, bool showBar, bool lowBattery, int id, qint64 wall);
 
@@ -60,7 +60,7 @@ public:
   static Reading reading(const PortSample &ps);
 
 private:
-  ReadEvent::DataFormat m_format;
+  FrameFormat::DataFormat m_format;
   int                   m_counts = 0;
   PortKey               m_mainKey;   ///< the last main value's port, for the slot of the others
 };

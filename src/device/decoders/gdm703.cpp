@@ -4,15 +4,15 @@
 // Voltcraft GDM 703 family (ablage/CDMM/src/dmmclass.cpp): 9600 8N1, DTR,
 // two values per frame. Marked "*": ported from CDMM without a capture.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Voltcraft", "GDM 703 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "GDM 704 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "GDM 705 *", "", 9600, ReadEvent::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 703 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 704 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 705 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
   return true;
 }();
 
 size_t DecoderGDM703::getPacketLength()
 {
-  return (m_type == ReadEvent::GDM703Continuous ? 26 : 0);
+  return (m_type == FrameFormat::GDM703Continuous ? 26 : 0);
 }
 
 bool DecoderGDM703::checkFormat(const char *data, size_t idx)

@@ -4,7 +4,7 @@
 
 std::vector<DmmDecoder::DMMInfo> *DmmDecoder::m_configurations;
 
-DmmDecoder::DmmDecoder(ReadEvent::DataFormat df)
+DmmDecoder::DmmDecoder(FrameFormat::DataFormat df)
   : m_type(df)
 {}
 

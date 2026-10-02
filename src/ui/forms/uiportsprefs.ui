@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>UIPortsPrefs</class>
- <widget class="PrefWidget" name="UIPortsPrefs">
+ <widget class="SettingsPage" name="UIPortsPrefs">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -481,14 +481,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PrefWidget</class>
+   <class>SettingsPage</class>
    <extends>QWidget</extends>
-   <header>ui/settings/prefwidget.h</header>
+   <header>ui/settings/settingspage.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
  <includes>
-  <include location="global">ui/settings/prefwidget.h</include>
+  <include location="global">ui/settings/settingspage.h</include>
  </includes>
  <resources>
   <include location="../resources.qrc"/>

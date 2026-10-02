@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>UIScalePrefs</class>
- <widget class="PrefWidget" name="UIScalePrefs">
+ <widget class="SettingsPage" name="UIScalePrefs">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -424,9 +424,9 @@ You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Exa
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PrefWidget</class>
+   <class>SettingsPage</class>
    <extends>QWidget</extends>
-   <header>ui/settings/prefwidget.h</header>
+   <header>ui/settings/settingspage.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -441,7 +441,7 @@ You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Exa
   <tabstop>lengthUnit</tabstop>
  </tabstops>
  <includes>
-  <include location="global">ui/settings/prefwidget.h</include>
+  <include location="global">ui/settings/settingspage.h</include>
  </includes>
  <resources/>
  <connections>

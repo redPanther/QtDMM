@@ -34,48 +34,48 @@
  */
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Digitek", "DT-9062"  , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Digitek", "DT-9062"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   // FS9721 per libsigrok (digitek-dt4000zc); was listed
   // under the FS9922 protocol before
-  DmmDecoder::addConfig({"Digitek", "DT4000ZC" , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"TekPower", "TP4000ZC", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Digitek", "DT4000ZC" , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"TekPower", "TP4000ZC", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   // models marked "*" come from chip data (libsigrok fs9721 list) and are
   // not confirmed on hardware yet
-  DmmDecoder::addConfig({"MASTECH", "MS8250B *", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"PCE", "PCE-DM32 *", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Tecpel", "DMM-8061 *", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"V&A", "VA18B *", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"V&A", "VA40B *", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"MASTECH", "MS8250B *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"PCE", "PCE-DM32 *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Tecpel", "DMM-8061 *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"V&A", "VA18B *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"V&A", "VA40B *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   // from Matthias Toussaint's CDMM device table (ablage/CDMM); the Protek
   // 50x speak the FS9721 frame at 1200 7N2 with RTS driven ("PT506" there)
-  DmmDecoder::addConfig({"Metrel", "MD9015 *", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Protek", "504 *", "", 1200, ReadEvent::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
-  DmmDecoder::addConfig({"Protek", "505 *", "", 1200, ReadEvent::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
-  DmmDecoder::addConfig({"Protek", "506 *", "", 1200, ReadEvent::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT30A *", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT30E *", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Digitek", "INO2513"  , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Digitech", "QM1462"  , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Digitech", "QM1538"  , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"HoldPeak", "HP-90EPC", "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"PeakTech", "3330"    , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Tenma", "72-7745"    , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Tenma", "72-6870 *"  , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});   // sigrok PR #282
-  DmmDecoder::addConfig({"Uni-Trend", "UT60A"  , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT60E"  , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 820" , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 840" , "", 2400, ReadEvent::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metrel", "MD9015 *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Protek", "504 *", "", 1200, FrameFormat::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
+  DmmDecoder::addConfig({"Protek", "505 *", "", 1200, FrameFormat::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
+  DmmDecoder::addConfig({"Protek", "506 *", "", 1200, FrameFormat::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT30A *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT30E *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Digitek", "INO2513"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Digitech", "QM1462"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Digitech", "QM1538"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"HoldPeak", "HP-90EPC", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "3330"    , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Tenma", "72-7745"    , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Tenma", "72-6870 *"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});   // sigrok PR #282
+  DmmDecoder::addConfig({"Uni-Trend", "UT60A"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT60E"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 820" , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 840" , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   return true;
 }();
 
 bool DecoderVC820::checkFormat(const char* data, size_t idx)
 {
-  return (m_type == ReadEvent::VC820Continuous && ((data[idx] & 0xf0) == 0xe0));
+  return (m_type == FrameFormat::VC820Continuous && ((data[idx] & 0xf0) == 0xe0));
 }
 
 size_t DecoderVC820::getPacketLength()
 {
-  return  (m_type == ReadEvent::VC820Continuous ? 14 : 0);
+  return  (m_type == FrameFormat::VC820Continuous ? 14 : 0);
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderVC820::decode(const QByteArray &data, int id)

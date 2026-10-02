@@ -24,7 +24,7 @@ class QTimer;
 /// (profile()); the UNI-T iDMM meters (UT60BT, UT161) use the Microchip/ISSC
 /// "Transparent UART" service. Port string: "<address>". open() returns at
 /// once and the connection is set up in the background; a lost link emits
-/// finished() and DMM reconnects as for the other port types.
+/// finished() and MeterConnection reconnects as for the other port types.
 ///
 /// Polled meters answer one request with one frame. The reader asks once a
 /// second; to follow the meter's own update rate the device repeats the last
@@ -42,7 +42,7 @@ public:
     QStringList namePrefixes;      ///< for scan(): advertised names that belong to it
   };
   /// The profile for @p format, or nullopt when it is not a GATT protocol.
-  static std::optional<Profile> profile(ReadEvent::DataFormat format);
+  static std::optional<Profile> profile(FrameFormat::DataFormat format);
 
   explicit BleGattDevice(const DmmDecoder::DMMInfo &info, const QString &device, QObject *parent = nullptr);
   ~BleGattDevice() override;
@@ -63,7 +63,7 @@ public:
 
   /// Meters of @p format seen in a short scan, as "<address> <name>". Blocks
   /// for @p ms.
-  static QStringList scan(ReadEvent::DataFormat format, int ms = 6000);
+  static QStringList scan(FrameFormat::DataFormat format, int ms = 6000);
 
 Q_SIGNALS:
   /// The link is gone or could not be set up; the text says why.

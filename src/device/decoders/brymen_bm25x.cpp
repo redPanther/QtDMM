@@ -3,16 +3,16 @@
 // Brymen BM25x family (libsigrok "brymen-bm25x": 9600/8n1/rts=1/dtr=1).
 // "*": ported from the libsigrok parser, not confirmed on hardware.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Brymen", "BM250 *", "", 9600, ReadEvent::BrymenBM25x, 8, 1, 1, 0, 6000, 0, 1, 1});
-  DmmDecoder::addConfig({"Brymen", "BM251 *", "", 9600, ReadEvent::BrymenBM25x, 8, 1, 1, 0, 6000, 0, 1, 1});
-  DmmDecoder::addConfig({"Brymen", "BM252 *", "", 9600, ReadEvent::BrymenBM25x, 8, 1, 1, 0, 6000, 0, 1, 1});
-  DmmDecoder::addConfig({"Brymen", "BM257 *", "", 9600, ReadEvent::BrymenBM25x, 8, 1, 1, 0, 6000, 0, 1, 1});
+  DmmDecoder::addConfig({"Brymen", "BM250 *", "", 9600, FrameFormat::BrymenBM25x, 8, 1, 1, 0, 6000, 0, 1, 1});
+  DmmDecoder::addConfig({"Brymen", "BM251 *", "", 9600, FrameFormat::BrymenBM25x, 8, 1, 1, 0, 6000, 0, 1, 1});
+  DmmDecoder::addConfig({"Brymen", "BM252 *", "", 9600, FrameFormat::BrymenBM25x, 8, 1, 1, 0, 6000, 0, 1, 1});
+  DmmDecoder::addConfig({"Brymen", "BM257 *", "", 9600, FrameFormat::BrymenBM25x, 8, 1, 1, 0, 6000, 0, 1, 1});
   return true;
 }();
 
 size_t DecoderBrymenBM25x::getPacketLength()
 {
-  return (m_type == ReadEvent::BrymenBM25x ? 15 : 0);
+  return (m_type == FrameFormat::BrymenBM25x ? 15 : 0);
 }
 
 bool DecoderBrymenBM25x::checkFormat(const char *data, size_t idx)

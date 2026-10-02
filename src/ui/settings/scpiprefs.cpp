@@ -13,7 +13,7 @@
 
 #include "core/settings.h"
 
-ScpiPrefs::ScpiPrefs(QWidget *parent) : PrefWidget(parent)
+ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
 {
   m_label = tr("SCPI server");
   m_description = tr("<b>Lets other programs read the meter over the network:</b> QtDMM answers "

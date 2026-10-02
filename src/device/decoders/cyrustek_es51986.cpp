@@ -3,13 +3,13 @@
 // same as es51981, but less features. no collisons between features
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Iso-Tech", "IDM 73", "", 19200, ReadEvent::CyrustekES51986, 7, 1, 1, 2, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Iso-Tech", "IDM 73", "", 19200, FrameFormat::CyrustekES51986, 7, 1, 1, 2, 6000, 0, 0, 1});
   // ES51986 per the chip datasheet, settings as the IDM 73 (same family); "*" =
   // not confirmed on hardware yet
-  DmmDecoder::addConfig({"APPA", "71 *", "", 19200, ReadEvent::CyrustekES51986, 7, 1, 1, 2, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"APPA", "73 *", "", 19200, ReadEvent::CyrustekES51986, 7, 1, 1, 2, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Tenma", "72-1016"  , "", 19200, ReadEvent::CyrustekES51986, 7, 1, 2, 2, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend","UT803" , "", 19200, ReadEvent::CyrustekES51986, 7, 1, 1, 2, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"APPA", "71 *", "", 19200, FrameFormat::CyrustekES51986, 7, 1, 1, 2, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"APPA", "73 *", "", 19200, FrameFormat::CyrustekES51986, 7, 1, 1, 2, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Tenma", "72-1016"  , "", 19200, FrameFormat::CyrustekES51986, 7, 1, 2, 2, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend","UT803" , "", 19200, FrameFormat::CyrustekES51986, 7, 1, 1, 2, 6000, 0, 0, 1});
   return true;
 }();
 
@@ -21,12 +21,12 @@ bool DecoderCyrusTekES51986::checkFormat(const char* data, size_t idx)
   // the second copy at idx == 21 matches. That yields one reading per
   // measurement instead of two identical ones. Do not "simplify" this to
   // getPacketLength() - unlike vc940, this protocol duplicates its frames.
-  return (m_type == ReadEvent::CyrustekES51986 && idx >= 12 && data[(idx-1+FIFO_LENGTH)%FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+  return (m_type == FrameFormat::CyrustekES51986 && idx >= 12 && data[(idx-1+FIFO_LENGTH)%FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
 }
 
 size_t DecoderCyrusTekES51986::getPacketLength()
 {
-  return  (m_type == ReadEvent::CyrustekES51986 ? 11 : 0);
+  return  (m_type == FrameFormat::CyrustekES51986 ? 11 : 0);
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51986::decode(const QByteArray &data, int id)

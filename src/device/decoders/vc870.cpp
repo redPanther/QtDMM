@@ -1,18 +1,18 @@
 #include "device/decoders/vc870.h"
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Voltcraft", "VC 870", "", 9600, ReadEvent::VC870Continuous, 8, 1, 2, 0, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 870", "", 9600, FrameFormat::VC870Continuous, 8, 1, 2, 0, 40000, 0, 0, 1});
   return true;
 }();
 
 bool DecoderVC870::checkFormat(const char* data, size_t idx)
 {
-  return (m_type == ReadEvent::VC870Continuous && (idx) && (data[idx - 1] == 0x0d) && (data[idx] == 0x0a));
+  return (m_type == FrameFormat::VC870Continuous && (idx) && (data[idx - 1] == 0x0d) && (data[idx] == 0x0a));
 }
 
 size_t DecoderVC870::getPacketLength()
 {
-  return  (m_type == ReadEvent::VC870Continuous ? 23 : 0);
+  return  (m_type == FrameFormat::VC870Continuous ? 23 : 0);
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderVC870::decode(const QByteArray &data, int id)

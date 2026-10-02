@@ -13,7 +13,7 @@ class DecoderBrymenBM52x : public DmmDecoder
 {
   Q_OBJECT
 public:
-  DecoderBrymenBM52x(ReadEvent::DataFormat df) : DmmDecoder(df) { m_name = df == ReadEvent::BrymenBM82x ? "BM82x" : "BM52x"; }
+  DecoderBrymenBM52x(FrameFormat::DataFormat df) : DmmDecoder(df) { m_name = df == FrameFormat::BrymenBM82x ? "BM82x" : "BM52x"; }
 
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   bool checkFormat(const char* data, size_t idx) override;
@@ -27,5 +27,5 @@ public:
   static QString digits(const unsigned char *pkt, unsigned char signFlag, QChar *tempUnit);
 
 private:
-  unsigned char modelId() const { return m_type == ReadEvent::BrymenBM82x ? 0x82 : 0x52; }
+  unsigned char modelId() const { return m_type == FrameFormat::BrymenBM82x ? 0x82 : 0x52; }
 };

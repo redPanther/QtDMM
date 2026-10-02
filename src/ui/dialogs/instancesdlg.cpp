@@ -6,7 +6,7 @@
 #include "service/sharedstatemanager.h"
 #include "core/siprefix.h"
 #include "core/calcexpr.h"
-#include "device/readevent.h"
+#include "device/frameformat.h"
 #include <QRegularExpression>
 
 namespace
@@ -170,13 +170,13 @@ QString InstancesDlg::createCalculatedInstance(const QString &configId, const QS
     Settings cfg(configId, configPath);
     cfg.setString("DMM/model", "QtDMM Calculated value");
     cfg.setBool("DMM/configured", true);
-    cfg.setString("DMM/data-format", ReadEvent::toString(ReadEvent::Sigrok));
+    cfg.setString("DMM/data-format", FrameFormat::toString(FrameFormat::Sigrok));
     cfg.setString("DMM/display", "400000");
     cfg.setString("DMM/calc-unit", unit);
     cfg.setString("DMM/calc-expression", formula);
     cfg.setString("Port settings/device", QString("calc %1 %2").arg(unit, formula));
     cfg.setBool("QtDMM/show-tip", false);
-    // what GuiPrefs writes on OK; without them ConfigDlg greets the file as
+    // what GuiPrefs writes on OK; without them SettingsDialog greets the file as
     // an upgrade from before 0.8.4
     cfg.setInt("QtDMM/version", 0);
     cfg.setInt("QtDMM/revision", 84);

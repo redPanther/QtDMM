@@ -18,7 +18,7 @@
 #include "ui/engnumbervalidator.h"
 #include "core/settings.h"
 
-AlarmPrefs::AlarmPrefs(QWidget *parent) : PrefWidget(parent)
+AlarmPrefs::AlarmPrefs(QWidget *parent) : SettingsPage(parent)
 {
   m_label = tr("Alarms");
   m_description = tr("<b>Alarms watch the reading and tell you when it leaves the range you expect:</b> "

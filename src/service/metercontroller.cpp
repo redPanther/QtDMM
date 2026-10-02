@@ -7,7 +7,7 @@
 #include <QProcess>
 #include <QRegularExpression>
 
-#include "device/dmm.h"
+#include "device/meterconnection.h"
 #include "ui/engnumbervalidator.h"
 #include "service/mdnsresponder.h"
 #include "recording/recordingstore.h"
@@ -18,7 +18,7 @@
 
 MeterController::MeterController(QObject *parent)
   : QObject(parent)
-  , m_dmm(new DMM(this))
+  , m_dmm(new MeterConnection(this))
   , m_alarms(new AlarmManager(this))
   , m_recorder(new RecordingStore(this))
   , m_scpi(new ScpiServer(this))
@@ -26,8 +26,8 @@ MeterController::MeterController(QObject *parent)
   , m_external(new QProcess(this))
 {
   qRegisterMetaType<Reading>();
-  connect(m_dmm, &DMM::response, this, &MeterController::responseSLOT);
-  connect(m_dmm, &DMM::error, this, &MeterController::error);
+  connect(m_dmm, &MeterConnection::response, this, &MeterController::responseSLOT);
+  connect(m_dmm, &MeterConnection::error, this, &MeterController::error);
 
   // the recorder: the sample clock drives it, the readings give each sample
   // its mode, text and quality

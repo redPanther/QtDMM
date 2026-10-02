@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 
   // --- 1b. a record cut short must not show values ---
   {
-    DecoderVictronBLE d(ReadEvent::VictronBLE);
+    DecoderVictronBLE d(FrameFormat::VictronBLE);
     // battery monitor: 4 bytes instead of 12 - voltage is still there, the
     // current is not. Before, its all-ones bits became -1 = -0.001 A.
     const auto r = d.decode(VictronBle::frame(VictronBle::BatteryMonitor, QByteArray::fromHex("e803e504")), 0);
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
   check(VictronBle::keyFromHex("zzf4d0995b7d1e176c0c33ecb9e70dcd").isEmpty(), "non-hex rejected");
 
   // --- 3. SmartShunt advertisement (victron-ble test vector) ---
-  DecoderVictronBLE decoder(ReadEvent::VictronBLE);
+  DecoderVictronBLE decoder(FrameFormat::VictronBLE);
   {
     const QByteArray adv = QByteArray::fromHex("100289a302b040af925d09a4d89aa0128bdef48c6298a9");
     const QByteArray key = VictronBle::keyFromHex("aff4d0995b7d1e176c0c33ecb9e70dcd");

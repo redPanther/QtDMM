@@ -2,23 +2,23 @@
 // ES51966
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Tenma", "72-7732"    , "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT71B"  , "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 200000, 0, 0, 1});
+  DmmDecoder::addConfig({"Tenma", "72-7732"    , "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT71B"  , "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 200000, 0, 0, 1});
   // ut71x family per libsigrok; "*" = not confirmed on hardware yet
-  DmmDecoder::addConfig({"Uni-Trend", "UT71A *", "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 20000, 0, 0, 1});
-  DmmDecoder::addConfig({"Tenma", "72-7730 *", "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 20000, 0, 0, 1});
-  DmmDecoder::addConfig({"Tenma", "72-9380A *", "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT71CDE", "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT804"  , "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 920" , "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 940" , "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 960" , "", 2400, ReadEvent::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT71A *", "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 20000, 0, 0, 1});
+  DmmDecoder::addConfig({"Tenma", "72-7730 *", "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 20000, 0, 0, 1});
+  DmmDecoder::addConfig({"Tenma", "72-9380A *", "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT71CDE", "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT804"  , "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 920" , "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 940" , "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 960" , "", 2400, FrameFormat::VC940Continuous, 7, 1, 1, 2, 40000, 0, 0, 1});
   return true;
 }();
 
 size_t DecoderVC940::getPacketLength()
 {
-  return  (m_type == ReadEvent::VC940Continuous ? 11 : 0);
+  return  (m_type == FrameFormat::VC940Continuous ? 11 : 0);
 }
 
 bool DecoderVC940::checkFormat(const char* data, size_t idx)
@@ -31,7 +31,7 @@ bool DecoderVC940::checkFormat(const char* data, size_t idx)
   // and UT804.log mention no duplication for the Uni-T models later added to this
   // decoder, so those may be losing every second reading here. Resolving that
   // needs per-device handling, not a change to this guard.
-  return (m_type==ReadEvent::VC940Continuous && idx >= 12 && data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+  return (m_type==FrameFormat::VC940Continuous && idx >= 12 && data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &data, int id)

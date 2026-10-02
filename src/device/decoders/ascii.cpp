@@ -1,53 +1,53 @@
 #include "device/decoders/ascii.h"
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Digitech", "QM1350", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"MASTECH", "MAS-343", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"MASTECH", "MAS-345", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"McVoice", "M-345pro", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "M-3360D *", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // CDMM table; unconfirmed
-  DmmDecoder::addConfig({"Metex", "M-3640D *", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // libsigrok metex14; unconfirmed
-  DmmDecoder::addConfig({"Metex", "Universal System 9140 *", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // CDMM table
-  DmmDecoder::addConfig({"Voltcraft", "MS-9140 *", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // CDMM table
-  DmmDecoder::addConfig({"Voltcraft", "MS-9160 *", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // CDMM table
-  DmmDecoder::addConfig({"Metex", "M-3660D", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "M-3830D", "", 1200, ReadEvent::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "M-3840D", "", 1200, ReadEvent::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "M-3850D", "", 1200, ReadEvent::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "M-3850M", "", 9600, ReadEvent::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "M-3870D", "", 1200, ReadEvent::Metex14, 7, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "M-4650C", "", 1200, ReadEvent::Metex14, 7, 2, 4, 0, 20000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "ME-11", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "ME-22", "", 2400, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "ME-32", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "ME-21 *", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // libsigrok-master metex14; unconfirmed
-  DmmDecoder::addConfig({"Metex", "ME-42", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Metex", "universal system 9160", "", 1200, ReadEvent::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"PeakTech", "4010", "", 9600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"PeakTech", "4015A", "", 9600, ReadEvent::Metex14, 7, 2, 4, 0, 100000, 0, 0, 1});
-  DmmDecoder::addConfig({"PeakTech", "4360", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"PeakTech", "4390", "", 9600, ReadEvent::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Radioshack", "22-805 DMM", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Radioshack", "RS22-168A", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Sinometer", "MAS-343", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "M-3610D", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "M-3650D", "", 1200, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "M-3860", "", 9600, ReadEvent::Metex14, 7, 2, 4, 0, 20000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "M-4660", "", 1200, ReadEvent::Metex14, 7, 2, 4, 0, 50000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "ME-11", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "ME-22T", "", 2400, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "ME-32", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "ME-42", "", 600, ReadEvent::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "M-4660A", "", 9600, ReadEvent::Metex14, 7, 2, 4, 0, 50000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "M-4660M", "", 9600, ReadEvent::Metex14, 7, 2, 4, 0, 50000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "MXD-4660A", "", 9600, ReadEvent::Metex14, 7, 2, 4, 0, 50000, 0, 0, 1});
-  DmmDecoder::addConfig({"PeakTech", "451", "", 600, ReadEvent::PeakTech10, 7, 2, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "M-4650CR", "", 1200, ReadEvent::Voltcraft14Continuous, 7, 2, 1, 0, 20000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 670", "", 4800, ReadEvent::Voltcraft14Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 630", "", 4800, ReadEvent::Voltcraft14Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 650", "", 4800, ReadEvent::Voltcraft14Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 635", "", 2400, ReadEvent::Voltcraft15Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 655", "", 2400,  ReadEvent::Voltcraft15Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"Digitech", "QM1350", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"MASTECH", "MAS-343", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"MASTECH", "MAS-345", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"McVoice", "M-345pro", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "M-3360D *", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // CDMM table; unconfirmed
+  DmmDecoder::addConfig({"Metex", "M-3640D *", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // libsigrok metex14; unconfirmed
+  DmmDecoder::addConfig({"Metex", "Universal System 9140 *", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // CDMM table
+  DmmDecoder::addConfig({"Voltcraft", "MS-9140 *", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // CDMM table
+  DmmDecoder::addConfig({"Voltcraft", "MS-9160 *", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // CDMM table
+  DmmDecoder::addConfig({"Metex", "M-3660D", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "M-3830D", "", 1200, FrameFormat::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "M-3840D", "", 1200, FrameFormat::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "M-3850D", "", 1200, FrameFormat::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "M-3850M", "", 9600, FrameFormat::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "M-3870D", "", 1200, FrameFormat::Metex14, 7, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "M-4650C", "", 1200, FrameFormat::Metex14, 7, 2, 4, 0, 20000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "ME-11", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "ME-22", "", 2400, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "ME-32", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "ME-21 *", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});   // libsigrok-master metex14; unconfirmed
+  DmmDecoder::addConfig({"Metex", "ME-42", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Metex", "universal system 9160", "", 1200, FrameFormat::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "4010", "", 9600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "4015A", "", 9600, FrameFormat::Metex14, 7, 2, 4, 0, 100000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "4360", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "4390", "", 9600, FrameFormat::Metex14, 7, 2, 4, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Radioshack", "22-805 DMM", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Radioshack", "RS22-168A", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Sinometer", "MAS-343", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "M-3610D", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "M-3650D", "", 1200, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "M-3860", "", 9600, FrameFormat::Metex14, 7, 2, 4, 0, 20000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "M-4660", "", 1200, FrameFormat::Metex14, 7, 2, 4, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "ME-11", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "ME-22T", "", 2400, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "ME-32", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "ME-42", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "M-4660A", "", 9600, FrameFormat::Metex14, 7, 2, 4, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "M-4660M", "", 9600, FrameFormat::Metex14, 7, 2, 4, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "MXD-4660A", "", 9600, FrameFormat::Metex14, 7, 2, 4, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "451", "", 600, FrameFormat::PeakTech10, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "M-4650CR", "", 1200, FrameFormat::Voltcraft14Continuous, 7, 2, 1, 0, 20000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 670", "", 4800, FrameFormat::Voltcraft14Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 630", "", 4800, FrameFormat::Voltcraft14Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 650", "", 4800, FrameFormat::Voltcraft14Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 635", "", 2400, FrameFormat::Voltcraft15Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 655", "", 2400,  FrameFormat::Voltcraft15Continuous, 7, 1, 1, 0, 50000, 0, 0, 1});
   return true;
 }();
 
@@ -57,11 +57,11 @@ bool DecoderAscii::checkFormat(const char* data, size_t idx)
   {
     // "#VVVVVVUUUU": complete when the '#' is ten bytes back. Only once ten
     // bytes are in: before that the look-back lands on stale bytes of the ring
-    case ReadEvent::PeakTech10: return idx >= 10 && data[(idx-10+FIFO_LENGTH)%FIFO_LENGTH] == '#';
-    case ReadEvent::Metex14:
-    case ReadEvent::Voltcraft14Continuous: return (data[idx] == 0x0d);
-    case ReadEvent::Sigrok:                return (data[idx] == 0x0a);
-    case ReadEvent::Voltcraft15Continuous: return (data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+    case FrameFormat::PeakTech10: return idx >= 10 && data[(idx-10+FIFO_LENGTH)%FIFO_LENGTH] == '#';
+    case FrameFormat::Metex14:
+    case FrameFormat::Voltcraft14Continuous: return (data[idx] == 0x0d);
+    case FrameFormat::Sigrok:                return (data[idx] == 0x0a);
+    case FrameFormat::Voltcraft15Continuous: return (data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
     default: return false;
   }
 }
@@ -70,11 +70,11 @@ size_t DecoderAscii::getPacketLength()
 {
   switch (m_type)
   {
-    case ReadEvent::Sigrok:                return 30;
-    case ReadEvent::PeakTech10:            return 11;
-    case ReadEvent::Metex14:               return 14;
-    case ReadEvent::Voltcraft14Continuous: return 14;
-    case ReadEvent::Voltcraft15Continuous: return 15;
+    case FrameFormat::Sigrok:                return 30;
+    case FrameFormat::PeakTech10:            return 11;
+    case FrameFormat::Metex14:               return 14;
+    case FrameFormat::Voltcraft14Continuous: return 14;
+    case FrameFormat::Voltcraft15Continuous: return 15;
     default: return 0;
   }
 }
@@ -131,18 +131,18 @@ std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &da
 
   switch (m_type)
   {
-    case ReadEvent::Metex14:
-    case ReadEvent::Voltcraft14Continuous:
-    case ReadEvent::Voltcraft15Continuous:
+    case FrameFormat::Metex14:
+    case FrameFormat::Voltcraft14Continuous:
+    case FrameFormat::Voltcraft15Continuous:
       m_result.val     = str.mid(2, 7).trimmed();
       m_result.unit    = str.mid(9, 4).trimmed();
       m_result.special = str.left(3).trimmed();
       break;
-    case ReadEvent::PeakTech10:
+    case FrameFormat::PeakTech10:
       m_result.val  = str.mid(1, 6).trimmed();
       m_result.unit = str.mid(7, 4).trimmed();
       break;
-    case ReadEvent::Sigrok:
+    case FrameFormat::Sigrok:
       if (!decodeSigrok(str))
         return std::nullopt;
       break;
@@ -155,7 +155,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &da
   switch (m_result.unit.length())
   {
     case 0:
-      if (m_type!=ReadEvent::Sigrok) return std::nullopt;
+      if (m_type!=FrameFormat::Sigrok) return std::nullopt;
         formatResultValue(0, "", m_result.unit);
         break;
     case 1:
@@ -166,7 +166,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &da
       // Metex meters send kilo as a capital K ("KOhm", "KHz"; see
       // docs/protocols/sources/metex-22t.log, and heha's Metex.cpp lists
       // "pnum KMG" as the prefix alphabet). Normalise it so the value is scaled
-      // and the unit matches what DisplayWid knows.
+      // and the unit matches what LcdWidget knows.
       QString prefix = m_result.unit.left(1);
       if (prefix == "K")
         prefix = "k";

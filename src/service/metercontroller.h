@@ -13,7 +13,7 @@
 #include "core/reading.h"
 #include "core/stalerule.h"
 
-class DMM;
+class MeterConnection;
 class QProcess;
 class ScpiServer;
 class MdnsResponder;
@@ -29,7 +29,7 @@ struct ScpiConfig
   bool    mdns = false;            ///< announce as _scpi-raw._tcp
 };
 
-/// The meter session without any user interface: the connection (DMM), the
+/// The meter session without any user interface: the connection (MeterConnection), the
 /// min/max memory, the alarms, the SCPI server with its mDNS announcement,
 /// the external-program trigger and the publishing of readings to the other
 /// instances.
@@ -46,7 +46,7 @@ public:
   ~MeterController() override;
 
   /// The connection; the settings page configures its port and protocol.
-  DMM        *dmm() const { return m_dmm; }
+  MeterConnection        *dmm() const { return m_dmm; }
   /// The recorder: the sample clock and the readings feed it from here on,
   /// views (the graph) show it. SCPI learns when it starts or stops.
   RecordingStore *recorder() const { return m_recorder; }
@@ -111,7 +111,7 @@ Q_SIGNALS:
   /// Ten times a second: the current main value, for the recorder; NaN
   /// when there is none (overload, or the last one is stale, StaleRule).
   void        sample(double value);
-  /// For the status bar's connection field (DMM messages, alarms, SCPI errors).
+  /// For the status bar's connection field (MeterConnection messages, alarms, SCPI errors).
   void        error(const QString &);
   /// For the status bar's info field.
   void        info(const QString &);
@@ -145,7 +145,7 @@ private:
   void        updateScpiStatus();
   void        timerEvent(QTimerEvent *) override;
 
-  DMM                *m_dmm;
+  MeterConnection                *m_dmm;
   AlarmManager       *m_alarms;
   RecordingStore     *m_recorder;
   ReadingAdapter      m_adapter;

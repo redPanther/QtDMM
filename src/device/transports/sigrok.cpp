@@ -51,7 +51,7 @@ qint64 SigrokDevice::readData(char *data, qint64 maxSize)
   // pads sigrok line to fixed length with spaces.
   // this way it is much easier and faster to decode afterwards.
   // m_outLine holds the not-yet-delivered remainder of the current padded
-  // line, since callers (ReaderThread) may read as little as one byte at a time.
+  // line, since callers (FrameReader) may read as little as one byte at a time.
   if (m_outLine.isEmpty())
   {
     int newlineIndex = m_buffer.indexOf('\n');

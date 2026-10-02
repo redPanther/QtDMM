@@ -4,7 +4,7 @@
 #include "ui/settings/portsprefs.h"
 #include "core/settings.h"
 
-PortsPrefs::PortsPrefs(QWidget *parent) : PrefWidget(parent)
+PortsPrefs::PortsPrefs(QWidget *parent) : SettingsPage(parent)
 {
   setupUi(this);
   m_label = tr("Special ports");

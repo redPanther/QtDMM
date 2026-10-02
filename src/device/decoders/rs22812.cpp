@@ -59,20 +59,20 @@ https://github.com/syn-net/rs22812/blob/master/rs22812_linux.py
 */
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Radioshack", "22-812", "", 4800, ReadEvent::RS22812Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Radioshack", "22-812", "", 4800, FrameFormat::RS22812Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   return true;
 }();
 
 
 size_t DecoderRS22812::getPacketLength()
 {
-  return  (m_type == ReadEvent::RS22812Continuous ? 9 : 0);
+  return  (m_type == FrameFormat::RS22812Continuous ? 9 : 0);
 }
 
 
 bool DecoderRS22812::checkFormat(const char* data, size_t idx)
 {
-  if (m_type != ReadEvent::RS22812Continuous)
+  if (m_type != FrameFormat::RS22812Continuous)
     return false;
 
   unsigned int checksum = 0x00;

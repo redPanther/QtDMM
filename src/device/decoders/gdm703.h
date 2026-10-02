@@ -12,7 +12,7 @@ class DecoderGDM703 : public DmmDecoder
 {
   Q_OBJECT
 public:
-  DecoderGDM703(ReadEvent::DataFormat df) : DmmDecoder(df) { m_name = "GDM703"; }
+  DecoderGDM703(FrameFormat::DataFormat df) : DmmDecoder(df) { m_name = "GDM703"; }
 
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   bool checkFormat(const char* data, size_t idx) override;

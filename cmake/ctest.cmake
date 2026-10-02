@@ -25,7 +25,7 @@ if (BUILD_TESTING)
 	endforeach()
 
 	set( TEST_GRAPH test_graph)
-	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/ui/views/dmmgraph.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/settings.cpp src/core/siprefix.cpp src/ui/engnumbervalidator.cpp)
+	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/ui/views/graphwidget.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/settings.cpp src/core/siprefix.cpp src/ui/engnumbervalidator.cpp)
 	target_link_libraries(${TEST_GRAPH} PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Charts Qt6::Svg Qt::Core Qt::Test)
 	add_test(NAME dmmgraph COMMAND ${TEST_GRAPH} "${CMAKE_SOURCE_DIR}/tests/data/graph")
 
@@ -48,7 +48,7 @@ if (BUILD_TESTING)
 	## the analog meter: angle mapping, full-scale derivation, ballistics and
 	## a headless render check
 	set( TEST_METER test_meter)
-	add_executable(${TEST_METER} MACOSX_BUNDLE tests/test_meter.cpp src/ui/views/meterwid.cpp src/ui/panelframe.cpp src/core/siprefix.cpp src/core/readingadapter.cpp)
+	add_executable(${TEST_METER} MACOSX_BUNDLE tests/test_meter.cpp src/ui/views/analogmeter.cpp src/ui/panelframe.cpp src/core/siprefix.cpp src/core/readingadapter.cpp)
 	target_include_directories(${TEST_METER} PRIVATE src)
 	target_link_libraries(${TEST_METER} PRIVATE Qt6::Widgets Qt::Core Qt::Test)
 	add_test(NAME analog_meter COMMAND ${TEST_METER})
@@ -62,7 +62,7 @@ if (BUILD_TESTING)
 
 	## the digital display: glyph table and a headless render check
 	set( TEST_DISPLAY test_display)
-	add_executable(${TEST_DISPLAY} MACOSX_BUNDLE tests/test_display.cpp src/ui/views/displaywid.cpp src/ui/panelframe.cpp src/core/siprefix.cpp)
+	add_executable(${TEST_DISPLAY} MACOSX_BUNDLE tests/test_display.cpp src/ui/views/lcdwidget.cpp src/ui/panelframe.cpp src/core/siprefix.cpp)
 	target_include_directories(${TEST_DISPLAY} PRIVATE src)
 	target_link_libraries(${TEST_DISPLAY} PRIVATE Qt6::Widgets Qt::Core)
 	add_test(NAME digital_display COMMAND ${TEST_DISPLAY})
@@ -108,7 +108,7 @@ if (BUILD_TESTING)
 	## DMM connection state machine (Connecting/Connected/Timeout/Error/reconnect)
 	## against a fake RFC 2217 server; needs the whole port stack
 	set( TEST_DMM test_dmm)
-	add_executable(${TEST_DMM} MACOSX_BUNDLE tests/test_dmm.cpp src/device/dmm.cpp src/device/readerthread.cpp src/device/porthandler.cpp
+	add_executable(${TEST_DMM} MACOSX_BUNDLE tests/test_dmm.cpp src/device/meterconnection.cpp src/device/framereader.cpp src/device/transport.cpp
 		src/device/transports/serial.cpp src/device/transports/hidserial.cpp src/device/transports/rfc2217serial.cpp src/device/transports/sigrok.cpp
 		src/device/transports/calc.cpp src/core/calcexpr.cpp src/service/sharedstatemanager.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
 	target_include_directories(${TEST_DMM} PRIVATE src)
@@ -131,7 +131,7 @@ if (BUILD_TESTING)
 
 	## the readings table model, without its widget
 	set( TEST_READINGLOG test_readinglog)
-	add_executable(${TEST_READINGLOG} MACOSX_BUNDLE tests/test_readinglog.cpp src/recording/readinglog.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
+	add_executable(${TEST_READINGLOG} MACOSX_BUNDLE tests/test_readinglog.cpp src/recording/readingsmodel.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
 	target_include_directories(${TEST_READINGLOG} PRIVATE src)
 	target_link_libraries(${TEST_READINGLOG} PRIVATE Qt6::Gui Qt::Core Qt::Test)
 	add_test(NAME reading_log COMMAND ${TEST_READINGLOG})

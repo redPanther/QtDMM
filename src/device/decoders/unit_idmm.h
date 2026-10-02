@@ -31,7 +31,7 @@ class DecoderUniTiDMM : public DmmDecoder
 {
   Q_OBJECT
 public:
-  DecoderUniTiDMM(ReadEvent::DataFormat df) : DmmDecoder(df) { m_name = "UniTiDMM"; }
+  DecoderUniTiDMM(FrameFormat::DataFormat df) : DmmDecoder(df) { m_name = "UniTiDMM"; }
 
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   QByteArray pollRequest() const override;

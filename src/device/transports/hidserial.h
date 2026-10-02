@@ -41,7 +41,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcHid)
 /// Both UT-D09 revisions look alike; lsusb tells them apart.
 /// A HidReader in its own thread blocks in hid_read_timeout() and hands each
 /// report over as a queued signal; this object stays in the main thread,
-/// unpacks the UART bytes into a buffer and serves ReaderThread through
+/// unpacks the UART bytes into a buffer and serves FrameReader through
 /// readData()/bytesAvailable() with readyRead(). The line configuration
 /// (feature reports) is sent in the constructor, so a cable that refuses it
 /// fails open() at once.
@@ -110,7 +110,7 @@ public:
 
   /// Appends the known cable chips found via hidapi to @p portlist.
   static bool availablePorts(QStringList &portlist);
-  /// Fails when the hidapi handle could not be opened, so DMM reports an
+  /// Fails when the hidapi handle could not be opened, so MeterConnection reports an
   /// error instead of waiting for frames that never come.
   bool open(OpenMode mode) override;
   /// True once the cable has delivered an input report (even an empty one),
@@ -123,12 +123,12 @@ public:
 
   /// Bytes waiting for readData(). Must stay const: QIODevice's version
   /// is const and virtual, so a non-const one would hide instead of override
-  /// it and ReaderThread (holding a QIODevice*) would get the base version.
+  /// it and FrameReader (holding a QIODevice*) would get the base version.
   qint64 bytesAvailable() const override;
 
 Q_SIGNALS:
   /// The cable is gone: the read loop ended with an error while the device
-  /// was open. DMM reopens it later.
+  /// was open. MeterConnection reopens it later.
   void finished();
 
 protected:

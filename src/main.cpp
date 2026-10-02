@@ -23,7 +23,7 @@
 #include <QtGui>
 #include <iostream>
 
-#include "ui/mainwin.h"
+#include "ui/mainwindow.h"
 #include "ui/mnemoniccheck.h"
 #include "core/settings.h"
 
@@ -53,7 +53,7 @@ static void attachParentConsole()
 // Everything goes to stderr, prefixed by severity. Written with fprintf on
 // purpose: calling qDebug() & co. from inside the handler re-enters it.
 // Debug messages only appear for logging categories switched on by --debug
-// (see MainWin::setConsoleLogging), which keeps release builds quiet.
+// (see MainWindow::setConsoleLogging), which keeps release builds quiet.
 void qtdmmMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
   const char *prefix = "";
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
     }
   }
 
-  MainWin mainWin(parser);
+  MainWindow mainWin(parser);
 
   mainWin.show();
   mainWin.move(100, 100);

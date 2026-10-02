@@ -32,7 +32,7 @@
 #define HOUR_SECS     60*60
 #define DAY_SECS      60*60*24
 
-RecorderPrefs::RecorderPrefs(QWidget *parent) : PrefWidget(parent)
+RecorderPrefs::RecorderPrefs(QWidget *parent) : SettingsPage(parent)
 {
   setupUi(this);
   m_label = tr("Recording");
@@ -57,17 +57,17 @@ void RecorderPrefs::defaultsSLOT()
   sampleTime->setValue(m_cfg->getInt("Sample/time", 500));
   timeUnit->setCurrentIndex(m_cfg->getInt("Sample/time-unit"));
 
-  DMMGraph::SampleMode mode = static_cast<DMMGraph::SampleMode>(m_cfg->getInt("Start/mode"));
-  if (mode == DMMGraph::Manual)
+  GraphWidget::SampleMode mode = static_cast<GraphWidget::SampleMode>(m_cfg->getInt("Start/mode"));
+  if (mode == GraphWidget::Manual)
     manualBut->setChecked(true);
-  else if (mode == DMMGraph::Time)
+  else if (mode == GraphWidget::Time)
     predefinedBut->setChecked(true);
-  if (mode == DMMGraph::Raising)
+  if (mode == GraphWidget::Raising)
   {
     triggerBut->setChecked(true);
     raisingBut->setChecked(true);
   }
-  if (mode == DMMGraph::Falling)
+  if (mode == GraphWidget::Falling)
   {
     triggerBut->setChecked(true);
     fallingBut->setChecked(true);
@@ -111,17 +111,17 @@ void RecorderPrefs::applySLOT()
   m_cfg->setString("Start/falling-threshold", ui_fallingThreshold->text());
 }
 
-DMMGraph::SampleMode RecorderPrefs::sampleMode() const
+GraphWidget::SampleMode RecorderPrefs::sampleMode() const
 {
   if (predefinedBut->isChecked())
-    return DMMGraph::Time;
+    return GraphWidget::Time;
   if (triggerBut->isChecked())
   {
     if (raisingBut->isChecked())
-      return DMMGraph::Raising;
-    return DMMGraph::Falling;
+      return GraphWidget::Raising;
+    return GraphWidget::Falling;
   }
-  return DMMGraph::Manual;
+  return GraphWidget::Manual;
 }
 
 int RecorderPrefs::sampleStep() const

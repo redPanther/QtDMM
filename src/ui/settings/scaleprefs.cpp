@@ -33,7 +33,7 @@
 #define HOUR_SECS     60*60
 #define DAY_SECS      60*60*24
 
-ScalePrefs::ScalePrefs(QWidget *parent) : PrefWidget(parent)
+ScalePrefs::ScalePrefs(QWidget *parent) : SettingsPage(parent)
 {
   setupUi(this);
   m_label = tr("Scales");

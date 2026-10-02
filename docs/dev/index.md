@@ -5,14 +5,14 @@ Documentation for people working on QtDMM itself. Planned pages:
 - **Building and testing** — `compile.sh`, the CMake targets, the CTest suites
   (`test_decoder`, `test_graph`) and how the decoder fixtures in
   `tests/data/decoder/` are generated from the protocol specifications.
-- **Architecture** — the path from `PortHandler` and the `QIODevice` backends
-  through `ReaderThread` and the `DmmDecoder` subclasses to `DMM`, `MainWid`,
-  `DisplayWid` and `DMMGraph`; the `DmmResponse` value contract; the
+- **Architecture** — the path from `Transport` and the `QIODevice` backends
+  through `FrameReader` and the `DmmDecoder` subclasses to `MeterConnection`, `InstanceWidget`,
+  `LcdWidget` and `GraphWidget`; the `DmmResponse` value contract; the
   `SharedStateManager` used for multiple instances.
 - **Adding a protocol** — the `DmmDecoder` subclass, a value in the
-  `ReadEvent::DataFormat` enum (before `EndOfList`), one row in the table in
+  `FrameFormat::DataFormat` enum (before `EndOfList`), one row in the table in
   `src/device/protocols.cpp` (name, combo text, chip, factory - the settings combo,
-  `ReadEvent::toString()`, `DmmDecoder::getInstance()` and the device table
+  `FrameFormat::toString()`, `DmmDecoder::getInstance()` and the device table
   all read it; ctest `protocol_table` and `docs_generated` fail when enum and
   table disagree), `addConfig()` for each supported device, and the protocol
   specification and test vectors under `docs/protocols/spec/`. Frames are
@@ -45,7 +45,7 @@ every accepted header, the answers and the error codes.
 ## API documentation
 
 The headers under `src/` carry Doxygen comments; the class descriptions of
-`DMM`, `PortHandler`, `ReaderThread`, `DmmDecoder`, `MainWid`, `DMMGraph`
+`MeterConnection`, `Transport`, `FrameReader`, `DmmDecoder`, `InstanceWidget`, `GraphWidget`
 and `SharedStateManager` together describe the architecture. Generate the
 HTML with
 
@@ -129,7 +129,7 @@ The Bluetooth LE port (`src/device/transports/ble.cpp`) needs Qt6 Bluetooth and
 is optional: CMake option `QTDMM_WITH_BLE` (on when the module is found;
 the Windows workflow installs `qtconnectivity`, Ubuntu `qt6-connectivity-dev`,
 FreeBSD `qt6-connectivity`). Platform-specific code is limited to the permission
-hint in `src/device/dmm.cpp`, the process liveness check in
+hint in `src/device/meterconnection.cpp`, the process liveness check in
 `src/service/sharedstatemanager.cpp`, the serial port naming in
 `src/device/transports/serial.cpp` and the console attach in `src/main.cpp`.
 

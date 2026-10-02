@@ -28,7 +28,7 @@
 #include "core/settings.h"
 
 
-ExecutePrefs::ExecutePrefs(QWidget *parent) : PrefWidget(parent)
+ExecutePrefs::ExecutePrefs(QWidget *parent) : SettingsPage(parent)
 {
   setupUi(this);
   m_label = tr("External application");

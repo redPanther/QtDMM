@@ -3,14 +3,14 @@
 // Brymen BM52x / BM82x over the BU-86X adapter (libsigrok "brymen-bm52x",
 // "brymen-bm82x", "hid/bu86x"). "*": not confirmed on hardware.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Brymen", "BM525s *", "", 0, ReadEvent::BrymenBM52x, 8, 1, 2, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Brymen", "BM829s *", "", 0, ReadEvent::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM525s *", "", 0, FrameFormat::BrymenBM52x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM829s *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
   return true;
 }();
 
 size_t DecoderBrymenBM52x::getPacketLength()
 {
-  return (m_type == ReadEvent::BrymenBM52x || m_type == ReadEvent::BrymenBM82x) ? 24 : 0;
+  return (m_type == FrameFormat::BrymenBM52x || m_type == FrameFormat::BrymenBM82x) ? 24 : 0;
 }
 
 QByteArray DecoderBrymenBM52x::pollRequest() const

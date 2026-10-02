@@ -13,12 +13,12 @@
 #include "device/dmmdecoder.h"
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Keysight", "34465A (sigrok) *", "", 0, ReadEvent::Sigrok, 8, 1, 1, 0, 1000000, 0, 0, 0, "", "scpi-dmm"});
-  DmmDecoder::addConfig({"Agilent", "34405A (sigrok) *", "", 0, ReadEvent::Sigrok, 8, 1, 1, 0, 100000, 0, 0, 0, "", "scpi-dmm"});
-  DmmDecoder::addConfig({"Agilent", "34410A (sigrok) *", "", 0, ReadEvent::Sigrok, 8, 1, 1, 0, 1000000, 0, 0, 0, "", "scpi-dmm"});
-  DmmDecoder::addConfig({"Agilent", "34460A (sigrok) *", "", 0, ReadEvent::Sigrok, 8, 1, 1, 0, 1000000, 0, 0, 0, "", "scpi-dmm"});
-  DmmDecoder::addConfig({"HP", "34401A (sigrok) *", "", 0, ReadEvent::Sigrok, 8, 1, 1, 0, 1000000, 0, 0, 0, "", "scpi-dmm"});
-  DmmDecoder::addConfig({"Siglent", "SDM3055 (sigrok) *", "", 0, ReadEvent::Sigrok, 8, 1, 1, 0, 200000, 0, 0, 0, "", "scpi-dmm"});
-  DmmDecoder::addConfig({"sigrok", "SCPI DMM (any scpi-dmm model) *", "", 0, ReadEvent::Sigrok, 8, 1, 1, 0, 100000, 0, 0, 0, "", "scpi-dmm"});
+  DmmDecoder::addConfig({"Keysight", "34465A (sigrok) *", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 1000000, 0, 0, 0, "", "scpi-dmm"});
+  DmmDecoder::addConfig({"Agilent", "34405A (sigrok) *", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 100000, 0, 0, 0, "", "scpi-dmm"});
+  DmmDecoder::addConfig({"Agilent", "34410A (sigrok) *", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 1000000, 0, 0, 0, "", "scpi-dmm"});
+  DmmDecoder::addConfig({"Agilent", "34460A (sigrok) *", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 1000000, 0, 0, 0, "", "scpi-dmm"});
+  DmmDecoder::addConfig({"HP", "34401A (sigrok) *", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 1000000, 0, 0, 0, "", "scpi-dmm"});
+  DmmDecoder::addConfig({"Siglent", "SDM3055 (sigrok) *", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 200000, 0, 0, 0, "", "scpi-dmm"});
+  DmmDecoder::addConfig({"sigrok", "SCPI DMM (any scpi-dmm model) *", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 100000, 0, 0, 0, "", "scpi-dmm"});
   return true;
 }();

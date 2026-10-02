@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
-#include "ui/settings/prefwidget.h"
+#include "ui/settings/settingspage.h"
 #include "core/alarm.h"
 
 class QListWidget;
@@ -10,7 +10,7 @@ class QPushButton;
 
 /// Settings page "Alarms": the list of alarms with add / edit / remove
 /// (AlarmDlg edits one). Stored as JSON under Alarms/list.
-class AlarmPrefs : public PrefWidget
+class AlarmPrefs : public SettingsPage
 {
   Q_OBJECT
 public:

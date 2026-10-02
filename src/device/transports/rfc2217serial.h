@@ -12,7 +12,7 @@
 ///
 /// On connect the telnet options are negotiated and the meter's line settings
 /// from the DMMInfo are sent as COM-PORT-OPTION commands. The socket's data
-/// is buffered and handed to ReaderThread through the QIODevice interface.
+/// is buffered and handed to FrameReader through the QIODevice interface.
 class RFC2217SerialDevice : public QIODevice
 {
   Q_OBJECT

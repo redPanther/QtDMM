@@ -27,7 +27,7 @@ HIDSerialDevice::Chip HIDSerialDevice::chipFor(unsigned short vendorId, unsigned
 
 HIDSerialDevice::Chip HIDSerialDevice::chipForEntry(const QString &entry)
 {
-  // "0x1a86:0xe429" somewhere in the entry; DMM::setDevice() hands us only
+  // "0x1a86:0xe429" somewhere in the entry; MeterConnection::setDevice() hands us only
   // the path, so the ids are looked up from the enumeration in that case
   static const QRegularExpression ids("0x([0-9a-fA-F]{4}):0x([0-9a-fA-F]{4})");
   const auto m = ids.match(entry);
@@ -286,7 +286,7 @@ void HIDSerialDevice::close()
   m_isOpen = false;
   stopReader();
   // Without this the QIODevice base keeps reporting isOpen() == true, which
-  // is what PortHandler::isOpen() actually queries.
+  // is what Transport::isOpen() actually queries.
   QIODevice::close();
 }
 

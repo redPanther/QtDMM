@@ -4,14 +4,14 @@
 // "*": ported from the libsigrok parser, not confirmed on hardware. The
 // BM869s was confirmed by a user (2026-09).
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Brymen", "BM867s *", "", 0, ReadEvent::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Brymen", "BM869s", "", 0, ReadEvent::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM867s *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM869s", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
   return true;
 }();
 
 size_t DecoderBrymenBM86x::getPacketLength()
 {
-  return (m_type == ReadEvent::BrymenBM86x ? 24 : 0);
+  return (m_type == FrameFormat::BrymenBM86x ? 24 : 0);
 }
 
 bool DecoderBrymenBM86x::checkFormat(const char *data, size_t idx)

@@ -3,7 +3,7 @@
 //
 // RecordingStore on its own: QCoreApplication only, no widgets. The
 // recorder's behaviour (triggers, averaging, integral, length) is covered
-// through DMMGraph in test_graph (5c-5i); this is what the store adds:
+// through GraphWidget in test_graph (5c-5i); this is what the store adds:
 // the full sample (quality, flags, text), the ring, marks by sample, load.
 #include <QCoreApplication>
 #include <QDebug>

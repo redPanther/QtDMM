@@ -13,7 +13,7 @@ class DecoderBrymenBM86x : public DmmDecoder
 {
   Q_OBJECT
 public:
-  DecoderBrymenBM86x(ReadEvent::DataFormat df) : DmmDecoder(df) { m_name = "BM86x"; }
+  DecoderBrymenBM86x(FrameFormat::DataFormat df) : DmmDecoder(df) { m_name = "BM86x"; }
 
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   bool checkFormat(const char* data, size_t idx) override;

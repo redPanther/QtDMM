@@ -19,7 +19,7 @@ class DecoderVictronBLE : public DmmDecoder
 {
   Q_OBJECT
 public:
-  DecoderVictronBLE(ReadEvent::DataFormat df) : DmmDecoder(df) { m_name = "VictronBLE"; }
+  DecoderVictronBLE(FrameFormat::DataFormat df) : DmmDecoder(df) { m_name = "VictronBLE"; }
 
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   bool checkFormat(const char *data, size_t idx) override { return data[idx] == '\n'; }

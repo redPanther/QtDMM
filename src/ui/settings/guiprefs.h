@@ -28,7 +28,7 @@
 /// Settings page "Appearance": window and toolbar options, the LCD display
 /// (colour, bar graph, min/max) and the analog meter (scale mode, style,
 /// ballistics, red zone), tips at start-up.
-class GuiPrefs : public PrefWidget, private Ui::UIGuiPrefs
+class GuiPrefs : public SettingsPage, private Ui::UIGuiPrefs
 {
   Q_OBJECT
 public:

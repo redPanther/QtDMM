@@ -4,7 +4,7 @@
 // Instances dialog without a running second QtDMM: the list is built from the
 // config files in a temporary config directory, delete mode removes the
 // selected instance's file, a calculated instance is created with the keys
-// DMM and MainWin rely on, and a new instance copies all but the meter.
+// MeterConnection and MainWindow rely on, and a new instance copies all but the meter.
 
 #include <QtWidgets>
 #include <QTemporaryDir>

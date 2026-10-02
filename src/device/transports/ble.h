@@ -17,7 +17,7 @@ class QBluetoothDeviceInfo;
 /// (VictronBle::frame). Port string: "<address> <key> [<main> <second>]"
 /// with the field ids the decoder should show, e.g.
 /// "CB:09:E4:16:33:DB 2ac4... SOC V". finished() reports a lost adapter or a
-/// wrong key; silence is left to DMM's watchdog. Built only with
+/// wrong key; silence is left to MeterConnection's watchdog. Built only with
 /// QTDMM_WITH_BLE (Qt6::Bluetooth).
 class BleAdvertisementDevice : public QIODevice
 {

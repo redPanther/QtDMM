@@ -26,12 +26,12 @@
 
 
 #include "ui/colorbutton.h"
-#include "ui/views/dmmgraph.h"
+#include "ui/views/graphwidget.h"
 #include "ui/settings/graphprefs.h"
 #include "core/settings.h"
 
 
-GraphPrefs::GraphPrefs(QWidget *parent) : PrefWidget(parent)
+GraphPrefs::GraphPrefs(QWidget *parent) : SettingsPage(parent)
 {
   setupUi(this);
   m_label = tr("Graph");
@@ -42,12 +42,12 @@ GraphPrefs::GraphPrefs(QWidget *parent) : PrefWidget(parent)
   // the graphs' colours; the colour buttons below are the variant Custom
   // (cursor and thresholds always)
   m_variant = new QComboBox(this);
-  for (auto v : { DMMGraph::Neutral, DMMGraph::ScopeBlue, DMMGraph::PhosphorGreen, DMMGraph::PhosphorAmber,
-                  DMMGraph::ChartRecorder, DMMGraph::Custom })
-    m_variant->addItem(v == DMMGraph::Custom ? tr("Custom: the colours below")
-                                             : v == DMMGraph::Neutral ? tr("Neutral: follows the design")
-                                                                      : DMMGraph::variantTitle(v),
-                       DMMGraph::variantName(v));
+  for (auto v : { GraphWidget::Neutral, GraphWidget::ScopeBlue, GraphWidget::PhosphorGreen, GraphWidget::PhosphorAmber,
+                  GraphWidget::ChartRecorder, GraphWidget::Custom })
+    m_variant->addItem(v == GraphWidget::Custom ? tr("Custom: the colours below")
+                                             : v == GraphWidget::Neutral ? tr("Neutral: follows the design")
+                                                                      : GraphWidget::variantTitle(v),
+                       GraphWidget::variantName(v));
   m_variant->setWhatsThis(tr("The colours of the graph: background, grid, lettering and curves. "
                              "Custom uses the colours below. A graph's context menu can choose "
                              "other colours for that graph only."));

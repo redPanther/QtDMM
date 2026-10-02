@@ -7,7 +7,7 @@ class DecoderDO3122 : public DmmDecoder
 {
   Q_OBJECT
 public:
-  DecoderDO3122(ReadEvent::DataFormat df) : DmmDecoder(df) {}
+  DecoderDO3122(FrameFormat::DataFormat df) : DmmDecoder(df) {}
 
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   bool checkFormat(const char* data, size_t idx) override;

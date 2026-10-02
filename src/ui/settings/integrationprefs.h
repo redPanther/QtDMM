@@ -28,7 +28,7 @@
 
 /// Settings page "Integration curve": scale, threshold, offset and the look
 /// of the integration curve in the graph.
-class IntegrationPrefs : public PrefWidget, private Ui::UIIntegrationPrefs
+class IntegrationPrefs : public SettingsPage, private Ui::UIIntegrationPrefs
 {
   Q_OBJECT
 public:

@@ -25,13 +25,13 @@
 class QPainter;
 
 /// @file
-/// The bezel and face shared by MeterWid and DisplayWid.
+/// The bezel and face shared by AnalogMeter and LcdWidget.
 
 /// The instrument housing shared by the analog meter and the digital
 /// display: a rounded metal bezel with a recessed face, lit from a point.
 namespace PanelFrame
 {
-  /// Colours of the housing; MeterStyle and DisplayWid provide them.
+  /// Colours of the housing; AnalogMeterStyle and LcdWidget provide them.
   struct Colors
   {
     QColor bezelLight;

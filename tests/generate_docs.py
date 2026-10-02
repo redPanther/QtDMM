@@ -26,11 +26,11 @@ DOCS = REPO / "docs"
 DEVICES_MD = DOCS / "user" / "supported-devices.md"
 README = REPO / "README.md"
 
-# {"Vendor", "Model", "", baud, ReadEvent::Proto, bits, stopBits, numValues,
+# {"Vendor", "Model", "", baud, FrameFormat::Proto, bits, stopBits, numValues,
 #  parity, display, externalSetup, rts, dtr}
 ADD_CONFIG = re.compile(
     r'addConfig\(\s*\{\s*"(?P<vendor>[^"]*)"\s*,\s*"(?P<model>[^"]*)"\s*,\s*"[^"]*"\s*,'
-    r'\s*(?P<baud>\d+)\s*,\s*ReadEvent::(?P<protocol>\w+)\s*,\s*(?P<bits>\d)\s*,'
+    r'\s*(?P<baud>\d+)\s*,\s*FrameFormat::(?P<protocol>\w+)\s*,\s*(?P<bits>\d)\s*,'
     r'\s*(?P<stop>\d)\s*,\s*(?P<values>\d+)\s*,\s*(?P<parity>\d)\s*,\s*(?P<counts>\d+)\s*,'
     r'\s*(?P<ext>\d)\s*,\s*(?P<rts>\d)\s*,\s*(?P<dtr>\d)')
 PARITY = {"0": "N", "1": "E", "2": "O"}
@@ -38,9 +38,9 @@ PARITY = {"0": "N", "1": "E", "2": "O"}
 # The chip behind a protocol, where it is known: lets a user match an
 # unlisted meter to a protocol. Read from the protocol table in
 # src/device/protocols.cpp - one row per line:
-#   { ReadEvent::<Id>, "<Name>", QT_TRANSLATE_NOOP("Protocols", "<text>"), "<chip>", "<transport>", make<...> },
+#   { FrameFormat::<Id>, "<Name>", QT_TRANSLATE_NOOP("Protocols", "<text>"), "<chip>", "<transport>", make<...> },
 PROTOCOL_ROW = re.compile(
-    r'\{\s*ReadEvent::(?P<id>\w+)\s*,\s*"(?P<name>\w+)"\s*,\s*QT_TRANSLATE_NOOP\("Protocols",\s*"(?P<text>[^"]*)"\)'
+    r'\{\s*FrameFormat::(?P<id>\w+)\s*,\s*"(?P<name>\w+)"\s*,\s*QT_TRANSLATE_NOOP\("Protocols",\s*"(?P<text>[^"]*)"\)'
     r'\s*,\s*"(?P<chip>[^"]*)"\s*,\s*"(?P<transport>[^"]*)"\s*,\s*make<(?P<decoder>\w+)>')
 
 
@@ -208,21 +208,21 @@ def render_readme(devices_md):
 
 
 def protocol_drift():
-    """Every ReadEvent::DataFormat value before EndOfList must have exactly
+    """Every FrameFormat::DataFormat value before EndOfList must have exactly
     one row in src/device/protocols.cpp, with the enum id as its name."""
-    header = (REPO / "src" / "device" / "readevent.h").read_text(encoding="utf-8")
+    header = (REPO / "src" / "device" / "frameformat.h").read_text(encoding="utf-8")
     body = header[header.index("enum DataFormat"):header.index("EndOfList")]
     enum_ids = [m.group(1) for m in re.finditer(r"^\s*(\w+)\s*(?:=\s*-?\d+)?\s*,", body, re.M) if m.group(1) != "Invalid"]
     rows = protocol_table()
     problems = []
     for e in enum_ids:
         if e not in rows:
-            problems.append(f"ReadEvent::{e} has no row in src/device/protocols.cpp")
+            problems.append(f"FrameFormat::{e} has no row in src/device/protocols.cpp")
     for name, row in rows.items():
         if row["id"] != name:
             problems.append(f"protocols.cpp row {name}: enum id {row['id']} differs from the name")
         if row["id"] not in enum_ids:
-            problems.append(f"protocols.cpp row {name}: ReadEvent::{row['id']} is not in the enum")
+            problems.append(f"protocols.cpp row {name}: FrameFormat::{row['id']} is not in the enum")
     return problems
 
 

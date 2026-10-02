@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QDebug>
 
-#include "ui/views/displaywid.h"
+#include "ui/views/lcdwidget.h"
 #include "core/siprefix.h"
 
 static int failed = 0;
@@ -19,7 +19,7 @@ static void check(bool cond, const QString &what)
   }
 }
 
-static QImage render(DisplayWid &w, const QSize &size)
+static QImage render(LcdWidget &w, const QSize &size)
 {
   w.resize(size);
   QImage img(size, QImage::Format_ARGB32_Premultiplied);
@@ -45,14 +45,14 @@ int main(int argc, char **argv)
   QApplication app(argc, argv);
 
   // --- 1. glyphs: every digit, the letters meters send (OL, Err, dIodE, bAt) ---
-  check(DisplayWid::segmentsFor('8') == 0x7f, "8 lights all seven segments");
-  check(DisplayWid::segmentsFor('1') == 0x06, "1 lights b and c");
-  check(DisplayWid::segmentsFor('-') == 0x40, "minus is the middle segment");
-  check(DisplayWid::segmentsFor(' ') == 0, "space is blank");
+  check(LcdWidget::segmentsFor('8') == 0x7f, "8 lights all seven segments");
+  check(LcdWidget::segmentsFor('1') == 0x06, "1 lights b and c");
+  check(LcdWidget::segmentsFor('-') == 0x40, "minus is the middle segment");
+  check(LcdWidget::segmentsFor(' ') == 0, "space is blank");
   for (QChar ch : QString("0123456789abcdefhlnoprstuy"))
-    check(DisplayWid::segmentsFor(ch) != 0, QString("glyph for '%1'").arg(ch));
-  check(DisplayWid::segmentsFor('L') == DisplayWid::segmentsFor('l'), "letters are case-insensitive");
-  check(DisplayWid::segmentsFor('0') != DisplayWid::segmentsFor('o'), "0 and o differ (o is lower case)");
+    check(LcdWidget::segmentsFor(ch) != 0, QString("glyph for '%1'").arg(ch));
+  check(LcdWidget::segmentsFor('L') == LcdWidget::segmentsFor('l'), "letters are case-insensitive");
+  check(LcdWidget::segmentsFor('0') != LcdWidget::segmentsFor('o'), "0 and o differ (o is lower case)");
 
   // --- 1b. units as the displays write them (LCD and analog meter share it) ---
   check(SiPrefix::displayText("Ohm") == QStringLiteral("Ω"), "Ohm -> Ω");
@@ -73,8 +73,8 @@ int main(int argc, char **argv)
   //         ("-029.30" shows "-  29.30" like the UT61E, not "- 029.30"
   //         nor " -29.30"): the same picture as the value without them ---
   {
-    DisplayWid a, b;
-    for (DisplayWid *d : { &a, &b })
+    LcdWidget a, b;
+    for (LcdWidget *d : { &a, &b })
     {
       d->setDisplayMode(22000, true, true, 1);
       d->setUnit(0, "mV");
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
   // --- 2. render: a value paints more dark pixels than an empty display ---
   const QString dump = qEnvironmentVariable("TEST_DISPLAY_DUMP");
   const QSize size(520, 200);
-  DisplayWid w;
+  LcdWidget w;
   w.setDisplayMode(4000, true, true, 1);
   QImage empty = render(w, size);
   check(!empty.isNull(), "renders empty");
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
   // --- 4. narrow panels: flags and MIN/MAX blocks must fit the width ---
   // (they used to overlap: MANU into AC, MIN's unit under MAX)
   {
-    DisplayWid n;
+    LcdWidget n;
     n.setDisplayMode(50000, true, true, 1);   // 5 digits
     n.setValue(0, "12.345");
     n.setUnit(0, "MOhm");
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
     for (int width : {160, 200, 260, 320, 400, 520})   // down to well below minimumSizeHint (260)
     {
       n.resize(width, 400);
-      const DisplayWid::Layout l = n.layout();
+      const LcdWidget::Layout l = n.layout();
       // fits - or the font is already at its 5 px floor (a fallback font
       // on a machine without fonts is wide even there)
       const bool flagsFloor = l.flagsPx <= 5.5, smallFloor = l.smallH <= 5.5;
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
     }
     // a roomy panel is not shrunk by the width rule
     n.resize(520, 200);
-    const DisplayWid::Layout l = n.layout();
+    const LcdWidget::Layout l = n.layout();
     check(l.flagsPx <= l.flags.height() * 0.75 + 0.01, "annunciator font never exceeds the row's");
     check(!scalableFont || qFuzzyCompare(l.flagsPx, l.flags.height() * 0.75), "wide panel: annunciator font is the row's");
   }

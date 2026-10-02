@@ -23,17 +23,17 @@
 #pragma once
 
 #include "ui_uirecorderprefs.h"
-#include "ui/views/dmmgraph.h"
+#include "ui/views/graphwidget.h"
 
-/// Settings page "Recording": how recording starts (DMMGraph::SampleMode),
+/// Settings page "Recording": how recording starts (GraphWidget::SampleMode),
 /// the thresholds, sample time and length.
-class RecorderPrefs : public PrefWidget, private Ui::UIRecorderPrefs
+class RecorderPrefs : public SettingsPage, private Ui::UIRecorderPrefs
 {
   Q_OBJECT
 public:
   RecorderPrefs(QWidget *parent = Q_NULLPTR);
   ~RecorderPrefs();
-  DMMGraph::SampleMode sampleMode() const;
+  GraphWidget::SampleMode sampleMode() const;
   int         sampleStep() const;
   int         sampleLength() const;
   double      fallingThreshold() const;

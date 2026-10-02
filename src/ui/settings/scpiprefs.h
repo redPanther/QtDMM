@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
-#include "ui/settings/prefwidget.h"
+#include "ui/settings/settingspage.h"
 
 class QCheckBox;
 class QComboBox;
@@ -13,7 +13,7 @@ class QSpinBox;
 /// TCP in SCPI (port 5025, lxi-tools style), with optional mDNS
 /// announcement. Keys Scpi/enabled, Scpi/port, Scpi/all-interfaces,
 /// Scpi/mdns.
-class ScpiPrefs : public PrefWidget
+class ScpiPrefs : public SettingsPage
 {
   Q_OBJECT
 public:

@@ -1,4 +1,4 @@
-// Baseline behavior tests for DMMGraph, written before the planned QtGraph-based
+// Baseline behavior tests for GraphWidget, written before the planned QtGraph-based
 // rewrite so the current CSV import/export contract has a regression net to
 // compare the replacement against.
 #include <QApplication>
@@ -9,7 +9,7 @@
 #include <QDebug>
 #include <QFileInfo>
 
-#include "ui/views/dmmgraph.h"
+#include "ui/views/graphwidget.h"
 #include "recording/recordingstore.h"
 #include <QChartView>
 #include <QValueAxis>
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 
   for (const QString &name : fixtures)
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     QString path = dataDir + "/" + name;
     bool ok = graph.importCsvFile(path);
     check(ok, QString("importCsvFile() failed for fixture '%1'").arg(name));
@@ -83,8 +83,8 @@ int main(int argc, char **argv)
   //          page and the recorder's capacity follow the recording's length,
   //          not ten times it ---
   {
-    DMMGraph graph(nullptr, &settings);
-    QSignalSpy sized(&graph, &DMMGraph::graphSize);
+    GraphWidget graph(nullptr, &settings);
+    QSignalSpy sized(&graph, &GraphWidget::graphSize);
     check(graph.importCsvFile(dataDir + "/new_larger.csv"), "import size: import failed");
     const int count = graph.store()->count();
     const double seconds = count * graph.store()->sampleTime() / 10.0;
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
     QTextStream(&f) << "this is not a valid QtDMM export\n";
     f.close();
 
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     bool ok = graph.importCsvFile(badFile);
     check(!ok, "importCsvFile() should reject a non-matching file, but reported success");
   }
@@ -116,14 +116,14 @@ int main(int argc, char **argv)
   // --- 3. import -> export -> re-import must round-trip to the same CSV
   //         (this is the contract the QtGraph replacement needs to preserve) ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     check(graph.importCsvFile(dataDir + "/new_larger.csv"), "round-trip: initial import failed");
 
     QTemporaryDir outDir;
     QString exported1 = outDir.path() + "/export1.csv";
     check(graph.exportCsvFile(exported1), "round-trip: first export failed");
 
-    DMMGraph graph2(nullptr, &settings);
+    GraphWidget graph2(nullptr, &settings);
     check(graph2.importCsvFile(exported1), "round-trip: re-import of exported file failed");
 
     QString exported2 = outDir.path() + "/export2.csv";
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 
   // --- 3b. time buttons (All / 1 min / 5 min / 30 min) top right ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(10);   // one sample per second
     graph.setGraphSize(300, 3600);
     const QList<QToolButton *> buttons = graph.findChildren<QToolButton *>();
@@ -153,10 +153,10 @@ int main(int argc, char **argv)
     if (all && one && five && thirty)
     {
       check(five->isChecked() && !one->isChecked() && !all->isChecked(), "time buttons: a 300 s window marks 5 min");
-      QSignalSpy spy(&graph, &DMMGraph::windowRequested);
+      QSignalSpy spy(&graph, &GraphWidget::windowRequested);
       one->click();
       check(spy.size() == 1 && spy.last().at(0).toInt() == 60, "time buttons: 1 min asks for a 60 s window");
-      // MainWid applies the request through the settings, like a zoom
+      // InstanceWidget applies the request through the settings, like a zoom
       graph.setGraphSize(60, 3600);
       check(one->isChecked() && !five->isChecked(), "time buttons: the applied window is marked");
       graph.setGraphSize(45, 3600);
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
   //         minutes (the settings keep seconds only up to 99999; an odd
   //         value above was cut and asked for again with every sample) ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(10);   // one sample per second
     graph.setGraphSize(10, 3600);
     QToolButton *all = nullptr;
@@ -198,8 +198,8 @@ int main(int argc, char **argv)
     {
       all->click();
       QList<int> requests;
-      // MainWid applies each request through the settings
-      QObject::connect(&graph, &DMMGraph::windowRequested, &graph, [&](int seconds)
+      // InstanceWidget applies each request through the settings
+      QObject::connect(&graph, &GraphWidget::windowRequested, &graph, [&](int seconds)
       {
         requests << seconds;
         graph.setGraphSize(seconds, 3600);
@@ -223,8 +223,8 @@ int main(int argc, char **argv)
   //         sample interval is on the order of the actual ~0.2s spacing,
   //         not something that grows with the number of rows. ---
   {
-    DMMGraph graph(nullptr, &settings);
-    QSignalSpy spy(&graph, &DMMGraph::sampleTime);
+    GraphWidget graph(nullptr, &settings);
+    QSignalSpy spy(&graph, &GraphWidget::sampleTime);
     check(graph.importCsvFile(dataDir + "/new_larger.csv"), "sampleTime regression: import failed");
     check(spy.count() == 1, "sampleTime regression: expected exactly one sampleTime() signal");
     if (spy.count() == 1)
@@ -252,8 +252,8 @@ int main(int argc, char **argv)
       out << t0.addMSecs(i * 500).toString("yyyy-MM-ddTHH:mm:ss,zzz") << ";" << i * 0.5 << ";12.0;V\n";
     f.close();
 
-    DMMGraph graph(nullptr, &settings);
-    QSignalSpy spy(&graph, &DMMGraph::sampleTime);
+    GraphWidget graph(nullptr, &settings);
+    QSignalSpy spy(&graph, &GraphWidget::sampleTime);
     check(graph.importCsvFile(slow), "slow: import failed");
     check(spy.count() == 1 && spy.at(0).at(0).toInt() == 5,
           QString("slow: sample time %1, expected 5 (0.5 s)").arg(spy.count() ? spy.at(0).at(0).toInt() : -1));
@@ -271,10 +271,10 @@ int main(int argc, char **argv)
   //         buffer wrap without crashing, and setGraphSize() must be callable
   //         again afterwards while data already exists. ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
     graph.setGraphSize(5, 5); // small window -> wraps quickly
-    graph.setMode(DMMGraph::Manual);
+    graph.setMode(GraphWidget::Manual);
     graph.startSLOT();
 
     for (int i = 0; i < 20; i++)
@@ -290,11 +290,11 @@ int main(int argc, char **argv)
   //          0 at or below it - the first sample, too (it used to be the
   //          threshold itself, a spike at the left edge) ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
     graph.setGraphSize(100, 100);
     graph.setIntegration(true, 1.0, 0.5, 0.0);
-    graph.setMode(DMMGraph::Manual);
+    graph.setMode(GraphWidget::Manual);
     graph.startSLOT();
     for (double v : { 0.1, 0.2, 0.8, 0.9, 0.1, 0.6 })
       graph.addValue(v);
@@ -308,12 +308,12 @@ int main(int argc, char **argv)
           QString("integration: expected '0 0 0.8 1.7 0 0.6', got '%1'").arg(got.join(' ')));
   }
 
-  // --- 5b. window size and sample time in either order: MainWid used to set
+  // --- 5b. window size and sample time in either order: InstanceWidget used to set
   //          the window (counted in samples) before the sample time, and any
   //          later x axis update showed it scaled by the ratio of the two ---
   {
     Settings cfg("ordertest", tmpDir.path());
-    DMMGraph graph(nullptr, &cfg);
+    GraphWidget graph(nullptr, &cfg);
     graph.resize(800, 500);
     auto *x = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Horizontal).first());
     graph.setGraphSize(600, 3600);   // with the default sample time of 0.1 s
@@ -334,7 +334,7 @@ int main(int argc, char **argv)
   //            used, so these run unchanged against the split graph. ---
 
   // y values of series @p index (0 data line, 2 integration) as "1 4 8"
-  auto seriesY = [](DMMGraph &graph, int index) -> QString
+  auto seriesY = [](GraphWidget &graph, int index) -> QString
   {
     const QList<QAbstractSeries *> series = graph.findChild<QChartView *>()->chart()->series();
     auto *s = series.size() > index ? qobject_cast<QXYSeries *>(series[index]) : nullptr;
@@ -344,7 +344,7 @@ int main(int argc, char **argv)
         got << QString::number(p.y());
     return got.join(' ');
   };
-  auto seriesX = [](DMMGraph &graph) -> QString
+  auto seriesX = [](GraphWidget &graph) -> QString
   {
     auto *s = qobject_cast<QXYSeries *>(graph.findChild<QChartView *>()->chart()->series().value(0));
     QStringList got;
@@ -358,10 +358,10 @@ int main(int argc, char **argv)
   //          came, every later one is the mean of the readings of its sample
   //          period (the one that closes the period included) ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(2);          // one sample per 0.2 s = per 2 readings
     graph.setGraphSize(100, 100);
-    graph.setMode(DMMGraph::Manual);
+    graph.setMode(GraphWidget::Manual);
     graph.startSLOT();
     for (double v : { 1.0, 3.0, 5.0, 7.0, 9.0 })
       graph.addValue(v);
@@ -380,12 +380,12 @@ int main(int argc, char **argv)
   //          threshold from below and records it as the first sample; the
   //          very first reading (nothing to compare with) never triggers ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
     graph.setGraphSize(100, 100);
     graph.setThresholds(0.0, 1.0);
-    graph.setMode(DMMGraph::Raising);
-    QSignalSpy running(&graph, &DMMGraph::running);
+    graph.setMode(GraphWidget::Raising);
+    QSignalSpy running(&graph, &GraphWidget::running);
     graph.addValue(1.5);             // first reading, above: no start
     graph.addValue(0.5);
     graph.addValue(0.8);
@@ -398,12 +398,12 @@ int main(int argc, char **argv)
 
   // --- 5e. start trigger, falling ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
     graph.setGraphSize(100, 100);
     graph.setThresholds(-1.0, 5.0);
-    graph.setMode(DMMGraph::Falling);
-    QSignalSpy running(&graph, &DMMGraph::running);
+    graph.setMode(GraphWidget::Falling);
+    QSignalSpy running(&graph, &GraphWidget::running);
     graph.addValue(-2.0);            // first reading, below: no start
     graph.addValue(0.0);
     graph.addValue(-0.5);
@@ -417,19 +417,19 @@ int main(int argc, char **argv)
   // --- 5f. start trigger, clock time: starts within two seconds after the
   //          start time (a reading may miss the exact second), not before ---
   {
-    DMMGraph later(nullptr, &settings);
+    GraphWidget later(nullptr, &settings);
     later.setGraphSize(100, 100);
     later.setStartTime(QTime::currentTime().addSecs(120));
-    later.setMode(DMMGraph::Time);
-    QSignalSpy notYet(&later, &DMMGraph::running);
+    later.setMode(GraphWidget::Time);
+    QSignalSpy notYet(&later, &GraphWidget::running);
     later.addValue(1.0);
     check(notYet.isEmpty(), "time trigger: started before the start time");
 
-    DMMGraph now(nullptr, &settings);
+    GraphWidget now(nullptr, &settings);
     now.setGraphSize(100, 100);
     now.setStartTime(QTime::currentTime());
-    now.setMode(DMMGraph::Time);
-    QSignalSpy started(&now, &DMMGraph::running);
+    now.setMode(GraphWidget::Time);
+    QSignalSpy started(&now, &GraphWidget::running);
     now.addValue(1.0);
     check(started.size() == 1, "time trigger: did not start at the start time");
   }
@@ -437,12 +437,12 @@ int main(int argc, char **argv)
   // --- 5g. external program threshold: once per recording, in the chosen
   //          direction, only while recording ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
     graph.setGraphSize(100, 100);
-    graph.setMode(DMMGraph::Manual);
+    graph.setMode(GraphWidget::Manual);
     graph.setExternal(true, false, 2.0);
-    QSignalSpy ext(&graph, &DMMGraph::externalTriggered);
+    QSignalSpy ext(&graph, &GraphWidget::externalTriggered);
     graph.addValue(1.0);
     graph.addValue(3.0);             // crosses, but not recording
     check(ext.isEmpty(), "external: fired while not recording");
@@ -471,11 +471,11 @@ int main(int argc, char **argv)
   //          left, the integral keeps summing on the shifted data, a mark
   //          moves with its sample and falls off with it ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
     graph.setGraphSize(1, 1);        // 1 s = 11 samples of 0.1 s
     graph.setIntegration(true, 1.0, 0.0, 0.0);
-    graph.setMode(DMMGraph::Manual);
+    graph.setMode(GraphWidget::Manual);
     graph.startSLOT();
     for (int i = 1; i <= 5; i++)
       graph.addValue(i);
@@ -505,12 +505,12 @@ int main(int argc, char **argv)
   // --- 5i. recording length: stops on its own after setSampleLength()
   //          (tenths of a second of readings); 0 records until stopped ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
     graph.setGraphSize(100, 100);
     graph.setSampleLength(5);
-    graph.setMode(DMMGraph::Manual);
-    QSignalSpy running(&graph, &DMMGraph::running);
+    graph.setMode(GraphWidget::Manual);
+    QSignalSpy running(&graph, &GraphWidget::running);
     graph.startSLOT();
     for (int i = 1; i <= 8; i++)
       graph.addValue(i);
@@ -536,7 +536,7 @@ int main(int argc, char **argv)
     store.addValue(1);
     store.addValue(2);
 
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.setStore(&store);
     check(graph.store() == &store, "setStore: store() must return the new store");
     check(seriesY(graph, 0) == "1 2",
@@ -555,11 +555,11 @@ int main(int argc, char **argv)
   //          store and the export keep every sample, and growing the series
   //          sample by sample gives what a rebuild gives ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.resize(300, 200);
     graph.setSampleTime(1);
     graph.setGraphSize(200, 200);            // 2000 samples in the window
-    graph.setMode(DMMGraph::Manual);
+    graph.setMode(GraphWidget::Manual);
     graph.startSLOT();
     const int samples = 2000;
     for (int i = 0; i < samples; i++)
@@ -595,11 +595,11 @@ int main(int argc, char **argv)
   //          bucket, so the drawn minima and maxima of the older samples do
   //          not change from one new sample to the next ---
   {
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.resize(300, 200);
     graph.setSampleTime(1);
     graph.setGraphSize(200, 200);            // 2001 samples in the ring
-    graph.setMode(DMMGraph::Manual);
+    graph.setMode(GraphWidget::Manual);
     graph.startSLOT();
     auto noise = [](int i) { return double((i * 37) % 101); };
     int i = 0;
@@ -636,7 +636,7 @@ int main(int argc, char **argv)
   //          thinned or not ---
   {
     // the drawn lines: the y values of each line segment that has points
-    auto lines = [](DMMGraph &graph)
+    auto lines = [](GraphWidget &graph)
     {
       QStringList out;
       for (QAbstractSeries *a : graph.findChild<QChartView *>()->chart()->series())
@@ -651,16 +651,16 @@ int main(int argc, char **argv)
       }
       return out;
     };
-    auto dataPoints = [](DMMGraph &graph)
+    auto dataPoints = [](GraphWidget &graph)
     {
       return qobject_cast<QScatterSeries *>(graph.findChild<QChartView *>()->chart()->series().value(1))->count();
     };
 
-    DMMGraph graph(nullptr, &settings);
+    GraphWidget graph(nullptr, &settings);
     graph.resize(800, 300);
     graph.setSampleTime(1);
     graph.setGraphSize(100, 100);
-    graph.setMode(DMMGraph::Manual);
+    graph.setMode(GraphWidget::Manual);
     graph.startSLOT();
     for (int i = 0; i < 30; i++)
       graph.addValue(i >= 10 && i < 20 ? qQNaN() : i);
@@ -675,11 +675,11 @@ int main(int argc, char **argv)
     check(lines(graph).isEmpty() && dataPoints(graph) == 0, "gaps: cleared");
 
     // thinned: a bucket with a value draws it, a bucket of gaps is a gap
-    DMMGraph thin(nullptr, &settings);
+    GraphWidget thin(nullptr, &settings);
     thin.resize(300, 200);
     thin.setSampleTime(1);
     thin.setGraphSize(200, 200);
-    thin.setMode(DMMGraph::Manual);
+    thin.setMode(GraphWidget::Manual);
     thin.startSLOT();
     for (int i = 0; i < 2000; i++)
       thin.addValue((i / 300) % 2 ? qQNaN() : i % 7 == 3 ? qQNaN() : (i * 37) % 101);
@@ -699,11 +699,11 @@ int main(int argc, char **argv)
 
     auto exportedUnitFor = [&](const QString &unit, double rawValue) -> QString
     {
-      DMMGraph graph(nullptr, &settings);
+      GraphWidget graph(nullptr, &settings);
       graph.setUnit(unit);
       graph.setSampleTime(10);
       graph.setGraphSize(5, 5);
-      graph.setMode(DMMGraph::Manual);
+      graph.setMode(GraphWidget::Manual);
       graph.startSLOT();
       graph.addValue(rawValue);
 
@@ -725,18 +725,18 @@ int main(int argc, char **argv)
     // Full round trip at an extreme prefix: import a pF-range export, export
     // again, and the two exports must be byte-for-byte identical.
     {
-      DMMGraph graph(nullptr, &settings);
+      GraphWidget graph(nullptr, &settings);
       graph.setUnit("F");
       graph.setSampleTime(10);
       graph.setGraphSize(5, 5);
-      graph.setMode(DMMGraph::Manual);
+      graph.setMode(GraphWidget::Manual);
       graph.startSLOT();
       graph.addValue(2.5e-12);
 
       QString exported1 = outDir.path() + "/pf_export1.csv";
       check(graph.exportCsvFile(exported1), "pF round-trip: first export failed");
 
-      DMMGraph graph2(nullptr, &settings);
+      GraphWidget graph2(nullptr, &settings);
       check(graph2.importCsvFile(exported1), "pF round-trip: re-import failed");
 
       QString exported2 = outDir.path() + "/pf_export2.csv";
@@ -757,11 +757,11 @@ int main(int argc, char **argv)
     QTemporaryDir outDir;
 
     {
-      DMMGraph graph(nullptr, &settings);
+      GraphWidget graph(nullptr, &settings);
       graph.setUnit("A");
       graph.setSampleTime(10);
       graph.setGraphSize(5, 5);
-      graph.setMode(DMMGraph::Manual);
+      graph.setMode(GraphWidget::Manual);
       graph.startSLOT();
       graph.addValue(2.5e-6);
       QString path = outDir.path() + "/micro_export.csv";
@@ -783,7 +783,7 @@ int main(int argc, char **argv)
           << "2026-09-19T10:00:01,000;1;2.5;" << unitInFile << "\n";
       f.close();
 
-      DMMGraph graph(nullptr, &settings);
+      GraphWidget graph(nullptr, &settings);
       if (!graph.importCsvFile(path))
         return -1;
       QString exported = path + ".out.csv";
@@ -806,7 +806,7 @@ int main(int argc, char **argv)
   //          formats come out with the asked-for size ---
   {
     Settings cfg("imgtest", tmpDir.path());
-    DMMGraph graph(nullptr, &cfg);
+    GraphWidget graph(nullptr, &cfg);
     graph.resize(800, 500);
     check(graph.importCsvFile(dataDir + "/new_larger.csv"), "image export: import failed");
     // as in the program: the graph is on screen and laid out (a hidden
@@ -855,40 +855,40 @@ int main(int argc, char **argv)
   // --- 7c. colour variants: 1-2-5 divisions and 10 x 8 for the scope-like
   //          ones, names round-trip ---
   {
-    check(DMMGraph::niceStep(0.3) == 0.5 && DMMGraph::niceStep(1) == 1 && DMMGraph::niceStep(1.01) == 2
-          && DMMGraph::niceStep(4.9) == 5 && DMMGraph::niceStep(6) == 10 && qFuzzyCompare(DMMGraph::niceStep(0.0021), 0.005),
+    check(GraphWidget::niceStep(0.3) == 0.5 && GraphWidget::niceStep(1) == 1 && GraphWidget::niceStep(1.01) == 2
+          && GraphWidget::niceStep(4.9) == 5 && GraphWidget::niceStep(6) == 10 && qFuzzyCompare(GraphWidget::niceStep(0.0021), 0.005),
           "niceStep follows 1-2-5");
-    for (auto v : { DMMGraph::Neutral, DMMGraph::ScopeBlue, DMMGraph::PhosphorGreen, DMMGraph::PhosphorAmber,
-                    DMMGraph::ChartRecorder, DMMGraph::Custom })
-      check(DMMGraph::variantFromName(DMMGraph::variantName(v)) == v, "variant name round-trip " + DMMGraph::variantName(v));
-    check(DMMGraph::variantFromName("nonsense") == DMMGraph::Neutral, "unknown variant is neutral");
+    for (auto v : { GraphWidget::Neutral, GraphWidget::ScopeBlue, GraphWidget::PhosphorGreen, GraphWidget::PhosphorAmber,
+                    GraphWidget::ChartRecorder, GraphWidget::Custom })
+      check(GraphWidget::variantFromName(GraphWidget::variantName(v)) == v, "variant name round-trip " + GraphWidget::variantName(v));
+    check(GraphWidget::variantFromName("nonsense") == GraphWidget::Neutral, "unknown variant is neutral");
 
     Settings cfg("varianttest", tmpDir.path());
-    DMMGraph graph(nullptr, &cfg);
+    GraphWidget graph(nullptr, &cfg);
     graph.resize(800, 500);
     graph.setScale(false, false, -0.3, 11.7);
     auto *y = graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first();
     auto *yAxis = qobject_cast<QValueAxis *>(y);
     check(qFuzzyCompare(yAxis->min(), -0.3) && qFuzzyCompare(yAxis->max(), 11.7), "neutral keeps the scale as set");
-    graph.setColorVariant(DMMGraph::Neutral, DMMGraph::PhosphorGreen);   // this graph only
+    graph.setColorVariant(GraphWidget::Neutral, GraphWidget::PhosphorGreen);   // this graph only
     const double div = (yAxis->max() - yAxis->min()) / 8;
     check(yAxis->tickCount() == 9 && qFuzzyCompare(div, 2.0) && qFuzzyCompare(yAxis->min(), -2.0),
           QString("phosphor: 8 divisions of 2 from -2, got %1..%2").arg(yAxis->min()).arg(yAxis->max()));
-    check(graph.colorOverride() == DMMGraph::PhosphorGreen, "the override is kept");
-    graph.setColorVariant(DMMGraph::Custom);   // the default, no override
-    check(graph.colorVariant() == DMMGraph::Custom && graph.colorOverride() == -1, "default without override");
+    check(graph.colorOverride() == GraphWidget::PhosphorGreen, "the override is kept");
+    graph.setColorVariant(GraphWidget::Custom);   // the default, no override
+    check(graph.colorVariant() == GraphWidget::Custom && graph.colorOverride() == -1, "default without override");
     check(yAxis->tickCount() == 5 && qFuzzyCompare(yAxis->max(), 11.7), "custom goes back to the plain scale");
   }
 
   // --- 7d. the time axis: whole time steps, labelled in s, min or h; the
   //          scope-like variants make 600 s 10 x 1 min (not 10 x 100 s) ---
   {
-    check(DMMGraph::timeStep(45) == 60 && DMMGraph::timeStep(61) == 120 && DMMGraph::timeStep(3) == 5
-          && DMMGraph::timeStep(12) == 15 && DMMGraph::timeStep(400) == 600 && DMMGraph::timeStep(2000) == 3600
-          && DMMGraph::timeStep(0.15) == 0.2 && DMMGraph::timeStep(100000) == 172800,
+    check(GraphWidget::timeStep(45) == 60 && GraphWidget::timeStep(61) == 120 && GraphWidget::timeStep(3) == 5
+          && GraphWidget::timeStep(12) == 15 && GraphWidget::timeStep(400) == 600 && GraphWidget::timeStep(2000) == 3600
+          && GraphWidget::timeStep(0.15) == 0.2 && GraphWidget::timeStep(100000) == 172800,
           "timeStep: 1, 2, 5, 10, 15, 30 s, 1, 2, 5, 10, 15, 30 min, h, days");
     Settings cfg("timeaxis", tmpDir.path());
-    DMMGraph graph(nullptr, &cfg);
+    GraphWidget graph(nullptr, &cfg);
     graph.resize(800, 500);
     graph.setSampleTime(10);
     graph.setGraphSize(600, 3600);
@@ -908,7 +908,7 @@ int main(int argc, char **argv)
     check(x->tickType() == QValueAxis::TicksDynamic && x->tickInterval() == 120 && x->titleText() == "[min]",
           QString("neutral 600 s: a tick every 2 min, got %1 s, '%2'").arg(x->tickInterval()).arg(x->titleText()));
     check(labels().join(' ') == "0 2 4 6 8", "neutral 600 s: labels 0 2 4 6 8 min, got " + labels().join(' '));
-    graph.setColorVariant(DMMGraph::ScopeBlue);
+    graph.setColorVariant(GraphWidget::ScopeBlue);
     check(x->tickInterval() == 60 && qFuzzyCompare(x->max() - x->min(), 600.0),
           QString("scope 600 s: 10 x 1 min, got %1 x %2 s").arg((x->max() - x->min()) / x->tickInterval()).arg(x->tickInterval()));
     check(labels().join(' ') == "0 1 2 3 4 5 6 7 8 9 10", "scope 600 s: labels 0..10 min, got " + labels().join(' '));
@@ -916,7 +916,7 @@ int main(int argc, char **argv)
     check(x->tickInterval() == 2 && x->titleText() == "[sec]", QString("scope 20 s: 10 x 2 s, got %1").arg(x->tickInterval()));
     graph.setGraphSize(7200, 36000);
     check(x->tickInterval() == 900 && x->titleText() == "[min]", QString("scope 2 h: 10 x 15 min, got %1").arg(x->tickInterval()));
-    graph.setColorVariant(DMMGraph::Neutral);
+    graph.setColorVariant(GraphWidget::Neutral);
     check(x->tickInterval() == 1800 && x->titleText() == "[min]", QString("neutral 2 h: every 30 min, got %1").arg(x->tickInterval()));
   }
 
@@ -925,7 +925,7 @@ int main(int argc, char **argv)
   //          labels are there before the first reading ---
   {
     Settings cfg("emptyscale", tmpDir.path());
-    DMMGraph graph(nullptr, &cfg);
+    GraphWidget graph(nullptr, &cfg);
     graph.resize(800, 500);
     auto *yAxis = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first());
     for (bool includeZero : { false, true })
@@ -963,9 +963,9 @@ int main(int argc, char **argv)
   }
 
   if (failed == 0)
-    qInfo() << "All DMMGraph baseline tests passed.";
+    qInfo() << "All GraphWidget baseline tests passed.";
   else
-    qWarning() << failed << "DMMGraph baseline test(s) failed.";
+    qWarning() << failed << "GraphWidget baseline test(s) failed.";
 
   return failed == 0 ? 0 : 1;
 }

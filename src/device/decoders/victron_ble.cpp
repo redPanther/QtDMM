@@ -12,11 +12,11 @@
 // fits 12/24/48 V systems (13.23 V -> 60 V); the chargers show whole watts,
 // 1000 counts = a 1 kW scale.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Victron", "SmartShunt", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Victron", "BMV-712 Smart *", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Victron", "SmartSolar MPPT", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 1000, 0, 0, 0});
-  DmmDecoder::addConfig({"Victron", "BlueSolar MPPT *", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 1000, 0, 0, 0});
-  DmmDecoder::addConfig({"Victron", "Phoenix Inverter Smart", "", 0, ReadEvent::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "SmartShunt", "", 0, FrameFormat::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "BMV-712 Smart *", "", 0, FrameFormat::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "SmartSolar MPPT", "", 0, FrameFormat::VictronBLE, 8, 1, 2, 0, 1000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "BlueSolar MPPT *", "", 0, FrameFormat::VictronBLE, 8, 1, 2, 0, 1000, 0, 0, 0});
+  DmmDecoder::addConfig({"Victron", "Phoenix Inverter Smart", "", 0, FrameFormat::VictronBLE, 8, 1, 2, 0, 6000, 0, 0, 0});
   return true;
 }();
 

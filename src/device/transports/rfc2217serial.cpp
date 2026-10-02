@@ -54,7 +54,7 @@ void RFC2217SerialDevice::onConnected()
 
 void RFC2217SerialDevice::onDisconnected()
 {
-  // Has to go through the base class: PortHandler::isOpen() asks QIODevice, so
+  // Has to go through the base class: Transport::isOpen() asks QIODevice, so
   // without this a dropped connection still looked open to the rest of the app.
   QIODevice::close();
   emit finished();
@@ -81,7 +81,7 @@ bool RFC2217SerialDevice::open(OpenMode mode)
 void RFC2217SerialDevice::close()
 {
   // detach first: disconnectFromHost() can emit disconnected() synchronously,
-  // which would re-enter here through finished() -> DMM::portLost()
+  // which would re-enter here through finished() -> MeterConnection::portLost()
   QTcpSocket *socket = m_socket;
   m_socket = nullptr;
   if (socket)

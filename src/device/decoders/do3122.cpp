@@ -1,20 +1,20 @@
 #include "device/decoders/do3122.h"
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Duratool", "DO3122", "", 9600, ReadEvent::DO3122Continuous, 8, 1, 1, 0, 4000, 0, 0, 0});
+  DmmDecoder::addConfig({"Duratool", "DO3122", "", 9600, FrameFormat::DO3122Continuous, 8, 1, 1, 0, 4000, 0, 0, 0});
   return true;
 }();
 
 size_t DecoderDO3122::getPacketLength()
 {
-  return  (m_type == ReadEvent::DO3122Continuous ? 22 : 0);
+  return  (m_type == FrameFormat::DO3122Continuous ? 22 : 0);
 }
 
 bool DecoderDO3122::checkFormat(const char* data, size_t idx)
 {
   // only once a whole frame is in: before that the look-back lands on stale
   // bytes of the ring
-  if (m_type == ReadEvent::DO3122Continuous && idx >= 21)
+  if (m_type == FrameFormat::DO3122Continuous && idx >= 21)
   {
     if ((static_cast<uint8_t>(data[(idx - 21 + FIFO_LENGTH) % FIFO_LENGTH]) != 0xAAu)
         || (static_cast<uint8_t>(data[(idx - 20 + FIFO_LENGTH) % FIFO_LENGTH]) != 0x55u)

@@ -3,28 +3,28 @@
 // FS9922-DMM4
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Digitech", "QM1537", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"PeakTech", "3430", "", 19200, ReadEvent::QM1537Continuous, 7, 2, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Digitech", "QM1537", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "3430", "", 19200, FrameFormat::QM1537Continuous, 7, 2, 1, 0, 4000, 0, 0, 1});
   // models marked "*" come from chip data (libsigrok, datasheets) and are
   // not confirmed on hardware yet
-  DmmDecoder::addConfig({"Digitek", "DT-9602R+ *", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Pro'sKit", "MT-1820 *", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"SparkFun", "70C *", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT60D *", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT61A *", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "VC 830 *", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"GW Instek", "GDM-397 *", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});   // libsigrok-master fs9922
-  DmmDecoder::addConfig({"PeakTech", "2025 *", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});      // libsigrok-master fs9922
-  DmmDecoder::addConfig({"Uni-Trend", "UT61B", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT61C", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Uni-Trend", "UT61D", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Vichy", "VC99", "", 2400, ReadEvent::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Digitek", "DT-9602R+ *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Pro'sKit", "MT-1820 *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"SparkFun", "70C *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT60D *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61A *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 830 *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"GW Instek", "GDM-397 *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});   // libsigrok-master fs9922
+  DmmDecoder::addConfig({"PeakTech", "2025 *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});      // libsigrok-master fs9922
+  DmmDecoder::addConfig({"Uni-Trend", "UT61B", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61C", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61D", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Vichy", "VC99", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
   return true;
 }();
 
 size_t DecoderQM1537::getPacketLength()
 {
-  return  (m_type == ReadEvent::QM1537Continuous ? 14 : 0);
+  return  (m_type == FrameFormat::QM1537Continuous ? 14 : 0);
 }
 
 bool DecoderQM1537::checkFormat(const char* data, size_t idx)
@@ -33,7 +33,7 @@ bool DecoderQM1537::checkFormat(const char* data, size_t idx)
   // Firing on the CR alone, as this used to, handed the reader the previous
   // frame's LF plus 13 bytes - decode() then saw the LF where the sign
   // belongs and reported "Data error!" for every reading.
-  return (m_type == ReadEvent::QM1537Continuous && idx && data[idx - 1] == 0x0d && data[idx] == 0x0a);
+  return (m_type == FrameFormat::QM1537Continuous && idx && data[idx - 1] == 0x0d && data[idx] == 0x0a);
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &data, int id)
@@ -139,7 +139,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &d
   else if (data[10] & 0x02)
   {
     /* Temperature, byte 10 bit 1 per docs/protocols/sources/UT61BCD.log
-       (UT61B/C only, not the UT61D). "C" and "dF" are the strings DisplayWid
+       (UT61B/C only, not the UT61D). "C" and "dF" are the strings LcdWidget
        maps to the degree glyphs. */
     m_result.unit = "C";
     m_result.special = "TE";

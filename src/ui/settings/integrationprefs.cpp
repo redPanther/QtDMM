@@ -28,7 +28,7 @@
 #include "ui/settings/integrationprefs.h"
 #include "core/settings.h"
 
-IntegrationPrefs::IntegrationPrefs(QWidget *parent) : PrefWidget(parent)
+IntegrationPrefs::IntegrationPrefs(QWidget *parent) : SettingsPage(parent)
 {
   setupUi(this);
   m_label = tr("Integration curve");

@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "device/readevent.h"
+#include "device/frameformat.h"
 
 class DmmDecoder;
 
@@ -14,12 +14,12 @@ class DmmDecoder;
 /// value, its persistent name, the text shown in the protocol combo, the
 /// meter chip behind it (for the device table) and the decoder factory.
 ///
-/// The combo in the settings, ReadEvent::toString()/fromString(),
+/// The combo in the settings, FrameFormat::toString()/fromString(),
 /// DmmDecoder::getInstance() and tests/generate_docs.py (which parses this
 /// table) all read from here, so a new protocol is one new row.
 struct ProtocolInfo
 {
-  ReadEvent::DataFormat id;
+  FrameFormat::DataFormat id;
   const char *name;          ///< persistent name, e.g. "CyrustekES51922"
   const char *description;   ///< combo text; translated with QCoreApplication::translate("Protocols", ...)
   const char *chip;          ///< meter chip, "" when unknown
@@ -28,10 +28,10 @@ struct ProtocolInfo
   /// devices carry a baud rate. Used by the device table, and by the
   /// settings page of a build without Bluetooth to recognise these models.
   const char *transport;
-  std::shared_ptr<DmmDecoder> (*create)(ReadEvent::DataFormat);
+  std::shared_ptr<DmmDecoder> (*create)(FrameFormat::DataFormat);
 };
 
 /// All protocols, in the order they are shown.
 const std::vector<ProtocolInfo> &protocols();
 /// The row for @p id, or null.
-const ProtocolInfo *protocolInfo(ReadEvent::DataFormat id);
+const ProtocolInfo *protocolInfo(FrameFormat::DataFormat id);

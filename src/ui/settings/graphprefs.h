@@ -26,13 +26,13 @@
 #include "ui_uigraphprefs.h"
 
 /// Settings page "Graph": colours, line and point style of the recorder curve.
-class GraphPrefs : public PrefWidget, private Ui::UIGraphPrefs
+class GraphPrefs : public SettingsPage, private Ui::UIGraphPrefs
 {
   Q_OBJECT
 public:
   GraphPrefs(QWidget *parent = Q_NULLPTR);
   ~GraphPrefs();
-  /// The graphs' default colours, a DMMGraph::variantName().
+  /// The graphs' default colours, a GraphWidget::variantName().
   QString       variant() const;
   QColor        bgColor() const;
   QColor        gridColor() const;

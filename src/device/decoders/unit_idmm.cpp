@@ -6,21 +6,21 @@
 
 static const bool registered = []() {
   // Bluetooth LE: no baud rate; the address is chosen on the Multimeter page
-  DmmDecoder::addConfig({"Uni-Trend", "UT60BT", "", 0, ReadEvent::UniTiDMM, 8, 1, 1, 0, 10000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT60BT", "", 0, FrameFormat::UniTiDMM, 8, 1, 1, 0, 10000, 0, 0, 0});
   // UT161 series: Bluetooth built in like the UT60BT, ranges of the UT61+
   // (vendor tables funOl_UT161B/D/E); not tried with QtDMM
-  DmmDecoder::addConfig({"Uni-Trend", "UT161B *", "", 0, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Uni-Trend", "UT161D *", "", 0, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Uni-Trend", "UT161E *", "", 0, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 22000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT161B *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT161D *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT161E *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 22000, 0, 0, 0});
   // UT61B+/D+/E+ (per ut61xpy): the USB cable UT-D09 is a USB-HID UART (both
   // revisions, CP2110 and CH9329) at 9600 8N1; the UT-D07B Bluetooth adapter
   // carries the same frames over the same GATT service as the UT60BT
-  DmmDecoder::addConfig({"Uni-Trend", "UT61E+ *", "", 9600, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 22000, 0, 0, 0});
-  DmmDecoder::addConfig({"Uni-Trend", "UT61D+ *", "", 9600, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Uni-Trend", "UT61B+ *", "", 9600, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Uni-Trend", "UT61E+ (UT-D07B Bluetooth) *", "", 0, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 22000, 0, 0, 0});
-  DmmDecoder::addConfig({"Uni-Trend", "UT61D+ (UT-D07B Bluetooth) *", "", 0, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
-  DmmDecoder::addConfig({"Uni-Trend", "UT61B+ (UT-D07B Bluetooth) *", "", 0, ReadEvent::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61E+ *", "", 9600, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 22000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61D+ *", "", 9600, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61B+ *", "", 9600, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61E+ (UT-D07B Bluetooth) *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 22000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61D+ (UT-D07B Bluetooth) *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT61B+ (UT-D07B Bluetooth) *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
   return true;
 }();
 
@@ -163,7 +163,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
     return std::nullopt;
 
   const int fn = f[3] & 0x7F;
-  const bool plus = m_type == ReadEvent::UniTUT61Plus;
+  const bool plus = m_type == FrameFormat::UniTUT61Plus;
   if (fn >= (plus ? kFunctionCount61Plus : kFunctionCount))
     return std::nullopt;
   const Function &func = plus ? kFunctions61Plus[fn] : kFunctions[fn];

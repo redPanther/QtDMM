@@ -18,7 +18,7 @@ struct Recording
 };
 
 /// The CSV file formats of the recorder, free of widgets and settings so they
-/// can be tested on their own. DMMGraph hands a Recording in and out.
+/// can be tested on their own. GraphWidget hands a Recording in and out.
 ///
 /// Written: `timestamp;time (s);value;unit` with ISO 8601 timestamps
 /// (`2026-09-21T14:03:05,250`), the value with an SI prefix on the unit.

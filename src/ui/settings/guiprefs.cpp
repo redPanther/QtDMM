@@ -28,7 +28,7 @@
 #include "ui/settings/guiprefs.h"
 #include "core/settings.h"
 
-GuiPrefs::GuiPrefs(QWidget *parent) : PrefWidget(parent)
+GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
 {
   setupUi(this);
   m_label = tr("Appearance");

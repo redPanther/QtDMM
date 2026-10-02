@@ -28,7 +28,7 @@
 
 /// Settings page "External application": the command to run when the
 /// reading crosses a threshold while recording.
-class ExecutePrefs : public PrefWidget, private Ui::UIExecutePrefs
+class ExecutePrefs : public SettingsPage, private Ui::UIExecutePrefs
 {
   Q_OBJECT
 public:

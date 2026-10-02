@@ -7,7 +7,7 @@
 // Fluke 45 Users Manual, chapter 5 (docs/protocols/sources/); no meter at
 // hand, so "*". 100000 counts (5 digits), baud rate as set on the meter.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Fluke", "45 *", "", 9600, ReadEvent::Fluke45, 8, 1, 1, 0, 100000, 0, 0, 0});
+  DmmDecoder::addConfig({"Fluke", "45 *", "", 9600, FrameFormat::Fluke45, 8, 1, 1, 0, 100000, 0, 0, 0});
   return true;
 }();
 

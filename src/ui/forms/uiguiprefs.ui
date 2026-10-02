@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>UIGuiPrefs</class>
- <widget class="PrefWidget" name="UIGuiPrefs">
+ <widget class="SettingsPage" name="UIGuiPrefs">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -789,9 +789,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>PrefWidget</class>
+   <class>SettingsPage</class>
    <extends>QWidget</extends>
-   <header>ui/settings/prefwidget.h</header>
+   <header>ui/settings/settingspage.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -814,7 +814,7 @@
   <tabstop>ui_tipOfTheDay</tabstop>
  </tabstops>
  <includes>
-  <include location="global">ui/settings/prefwidget.h</include>
+  <include location="global">ui/settings/settingspage.h</include>
   <include location="global">ui/colorbutton.h</include>
  </includes>
  <resources/>

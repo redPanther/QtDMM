@@ -12,23 +12,23 @@
  */
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Generic", "DTM0660 4000 count", "", 2400, ReadEvent::DTM0660, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Generic", "DTM0660 6000 count", "", 2400, ReadEvent::DTM0660, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Generic", "DTM0660 8000 count", "", 2400, ReadEvent::DTM0660, 8, 1, 1, 0, 8000, 0, 0, 1});
+  DmmDecoder::addConfig({"Generic", "DTM0660 4000 count", "", 2400, FrameFormat::DTM0660, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Generic", "DTM0660 6000 count", "", 2400, FrameFormat::DTM0660, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Generic", "DTM0660 8000 count", "", 2400, FrameFormat::DTM0660, 8, 1, 1, 0, 8000, 0, 0, 1});
   // DTM0660 per libsigrok; "*" = not confirmed on hardware yet
-  DmmDecoder::addConfig({"PeakTech", "3415 *", "", 2400, ReadEvent::DTM0660, 8, 1, 1, 0, 6000, 0, 0, 1});
-  DmmDecoder::addConfig({"Velleman", "DVM4100 *", "", 2400, ReadEvent::DTM0660, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"PeakTech", "3415 *", "", 2400, FrameFormat::DTM0660, 8, 1, 1, 0, 6000, 0, 0, 1});
+  DmmDecoder::addConfig({"Velleman", "DVM4100 *", "", 2400, FrameFormat::DTM0660, 8, 1, 1, 0, 6000, 0, 0, 1});
   return true;
 }();
 
 size_t DecoderDTM0660::getPacketLength()
 {
-  return  (m_type == ReadEvent::DTM0660 ? 15 : 0);
+  return  (m_type == FrameFormat::DTM0660 ? 15 : 0);
 }
 
 bool DecoderDTM0660::checkFormat(const char* data, size_t idx)
 {
-  return (m_type == ReadEvent::DTM0660 && ((data[idx] & 0xf0) == 0xf0));
+  return (m_type == FrameFormat::DTM0660 && ((data[idx] & 0xf0) == 0xf0));
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderDTM0660::decode(const QByteArray &data, int id)

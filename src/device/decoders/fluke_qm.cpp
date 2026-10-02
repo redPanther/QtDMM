@@ -11,12 +11,12 @@
 // fluke_28x_remote.pdf) and libsigrok fluke-dmm. No meter at hand: all "*".
 // Display counts: 87-IV 20000, the others 50000.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Fluke", "87-IV *", "", 9600, ReadEvent::FlukeQM, 8, 1, 1, 0, 20000, 0, 0, 0});
-  DmmDecoder::addConfig({"Fluke", "89-IV *", "", 9600, ReadEvent::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Fluke", "187 *", "", 9600, ReadEvent::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Fluke", "189 *", "", 9600, ReadEvent::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Fluke", "287 *", "", 115200, ReadEvent::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Fluke", "289 *", "", 115200, ReadEvent::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Fluke", "87-IV *", "", 9600, FrameFormat::FlukeQM, 8, 1, 1, 0, 20000, 0, 0, 0});
+  DmmDecoder::addConfig({"Fluke", "89-IV *", "", 9600, FrameFormat::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Fluke", "187 *", "", 9600, FrameFormat::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Fluke", "189 *", "", 9600, FrameFormat::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Fluke", "287 *", "", 115200, FrameFormat::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Fluke", "289 *", "", 115200, FrameFormat::FlukeQM, 8, 1, 1, 0, 50000, 0, 0, 0});
   return true;
 }();
 
