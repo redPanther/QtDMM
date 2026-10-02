@@ -10,7 +10,7 @@
 #include <QDebug>
 #include <QElapsedTimer>
 
-#include "helpdlg.h"
+#include "ui/dialogs/helpdlg.h"
 
 static int failed = 0;
 

@@ -8,8 +8,8 @@
 
 #include <QtCore>
 
-#include "decoders/victron_ble.h"
-#include "victronble.h"
+#include "device/decoders/victron_ble.h"
+#include "device/victronble.h"
 
 static int failed = 0;
 

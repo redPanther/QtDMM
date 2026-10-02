@@ -8,7 +8,7 @@
 #include <QtCore>
 #include <QtNetwork>
 
-#include "portdevices/rfc2217serial.h"
+#include "device/transports/rfc2217serial.h"
 
 static int failed = 0;
 

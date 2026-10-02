@@ -11,7 +11,7 @@
 #include <QVBoxLayout>
 #include <QTest>
 
-#include "mdiarranger.h"
+#include "ui/mdiarranger.h"
 
 static int failed = 0;
 

@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <cmath>
 
-#include "calcexpr.h"
+#include "core/calcexpr.h"
 
 static int failed = 0;
 

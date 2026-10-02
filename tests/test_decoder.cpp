@@ -7,9 +7,9 @@
 #include <QtTest>
 #include <QRegularExpression>
 
-#include "dmmdecoder.h"
-#include "protocols.h"
-#include "readingadapter.h"
+#include "device/dmmdecoder.h"
+#include "device/protocols.h"
+#include "core/readingadapter.h"
 
 QByteArray parseHexStringToByteArray(const QString &hexString)
 {

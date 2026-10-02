@@ -5,8 +5,8 @@
 #include <QDir>
 #include <QDebug>
 
-#include "displaywid.h"
-#include "siprefix.h"
+#include "ui/views/displaywid.h"
+#include "core/siprefix.h"
 
 static int failed = 0;
 

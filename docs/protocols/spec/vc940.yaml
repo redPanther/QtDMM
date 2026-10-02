@@ -1,5 +1,5 @@
 protocol: VC940Continuous
-decoder: src/decoders/vc940.cpp
+decoder: src/device/decoders/vc940.cpp
 devices: [Tenma 72-7732, Uni-Trend UT71B, Uni-Trend UT71CDE, Uni-Trend UT804, Voltcraft VC 920, Voltcraft VC 940, Voltcraft VC 960]
 frames_per_reading: 2
 unit_map:                      # log spelling -> what the decoder emits

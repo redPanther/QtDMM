@@ -1,7 +1,7 @@
 # Protocols
 
 Every supported meter speaks one of the wire protocols below, each handled by one
-decoder class in `src/decoders/`. This section collects what is known about
+decoder class in `src/device/decoders/`. This section collects what is known about
 those protocols, where that knowledge comes from, and how it is turned into
 regression tests.
 
@@ -48,7 +48,7 @@ everything since the previous frame to the decoder (`getPacketLength()` 0),
 which takes the last line.
 
 `VictronBLE` is not a serial protocol at all: `BleAdvertisementDevice`
-decrypts each Bluetooth advertisement (`src/victronble.cpp`, AES-128-CTR
+decrypts each Bluetooth advertisement (`src/device/victronble.cpp`, AES-128-CTR
 with the key from VictronConnect) and hands the decoder one text line - the
 readout type and the plaintext as hex - so the decoder stays a pure
 bit-field parser that the fixtures can exercise.

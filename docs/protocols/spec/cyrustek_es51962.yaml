@@ -1,5 +1,5 @@
 protocol: CyrustekES51962
-decoder: src/decoders/cyrustek_es51962.cpp
+decoder: src/device/decoders/cyrustek_es51962.cpp
 devices: [PeakTech 3315, Uni-Trend UT70B]
 frames_per_reading: 2
 unit_map:                      # log spelling -> what the decoder emits

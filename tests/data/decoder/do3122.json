@@ -1,6 +1,6 @@
 {
   "decoder": "DO3122Continuous",
-  "comment": "SYNTHETIC: frames built by hand from the layout in src/decoders/do3122.cpp (header, seven-segment digits, mode and unit bytes); docs/protocols/sources/duratool.pdf is the meter's datasheet, which does not give the serial frame. Expectations are worked out from the displayed reading. No capture from a real Duratool DO3122 exists here. Replace with real data when available.",
+  "comment": "SYNTHETIC: frames built by hand from the layout in src/device/decoders/do3122.cpp (header, seven-segment digits, mode and unit bytes); docs/protocols/sources/duratool.pdf is the meter's datasheet, which does not give the serial frame. Expectations are worked out from the displayed reading. No capture from a real Duratool DO3122 exists here. Replace with real data when available.",
   "tests": [
     {
       "comment": "1.234 V DC",

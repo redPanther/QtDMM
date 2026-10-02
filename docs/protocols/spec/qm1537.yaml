@@ -1,5 +1,5 @@
 protocol: QM1537Continuous
-decoder: src/decoders/qm1537.cpp
+decoder: src/device/decoders/qm1537.cpp
 devices: [Digitek DT4000ZC, Digitech QM1537, PeakTech 3430, TekPower TP4000ZC, Uni-Trend UT61B, Uni-Trend UT61C, Uni-Trend UT61D, Vichy VC99]
 frames_per_reading: 1
 unit_map:                      # log spelling -> what the decoder emits

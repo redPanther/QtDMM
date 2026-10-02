@@ -15,7 +15,7 @@ look.
 
 Usage:
   import_protocol_log.py docs/protocols/sources/UT61E.log \\
-      --protocol CyrustekES51922 --decoder src/decoders/cyrustek_es51922.cpp \\
+      --protocol CyrustekES51922 --decoder src/device/decoders/cyrustek_es51922.cpp \\
       --devices "Uni-Trend UT61E" "Wintex TD2200" --packet-length 14 \\
       > docs/protocols/spec/cyrustek_es51922.yaml
 """

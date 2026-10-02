@@ -9,8 +9,8 @@
 #include <QDebug>
 #include <cmath>
 
-#include "readingadapter.h"
-#include "stalerule.h"
+#include "core/readingadapter.h"
+#include "core/stalerule.h"
 
 static int failed = 0;
 

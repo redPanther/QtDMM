@@ -5,15 +5,15 @@ if (BUILD_TESTING)
 	set( TEST_DECODER test_decoder)
 	enable_testing()
 
-	file(GLOB DECODER_FILES CONFIGURE_DEPENDS src/decoders/*.h  src/decoders/*.cpp )
-	## the Victron decoder reads bit fields through src/victronble.cpp (which also carries the AES)
-	list(APPEND DECODER_FILES src/victronble.cpp src/3rdparty/tiny-aes/aes.c)
-	add_executable(${TEST_DECODER} MACOSX_BUNDLE tests/test_decoder.cpp src/dmmdecoder.cpp src/protocols.cpp src/siprefix.cpp src/readingadapter.cpp ${DECODER_FILES})
+	file(GLOB DECODER_FILES CONFIGURE_DEPENDS src/device/decoders/*.h  src/device/decoders/*.cpp )
+	## the Victron decoder reads bit fields through src/device/victronble.cpp (which also carries the AES)
+	list(APPEND DECODER_FILES src/device/victronble.cpp src/3rdparty/tiny-aes/aes.c)
+	add_executable(${TEST_DECODER} MACOSX_BUNDLE tests/test_decoder.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp src/core/readingadapter.cpp ${DECODER_FILES})
 	target_link_libraries(${TEST_DECODER} PRIVATE Qt::Core Qt::Test)
 	add_test(NAME protocol_table COMMAND ${TEST_DECODER} --table)
 
 	## the core's base types and ReadingAdapter (the decoder fixtures check the ports too)
-	add_executable(test_adapter tests/test_adapter.cpp src/readingadapter.cpp src/siprefix.cpp)
+	add_executable(test_adapter tests/test_adapter.cpp src/core/readingadapter.cpp src/core/siprefix.cpp)
 	target_include_directories(test_adapter PRIVATE src)
 	target_link_libraries(test_adapter PRIVATE Qt::Core)
 	add_test(NAME reading_adapter COMMAND test_adapter)
@@ -25,12 +25,12 @@ if (BUILD_TESTING)
 	endforeach()
 
 	set( TEST_GRAPH test_graph)
-	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/dmmgraph.cpp src/gapline.cpp src/recordingstore.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/settings.cpp src/siprefix.cpp src/engnumbervalidator.cpp)
+	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/ui/views/dmmgraph.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/settings.cpp src/core/siprefix.cpp src/ui/engnumbervalidator.cpp)
 	target_link_libraries(${TEST_GRAPH} PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Charts Qt6::Svg Qt::Core Qt::Test)
 	add_test(NAME dmmgraph COMMAND ${TEST_GRAPH} "${CMAKE_SOURCE_DIR}/tests/data/graph")
 
 	## the recorder's store on its own: QtCore only, no widgets
-	add_executable(test_recordingstore tests/test_recordingstore.cpp src/recordingstore.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/siprefix.cpp src/readingadapter.cpp)
+	add_executable(test_recordingstore tests/test_recordingstore.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp src/core/readingadapter.cpp)
 	target_include_directories(test_recordingstore PRIVATE src)
 	target_link_libraries(test_recordingstore PRIVATE Qt::Core Qt::Test)
 	add_test(NAME recording_store COMMAND test_recordingstore)
@@ -40,7 +40,7 @@ if (BUILD_TESTING)
 	set( TEST_HELP test_help)
 	## links the same compiled resources as the application (qtdmm_resources
 	## also carries the generated ui header helpdlg.cpp needs)
-	add_executable(${TEST_HELP} MACOSX_BUNDLE tests/test_help.cpp src/helpdlg.cpp src/settings.cpp)
+	add_executable(${TEST_HELP} MACOSX_BUNDLE tests/test_help.cpp src/ui/dialogs/helpdlg.cpp src/core/settings.cpp)
 	target_include_directories(${TEST_HELP} PRIVATE src)
 	target_link_libraries(${TEST_HELP} PRIVATE qtdmm_resources Qt6::Widgets Qt::Core)
 	add_test(NAME handbook COMMAND ${TEST_HELP})
@@ -48,21 +48,21 @@ if (BUILD_TESTING)
 	## the analog meter: angle mapping, full-scale derivation, ballistics and
 	## a headless render check
 	set( TEST_METER test_meter)
-	add_executable(${TEST_METER} MACOSX_BUNDLE tests/test_meter.cpp src/meterwid.cpp src/panelframe.cpp src/siprefix.cpp src/readingadapter.cpp)
+	add_executable(${TEST_METER} MACOSX_BUNDLE tests/test_meter.cpp src/ui/views/meterwid.cpp src/ui/panelframe.cpp src/core/siprefix.cpp src/core/readingadapter.cpp)
 	target_include_directories(${TEST_METER} PRIVATE src)
 	target_link_libraries(${TEST_METER} PRIVATE Qt6::Widgets Qt::Core Qt::Test)
 	add_test(NAME analog_meter COMMAND ${TEST_METER})
 
 	## the MDI window arrangement: automatic layout, order, title bars
 	set( TEST_MDI test_mdiarranger)
-	add_executable(${TEST_MDI} MACOSX_BUNDLE tests/test_mdiarranger.cpp src/mdiarranger.cpp)
+	add_executable(${TEST_MDI} MACOSX_BUNDLE tests/test_mdiarranger.cpp src/ui/mdiarranger.cpp)
 	target_include_directories(${TEST_MDI} PRIVATE src)
 	target_link_libraries(${TEST_MDI} PRIVATE Qt6::Widgets Qt::Core Qt::Test)
 	add_test(NAME mdi_arranger COMMAND ${TEST_MDI})
 
 	## the digital display: glyph table and a headless render check
 	set( TEST_DISPLAY test_display)
-	add_executable(${TEST_DISPLAY} MACOSX_BUNDLE tests/test_display.cpp src/displaywid.cpp src/panelframe.cpp src/siprefix.cpp)
+	add_executable(${TEST_DISPLAY} MACOSX_BUNDLE tests/test_display.cpp src/ui/views/displaywid.cpp src/ui/panelframe.cpp src/core/siprefix.cpp)
 	target_include_directories(${TEST_DISPLAY} PRIVATE src)
 	target_link_libraries(${TEST_DISPLAY} PRIVATE Qt6::Widgets Qt::Core)
 	add_test(NAME digital_display COMMAND ${TEST_DISPLAY})
@@ -70,21 +70,21 @@ if (BUILD_TESTING)
 	## instance coordination over shared memory: registration, state channel
 	## and published readings
 	set( TEST_SHAREDSTATE test_sharedstate)
-	add_executable(${TEST_SHAREDSTATE} MACOSX_BUNDLE tests/test_sharedstate.cpp src/sharedstatemanager.cpp)
+	add_executable(${TEST_SHAREDSTATE} MACOSX_BUNDLE tests/test_sharedstate.cpp src/service/sharedstatemanager.cpp)
 	target_include_directories(${TEST_SHAREDSTATE} PRIVATE src)
 	target_link_libraries(${TEST_SHAREDSTATE} PRIVATE Qt::Core)
 	add_test(NAME shared_state COMMAND ${TEST_SHAREDSTATE})
 
 	## instances dialog: list from config files, delete mode, calculated instance
 	set( TEST_INSTANCES test_instances)
-	add_executable(${TEST_INSTANCES} MACOSX_BUNDLE tests/test_instances.cpp src/instancesdlg.cpp src/settings.cpp src/protocols.cpp src/dmmdecoder.cpp src/siprefix.cpp ${DECODER_FILES}
-		src/sharedstatemanager.cpp src/calcexpr.cpp src/siprefix.cpp src/ui/uiinstancesdlg.ui)
+	add_executable(${TEST_INSTANCES} MACOSX_BUNDLE tests/test_instances.cpp src/ui/dialogs/instancesdlg.cpp src/core/settings.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp src/core/siprefix.cpp ${DECODER_FILES}
+		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uiinstancesdlg.ui)
 	target_include_directories(${TEST_INSTANCES} PRIVATE src)
 	target_link_libraries(${TEST_INSTANCES} PRIVATE Qt6::Widgets Qt::Core)
 	add_test(NAME instances_dialog COMMAND ${TEST_INSTANCES})
 	## the formula evaluator of calculated instances
 	set( TEST_CALC test_calc)
-	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/calcexpr.cpp src/siprefix.cpp)
+	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/core/calcexpr.cpp src/core/siprefix.cpp)
 	target_include_directories(${TEST_CALC} PRIVATE src)
 	target_link_libraries(${TEST_CALC} PRIVATE Qt::Core)
 	add_test(NAME calc_expression COMMAND ${TEST_CALC})
@@ -92,15 +92,15 @@ if (BUILD_TESTING)
 	## the calculated-value source: formula over the other instances' readings,
 	## checked through the real ASCII decoder
 	set( TEST_CALC_DEVICE test_calc_device)
-	add_executable(${TEST_CALC_DEVICE} MACOSX_BUNDLE tests/test_calc_device.cpp src/portdevices/calc.cpp src/calcexpr.cpp
-		src/sharedstatemanager.cpp src/dmmdecoder.cpp src/protocols.cpp src/siprefix.cpp ${DECODER_FILES})
+	add_executable(${TEST_CALC_DEVICE} MACOSX_BUNDLE tests/test_calc_device.cpp src/device/transports/calc.cpp src/core/calcexpr.cpp
+		src/service/sharedstatemanager.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
 	target_include_directories(${TEST_CALC_DEVICE} PRIVATE src)
 	target_link_libraries(${TEST_CALC_DEVICE} PRIVATE Qt::Core)
 	add_test(NAME calc_device COMMAND ${TEST_CALC_DEVICE})
 
 	## HID cable chips: report layouts and chip detection, no hardware needed
 	set( TEST_HID test_hid)
-	add_executable(${TEST_HID} MACOSX_BUNDLE tests/test_hid.cpp src/portdevices/hidserial.cpp src/dmmdecoder.cpp src/protocols.cpp src/siprefix.cpp ${DECODER_FILES})
+	add_executable(${TEST_HID} MACOSX_BUNDLE tests/test_hid.cpp src/device/transports/hidserial.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
 	target_include_directories(${TEST_HID} PRIVATE src)
 	target_link_libraries(${TEST_HID} PRIVATE Qt::Core ${HIDAPI_TARGET})
 	add_test(NAME hid_cable COMMAND ${TEST_HID} "${CMAKE_SOURCE_DIR}/tests/data/hid_cables.json")
@@ -108,65 +108,65 @@ if (BUILD_TESTING)
 	## DMM connection state machine (Connecting/Connected/Timeout/Error/reconnect)
 	## against a fake RFC 2217 server; needs the whole port stack
 	set( TEST_DMM test_dmm)
-	add_executable(${TEST_DMM} MACOSX_BUNDLE tests/test_dmm.cpp src/dmm.cpp src/readerthread.cpp src/porthandler.cpp
-		src/portdevices/serial.cpp src/portdevices/hidserial.cpp src/portdevices/rfc2217serial.cpp src/portdevices/sigrok.cpp
-		src/portdevices/calc.cpp src/calcexpr.cpp src/sharedstatemanager.cpp src/dmmdecoder.cpp src/protocols.cpp src/siprefix.cpp ${DECODER_FILES})
+	add_executable(${TEST_DMM} MACOSX_BUNDLE tests/test_dmm.cpp src/device/dmm.cpp src/device/readerthread.cpp src/device/porthandler.cpp
+		src/device/transports/serial.cpp src/device/transports/hidserial.cpp src/device/transports/rfc2217serial.cpp src/device/transports/sigrok.cpp
+		src/device/transports/calc.cpp src/core/calcexpr.cpp src/service/sharedstatemanager.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
 	target_include_directories(${TEST_DMM} PRIVATE src)
 	target_link_libraries(${TEST_DMM} PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Network Qt::Core ${HIDAPI_TARGET})
 	add_test(NAME dmm_link_state COMMAND ${TEST_DMM})
 
 	## RFC 2217 client against a fake server: negotiation, telnet filtering, IAC escaping
 	set( TEST_RFC2217 test_rfc2217)
-	add_executable(${TEST_RFC2217} MACOSX_BUNDLE tests/test_rfc2217.cpp src/portdevices/rfc2217serial.cpp src/dmmdecoder.cpp src/protocols.cpp src/siprefix.cpp ${DECODER_FILES})
+	add_executable(${TEST_RFC2217} MACOSX_BUNDLE tests/test_rfc2217.cpp src/device/transports/rfc2217serial.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
 	target_include_directories(${TEST_RFC2217} PRIVATE src)
 	target_link_libraries(${TEST_RFC2217} PRIVATE Qt::Core Qt::Network)
 	add_test(NAME rfc2217_client COMMAND ${TEST_RFC2217})
 
 	## the recorder's CSV formats, without widgets
 	set( TEST_RECORDING test_recording)
-	add_executable(${TEST_RECORDING} MACOSX_BUNDLE tests/test_recording.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/siprefix.cpp)
+	add_executable(${TEST_RECORDING} MACOSX_BUNDLE tests/test_recording.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
 	target_include_directories(${TEST_RECORDING} PRIVATE src)
 	target_link_libraries(${TEST_RECORDING} PRIVATE Qt::Core)
 	add_test(NAME recording_file COMMAND ${TEST_RECORDING} "${CMAKE_SOURCE_DIR}/tests/data/graph")
 
 	## the readings table model, without its widget
 	set( TEST_READINGLOG test_readinglog)
-	add_executable(${TEST_READINGLOG} MACOSX_BUNDLE tests/test_readinglog.cpp src/readinglog.cpp src/recordingstore.cpp src/recordingfile.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/siprefix.cpp)
+	add_executable(${TEST_READINGLOG} MACOSX_BUNDLE tests/test_readinglog.cpp src/recording/readinglog.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
 	target_include_directories(${TEST_READINGLOG} PRIVATE src)
 	target_link_libraries(${TEST_READINGLOG} PRIVATE Qt6::Gui Qt::Core Qt::Test)
 	add_test(NAME reading_log COMMAND ${TEST_READINGLOG})
 
 	## Victron Instant Readout: advertisement parsing, AES-CTR, the decoder
 	set( TEST_VICTRON test_victronble)
-	add_executable(${TEST_VICTRON} MACOSX_BUNDLE tests/test_victronble.cpp src/dmmdecoder.cpp src/protocols.cpp src/siprefix.cpp ${DECODER_FILES})
+	add_executable(${TEST_VICTRON} MACOSX_BUNDLE tests/test_victronble.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
 	target_include_directories(${TEST_VICTRON} PRIVATE src ${CMAKE_BINARY_DIR})
 	target_link_libraries(${TEST_VICTRON} PRIVATE Qt::Core Qt::Test)
 	add_test(NAME victron_instant_readout COMMAND ${TEST_VICTRON})
 
 	## mDNS browsing for qtdmm-bridge announcements
 	set( TEST_MDNS test_mdns)
-	add_executable(${TEST_MDNS} MACOSX_BUNDLE tests/test_mdns.cpp src/mdnsbrowser.cpp)
+	add_executable(${TEST_MDNS} MACOSX_BUNDLE tests/test_mdns.cpp src/service/mdnsbrowser.cpp)
 	target_include_directories(${TEST_MDNS} PRIVATE src)
 	target_link_libraries(${TEST_MDNS} PRIVATE Qt::Core Qt6::Network Qt::Test)
 	add_test(NAME mdns_browse COMMAND ${TEST_MDNS} "${CMAKE_SOURCE_DIR}/tests/data/mdns" "${CMAKE_SOURCE_DIR}/tools/qtdmm-bridge")
 
 	## SCPI server: command interpreter, TCP round trip, mDNS announcement
 	set( TEST_SCPI test_scpi)
-	add_executable(${TEST_SCPI} MACOSX_BUNDLE tests/test_scpi.cpp src/scpiserver.cpp src/mdnsresponder.cpp src/mdnsbrowser.cpp)
+	add_executable(${TEST_SCPI} MACOSX_BUNDLE tests/test_scpi.cpp src/service/scpiserver.cpp src/service/mdnsresponder.cpp src/service/mdnsbrowser.cpp)
 	target_include_directories(${TEST_SCPI} PRIVATE src)
 	target_link_libraries(${TEST_SCPI} PRIVATE Qt::Core Qt6::Network Qt::Test)
 	add_test(NAME scpi_server COMMAND ${TEST_SCPI})
 
 	## alarms: conditions, duration, hysteresis, acknowledge, JSON
 	set( TEST_ALARM test_alarm)
-	add_executable(${TEST_ALARM} MACOSX_BUNDLE tests/test_alarm.cpp src/alarm.cpp src/engnumbervalidator.cpp src/siprefix.cpp)
+	add_executable(${TEST_ALARM} MACOSX_BUNDLE tests/test_alarm.cpp src/core/alarm.cpp src/ui/engnumbervalidator.cpp src/core/siprefix.cpp)
 	target_include_directories(${TEST_ALARM} PRIVATE src)
 	target_link_libraries(${TEST_ALARM} PRIVATE Qt6::Gui Qt::Core Qt::Test)
 	add_test(NAME alarms COMMAND ${TEST_ALARM})
 
 	## XLSX/ODS writer, read back with LibreOffice when installed
 	set( TEST_SPREADSHEET test_spreadsheet)
-	add_executable(${TEST_SPREADSHEET} MACOSX_BUNDLE tests/test_spreadsheet.cpp src/spreadsheet.cpp src/3rdparty/miniz/miniz.c)
+	add_executable(${TEST_SPREADSHEET} MACOSX_BUNDLE tests/test_spreadsheet.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c)
 	target_include_directories(${TEST_SPREADSHEET} PRIVATE src)
 	target_link_libraries(${TEST_SPREADSHEET} PRIVATE Qt::Core Qt::Test)
 	add_test(NAME spreadsheet COMMAND ${TEST_SPREADSHEET})

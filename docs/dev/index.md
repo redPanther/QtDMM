@@ -11,7 +11,7 @@ Documentation for people working on QtDMM itself. Planned pages:
   `SharedStateManager` used for multiple instances.
 - **Adding a protocol** — the `DmmDecoder` subclass, a value in the
   `ReadEvent::DataFormat` enum (before `EndOfList`), one row in the table in
-  `src/protocols.cpp` (name, combo text, chip, factory - the settings combo,
+  `src/device/protocols.cpp` (name, combo text, chip, factory - the settings combo,
   `ReadEvent::toString()`, `DmmDecoder::getInstance()` and the device table
   all read it; ctest `protocol_table` and `docs_generated` fail when enum and
   table disagree), `addConfig()` for each supported device, and the protocol
@@ -20,7 +20,7 @@ Documentation for people working on QtDMM itself. Planned pages:
   returns 0 there and gets everything since the previous frame, terminator
   included (`fluke_qm.cpp` is the example, it skips the ACK line itself).
 - **Adding a USB-HID cable chip** — the chip table and report layouts live
-  twice, in `src/portdevices/hidserial.cpp` (QtDMM) and
+  twice, in `src/device/transports/hidserial.cpp` (QtDMM) and
   `tools/qtdmm-bridge/qtdmm_bridge.py` (the bridge). Both are tested against
   the same vectors, `tests/data/hid_cables.json`, and
   `tests/generate_docs.py --check` (ctest `docs_generated`) fails when either
@@ -125,13 +125,13 @@ To use a new symbol, add its Breeze name to `BREEZE` in the script (or an SVG
 to `own/`, drawn with `currentColor` like Breeze), run it and commit the
 result.
 
-The Bluetooth LE port (`src/portdevices/ble.cpp`) needs Qt6 Bluetooth and
+The Bluetooth LE port (`src/device/transports/ble.cpp`) needs Qt6 Bluetooth and
 is optional: CMake option `QTDMM_WITH_BLE` (on when the module is found;
 the Windows workflow installs `qtconnectivity`, Ubuntu `qt6-connectivity-dev`,
 FreeBSD `qt6-connectivity`). Platform-specific code is limited to the permission
-hint in `src/dmm.cpp`, the process liveness check in
-`src/sharedstatemanager.cpp`, the serial port naming in
-`src/portdevices/serial.cpp` and the console attach in `src/main.cpp`.
+hint in `src/device/dmm.cpp`, the process liveness check in
+`src/service/sharedstatemanager.cpp`, the serial port naming in
+`src/device/transports/serial.cpp` and the console attach in `src/main.cpp`.
 
 Longer-term idea from the original README: split measuring and recording into
 a separate background daemon.

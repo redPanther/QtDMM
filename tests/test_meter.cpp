@@ -11,8 +11,8 @@
 #include <QTest>
 #include <cmath>
 
-#include "meterwid.h"
-#include "readingadapter.h"
+#include "ui/views/meterwid.h"
+#include "core/readingadapter.h"
 #include <limits>
 
 static int failed = 0;

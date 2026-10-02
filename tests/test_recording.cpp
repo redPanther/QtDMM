@@ -8,7 +8,7 @@
 
 #include <QtCore>
 
-#include "recordingfile.h"
+#include "recording/recordingfile.h"
 
 static int failed = 0;
 

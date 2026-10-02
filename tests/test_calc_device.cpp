@@ -7,9 +7,9 @@
 #include <QDebug>
 #include <cmath>
 
-#include "sharedstatemanager.h"
-#include "portdevices/calc.h"
-#include "dmmdecoder.h"
+#include "service/sharedstatemanager.h"
+#include "device/transports/calc.h"
+#include "device/dmmdecoder.h"
 
 static int failed = 0;
 

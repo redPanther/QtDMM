@@ -10,7 +10,7 @@
 #include <QtCore>
 #include <QtNetwork>
 
-#include "dmm.h"
+#include "device/dmm.h"
 
 static int failed = 0;
 

@@ -11,8 +11,8 @@
 #include <QTemporaryDir>
 #include <cmath>
 
-#include "readingadapter.h"
-#include "recordingstore.h"
+#include "core/readingadapter.h"
+#include "recording/recordingstore.h"
 
 static int failed = 0;
 

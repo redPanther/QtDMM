@@ -8,9 +8,9 @@
 #include <QtCore>
 #include <QAbstractItemModelTester>
 
-#include "readinglog.h"
-#include "reading.h"
-#include "recordingstore.h"
+#include "recording/readinglog.h"
+#include "core/reading.h"
+#include "recording/recordingstore.h"
 
 static int failed = 0;
 

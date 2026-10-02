@@ -9,7 +9,7 @@
 #include <QJsonObject>
 #include <QDebug>
 
-#include "sharedstatemanager.h"
+#include "service/sharedstatemanager.h"
 
 static int failed = 0;
 

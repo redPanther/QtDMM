@@ -1,5 +1,5 @@
 protocol: BrymenBM25x
-decoder: src/decoders/brymen_bm25x.cpp
+decoder: src/device/decoders/brymen_bm25x.cpp
 devices: [Brymen BM250, Brymen BM251, Brymen BM252, Brymen BM257]
 frames_per_reading: 1
 sources:

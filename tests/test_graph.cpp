@@ -9,17 +9,17 @@
 #include <QDebug>
 #include <QFileInfo>
 
-#include "dmmgraph.h"
-#include "recordingstore.h"
+#include "ui/views/dmmgraph.h"
+#include "recording/recordingstore.h"
 #include <QChartView>
 #include <QValueAxis>
 #include <QGraphicsSimpleTextItem>
 #include <QXYSeries>
 #include <QScrollBar>
 #include <QToolButton>
-#include "siprefix.h"
-#include "engnumbervalidator.h"
-#include "settings.h"
+#include "core/siprefix.h"
+#include "ui/engnumbervalidator.h"
+#include "core/settings.h"
 
 static int failed = 0;
 

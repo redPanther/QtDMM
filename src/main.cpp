@@ -23,9 +23,9 @@
 #include <QtGui>
 #include <iostream>
 
-#include "mainwin.h"
-#include "mnemoniccheck.h"
-#include "settings.h"
+#include "ui/mainwin.h"
+#include "ui/mnemoniccheck.h"
+#include "core/settings.h"
 
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX

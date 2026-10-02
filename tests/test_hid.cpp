@@ -9,7 +9,7 @@
 #include <QJsonObject>
 #include <cstring>
 
-#include "portdevices/hidserial.h"
+#include "device/transports/hidserial.h"
 
 static int failed = 0;
 

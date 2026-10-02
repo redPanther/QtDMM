@@ -1,5 +1,5 @@
 protocol: VC820Continuous
-decoder: src/decoders/vc820.cpp
+decoder: src/device/decoders/vc820.cpp
 devices: [Digitek DT-9062, Digitek INO2513, Digitech QM1462, Digitech QM1538, HoldPeak HP-90EPC, PeakTech 3330, Tenma 72-7745, Uni-Trend UT60A, Uni-Trend UT60E, Voltcraft VC 820, Voltcraft VC 840]
 frames_per_reading: 1
 unit_map:                      # log spelling -> what the decoder emits

@@ -9,8 +9,8 @@
 #include <QtWidgets>
 #include <QTemporaryDir>
 
-#include "instancesdlg.h"
-#include "settings.h"
+#include "ui/dialogs/instancesdlg.h"
+#include "core/settings.h"
 
 static int failed = 0;
 

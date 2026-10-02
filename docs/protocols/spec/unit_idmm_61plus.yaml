@@ -1,5 +1,5 @@
 protocol: UniTUT61Plus
-decoder: src/decoders/unit_idmm.cpp
+decoder: src/device/decoders/unit_idmm.cpp
 devices: [UNI-T UT61E+, UNI-T UT61D+, UNI-T UT61B+, UNI-T UT161E, UNI-T UT161D, UNI-T UT161B]
 frames_per_reading: 1
 unit_map:                      # spec spelling -> what the decoder emits

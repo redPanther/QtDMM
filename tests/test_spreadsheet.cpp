@@ -8,7 +8,7 @@
 
 #include <QtCore>
 
-#include "spreadsheet.h"
+#include "recording/spreadsheet.h"
 #include "3rdparty/miniz/miniz.h"
 
 static int failed = 0;

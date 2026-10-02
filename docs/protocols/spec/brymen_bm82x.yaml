@@ -1,5 +1,5 @@
 protocol: BrymenBM82x
-decoder: src/decoders/brymen_bm52x.cpp
+decoder: src/device/decoders/brymen_bm52x.cpp
 devices: [Brymen BM829s]
 frames_per_reading: 1
 sources:
