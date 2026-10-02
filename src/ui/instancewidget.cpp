@@ -175,6 +175,7 @@ void InstanceWidget::setDisplay(LcdWidget *display)
             ? "classic" : "custom";
   display->setLcdVariant(LcdWidget::lcdVariantFromName(lcd));
   connect(m_ctl, &MeterController::reading, display, &LcdWidget::showReading);
+  connect(m_ctl, &MeterController::staleChanged, display, &LcdWidget::setStale);
   connect(m_ctl, &MeterController::minimumChanged, display, &LcdWidget::showMinimum);
   connect(m_ctl, &MeterController::maximumChanged, display, &LcdWidget::showMaximum);
   connect(m_ctl, &MeterController::minMaxReset, display, &LcdWidget::clearMinMax);
@@ -184,6 +185,7 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
 {
   m_meter = meter;
   connect(m_ctl, &MeterController::reading, meter, &AnalogMeter::showReading);
+  connect(m_ctl, &MeterController::staleChanged, meter, &AnalogMeter::setStale);
   connect(m_ctl, &MeterController::minimumChanged, meter, &AnalogMeter::showMinimum);
   connect(m_ctl, &MeterController::maximumChanged, meter, &AnalogMeter::showMaximum);
   connect(m_ctl, &MeterController::minMaxReset, meter, &AnalogMeter::clearMinMax);

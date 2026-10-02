@@ -720,6 +720,14 @@ void AnalogMeter::renderStatic()
   m_staticDirty = false;
 }
 
+void AnalogMeter::setStale(bool stale)
+{
+  if (stale == m_stale)
+    return;
+  m_stale = stale;
+  update();
+}
+
 void AnalogMeter::paintEvent(QPaintEvent *)
 {
   if (m_staticDirty || m_static.isNull())
@@ -731,6 +739,8 @@ void AnalogMeter::paintEvent(QPaintEvent *)
   p.drawPixmap(0, 0, m_static);
 
   const Geometry g = geometry();
+  if (m_stale)
+    p.setOpacity(PanelFrame::kStaleOpacity);
   drawReadouts(p, g);
   drawLamp(p, g);
   drawMarks(p, g);

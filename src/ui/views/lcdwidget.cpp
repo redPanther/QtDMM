@@ -714,6 +714,14 @@ void LcdWidget::renderStatic()
   m_staticDirty = false;
 }
 
+void LcdWidget::setStale(bool stale)
+{
+  if (stale == m_stale)
+    return;
+  m_stale = stale;
+  update();
+}
+
 void LcdWidget::paintEvent(QPaintEvent *)
 {
   if (m_staticDirty || m_static.isNull())
@@ -726,6 +734,10 @@ void LcdWidget::paintEvent(QPaintEvent *)
 
   const Layout l = layout();
   PanelFrame::clipToFace(p, l.face);
+  // a stale value fades like an LCD losing its drive; the ghosts of the
+  // static part stay as they are
+  if (m_stale)
+    p.setOpacity(PanelFrame::kStaleOpacity);
   drawFlags(p, l);
   drawMain(p, l);
   drawMinMax(p, l);

@@ -130,6 +130,15 @@ int main(int argc, char **argv)
   if (!dump.isEmpty()) value.save(QDir(dump).filePath("display_value.png"));
   check(qAlpha(value.pixel(0, 0)) == 0, "corners outside the bezel stay transparent");
 
+  // a stale value fades, but stays readable; a current one is back as it was
+  w.setStale(true);
+  QImage stale = render(w, size);
+  if (!dump.isEmpty()) stale.save(QDir(dump).filePath("display_stale.png"));
+  check(darkPixels(stale) < darkPixels(value) - 200 && darkPixels(stale) >= darkPixels(empty),
+        QString("stale: fewer dark pixels (%1 < %2)").arg(darkPixels(stale)).arg(darkPixels(value)));
+  w.setStale(false);
+  check(render(w, size) == value, "current again: as before");
+
   // --- 3. aspect clamp: a strip-shaped widget keeps a panel of sane shape ---
   {
     QImage wide = render(w, QSize(1400, 200));

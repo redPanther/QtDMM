@@ -98,6 +98,10 @@ public:
   void setDisplayCounts(int counts) { m_counts = counts; }
 public Q_SLOTS:
   void showReading(const Reading &reading);
+  /// The value is too old to stand for the present (StaleRule): needle
+  /// and readouts fade, the dial stays.
+  void setStale(bool stale);
+  bool isStale() const { return m_stale; }
   /// Min/max memory in SI base units; drawn as marks in display units.
   void showMinimum(double value, const QString &text, const QString &unit);
   void showMaximum(double value, const QString &text, const QString &unit);
@@ -190,6 +194,7 @@ private:
   QString m_unit;
   bool m_overload = false;
   bool m_hold = false;
+  bool m_stale = false;
   double m_peak;   ///< NaN = none
   double m_markMin;   ///< NaN = none
   double m_markMax;

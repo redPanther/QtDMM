@@ -118,7 +118,13 @@ void MeterController::timerEvent(QTimerEvent *)
   // (kern_spezifikation §4.3): the recorder gets a gap, not the old value
   const qint64 t = m_clock.elapsed();
   m_recorder->setStaleAfter(int(m_stale.maxAgeMs()));
-  Q_EMIT sample(m_stale.stale(t) ? qQNaN() : m_dval);
+  const bool stale = m_stale.stale(t);
+  if (stale != m_staleShown)
+  {
+    m_staleShown = stale;
+    Q_EMIT staleChanged(stale);
+  }
+  Q_EMIT sample(stale ? qQNaN() : m_dval);
   m_alarms->tick(QDateTime::currentMSecsSinceEpoch());
 }
 

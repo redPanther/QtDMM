@@ -31,6 +31,10 @@ class QPainter;
 /// display: a rounded metal bezel with a recessed face, lit from a point.
 namespace PanelFrame
 {
+  /// What is left of the value's ink while it is stale (StaleRule): the
+  /// display and the meter fade it alike.
+  constexpr double kStaleOpacity = 0.35;
+
   /// Colours of the housing; AnalogMeterStyle and LcdWidget provide them.
   struct Colors
   {
