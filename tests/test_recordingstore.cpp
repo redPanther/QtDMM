@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QSignalSpy>
 #include <QTemporaryDir>
+#include <cmath>
 
 #include "readingadapter.h"
 #include "recordingstore.h"
@@ -171,6 +172,48 @@ int main(int argc, char **argv)
     check(!store.dirty(), "write: still dirty after writing");
     const Recording back = store.toRecording();
     check(back.unit == "V" && back.values.size() == 1 && back.values.first() == 7, "write: recording content");
+  }
+
+  // --- 5b. gaps: a NaN (overload, stale) is no value. The mean is over the
+  //          values there were, a sample time without any is a gap (NaN,
+  //          Stale or Overload), the integral carries over it, and the
+  //          start triggers compare with the last value there was ---
+  {
+    RecordingStore store;
+    store.setCapacity(100);
+    store.setSampleTime(3);
+    store.setIntegrationThreshold(0);
+    store.start();
+    store.setReading(reading(1, "1.000", "DC"));
+    store.addValue(2);   // the first sample as it is
+    store.addValue(4);
+    store.addValue(qQNaN());
+    store.addValue(6);
+    check(store.count() == 2 && store.last().value == 5, QString("gap: mean of 4 and 6, got %1").arg(store.last().value));
+    check(store.last().integral == 7 && store.last().quality == Quality::Valid, "gap: integral 2 + 5");
+    for (int i = 0; i < 3; ++i)
+      store.addValue(qQNaN());
+    check(store.count() == 3 && std::isnan(store.last().value) && std::isnan(store.last().integral),
+          "gap: no value in the sample time is a gap");
+    check(store.last().quality == Quality::Stale, "gap: without an overload it is Stale");
+    for (int i = 0; i < 3; ++i)
+      store.addValue(3);
+    check(store.last().value == 3 && store.last().integral == 10,
+          QString("gap: the integral carries over it, 7 + 3, got %1").arg(store.last().integral));
+    store.setReading(reading(0, "OL", "DC"));
+    for (int i = 0; i < 3; ++i)
+      store.addValue(qQNaN());
+    check(std::isnan(store.last().value) && store.last().quality == Quality::Overload, "gap: an OL is Overload");
+    check(std::isnan(store.toRecording().values.last()), "gap: the export has the NaN");
+
+    RecordingStore trig;
+    trig.setStartMode(RecordingStore::Raising);
+    trig.setThresholds(0, 1);
+    trig.addValue(0);
+    trig.addValue(qQNaN());
+    check(!trig.isRunning(), "gap: a NaN crosses no threshold");
+    trig.addValue(2);
+    check(trig.isRunning(), "gap: 0, gap, 2 crosses 1");
   }
 
   // --- 2. the readings series: every reading of every value, whether or

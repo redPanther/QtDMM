@@ -412,7 +412,7 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
       return kNotANumber;
     }
     if (r->overload)
-      return number(r->value < 0 ? -INFINITY : INFINITY);
+      return number(std::signbit(r->value) ? -INFINITY : INFINITY);   // -OL: a negative NaN
     return number(r->value);
   }
   if (matches(head, "MEASure") && depth > 2)
@@ -432,7 +432,7 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
       pushError(-230, "Data corrupt or stale");
       return kNotANumber;
     }
-    return r->overload ? number(INFINITY) : number(r->value);
+    return r->overload ? number(std::signbit(r->value) ? -INFINITY : INFINITY) : number(r->value);
   }
 
   if (matches(head, "UNIT") && depth == 1)

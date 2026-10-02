@@ -77,10 +77,15 @@ int main(int argc, char **argv)
   check(ask(s, "READ3?").isEmpty() && ask(s, "SYST:ERR?").startsWith("-114,"), "READ3? is out of range");
   s.process("*CLS");
 
-  ScpiServer::Reading ol = reading(0, "Ohm", "resistance");
+  ScpiServer::Reading ol = reading(qQNaN(), "Ohm", "resistance");   // an overload has no value
   ol.overload = true;
   s.setReading(0, ol);
   check(ask(s, "READ?") == "9.9E+37", "overload is +INF " + ask(s, "READ?"));
+  ol.value = -qQNaN();   // "-OL": the adapter keeps the sign on the NaN
+  s.setReading(0, ol);
+  check(ask(s, "READ?") == "-9.9E+37" && ask(s, "MEAS:RES?") == "-9.9E+37", "-OL is -INF " + ask(s, "READ?"));
+  ol.value = qQNaN();
+  s.setReading(0, ol);
   check(ask(s, "CONF?") == "\"RES AUTO\"", "resistance");
   check(ask(s, "STAT:QUES?") == "1", "questionable: overload bit " + ask(s, "STAT:QUES?"));
   ScpiServer::Reading old = reading(3.3, "V");

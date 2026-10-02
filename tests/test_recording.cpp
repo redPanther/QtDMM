@@ -61,7 +61,12 @@ int main(int argc, char **argv)
     const auto nan = RecordingFile::read(dataDir + "/legacy_nan.txt");
     check(nan.has_value(), "legacy with nan reads");
     if (nan)
-      check(std::none_of(nan->values.cbegin(), nan->values.cend(), [](double v) { return std::isnan(v); }), "nan becomes 0");
+    {
+      // old QtDMM wrote an overload as nan: it is a gap again, not a 0
+      check(std::count_if(nan->values.cbegin(), nan->values.cend(), [](double v) { return std::isnan(v); }) == 17,
+            "nan stays a gap");
+      check(nan->values.size() == 47 && nan->values[6] == 0.011452, "the values around the gaps stay");
+    }
   }
 
   // --- 4. units: values come back in the base unit, µ and u alike; a

@@ -118,6 +118,8 @@ DMMGraph::DMMGraph(QWidget *parent, Settings *settings) :
   m_dataPoints->attachAxis(m_yAxis);
   m_intSeries->attachAxis(m_yAxis);
   m_intPoints->attachAxis(m_yAxis);
+  m_dataLine = std::make_unique<GapLine>(m_dataSeries);
+  m_intLine = std::make_unique<GapLine>(m_intSeries);
 
   updateSeriesAppearance();
 
@@ -361,6 +363,8 @@ int DMMGraph::bucketStart(int i) const
 // The points of the samples first..last: the sample itself, or with more than
 // one the minimum and the maximum in time order, so a spike survives the
 // thinning. The store keeps every sample; only the drawing is thinned.
+// Samples without a value (NaN: overload, stale) do not count; a bucket of
+// nothing else is one NaN point, the gap.
 int DMMGraph::bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const
 {
   const double step = sampleTenths() / 10.0;
@@ -369,11 +373,20 @@ int DMMGraph::bucketPoints(int first, int last, bool integral, QList<QPointF> &o
     const RecordedPoint &p = m_store->at(i);
     return integral ? m_integrationOffset + p.integral * m_integrationScale : p.value;
   };
+  while (first <= last && std::isnan(value(first)))
+    first++;
+  if (first > last)
+  {
+    out.append(QPointF(last * step, qQNaN()));
+    return 1;
+  }
   int lo = first, hi = first;
   double loValue = value(first), hiValue = loValue;
   for (int i = first + 1; i <= last; i++)
   {
     const double v = value(i);
+    if (std::isnan(v))
+      continue;
     if (v < loValue)
     {
       loValue = v;
@@ -418,10 +431,12 @@ void DMMGraph::rebuildSeries()
     first = last + 1;
   }
 
-  m_dataSeries->replace(points);
-  m_dataPoints->replace(points);
-  m_intSeries->replace(intPoints);
-  m_intPoints->replace(intPoints);
+  m_dataLine->replace(points);
+  m_dataPoints->replace(withoutGaps(points));
+  m_intLine->replace(intPoints);
+  m_intPoints->replace(withoutGaps(intPoints));
+  m_tailDataPts = finiteTail(points, m_tailData);
+  m_tailIntPts = finiteTail(intPoints, m_tailInt);
 }
 
 // The newest sample went into the series: a new bucket adds its point, one
@@ -432,18 +447,41 @@ void DMMGraph::appendToSeries()
   const int first = bucketStart(count - 1);
   if (first != count - 1)
   {
-    m_dataSeries->removePoints(m_dataSeries->count() - m_tailData, m_tailData);
-    m_dataPoints->removePoints(m_dataPoints->count() - m_tailData, m_tailData);
-    m_intSeries->removePoints(m_intSeries->count() - m_tailInt, m_tailInt);
-    m_intPoints->removePoints(m_intPoints->count() - m_tailInt, m_tailInt);
+    m_dataLine->removeLast(m_tailData);
+    m_dataPoints->removePoints(m_dataPoints->count() - m_tailDataPts, m_tailDataPts);
+    m_intLine->removeLast(m_tailInt);
+    m_intPoints->removePoints(m_intPoints->count() - m_tailIntPts, m_tailIntPts);
   }
   QList<QPointF> points, intPoints;
   m_tailData = bucketPoints(first, count - 1, false, points);
   m_tailInt = bucketPoints(first, count - 1, true, intPoints);
-  m_dataSeries->append(points);
-  m_dataPoints->append(points);
-  m_intSeries->append(intPoints);
-  m_intPoints->append(intPoints);
+  m_dataLine->append(points);
+  m_intLine->append(intPoints);
+  const QList<QPointF> dataPts = withoutGaps(points), intPts = withoutGaps(intPoints);
+  m_dataPoints->append(dataPts);
+  m_intPoints->append(intPts);
+  m_tailDataPts = int(dataPts.size());
+  m_tailIntPts = int(intPts.size());
+}
+
+QList<QPointF> DMMGraph::withoutGaps(const QList<QPointF> &points)
+{
+  QList<QPointF> out;
+  out.reserve(points.size());
+  for (const QPointF &p : points)
+    if (!std::isnan(p.y()))
+      out.append(p);
+  return out;
+}
+
+// how many of the last @p tail points have a value
+int DMMGraph::finiteTail(const QList<QPointF> &points, int tail)
+{
+  int n = 0;
+  for (qsizetype i = qMax<qsizetype>(0, points.size() - tail); i < points.size(); ++i)
+    if (!std::isnan(points[i].y()))
+      n++;
+  return n;
 }
 
 void DMMGraph::updateXAxisRange()
@@ -619,8 +657,8 @@ void DMMGraph::updateCentreTicks()
 
 void DMMGraph::updateSeriesAppearance()
 {
-  m_dataSeries->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
-  m_dataSeries->setVisible(m_lineMode != NoLine);
+  m_dataLine->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
+  m_dataLine->setVisible(m_lineMode != NoLine);
 
   QScatterSeries::MarkerShape shape = QScatterSeries::MarkerShapeCircle;
   int size = 7;
@@ -648,8 +686,8 @@ void DMMGraph::updateSeriesAppearance()
 
   // phosphor: one colour, the integration curve dashed when it is a solid line
   const Qt::PenStyle intStyle = phosphor() && m_intLineMode == Solid ? Qt::DashLine : penStyle(m_intLineMode);
-  m_intSeries->setPen(QPen(intColor(), m_intLineWidth, intStyle, Qt::RoundCap, Qt::RoundJoin));
-  m_intSeries->setVisible(m_showIntegration && m_intLineMode != NoLine);
+  m_intLine->setPen(QPen(intColor(), m_intLineWidth, intStyle, Qt::RoundCap, Qt::RoundJoin));
+  m_intLine->setVisible(m_showIntegration && m_intLineMode != NoLine);
 
   QScatterSeries::MarkerShape intShape = QScatterSeries::MarkerShapeCircle;
   int intSize = 7;
@@ -848,11 +886,11 @@ void DMMGraph::onCleared()
     }
   }
 
-  m_dataSeries->clear();
+  m_dataLine->clear();
   m_dataPoints->clear();
-  m_intSeries->clear();
+  m_intLine->clear();
   m_intPoints->clear();
-  m_tailData = m_tailInt = 0;
+  m_tailData = m_tailInt = m_tailDataPts = m_tailIntPts = 0;
 }
 
 void DMMGraph::emitInfo()
@@ -1110,7 +1148,13 @@ void DMMGraph::handleChartMouseMove(QMouseEvent *ev)
 
     QString text = m_store->startDateTime().time().addSecs(int(idx * sampleTenths() / 10)).toString();
 
-    if (idx >= 0 && idx < m_store->count())
+    if (idx >= 0 && idx < m_store->count() && std::isnan(m_store->at(idx).value))
+    {
+      // a gap: say why there is no value
+      m_crosshairHLine->setVisible(false);
+      text += "   " + (m_store->at(idx).quality == Quality::Overload ? QStringLiteral("OL") : tr("no value"));
+    }
+    else if (idx >= 0 && idx < m_store->count())
     {
       double val = m_store->at(idx).value;
       QPointF scenePoint = m_chart->mapToPosition(QPointF(xValue, val), m_dataSeries);

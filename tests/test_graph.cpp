@@ -630,6 +630,65 @@ int main(int argc, char **argv)
           "scrolling: the thinned points of the older samples must stay as they were");
   }
 
+  // --- 5m. gaps: a sample without a value (NaN: overload, stale) breaks the
+  //          line - Qt Charts would draw straight across it - and has no
+  //          point; growing sample by sample gives what a rebuild gives,
+  //          thinned or not ---
+  {
+    // the drawn lines: the y values of each line segment that has points
+    auto lines = [](DMMGraph &graph)
+    {
+      QStringList out;
+      for (QAbstractSeries *a : graph.findChild<QChartView *>()->chart()->series())
+      {
+        auto *line = qobject_cast<QLineSeries *>(a);
+        if (!line || line->count() == 0)
+          continue;
+        QStringList ys;
+        for (const QPointF &p : line->points())
+          ys << QString::number(p.y());
+        out << ys.join(' ');
+      }
+      return out;
+    };
+    auto dataPoints = [](DMMGraph &graph)
+    {
+      return qobject_cast<QScatterSeries *>(graph.findChild<QChartView *>()->chart()->series().value(1))->count();
+    };
+
+    DMMGraph graph(nullptr, &settings);
+    graph.resize(800, 300);
+    graph.setSampleTime(1);
+    graph.setGraphSize(100, 100);
+    graph.setMode(DMMGraph::Manual);
+    graph.startSLOT();
+    for (int i = 0; i < 30; i++)
+      graph.addValue(i >= 10 && i < 20 ? qQNaN() : i);
+    const QStringList grown = lines(graph);
+    // data and integral, two segments each
+    check(grown.size() == 4 && grown.first() == "0 1 2 3 4 5 6 7 8 9" && grown.contains("20 21 22 23 24 25 26 27 28 29"),
+          "gaps: two segments, got " + grown.join(" | "));
+    check(dataPoints(graph) == 20, QString("gaps: no point in the gap, got %1").arg(dataPoints(graph)));
+    graph.setGraphSize(100, 100);   // rebuilds the series
+    check(lines(graph) == grown, "gaps: rebuilt = grown, got " + lines(graph).join(" | "));
+    graph.clearSLOT();
+    check(lines(graph).isEmpty() && dataPoints(graph) == 0, "gaps: cleared");
+
+    // thinned: a bucket with a value draws it, a bucket of gaps is a gap
+    DMMGraph thin(nullptr, &settings);
+    thin.resize(300, 200);
+    thin.setSampleTime(1);
+    thin.setGraphSize(200, 200);
+    thin.setMode(DMMGraph::Manual);
+    thin.startSLOT();
+    for (int i = 0; i < 2000; i++)
+      thin.addValue((i / 300) % 2 ? qQNaN() : i % 7 == 3 ? qQNaN() : (i * 37) % 101);
+    const QStringList thinGrown = lines(thin);
+    check(thinGrown.size() == 2 * 4, QString("gaps thinned: 4 runs, data and integral, got %1").arg(thinGrown.size()));
+    thin.setGraphSize(200, 200);
+    check(lines(thin) == thinGrown, "gaps thinned: rebuilt = grown");
+  }
+
   // --- 6. engineering-prefix export/import: setUnit() must strip a leading
   //         G or p prefix too (previously only n/u/m/k/M were recognized), and
   //         a value re-imported from a prefix-scaled export (e.g. "2.5;pF")

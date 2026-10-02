@@ -56,6 +56,7 @@ MeterController::MeterController(QObject *parent)
     Q_EMIT externalFinished(exitCode);
   });
 
+  m_clock.start();
   startTimer(100);   // recorder sample clock and alarm time base
 }
 
@@ -83,6 +84,7 @@ void MeterController::setAlarms(const QList<Alarm> &alarms)
 bool MeterController::connectMeter(bool on)
 {
   bool ok = true;
+  m_stale.reset();   // a new connection has its own rhythm
   if (on)
     ok = m_dmm->open();
   else
@@ -105,7 +107,11 @@ void MeterController::setRecording(bool on)
 
 void MeterController::timerEvent(QTimerEvent *)
 {
-  Q_EMIT sample(m_dval);
+  // a value older than the meter's rhythm allows is no value any more
+  // (kern_spezifikation §4.3): the recorder gets a gap, not the old value
+  const qint64 t = m_clock.elapsed();
+  m_recorder->setStaleAfter(int(m_stale.maxAgeMs()));
+  Q_EMIT sample(m_stale.stale(t) ? qQNaN() : m_dval);
   m_alarms->tick(QDateTime::currentMSecsSinceEpoch());
 }
 
@@ -170,6 +176,7 @@ void MeterController::publish(const Reading &rd)
 
   if (id == 0)
   {
+    m_stale.arrived(m_clock.elapsed());
     m_overload = overload;
     m_baseUnit = baseUnit;
     m_alarms->feed(dval, overload, now);

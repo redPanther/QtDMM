@@ -9,6 +9,8 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
+#include <cmath>
+
 #include "siprefix.h"
 #include "spreadsheet.h"
 
@@ -247,7 +249,7 @@ ReadingLog::Stats ReadingLog::stats() const
   for (int i = 0; i < s.count; ++i)
   {
     const LoggedReading &e = m_store->readingAt(i);
-    if (e.id != 0 || e.text.contains(letters))   // secondary values, OL
+    if (e.id != 0 || e.text.contains(letters) || !std::isfinite(e.value))   // secondary values, OL
       continue;
     if (s.numeric == 0)
       s.min = s.max = e.value;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QColor>
+#include <QElapsedTimer>
 #include <QObject>
 #include <QString>
 #include <functional>
@@ -10,6 +11,7 @@
 #include "alarm.h"
 #include "readingadapter.h"
 #include "reading.h"
+#include "stalerule.h"
 
 class DMM;
 class QProcess;
@@ -106,7 +108,8 @@ Q_SIGNALS:
   void        minMaxReset();
   /// The main value's unit changed ("mV" -> "V").
   void        unitChanged(const QString &unit);
-  /// Ten times a second: the current main value, for the recorder.
+  /// Ten times a second: the current main value, for the recorder; NaN
+  /// when there is none (overload, or the last one is stale, StaleRule).
   void        sample(double value);
   /// For the status bar's connection field (DMM messages, alarms, SCPI errors).
   void        error(const QString &);
@@ -158,5 +161,7 @@ private:
   QString     m_lastUnit;
   QString     m_baseUnit;
   bool        m_overload = false;
-  double      m_dval = 0.0;
+  double      m_dval = qQNaN();
+  QElapsedTimer m_clock;   ///< the sample clock's time base, monotonic
+  StaleRule   m_stale;     ///< when the main value is too old to sample
 };
