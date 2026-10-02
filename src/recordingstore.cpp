@@ -133,6 +133,7 @@ void RecordingStore::start()
 {
   m_sampleCounter = 0;
   m_sum = 0;
+  m_sumCount = 0;
   clear();
   m_running = true;
   m_remainingLength = m_sampleLength;
@@ -207,8 +208,13 @@ void RecordingStore::addValue(double val)
     }
   }
 
-  m_lastValValid = true;
-  m_lastVal = val;
+  // a gap (NaN: overload, stale) crosses nothing: the triggers compare
+  // with the last value there was
+  if (std::isfinite(val))
+  {
+    m_lastValValid = true;
+    m_lastVal = val;
+  }
 
   if (!m_running)
     return;
@@ -218,16 +224,22 @@ void RecordingStore::addValue(double val)
   if (q == Quality::Overload || (q == Quality::Stale && m_periodQuality == Quality::Valid))
     m_periodQuality = q;
 
-  m_sum += val;
+  // the mean over the values there were; none at all is a gap
+  if (std::isfinite(val))
+  {
+    m_sum += val;
+    m_sumCount++;
+  }
 
   if (0 == m_sampleCounter)
   {
     m_dirty = true;
 
     if (!m_first)
-      val = m_sum / double(m_sampleTime);
+      val = m_sumCount > 0 ? m_sum / double(m_sumCount) : qQNaN();
     m_first = false;
     m_sum = 0.0;
+    m_sumCount = 0;
 
     const bool shifted = m_count >= m_capacity;
     if (shifted)
@@ -251,9 +263,17 @@ void RecordingStore::addValue(double val)
     p.msecs = (m_firstSeq + m_count) * m_sampleTime * 100;
     p.value = val;
     // integration: the running sum of the values above the threshold, back
-    // to 0 at or below it (the first sample, too)
-    p.integral = val <= m_integrationThreshold ? 0.0 : (m_count > 0 ? last().integral : 0.0) + val;
+    // to 0 at or below it (the first sample, too); a gap adds nothing and
+    // has no point of its own
+    if (m_count == 0)
+      m_integral = 0.0;
+    if (std::isfinite(val))
+      m_integral = val <= m_integrationThreshold ? 0.0 : m_integral + val;
+    p.integral = std::isfinite(val) ? m_integral : qQNaN();
     p.quality = m_periodQuality;
+    // no value without a reason in the readings: the main value went stale
+    if (!std::isfinite(val) && p.quality == Quality::Valid)
+      p.quality = Quality::Stale;
     if (m_haveReading)
     {
       p.flags = m_reading.flags;

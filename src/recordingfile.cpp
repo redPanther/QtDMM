@@ -7,6 +7,8 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
+#include <cmath>
+
 #include "siprefix.h"
 #include "spreadsheet.h"
 
@@ -90,7 +92,7 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
       end = when;
       const QString value = match.captured("value");
       rec.values << (value.compare("nan", Qt::CaseInsensitive) == 0
-                       ? 0.0
+                       ? qQNaN()   // a gap: overload or no value
                        : value.toDouble() * unitScaleFactor(match.captured("unit"), rec.unit));
     }
     line = ts.readLine();
@@ -153,7 +155,9 @@ bool RecordingFile::writeAny(const Recording &recording, const QString &path, QS
   for (int i = 0; i < recording.values.size(); ++i)
   {
     const QDateTime dt = recording.start.addMSecs(qint64(i) * recording.sampleTimeTenths * 100);
-    sheet.addRow({dt, i * recording.sampleTimeTenths / 10.0, recording.values[i], recording.unit});
+    // a gap is an empty cell: a spreadsheet has no NaN
+    const double v = recording.values[i];
+    sheet.addRow({dt, i * recording.sampleTimeTenths / 10.0, std::isfinite(v) ? QVariant(v) : QVariant(), recording.unit});
   }
   return sheet.write(path, *format, error);
 }

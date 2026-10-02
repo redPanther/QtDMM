@@ -8,6 +8,9 @@
 #include <QStringDecoder>
 #include <QCoreApplication>
 
+#include <cmath>
+#include <limits>
+
 #ifdef Q_OS_UNIX
 #include <cerrno>
 #include <csignal>
@@ -21,6 +24,12 @@
 
 namespace
 {
+// An overload's value is NaN, which never equals itself
+bool sameValue(double a, double b)
+{
+  return a == b || (std::isnan(a) && std::isnan(b));
+}
+
 // True if a process with this pid still exists. Used to tell a genuinely
 // still-running instance apart from a stale registration left behind by one
 // that crashed/was killed without reaching its destructor (unregisterInstance()
@@ -73,7 +82,7 @@ QJsonObject readingToJson(const SharedStateManager::Reading &r)
 SharedStateManager::Reading readingFromJson(const QJsonObject &o)
 {
   SharedStateManager::Reading r;
-  r.value = o["value"].toDouble();
+  r.value = o["value"].toDouble(std::numeric_limits<double>::quiet_NaN());   // NaN goes out as null
   r.unit = o["unit"].toString();
   r.port = o["port"].toString();
   r.msecs = static_cast<qint64>(o["msecs"].toDouble());
@@ -298,7 +307,7 @@ void SharedStateManager::publishReading(const Reading &reading)
 {
   if (!m_registered)
     return;
-  if (reading.valid == m_published.valid && reading.value == m_published.value &&
+  if (reading.valid == m_published.valid && sameValue(reading.value, m_published.value) &&
       reading.unit == m_published.unit && reading.port == m_published.port &&
       reading.msecs - m_published.msecs < 1000)
     return;

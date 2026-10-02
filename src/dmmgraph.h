@@ -32,6 +32,7 @@
 #include <QValueAxis>
 #include <QGraphicsLineItem>
 
+#include "gapline.h"
 #include "recordingstore.h"
 
 class Settings;
@@ -275,8 +276,10 @@ protected:
   QScrollBar      *scrollbar;
   int              m_size;          ///< visible window in samples
   int              m_bucket = 1;    ///< samples per drawn min/max pair (see bucketSize())
-  int              m_tailData = 0;  ///< points the newest bucket has in the data series (1 or 2)
+  int              m_tailData = 0;  ///< points the newest bucket gave the data line (1 or 2; a gap is 1)
   int              m_tailInt = 0;   ///< the same for the integral
+  int              m_tailDataPts = 0;  ///< and the data points (a gap has none)
+  int              m_tailIntPts = 0;
   int              m_windowSeconds = 0;   ///< setGraphSize(), for setSampleTime()
   /// @name Time buttons (All / 1 min / 5 min / 30 min) top right in the graph
   /// @{
@@ -308,6 +311,8 @@ protected:
   int              bucketSize() const;
   int              bucketStart(int i) const;
   int              bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const;
+  static QList<QPointF> withoutGaps(const QList<QPointF> &points);
+  static int       finiteTail(const QList<QPointF> &points, int tail);
   void             appendToSeries();
   void             onAppended(bool shifted);
   void             onCleared();
@@ -344,10 +349,12 @@ protected:
   // top of the chart scene).
   QChartView      *m_chartView;
   QChart          *m_chart;
-  QLineSeries     *m_dataSeries;
+  QLineSeries     *m_dataSeries;   ///< the data line's first segment (positions map with it)
   QScatterSeries  *m_dataPoints;
   QLineSeries     *m_intSeries;
   QScatterSeries  *m_intPoints;
+  std::unique_ptr<GapLine> m_dataLine;   ///< the data line, split at the gaps
+  std::unique_ptr<GapLine> m_intLine;
   QValueAxis      *m_xAxis;
   QValueAxis      *m_yAxis;
   /// The y axis title ("[V]"), written horizontally above the axis: turned

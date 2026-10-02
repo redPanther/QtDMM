@@ -3,12 +3,14 @@
 //
 // The core's base types and ReadingAdapter: port keys and their text form,
 // and the cases of the special/unit table the decoder fixtures do not cover.
+// StaleRule, the time rule beside it.
 
 #include <QCoreApplication>
 #include <QDebug>
 #include <cmath>
 
 #include "readingadapter.h"
+#include "stalerule.h"
 
 static int failed = 0;
 
@@ -94,6 +96,11 @@ int main(int argc, char **argv)
   {
     const PortSample ol = one(a, " OL ", "MOhm", "OH");
     check(ol.sample.quality == Quality::Overload, "OL: quality Overload");
+    check(std::isnan(ol.sample.value) && !std::signbit(ol.sample.value), "OL: no value, NaN (the decoder said 0)");
+    const PortSample neg = one(a, "-OL", "V", "DC");
+    check(std::isnan(neg.sample.value) && std::signbit(neg.sample.value), "-OL: a negative NaN");
+    const Reading r = ReadingAdapter::reading(neg);
+    check(std::isnan(r.value) && r.overload && r.text == "-OL", "Reading: NaN, overload, the text as shown");
     check(std::isnan(ol.sample.range.full) && std::isnan(ol.sample.bar), "OL: no range, no bar");
     const PortSample v = one(a, "3.856", "V", "DC");
     check(v.sample.quality == Quality::Valid, "a number: Valid");
@@ -104,6 +111,33 @@ int main(int argc, char **argv)
     const PortSample t = one(a, "37.2", "C", "TE");
     check(!t.showBar && std::isnan(t.sample.range.full), "temperature: no bar, no range");
     check(one(a, "1.234", "V", "DC", "AUTO", false).showBar == false, "the decoder's showBar is kept");
+  }
+
+  // --- the stale rule (kern_spezifikation §4.3): three intervals, 1..30 s ---
+  {
+    StaleRule s;
+    check(s.stale(0) && s.maxAgeMs() == 3000, "no value yet: stale, 3 s");
+    s.arrived(0);
+    check(!s.stale(3000) && s.stale(3001), "one value: the 3 s of the link timeout");
+    for (qint64 t = 500; t <= 10000; t += 500)
+      s.arrived(t);
+    check(s.maxAgeMs() == 1500 && !s.stale(11500) && s.stale(11501),
+          QString("every 0.5 s: stale after 1.5 s, got %1").arg(s.maxAgeMs()));
+    s.arrived(30000);   // an outage, not the rhythm
+    check(s.maxAgeMs() == 1500, QString("a gap does not count as an interval, got %1").arg(s.maxAgeMs()));
+
+    StaleRule fast;
+    for (qint64 t = 0; t <= 5000; t += 100)
+      fast.arrived(t);
+    check(fast.maxAgeMs() == 1000, QString("every 0.1 s: at least 1 s, got %1").arg(fast.maxAgeMs()));
+
+    StaleRule slow;   // a slow meter: the limit grows with each interval it allows
+    qint64 t = 0;
+    for (int i = 0; i < 60; ++i, t += qMin<qint64>(12000, slow.maxAgeMs()))
+      slow.arrived(t);
+    check(slow.maxAgeMs() == 30000, QString("every 12 s: at most 30 s, got %1").arg(slow.maxAgeMs()));
+    slow.reset();
+    check(slow.stale(t) && slow.maxAgeMs() == 3000, "reset: no value, 3 s");
   }
 
   // --- the second value: its own port, or a slot of the main one ---

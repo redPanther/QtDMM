@@ -4,6 +4,9 @@
 
 #include <QRegularExpression>
 
+#include <cmath>
+#include <limits>
+
 #include "siprefix.h"
 
 namespace
@@ -192,6 +195,12 @@ PortSample ReadingAdapter::adaptValue(double dval, const QString &text, const QS
   // text ("OL", "-OL", "0.L", "EFLO"); a number never has one
   static const QRegularExpression letters("[A-Za-z]");
   s.quality = text.contains(letters) ? Quality::Overload : Quality::Valid;
+  // an overload has no value (kern_spezifikation §2.4): whatever number the
+  // decoder made of "OL" is not one. The sign of "-OL" stays on the NaN,
+  // for SCPI's -9.9E37.
+  if (s.quality == Quality::Overload)
+    s.value = std::copysign(std::numeric_limits<double>::quiet_NaN(),
+                            text.trimmed().startsWith(QLatin1Char('-')) ? -1.0 : 1.0);
   s.range.autorange = range == QLatin1String("AUTO");
 
   // full scale and bar from the display count and the decimals shown:

@@ -21,8 +21,8 @@
 struct RecordedPoint
 {
   qint64  msecs = 0;        ///< since the start of the recording
-  double  value = 0;        ///< SI base units, the mean over the sample time
-  double  integral = 0;     ///< running sum above the integration threshold, raw
+  double  value = 0;        ///< SI base units, the mean over the sample time; NaN = none (a gap)
+  double  integral = 0;     ///< running sum above the integration threshold, raw; NaN in a gap
   Quality quality = Quality::Valid;   ///< worst over the sample time
   quint32 flags = 0;        ///< SampleFlag, of the newest reading in the sample time
   QString text;             ///< as the meter showed it ("-006.52", "OL")
@@ -35,7 +35,7 @@ struct RecordedPoint
 struct LoggedReading
 {
   qint64  when = 0;         ///< ms since the epoch, wall clock
-  double  value = 0;        ///< SI base units
+  double  value = 0;        ///< SI base units; NaN for an overload
   Quality quality = Quality::Valid;
   quint32 flags = 0;        ///< SampleFlag
   QString text;             ///< as the meter showed it ("-006.52", "OL")
@@ -243,6 +243,8 @@ private:
   int         m_remainingLength = 0;
   int         m_sampleCounter = 0;
   double      m_sum = 0;
+  int         m_sumCount = 0;   ///< the finite values in m_sum
+  double      m_integral = 0;   ///< the running integral, carried over gaps
   bool        m_first = true;
   bool        m_running = false;
   bool        m_dirty = false;
