@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>QtDMM arrange: two windows side by side (Oxygen style)</title>
+  <defs>
+    <linearGradient id="title" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8cc0f0"/>
+      <stop offset="1" stop-color="#2b6cc0"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d6dbe2"/>
+    </linearGradient>
+  </defs>
+  <!-- shadow -->
+  <rect x="4" y="12" width="57" height="46" rx="3" fill="#000" opacity="0.18"/>
+  <!-- left window -->
+  <rect x="3" y="9" width="27" height="46" rx="2.5" fill="url(#body)" stroke="#36506e" stroke-width="1.5"/>
+  <path d="M3,11.5 a2.5,2.5 0 0 1 2.5,-2.5 h22 a2.5,2.5 0 0 1 2.5,2.5 v6.5 h-27 z" fill="url(#title)" stroke="#36506e" stroke-width="1.5"/>
+  <rect x="7" y="22" width="19" height="2.5" rx="1" fill="#9aa6b4"/>
+  <rect x="7" y="27" width="15" height="2.5" rx="1" fill="#9aa6b4"/>
+  <rect x="7" y="32" width="17" height="2.5" rx="1" fill="#9aa6b4"/>
+  <!-- right window -->
+  <rect x="34" y="9" width="27" height="46" rx="2.5" fill="url(#body)" stroke="#36506e" stroke-width="1.5"/>
+  <path d="M34,11.5 a2.5,2.5 0 0 1 2.5,-2.5 h22 a2.5,2.5 0 0 1 2.5,2.5 v6.5 h-27 z" fill="url(#title)" stroke="#36506e" stroke-width="1.5"/>
+  <rect x="38" y="22" width="19" height="2.5" rx="1" fill="#9aa6b4"/>
+  <rect x="38" y="27" width="13" height="2.5" rx="1" fill="#9aa6b4"/>
+  <rect x="38" y="32" width="17" height="2.5" rx="1" fill="#9aa6b4"/>
+  <!-- title bar highlights -->
+  <rect x="5" y="10.5" width="23" height="2" rx="1" fill="#fff" opacity="0.45"/>
+  <rect x="36" y="10.5" width="23" height="2" rx="1" fill="#fff" opacity="0.45"/>
+</svg>

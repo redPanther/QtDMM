@@ -18,7 +18,7 @@ file(GLOB TRANSLATIONS CONFIGURE_DEPENDS assets/translations/${PROJECT_NAME}_*.t
 file(GLOB DECODER_HEADER_FILES CONFIGURE_DEPENDS src/device/decoders/*.h )
 file(GLOB UI_FILES CONFIGURE_DEPENDS src/ui/forms/*.ui)
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp src/*.h )
-file(GLOB XPM_FILES CONFIGURE_DEPENDS assets/icons/*.xpm )
+file(GLOB XPM_FILES CONFIGURE_DEPENDS assets/icons/app/*.xpm )
 
 
 ## generate resources.qrc so you can't forget to add the icons and translations.
@@ -49,13 +49,14 @@ if (QTDMM_EMBED_TRANSLATIONS)
 	set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 endif()
 
-## icon themes (Breeze symbols, light and dark; tools/update_icons.py), as
-## :/icons/<theme>/... for QIcon::fromTheme()
-file(GLOB_RECURSE THEME_FILES CONFIGURE_DEPENDS assets/icons/theme/*/index.theme assets/icons/theme/*/22/*.svg)
+## icon sets (Breeze light and dark, Oxygen; tools/update_icons.py), each an
+## icon theme as :/icons/<theme>/... for QIcon::fromTheme()
+file(GLOB_RECURSE THEME_FILES CONFIGURE_DEPENDS assets/icons/sets/*/index.theme assets/icons/sets/*.svg
+     assets/icons/sets/*.png)
 list(SORT THEME_FILES)
 set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/icons\">\n")
 foreach(file_path IN LISTS THEME_FILES)
-	file(RELATIVE_PATH alias "${CMAKE_SOURCE_DIR}/assets/icons/theme" "${file_path}")
+	file(RELATIVE_PATH alias "${CMAKE_SOURCE_DIR}/assets/icons/sets" "${file_path}")
 	set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${alias}\">${file_path}</file>\n")
 endforeach()
 set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
@@ -207,7 +208,7 @@ endif()
 
 if(APPLE)
 	# bundle icon: copied to qtdmm.app/Contents/Resources, named in Info.plist
-	# (regenerate with tools/make_icons.py from assets/icons/qtdmm.svg)
+	# (regenerate with tools/make_icons.py from assets/icons/app/qtdmm.svg)
 	set(MAC_RESOURCES assets/macos/qtdmm.icns)
 	set_source_files_properties(${MAC_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif()
@@ -276,10 +277,10 @@ if (NOT WIN32)
 	## desktop file and icon are named after the application id, like the
 	## AppStream component (freedesktop recommends it, Flathub requires it)
 	install(FILES assets/io.github.qtdmm.qtdmm.desktop DESTINATION share/applications)
-	install(FILES assets/icons/qtdmm_32.png DESTINATION share/icons/hicolor/32x32/apps RENAME io.github.qtdmm.qtdmm.png)
-	install(FILES assets/icons/qtdmm_64.png DESTINATION share/icons/hicolor/64x64/apps RENAME io.github.qtdmm.qtdmm.png)
-	install(FILES assets/icons/qtdmm_128.png DESTINATION share/icons/hicolor/128x128/apps RENAME io.github.qtdmm.qtdmm.png)
-	install(FILES assets/icons/qtdmm.svg DESTINATION share/icons/hicolor/scalable/apps RENAME io.github.qtdmm.qtdmm.svg)
+	install(FILES assets/icons/app/qtdmm_32.png DESTINATION share/icons/hicolor/32x32/apps RENAME io.github.qtdmm.qtdmm.png)
+	install(FILES assets/icons/app/qtdmm_64.png DESTINATION share/icons/hicolor/64x64/apps RENAME io.github.qtdmm.qtdmm.png)
+	install(FILES assets/icons/app/qtdmm_128.png DESTINATION share/icons/hicolor/128x128/apps RENAME io.github.qtdmm.qtdmm.png)
+	install(FILES assets/icons/app/qtdmm.svg DESTINATION share/icons/hicolor/scalable/apps RENAME io.github.qtdmm.qtdmm.svg)
 	install(FILES ${CMAKE_BINARY_DIR}/qtdmm.1.gz DESTINATION share/man/man1)
 	## AppStream metadata for software centres, named after the component id
 	install(FILES assets/appimage/qtdmm.appdata.xml DESTINATION share/metainfo RENAME io.github.qtdmm.qtdmm.metainfo.xml)

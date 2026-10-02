@@ -44,13 +44,24 @@ namespace Designs
   };
   GraphColors graphColors(Design d);
 
-  /// The symbols: QtDMM's Breeze set (:/icons/qtdmm-breeze, -dark),
-  /// light or dark to match the palette. With @p systemIcons (Linux) the
-  /// desktop's icon theme comes first and the Breeze set fills the gaps
-  /// (QtDMM's own symbols are only there). Called by apply() with the last
-  /// choice; widgets repaint with the new symbols.
-  void setSystemIcons(bool systemIcons);
-  bool systemIcons();
-  /// The name of the Breeze set in use ("qtdmm-breeze" or "qtdmm-breeze-dark").
+  /// The symbols (Settings -> Appearance -> Symbols):
+  /// - Coloured: Oxygen (:/icons/qtdmm-oxygen), the default
+  /// - Plain: monochrome Breeze (:/icons/qtdmm-breeze, -dark), light or dark
+  ///   to match the palette
+  /// - SystemIcons: the desktop's icon theme (Linux/BSD, where there is
+  ///   one), the coloured set filling the gaps - QtDMM's own symbols are
+  ///   only there
+  enum IconSet { SystemIcons, Plain, Coloured };
+  /// "system", "plain", "colored" - the settings value (Icons/set).
+  QString iconSetName(IconSet set);
+  IconSet iconSetFromName(const QString &name);
+  /// Whether the desktop has an icon theme SystemIcons could use.
+  bool systemIconsAvailable();
+  /// Called by apply() with the last choice; widgets repaint with the new
+  /// symbols.
+  void setIconSet(IconSet set);
+  IconSet iconSet();
+  /// The built-in set in use ("qtdmm-oxygen", "qtdmm-breeze" or
+  /// "qtdmm-breeze-dark"); the fallback under SystemIcons.
   QString iconTheme();
 }

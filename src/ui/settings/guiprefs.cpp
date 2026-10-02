@@ -25,6 +25,7 @@
 #include <QtWidgets>
 
 #include "ui/colorbutton.h"
+#include "ui/designs.h"
 #include "ui/settings/guiprefs.h"
 #include "core/settings.h"
 
@@ -38,9 +39,11 @@ GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
   m_description = tr("<b>Here you can configure QtDMM's visual"
                      " appearance and behaviour.</b>");
   m_iconName = "preferences-desktop-theme-global";
-#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
-  ui_systemIcons->hide();   // no desktop icon themes there
-#endif
+  ui_iconSet->addItem(tr("Coloured"), QString("colored"));
+  ui_iconSet->addItem(tr("Plain"), QString("plain"));
+  // only where the desktop has an icon theme (not on Windows, macOS)
+  if (Designs::systemIconsAvailable())
+    ui_iconSet->addItem(tr("System"), QString("system"));
 }
 GuiPrefs::~GuiPrefs()
 {
@@ -65,13 +68,16 @@ void GuiPrefs::defaultsSLOT()
 
   ui_alertUnsavedData->setChecked(m_cfg->getBool("Alert/unsaved-file", true));
   ui_textLabel->setChecked(m_cfg->getBool("Icons/text-label", false));
-  ui_systemIcons->setChecked(m_cfg->getBool("Icons/system-theme", false));
+  // Icons/system-theme was the checkbox before the sets (26.2)
+  QString set = m_cfg->getString("Icons/set");
+  if (set.isEmpty())
+    set = m_cfg->getBool("Icons/system-theme", false) ? "system" : "colored";
+  ui_iconSet->setCurrentIndex(qMax(0, ui_iconSet->findData(set)));
 
   ui_dmmToolBar->setChecked(m_cfg->getBool("Toolbar/dmm", true));
   ui_graphToolBar->setChecked(m_cfg->getBool("Toolbar/graph", true));
   ui_fileToolBar->setChecked(m_cfg->getBool("Toolbar/file", true));
 
-  ui_tipOfTheDay->setChecked(m_cfg->getBool("QtDMM/show-tip", true));
 
   ui_meterScale->setCurrentIndex(qBound(0, m_cfg->getInt("Meter/scale-mode", 0), 2));
   ui_meterStyle->setCurrentIndex(qBound(0, m_cfg->getInt("Meter/style", 1), 1));
@@ -93,13 +99,12 @@ void GuiPrefs::factoryDefaultsSLOT()
 
   ui_alertUnsavedData->setChecked(true);
   ui_textLabel->setChecked(false);
-  ui_systemIcons->setChecked(false);
+  ui_iconSet->setCurrentIndex(ui_iconSet->findData(QString("colored")));
 
   ui_dmmToolBar->setChecked(true);
   ui_graphToolBar->setChecked(true);
   ui_fileToolBar->setChecked(true);
 
-  ui_tipOfTheDay->setChecked(true);
 
   ui_meterScale->setCurrentIndex(0);
   ui_meterStyle->setCurrentIndex(1);   // classic ivory
@@ -119,7 +124,6 @@ void GuiPrefs::applySLOT()
 {
   m_cfg->setInt("QtDMM/version", 0);   // TODO set version by cmake
   m_cfg->setInt("QtDMM/revision", 84); // TODO set revision by cmake
-  m_cfg->setBool("QtDMM/show-tip", showTip());
   m_cfg->setBool("Save/window-pos", saveWindowPosition());
   m_cfg->setBool("Save/window-size", saveWindowSize());
   m_cfg->setBool("Display/show", showDisplay());
@@ -129,7 +133,7 @@ void GuiPrefs::applySLOT()
   m_cfg->setString("Windows/design", ui_design->currentData().toString());
   m_cfg->setBool("Alert/unsaved-file", alertUnsavedData());
   m_cfg->setBool("Icons/text-label", useTextLabel());
-  m_cfg->setBool("Icons/system-theme", systemIcons());
+  m_cfg->setString("Icons/set", iconSet());
   m_cfg->setBool("Toolbar/dmm", showDmmToolbar());
   m_cfg->setBool("Toolbar/graph", showGraphToolbar());
   m_cfg->setBool("Toolbar/file", showFileToolbar());
@@ -164,10 +168,6 @@ int GuiPrefs::meterRedZone() const
   return ui_meterRedZone->value();
 }
 
-bool GuiPrefs::showTip() const
-{
-  return ui_tipOfTheDay->isChecked();
-}
 
 bool GuiPrefs::showDmmToolbar() const
 {
@@ -210,9 +210,9 @@ bool GuiPrefs::useTextLabel() const
   return ui_textLabel->isChecked();
 }
 
-bool GuiPrefs::systemIcons() const
+QString GuiPrefs::iconSet() const
 {
-  return ui_systemIcons->isChecked();
+  return ui_iconSet->currentData().toString();
 }
 
 QColor GuiPrefs::displayBgColor() const
@@ -230,7 +230,3 @@ bool GuiPrefs::saveWindowSize() const
   return ui_saveWindowSize->isChecked();
 }
 
-void GuiPrefs::on_ui_tipOfTheDay_toggled(bool on)
-{
-  ui_tipOfTheDay->setChecked(on);
-}

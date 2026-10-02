@@ -27,24 +27,22 @@
 
 /// Settings page "Appearance": window and toolbar options, the LCD display
 /// (colour, bar graph, min/max) and the analog meter (scale mode, style,
-/// ballistics, red zone), tips at start-up.
+/// ballistics, red zone).
 class GuiPrefs : public SettingsPage, private Ui::UIGuiPrefs
 {
   Q_OBJECT
 public:
   GuiPrefs(QWidget *parent = Q_NULLPTR);
   ~GuiPrefs();
-  bool      showTip() const;
   bool      showBar() const;
   bool      showMinMax() const;
   bool      alertUnsavedData() const;
   bool      useTextLabel() const;
-  /// Symbols from the desktop's icon theme first (Linux, Designs::setSystemIcons).
-  bool      systemIcons() const;
+  /// The symbols: "colored", "plain" or "system" (Designs::IconSet).
+  QString   iconSet() const;
   QColor    displayBgColor() const;
   bool      saveWindowPosition() const;
   bool      saveWindowSize() const;
-  void      on_ui_tipOfTheDay_toggled(bool on);
   bool      showDmmToolbar() const;
   bool      showGraphToolbar() const;
   bool      showFileToolbar() const;
@@ -55,9 +53,6 @@ public:
   void      setMeterStyle(int style);
   bool      meterBallistics() const;
   int       meterRedZone() const;   ///< percent of full scale
-
-Q_SIGNALS:
-  void      showTips(bool);
 
 public Q_SLOTS:
   virtual void defaultsSLOT();

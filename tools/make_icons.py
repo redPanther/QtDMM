@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 The QtDMM developers
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Builds the platform icons from assets/icons/qtdmm.svg.
+"""Builds the platform icons from assets/icons/app/qtdmm.svg.
 
 - assets/macos/qtdmm.icns: all sizes from the SVG, drawn inside the macOS
   icon grid (an 824 px body on a 1024 px canvas), so QtDMM is as large in
@@ -21,7 +21,7 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
-SVG = ROOT / "assets" / "icons" / "qtdmm.svg"
+SVG = ROOT / "assets" / "icons" / "app" / "qtdmm.svg"
 ICNS = ROOT / "assets" / "macos" / "qtdmm.icns"
 ICO = ROOT / "assets" / "windows" / "qtdmm.ico"
 

@@ -527,11 +527,6 @@ QString SettingsDialog::externalCommand() const
 /////////////////////////////////////////////////////////////////
 // GUI
 //
-bool SettingsDialog::showTip() const
-{
-  return m_gui->showTip();
-}
-
 bool SettingsDialog::showBar() const
 {
   return m_gui->showBar();
@@ -552,9 +547,9 @@ bool SettingsDialog::useTextLabel() const
   return m_gui->useTextLabel();
 }
 
-bool SettingsDialog::systemIcons() const
+QString SettingsDialog::iconSet() const
 {
-  return m_gui->systemIcons();
+  return m_gui->iconSet();
 }
 
 QColor SettingsDialog::displayBgColor() const
@@ -572,10 +567,6 @@ bool SettingsDialog::saveWindowSize() const
   return m_gui->saveWindowSize();
 }
 
-void SettingsDialog::setShowTipsSLOT(bool on)
-{
-  m_gui->on_ui_tipOfTheDay_toggled(on);
-}
 
 bool SettingsDialog::showDmmToolbar() const
 {

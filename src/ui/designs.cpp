@@ -17,7 +17,7 @@ bool g_saved = false;
 QPalette g_systemPalette;
 QString g_systemStyle;
 QString g_systemIconTheme;   ///< the desktop's icon theme, empty on Windows/macOS
-bool g_systemIcons = false;
+Designs::IconSet g_iconSet = Designs::Coloured;
 
 // the first call remembers what the system had, for System and the icons
 void saveSystem()
@@ -33,15 +33,15 @@ void saveSystem()
 
 void applyIcons()
 {
-  const QString breeze = Designs::iconTheme();
-  if (g_systemIcons && !g_systemIconTheme.isEmpty())
+  const QString builtIn = Designs::iconTheme();
+  if (g_iconSet == Designs::SystemIcons && Designs::systemIconsAvailable())
   {
     QIcon::setThemeName(g_systemIconTheme);
-    QIcon::setFallbackThemeName(breeze);
+    QIcon::setFallbackThemeName(builtIn);
   }
   else
   {
-    QIcon::setThemeName(breeze);
+    QIcon::setThemeName(builtIn);
     QIcon::setFallbackThemeName(QString());
   }
   // icons from fromTheme() look the theme up again when painted
@@ -161,20 +161,52 @@ void Designs::apply(Design d)
 
 QString Designs::iconTheme()
 {
+  if (g_iconSet != Plain)
+    return "qtdmm-oxygen";   // coloured; good on light and dark alike
   // by the window colour, so System on a dark desktop gets the dark set
   return QApplication::palette().color(QPalette::Window).lightness() < 128 ? "qtdmm-breeze-dark" : "qtdmm-breeze";
 }
 
-void Designs::setSystemIcons(bool systemIcons)
+QString Designs::iconSetName(IconSet set)
+{
+  switch (set)
+  {
+    case SystemIcons: return "system";
+    case Plain:       return "plain";
+    default:          return "colored";
+  }
+}
+
+Designs::IconSet Designs::iconSetFromName(const QString &name)
+{
+  if (name == "system")
+    return SystemIcons;
+  if (name == "plain")
+    return Plain;
+  return Coloured;
+}
+
+bool Designs::systemIconsAvailable()
+{
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+  return false;   // no desktop icon themes there
+#else
+  saveSystem();
+  // "hicolor" is the bare freedesktop fallback, not a theme of the desktop
+  return !g_systemIconTheme.isEmpty() && g_systemIconTheme != "hicolor";
+#endif
+}
+
+void Designs::setIconSet(IconSet set)
 {
   saveSystem();
-  g_systemIcons = systemIcons;
+  g_iconSet = set;
   applyIcons();
 }
 
-bool Designs::systemIcons()
+Designs::IconSet Designs::iconSet()
 {
-  return g_systemIcons;
+  return g_iconSet;
 }
 
 QBrush Designs::areaBrush(Design d)
