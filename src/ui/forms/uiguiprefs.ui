@@ -38,7 +38,7 @@
       <item>
        <widget class="QComboBox" name="ui_design">
         <property name="toolTip">
-         <string>The look of the whole window: the colours of the desktop (System), brushed metal (Silver) or dark. The same as in the View menu.</string>
+         <string>The look of the whole window: the colours of the desktop (System), brushed metal (Silver) or dark. The same as Design in the menu.</string>
         </property>
        </widget>
       </item>
