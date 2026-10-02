@@ -123,7 +123,7 @@ into the resources (`:/icons`); the code asks for symbols by name with
 
 Both are LGPL-3.0-or-later (`assets/icons/sets/LICENSE.breeze`, `LICENSE.oxygen`).
 *System* (Linux/BSD, when the desktop has an icon theme) puts the desktop's
-theme first, with the Oxygen set as the fallback. `tools/update_icons.py`
+theme first, with the plain Breeze set as the fallback. `tools/update_icons.py`
 copies the names in `NAMES` from installed Breeze and Oxygen themes (Oxygen
 lacks five of them under that name: `OXYGEN_ALIAS`) and adds QtDMM's own
 symbols from `assets/icons/own/<style>/`: `own/breeze/` as SVG drawn with

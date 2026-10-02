@@ -161,8 +161,10 @@ void Designs::apply(Design d)
 
 QString Designs::iconTheme()
 {
-  if (g_iconSet != Plain)
-    return "qtdmm-oxygen";   // coloured; good on light and dark alike
+  // System falls back on the plain set: its monochrome symbols sit better
+  // among a desktop theme's than the coloured ones
+  if (g_iconSet == Coloured)
+    return "qtdmm-oxygen";   // good on light and dark alike
   // by the window colour, so System on a dark desktop gets the dark set
   return QApplication::palette().color(QPalette::Window).lightness() < 128 ? "qtdmm-breeze-dark" : "qtdmm-breeze";
 }

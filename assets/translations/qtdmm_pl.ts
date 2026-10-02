@@ -3016,8 +3016,8 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="58"/>
-        <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the coloured set.</source>
-        <translation>&lt;b&gt;Kolorowe&lt;/b&gt;: kolorowe symbole QtDMM (Oxygen). &lt;b&gt;Proste&lt;/b&gt;: jednobarwne symbole (Breeze), jasne lub ciemne zależnie od wyglądu. &lt;b&gt;Systemowy&lt;/b&gt;: motyw ikon pulpitu, jeśli istnieje; własne symbole QtDMM i to, czego brakuje w motywie, pochodzą z zestawu kolorowego.</translation>
+        <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the plain set.</source>
+        <translation>&lt;b&gt;Kolorowe&lt;/b&gt;: kolorowe symbole QtDMM (Oxygen). &lt;b&gt;Proste&lt;/b&gt;: jednobarwne symbole (Breeze), jasne lub ciemne zależnie od wyglądu. &lt;b&gt;Systemowy&lt;/b&gt;: motyw ikon pulpitu, jeśli istnieje; własne symbole QtDMM i to, czego brakuje w motywie, pochodzą z zestawu prostego.</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="75"/>

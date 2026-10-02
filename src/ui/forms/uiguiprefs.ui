@@ -55,7 +55,7 @@
       <item>
        <widget class="QComboBox" name="ui_iconSet">
         <property name="toolTip">
-         <string>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM's coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM's own symbols and what the theme lacks come from the coloured set.</string>
+         <string>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM's coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM's own symbols and what the theme lacks come from the plain set.</string>
         </property>
        </widget>
       </item>
