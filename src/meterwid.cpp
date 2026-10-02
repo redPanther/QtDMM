@@ -748,7 +748,6 @@ void MeterWid::showReading(const Reading &r)
     return;
   const QString &val = r.text;
   const QString &unit = r.unit;
-  const QString &special = r.special;
 
   if (r.temperature())
   {
@@ -771,14 +770,12 @@ void MeterWid::showReading(const Reading &r)
 
   // the unit as the digital display writes it ("kΩ", "°C")
   QString label = SiPrefix::displayText(unit);
-  if (special == "AC" || special == "DC")
-    label += " " + special;
-  else if (special == "ACDC")
-    label += " AC+DC";
-  else if (special == "DI" || special == "Diode")
+  if (r.diode())
     label += " DIODE";
-  else if (special == "BUZ")
+  else if (r.continuity())
     label += " CONT";
+  else if (!couplingText(r.flags).isEmpty())
+    label += " " + couplingText(r.flags);
 
   m_unitText = unit;
   const double value = r.overload ? 0.0 : QString(val).remove(' ').toDouble();

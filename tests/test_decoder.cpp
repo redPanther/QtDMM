@@ -9,6 +9,7 @@
 
 #include "dmmdecoder.h"
 #include "protocols.h"
+#include "readingadapter.h"
 
 QByteArray parseHexStringToByteArray(const QString &hexString)
 {
@@ -221,6 +222,18 @@ int main(int argc, char **argv)
     if (expected.contains("val2"))    check("val2",    result->val2,    expected["val2"]);
     if (expected.contains("unit2"))   check("unit2",   result->unit2,   expected["unit2"]);
     if (expected.contains("id2"))     check("id2",     result->id2,     expected["id2"]);
+
+    // the golden part (kern_spezifikation §11.2): the port each value lands
+    // on behind ReadingAdapter
+    if (expected.contains("port") || expected.contains("port2"))
+    {
+      ReadingAdapter adapter(decoder->getType());
+      const QList<PortSample> samples = adapter.adapt(*result, 0);
+      if (expected.contains("port"))
+        check("port", samples.value(0).port.toString(), expected["port"]);
+      if (expected.contains("port2"))
+        check("port2", samples.size() > 1 ? samples[1].port.toString() : QString(), expected["port2"]);
+    }
   }
 
   // Frame alignment invariant: feeding N readings' worth of frames through the

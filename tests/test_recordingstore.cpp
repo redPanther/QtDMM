@@ -10,6 +10,7 @@
 #include <QSignalSpy>
 #include <QTemporaryDir>
 
+#include "readingadapter.h"
 #include "recordingstore.h"
 
 static int failed = 0;
@@ -23,20 +24,14 @@ static void check(bool cond, const QString &what)
   }
 }
 
+// A reading as the MeterController makes it: through ReadingAdapter
 static Reading reading(double value, const QString &text, const QString &special, bool hold = false,
                        const QString &range = "AUTO")
 {
-  Reading r;
-  r.value = value;
-  r.text = text;
-  r.unit = "mV";
-  r.prefix = "m";
-  r.baseUnit = "V";
-  r.special = special;
-  r.range = range;
-  r.hold = hold;
-  r.overload = text.contains(QLatin1String("OL"));
-  r.msecs = QDateTime::currentMSecsSinceEpoch();
+  static ReadingAdapter adapter;
+  Reading r = ReadingAdapter::reading(adapter.adaptValue(value, text, "mV", special, range, hold, true, false, 0,
+                                                         QDateTime::currentMSecsSinceEpoch()));
+  r.value = value;   // the tests give SI values together with display texts of their own
   return r;
 }
 
@@ -197,7 +192,7 @@ int main(int argc, char **argv)
     check(store.readingCount() == 3 && inserted == 3,
           QString("readings: expected 3 rows, got %1").arg(store.readingCount()));
     const LoggedReading &first = store.readingAt(0);
-    check(first.text == "12.34" && first.unit == "mV" && first.special == "DC" && first.range == "AUTO" &&
+    check(first.text == "12.34" && first.unit == "mV" && first.port.toString() == "voltage.dc" && first.range == "AUTO" &&
           first.hold() && first.value == 0.01234 && first.id == 0,
           "readings: the full tuple of the first row");
     check(store.readingAt(1).id == 1 && store.readingAt(1).range == "MANU", "readings: a secondary value is a row too");

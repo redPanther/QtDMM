@@ -95,6 +95,9 @@ bool DecoderAscii::decodeSigrok(QString str)
   // libsigrok spells the units the same for every driver; map the ones the
   // other decoders spell differently, so units compare equal across protocols
   m_result.unit = list.size() > 2 ? list[2] : QString();
+  // libsigrok prints a value without unit only for continuity (SR_UNIT_BOOLEAN)
+  if (m_result.unit.isEmpty())
+    m_result.special = "BUZ";
   m_result.unit.replace(QStringLiteral("Ω"), QStringLiteral("Ohm"));
   if (m_result.unit == QStringLiteral("°C"))
     m_result.unit = QStringLiteral("C");

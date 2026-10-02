@@ -9,7 +9,8 @@
         "val": "12.34",
         "dval": 12.34,
         "unit": "V",
-        "hold": false
+        "hold": false,
+        "port": "voltage"
       }
     },
     {
@@ -19,7 +20,8 @@
         "val": "230.1",
         "dval": 230.1,
         "unit": "V",
-        "hold": false
+        "hold": false,
+        "port": "voltage"
       }
     },
     {
@@ -29,7 +31,8 @@
         "val": "0.623",
         "dval": 0.623,
         "unit": "V",
-        "hold": false
+        "hold": false,
+        "port": "voltage"
       }
     }
   ]

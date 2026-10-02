@@ -30,12 +30,12 @@ static QString ask(ScpiServer &s, const char *msg)
   return QString::fromUtf8(s.process(msg)).trimmed();
 }
 
-static ScpiServer::Reading reading(double v, const QString &unit, const QString &special = "DC")
+static ScpiServer::Reading reading(double v, const QString &unit, const QString &port = "voltage.dc")
 {
   ScpiServer::Reading r;
   r.value = v;
   r.unit = unit;
-  r.special = special;
+  r.port = PortKey::fromString(port);
   r.range = "AUTO";
   r.valid = true;
   r.msecs = QDateTime::currentMSecsSinceEpoch();
@@ -70,14 +70,14 @@ int main(int argc, char **argv)
   check(ask(s, "UNIT?") == "\"V\"", "UNIT? " + ask(s, "UNIT?"));
   check(ask(s, "CONF?") == "\"VOLT:DC AUTO\"", "CONF? " + ask(s, "CONF?"));
   check(ask(s, "READ2?") == "9.91E+37", "second value not there yet");
-  s.setReading(1, reading(0.05, "A", "AC"));
+  s.setReading(1, reading(0.05, "A", "current.ac"));
   check(ask(s, "READ2?") == "+5.000000E-02" && ask(s, "VAL2?") == "+5.000000E-02", "READ2? VAL2?");
   check(ask(s, "UNIT2?") == "\"A\"" && ask(s, "CONF2?") == "\"CURR:AC AUTO\"", "UNIT2? CONF2?");
   s.process("*CLS");
   check(ask(s, "READ3?").isEmpty() && ask(s, "SYST:ERR?").startsWith("-114,"), "READ3? is out of range");
   s.process("*CLS");
 
-  ScpiServer::Reading ol = reading(0, "Ohm");
+  ScpiServer::Reading ol = reading(0, "Ohm", "resistance");
   ol.overload = true;
   s.setReading(0, ol);
   check(ask(s, "READ?") == "9.9E+37", "overload is +INF " + ask(s, "READ?"));

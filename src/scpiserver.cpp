@@ -149,29 +149,26 @@ QString ScpiServer::number(double v)
 // The SCPI function name behind the meter's mode and unit, for CONF?.
 QString ScpiServer::function(const Reading &r) const
 {
-  const QString sp = r.special.toUpper();
-  const QString u = r.unit;
-  if (sp.startsWith("DI"))
-    return "DIOD";
-  if (sp == "TE" || u.contains(QChar(0xB0)))
-    return "TEMP";
-  if (u == "V")
-    return sp.startsWith("AC") ? "VOLT:AC" : "VOLT:DC";
-  if (u == "A")
-    return sp.startsWith("AC") ? "CURR:AC" : "CURR:DC";
-  if (u == "Ohm" || u == QString(QChar(0x3A9)))
-    return sp.startsWith("BE") || sp.startsWith("CO") ? "CONT" : "RES";
-  if (u == "F")
-    return "CAP";
-  if (u == "Hz")
-    return "FREQ";
-  if (u == "%")
-    return "PER";
-  if (u == "W")
-    return "POW";
-  if (u == "s")
-    return "PWID";
-  return u.isEmpty() ? QString("NONE") : u.toUpper();
+  const bool ac = r.port.defining & SampleFlag::AC;
+  switch (r.port.quantity)
+  {
+    case Quantity::Voltage:
+      if (r.port.defining & SampleFlag::Diode)
+        return "DIOD";
+      return ac ? "VOLT:AC" : "VOLT:DC";
+    case Quantity::Current:     return ac ? "CURR:AC" : "CURR:DC";
+    case Quantity::Resistance:  return "RES";
+    case Quantity::Continuity:  return "CONT";
+    case Quantity::Temperature: return "TEMP";
+    case Quantity::Capacitance: return "CAP";
+    case Quantity::Frequency:   return "FREQ";
+    case Quantity::DutyCycle:   return "PER";
+    case Quantity::Power:       return "POW";
+    case Quantity::PulseWidth:
+    case Quantity::Time:        return "PWID";
+    default:
+      return r.unit.isEmpty() ? QString("NONE") : r.unit.toUpper();
+  }
 }
 
 const ScpiServer::Reading *ScpiServer::reading(int channel)

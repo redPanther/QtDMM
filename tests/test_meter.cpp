@@ -12,7 +12,7 @@
 #include <cmath>
 
 #include "meterwid.h"
-#include "reading.h"
+#include "readingadapter.h"
 #include <limits>
 
 static int failed = 0;
@@ -110,26 +110,16 @@ int main(int argc, char **argv)
   check(near(MeterWid::fullScaleWithoutRange(950.0, none), 2000.0), "950 -> 2000");
   check(near(MeterWid::fullScaleWithoutRange(20.0, 100.0), 100.0), "the scale does not shrink");
   {
-    Reading t;
-    t.special = "TE";
-    t.baseUnit = "C";
-    check(t.temperature(), "TE is a temperature");
-    Reading f;
-    f.baseUnit = "dF";
-    check(f.temperature(), "dF (Fahrenheit) is a temperature");
-    Reading farad;
-    farad.special = "CA";
-    farad.baseUnit = "F";
-    check(!farad.temperature(), "F with CA is farad, not a temperature");
-  }
-  {
     // a 50000-count meter showing 37.2 °C: 50, not 5000; a voltage keeps the count rule
+    ReadingAdapter adapter;
+    auto reading = [&](const QString &text, const QString &unit, const QString &special)
+    {
+      return ReadingAdapter::reading(adapter.adaptValue(text.toDouble(), text, unit, special, "AUTO", false, true, false, 0, 0));
+    };
     MeterWid m;
     m.setDisplayCounts(50000);
-    Reading r;
-    r.special = "TE";
-    r.unit = r.baseUnit = "C";
-    r.text = "37.2";
+    Reading r = reading("37.2", "C", "TE");
+    check(r.temperature(), "C with TE is a temperature");
     m.showReading(r);
     check(near(m.fullScale(), 50.0), QString("37.2 C @50000 -> 50, got %1").arg(m.fullScale()));
     r.text = "22.6";
@@ -142,11 +132,7 @@ int main(int argc, char **argv)
     r.text = "22.6";
     m.showReading(r);
     check(near(m.fullScale(), 50.0), "reset: starts again from the value");
-    Reading v;
-    v.special = "DC";
-    v.unit = v.baseUnit = "V";
-    v.text = "3.8560";
-    m.showReading(v);
+    m.showReading(reading("3.8560", "V", "DC"));
     check(near(m.fullScale(), 5.0), QString("a voltage keeps the count rule (5.0000 @50000), got %1").arg(m.fullScale()));
   }
   check(std::isnan(MeterWid::fullScaleFromReading("3.856", 0)), "no counts, no scale");

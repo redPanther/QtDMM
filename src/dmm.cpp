@@ -418,6 +418,7 @@ void DMM::readEventSLOT(const QByteArray &data, int id)
   m_lastFrame.restart();
   if (auto r = m_decoder->decode(data, id); r)
   {
+    Q_EMIT response(*r);
     Q_EMIT value(r->dval, r->val, r->unit, r->special, r->range, r->hold, r->showBar, r->id);
     if (r->id2 > 0)
       Q_EMIT value(r->dval2, r->val2, r->unit2, r->special2, r->range, r->hold, r->showBar, r->id2);

@@ -7,6 +7,8 @@
 #include <QDateTime>
 #include <QVector>
 
+#include "sampletypes.h"
+
 /// Every reading the meter sent, one row each, as a table model: the raw
 /// protocol of a session next to the recorder's time-gridded graph. A thin
 /// model over the readings series of a RecordingStore (the newest maxRows()
@@ -28,7 +30,8 @@ public:
     double dval = 0;      ///< SI base units, for statistics and sorting
     QString val;          ///< as displayed ("1.234", "OL")
     QString unit;         ///< with prefix ("mV")
-    QString special;      ///< "DC", "AC", "DI", ...
+    PortKey port;         ///< what was measured: voltage.dc, resistance, ...
+    quint32 flags = 0;    ///< SampleFlag: AC, DC, Diode, Hold, ...
     QString range;        ///< "AUTO", "MANU" or empty
     bool hold = false;
     int id = 0;           ///< 0 = main display, 1+ = secondary values
@@ -103,7 +106,8 @@ public:
   /// only the time of day ("14:03:05.250").
   bool isSingleDay() const { return m_singleDay; }
   /// The Mode column: the decoders' codes as words ("OH" -> "Resistance").
-  static QString modeText(const QString &special);
+  /// The Mode column: "DC", "AC+DC", "Diode", "Resistance", ...
+  static QString modeText(const PortKey &port, quint32 flags);
 
 private:
   RecordingStore *m_own;     ///< used until setStore(), and after that store is gone

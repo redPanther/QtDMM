@@ -8,7 +8,8 @@
       "expected": {
         "dval": 50.0,
         "unit": "kHz",
-        "hold": false
+        "hold": false,
+        "port": "frequency"
       }
     },
     {
@@ -17,7 +18,8 @@
       "expected": {
         "dval": 17.0,
         "unit": "V",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -26,7 +28,8 @@
       "expected": {
         "dval": 1e-06,
         "unit": "mA",
-        "hold": false
+        "hold": false,
+        "port": "current.dc"
       }
     },
     {
@@ -35,7 +38,8 @@
       "expected": {
         "dval": 0.01,
         "unit": "A",
-        "hold": false
+        "hold": false,
+        "port": "current.dc"
       }
     },
     {
@@ -44,7 +48,8 @@
       "expected": {
         "dval": 1.0,
         "unit": "C",
-        "hold": false
+        "hold": false,
+        "port": "temperature"
       }
     },
     {
@@ -53,7 +58,8 @@
       "expected": {
         "dval": 0.039,
         "unit": "mV",
-        "hold": false
+        "hold": false,
+        "port": "voltage.diode"
       }
     }
   ]

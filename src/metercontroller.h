@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "alarm.h"
+#include "readingadapter.h"
 #include "reading.h"
 
 class DMM;
@@ -47,6 +48,9 @@ public:
   /// The recorder: the sample clock and the readings feed it from here on,
   /// views (the graph) show it. SCPI learns when it starts or stops.
   RecordingStore *recorder() const { return m_recorder; }
+  /// The meter's display count (DMMInfo::display), for the range and the
+  /// bar graph of the readings.
+  void        setDisplayCounts(int counts) { m_adapter.setCounts(counts); }
   /// Readings are published to the other instances through @p mgr.
   void        setStateManager(SharedStateManager *mgr);
   /// This instance's id (--config-id), part of the mDNS name.
@@ -130,8 +134,9 @@ Q_SIGNALS:
   void        externalFinished(int exitCode);
 
 private:
-  void        valueSLOT(double dval, const QString &val, const QString &unit, const QString &special,
-                        const QString &range, bool hold, bool showBar, int id);
+  void        responseSLOT(const DmmDecoder::DmmResponse &response);
+  /// One value as the views get it: min/max, alarms, the other instances, SCPI.
+  void        publish(const Reading &reading);
   void        onAlarmRaised(int index, const Alarm &alarm, double value);
   void        updateBanner();
   void        updateScpiStatus();
@@ -140,6 +145,7 @@ private:
   DMM                *m_dmm;
   AlarmManager       *m_alarms;
   RecordingStore     *m_recorder;
+  ReadingAdapter      m_adapter;
   ScpiServer         *m_scpi;
   MdnsResponder      *m_mdns;
   QProcess           *m_external;

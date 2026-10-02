@@ -26,6 +26,8 @@
 #include <QColor>
 #include <QPixmap>
 
+#include "sampletypes.h"
+
 /// The digital display: an LCD panel in the same housing as the analog
 /// meter. Seven-segment digits, unit, annunciators (HOLD, AUTO, MANU, AC,
 /// DC, diode, continuity), the min/max memory, a bar graph and up to three
@@ -59,7 +61,9 @@ public:
   /// secondary values of multi-line meters.
   void setValue(int id, const QString &);
   void setUnit(int id, const QString &);
-  void setMode(int id, const QString &);   ///< "AC", "DC", "ACDC", "DI", "BUZ", ...
+  /// The annunciators of value @p id: AC, DC and diode from @p flags
+  /// (SampleFlag), the continuity buzzer from @p quantity.
+  void setMode(int id, quint32 flags, Quantity quantity = Quantity::Unknown);
   /// @name Min/max memory row
   /// @{
   void setMinValue(const QString &);
@@ -156,7 +160,8 @@ private:
 
   QString m_value[4];
   QString m_unit[4];
-  QString m_mode[4];
+  quint32  m_flags[4] = {};
+  Quantity m_quantity[4] = { Quantity::Unknown, Quantity::Unknown, Quantity::Unknown, Quantity::Unknown };
   QString m_minValue, m_maxValue, m_minUnit, m_maxUnit;
   int m_counts = 4000;
   bool m_showMinMax = true;

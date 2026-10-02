@@ -9,7 +9,8 @@
         "dval": 1.234,
         "unit": "V",
         "special": "DC",
-        "range": "AUTO"
+        "range": "AUTO",
+        "port": "voltage.dc"
       }
     },
     {
@@ -18,7 +19,8 @@
       "expected": {
         "dval": -1.234,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -28,7 +30,8 @@
         "val": "1234",
         "dval": 1234.0,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -38,7 +41,8 @@
         "dval": 23.05,
         "unit": "V",
         "special": "AC",
-        "range": "MANU"
+        "range": "MANU",
+        "port": "voltage.ac"
       }
     },
     {
@@ -47,7 +51,8 @@
       "expected": {
         "dval": 0.0,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -56,7 +61,8 @@
       "expected": {
         "dval": 0.512,
         "unit": "V",
-        "special": "DI"
+        "special": "DI",
+        "port": "voltage.diode"
       }
     },
     {
@@ -65,7 +71,8 @@
       "expected": {
         "dval": 123.4,
         "unit": "Ohm",
-        "special": "OH"
+        "special": "OH",
+        "port": "resistance"
       }
     },
     {
@@ -74,7 +81,8 @@
       "expected": {
         "dval": 50.0,
         "unit": "Hz",
-        "special": "HZ"
+        "special": "HZ",
+        "port": "frequency"
       }
     },
     {
@@ -84,7 +92,8 @@
         "dval": 12.34,
         "unit": "V",
         "special": "DC",
-        "range": "AUTO"
+        "range": "AUTO",
+        "port": "voltage.dc"
       }
     },
     {
@@ -93,7 +102,8 @@
       "expected": {
         "dval": -12.34,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -103,7 +113,8 @@
         "val": "123.4",
         "dval": 0.1234,
         "unit": "mV",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -113,7 +124,8 @@
         "val": "0.623",
         "dval": 0.623,
         "unit": "V",
-        "special": "DI"
+        "special": "DI",
+        "port": "voltage.diode"
       }
     },
     {
@@ -123,7 +135,8 @@
         "val": "4.700",
         "dval": 4700.0,
         "unit": "kOhm",
-        "special": "OH"
+        "special": "OH",
+        "port": "resistance"
       }
     }
   ]

@@ -64,7 +64,7 @@ QJsonObject readingToJson(const SharedStateManager::Reading &r)
   QJsonObject o;
   o["value"] = r.value;
   o["unit"] = r.unit;
-  o["special"] = r.special;
+  o["port"] = r.port;
   o["msecs"] = static_cast<double>(r.msecs);
   o["valid"] = r.valid;
   return o;
@@ -75,7 +75,7 @@ SharedStateManager::Reading readingFromJson(const QJsonObject &o)
   SharedStateManager::Reading r;
   r.value = o["value"].toDouble();
   r.unit = o["unit"].toString();
-  r.special = o["special"].toString();
+  r.port = o["port"].toString();
   r.msecs = static_cast<qint64>(o["msecs"].toDouble());
   r.valid = o["valid"].toBool();
   return r;
@@ -299,7 +299,7 @@ void SharedStateManager::publishReading(const Reading &reading)
   if (!m_registered)
     return;
   if (reading.valid == m_published.valid && reading.value == m_published.value &&
-      reading.unit == m_published.unit && reading.special == m_published.special &&
+      reading.unit == m_published.unit && reading.port == m_published.port &&
       reading.msecs - m_published.msecs < 1000)
     return;
 

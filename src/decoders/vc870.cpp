@@ -141,7 +141,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC870::decode(const QByteArray &da
       // Measurement mode: degrees celsius and fahrenheit
       special    = "TE";
       unit1      = "C";
-      unit2      = "F";
+      unit2      = "dF";   // Fahrenheit in QtDMM's spelling: "F" alone is farad
       l_bShowBar = false;
       switch (l_FactorIndex)
       {

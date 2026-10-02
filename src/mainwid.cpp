@@ -478,6 +478,7 @@ void MainWid::readConfig()
   m_display->setDisplayMode(m_configDlg->display(), m_configDlg->showMinMax(),
                             m_configDlg->showBar(), m_configDlg->numValues());
   dmm->setNumValues(m_configDlg->numValues());
+  m_ctl->setDisplayCounts(m_configDlg->display());
 
   if (m_meter)
   {

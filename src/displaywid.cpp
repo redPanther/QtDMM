@@ -78,7 +78,11 @@ QSize DisplayWid::minimumSizeHint() const
 
 void DisplayWid::setValue(int id, const QString &v) { m_value[id] = v; }
 void DisplayWid::setUnit(int id, const QString &v) { m_unit[id] = v; }
-void DisplayWid::setMode(int id, const QString &v) { m_mode[id] = v; }
+void DisplayWid::setMode(int id, quint32 flags, Quantity quantity)
+{
+  m_flags[id] = flags;
+  m_quantity[id] = quantity;
+}
 void DisplayWid::setMinValue(const QString &v) { m_minValue = v; }
 void DisplayWid::setMaxValue(const QString &v) { m_maxValue = v; }
 void DisplayWid::setMinUnit(const QString &v) { m_minUnit = v; }
@@ -529,7 +533,7 @@ void DisplayWid::drawFlags(QPainter &p, const Layout &l) const
   const double fontPx = l.flagsPx;   // sized by layout() to fit the width
   const QFontMetricsF fm(sansFont(fontPx));
   const double gap = fontPx * 0.9;
-  const QString mode = m_mode[0];
+  const quint32 flags = m_flags[0];
 
   struct Flag { QString text; bool on; };
   const QStringList &lt = leftFlags();
@@ -540,10 +544,10 @@ void DisplayWid::drawFlags(QPainter &p, const Layout &l) const
     { lt[2], m_manu },
   };
   const Flag right[] = {
-    { rt[0], mode == "AC" || mode == "ACDC" },
-    { rt[1], mode == "DC" || mode == "ACDC" },
-    { rt[2], mode == "DI" || mode == "Diode" },   // diode
-    { rt[3], mode == "BUZ" },                     // continuity
+    { rt[0], bool(flags & SampleFlag::AC) },
+    { rt[1], bool(flags & SampleFlag::DC) },
+    { rt[2], bool(flags & SampleFlag::Diode) },
+    { rt[3], m_quantity[0] == Quantity::Continuity },
   };
 
   double x = l.flags.left();
@@ -739,7 +743,7 @@ void DisplayWid::showReading(const Reading &r)
   if (r.range == "MANU")
     setManu(true);
   setShowBar(r.showBar);
-  setMode(r.id, r.special);
+  setMode(r.id, r.flags, r.port.quantity);
   if (!r.hold)
   {
     setValue(r.id, r.text);

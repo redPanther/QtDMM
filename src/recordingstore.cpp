@@ -256,7 +256,7 @@ void RecordingStore::addValue(double val)
     p.quality = m_periodQuality;
     if (m_haveReading)
     {
-      p.flags = sampleFlags(m_reading);
+      p.flags = m_reading.flags;
       p.text = m_reading.text;
       p.prefix = m_reading.prefix;
     }
@@ -295,10 +295,10 @@ void RecordingStore::logReading(const Reading &reading)
   row.when = reading.msecs;
   row.value = reading.value;
   row.quality = reading.overload ? Quality::Overload : Quality::Valid;
-  row.flags = sampleFlags(reading);
+  row.flags = reading.flags;
   row.text = reading.text;
   row.unit = reading.unit;
-  row.special = reading.special;
+  row.port = reading.port;
   row.range = reading.range;
   row.id = reading.id;
 

@@ -9,7 +9,8 @@
         "dval": 0.1962,
         "unit": "V",
         "special": "DC",
-        "hold": false
+        "hold": false,
+        "port": "voltage.dc"
       }
     },
     {
@@ -18,7 +19,8 @@
       "expected": {
         "dval": 1.2345,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -27,7 +29,8 @@
       "expected": {
         "dval": 23.456,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -36,7 +39,8 @@
       "expected": {
         "dval": -300.0,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -45,7 +49,8 @@
       "expected": {
         "dval": 1000.0,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -55,7 +60,8 @@
         "val": "0L",
         "dval": 0.0,
         "unit": "V",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -64,7 +70,8 @@
       "expected": {
         "dval": 0.12345,
         "unit": "mV",
-        "special": "DC"
+        "special": "DC",
+        "port": "voltage.dc"
       }
     },
     {
@@ -75,8 +82,10 @@
         "unit": "C",
         "special": "TE",
         "dval2": 254.1,
-        "unit2": "F",
-        "id2": 1
+        "unit2": "dF",
+        "id2": 1,
+        "port": "temperature",
+        "port2": "temperature.sub"
       }
     },
     {
@@ -85,7 +94,8 @@
       "expected": {
         "dval": 123.45,
         "unit": "Ohm",
-        "special": "OH"
+        "special": "OH",
+        "port": "resistance"
       }
     },
     {
@@ -94,7 +104,8 @@
       "expected": {
         "dval": 1234.0,
         "unit": "kOhm",
-        "special": "OH"
+        "special": "OH",
+        "port": "resistance"
       }
     },
     {
@@ -103,7 +114,8 @@
       "expected": {
         "dval": 1.2345e-08,
         "unit": "nF",
-        "special": "CA"
+        "special": "CA",
+        "port": "capacitance"
       }
     },
     {
@@ -112,7 +124,8 @@
       "expected": {
         "dval": 0.5123,
         "unit": "V",
-        "special": "DI"
+        "special": "DI",
+        "port": "voltage.diode"
       }
     },
     {
@@ -121,7 +134,8 @@
       "expected": {
         "dval": 20.0,
         "unit": "Hz",
-        "special": "FR"
+        "special": "FR",
+        "port": "frequency"
       }
     },
     {
@@ -130,7 +144,8 @@
       "expected": {
         "dval": 2000.0,
         "unit": "kHz",
-        "special": "FR"
+        "special": "FR",
+        "port": "frequency"
       }
     },
     {
@@ -139,7 +154,8 @@
       "expected": {
         "dval": 0.00012345,
         "unit": "uA",
-        "special": "DC"
+        "special": "DC",
+        "port": "current.dc"
       }
     },
     {
@@ -148,7 +164,8 @@
       "expected": {
         "dval": 0.012345,
         "unit": "mA",
-        "special": "DC"
+        "special": "DC",
+        "port": "current.dc"
       }
     },
     {
@@ -157,7 +174,8 @@
       "expected": {
         "dval": 9.876,
         "unit": "A",
-        "special": "DC"
+        "special": "DC",
+        "port": "current.dc"
       }
     },
     {
@@ -168,7 +186,9 @@
         "unit": "W",
         "dval2": 200.0,
         "unit2": "VA",
-        "id2": 1
+        "id2": 1,
+        "port": "power.ac",
+        "port2": "apparent_power"
       }
     }
   ]

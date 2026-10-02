@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   SharedStateManager::Reading r;
   r.value = 12.345;
   r.unit = "V";
-  r.special = "DC";
+  r.port = "voltage.dc";
   r.msecs = QDateTime::currentMSecsSinceEpoch();
   r.valid = true;
   u.publishReading(r);
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
   if (seen.contains("u"))
   {
     check(qFuzzyCompare(seen["u"].value, 12.345), "value round-trips");
-    check(seen["u"].unit == "V" && seen["u"].special == "DC", "unit and special round-trip");
+    check(seen["u"].unit == "V" && seen["u"].port == "voltage.dc", "unit and port round-trip");
     check(seen["u"].msecs == r.msecs, "timestamp round-trips");
     check(seen["u"].valid, "valid flag round-trips");
   }

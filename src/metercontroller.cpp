@@ -26,7 +26,7 @@ MeterController::MeterController(QObject *parent)
   , m_external(new QProcess(this))
 {
   qRegisterMetaType<Reading>();
-  connect(m_dmm, &DMM::value, this, &MeterController::valueSLOT);
+  connect(m_dmm, &DMM::response, this, &MeterController::responseSLOT);
   connect(m_dmm, &DMM::error, this, &MeterController::error);
 
   // the recorder: the sample clock drives it, the readings give each sample
@@ -109,29 +109,22 @@ void MeterController::timerEvent(QTimerEvent *)
   m_alarms->tick(QDateTime::currentMSecsSinceEpoch());
 }
 
-void MeterController::valueSLOT(double dval, const QString &val, const QString &unit, const QString &special,
-                                const QString &range, bool hold, bool showBar, int id)
+void MeterController::responseSLOT(const DmmDecoder::DmmResponse &response)
 {
-  // the one place the display strings are interpreted: decoders mark
-  // overload and similar states with letters in the value text ("OL",
-  // "-OL", "EFLO"), a number never has one
-  static const QRegularExpression letters("[A-Za-z]");
-  Reading rd;
-  rd.value = dval;
-  rd.text = val;
-  rd.unit = unit;
-  const SiPrefix::Split split = SiPrefix::split(unit);
-  rd.prefix = split.prefix;
-  rd.baseUnit = split.baseUnit;
-  rd.special = special;
-  rd.range = range;
-  rd.hold = hold;
-  // a bar graph is a share of the display count, which a temperature (no
-  // range) does not fill: 37.2 °C of 50000 counts is an empty bar
-  rd.showBar = showBar && !rd.temperature();
-  rd.overload = val.contains(letters);
-  rd.id = id;
-  rd.msecs = QDateTime::currentMSecsSinceEpoch();
+  // the one place the decoders' strings are read is ReadingAdapter
+  m_adapter.setFormat(m_dmm->format());
+  const qint64 now = QDateTime::currentMSecsSinceEpoch();
+  for (const PortSample &ps : m_adapter.adapt(response, now))
+    publish(ReadingAdapter::reading(ps));
+}
+
+void MeterController::publish(const Reading &rd)
+{
+  const double dval = rd.value;
+  const QString &val = rd.text;
+  const QString &unit = rd.unit;
+  const bool hold = rd.hold;
+  const int id = rd.id;
   const qint64 now = rd.msecs;
   const bool overload = rd.overload;
   const QString &baseUnit = rd.baseUnit;
@@ -187,7 +180,7 @@ void MeterController::valueSLOT(double dval, const QString &val, const QString &
       SharedStateManager::Reading r;
       r.value = dval;
       r.unit = baseUnit;
-      r.special = special;
+      r.port = rd.port.toString();
       r.msecs = now;
       r.valid = !hold && !overload;
       m_stateMgr->publishReading(r);
@@ -197,8 +190,8 @@ void MeterController::valueSLOT(double dval, const QString &val, const QString &
   ScpiServer::Reading r;
   r.value = dval;
   r.unit = baseUnit;
-  r.special = special;
-  r.range = range;
+  r.port = rd.port;
+  r.range = rd.range;
   r.hold = hold;
   r.overload = overload;
   r.valid = true;

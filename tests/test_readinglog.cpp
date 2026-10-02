@@ -30,7 +30,8 @@ static ReadingLog::Entry entry(double dval, const QString &val, const QString &u
   e.dval = dval;
   e.val = val;
   e.unit = unit;
-  e.special = "DC";
+  e.port = PortKey::fromString("voltage.dc");
+  e.flags = SampleFlag::DC;
   e.range = "AUTO";
   e.id = id;
   return e;
@@ -186,7 +187,8 @@ int main(int argc, char **argv)
     r.value = 0.0122;
     r.text = "12.2";
     r.unit = "mV";
-    r.special = "DC";
+    r.port = PortKey::fromString("voltage.dc");
+    r.flags = SampleFlag::DC | SampleFlag::Autorange;
     r.range = "AUTO";
     r.msecs = QDateTime(QDate(2026, 9, 21), QTime(14, 3, 5, 250)).toMSecsSinceEpoch();
     store.setReading(r);   // the recorder's feed, as the MeterController makes it
