@@ -26,9 +26,17 @@
 namespace PanelFrame
 {
 
+// The same bezel on every instrument: a share of the height made the
+// taller analog meter's frame thicker than the LCD's beside it. Only a
+// panel too small for it gets a thinner one.
 static double bezelWidth(const QRectF &bezel)
 {
-  return qMax(4.0, bezel.height() * 0.06);
+  return qBound(4.0, bezel.height() * 0.12, 12.0);
+}
+
+static double faceRadius(const QRectF &face)
+{
+  return qMin(9.0, face.height() * 0.05);
 }
 
 QRectF panelRect(const QRectF &available, double minAspect, double maxAspect)
@@ -51,7 +59,7 @@ QRectF faceRect(const QRectF &bezel)
 
 void clipToFace(QPainter &p, const QRectF &face)
 {
-  const double r = face.height() * 0.05;
+  const double r = faceRadius(face);
   QPainterPath clip;
   clip.addRoundedRect(face, r, r);
   p.setClipPath(clip);
@@ -59,7 +67,7 @@ void clipToFace(QPainter &p, const QRectF &face)
 
 void paint(QPainter &p, const QRectF &bezel, const Colors &c, const QPointF &glowCenter, double glowRadius)
 {
-  const double radius = bezel.height() * 0.07;
+  const double radius = bezelWidth(bezel) * 1.2;
 
   QLinearGradient metal(bezel.topLeft(), bezel.bottomLeft());
   metal.setColorAt(0.0, c.bezelLight);
@@ -76,7 +84,7 @@ void paint(QPainter &p, const QRectF &bezel, const Colors &c, const QPointF &glo
 
   // recessed face: base colour, lit from glowCenter, inner shadow
   const QRectF face = faceRect(bezel);
-  const double faceRadius = face.height() * 0.05;
+  const double faceR = faceRadius(face);
   p.save();
   clipToFace(p, face);
   p.fillRect(face, c.face);
@@ -93,7 +101,7 @@ void paint(QPainter &p, const QRectF &bezel, const Colors &c, const QPointF &glo
   {
     p.setPen(QPen(QColor(0, 0, 0, 70 - i * 15), 1));
     p.setBrush(Qt::NoBrush);
-    p.drawRoundedRect(face.adjusted(i, i, -i, -i), faceRadius, faceRadius);
+    p.drawRoundedRect(face.adjusted(i, i, -i, -i), faceR, faceR);
   }
   p.restore();
 }

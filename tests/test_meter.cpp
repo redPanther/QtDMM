@@ -248,7 +248,7 @@ int main(int argc, char **argv)
     check(render(w, size) == half, "current again: as before");
 
     // rough geometry, mirrors AnalogMeter::geometry()
-    const double bezelW = qMax(4.0, (size.height() - 2) * 0.06);
+    const double bezelW = qBound(4.0, (size.height() - 2) * 0.12, 12.0);   // PanelFrame::bezelWidth()
     const double fh = size.height() - 2 - 2 * bezelW;
     const double fw = size.width() - 2 - 2 * bezelW;
     const QPointF pivot(size.width() / 2.0, 1 + bezelW + fh + fh * 0.02);
