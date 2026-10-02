@@ -39,6 +39,27 @@ by clearing, importing or quitting; the warning can be switched off under
 [Alarms](alarms.md) can start and stop the recorder as well, on any of
 their conditions.
 
+A recording measures one thing. When you switch the meter to another
+function while it runs - V DC to Ω, DC to AC, °C to °F - the recording
+stops, the status bar says what changed, and an orange mark in the graph
+shows where. *Start* begins a new recording in the new function. The
+stopped one keeps its unit, on the axis and in the export. A change of the
+range or prefix (mV to V) is no new function; the recording goes on.
+
+## Gaps
+
+Where the meter showed no value, the curve has a gap instead of a line:
+
+- **OL** - the reading was out of range (overload).
+- **No value** - the meter stopped sending, or the connection dropped.
+  QtDMM learns how often the meter sends and takes a value as gone after
+  three of its intervals (at least 1 s, at most 30 s). The digital display
+  and the analog meter fade their value at the same time.
+
+Hovering over a gap shows "OL" or "no value". If a sample interval holds
+some values and some gaps, the sample is the average of the values there
+were; the integration curve carries on across a gap.
+
 ## External command
 
 **Settings → External application** runs a program when the reading crosses a threshold
@@ -80,7 +101,7 @@ pipes or redirections, call the shell yourself, e.g.
 **Settings → Graph → Graph colours** sets the colours of the graph:
 
 - **Neutral** follows the window's design.
-- **Scope blue**, **Phosphor green**, **Phosphor amber** and **Chart
+- **Scope blue** (the default), **Phosphor green**, **Phosphor amber** and **Chart
   recorder** look like an oscilloscope or a paper recorder. They divide the
   graph into 10 × 8 squares of 1, 2 or 5 units each (1 V, 2 V, 5 V, 10 V,
   ...), so the visible time and the vertical scale grow to whole squares.
@@ -111,7 +132,8 @@ timestamp;time (s);value;unit
 ```
 
 The value is written with an SI prefix and the matching unit, exactly as a
-meter would show it. *Import* (Ctrl+I) reads such files back, scaling the
+meter would show it. A [gap](#gaps) is written as `nan` in CSV and as an
+empty cell in a spreadsheet; *Import* reads `nan` back as a gap. *Import* (Ctrl+I) reads such files back, scaling the
 values into base units again, and also accepts the tab-separated format of
 QtDMM versions before 0.9.5. The unit of the first row becomes the graph's
 unit.

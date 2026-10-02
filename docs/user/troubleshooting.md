@@ -16,6 +16,12 @@ login.
 On FreeBSD the ports are `/dev/cuaU0`, `/dev/cuau0` … and belong to group
 `dialer`: `sudo pw groupmod dialer -m $USER`, then log in again.
 
+## The display and the needle turn pale
+
+The meter has stopped sending: QtDMM fades the last value instead of showing
+it as if it were current, and the graph gets a gap. It comes back with the next
+value. If the meter is on, see the next section.
+
 ## "Timeout on device" although the meter is on
 
 - Many meters only send data after their RS-232 or USB function is switched on

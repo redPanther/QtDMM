@@ -12,6 +12,28 @@
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
 - Meter keys under the display with a fold button (not working yet, for the coming remote control)
+- Defaults for a new configuration: design Dark, LCD backlight blue, analog meter classic ivory, graph scope
+  blue, LCD without min/max. The design can also be chosen in the settings (Appearance)
+- Graph: an overload (OL) or a meter that stopped sending is a gap in the curve, no longer a 0 or the last
+  value drawn on; the cursor says "OL" or "no value" there. The average of a sample time is taken over the
+  values there were, the integral carries over a gap
+- Recording: switching the meter to another function (V DC to Ω, DC to AC, °C to °F) stops the recording
+  with a message and a mark in the graph, so one recording never mixes two quantities. A stopped recording
+  keeps its unit, also in the export (it was relabelled with the new unit). A prefix change (mV to V) goes on
+- LCD and analog meter fade the value when the meter stops sending, and are back as soon as a value arrives
+- Graph: long recordings are drawn with a minimum and a maximum per pixel column, so a spike stays visible
+  and the drawing stays fast; the grid and labels are there before the first value
+- Export: a gap is "nan" in CSV (as older versions wrote an overload) and an empty cell in XLSX/ODS; on
+  import "nan" is a gap again instead of a 0
+- Temperature: no bar graph, the analog scale follows the values (1-2-5)
+- Same bezel thickness for the LCD and the analog meter
+- SCPI: CONF? answers CONT for continuity (it said RES); READ? on "-OL" gives -9.9E37
+- Readings table: the Mode column names the quantity (Frequency, Duty cycle, ...) where it showed the meter's
+  code (HZ, PC, ...)
+- UNI-T UT71/UT804 (VC940 protocol): AC+DC readings are shown as AC+DC (they showed as AC)
+- Voltcraft VC870: °F on the second display was read as farad
+- sigrok-cli: a reading without unit is continuity
+- Import: the recording length is counted in seconds (a 54 s recording was taken for 542 s)
 - Update from 26.1: the window layout starts fresh. The analog meter is shown and the readings table is
   hidden, whatever 26.1 had; the new layout is saved from then on
 
