@@ -375,20 +375,6 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="action_Tip_of_the_day">
-   <property name="text">
-    <string>&amp;Tip of the day</string>
-   </property>
-   <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show tip of the day.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="shortcut">
-    <string notr="true">Ctrl+T</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>true</bool>
-   </property>
-  </action>
   <action name="action_Direct_help">
    <property name="icon">
     <iconset theme="help-whatsthis"/>
