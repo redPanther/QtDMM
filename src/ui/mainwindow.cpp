@@ -257,6 +257,13 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   updateWindowTitle();
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateWindowTitle);
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateLed);
+  // the design can be chosen in the settings (Appearance), too
+  connect(m_wid, &InstanceWidget::configChanged, this, [this]
+  {
+    const Designs::Design d = Designs::fromName(m_wid->settings()->getString("Windows/design", "dark"));
+    if (d != Designs::current())
+      setDesign(d);
+  });
 
   createExtraActions();
   addShortcutsToToolTips();
@@ -881,7 +888,7 @@ void MainWindow::saveWindows()
 
 void MainWindow::applyWorkspace(const WorkspaceGet &get)
 {
-  setDesign(Designs::fromName(get("Windows/design", QString("system")).toString()));
+  setDesign(Designs::fromName(get("Windows/design", QString("dark")).toString()));
   m_restoring = true;
   const QString arrange = get("Windows/arrange", QString("top")).toString();
   const bool free = arrange == "free";
@@ -1154,6 +1161,8 @@ void MainWindow::setDesign(int design)
   m_wid->graph()->setThemeColors(g.background, g.grid, g.labels, g.data);
   for (QAction *a : m_designMenu->actions())
     a->setChecked(a->data().toInt() == design);
+  // at once, so the settings dialog shows the design of the menu
+  m_wid->settings()->setString("Windows/design", Designs::name(d));
 }
 
 void MainWindow::setToolbarVisibilitySLOT()

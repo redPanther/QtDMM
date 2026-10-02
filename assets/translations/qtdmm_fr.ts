@@ -285,6 +285,31 @@
     </message>
 </context>
 <context>
+    <name>AnalogMeter</name>
+    <message>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="545"/>
+        <source>MIN</source>
+        <translation>MIN</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="546"/>
+        <source>MAX</source>
+        <translation>MAX</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="552"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="553"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="561"/>
+        <source>OL</source>
+        <translation>OL</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="621"/>
+        <source>HOLD</source>
+        <translation>HOLD</translation>
+    </message>
+</context>
+<context>
     <name>BleAdvertisementDevice</name>
     <message>
         <location filename="../../src/device/transports/ble.cpp" line="37"/>
@@ -450,41 +475,6 @@
     </message>
 </context>
 <context>
-    <name>SettingsDialog</name>
-    <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="71"/>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="96"/>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="117"/>
-        <source>QtDMM: Welcome!</source>
-        <translation>QtDMM : Bienvenue !</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="72"/>
-        <source>&lt;font size=+2&gt;&lt;b&gt;Welcome!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;This seems to be your first invocation of QtDMM (Or you have deleted its configuration file).&lt;p&gt;QtDMM has created the file %1 in your home directory to save its settings.</source>
-        <translation>&lt;font size=+2&gt;&lt;b&gt;Bienvenue !&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Il semble que ce soit votre premier lancement de QtDMM (ou vous avez supprimé son fichier de configuration).&lt;p&gt;QtDMM a créé le fichier %1 dans votre répertoire personnel pour y enregistrer ses réglages.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="84"/>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="109"/>
-        <source>Continue</source>
-        <translation>Continuer</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="97"/>
-        <source>&lt;font size=+2&gt;&lt;b&gt;Welcome!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You seem to have upgraded &lt;b&gt;QtDMM&lt;/b&gt; from a version prior to 0.8.4. Please check your configuration. There are some new parameters to be configured.&lt;p&gt;Thank you for choosing &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</source>
-        <translation>&lt;font size=+2&gt;&lt;b&gt;Bienvenue !&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Vous semblez avoir mis à jour &lt;b&gt;QtDMM&lt;/b&gt; depuis une version antérieure à 0.8.4. Veuillez vérifier votre configuration : de nouveaux paramètres sont à régler.&lt;p&gt;Merci d&apos;avoir choisi &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="118"/>
-        <source>Your config file has been converted to the new format.
-Please check your color settings, because they couldn&apos;t be converted automatically.
-Your old config ~/.qtdmmrc was renamed to ~/.qtdmmrc.old.</source>
-        <translation>Votre fichier de configuration a été converti au nouveau format.
-Veuillez vérifier vos réglages de couleurs, qui n&apos;ont pas pu être convertis automatiquement.
-Votre ancienne configuration ~/.qtdmmrc a été renommée ~/.qtdmmrc.old.</translation>
-    </message>
-</context>
-<context>
     <name>ControlBar</name>
     <message>
         <location filename="../../src/ui/controlbar.cpp" line="23"/>
@@ -578,390 +568,15 @@ Votre ancienne configuration ~/.qtdmmrc a été renommée ~/.qtdmmrc.old.</trans
     </message>
 </context>
 <context>
-    <name>MeterConnection</name>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="199"/>
-        <source>Error creating port %1.</source>
-        <translation>Erreur à la création du port %1.</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="219"/>
-        <source>Missing Permission</source>
-        <translation>Permission manquante</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="222"/>
-        <source>No such device %1.</source>
-        <translation>Périphérique %1 introuvable.</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="225"/>
-        <source>Error opening %1.
-DMM connected and switched on?</source>
-        <translation>Erreur à l&apos;ouverture de %1.
-Le multimètre est-il branché et allumé ?</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="237"/>
-        <source>Error configuring serial port %1.</source>
-        <translation>Erreur de configuration du port série %1.</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="279"/>
-        <source>Connecting ...</source>
-        <translation>Connexion…</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="325"/>
-        <source>Lost connection to %1.</source>
-        <translation>Connexion à %1 perdue.</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="329"/>
-        <location filename="../../src/device/meterconnection.cpp" line="383"/>
-        <source>Retrying every %1 s.</source>
-        <translation>Nouvel essai toutes les %1 s.</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="345"/>
-        <source>Calculating %1</source>
-        <translation>Calcul de %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="356"/>
-        <source>Access denied for %1.</source>
-        <translation>Accès refusé pour %1.</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="368"/>
-        <source>Not connected</source>
-        <translation>Non connecté</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="346"/>
-        <source>Connected %1</source>
-        <translation>Connecté à %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="198"/>
-        <source>This QtDMM was built without Bluetooth support.</source>
-        <translation>Ce QtDMM a été compilé sans prise en charge du Bluetooth.</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="396"/>
-        <source>Connecting to %1 over Bluetooth ...</source>
-        <translation>Connexion à %1 par Bluetooth ...</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="432"/>
-        <source>Error %1</source>
-        <translation>Erreur %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="305"/>
-        <source>The USB cable answers, but the meter sends nothing.
-Switch on the meter&apos;s serial output (on UNI-T meters: hold the RS232/USB button).</source>
-        <translation>Le câble USB répond, mais le multimètre n&apos;envoie rien.
-Activez la sortie série du multimètre (sur les UNI-T : maintenez la touche RS232/USB).</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/meterconnection.cpp" line="307"/>
-        <source>Timeout on device %1.
-DMM connected and switched on?</source>
-        <translation>Délai dépassé sur %1.
-Le multimètre est-il branché et allumé ?</translation>
-    </message>
-</context>
-<context>
-    <name>GraphWidget</name>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="116"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="402"/>
-        <source>[sec]</source>
-        <translation>[s]</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="181"/>
-        <source>All</source>
-        <translation>Tout</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="181"/>
-        <source>1 min</source>
-        <translation>1 min</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="181"/>
-        <source>5 min</source>
-        <translation>5 min</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="182"/>
-        <source>30 min</source>
-        <translation>30 min</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="192"/>
-        <source>Show the whole recording, growing with it</source>
-        <translation>Afficher tout l&apos;enregistrement ; la fenêtre s&apos;agrandit avec lui</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="193"/>
-        <source>Show the last %1</source>
-        <translation>Afficher les dernières %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="271"/>
-        <source>QtDMM: %1</source>
-        <translation>QtDMM : %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="291"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="296"/>
-        <source>Sampling start:</source>
-        <translation>Début de l&apos;échantillonnage :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="292"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="301"/>
-        <source>Sampling resolution:</source>
-        <translation>Résolution d&apos;échantillonnage :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="304"/>
-        <source>%1 Seconds</source>
-        <translation>%1 secondes</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="406"/>
-        <source>[h]</source>
-        <translation>[h]</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="411"/>
-        <source>[min]</source>
-        <translation>[min]</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="900"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="902"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="904"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="906"/>
-        <source>Sampling</source>
-        <translation>Échantillonnage</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="900"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="902"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="904"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="906"/>
-        <source>Stopped</source>
-        <translation>Arrêté</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="969"/>
-        <source>Disconnect</source>
-        <translation>Déconnecter</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="976"/>
-        <source>Connect</source>
-        <translation>Connecter</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="985"/>
-        <source>Stop recorder</source>
-        <translation>Arrêter l&apos;enregistreur</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="992"/>
-        <source>Start recorder</source>
-        <translation>Démarrer l&apos;enregistreur</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="997"/>
-        <source>Clear graph</source>
-        <translation>Effacer le graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1003"/>
-        <source>Configure...</source>
-        <translation>Configurer…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1007"/>
-        <source>Copy image</source>
-        <translation>Copier l’image</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1010"/>
-        <source>Export image...</source>
-        <translation>Exporter l&apos;image...</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1016"/>
-        <source>Graph &amp;colours</source>
-        <translation>&amp;Couleurs du graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1025"/>
-        <source>&amp;Default: %1</source>
-        <translation>Par &amp;défaut : %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1033"/>
-        <source>Export data...</source>
-        <translation>Exporter les données…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1037"/>
-        <source>Import data...</source>
-        <translation>Importer des données…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1191"/>
-        <source>CSV (*.csv)</source>
-        <translation>CSV (*.csv)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1191"/>
-        <source>Excel (*.xlsx)</source>
-        <translation>Excel (*.xlsx)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1191"/>
-        <source>OpenDocument (*.ods)</source>
-        <translation>OpenDocument (*.ods)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1193"/>
-        <source>Export data</source>
-        <translation>Exporter les données</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1235"/>
-        <source>QtDMM: Unsaved data</source>
-        <translation>QtDMM : données non enregistrées</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1236"/>
-        <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Importing data will overwrite your measured data&lt;p&gt;Do you want to export your unsaved data first?</source>
-        <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;L&apos;importation écrasera vos mesures.&lt;p&gt;Voulez-vous d&apos;abord exporter vos données non enregistrées ?</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1248"/>
-        <source>Export data first</source>
-        <translation>Exporter d&apos;abord</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1252"/>
-        <source>Import &amp; overwrite data</source>
-        <translation>Importer et écraser</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1263"/>
-        <source>Import data</source>
-        <translation>Importer les données</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1263"/>
-        <source>CSV (*.csv);;All files (*)</source>
-        <translation>CSV (*.csv);;Tous les fichiers (*)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1464"/>
-        <source>Scope blue</source>
-        <translation>Oscilloscope bleu</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1465"/>
-        <source>Phosphor green</source>
-        <translation>Phosphore vert</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1466"/>
-        <source>Phosphor amber</source>
-        <translation>Phosphore ambre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1467"/>
-        <source>Chart recorder</source>
-        <translation>Enregistreur papier</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1468"/>
-        <source>Custom</source>
-        <translation>Personnalisé</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1469"/>
-        <source>Neutral</source>
-        <translation>Neutre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1804"/>
-        <source>Scalable vector graphics (*.svg)</source>
-        <translation>Graphique vectoriel évolutif (*.svg)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1804"/>
-        <source>PDF (*.pdf)</source>
-        <translation>PDF (*.pdf)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1805"/>
-        <source>PNG image (*.png)</source>
-        <translation>Image PNG (*.png)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1805"/>
-        <source>JPEG image (*.jpg)</source>
-        <translation>Image JPEG (*.jpg)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1808"/>
-        <source>Export image</source>
-        <translation>Exporter l&apos;image</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1858"/>
-        <source>QtDMM recording, %1</source>
-        <translation>Enregistrement QtDMM, %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1859"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1876"/>
-        <source>QtDMM graph</source>
-        <translation>Graphique QtDMM</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1860"/>
-        <source>%1 values, %2 s per sample, unit %3</source>
-        <translation>%1 valeurs, %2 s par échantillon, unité %3</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1865"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1885"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1900"/>
-        <source>Could not write %1</source>
-        <translation>Impossible d&apos;écrire %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1904"/>
-        <source>Graph written to %1</source>
-        <translation>Graphique écrit dans %1</translation>
-    </message>
-</context>
-<context>
     <name>DecoderDO3122</name>
     <message>
-        <location filename="../../src/device/decoders/do3122.cpp" line="79"/>
+        <location filename="../../src/device/decoders/do3122.cpp" line="81"/>
         <source>Digit parse fail</source>
         <translation>Échec de l&apos;analyse d&apos;un nombre</translation>
     </message>
     <message>
-        <location filename="../../src/device/decoders/do3122.cpp" line="142"/>
-        <location filename="../../src/device/decoders/do3122.cpp" line="145"/>
+        <location filename="../../src/device/decoders/do3122.cpp" line="144"/>
+        <location filename="../../src/device/decoders/do3122.cpp" line="147"/>
         <source>Parser errors</source>
         <translation>Erreurs d&apos;analyse</translation>
     </message>
@@ -972,176 +587,6 @@ Le multimètre est-il branché et allumé ?</translation>
         <location filename="../../src/device/decoders/vc870.cpp" line="764"/>
         <source>Parser errors</source>
         <translation>Erreurs d&apos;analyse</translation>
-    </message>
-</context>
-<context>
-    <name>LcdWidget</name>
-    <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="485"/>
-        <source>HOLD</source>
-        <translation>HOLD</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="485"/>
-        <source>AUTO</source>
-        <translation>AUTO</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="485"/>
-        <source>MANU</source>
-        <translation>MANU</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="508"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="590"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="606"/>
-        <source>MAX</source>
-        <translation>MAX</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="605"/>
-        <source>MIN</source>
-        <translation>MIN</translation>
-    </message>
-</context>
-<context>
-    <name>MeterPrefs</name>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="51"/>
-        <source>Multimeter</source>
-        <translation>Multimètre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="52"/>
-        <source>&lt;b&gt;Here you can configure the serial port and protocol for your DMM. There is also a number of predefined models.&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Configurez ici le port série et le protocole de votre multimètre. Un certain nombre de modèles sont prédéfinis.&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="110"/>
-        <source>Manual settings</source>
-        <translation>Réglages manuels</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="111"/>
-        <source>All vendors</source>
-        <translation>Tous les fabricants</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="442"/>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="517"/>
-        <source>Position %1: %2</source>
-        <translation>Position %1 : %2</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="533"/>
-        <source>%1: no such instance running</source>
-        <translation>%1 : aucune instance de ce nom n&apos;est lancée</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="543"/>
-        <source>Running instances: %1</source>
-        <translation>Instances lancées : %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="545"/>
-        <source>No other instance is running.</source>
-        <translation>Aucune autre instance n&apos;est lancée.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="744"/>
-        <source>none</source>
-        <translation>aucune</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="807"/>
-        <source>%1 was not found or does not run. Install sigrok-cli, or set its path under &lt;a href=&quot;ports&quot;&gt;Special ports&lt;/a&gt;.</source>
-        <translation>%1 est introuvable ou ne démarre pas. Installez sigrok-cli ou indiquez son chemin sous &lt;a href=&quot;ports&quot;&gt;Ports spéciaux&lt;/a&gt;.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="810"/>
-        <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
-        <translation>%1 n&apos;a pas de pilote « %2 » ; voir sigrok-cli --list-supported.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="812"/>
-        <source>%1 found.</source>
-        <translation>%1 trouvé.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="822"/>
-        <source>Running %1 --driver %2 --scan ...</source>
-        <translation>%1 --driver %2 --scan en cours…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="844"/>
-        <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
-        <translation>Aucun appareil n&apos;a répondu en 30 s (un port série sans appareil SCPI fait attendre sigrok-cli indéfiniment).</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="846"/>
-        <source>Found: %1</source>
-        <translation>Trouvé : %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="848"/>
-        <source>No meter answered.</source>
-        <translation>Aucun appareil n&apos;a répondu.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="857"/>
-        <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
-        <translation>Ce QtDMM a été compilé sans prise en charge du Bluetooth, il ne peut donc pas se connecter à ce multimètre.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="864"/>
-        <source>Pick the device or type its Bluetooth address.</source>
-        <translation>Choisissez l&apos;appareil ou saisissez son adresse Bluetooth.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="867"/>
-        <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
-        <translation>Activez le Bluetooth du multimètre (le symbole Bluetooth s&apos;affiche) avant de rechercher ou de connecter.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="872"/>
-        <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
-        <translation>La clé est la « clé de chiffrement » à 32 chiffres que VictronConnect affiche sous Infos produit, Lecture instantanée via Bluetooth.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="882"/>
-        <source>Scanning for %1 (6 s)...</source>
-        <translation>Recherche de %1 (6 s)...</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="883"/>
-        <source>Scanning for Victron devices (5 s)...</source>
-        <translation>Recherche d&apos;appareils Victron (5 s)…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="894"/>
-        <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
-        <translation>Aucun multimètre trouvé. Son Bluetooth est-il activé, et aucun autre programme n&apos;y est-il connecté ?</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="895"/>
-        <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
-        <translation>Aucun appareil Victron trouvé. Le Bluetooth est-il activé, et la lecture instantanée activée sur l&apos;appareil ?</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="934"/>
-        <source>Load DMM description</source>
-        <translation>Charger une description de multimètre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="934"/>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="960"/>
-        <source>DMM description (*.cfg)</source>
-        <translation>Description de multimètre (*.cfg)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="960"/>
-        <source>Save DMM description</source>
-        <translation>Enregistrer la description du multimètre</translation>
     </message>
 </context>
 <context>
@@ -1204,14 +649,314 @@ Le multimètre est-il branché et allumé ?</translation>
     </message>
 </context>
 <context>
+    <name>GraphWidget</name>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="94"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="539"/>
+        <source>[sec]</source>
+        <translation>[s]</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="161"/>
+        <source>All</source>
+        <translation>Tout</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="161"/>
+        <source>1 min</source>
+        <translation>1 min</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="161"/>
+        <source>5 min</source>
+        <translation>5 min</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="162"/>
+        <source>30 min</source>
+        <translation>30 min</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="172"/>
+        <source>Show the whole recording, growing with it</source>
+        <translation>Afficher tout l&apos;enregistrement ; la fenêtre s&apos;agrandit avec lui</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="173"/>
+        <source>Show the last %1</source>
+        <translation>Afficher les dernières %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="280"/>
+        <source>QtDMM: %1</source>
+        <translation>QtDMM : %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="300"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="305"/>
+        <source>Sampling start:</source>
+        <translation>Début de l&apos;échantillonnage :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="301"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="310"/>
+        <source>Sampling resolution:</source>
+        <translation>Résolution d&apos;échantillonnage :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="313"/>
+        <source>%1 Seconds</source>
+        <translation>%1 secondes</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="543"/>
+        <source>[h]</source>
+        <translation>[h]</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="548"/>
+        <source>[min]</source>
+        <translation>[min]</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="923"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="925"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="927"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="929"/>
+        <source>Sampling</source>
+        <translation>Échantillonnage</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="923"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="925"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="927"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="929"/>
+        <source>Stopped</source>
+        <translation>Arrêté</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="992"/>
+        <source>Disconnect</source>
+        <translation>Déconnecter</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="999"/>
+        <source>Connect</source>
+        <translation>Connecter</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1008"/>
+        <source>Stop recorder</source>
+        <translation>Arrêter l&apos;enregistreur</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1015"/>
+        <source>Start recorder</source>
+        <translation>Démarrer l&apos;enregistreur</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1020"/>
+        <source>Clear graph</source>
+        <translation>Effacer le graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1026"/>
+        <source>Configure...</source>
+        <translation>Configurer…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1030"/>
+        <source>Copy image</source>
+        <translation>Copier l’image</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1033"/>
+        <source>Export image...</source>
+        <translation>Exporter l&apos;image...</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1039"/>
+        <source>Graph &amp;colours</source>
+        <translation>&amp;Couleurs du graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1048"/>
+        <source>&amp;Default: %1</source>
+        <translation>Par &amp;défaut : %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1056"/>
+        <source>Export data...</source>
+        <translation>Exporter les données…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1060"/>
+        <source>Import data...</source>
+        <translation>Importer des données…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1165"/>
+        <source>no value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1220"/>
+        <source>CSV (*.csv)</source>
+        <translation>CSV (*.csv)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1220"/>
+        <source>Excel (*.xlsx)</source>
+        <translation>Excel (*.xlsx)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1220"/>
+        <source>OpenDocument (*.ods)</source>
+        <translation>OpenDocument (*.ods)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1222"/>
+        <source>Export data</source>
+        <translation>Exporter les données</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1255"/>
+        <source>QtDMM: Unsaved data</source>
+        <translation>QtDMM : données non enregistrées</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1256"/>
+        <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Importing data will overwrite your measured data&lt;p&gt;Do you want to export your unsaved data first?</source>
+        <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;L&apos;importation écrasera vos mesures.&lt;p&gt;Voulez-vous d&apos;abord exporter vos données non enregistrées ?</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1268"/>
+        <source>Export data first</source>
+        <translation>Exporter d&apos;abord</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1272"/>
+        <source>Import &amp; overwrite data</source>
+        <translation>Importer et écraser</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1283"/>
+        <source>Import data</source>
+        <translation>Importer les données</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1283"/>
+        <source>CSV (*.csv);;All files (*)</source>
+        <translation>CSV (*.csv);;Tous les fichiers (*)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1481"/>
+        <source>Scope blue</source>
+        <translation>Oscilloscope bleu</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1482"/>
+        <source>Phosphor green</source>
+        <translation>Phosphore vert</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1483"/>
+        <source>Phosphor amber</source>
+        <translation>Phosphore ambre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1484"/>
+        <source>Chart recorder</source>
+        <translation>Enregistreur papier</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1485"/>
+        <source>Custom</source>
+        <translation>Personnalisé</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1486"/>
+        <source>Neutral</source>
+        <translation>Neutre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1819"/>
+        <source>Scalable vector graphics (*.svg)</source>
+        <translation>Graphique vectoriel évolutif (*.svg)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1819"/>
+        <source>PDF (*.pdf)</source>
+        <translation>PDF (*.pdf)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1820"/>
+        <source>PNG image (*.png)</source>
+        <translation>Image PNG (*.png)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1820"/>
+        <source>JPEG image (*.jpg)</source>
+        <translation>Image JPEG (*.jpg)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1823"/>
+        <source>Export image</source>
+        <translation>Exporter l&apos;image</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1873"/>
+        <source>QtDMM recording, %1</source>
+        <translation>Enregistrement QtDMM, %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1874"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1891"/>
+        <source>QtDMM graph</source>
+        <translation>Graphique QtDMM</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1875"/>
+        <source>%1 values, %2 s per sample, unit %3</source>
+        <translation>%1 valeurs, %2 s par échantillon, unité %3</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1880"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1900"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1915"/>
+        <source>Could not write %1</source>
+        <translation>Impossible d&apos;écrire %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1919"/>
+        <source>Graph written to %1</source>
+        <translation>Graphique écrit dans %1</translation>
+    </message>
+</context>
+<context>
     <name>GuiPrefs</name>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="34"/>
+        <source>System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="35"/>
+        <source>Silver</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="36"/>
+        <source>Dark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="37"/>
         <source>Appearance</source>
         <translation>Apparence</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="35"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="38"/>
         <source>&lt;b&gt;Here you can configure QtDMM&apos;s visual appearance and behaviour.&lt;/b&gt;</source>
         <translation>&lt;b&gt;Configurez ici l&apos;apparence et le comportement de QtDMM.&lt;/b&gt;</translation>
     </message>
@@ -1225,76 +970,170 @@ Le multimètre est-il branché et allumé ?</translation>
     </message>
 </context>
 <context>
+    <name>InstanceWidget</name>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="217"/>
+        <source>QtDMM: Unsaved data</source>
+        <translation>QtDMM : données non enregistrées</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="218"/>
+        <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. If you quit now it will be lost.&lt;p&gt;Do you want to export your unsaved data first?</source>
+        <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Des mesures non enregistrées sont encore en mémoire. Si vous quittez maintenant, elles seront perdues.&lt;p&gt;Voulez-vous d&apos;abord les exporter ?</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="233"/>
+        <source>Export data first</source>
+        <translation>Exporter d&apos;abord</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="237"/>
+        <source>Quit without saving</source>
+        <translation>Quitter sans enregistrer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="502"/>
+        <source>Automatic start at %1</source>
+        <translation>Démarrage automatique à %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="504"/>
+        <source>Raising threshold %1</source>
+        <translation>Seuil montant %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="506"/>
+        <source>Falling threshold %1</source>
+        <translation>Seuil descendant %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="530"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="560"/>
+        <source>QtDMM: Launch error</source>
+        <translation>QtDMM : erreur de lancement</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="531"/>
+        <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
+        <translation>&lt;font size=+2&gt;&lt;b&gt;Erreur de lancement&lt;/b&gt;&lt;/font&gt;&lt;p&gt;L&apos;application %1 est encore en cours d&apos;exécution !&lt;p&gt;Voulez-vous la terminer maintenant ?</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="543"/>
+        <source>Yes, kill it!</source>
+        <translation>Oui, la terminer !</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="547"/>
+        <source>No, keep running</source>
+        <translation>Non, la laisser tourner</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="561"/>
+        <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
+        <translation>&lt;font size=+2&gt;&lt;b&gt;Erreur de lancement&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Impossible de lancer %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="572"/>
+        <source>Bummer!</source>
+        <translation>Dommage !</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="578"/>
+        <source>Launched %1</source>
+        <translation>%1 lancé</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="583"/>
+        <source>%1 terminated with exit code %2.</source>
+        <translation>%1 s&apos;est terminé avec le code %2.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="623"/>
+        <source>calculated</source>
+        <translation>calculé</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="632"/>
+        <source>no meter configured</source>
+        <translation>aucun multimètre configuré</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="670"/>
+        <source>QtDMM alarm: %1</source>
+        <translation>Alarme QtDMM : %1</translation>
+    </message>
+</context>
+<context>
     <name>InstancesDlg</name>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="268"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="270"/>
         <source>QtDMM - new instance</source>
         <translation>QtDMM – nouvelle instance</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="268"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="270"/>
         <source>Instance name:</source>
         <translation>Nom de l&apos;instance :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="231"/>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="277"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="233"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="279"/>
         <source>Instance names may contain letters, digits and underscores and must not start with a digit.</source>
         <translation>Un nom d&apos;instance ne peut contenir que des lettres, des chiffres et des tirets bas, et ne doit pas commencer par un chiffre.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="77"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="79"/>
         <source>running</source>
         <translation>en cours</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="79"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="81"/>
         <source>offline</source>
         <translation>hors ligne</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="199"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="201"/>
         <source>QtDMM - new calculated instance</source>
         <translation>QtDMM – nouvelle instance calculée</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="212"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="214"/>
         <source>No instance is running yet; the variables are the instance names.</source>
         <translation>Aucune instance n&apos;est encore lancée ; les variables sont les noms des instances.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="213"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="215"/>
         <source>Variables (running instances): %1</source>
         <translation>Variables (instances lancées) : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="214"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="216"/>
         <source>&amp;Name:</source>
         <translation>&amp;Nom :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="215"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="217"/>
         <source>&amp;Unit:</source>
         <translation>&amp;Unité :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="216"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="218"/>
         <source>&amp;Formula:</source>
         <translation>&amp;Formule :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="233"/>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="283"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="235"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="285"/>
         <source>Instance already exists.</source>
         <translation>Cette instance existe déjà.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="235"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="237"/>
         <source>Please give a unit without spaces.</source>
         <translation>Indiquez une unité sans espace.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="237"/>
+        <location filename="../../src/ui/dialogs/instancesdlg.cpp" line="239"/>
         <source>Position %1: %2</source>
         <translation>Position %1 : %2</translation>
     </message>
@@ -1313,97 +1152,33 @@ Le multimètre est-il branché et allumé ?</translation>
     </message>
 </context>
 <context>
-    <name>InstanceWidget</name>
+    <name>LcdWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="212"/>
-        <source>QtDMM: Unsaved data</source>
-        <translation>QtDMM : données non enregistrées</translation>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="494"/>
+        <source>HOLD</source>
+        <translation>HOLD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="213"/>
-        <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. If you quit now it will be lost.&lt;p&gt;Do you want to export your unsaved data first?</source>
-        <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Des mesures non enregistrées sont encore en mémoire. Si vous quittez maintenant, elles seront perdues.&lt;p&gt;Voulez-vous d&apos;abord les exporter ?</translation>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="494"/>
+        <source>AUTO</source>
+        <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="228"/>
-        <source>Export data first</source>
-        <translation>Exporter d&apos;abord</translation>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="494"/>
+        <source>MANU</source>
+        <translation>MANU</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="232"/>
-        <source>Quit without saving</source>
-        <translation>Quitter sans enregistrer</translation>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="517"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="599"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="615"/>
+        <source>MAX</source>
+        <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="496"/>
-        <source>Automatic start at %1</source>
-        <translation>Démarrage automatique à %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="498"/>
-        <source>Raising threshold %1</source>
-        <translation>Seuil montant %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="500"/>
-        <source>Falling threshold %1</source>
-        <translation>Seuil descendant %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="525"/>
-        <location filename="../../src/ui/instancewidget.cpp" line="555"/>
-        <source>QtDMM: Launch error</source>
-        <translation>QtDMM : erreur de lancement</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="526"/>
-        <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
-        <translation>&lt;font size=+2&gt;&lt;b&gt;Erreur de lancement&lt;/b&gt;&lt;/font&gt;&lt;p&gt;L&apos;application %1 est encore en cours d&apos;exécution !&lt;p&gt;Voulez-vous la terminer maintenant ?</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="538"/>
-        <source>Yes, kill it!</source>
-        <translation>Oui, la terminer !</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="542"/>
-        <source>No, keep running</source>
-        <translation>Non, la laisser tourner</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="556"/>
-        <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
-        <translation>&lt;font size=+2&gt;&lt;b&gt;Erreur de lancement&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Impossible de lancer %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="567"/>
-        <source>Bummer!</source>
-        <translation>Dommage !</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="573"/>
-        <source>Launched %1</source>
-        <translation>%1 lancé</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="578"/>
-        <source>%1 terminated with exit code %2.</source>
-        <translation>%1 s&apos;est terminé avec le code %2.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="618"/>
-        <source>calculated</source>
-        <translation>calculé</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="627"/>
-        <source>no meter configured</source>
-        <translation>aucun multimètre configuré</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="665"/>
-        <source>QtDMM alarm: %1</source>
-        <translation>Alarme QtDMM : %1</translation>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="614"/>
+        <source>MIN</source>
+        <translation>MIN</translation>
     </message>
 </context>
 <context>
@@ -1579,280 +1354,500 @@ Le multimètre est-il branché et allumé ?</translation>
         <translation>S&amp;ombre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="305"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="312"/>
         <source>The SCPI server: other programs can read the meter here (Settings, SCPI server).</source>
         <translation>Le serveur SCPI : d&apos;autres programmes peuvent lire le multimètre ici (Préférences, Serveur SCPI).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="392"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="399"/>
         <source>Another instance is running.</source>
         <translation>Une autre instance est en cours d&apos;exécution.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="473"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="480"/>
         <source>&amp;Full screen</source>
         <translation>&amp;Plein écran</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="476"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="483"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Full screen&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Use the whole screen for the instruments, e.g. on a lab monitor. F11 again returns to the normal window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Plein écran&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Utiliser tout l’écran pour les instruments, par ex. sur un moniteur de laboratoire. F11 à nouveau revient à la fenêtre normale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="481"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="488"/>
         <source>Zoom &amp;in</source>
         <translation>Zoom ava&amp;nt</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="484"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="491"/>
         <source>Zoom &amp;out</source>
         <translation>Zoom a&amp;rrière</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="487"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="494"/>
         <source>Show &amp;whole recording</source>
         <translation>Afficher tout l’&amp;enregistrement</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="490"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="497"/>
         <source>Cop&amp;y graph image</source>
         <translation>Copier le graphe comme &amp;image</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="492"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="499"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copy graph image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Puts a picture of the recorder graph on the clipboard, ready to paste into a report or a chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copier le graphe comme image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Place une image du graphe de l’enregistreur dans le presse-papiers, prête à être collée dans un rapport ou un chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="547"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="554"/>
         <source>Record DMM data</source>
         <translation>Enregistrer les mesures</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="548"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="555"/>
         <source>Multiple instances of QtDMM have been detected.
 Please choose which instance should record.</source>
         <translation>Plusieurs instances de QtDMM ont été détectées.
 Choisissez quelle instance doit enregistrer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="551"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="558"/>
         <source>This instance</source>
         <translation>Cette instance</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="552"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="559"/>
         <source>All instances</source>
         <translation>Toutes les instances</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="612"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="619"/>
         <source>About QtDMM</source>
         <translation>À propos de QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="615"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="622"/>
         <source>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;A readout and transient recorder for digital multimeters.&lt;/p&gt;&lt;p&gt;Built with &lt;b&gt;Qt&lt;/b&gt; %2. Licensed under the &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions before 0.9.0 under GPL 2).&lt;/p&gt;&lt;p&gt;0.9.5 onwards: tuxmaster and contributors, see the AUTHORS file.&lt;br&gt;0.9.3 and before: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Source and bug reports: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbols from the &lt;b&gt;Breeze&lt;/b&gt; icon theme of the KDE community (LGPL 3); QtDMM&apos;s own symbols are drawn in its style.&lt;/p&gt;</source>
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Affichage et enregistreur de transitoires pour multimètres numériques.&lt;/p&gt;&lt;p&gt;Construit avec &lt;b&gt;Qt&lt;/b&gt; %2. Sous licence &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions antérieures à 0.9.0 sous GPL 2).&lt;/p&gt;&lt;p&gt;À partir de 0.9.5 : tuxmaster et contributeurs, voir le fichier AUTHORS.&lt;br&gt;0.9.3 et antérieures : &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Site web : &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact : &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Sources et rapports de bogues : &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Les symboles proviennent du thème d&apos;icônes &lt;b&gt;Breeze&lt;/b&gt; de la communauté KDE (LGPL 3) ; les symboles propres à QtDMM sont dessinés dans son style.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="632"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="639"/>
         <source>Supported devices...</source>
         <translation>Appareils pris en charge…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="781"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="788"/>
         <source>&amp;Hide window</source>
         <translation>&amp;Masquer la fenêtre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="782"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="789"/>
         <source>&amp;Title bar</source>
         <translation>&amp;Barre de titre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="787"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="794"/>
         <source>Hide &amp;controls</source>
         <translation>Masquer les &amp;commandes</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="794"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="801"/>
         <source>&amp;LCD colours</source>
         <translation>Couleurs du &amp;LCD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="796"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="803"/>
         <source>&amp;Classic</source>
         <translation>&amp;Classique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="796"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="803"/>
         <source>&amp;Backlight blue</source>
         <translation>Rétroéclairage &amp;bleu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="797"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="804"/>
         <source>&amp;Amber</source>
         <translation>&amp;Ambre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="797"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="804"/>
         <source>&amp;High contrast</source>
         <translation>Contraste é&amp;levé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="798"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="805"/>
         <source>C&amp;ustom (from the settings)</source>
         <translation>&amp;Personnalisé (des réglages)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="811"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="818"/>
         <source>Meter &amp;style</source>
         <translation>S&amp;tyle du galvanomètre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="812"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="819"/>
         <source>&amp;Dark studio</source>
         <translation>Studio &amp;sombre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="812"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="819"/>
         <source>Classic &amp;ivory</source>
         <translation>&amp;Ivoire classique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="846"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="853"/>
         <source>%1: readings are coming in</source>
         <translation>%1 : des mesures arrivent</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="847"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="854"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1 : aucune mesure depuis 3 s</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="958"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="965"/>
         <source>Save workspace</source>
         <translation>Enregistrer l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="959"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="985"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="966"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="992"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Espace de travail QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="972"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="979"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM : Enregistrer l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="972"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="979"/>
         <source>Could not write %1.</source>
         <translation>Impossible d&apos;écrire %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="976"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="983"/>
         <source>Workspace saved to %1</source>
         <translation>Espace de travail enregistré dans %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="984"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="991"/>
         <source>Load workspace</source>
         <translation>Charger l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="991"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="998"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM : Charger l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="992"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="999"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 n&apos;est pas un espace de travail QtDMM.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1016"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1023"/>
         <source>Workspace loaded from %1</source>
         <translation>Espace de travail chargé depuis %1</translation>
     </message>
 </context>
 <context>
+    <name>MeterConnection</name>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="199"/>
+        <source>Error creating port %1.</source>
+        <translation>Erreur à la création du port %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="219"/>
+        <source>Missing Permission</source>
+        <translation>Permission manquante</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="222"/>
+        <source>No such device %1.</source>
+        <translation>Périphérique %1 introuvable.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="225"/>
+        <source>Error opening %1.
+DMM connected and switched on?</source>
+        <translation>Erreur à l&apos;ouverture de %1.
+Le multimètre est-il branché et allumé ?</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="237"/>
+        <source>Error configuring serial port %1.</source>
+        <translation>Erreur de configuration du port série %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="279"/>
+        <source>Connecting ...</source>
+        <translation>Connexion…</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="325"/>
+        <source>Lost connection to %1.</source>
+        <translation>Connexion à %1 perdue.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="329"/>
+        <location filename="../../src/device/meterconnection.cpp" line="383"/>
+        <source>Retrying every %1 s.</source>
+        <translation>Nouvel essai toutes les %1 s.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="345"/>
+        <source>Calculating %1</source>
+        <translation>Calcul de %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="356"/>
+        <source>Access denied for %1.</source>
+        <translation>Accès refusé pour %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="368"/>
+        <source>Not connected</source>
+        <translation>Non connecté</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="346"/>
+        <source>Connected %1</source>
+        <translation>Connecté à %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="198"/>
+        <source>This QtDMM was built without Bluetooth support.</source>
+        <translation>Ce QtDMM a été compilé sans prise en charge du Bluetooth.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="396"/>
+        <source>Connecting to %1 over Bluetooth ...</source>
+        <translation>Connexion à %1 par Bluetooth ...</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="433"/>
+        <source>Error %1</source>
+        <translation>Erreur %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="305"/>
+        <source>The USB cable answers, but the meter sends nothing.
+Switch on the meter&apos;s serial output (on UNI-T meters: hold the RS232/USB button).</source>
+        <translation>Le câble USB répond, mais le multimètre n&apos;envoie rien.
+Activez la sortie série du multimètre (sur les UNI-T : maintenez la touche RS232/USB).</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/meterconnection.cpp" line="307"/>
+        <source>Timeout on device %1.
+DMM connected and switched on?</source>
+        <translation>Délai dépassé sur %1.
+Le multimètre est-il branché et allumé ?</translation>
+    </message>
+</context>
+<context>
     <name>MeterController</name>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="33"/>
+        <location filename="../../src/service/metercontroller.cpp" line="41"/>
+        <source>Recording stopped: the meter measures %2 now, not %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="42"/>
+        <source>Function changed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="48"/>
         <source>%1 cleared</source>
         <translation>%1 effacée</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="204"/>
+        <location filename="../../src/service/metercontroller.cpp" line="235"/>
         <source>%1: %2 (%3)</source>
         <translation>%1 : %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="221"/>
+        <location filename="../../src/service/metercontroller.cpp" line="252"/>
         <source>%1: could not run %2</source>
         <translation>%1 : impossible de lancer %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="275"/>
+        <location filename="../../src/service/metercontroller.cpp" line="306"/>
         <source>SCPI server: %1</source>
         <translation>Serveur SCPI : %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="297"/>
+        <location filename="../../src/service/metercontroller.cpp" line="328"/>
         <source>The server is not running.</source>
         <translation>Le serveur n&apos;est pas actif.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="302"/>
+        <location filename="../../src/service/metercontroller.cpp" line="333"/>
         <source>1 client</source>
         <translation>1 client</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="302"/>
+        <location filename="../../src/service/metercontroller.cpp" line="333"/>
         <source>%1 clients</source>
         <translation>%1 clients</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="303"/>
+        <location filename="../../src/service/metercontroller.cpp" line="334"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>À l&apos;écoute sur %1, port %2, %3 connecté(s).</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="305"/>
+        <location filename="../../src/service/metercontroller.cpp" line="336"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Annoncé sous « %1 ».</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="306"/>
+        <location filename="../../src/service/metercontroller.cpp" line="337"/>
         <source>SCPI %1:%2 (%3)</source>
         <translation>SCPI %1:%2 (%3)</translation>
     </message>
 </context>
 <context>
-    <name>AnalogMeter</name>
+    <name>MeterPrefs</name>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="537"/>
-        <source>MIN</source>
-        <translation>MIN</translation>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="51"/>
+        <source>Multimeter</source>
+        <translation>Multimètre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="538"/>
-        <source>MAX</source>
-        <translation>MAX</translation>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="52"/>
+        <source>&lt;b&gt;Here you can configure the serial port and protocol for your DMM. There is also a number of predefined models.&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Configurez ici le port série et le protocole de votre multimètre. Un certain nombre de modèles sont prédéfinis.&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="544"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="545"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="553"/>
-        <source>OL</source>
-        <translation>OL</translation>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="110"/>
+        <source>Manual settings</source>
+        <translation>Réglages manuels</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="613"/>
-        <source>HOLD</source>
-        <translation>HOLD</translation>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="111"/>
+        <source>All vendors</source>
+        <translation>Tous les fabricants</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="442"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="517"/>
+        <source>Position %1: %2</source>
+        <translation>Position %1 : %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="533"/>
+        <source>%1: no such instance running</source>
+        <translation>%1 : aucune instance de ce nom n&apos;est lancée</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="543"/>
+        <source>Running instances: %1</source>
+        <translation>Instances lancées : %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="545"/>
+        <source>No other instance is running.</source>
+        <translation>Aucune autre instance n&apos;est lancée.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="744"/>
+        <source>none</source>
+        <translation>aucune</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="807"/>
+        <source>%1 was not found or does not run. Install sigrok-cli, or set its path under &lt;a href=&quot;ports&quot;&gt;Special ports&lt;/a&gt;.</source>
+        <translation>%1 est introuvable ou ne démarre pas. Installez sigrok-cli ou indiquez son chemin sous &lt;a href=&quot;ports&quot;&gt;Ports spéciaux&lt;/a&gt;.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="810"/>
+        <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
+        <translation>%1 n&apos;a pas de pilote « %2 » ; voir sigrok-cli --list-supported.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="812"/>
+        <source>%1 found.</source>
+        <translation>%1 trouvé.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="822"/>
+        <source>Running %1 --driver %2 --scan ...</source>
+        <translation>%1 --driver %2 --scan en cours…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="844"/>
+        <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
+        <translation>Aucun appareil n&apos;a répondu en 30 s (un port série sans appareil SCPI fait attendre sigrok-cli indéfiniment).</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="846"/>
+        <source>Found: %1</source>
+        <translation>Trouvé : %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="848"/>
+        <source>No meter answered.</source>
+        <translation>Aucun appareil n&apos;a répondu.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="857"/>
+        <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
+        <translation>Ce QtDMM a été compilé sans prise en charge du Bluetooth, il ne peut donc pas se connecter à ce multimètre.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="864"/>
+        <source>Pick the device or type its Bluetooth address.</source>
+        <translation>Choisissez l&apos;appareil ou saisissez son adresse Bluetooth.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="867"/>
+        <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
+        <translation>Activez le Bluetooth du multimètre (le symbole Bluetooth s&apos;affiche) avant de rechercher ou de connecter.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="872"/>
+        <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
+        <translation>La clé est la « clé de chiffrement » à 32 chiffres que VictronConnect affiche sous Infos produit, Lecture instantanée via Bluetooth.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="882"/>
+        <source>Scanning for %1 (6 s)...</source>
+        <translation>Recherche de %1 (6 s)...</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="883"/>
+        <source>Scanning for Victron devices (5 s)...</source>
+        <translation>Recherche d&apos;appareils Victron (5 s)…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="894"/>
+        <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
+        <translation>Aucun multimètre trouvé. Son Bluetooth est-il activé, et aucun autre programme n&apos;y est-il connecté ?</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="895"/>
+        <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
+        <translation>Aucun appareil Victron trouvé. Le Bluetooth est-il activé, et la lecture instantanée activée sur l&apos;appareil ?</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="934"/>
+        <source>Load DMM description</source>
+        <translation>Charger une description de multimètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="934"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="960"/>
+        <source>DMM description (*.cfg)</source>
+        <translation>Description de multimètre (*.cfg)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="960"/>
+        <source>Save DMM description</source>
+        <translation>Enregistrer la description du multimètre</translation>
     </message>
 </context>
 <context>
@@ -2113,6 +2108,199 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
     </message>
 </context>
 <context>
+    <name>Quantity</name>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="128"/>
+        <source>Unknown</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="129"/>
+        <source>Voltage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="130"/>
+        <source>Current</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="131"/>
+        <source>Resistance</source>
+        <translation type="unfinished">Résistance</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="132"/>
+        <source>Capacitance</source>
+        <translation type="unfinished">Capacité</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="133"/>
+        <source>Temperature</source>
+        <translation type="unfinished">Température</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="134"/>
+        <source>Frequency</source>
+        <translation type="unfinished">Fréquence</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="135"/>
+        <source>Duty cycle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="136"/>
+        <source>Continuity</source>
+        <translation type="unfinished">Continuité</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="137"/>
+        <source>Pulse width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="138"/>
+        <source>Conductance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="139"/>
+        <source>Power</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="140"/>
+        <source>Gain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="141"/>
+        <source>Sound pressure level</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="142"/>
+        <source>Carbon monoxide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="143"/>
+        <source>Relative humidity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="144"/>
+        <source>Time</source>
+        <translation type="unfinished">Heure</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="145"/>
+        <source>Wind speed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="146"/>
+        <source>Pressure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="147"/>
+        <source>Parallel inductance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="148"/>
+        <source>Parallel capacitance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="149"/>
+        <source>Parallel resistance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="150"/>
+        <source>Series inductance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="151"/>
+        <source>Series capacitance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="152"/>
+        <source>Series resistance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="153"/>
+        <source>Dissipation factor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="154"/>
+        <source>Quality factor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="155"/>
+        <source>Phase angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="156"/>
+        <source>Difference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="157"/>
+        <source>Count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="158"/>
+        <source>Power factor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="159"/>
+        <source>Apparent power</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="160"/>
+        <source>Mass</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="161"/>
+        <source>Harmonic ratio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="162"/>
+        <source>Energy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="163"/>
+        <source>Electric charge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="164"/>
+        <source>State of charge</source>
+        <translation type="unfinished">État de charge</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="165"/>
+        <source>Time to go</source>
+        <translation type="unfinished">Autonomie restante</translation>
+    </message>
+</context>
+<context>
     <name>RFC2217SerialDevice</name>
     <message>
         <location filename="../../src/device/transports/rfc2217serial.cpp" line="21"/>
@@ -2128,105 +2316,105 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
 <context>
     <name>ReadingsModel</name>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="36"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="123"/>
         <source>AC+DC</source>
         <translation>AC+DC</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="37"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="120"/>
         <source>Diode</source>
         <translation>Diode</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="38"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="129"/>
         <source>Continuity</source>
         <translation>Continuité</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="39"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="130"/>
         <source>Resistance</source>
         <translation>Résistance</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="40"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="131"/>
         <source>Capacitance</source>
         <translation>Capacité</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="41"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="132"/>
         <source>Frequency</source>
         <translation>Fréquence</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="42"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="133"/>
         <source>Temperature</source>
         <translation>Température</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="72"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="168"/>
         <source>2nd</source>
         <translation>2e</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="74"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="255"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="170"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="345"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="87"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="248"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="183"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="337"/>
         <source>Time</source>
         <translation>Heure</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="88"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="248"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="184"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="337"/>
         <source>Value</source>
         <translation>Valeur</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="89"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="248"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="185"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="337"/>
         <source>Unit</source>
         <translation>Unité</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="90"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="248"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="186"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="337"/>
         <source>Mode</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="91"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="248"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="187"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="337"/>
         <source>Range</source>
         <translation>Gamme</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="92"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="248"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="188"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="337"/>
         <source>Hold</source>
         <translation>Hold</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="223"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="244"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="309"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="333"/>
         <source>Nothing to export.</source>
         <translation>Rien à exporter.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="226"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="312"/>
         <source>Cannot open file.</source>
         <translation>Impossible d&apos;ouvrir le fichier.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="247"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="336"/>
         <source>Readings</source>
         <translation>Mesures</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="248"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="337"/>
         <source>Alarm</source>
         <translation>Alarme</translation>
     </message>
@@ -2362,50 +2550,50 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
 <context>
     <name>RecordingFile</name>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="39"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="119"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="41"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="121"/>
         <source>Cannot open file.</source>
         <translation>Impossible d&apos;ouvrir le fichier.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="47"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="77"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="49"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="79"/>
         <source>Oops! Seems not to be a valid file</source>
         <translation>Oups ! Ce fichier ne semble pas valide</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="55"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="57"/>
         <source>File contains only header</source>
         <translation>Le fichier ne contient que l&apos;en-tête</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="113"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="148"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="115"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="150"/>
         <source>Nothing to export.</source>
         <translation>Rien à exporter.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="151"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="153"/>
         <source>Recording</source>
         <translation>Enregistrement</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="152"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
         <source>timestamp</source>
         <translation>horodatage</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="152"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
         <source>time (s)</source>
         <translation>temps (s)</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="152"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
         <source>value</source>
         <translation>valeur</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="152"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
         <source>unit</source>
         <translation>unité</translation>
     </message>
@@ -2492,6 +2680,41 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
     </message>
 </context>
 <context>
+    <name>SettingsDialog</name>
+    <message>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="71"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="96"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="117"/>
+        <source>QtDMM: Welcome!</source>
+        <translation>QtDMM : Bienvenue !</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="72"/>
+        <source>&lt;font size=+2&gt;&lt;b&gt;Welcome!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;This seems to be your first invocation of QtDMM (Or you have deleted its configuration file).&lt;p&gt;QtDMM has created the file %1 in your home directory to save its settings.</source>
+        <translation>&lt;font size=+2&gt;&lt;b&gt;Bienvenue !&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Il semble que ce soit votre premier lancement de QtDMM (ou vous avez supprimé son fichier de configuration).&lt;p&gt;QtDMM a créé le fichier %1 dans votre répertoire personnel pour y enregistrer ses réglages.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="84"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="109"/>
+        <source>Continue</source>
+        <translation>Continuer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="97"/>
+        <source>&lt;font size=+2&gt;&lt;b&gt;Welcome!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You seem to have upgraded &lt;b&gt;QtDMM&lt;/b&gt; from a version prior to 0.8.4. Please check your configuration. There are some new parameters to be configured.&lt;p&gt;Thank you for choosing &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</source>
+        <translation>&lt;font size=+2&gt;&lt;b&gt;Bienvenue !&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Vous semblez avoir mis à jour &lt;b&gt;QtDMM&lt;/b&gt; depuis une version antérieure à 0.8.4. Veuillez vérifier votre configuration : de nouveaux paramètres sont à régler.&lt;p&gt;Merci d&apos;avoir choisi &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="118"/>
+        <source>Your config file has been converted to the new format.
+Please check your color settings, because they couldn&apos;t be converted automatically.
+Your old config ~/.qtdmmrc was renamed to ~/.qtdmmrc.old.</source>
+        <translation>Votre fichier de configuration a été converti au nouveau format.
+Veuillez vérifier vos réglages de couleurs, qui n&apos;ont pas pu être convertis automatiquement.
+Votre ancienne configuration ~/.qtdmmrc a été renommée ~/.qtdmmrc.old.</translation>
+    </message>
+</context>
+<context>
     <name>SpreadsheetWriter</name>
     <message>
         <location filename="../../src/recording/spreadsheet.cpp" line="320"/>
@@ -2543,21 +2766,1005 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
     </message>
 </context>
 <context>
-    <name>UISettingsDialog</name>
+    <name>UIExecutePrefs</name>
     <message>
-        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="14"/>
-        <source>QtDMM: Preferences</source>
-        <translation>QtDMM : préférences</translation>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="23"/>
+        <source>Check this if you want QtDMM to execute an external command when given thresholds are reached (Falling or raising edge).</source>
+        <translation>Cochez pour que QtDMM exécute une commande externe lorsque les seuils donnés sont atteints (front montant ou descendant).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="129"/>
-        <source>&amp;Undo</source>
-        <translation>&amp;Annuler</translation>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="26"/>
+        <source>Execute external command at given threshold</source>
+        <translation>Exécuter une commande externe au seuil donné</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="155"/>
-        <source>&amp;Factory defaults</source>
-        <translation>Réglages d&apos;&amp;usine</translation>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="36"/>
+        <source>Threshold</source>
+        <translation>Seuil</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="48"/>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="79"/>
+        <source>Threshold:</source>
+        <translation>Seuil :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="64"/>
+        <source>Threshold for raising edge.&lt;p&gt;
+You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
+10k - 10000&lt;br&gt;100m - 0.1</source>
+        <translation>Seuil pour le front montant.&lt;p&gt;
+Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
+10k – 10000&lt;br&gt;100m – 0.1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="69"/>
+        <source>0</source>
+        <translation>0</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="95"/>
+        <source>Threshold for falling edge.&lt;p&gt;
+You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
+10k - 10000&lt;br&gt;100m - 0.1</source>
+        <translation>Seuil pour le front descendant.&lt;p&gt;
+Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
+10k – 10000&lt;br&gt;100m – 0.1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="100"/>
+        <source>0.0</source>
+        <translation>0.0</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="110"/>
+        <source>Call command on raising edge.</source>
+        <translation>Appeler la commande sur front montant.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="113"/>
+        <source>&amp;Raising edge</source>
+        <translation>Front m&amp;ontant</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="123"/>
+        <source>Call command on falling edge.</source>
+        <translation>Appeler la commande sur front descendant.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="126"/>
+        <source>&amp;Falling edge</source>
+        <translation>Front d&amp;escendant</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="171"/>
+        <source>Command</source>
+        <translation>Commande</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="197"/>
+        <source>Check this if you want QtDMM to disconnect (close the serial port) before executing the external command.</source>
+        <translation>Cochez pour que QtDMM se déconnecte (ferme le port série) avant d&apos;exécuter la commande externe.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="200"/>
+        <source>Disconnect before executing command</source>
+        <translation>Déconnecter avant d&apos;exécuter la commande</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="233"/>
+        <source>Enter here the external command to be executed.</source>
+        <translation>Saisissez ici la commande externe à exécuter.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="246"/>
+        <source>Browse</source>
+        <translation>Parcourir</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="249"/>
+        <source>Here you can browse your harddisk for the external command (Altenative to directly typing it into the field to the left).</source>
+        <translation>Parcourez le disque pour choisir la commande externe (au lieu de la saisir dans le champ de gauche).</translation>
+    </message>
+</context>
+<context>
+    <name>UIGraphPrefs</name>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="35"/>
+        <source>Colors</source>
+        <translation>Couleurs</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="85"/>
+        <source>Click this button so change the color of the data graph in the recorder.</source>
+        <translation>Cliquez pour changer la couleur de la courbe de données de l&apos;enregistreur.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="104"/>
+        <source>&amp;Data</source>
+        <translation>&amp;Données</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="148"/>
+        <source>Click this button to change the background color of the recorder graph.</source>
+        <translation>Cliquez pour changer la couleur de fond du graphe de l&apos;enregistreur.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="167"/>
+        <source>&amp;Background</source>
+        <translation>&amp;Fond</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="211"/>
+        <source>Click this button to change the color of the grid and grid text in the recorder.</source>
+        <translation>Cliquez pour changer la couleur de la grille et de ses libellés dans l&apos;enregistreur.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="227"/>
+        <source>&amp;Grid</source>
+        <translation>&amp;Grille</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="271"/>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="331"/>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="394"/>
+        <source>Click this button to change the color of the cursor at the current sampling position in the recorder.</source>
+        <translation>Cliquez pour changer la couleur du curseur à la position d&apos;échantillonnage courante.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="287"/>
+        <source>Cu&amp;rsor</source>
+        <translation>Cu&amp;rseur</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="350"/>
+        <source>Start threshold</source>
+        <translation>Seuil de démarrage</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="413"/>
+        <source>E&amp;xternal threshold</source>
+        <translation>Seuil e&amp;xterne</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="431"/>
+        <source>Drawing style</source>
+        <translation>Style de tracé</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="452"/>
+        <source>Data points:</source>
+        <translation>Points de données :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="469"/>
+        <source>No line</source>
+        <translation>Pas de ligne</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="474"/>
+        <source>Solid line</source>
+        <translation>Ligne pleine</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="479"/>
+        <source>Dotted line</source>
+        <translation>Ligne pointillée</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="493"/>
+        <source>Data:</source>
+        <translation>Données :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="528"/>
+        <source>Here you can choose the line width of the data graph in the recorder.</source>
+        <translation>Choisissez ici l&apos;épaisseur de la courbe de données de l&apos;enregistreur.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="544"/>
+        <source>Width:</source>
+        <translation>Largeur :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="558"/>
+        <source>No points</source>
+        <translation>Pas de points</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="563"/>
+        <source>Circle</source>
+        <translation>Cercle</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="568"/>
+        <source>Square</source>
+        <translation>Carré</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="573"/>
+        <source>Diamond</source>
+        <translation>Losange</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="578"/>
+        <source>X</source>
+        <translation>X</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="583"/>
+        <source>Large Circle</source>
+        <translation>Grand cercle</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="588"/>
+        <source>Large Square</source>
+        <translation>Grand carré</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="593"/>
+        <source>Large Diamond</source>
+        <translation>Grand losange</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="598"/>
+        <source>Large X</source>
+        <translation>Grand X</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uigraphprefs.ui" line="625"/>
+        <source>Crosshair cursor</source>
+        <translation>Curseur en croix</translation>
+    </message>
+</context>
+<context>
+    <name>UIGuiPrefs</name>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="35"/>
+        <source>Design</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="41"/>
+        <source>The look of the whole window: the colours of the desktop (System), brushed metal (Silver) or dark. The same as Design in the menu.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="58"/>
+        <source>Digital display (LCD)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="96"/>
+        <source>Show bargraph</source>
+        <translation>Afficher le bargraphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="141"/>
+        <source>Show Min/Max</source>
+        <translation>Afficher min/max</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="175"/>
+        <source>Show</source>
+        <translation>Afficher</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="214"/>
+        <source>Tint of the LCD face of the digital display. The default is a classic greenish LCD.</source>
+        <translation>Teinte de la face LCD de l&apos;afficheur numérique. Par défaut, un LCD verdâtre classique.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="227"/>
+        <source>LCD &amp;colour</source>
+        <translation>&amp;Couleur du LCD</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="248"/>
+        <source>Analog meter</source>
+        <translation>Galvanomètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="266"/>
+        <source>Scale</source>
+        <translation>Échelle</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="273"/>
+        <source>How the analog meter lays out its scale. &lt;b&gt;Automatic&lt;/b&gt; starts with zero at the left and switches to a centre-zero scale as soon as a clearly negative reading arrives (until the min/max memory is reset). &lt;b&gt;Zero left&lt;/b&gt; and &lt;b&gt;Centre zero&lt;/b&gt; fix one layout.</source>
+        <translation>Disposition de l&apos;échelle du galvanomètre. &lt;b&gt;Automatique&lt;/b&gt; commence avec le zéro à gauche et passe à un zéro central dès qu&apos;une valeur nettement négative arrive (jusqu&apos;à la remise à zéro de la mémoire min/max). &lt;b&gt;Zéro à gauche&lt;/b&gt; et &lt;b&gt;Zéro central&lt;/b&gt; fixent une disposition.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="277"/>
+        <source>Automatic</source>
+        <translation>Automatique</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="282"/>
+        <source>Zero left</source>
+        <translation>Zéro à gauche</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="287"/>
+        <source>Centre zero</source>
+        <translation>Zéro central</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="295"/>
+        <source>Style</source>
+        <translation>Style</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="302"/>
+        <source>Colour scheme of the analog meter: a dark studio dial with a white scale, or a classic ivory dial with a black scale.</source>
+        <translation>Couleurs du galvanomètre : un cadran sombre de studio avec échelle blanche, ou un cadran ivoire classique avec échelle noire.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="306"/>
+        <source>Dark studio</source>
+        <translation>Studio sombre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="311"/>
+        <source>Classic ivory</source>
+        <translation>Ivoire classique</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="319"/>
+        <source>Move the needle with the inertia of a real moving-coil instrument instead of jumping to each new reading.</source>
+        <translation>Déplacer l&apos;aiguille avec l&apos;inertie d&apos;un vrai galvanomètre au lieu de sauter à chaque nouvelle valeur.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="322"/>
+        <source>Needle inertia</source>
+        <translation>Inertie de l&apos;aiguille</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="329"/>
+        <source>Red zone from</source>
+        <translation>Zone rouge à partir de</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="336"/>
+        <source>Start of the red zone at the top end of the scale, as a percentage of full scale.</source>
+        <translation>Début de la zone rouge en haut de l&apos;échelle, en pourcentage de la pleine échelle.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="339"/>
+        <source> %</source>
+        <translation> %</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="358"/>
+        <source>At program exit</source>
+        <translation>À la fermeture du programme</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="396"/>
+        <source>When this option is checked QtDMM will alert you if you are going to overwrite or loose unsaved data (import, quit).</source>
+        <translation>Si cette option est cochée, QtDMM vous avertit avant d&apos;écraser ou de perdre des données non enregistrées (import, fermeture).</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="399"/>
+        <source>Alert unsaved data</source>
+        <translation>Avertir des données non enregistrées</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="444"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="492"/>
+        <source>When this option is checked the window position and size saved and restored in the next session.</source>
+        <translation>Si cette option est cochée, la position et la taille de la fenêtre sont enregistrées et restaurées à la session suivante.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="447"/>
+        <source>Save window position</source>
+        <translation>Enregistrer la position de la fenêtre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="495"/>
+        <source>Save window size</source>
+        <translation>Enregistrer la taille de la fenêtre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="526"/>
+        <source>Toolbar</source>
+        <translation>Barre d&apos;outils</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="564"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="622"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="670"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="753"/>
+        <source>Check this if you want text labels in the toolbar.</source>
+        <translation>Cochez pour afficher des libellés dans la barre d&apos;outils.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="567"/>
+        <source>Icons with text label</source>
+        <translation>Icônes avec libellé</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="577"/>
+        <source>Use the icon theme of your desktop for the symbols QtDMM shares with other programs. QtDMM&apos;s own symbols and anything the theme lacks come from the built-in Breeze set. Off: all symbols from the built-in set, light or dark to match the design.</source>
+        <translation>Utiliser le thème d&apos;icônes du bureau pour les symboles que QtDMM partage avec d&apos;autres programmes. Les symboles propres à QtDMM et ce qui manque au thème viennent du jeu Breeze intégré. Désactivé : tous les symboles du jeu intégré, clairs ou sombres selon l&apos;apparence.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="580"/>
+        <source>Use the desktop&apos;s icon theme</source>
+        <translation>Utiliser le thème d&apos;icônes du bureau</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="625"/>
+        <source>DMM toolbar</source>
+        <translation>Barre d&apos;outils multimètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="673"/>
+        <source>File toolbar</source>
+        <translation>Barre d&apos;outils fichier</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="756"/>
+        <source>Graph toolbar</source>
+        <translation>Barre d&apos;outils graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="787"/>
+        <source>Show tip of the day</source>
+        <translation>Afficher l&apos;astuce du jour</translation>
+    </message>
+</context>
+<context>
+    <name>UIHelpDlg</name>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="14"/>
+        <source>QtDMM: Handbook</source>
+        <translation>QtDMM : manuel</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="37"/>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="43"/>
+        <source>Back</source>
+        <translation>Précédent</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="40"/>
+        <source>Go back to the previously shown help page.</source>
+        <translation>Revenir à la page d&apos;aide précédente.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="56"/>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="62"/>
+        <source>Forward</source>
+        <translation>Suivant</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="59"/>
+        <source>Go forward again after going back.</source>
+        <translation>Avancer à nouveau après être revenu en arrière.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="75"/>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="81"/>
+        <source>Contents</source>
+        <translation>Sommaire</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="78"/>
+        <source>Return to the table of contents.</source>
+        <translation>Revenir au sommaire.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="94"/>
+        <source>Search in the page (Ctrl+F). Enter or F3 finds the next match, Shift+F3 the previous one.</source>
+        <translation>Rechercher dans la page (Ctrl+F). Entrée ou F3 trouve l’occurrence suivante, Maj+F3 la précédente.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="97"/>
+        <source>Search the shown help page. Enter or F3 jumps to the next match, Shift+Enter or Shift+F3 to the previous one.</source>
+        <translation>Rechercher dans la page d’aide affichée. Entrée ou F3 saute à l’occurrence suivante, Maj+Entrée ou Maj+F3 à la précédente.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="100"/>
+        <source>Search…</source>
+        <translation>Rechercher…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="123"/>
+        <source>&amp;Close</source>
+        <translation>&amp;Fermer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="139"/>
+        <source>Table of contents. Click an entry to show that page.</source>
+        <translation>Sommaire. Cliquez sur une entrée pour afficher la page.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uihelpdlg.ui" line="150"/>
+        <source>The help page. Links inside the text navigate to other pages; web links open in your browser.</source>
+        <translation>La page d&apos;aide. Les liens du texte mènent aux autres pages ; les liens web s&apos;ouvrent dans votre navigateur.</translation>
+    </message>
+</context>
+<context>
+    <name>UIInstanceWidget</name>
+    <message>
+        <location filename="../../src/ui/forms/uiinstancewidget.ui" line="71"/>
+        <source>This is the plotting area for the transient recorder. It is widely configurable by clicking the &lt;b&gt;config ...&lt;/b&gt; button to the right. Data aquisition may be started by hand, at a specific time or automatically triggered by the measured value itself &lt;i&gt;(See configuration dialog)&lt;/i&gt;&lt;p&gt;
+The maximum resolution for data aquisition is 1/10th of a second, but may also be configured to sample once a week or what ever you want.
+&lt;p&gt;
+&lt;b&gt;Note:&lt;/b&gt; Connecting to the DMM as well as a change of the measuring unit automatically clears the graph.</source>
+        <translation>Zone de tracé de l&apos;enregistreur de transitoires. Elle est largement configurable via le bouton &lt;b&gt;Configurer…&lt;/b&gt;. L&apos;acquisition peut être lancée à la main, à une heure donnée ou déclenchée automatiquement par la valeur mesurée &lt;i&gt;(voir le dialogue de configuration)&lt;/i&gt;&lt;p&gt;
+La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi échantillonner une fois par semaine ou à tout autre rythme.
+&lt;p&gt;
+&lt;b&gt;Note :&lt;/b&gt; la connexion au multimètre ainsi qu&apos;un changement d&apos;unité effacent automatiquement le graphe.</translation>
+    </message>
+</context>
+<context>
+    <name>UIInstancesDlg</name>
+    <message>
+        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="14"/>
+        <source>Instance Manager</source>
+        <translation>Gestionnaire d&apos;instances</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="28"/>
+        <source>Choose instance to open, or add/remove instances</source>
+        <translation>Choisissez une instance à ouvrir, ou ajoutez/supprimez des instances</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="55"/>
+        <source>add new instance</source>
+        <translation>ajouter une instance</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="58"/>
+        <source>+</source>
+        <translation>+</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="68"/>
+        <source>remove instances</source>
+        <translation>supprimer des instances</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="71"/>
+        <source>-</source>
+        <translation>-</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="84"/>
+        <source>add a calculated instance (a formula over the running instances, e.g. power = u * i)</source>
+        <translation>ajouter une instance calculée (une formule sur les instances lancées, p. ex. puissance = u * i)</translation>
+    </message>
+</context>
+<context>
+    <name>UIIntegrationPrefs</name>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="31"/>
+        <source>Show integration</source>
+        <translation>Afficher l&apos;intégration</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="59"/>
+        <source>Colors</source>
+        <translation>Couleurs</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="91"/>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="139"/>
+        <source>Click this button so change the color of the data graph in the recorder.</source>
+        <translation>Cliquez pour changer la couleur de la courbe de données de l&apos;enregistreur.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="104"/>
+        <source>Integration graph</source>
+        <translation>Courbe d&apos;intégration</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="152"/>
+        <source>Integration threshold</source>
+        <translation>Seuil d&apos;intégration</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="173"/>
+        <source>Drawing style</source>
+        <translation>Style de tracé</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="185"/>
+        <source>Point style:</source>
+        <translation>Style de points :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="204"/>
+        <source>Line style:</source>
+        <translation>Style de ligne :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="221"/>
+        <source>No points</source>
+        <translation>Pas de points</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="226"/>
+        <source>Circle</source>
+        <translation>Cercle</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="231"/>
+        <source>Square</source>
+        <translation>Carré</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="236"/>
+        <source>Diamond</source>
+        <translation>Losange</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="241"/>
+        <source>X</source>
+        <translation>X</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="246"/>
+        <source>Large Circle</source>
+        <translation>Grand cercle</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="251"/>
+        <source>Large Square</source>
+        <translation>Grand carré</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="256"/>
+        <source>Large Diamond</source>
+        <translation>Grand losange</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="261"/>
+        <source>Large X</source>
+        <translation>Grand X</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="270"/>
+        <source>No line</source>
+        <translation>Pas de ligne</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="275"/>
+        <source>Solid line</source>
+        <translation>Ligne pleine</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="280"/>
+        <source>Dotted line</source>
+        <translation>Ligne pointillée</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="288"/>
+        <source>Width:</source>
+        <translation>Largeur :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="307"/>
+        <source>Here you can choose the line width of the data graph in the recorder.</source>
+        <translation>Choisissez ici l&apos;épaisseur de la courbe de données de l&apos;enregistreur.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="361"/>
+        <source>Graph</source>
+        <translation>Graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="373"/>
+        <source>Scale:</source>
+        <translation>Échelle :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="386"/>
+        <source>Threshold:</source>
+        <translation>Seuil :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="399"/>
+        <source>Scaling factor for integration curve.&lt;p&gt;
+You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
+10k - 10000&lt;br&gt;100m - 0.1</source>
+        <translation>Facteur d&apos;échelle de la courbe d&apos;intégration.&lt;p&gt;
+Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
+10k – 10000&lt;br&gt;100m – 0.1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="404"/>
+        <source>1.0</source>
+        <translation>1.0</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="414"/>
+        <source>Amplitude offset for integration curve.&lt;p&gt;
+You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
+10k - 10000&lt;br&gt;100m - 0.1</source>
+        <translation>Décalage d&apos;amplitude de la courbe d&apos;intégration.&lt;p&gt;
+Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
+10k – 10000&lt;br&gt;100m – 0.1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="419"/>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="447"/>
+        <source>0.0</source>
+        <translation>0.0</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="429"/>
+        <source>Offset:</source>
+        <translation>Décalage :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="442"/>
+        <source>If sampled value gets below this offset the integration curve is reset to zero.&lt;p&gt;
+You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
+10k - 10000&lt;br&gt;100m - 0.1</source>
+        <translation>Si la valeur échantillonnée passe sous ce seuil, la courbe d&apos;intégration est remise à zéro.&lt;p&gt;
+Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
+10k – 10000&lt;br&gt;100m – 0.1</translation>
+    </message>
+</context>
+<context>
+    <name>UIMainWindow</name>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="27"/>
+        <source>DMM</source>
+        <translation>Multimètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="54"/>
+        <source>Recorder</source>
+        <translation>Enregistreur</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="80"/>
+        <source>File</source>
+        <translation>Fichier</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="103"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="451"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="454"/>
+        <source>Menu</source>
+        <translation>Menu</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="126"/>
+        <source>&amp;Export</source>
+        <translation>&amp;Exporter</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="129"/>
+        <source>Export graph</source>
+        <translation>Exporter le graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="132"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Export recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Here you can export the recorded data as tab separated list. Each line contains the following values (separated by a tab character): date (dd.mm.yyyy) time (hh:mm:ss) value (float) unit.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Exporter le graphe de l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Exporte les données enregistrées sous forme de liste séparée par des tabulations. Chaque ligne contient : date (jj.mm.aaaa), heure (hh:mm:ss), valeur (flottant), unité.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="146"/>
+        <source>&amp;Import</source>
+        <translation>&amp;Importer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="149"/>
+        <source>Import graph</source>
+        <translation>Importer un graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="152"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Import data into recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Here you can import previously exported data files. QtDMM tries to do an educated guess if the file format is correct and rejects import of files which to not match.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Importer des données dans l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Importe des fichiers de données exportés auparavant. QtDMM vérifie le format et refuse les fichiers qui ne correspondent pas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="166"/>
+        <source>&amp;Print</source>
+        <translation>&amp;Imprimer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="169"/>
+        <source>Print graph</source>
+        <translation>Imprimer le graphique</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="172"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Print recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A dialog will open where you can define a title and a comment for your printout. The printer itself can also be configured here. To be able to print you need at least one working postscript printer configured in your system. Printing into a file is also supported.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Imprimer le graphe de l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Un dialogue permet de définir un titre et un commentaire pour l&apos;impression et de configurer l&apos;imprimante. Il faut au moins une imprimante PostScript fonctionnelle configurée dans le système. L&apos;impression dans un fichier est aussi possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="186"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="286"/>
+        <source>&amp;Configure</source>
+        <translation>&amp;Configurer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="189"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="289"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="369"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configure QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will open QtDMM&apos;s configuration dialog. Here you can configure it&apos;s visual appearance and all options regarding the multimeter hardware and the recorder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configurer QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ouvre le dialogue de configuration de QtDMM : apparence, options du multimètre et de l&apos;enregistreur.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="203"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Quitter</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="206"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quit QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the recorder contains unsaved data QtDMM will give you the option to savve your data first.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quitter QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Si l&apos;enregistreur contient des données non enregistrées, QtDMM propose de les enregistrer d&apos;abord.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="223"/>
+        <source>&amp;Connect</source>
+        <translation>&amp;Connecter</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="226"/>
+        <source>Connect/Disconnect DMM</source>
+        <translation>Connecter/déconnecter le multimètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="229"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Connect to the Multimeter&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will establish the serial connection to the dmm. If not connected the serial port is free and can be used by other software.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Se connecter au multimètre&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Établit la liaison série avec le multimètre. Hors connexion, le port série est libre pour d&apos;autres logiciels.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="249"/>
+        <source>&amp;Graph</source>
+        <translation>&amp;Graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="252"/>
+        <source>show or hide the graph</source>
+        <translation>afficher ou masquer le graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="255"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show or hide the recorder graph. Recording continues while the graph is hidden; with only the display and the meter panels visible the window can be made much smaller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graphe&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Affiche ou masque le graphe de l&apos;enregistreur. L&apos;enregistrement continue quand le graphe est masqué ; avec seulement l&apos;afficheur et le galvanomètre, la fenêtre peut être bien plus petite.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="269"/>
+        <source>&amp;Reset</source>
+        <translation>&amp;Réinitialiser</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="272"/>
+        <source>reset min/max</source>
+        <translation>remettre à zéro min/max</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="275"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Reset min/max values&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The min/max values in the display will be reset. You can activate this option at any time. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Remettre à zéro min/max&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Les valeurs min/max de l&apos;afficheur sont remises à zéro. Cette action est possible à tout moment. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="306"/>
+        <source>&amp;Start</source>
+        <translation>&amp;Démarrer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="309"/>
+        <source>Start recording</source>
+        <translation>Démarrer l&apos;enregistrement</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="312"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Start the recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If you are in manual mode this will start the recorder. Press F2 to set the recorder options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Démarrer l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;En mode manuel, démarre l&apos;enregistreur. Appuyez sur F2 pour régler ses options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="329"/>
+        <source>S&amp;top</source>
+        <translation>S&amp;top</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="332"/>
+        <source>Stop recording</source>
+        <translation>Arrêter l&apos;enregistrement</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="335"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Stop the recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The recorder will be stopped. This is independent from the start mode of the recorder. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Arrêter l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Arrête l&apos;enregistreur, quel que soit son mode de démarrage. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="349"/>
+        <source>&amp;Clear</source>
+        <translation>E&amp;ffacer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="352"/>
+        <source>Clear graph</source>
+        <translation>Effacer le graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="355"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Clear the recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the recorder is already started it will clear the graph and continue recording.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Effacer le graphe&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Si l&apos;enregistreur est en cours, le graphe est effacé et l&apos;enregistrement continue.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="366"/>
+        <source>C&amp;onfigure</source>
+        <translation>C&amp;onfigurer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="380"/>
+        <source>&amp;Tip of the day</source>
+        <translation>Astuce du &amp;jour</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="383"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show tip of the day.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Afficher l&apos;astuce du jour.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="397"/>
+        <source>Direct Hel&amp;p</source>
+        <translation>Aide &amp;directe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="400"/>
+        <source>Help</source>
+        <translation>Aide</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="403"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Direct Help&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter the direct help mode. You have done this already when reading this text :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Aide directe&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Passe en mode aide directe. C&apos;est déjà fait puisque vous lisez ce texte :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="417"/>
+        <source>&amp;Handbook</source>
+        <translation>&amp;Manuel</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="420"/>
+        <source>Handbook</source>
+        <translation>Manuel</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="423"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Handbook&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the QtDMM handbook: connecting a meter, the recorder, troubleshooting and the list of supported devices.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Manuel&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ouvre le manuel de QtDMM : connexion d&apos;un multimètre, enregistreur, dépannage et liste des appareils pris en charge.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="437"/>
+        <source>A&amp;bout</source>
+        <translation>&amp;À propos</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="440"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copyright information&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show copyright information and some blurb about QtDMM. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Informations de copyright&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Affiche le copyright et quelques mots sur QtDMM. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="457"/>
+        <source>Ctrl+M</source>
+        <translation>Ctrl+M</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="465"/>
+        <source>Instances</source>
+        <translation>Instances</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="468"/>
+        <source>Instance Manager</source>
+        <translation>Gestionnaire d&apos;instances</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="471"/>
+        <source>Ctrl+N</source>
+        <translation>Ctrl+N</translation>
     </message>
 </context>
 <context>
@@ -2931,998 +4138,6 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
         <location filename="../../src/ui/forms/uimeterprefs.ui" line="1111"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you have a DMM not listed above and find manual settings that work, please open an issue at &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt; with the model and the settings. This way future users of this DMM can benefit from your help.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si votre multimètre n&apos;est pas dans la liste et que vous trouvez des réglages manuels qui fonctionnent, ouvrez un ticket sur &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt; avec le modèle et les réglages. Les futurs utilisateurs de ce multimètre profiteront ainsi de votre aide.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-</context>
-<context>
-    <name>UIExecutePrefs</name>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="23"/>
-        <source>Check this if you want QtDMM to execute an external command when given thresholds are reached (Falling or raising edge).</source>
-        <translation>Cochez pour que QtDMM exécute une commande externe lorsque les seuils donnés sont atteints (front montant ou descendant).</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="26"/>
-        <source>Execute external command at given threshold</source>
-        <translation>Exécuter une commande externe au seuil donné</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="36"/>
-        <source>Threshold</source>
-        <translation>Seuil</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="48"/>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="79"/>
-        <source>Threshold:</source>
-        <translation>Seuil :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="64"/>
-        <source>Threshold for raising edge.&lt;p&gt;
-You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
-10k - 10000&lt;br&gt;100m - 0.1</source>
-        <translation>Seuil pour le front montant.&lt;p&gt;
-Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
-10k – 10000&lt;br&gt;100m – 0.1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="69"/>
-        <source>0</source>
-        <translation>0</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="95"/>
-        <source>Threshold for falling edge.&lt;p&gt;
-You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
-10k - 10000&lt;br&gt;100m - 0.1</source>
-        <translation>Seuil pour le front descendant.&lt;p&gt;
-Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
-10k – 10000&lt;br&gt;100m – 0.1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="100"/>
-        <source>0.0</source>
-        <translation>0.0</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="110"/>
-        <source>Call command on raising edge.</source>
-        <translation>Appeler la commande sur front montant.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="113"/>
-        <source>&amp;Raising edge</source>
-        <translation>Front m&amp;ontant</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="123"/>
-        <source>Call command on falling edge.</source>
-        <translation>Appeler la commande sur front descendant.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="126"/>
-        <source>&amp;Falling edge</source>
-        <translation>Front d&amp;escendant</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="171"/>
-        <source>Command</source>
-        <translation>Commande</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="197"/>
-        <source>Check this if you want QtDMM to disconnect (close the serial port) before executing the external command.</source>
-        <translation>Cochez pour que QtDMM se déconnecte (ferme le port série) avant d&apos;exécuter la commande externe.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="200"/>
-        <source>Disconnect before executing command</source>
-        <translation>Déconnecter avant d&apos;exécuter la commande</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="233"/>
-        <source>Enter here the external command to be executed.</source>
-        <translation>Saisissez ici la commande externe à exécuter.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="246"/>
-        <source>Browse</source>
-        <translation>Parcourir</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiexecuteprefs.ui" line="249"/>
-        <source>Here you can browse your harddisk for the external command (Altenative to directly typing it into the field to the left).</source>
-        <translation>Parcourez le disque pour choisir la commande externe (au lieu de la saisir dans le champ de gauche).</translation>
-    </message>
-</context>
-<context>
-    <name>UIGraphPrefs</name>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="35"/>
-        <source>Colors</source>
-        <translation>Couleurs</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="85"/>
-        <source>Click this button so change the color of the data graph in the recorder.</source>
-        <translation>Cliquez pour changer la couleur de la courbe de données de l&apos;enregistreur.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="104"/>
-        <source>&amp;Data</source>
-        <translation>&amp;Données</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="148"/>
-        <source>Click this button to change the background color of the recorder graph.</source>
-        <translation>Cliquez pour changer la couleur de fond du graphe de l&apos;enregistreur.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="167"/>
-        <source>&amp;Background</source>
-        <translation>&amp;Fond</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="211"/>
-        <source>Click this button to change the color of the grid and grid text in the recorder.</source>
-        <translation>Cliquez pour changer la couleur de la grille et de ses libellés dans l&apos;enregistreur.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="227"/>
-        <source>&amp;Grid</source>
-        <translation>&amp;Grille</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="271"/>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="331"/>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="394"/>
-        <source>Click this button to change the color of the cursor at the current sampling position in the recorder.</source>
-        <translation>Cliquez pour changer la couleur du curseur à la position d&apos;échantillonnage courante.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="287"/>
-        <source>Cu&amp;rsor</source>
-        <translation>Cu&amp;rseur</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="350"/>
-        <source>Start threshold</source>
-        <translation>Seuil de démarrage</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="413"/>
-        <source>E&amp;xternal threshold</source>
-        <translation>Seuil e&amp;xterne</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="431"/>
-        <source>Drawing style</source>
-        <translation>Style de tracé</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="452"/>
-        <source>Data points:</source>
-        <translation>Points de données :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="469"/>
-        <source>No line</source>
-        <translation>Pas de ligne</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="474"/>
-        <source>Solid line</source>
-        <translation>Ligne pleine</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="479"/>
-        <source>Dotted line</source>
-        <translation>Ligne pointillée</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="493"/>
-        <source>Data:</source>
-        <translation>Données :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="528"/>
-        <source>Here you can choose the line width of the data graph in the recorder.</source>
-        <translation>Choisissez ici l&apos;épaisseur de la courbe de données de l&apos;enregistreur.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="544"/>
-        <source>Width:</source>
-        <translation>Largeur :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="558"/>
-        <source>No points</source>
-        <translation>Pas de points</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="563"/>
-        <source>Circle</source>
-        <translation>Cercle</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="568"/>
-        <source>Square</source>
-        <translation>Carré</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="573"/>
-        <source>Diamond</source>
-        <translation>Losange</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="578"/>
-        <source>X</source>
-        <translation>X</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="583"/>
-        <source>Large Circle</source>
-        <translation>Grand cercle</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="588"/>
-        <source>Large Square</source>
-        <translation>Grand carré</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="593"/>
-        <source>Large Diamond</source>
-        <translation>Grand losange</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="598"/>
-        <source>Large X</source>
-        <translation>Grand X</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uigraphprefs.ui" line="625"/>
-        <source>Crosshair cursor</source>
-        <translation>Curseur en croix</translation>
-    </message>
-</context>
-<context>
-    <name>UIGuiPrefs</name>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="35"/>
-        <source>Display</source>
-        <translation>Afficheur</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="73"/>
-        <source>Show bargraph</source>
-        <translation>Afficher le bargraphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="118"/>
-        <source>Show Min/Max</source>
-        <translation>Afficher min/max</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="152"/>
-        <source>Show</source>
-        <translation>Afficher</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="191"/>
-        <source>Tint of the LCD face of the digital display. The default is a classic greenish LCD.</source>
-        <translation>Teinte de la face LCD de l&apos;afficheur numérique. Par défaut, un LCD verdâtre classique.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="204"/>
-        <source>LCD &amp;colour</source>
-        <translation>&amp;Couleur du LCD</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="225"/>
-        <source>Analog meter</source>
-        <translation>Galvanomètre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="243"/>
-        <source>Scale</source>
-        <translation>Échelle</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="250"/>
-        <source>How the analog meter lays out its scale. &lt;b&gt;Automatic&lt;/b&gt; starts with zero at the left and switches to a centre-zero scale as soon as a clearly negative reading arrives (until the min/max memory is reset). &lt;b&gt;Zero left&lt;/b&gt; and &lt;b&gt;Centre zero&lt;/b&gt; fix one layout.</source>
-        <translation>Disposition de l&apos;échelle du galvanomètre. &lt;b&gt;Automatique&lt;/b&gt; commence avec le zéro à gauche et passe à un zéro central dès qu&apos;une valeur nettement négative arrive (jusqu&apos;à la remise à zéro de la mémoire min/max). &lt;b&gt;Zéro à gauche&lt;/b&gt; et &lt;b&gt;Zéro central&lt;/b&gt; fixent une disposition.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="254"/>
-        <source>Automatic</source>
-        <translation>Automatique</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="259"/>
-        <source>Zero left</source>
-        <translation>Zéro à gauche</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="264"/>
-        <source>Centre zero</source>
-        <translation>Zéro central</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="272"/>
-        <source>Style</source>
-        <translation>Style</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="279"/>
-        <source>Colour scheme of the analog meter: a dark studio dial with a white scale, or a classic ivory dial with a black scale.</source>
-        <translation>Couleurs du galvanomètre : un cadran sombre de studio avec échelle blanche, ou un cadran ivoire classique avec échelle noire.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="283"/>
-        <source>Dark studio</source>
-        <translation>Studio sombre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="288"/>
-        <source>Classic ivory</source>
-        <translation>Ivoire classique</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="296"/>
-        <source>Move the needle with the inertia of a real moving-coil instrument instead of jumping to each new reading.</source>
-        <translation>Déplacer l&apos;aiguille avec l&apos;inertie d&apos;un vrai galvanomètre au lieu de sauter à chaque nouvelle valeur.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="299"/>
-        <source>Needle inertia</source>
-        <translation>Inertie de l&apos;aiguille</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="306"/>
-        <source>Red zone from</source>
-        <translation>Zone rouge à partir de</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="313"/>
-        <source>Start of the red zone at the top end of the scale, as a percentage of full scale.</source>
-        <translation>Début de la zone rouge en haut de l&apos;échelle, en pourcentage de la pleine échelle.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="316"/>
-        <source> %</source>
-        <translation> %</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="335"/>
-        <source>At program exit</source>
-        <translation>À la fermeture du programme</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="373"/>
-        <source>When this option is checked QtDMM will alert you if you are going to overwrite or loose unsaved data (import, quit).</source>
-        <translation>Si cette option est cochée, QtDMM vous avertit avant d&apos;écraser ou de perdre des données non enregistrées (import, fermeture).</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="376"/>
-        <source>Alert unsaved data</source>
-        <translation>Avertir des données non enregistrées</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="421"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="469"/>
-        <source>When this option is checked the window position and size saved and restored in the next session.</source>
-        <translation>Si cette option est cochée, la position et la taille de la fenêtre sont enregistrées et restaurées à la session suivante.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="424"/>
-        <source>Save window position</source>
-        <translation>Enregistrer la position de la fenêtre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="472"/>
-        <source>Save window size</source>
-        <translation>Enregistrer la taille de la fenêtre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="503"/>
-        <source>Toolbar</source>
-        <translation>Barre d&apos;outils</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="541"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="599"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="647"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="730"/>
-        <source>Check this if you want text labels in the toolbar.</source>
-        <translation>Cochez pour afficher des libellés dans la barre d&apos;outils.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="544"/>
-        <source>Icons with text label</source>
-        <translation>Icônes avec libellé</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="554"/>
-        <source>Use the icon theme of your desktop for the symbols QtDMM shares with other programs. QtDMM&apos;s own symbols and anything the theme lacks come from the built-in Breeze set. Off: all symbols from the built-in set, light or dark to match the design.</source>
-        <translation>Utiliser le thème d&apos;icônes du bureau pour les symboles que QtDMM partage avec d&apos;autres programmes. Les symboles propres à QtDMM et ce qui manque au thème viennent du jeu Breeze intégré. Désactivé : tous les symboles du jeu intégré, clairs ou sombres selon l&apos;apparence.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="557"/>
-        <source>Use the desktop&apos;s icon theme</source>
-        <translation>Utiliser le thème d&apos;icônes du bureau</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="602"/>
-        <source>DMM toolbar</source>
-        <translation>Barre d&apos;outils multimètre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="650"/>
-        <source>File toolbar</source>
-        <translation>Barre d&apos;outils fichier</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="733"/>
-        <source>Graph toolbar</source>
-        <translation>Barre d&apos;outils graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="764"/>
-        <source>Show tip of the day</source>
-        <translation>Afficher l&apos;astuce du jour</translation>
-    </message>
-</context>
-<context>
-    <name>UIHelpDlg</name>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="14"/>
-        <source>QtDMM: Handbook</source>
-        <translation>QtDMM : manuel</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="37"/>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="43"/>
-        <source>Back</source>
-        <translation>Précédent</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="40"/>
-        <source>Go back to the previously shown help page.</source>
-        <translation>Revenir à la page d&apos;aide précédente.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="56"/>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="62"/>
-        <source>Forward</source>
-        <translation>Suivant</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="59"/>
-        <source>Go forward again after going back.</source>
-        <translation>Avancer à nouveau après être revenu en arrière.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="75"/>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="81"/>
-        <source>Contents</source>
-        <translation>Sommaire</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="78"/>
-        <source>Return to the table of contents.</source>
-        <translation>Revenir au sommaire.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="94"/>
-        <source>Search in the page (Ctrl+F). Enter or F3 finds the next match, Shift+F3 the previous one.</source>
-        <translation>Rechercher dans la page (Ctrl+F). Entrée ou F3 trouve l’occurrence suivante, Maj+F3 la précédente.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="97"/>
-        <source>Search the shown help page. Enter or F3 jumps to the next match, Shift+Enter or Shift+F3 to the previous one.</source>
-        <translation>Rechercher dans la page d’aide affichée. Entrée ou F3 saute à l’occurrence suivante, Maj+Entrée ou Maj+F3 à la précédente.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="100"/>
-        <source>Search…</source>
-        <translation>Rechercher…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="123"/>
-        <source>&amp;Close</source>
-        <translation>&amp;Fermer</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="139"/>
-        <source>Table of contents. Click an entry to show that page.</source>
-        <translation>Sommaire. Cliquez sur une entrée pour afficher la page.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uihelpdlg.ui" line="150"/>
-        <source>The help page. Links inside the text navigate to other pages; web links open in your browser.</source>
-        <translation>La page d&apos;aide. Les liens du texte mènent aux autres pages ; les liens web s&apos;ouvrent dans votre navigateur.</translation>
-    </message>
-</context>
-<context>
-    <name>UIInstancesDlg</name>
-    <message>
-        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="14"/>
-        <source>Instance Manager</source>
-        <translation>Gestionnaire d&apos;instances</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="28"/>
-        <source>Choose instance to open, or add/remove instances</source>
-        <translation>Choisissez une instance à ouvrir, ou ajoutez/supprimez des instances</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="55"/>
-        <source>add new instance</source>
-        <translation>ajouter une instance</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="58"/>
-        <source>+</source>
-        <translation>+</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="68"/>
-        <source>remove instances</source>
-        <translation>supprimer des instances</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="71"/>
-        <source>-</source>
-        <translation>-</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiinstancesdlg.ui" line="84"/>
-        <source>add a calculated instance (a formula over the running instances, e.g. power = u * i)</source>
-        <translation>ajouter une instance calculée (une formule sur les instances lancées, p. ex. puissance = u * i)</translation>
-    </message>
-</context>
-<context>
-    <name>UIIntegrationPrefs</name>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="31"/>
-        <source>Show integration</source>
-        <translation>Afficher l&apos;intégration</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="59"/>
-        <source>Colors</source>
-        <translation>Couleurs</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="91"/>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="139"/>
-        <source>Click this button so change the color of the data graph in the recorder.</source>
-        <translation>Cliquez pour changer la couleur de la courbe de données de l&apos;enregistreur.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="104"/>
-        <source>Integration graph</source>
-        <translation>Courbe d&apos;intégration</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="152"/>
-        <source>Integration threshold</source>
-        <translation>Seuil d&apos;intégration</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="173"/>
-        <source>Drawing style</source>
-        <translation>Style de tracé</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="185"/>
-        <source>Point style:</source>
-        <translation>Style de points :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="204"/>
-        <source>Line style:</source>
-        <translation>Style de ligne :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="221"/>
-        <source>No points</source>
-        <translation>Pas de points</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="226"/>
-        <source>Circle</source>
-        <translation>Cercle</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="231"/>
-        <source>Square</source>
-        <translation>Carré</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="236"/>
-        <source>Diamond</source>
-        <translation>Losange</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="241"/>
-        <source>X</source>
-        <translation>X</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="246"/>
-        <source>Large Circle</source>
-        <translation>Grand cercle</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="251"/>
-        <source>Large Square</source>
-        <translation>Grand carré</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="256"/>
-        <source>Large Diamond</source>
-        <translation>Grand losange</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="261"/>
-        <source>Large X</source>
-        <translation>Grand X</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="270"/>
-        <source>No line</source>
-        <translation>Pas de ligne</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="275"/>
-        <source>Solid line</source>
-        <translation>Ligne pleine</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="280"/>
-        <source>Dotted line</source>
-        <translation>Ligne pointillée</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="288"/>
-        <source>Width:</source>
-        <translation>Largeur :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="307"/>
-        <source>Here you can choose the line width of the data graph in the recorder.</source>
-        <translation>Choisissez ici l&apos;épaisseur de la courbe de données de l&apos;enregistreur.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="361"/>
-        <source>Graph</source>
-        <translation>Graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="373"/>
-        <source>Scale:</source>
-        <translation>Échelle :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="386"/>
-        <source>Threshold:</source>
-        <translation>Seuil :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="399"/>
-        <source>Scaling factor for integration curve.&lt;p&gt;
-You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
-10k - 10000&lt;br&gt;100m - 0.1</source>
-        <translation>Facteur d&apos;échelle de la courbe d&apos;intégration.&lt;p&gt;
-Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
-10k – 10000&lt;br&gt;100m – 0.1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="404"/>
-        <source>1.0</source>
-        <translation>1.0</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="414"/>
-        <source>Amplitude offset for integration curve.&lt;p&gt;
-You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
-10k - 10000&lt;br&gt;100m - 0.1</source>
-        <translation>Décalage d&apos;amplitude de la courbe d&apos;intégration.&lt;p&gt;
-Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
-10k – 10000&lt;br&gt;100m – 0.1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="419"/>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="447"/>
-        <source>0.0</source>
-        <translation>0.0</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="429"/>
-        <source>Offset:</source>
-        <translation>Décalage :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiintegrationprefs.ui" line="442"/>
-        <source>If sampled value gets below this offset the integration curve is reset to zero.&lt;p&gt;
-You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
-10k - 10000&lt;br&gt;100m - 0.1</source>
-        <translation>Si la valeur échantillonnée passe sous ce seuil, la courbe d&apos;intégration est remise à zéro.&lt;p&gt;
-Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;br&gt;Exemple :&lt;br&gt;
-10k – 10000&lt;br&gt;100m – 0.1</translation>
-    </message>
-</context>
-<context>
-    <name>UIInstanceWidget</name>
-    <message>
-        <location filename="../../src/ui/forms/uiinstancewidget.ui" line="71"/>
-        <source>This is the plotting area for the transient recorder. It is widely configurable by clicking the &lt;b&gt;config ...&lt;/b&gt; button to the right. Data aquisition may be started by hand, at a specific time or automatically triggered by the measured value itself &lt;i&gt;(See configuration dialog)&lt;/i&gt;&lt;p&gt;
-The maximum resolution for data aquisition is 1/10th of a second, but may also be configured to sample once a week or what ever you want.
-&lt;p&gt;
-&lt;b&gt;Note:&lt;/b&gt; Connecting to the DMM as well as a change of the measuring unit automatically clears the graph.</source>
-        <translation>Zone de tracé de l&apos;enregistreur de transitoires. Elle est largement configurable via le bouton &lt;b&gt;Configurer…&lt;/b&gt;. L&apos;acquisition peut être lancée à la main, à une heure donnée ou déclenchée automatiquement par la valeur mesurée &lt;i&gt;(voir le dialogue de configuration)&lt;/i&gt;&lt;p&gt;
-La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi échantillonner une fois par semaine ou à tout autre rythme.
-&lt;p&gt;
-&lt;b&gt;Note :&lt;/b&gt; la connexion au multimètre ainsi qu&apos;un changement d&apos;unité effacent automatiquement le graphe.</translation>
-    </message>
-</context>
-<context>
-    <name>UIMainWindow</name>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="27"/>
-        <source>DMM</source>
-        <translation>Multimètre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="54"/>
-        <source>Recorder</source>
-        <translation>Enregistreur</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="80"/>
-        <source>File</source>
-        <translation>Fichier</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="103"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="451"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="454"/>
-        <source>Menu</source>
-        <translation>Menu</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="126"/>
-        <source>&amp;Export</source>
-        <translation>&amp;Exporter</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="129"/>
-        <source>Export graph</source>
-        <translation>Exporter le graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="132"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Export recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Here you can export the recorded data as tab separated list. Each line contains the following values (separated by a tab character): date (dd.mm.yyyy) time (hh:mm:ss) value (float) unit.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Exporter le graphe de l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Exporte les données enregistrées sous forme de liste séparée par des tabulations. Chaque ligne contient : date (jj.mm.aaaa), heure (hh:mm:ss), valeur (flottant), unité.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="146"/>
-        <source>&amp;Import</source>
-        <translation>&amp;Importer</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="149"/>
-        <source>Import graph</source>
-        <translation>Importer un graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="152"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Import data into recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Here you can import previously exported data files. QtDMM tries to do an educated guess if the file format is correct and rejects import of files which to not match.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Importer des données dans l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Importe des fichiers de données exportés auparavant. QtDMM vérifie le format et refuse les fichiers qui ne correspondent pas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="166"/>
-        <source>&amp;Print</source>
-        <translation>&amp;Imprimer</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="169"/>
-        <source>Print graph</source>
-        <translation>Imprimer le graphique</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="172"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Print recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A dialog will open where you can define a title and a comment for your printout. The printer itself can also be configured here. To be able to print you need at least one working postscript printer configured in your system. Printing into a file is also supported.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Imprimer le graphe de l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Un dialogue permet de définir un titre et un commentaire pour l&apos;impression et de configurer l&apos;imprimante. Il faut au moins une imprimante PostScript fonctionnelle configurée dans le système. L&apos;impression dans un fichier est aussi possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="186"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="286"/>
-        <source>&amp;Configure</source>
-        <translation>&amp;Configurer</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="189"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="289"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="369"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configure QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will open QtDMM&apos;s configuration dialog. Here you can configure it&apos;s visual appearance and all options regarding the multimeter hardware and the recorder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configurer QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ouvre le dialogue de configuration de QtDMM : apparence, options du multimètre et de l&apos;enregistreur.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="203"/>
-        <source>&amp;Quit</source>
-        <translation>&amp;Quitter</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="206"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quit QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the recorder contains unsaved data QtDMM will give you the option to savve your data first.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quitter QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Si l&apos;enregistreur contient des données non enregistrées, QtDMM propose de les enregistrer d&apos;abord.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="223"/>
-        <source>&amp;Connect</source>
-        <translation>&amp;Connecter</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="226"/>
-        <source>Connect/Disconnect DMM</source>
-        <translation>Connecter/déconnecter le multimètre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="229"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Connect to the Multimeter&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will establish the serial connection to the dmm. If not connected the serial port is free and can be used by other software.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Se connecter au multimètre&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Établit la liaison série avec le multimètre. Hors connexion, le port série est libre pour d&apos;autres logiciels.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="249"/>
-        <source>&amp;Graph</source>
-        <translation>&amp;Graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="252"/>
-        <source>show or hide the graph</source>
-        <translation>afficher ou masquer le graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="255"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show or hide the recorder graph. Recording continues while the graph is hidden; with only the display and the meter panels visible the window can be made much smaller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graphe&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Affiche ou masque le graphe de l&apos;enregistreur. L&apos;enregistrement continue quand le graphe est masqué ; avec seulement l&apos;afficheur et le galvanomètre, la fenêtre peut être bien plus petite.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="269"/>
-        <source>&amp;Reset</source>
-        <translation>&amp;Réinitialiser</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="272"/>
-        <source>reset min/max</source>
-        <translation>remettre à zéro min/max</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="275"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Reset min/max values&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The min/max values in the display will be reset. You can activate this option at any time. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Remettre à zéro min/max&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Les valeurs min/max de l&apos;afficheur sont remises à zéro. Cette action est possible à tout moment. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="306"/>
-        <source>&amp;Start</source>
-        <translation>&amp;Démarrer</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="309"/>
-        <source>Start recording</source>
-        <translation>Démarrer l&apos;enregistrement</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="312"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Start the recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If you are in manual mode this will start the recorder. Press F2 to set the recorder options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Démarrer l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;En mode manuel, démarre l&apos;enregistreur. Appuyez sur F2 pour régler ses options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="329"/>
-        <source>S&amp;top</source>
-        <translation>S&amp;top</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="332"/>
-        <source>Stop recording</source>
-        <translation>Arrêter l&apos;enregistrement</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="335"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Stop the recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The recorder will be stopped. This is independent from the start mode of the recorder. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Arrêter l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Arrête l&apos;enregistreur, quel que soit son mode de démarrage. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="349"/>
-        <source>&amp;Clear</source>
-        <translation>E&amp;ffacer</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="352"/>
-        <source>Clear graph</source>
-        <translation>Effacer le graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="355"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Clear the recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the recorder is already started it will clear the graph and continue recording.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Effacer le graphe&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Si l&apos;enregistreur est en cours, le graphe est effacé et l&apos;enregistrement continue.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="366"/>
-        <source>C&amp;onfigure</source>
-        <translation>C&amp;onfigurer</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="380"/>
-        <source>&amp;Tip of the day</source>
-        <translation>Astuce du &amp;jour</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="383"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show tip of the day.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Afficher l&apos;astuce du jour.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="397"/>
-        <source>Direct Hel&amp;p</source>
-        <translation>Aide &amp;directe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="400"/>
-        <source>Help</source>
-        <translation>Aide</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="403"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Direct Help&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter the direct help mode. You have done this already when reading this text :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Aide directe&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Passe en mode aide directe. C&apos;est déjà fait puisque vous lisez ce texte :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="417"/>
-        <source>&amp;Handbook</source>
-        <translation>&amp;Manuel</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="420"/>
-        <source>Handbook</source>
-        <translation>Manuel</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="423"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Handbook&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the QtDMM handbook: connecting a meter, the recorder, troubleshooting and the list of supported devices.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Manuel&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ouvre le manuel de QtDMM : connexion d&apos;un multimètre, enregistreur, dépannage et liste des appareils pris en charge.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="437"/>
-        <source>A&amp;bout</source>
-        <translation>&amp;À propos</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="440"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copyright information&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show copyright information and some blurb about QtDMM. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Informations de copyright&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Affiche le copyright et quelques mots sur QtDMM. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="457"/>
-        <source>Ctrl+M</source>
-        <translation>Ctrl+M</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="465"/>
-        <source>Instances</source>
-        <translation>Instances</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="468"/>
-        <source>Instance Manager</source>
-        <translation>Gestionnaire d&apos;instances</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="471"/>
-        <source>Ctrl+N</source>
-        <translation>Ctrl+N</translation>
     </message>
 </context>
 <context>
@@ -4410,6 +4625,24 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
         <location filename="../../src/ui/forms/uiscaleprefs.ui" line="391"/>
         <source>Maximum length (in time) of the recorder graph. If this time is reached the first recorded values will be discarded. It will not stop recording.</source>
         <translation>Durée maximale du graphe. Une fois atteinte, les premières valeurs sont écartées ; l&apos;enregistrement ne s&apos;arrête pas.</translation>
+    </message>
+</context>
+<context>
+    <name>UISettingsDialog</name>
+    <message>
+        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="14"/>
+        <source>QtDMM: Preferences</source>
+        <translation>QtDMM : préférences</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="129"/>
+        <source>&amp;Undo</source>
+        <translation>&amp;Annuler</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="155"/>
+        <source>&amp;Factory defaults</source>
+        <translation>Réglages d&apos;&amp;usine</translation>
     </message>
 </context>
 <context>

@@ -111,6 +111,9 @@ Q_SIGNALS:
   /// Ten times a second: the current main value, for the recorder; NaN
   /// when there is none (overload, or the last one is stale, StaleRule).
   void        sample(double value);
+  /// The main value went stale (StaleRule) or is current again; the views
+  /// fade it. Only on a change.
+  void        staleChanged(bool stale);
   /// For the status bar's connection field (MeterConnection messages, alarms, SCPI errors).
   void        error(const QString &);
   /// For the status bar's info field.
@@ -164,4 +167,5 @@ private:
   double      m_dval = qQNaN();
   QElapsedTimer m_clock;   ///< the sample clock's time base, monotonic
   StaleRule   m_stale;     ///< when the main value is too old to sample
+  bool        m_staleShown = false;   ///< what staleChanged() said last
 };

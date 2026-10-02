@@ -240,9 +240,15 @@ int main(int argc, char **argv)
     QImage half = render(w, size);
     check(!half.isNull() && half.size() == size, "renders to an image");
     if (!dump.isEmpty()) half.save(QDir(dump).filePath("meter_dark_half.png"));
+    w.setStale(true);
+    const QImage stale = render(w, size);
+    if (!dump.isEmpty()) stale.save(QDir(dump).filePath("meter_dark_stale.png"));
+    check(stale != half, "stale: needle and readouts fade");
+    w.setStale(false);
+    check(render(w, size) == half, "current again: as before");
 
     // rough geometry, mirrors AnalogMeter::geometry()
-    const double bezelW = qMax(4.0, (size.height() - 2) * 0.06);
+    const double bezelW = qBound(4.0, (size.height() - 2) * 0.12, 12.0);   // PanelFrame::bezelWidth()
     const double fh = size.height() - 2 - 2 * bezelW;
     const double fw = size.width() - 2 - 2 * bezelW;
     const QPointF pivot(size.width() / 2.0, 1 + bezelW + fh + fh * 0.02);

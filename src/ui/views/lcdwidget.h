@@ -85,6 +85,10 @@ public:
   void setFaceColor(const QColor &);
   void setLcdVariant(LcdVariant variant);
   LcdVariant lcdVariant() const { return m_variant; }
+  /// The value is too old to stand for the present (StaleRule): the
+  /// segments fade, the panel stays.
+  void setStale(bool stale);
+  bool isStale() const { return m_stale; }
   /// "classic", "blue", "amber", "contrast", "custom"
   static QString lcdVariantName(LcdVariant variant);
   static LcdVariant lcdVariantFromName(const QString &name);
@@ -170,6 +174,7 @@ private:
   int m_numValues = 1;
   bool m_hold = false;
   bool m_auto = false;
+  bool m_stale = false;
   bool m_manu = false;
 
   QPixmap m_static;

@@ -167,14 +167,15 @@ void InstanceWidget::setConsoleLogging(bool on)
 void InstanceWidget::setDisplay(LcdWidget *display)
 {
   m_display = display;
-  // the LCD's colours; a config from before the variants lands on Classic
-  // when its tint is the old default, on Custom (its own tint) otherwise
+  // the LCD's colours: backlight blue unless chosen otherwise; a config
+  // from before the variants with a tint of its own lands on Custom
   QString lcd = m_settings->getString("Display/lcd");
   if (lcd.isEmpty())
     lcd = m_settings->getColor("Display/display-background", LcdWidget::classicFace()) == LcdWidget::classicFace()
-            ? "classic" : "custom";
+            ? "blue" : "custom";
   display->setLcdVariant(LcdWidget::lcdVariantFromName(lcd));
   connect(m_ctl, &MeterController::reading, display, &LcdWidget::showReading);
+  connect(m_ctl, &MeterController::staleChanged, display, &LcdWidget::setStale);
   connect(m_ctl, &MeterController::minimumChanged, display, &LcdWidget::showMinimum);
   connect(m_ctl, &MeterController::maximumChanged, display, &LcdWidget::showMaximum);
   connect(m_ctl, &MeterController::minMaxReset, display, &LcdWidget::clearMinMax);
@@ -184,6 +185,7 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
 {
   m_meter = meter;
   connect(m_ctl, &MeterController::reading, meter, &AnalogMeter::showReading);
+  connect(m_ctl, &MeterController::staleChanged, meter, &AnalogMeter::setStale);
   connect(m_ctl, &MeterController::minimumChanged, meter, &AnalogMeter::showMinimum);
   connect(m_ctl, &MeterController::maximumChanged, meter, &AnalogMeter::showMaximum);
   connect(m_ctl, &MeterController::minMaxReset, meter, &AnalogMeter::clearMinMax);

@@ -40,10 +40,15 @@ the maximum; *Reset* (Ctrl+R) clears both. The **OL** lamp lights and the
 needle rests against the right stop while the meter reports overload; **HOLD**
 appears while the meter's hold function is active.
 
+When the meter stops sending, the needle and the readouts fade (the
+digital display does the same) until the next value arrives, so a frozen
+value is not taken for a live one. See [Gaps](recorder.md#gaps) for when a
+value counts as gone.
+
 ## Style
 
 Two colour schemes are available: a dark studio dial with a white scale and needle, and
-a classic ivory dial with black lettering. Choose one with **Meter style** in the
+a classic ivory dial with black lettering (the default). Choose one with **Meter style** in the
 meter's right-click menu, or on the *Appearance* settings page.
 **Needle inertia** can be switched off to make the needle jump straight to each
 new reading.

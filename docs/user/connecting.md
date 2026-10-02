@@ -95,11 +95,11 @@ when the meter switches to a different unit.
 
 The display is a window like the [analog meter](analog-meter.md); digits and
 lettering scale with it. **Display** in the toolbar or the menu (Ctrl+1)
-hides and shows it. Bar graph and min/max are set on the *Appearance*
-settings page.
+hides and shows it. Bar graph and min/max (off by default) are set on the
+*Appearance* settings page, in the group *Digital display (LCD)*.
 
 **LCD colours** in the display's right-click menu: *Classic* (the
-yellow-green of most meters), *Backlight blue* (light segments on blue),
+yellow-green of most meters), *Backlight blue* (light segments on blue, the default),
 *Amber*, *High contrast* (black on white) or *Custom*, the tint from the
 *Appearance* page. Changing that tint switches the display to *Custom*.
 
@@ -166,8 +166,9 @@ the display or the meter for its window menu (hide the window, title bar on
 or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
 layouts of versions before 26.1 are not taken over.
 
-**Design** in the menu sets the colours of the window: *System* (the look of
-your desktop), *Silver* (brushed aluminium) or *Dark*. The readings table
+**Design** in the menu, or on the *Appearance* settings page, sets the colours
+of the window: *System* (the look of your desktop), *Silver* (brushed
+aluminium) or *Dark* (the default). The readings table
 and a graph in the colours *Neutral* follow; the LCD colours, the graph's
 colours and the style of the analog meter are chosen separately.
 
