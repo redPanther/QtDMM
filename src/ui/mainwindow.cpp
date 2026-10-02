@@ -457,7 +457,6 @@ void MainWindow::createActions()
   connect(action_Quit, SIGNAL(triggered()), this, SLOT(setToolbarVisibilitySLOT()));
   connect(action_Quit, SIGNAL(triggered()), m_wid, SLOT(quitSLOT()));
   connect(action_Direct_help, SIGNAL(triggered()), m_wid, SLOT(helpSLOT()));
-  connect(action_Tip_of_the_day, SIGNAL(triggered()), m_wid, SLOT(showTipsSLOT()));
   connect(action_Instances, SIGNAL(triggered()), m_wid, SLOT(instancesSLOT()));
 
   connect(toolBarMenu, SIGNAL(visibilityChanged(bool)),  this, SLOT(setToolbarVisibilitySLOT()));
@@ -506,7 +505,7 @@ void MainWindow::createExtraActions()
   toggleRecord->setShortcut(QKeySequence(Qt::Key_Space));
   connect(toggleRecord, &QAction::triggered, this, &MainWindow::toggleRecordingSLOT);
 
-  addActions({action_Configure, action_Direct_help, action_Help, action_Quit, action_Tip_of_the_day,
+  addActions({action_Configure, action_Direct_help, action_Help, action_Quit,
               m_displayAction, m_meterAction, m_readingsAction, m_titleBars,
               m_fullScreen, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage, toggleRecord});
 }
@@ -668,7 +667,6 @@ void MainWindow::on_action_Menu_triggered()
     m_menu->addAction(m_copyImage);
     m_menu->addSeparator();
     m_menu->addAction(action_Help);
-    m_menu->addAction(action_Tip_of_the_day);
     m_menu->addAction(action_Direct_help);
     m_menu->addAction(action_About);
     m_menu->addSeparator();
@@ -890,7 +888,7 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
 {
   setDesign(Designs::fromName(get("Windows/design", QString("dark")).toString()));
   m_restoring = true;
-  const QString arrange = get("Windows/arrange", QString("top")).toString();
+  const QString arrange = get("Windows/arrange", QString("left")).toString();
   const bool free = arrange == "free";
   const MdiArranger::Mode mode = free ? MdiArranger::Free : arrange == "left" ? MdiArranger::DisplaysOnLeft
                                  : arrange == "fixed" ? MdiArranger::Fixed : MdiArranger::DisplaysOnTop;

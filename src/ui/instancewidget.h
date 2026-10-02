@@ -33,7 +33,6 @@
 class MeterController;
 class SettingsDialog;
 class LcdWidget;
-class TipDlg;
 class Settings;
 class InstancesDlg;
 class AnalogMeter;
@@ -150,7 +149,6 @@ public Q_SLOTS:
   void        applySLOT();
   /// Settings dialog Cancel.
   void        rejectSLOT();
-  void        showTipsSLOT();
   /// Shows the instances dialog.
   void        instancesSLOT();
   /// The set of running instances changed (from SharedStateManager).
@@ -167,7 +165,6 @@ protected:
   AnalogMeter   *m_meter;
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
-  TipDlg     *m_tipDlg;
   InstancesDlg *m_instancesDlg;
   Settings    *m_settings;
   QString     m_instanceId;

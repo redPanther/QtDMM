@@ -37,7 +37,6 @@
 #include "recording/readingsmodel.h"
 #include "core/alarm.h"
 #include "core/siprefix.h"
-#include "ui/dialogs/tipdlg.h"
 #include "core/settings.h"
 #include "ui/dialogs/instancesdlg.h"
 #include "service/sharedstatemanager.h"
@@ -46,8 +45,7 @@
 
 InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget *parent) :  QFrame(parent),
   m_display(nullptr),
-  m_meter(nullptr),
-  m_tipDlg(nullptr)
+  m_meter(nullptr)
 {
   setupUi(this);
   setWindowIcon(QPixmap(":/Symbols/icon.xpm"));
@@ -154,9 +152,6 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
       return {};
     return bytes;
   });
-
-  if (m_configDlg->showTip())
-    showTipsSLOT();
 }
 
 void InstanceWidget::setConsoleLogging(bool on)
@@ -581,23 +576,6 @@ void InstanceWidget::startExternalSLOT()
 void InstanceWidget::exitedSLOT(int exitCode)
 {
   Q_EMIT error(tr("%1 terminated with exit code %2.").arg(m_configDlg->externalCommand()).arg(exitCode));
-}
-
-void InstanceWidget::showTipsSLOT()
-{
-  if (!m_tipDlg)
-  {
-    m_tipDlg = new TipDlg(this);
-
-    m_tipDlg->setShowTipsSLOT(m_configDlg->showTip());
-    m_tipDlg->setCurrentTip(m_configDlg->currentTipId());
-
-    connect(m_tipDlg, SIGNAL(showTips(bool)), m_configDlg, SLOT(setShowTipsSLOT(bool)));
-    connect(m_configDlg, SIGNAL(showTips(bool)), m_tipDlg, SLOT(setShowTipsSLOT(bool)));
-    connect(m_tipDlg, SIGNAL(currentTip(int)), m_configDlg, SLOT(setCurrentTipSLOT(int)));
-  }
-
-  m_tipDlg->show();
 }
 
 bool InstanceWidget::dmmConfigured() const
