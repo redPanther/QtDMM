@@ -1,7 +1,6 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "device/decoders/tfa_airco2ntrol.h"
-#include "device/transports/hidreader.h"
 
 #include <cmath>
 
