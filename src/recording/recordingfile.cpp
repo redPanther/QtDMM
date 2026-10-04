@@ -90,6 +90,10 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
         rec.start = when;
       }
       end = when;
+      // the old tab-separated export was always on the grid, often to the
+      // second only
+      if (!isLegacy)
+        rec.times << rec.start.msecsTo(when);
       const QString value = match.captured("value");
       rec.values << (value.compare("nan", Qt::CaseInsensitive) == 0
                        ? qQNaN()   // a gap: overload or no value
@@ -124,11 +128,11 @@ bool RecordingFile::write(const Recording &recording, const QString &path, QStri
 
   QTextStream ts(&file);
   ts << "timestamp;time (s);value;unit\n";
-  const qint64 startMs = recording.start.toMSecsSinceEpoch();
   for (int i = 0; i < recording.values.size(); ++i)
   {
-    const QDateTime dt = recording.start.addMSecs(qint64(i) * recording.sampleTimeTenths * 100);
-    const double deltaTime = (dt.toMSecsSinceEpoch() - startMs) / 1000.0;
+    const qint64 ms = recording.timeAt(i);
+    const QDateTime dt = recording.start.addMSecs(ms);
+    const double deltaTime = ms / 1000.0;
     QString prefix;
     const QString value = SiPrefix::format(recording.values[i], &prefix);
     ts << QString("%1;%2;%3;%4\n")
@@ -154,10 +158,10 @@ bool RecordingFile::writeAny(const Recording &recording, const QString &path, QS
   sheet.setHeader({tr("timestamp"), tr("time (s)"), tr("value"), tr("unit")});
   for (int i = 0; i < recording.values.size(); ++i)
   {
-    const QDateTime dt = recording.start.addMSecs(qint64(i) * recording.sampleTimeTenths * 100);
+    const qint64 ms = recording.timeAt(i);
     // a gap is an empty cell: a spreadsheet has no NaN
     const double v = recording.values[i];
-    sheet.addRow({dt, i * recording.sampleTimeTenths / 10.0, std::isfinite(v) ? QVariant(v) : QVariant(), recording.unit});
+    sheet.addRow({recording.start.addMSecs(ms), ms / 1000.0, std::isfinite(v) ? QVariant(v) : QVariant(), recording.unit});
   }
   return sheet.write(path, *format, error);
 }

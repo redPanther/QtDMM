@@ -242,6 +242,7 @@ Reading ReadingAdapter::reading(const PortSample &ps)
   r.overload = ps.sample.quality == Quality::Overload;
   r.id = ps.id;
   r.msecs = ps.sample.wall;
+  r.t = ps.sample.t;
   r.port = ps.port;
   r.portUnit = ps.unit;
   r.flags = ps.sample.flags;

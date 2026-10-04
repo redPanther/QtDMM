@@ -33,7 +33,14 @@ if (BUILD_TESTING)
 	add_executable(test_recordingstore tests/test_recordingstore.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp src/core/readingadapter.cpp)
 	target_include_directories(test_recordingstore PRIVATE src)
 	target_link_libraries(test_recordingstore PRIVATE Qt::Core Qt::Test)
-	add_test(NAME recording_store COMMAND test_recordingstore)
+	add_test(NAME recording_store COMMAND test_recordingstore "${CMAKE_SOURCE_DIR}/tests/data/graph")
+
+	## the recorder against readings with given times: the grid export, the
+	## integral and the triggers, as recorded with the 100 ms sample clock
+	add_executable(test_recording_golden tests/test_recording_golden.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp src/core/readingadapter.cpp)
+	target_include_directories(test_recording_golden PRIVATE src)
+	target_link_libraries(test_recording_golden PRIVATE Qt::Core)
+	add_test(NAME recording_golden COMMAND test_recording_golden "${CMAKE_SOURCE_DIR}/tests/data/recording")
 
 	## the handbook: same compiled resources as the application, so the test
 	## sees exactly the pages the user gets under :/Help/

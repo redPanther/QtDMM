@@ -27,6 +27,7 @@ struct Reading
   bool    overload = false;///< no number: OL, EFLO and the like
   int     id = 0;          ///< 0 = main value, 1..3 = secondary values
   qint64  msecs = 0;       ///< when it arrived (ms since the epoch)
+  qint64  t = 0;           ///< when it arrived on the core clock (Sample::now()), ms, monotonic
 
   PortKey port;            ///< which port of the meter: quantity, AC/DC/diode, slot
   Unit    portUnit;        ///< the port's unit in one spelling: "Ω", "°C"

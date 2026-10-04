@@ -4,30 +4,25 @@
 
 #include <QDateTime>
 #include <QObject>
+#include <QTimer>
 #include <QString>
 #include <QTime>
 #include <QVector>
 #include <cmath>
+#include <functional>
 
 #include "core/reading.h"
 #include "recording/recordingfile.h"
+#include "recording/recordingseries.h"
 #include "core/sampletypes.h"
 
-/// One stored sample of the recorder.
-///
-/// Besides the value it keeps what the meter showed for it (the full tuple
-/// of the core's Sample), so the same store can later feed the readings
-/// table, SCPI and an export with mode and quality.
-struct RecordedPoint
+/// A step of the grid: the recording at the sample time, for the export.
+struct GridPoint
 {
-  qint64  msecs = 0;        ///< since the start of the recording
-  double  value = 0;        ///< SI base units, the mean over the sample time; NaN = none (a gap)
-  double  integral = 0;     ///< running sum above the integration threshold, raw; NaN in a gap
-  Quality quality = Quality::Valid;   ///< worst over the sample time
-  quint32 flags = 0;        ///< SampleFlag, of the newest reading in the sample time
-  QString text;             ///< as the meter showed it ("-006.52", "OL")
-  QString prefix;           ///< SI prefix of the unit as shown ("m")
-  double  rangeFull = NAN;  ///< full scale of the range in SI, NaN = unknown
+  qint64  t = 0;            ///< ms since the start of the recording, a multiple of the step
+  double  value = 0;        ///< the time-weighted mean over the step (the value at t for the first); NaN = none
+  double  integral = 0;     ///< the integral at t; NaN in a gap
+  Quality quality = Quality::Valid;   ///< the worst in the step
 };
 
 /// One row of the readings series: a reading as the meter delivered it,
@@ -49,18 +44,22 @@ struct LoggedReading
   bool    hold() const { return flags & SampleFlag::Hold; }
 };
 
-/// The recorder without a widget: the recorded curve and everything that
-/// decides what goes into it.
+/// The recorder without a widget: the recorded readings and everything that
+/// decides what goes into them.
 ///
-/// It gets the current main value ten times a second (addValue(), the
-/// MeterController's sample clock) and the readings themselves (setReading())
-/// for their mode, text and quality. While recording it averages the values
-/// over the sample time and keeps the samples in a ring of capacity()
-/// entries; a full ring drops the oldest (shifted). Recording starts by hand,
-/// at a clock time or when the value crosses a threshold (StartMode), and
-/// stops by hand or after the recording length. The integral (running sum
-/// above a threshold), the external program threshold and the alarm marks
-/// live here too.
+/// While recording it keeps every main reading (id 0) with its time, as a
+/// RecordingSeries of RawPoint: setReading() from the MeterController. An
+/// overload is a point without a value, and so is the moment the value went
+/// stale (setStale()). The sample time is no longer the rate it records at
+/// but the grid of the export: grid() gives the time-weighted mean of every
+/// step. The integral is one over time (unit x s) of the values above the
+/// integration threshold.
+///
+/// Recording starts by hand, at a clock time or when the value crosses a
+/// threshold (StartMode), and stops by hand or after the recording length.
+/// The store keeps the last maxDuration() of a recording (at most
+/// kMaxPoints readings): older readings go (appended() says so). The
+/// external program threshold and the alarm marks live here too.
 ///
 /// Next to the recording the store keeps a second series, the readings:
 /// every reading of every value at full resolution, with its own capacity and
@@ -72,8 +71,8 @@ struct LoggedReading
 /// a matter of display (window, zoom, scale, colours, the integral's scale
 /// and offset). Only QtCore, so it can be tested on its own.
 ///
-/// Times are in tenths of a second, like the settings: a sample time of 5
-/// is one sample per 0.5 s.
+/// Sample time and recording length are in tenths of a second, like the
+/// settings: a sample time of 5 is a grid of 0.5 s.
 class RecordingStore : public QObject
 {
   Q_OBJECT
@@ -87,26 +86,28 @@ public:
     Falling       ///< when the value falls through the falling threshold
   };
 
-  /// An alarm mark at a sample.
+  /// An alarm mark at a time of the recording.
   struct Mark
   {
-    int     index;   ///< the sample, as for at()
+    qint64  t;       ///< ms since the start of the recording
     quint32 color;   ///< ARGB, as QColor::rgba()
     QString name;
   };
+
+  /// The most readings a series keeps; the oldest go beyond it.
+  static constexpr int kMaxPoints = 2000000;
 
   explicit RecordingStore(QObject *parent = nullptr);
 
   /// @name Settings
   /// @{
-  /// Sample time in tenths of a second (>= 1). The capacity is not
-  /// recounted here: the graph sets it from its seconds (setCapacity()).
+  /// The grid of the export in tenths of a second (>= 1).
   void        setSampleTime(int tenths);
   int         sampleTime() const { return m_sampleTime; }
-  /// Samples the ring holds. Growing keeps everything; shrinking below the
-  /// stored count keeps the oldest capacity - 1 samples.
-  void        setCapacity(int samples);
-  int         capacity() const { return m_capacity; }
+  /// How much of a recording the store keeps, in seconds (>= 1): older
+  /// readings go.
+  void        setMaxDuration(int seconds);
+  int         maxDuration() const { return int(m_maxMs / 1000); }
   /// Recording duration in tenths of a second after which recording stops
   /// on its own (0 = until stopped).
   void        setSampleLength(int tenths) { m_sampleLength = tenths; }
@@ -133,19 +134,25 @@ public:
   /// start() or clear() on.
   void        setUnit(const QString &baseUnit);
   QString     unit() const { return m_unit; }
-  /// A reading older than this (ms) makes the sample Stale.
+  /// How long a value holds before it is stale (ms, StaleRule): the gap
+  /// setStale() adds starts this long after the last value.
   void        setStaleAfter(int ms) { m_staleMs = ms; }
+  /// The clocks the store reads: a monotonic one in ms (the core clock,
+  /// Sample::now()) and the wall clock. Tests set their own.
+  void        setClock(std::function<qint64()> monotonic, std::function<QDateTime()> wall);
   /// @}
 
   /// @name The recording
   /// @{
-  int         count() const { return m_count; }
-  /// Sample @p i, 0 = the oldest in the ring.
-  const RecordedPoint &at(int i) const { return m_ring[(m_head + i) % m_capacity]; }
-  const RecordedPoint &last() const { return at(m_count - 1); }
-  /// The sample number of at(0) since the start: grows as the full ring
-  /// drops its oldest, so a sample keeps its number while its index moves.
-  qint64      firstSequence() const { return m_firstSeq; }
+  const RecordingSeries &series() const { return m_series; }
+  /// The readings kept (series().count()).
+  int         count() const { return m_series.count(); }
+  /// ms since the start the recording covers: up to now while it runs, up to
+  /// the stop, or up to the last reading of a loaded one.
+  qint64      duration() const;
+  /// The start of what the store still keeps (ms since the start of the
+  /// recording): 0 until older readings had to go.
+  qint64      origin() const;
   /// When the recording started (for an import: the file's first time stamp).
   QDateTime   startDateTime() const { return m_start; }
   bool        isRunning() const { return m_running; }
@@ -153,15 +160,24 @@ public:
   bool        dirty() const { return m_dirty; }
   void        setDirty(bool dirty) { m_dirty = dirty; }
   /// Tenths of a second left until the recording length is reached.
-  int         remainingLength() const { return m_remainingLength; }
-  QList<Mark> marks() const;
-  /// The values for the CSV/spreadsheet export.
-  Recording   toRecording() const;
-  /// Writes the recording (CSV, .xlsx or .ods by suffix); clears dirty().
-  bool        write(const QString &path, QString *error = nullptr);
-  /// Replaces the recording by @p rec: start, sample time and values (with
-  /// quality Valid and no integral). The capacity has to be set for it
-  /// first; it is widened when too small.
+  int         remainingLength() const;
+  QList<Mark> marks() const { return m_marks; }
+  /// The recording on a grid of @p tenths (the sample time): step k is the
+  /// time-weighted mean over the step that ends at k x step, step 0 the value
+  /// at the start. A value holds until the next reading; a step without one
+  /// is NaN. A loaded recording that is on the grid already comes back as it
+  /// was.
+  QVector<GridPoint> grid(int tenths) const;
+  /// The values for the CSV/spreadsheet export: the grid of the sample time,
+  /// or with @p raw every reading at its time (a gap a NaN of its own),
+  /// starting at the first.
+  Recording   toRecording(bool raw = false) const;
+  /// Writes the recording (CSV, .xlsx or .ods by suffix), on the grid or
+  /// with @p raw every reading; clears dirty().
+  bool        write(const QString &path, QString *error = nullptr, bool raw = false);
+  /// Replaces the recording by @p rec: start, sample time and values, each
+  /// at its time. A recording on the grid of its sample time stays one: it
+  /// exports as it came.
   void        load(const Recording &rec);
   /// @}
 
@@ -186,29 +202,34 @@ public Q_SLOTS:
   void        logReading(const Reading &reading);
   /// Empties the readings series.
   void        clearReadings();
-  /// The current main value, ten times a second.
-  void        addValue(double value);
-  /// A reading from the MeterController; the main value's (id 0) mode,
-  /// text and overload go into the next sample.
+  /// A reading from the MeterController: every one goes into the readings
+  /// series; the main value (id 0) into the recording, the triggers and the
+  /// check that the recording keeps its function.
   void        setReading(const Reading &reading);
+  /// The main value went stale (MeterController::staleChanged()): the
+  /// recording gets a gap from where the last value stopped holding.
+  void        setStale(bool stale);
+  /// The clock: the start at a clock time and the recording length.
+  /// A timer calls it every second.
+  void        poll();
   /// Clears the recording and starts it.
   void        start();
   void        stop();
-  /// Discards the recorded samples and marks; a running recording goes on.
+  /// Discards the recorded readings and marks; a running recording goes on.
   void        clear();
-  /// A mark at the newest sample.
+  /// A mark at the newest reading (now, while recording).
   void        addMark(quint32 argb, const QString &name);
 
 Q_SIGNALS:
-  /// A sample was stored (last()); @p shifted: the oldest was dropped for
-  /// it, all indices moved down by one.
+  /// A reading was stored (series().last()); @p shifted: older ones went
+  /// for it, the indices moved down.
   void        appended(bool shifted);
-  /// The samples were discarded (clear(), start()).
+  /// The readings were discarded (clear(), start()).
   void        cleared();
   /// load() replaced the recording.
   void        loaded();
   void        runningChanged(bool running);
-  /// Count, remaining length or running state changed (status bar).
+  /// Duration, remaining length or running state changed (status bar).
   void        progressChanged();
   /// The external program threshold was crossed.
   void        externalTriggered();
@@ -234,25 +255,30 @@ Q_SIGNALS:
 
 private:
   static QString describe(const PortKey &port, const QString &baseUnit);
-  RecordedPoint &slot(int i) { return m_ring[(m_head + i) % m_capacity]; }
-  /// The ring in order, oldest first, starting at index 0.
-  void        linearize();
+  /// ms since the start of the recording, now.
+  qint64      elapsed() const { return m_monotonic() - m_t0; }
+  /// Adds a point with the integral up to it.
+  void        appendPoint(RawPoint p);
+  /// appendPoint(), then the oldest points beyond the limits go; the signals.
+  void        append(const RawPoint &p);
+  /// Drops what is older than the store keeps; true when anything went.
+  bool        trim();
+  /// The start triggers and the external threshold on a new main value.
+  bool        trigger(double value);
+  /// Stops at the recording length when @p t (ms since the start) reached it.
+  bool        lengthReached(qint64 t);
 
-  QVector<RecordedPoint> m_ring;
-  int         m_capacity = 3600;
-  int         m_head = 0;       ///< ring index of the oldest sample
-  int         m_count = 0;
-  qint64      m_firstSeq = 0;   ///< sample number (since start) of at(0)
-  QList<QPair<qint64, Mark>> m_marks;   ///< by sample number
+  RecordingSeries m_series;
+  qint64      m_t0 = 0;           ///< the monotonic clock at the start
+  qint64      m_stopT = -1;       ///< ms since the start when it stopped; -1 = running or never ran
+  qint64      m_maxMs = 3600 * 1000;
+  int         m_loadedGrid = 0;   ///< load(): the points are the steps of this grid (tenths); 0 = readings
+  QList<Mark> m_marks;
+  QTimer      m_poll;
 
   int         m_sampleTime = 1;
   int         m_sampleLength = 0;
-  int         m_remainingLength = 0;
-  int         m_sampleCounter = 0;
-  double      m_sum = 0;
-  int         m_sumCount = 0;   ///< the finite values in m_sum
   double      m_integral = 0;   ///< the running integral, carried over gaps
-  bool        m_first = true;
   bool        m_running = false;
   bool        m_dirty = false;
   QDateTime   m_start;
@@ -270,16 +296,17 @@ private:
   bool        m_externalStarted = false;
   double      m_integrationThreshold = 0;
 
-  /// The newest main reading and the worst quality in the current period.
+  /// The newest main reading: the first value of a recording that starts.
   Reading     m_reading;
   bool        m_haveReading = false;
-  QString     m_nextUnit;        ///< setUnit() while samples are held
+  QString     m_nextUnit;        ///< setUnit() while readings are held
   bool        m_unitPending = false;
   PortKey     m_recordPort;      ///< what this recording measures, from its first value
   QString     m_recordBaseUnit;  ///< and in which unit (°C or °F)
-  Quality     m_periodQuality = Quality::Valid;
   int         m_staleMs = 3000;
-  Quality     currentQuality() const;
+
+  std::function<qint64()>    m_monotonic;
+  std::function<QDateTime()> m_wall;
 
   QList<LoggedReading> m_readings;
   int         m_readingCapacity = 10000;

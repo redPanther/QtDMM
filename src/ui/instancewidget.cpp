@@ -56,6 +56,8 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
 
   m_instanceId = instance_id;
   m_settings  = new Settings(instance_id, config_path, this);
+  // the integral is over time since 26.2: its scale once per settings file
+  GraphWidget::migrateIntegralScale(m_settings);
   m_configDlg = new SettingsDialog(m_settings, this);
   m_configDlg->hide();
   m_configDlg->readPrinter(&m_printer);
