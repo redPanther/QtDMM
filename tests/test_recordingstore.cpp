@@ -204,6 +204,67 @@ int main(int argc, char **argv)
     check(back.unit == "V" && back.values.size() == 1 && back.values.first() == 7, "write: recording content");
   }
 
+  // --- 5a. the export of every reading: each at its time, a gap a row of
+  //         its own; it imports with its times, and exports again the same;
+  //         the grid of an imported one holds each value to the next ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setUnit("V");
+    store.setSampleTime(10);
+    store.start();
+    store.setReading(clock.at(130, reading(1.5, "1.500", "DC")));
+    store.setReading(clock.at(610, reading(2.5, "2.500", "DC")));
+    store.setReading(clock.at(1090, reading(0, "OL", "DC")));
+    store.setReading(clock.at(1570, reading(0.004, "4.000", "DC")));
+    clock.now = 2000;
+    store.stop();
+    QTemporaryDir dir;
+    const QString raw1 = dir.path() + "/raw1.csv", raw2 = dir.path() + "/raw2.csv";
+    QString err;
+    check(store.write(raw1, &err, true), "raw: write: " + err);
+    QFile f(raw1);
+    f.open(QIODevice::ReadOnly);
+    const QString text = QString::fromUtf8(f.readAll());
+    check(text == "timestamp;time (s);value;unit\n"
+                  "2026-10-04T12:00:00,130;0;1.5;V\n"
+                  "2026-10-04T12:00:00,610;0.48;2.5;V\n"
+                  "2026-10-04T12:00:01,090;0.96;nan;V\n"
+                  "2026-10-04T12:00:01,570;1.44;4;mV\n",
+          "raw: the file is\n" + text);
+
+    const std::optional<Recording> rec = RecordingFile::read(raw1, &err);
+    check(rec && rec->times.size() == 4 && rec->times[3] == 1440 && !rec->onGrid(), "raw: read with its times");
+    RecordingStore back;
+    if (rec)
+      back.load(*rec);
+    check(back.count() == 4 && back.series().at(1).t == 480 && back.series().at(2).gap(), "raw: loaded at its times");
+    check(back.write(raw2, &err, true), "raw: write again: " + err);
+    QFile f2(raw2);
+    f2.open(QIODevice::ReadOnly);
+    check(QString::fromUtf8(f2.readAll()) == text, "raw: export, import, export is not the same file");
+    // on the grid of 0.5 s: the value at the start, then each step's mean
+    QStringList g;
+    for (const GridPoint &p : back.grid(5))
+      g << QString::number(p.value);
+    check(g.join(' ') == "1.5 1.54 2.5", "raw: grid of the import got " + g.join(' '));
+
+    // an old export on its grid stays one: the gaps where they were
+    const std::optional<Recording> legacy = RecordingFile::read(QString(argc > 1 ? argv[1] : "") + "/legacy_nan.txt", &err);
+    check(legacy.has_value(), "legacy: read: " + err);
+    if (legacy)
+    {
+      RecordingStore old;
+      old.load(*legacy);
+      const Recording out = old.toRecording();
+      bool same = out.values.size() == legacy->values.size();
+      for (int i = 0; same && i < out.values.size(); ++i)
+        same = (std::isnan(out.values[i]) && std::isnan(legacy->values[i])) || out.values[i] == legacy->values[i];
+      check(same, "legacy: the export of an old file has its values and gaps");
+    }
+  }
+
   // --- 5b. gaps and the integral: over time (V s) for the values above
   //         the threshold; a gap adds nothing, the integral carries over
   //         it; the start triggers compare with the last value there was ---

@@ -33,7 +33,7 @@ if (BUILD_TESTING)
 	add_executable(test_recordingstore tests/test_recordingstore.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp src/core/readingadapter.cpp)
 	target_include_directories(test_recordingstore PRIVATE src)
 	target_link_libraries(test_recordingstore PRIVATE Qt::Core Qt::Test)
-	add_test(NAME recording_store COMMAND test_recordingstore)
+	add_test(NAME recording_store COMMAND test_recordingstore "${CMAKE_SOURCE_DIR}/tests/data/graph")
 
 	## the recorder against readings with given times: the grid export, the
 	## integral and the triggers, as recorded with the 100 ms sample clock

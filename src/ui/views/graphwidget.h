@@ -263,7 +263,7 @@ public Q_SLOTS:
 
   /// File-path-driven, non-interactive halves of export/importDataSLOT (no QFileDialog),
   /// split out so the CSV parsing/writing logic can be exercised from tests.
-  bool             exportCsvFile(const QString &fileName);
+  bool             exportCsvFile(const QString &fileName, bool raw = false);
   bool             importCsvFile(const QString &fileName);
   /// Writes the graph to @p fileName, format taken from the suffix (svg, pdf,
   /// png, jpg, bmp). SVG and PDF keep the curve, the axes and their labels as

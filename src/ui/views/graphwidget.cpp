@@ -1227,8 +1227,11 @@ bool GraphWidget::exportDataSLOT()
   QString fnSuffix = validSuffixes.contains(fileInfo.suffix()) ? fileInfo.suffix() : "csv";
   QString fn = fileInfo.baseName().isEmpty() ? "untitled." + fnSuffix : fileInfo.absolutePath() + "/untitled." + fnSuffix;
   const QString csvFilter = tr("CSV (*.csv)"), xlsxFilter = tr("Excel (*.xlsx)"), odsFilter = tr("OpenDocument (*.ods)");
+  // every reading at its time instead of the sample time's grid
+  const QString rawFilter = tr("CSV, every reading (*.csv)");
   QString filter = fnSuffix == "xlsx" ? xlsxFilter : fnSuffix == "ods" ? odsFilter : csvFilter;
-  fn = QFileDialog::getSaveFileName(this, tr("Export data"), fn, csvFilter + ";;" + xlsxFilter + ";;" + odsFilter, &filter);
+  fn = QFileDialog::getSaveFileName(this, tr("Export data"), fn,
+                                    csvFilter + ";;" + xlsxFilter + ";;" + odsFilter + ";;" + rawFilter, &filter);
 
   if (fn.isNull())
     return false;
@@ -1236,10 +1239,10 @@ bool GraphWidget::exportDataSLOT()
   if (QFileInfo(fn).suffix().isEmpty())
     fn += filter == xlsxFilter ? ".xlsx" : filter == odsFilter ? ".ods" : ".csv";
 
-  return exportCsvFile(fn);
+  return exportCsvFile(fn, filter == rawFilter);
 }
 
-bool GraphWidget::exportCsvFile(const QString &fileName)
+bool GraphWidget::exportCsvFile(const QString &fileName, bool raw)
 {
   if (m_store->count() <= 0)
     return false;
@@ -1247,7 +1250,7 @@ bool GraphWidget::exportCsvFile(const QString &fileName)
   m_cfg->setString("QtDMM/LastUsesPath", QDir().absoluteFilePath(fileName));
 
   QString err;
-  if (!m_store->write(fileName, &err))
+  if (!m_store->write(fileName, &err, raw))
   {
     Q_EMIT error(err);
     return false;
@@ -1310,9 +1313,11 @@ bool GraphWidget::importCsvFile(const QString &fileName)
   setUnit(rec->unit);
   m_store->setSampleTime(rec->sampleTimeTenths);
   const int cnt = int(rec->values.size());
-  // setGraphSize() counts in seconds, the sample time is in tenths of one
+  // setGraphSize() counts in seconds, the sample time is in tenths of one;
+  // the length covers the last row and one sample time after it
   const int size = qMax(1, m_windowSeconds);
-  const int length = qMax(1, int(std::ceil(cnt * m_store->sampleTime() / 10.0)));
+  const qint64 span = cnt > 0 ? rec->timeAt(cnt - 1) + m_store->sampleTime() * 100 : 0;
+  const int length = qMax(1, int(std::ceil(span / 1000.0)));
 
   if (cnt > 1)
     Q_EMIT sampleTime(m_store->sampleTime());

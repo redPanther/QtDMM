@@ -165,22 +165,38 @@ QVector<GridPoint> RecordingStore::grid(int tenths) const
   return out;
 }
 
-Recording RecordingStore::toRecording() const
+Recording RecordingStore::toRecording(bool raw) const
 {
   Recording rec;
-  const QVector<GridPoint> steps = grid(m_sampleTime);
-  rec.start = m_start.addMSecs(steps.isEmpty() ? 0 : steps.first().t);
   rec.sampleTimeTenths = m_sampleTime;
   rec.unit = m_unit;
+  if (raw)
+  {
+    // from the reading that holds at the origin on
+    const int n = m_series.count();
+    const int first = qMax(0, m_series.holding(origin()));
+    const qint64 t0 = first < n ? m_series.at(first).t : 0;
+    rec.start = m_start.addMSecs(t0);
+    rec.values.reserve(n - first);
+    rec.times.reserve(n - first);
+    for (int i = first; i < n; ++i)
+    {
+      rec.values << m_series.at(i).value;
+      rec.times << m_series.at(i).t - t0;
+    }
+    return rec;
+  }
+  const QVector<GridPoint> steps = grid(m_sampleTime);
+  rec.start = m_start.addMSecs(steps.isEmpty() ? 0 : steps.first().t);
   rec.values.reserve(steps.size());
   for (const GridPoint &g : steps)
     rec.values << g.value;
   return rec;
 }
 
-bool RecordingStore::write(const QString &path, QString *error)
+bool RecordingStore::write(const QString &path, QString *error, bool raw)
 {
-  if (!RecordingFile::writeAny(toRecording(), path, error))
+  if (!RecordingFile::writeAny(toRecording(raw), path, error))
     return false;
   m_dirty = false;
   return true;
@@ -197,15 +213,18 @@ void RecordingStore::load(const Recording &rec)
   m_series.clear();
   m_series.reserve(int(rec.values.size()));
   m_marks.clear();
+  const bool onGrid = rec.onGrid();
   for (int i = 0; i < rec.values.size(); i++)
   {
     RawPoint p;
-    p.t = qint64(i) * m_sampleTime * 100;
+    p.t = onGrid ? qint64(i) * m_sampleTime * 100 : rec.timeAt(i);
     p.value = rec.values[i];
     p.quality = std::isfinite(p.value) ? Quality::Valid : Quality::Stale;
     appendPoint(p);
   }
-  m_loadedGrid = m_sampleTime;
+  // a file on its own grid: each row is already the mean over the step
+  // before it
+  m_loadedGrid = onGrid ? m_sampleTime : 0;
   m_stopT = -1;
   // the store keeps all of it
   if (duration() > m_maxMs)

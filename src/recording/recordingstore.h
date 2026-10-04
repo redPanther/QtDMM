@@ -168,12 +168,16 @@ public:
   /// is NaN. A loaded recording that is on the grid already comes back as it
   /// was.
   QVector<GridPoint> grid(int tenths) const;
-  /// The values for the CSV/spreadsheet export: the grid of the sample time.
-  Recording   toRecording() const;
-  /// Writes the recording (CSV, .xlsx or .ods by suffix); clears dirty().
-  bool        write(const QString &path, QString *error = nullptr);
-  /// Replaces the recording by @p rec: start, sample time and values, one
-  /// reading per sample time.
+  /// The values for the CSV/spreadsheet export: the grid of the sample time,
+  /// or with @p raw every reading at its time (a gap a NaN of its own),
+  /// starting at the first.
+  Recording   toRecording(bool raw = false) const;
+  /// Writes the recording (CSV, .xlsx or .ods by suffix), on the grid or
+  /// with @p raw every reading; clears dirty().
+  bool        write(const QString &path, QString *error = nullptr, bool raw = false);
+  /// Replaces the recording by @p rec: start, sample time and values, each
+  /// at its time. A recording on the grid of its sample time stays one: it
+  /// exports as it came.
   void        load(const Recording &rec);
   /// @}
 
