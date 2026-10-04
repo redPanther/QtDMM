@@ -16,10 +16,14 @@ analog meter and the graph at work without any hardware.
    it belongs to (UT-D04: the serial UNI-T meters, UT-D09: UT61B+/D+/E+ and
    UT161, BU-86X: Brymen, the TFA AIRCO2NTROL), a Bluetooth meter its name,
    a USB-serial adapter its chip. A device you keep in [My devices](my-devices.md)
-   says so.
+   says so - also when the port has another name now (`/dev/ttyUSB0` for
+   the saved `/dev/serial/by-id/...`, another `/dev/hidraw` number) - and a
+   port a running window uses says *In use here* or which instance has it.
 3. Choose it, confirm the **model** - the likeliest is chosen, *All models*
-   lists the rest - and for a Victron device enter its key. **Connect**, and
-   the first reading comes. *Keep in My devices* keeps it for the next time.
+   lists the rest; for a port QtDMM knows nothing of, none is chosen - and
+   for a Victron device enter its key. **Connect**, and the first reading
+   comes. *Keep in My devices* keeps it for the next time. One of My devices
+   is connected as it is, without a second entry.
 
 What is behind a serial port or a UT-D04 cable QtDMM cannot tell yet: the
 list then shows the models that fit, choose yours. A device QtDMM may not

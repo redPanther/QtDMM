@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // "My devices": the meter keys (Settings::isMeterKey(), the same that a new
-// instance does not copy), DeviceLibrary in devices.conf and the stable
-// name of a serial port.
+// instance does not copy), DeviceLibrary in devices.conf - what an entry
+// keeps, the old snapshots cut down, a find recognised by its place - and
+// the stable name of a serial port.
 #include <QCoreApplication>
 #include <QDeadlineTimer>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QSettings>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 
@@ -31,6 +33,13 @@ int main(int argc, char **argv)
 {
   QCoreApplication app(argc, argv);
   QTemporaryDir dir;
+  // what the model table says in QtDMM (InstanceWidget)
+  DeviceLibrary::setModelTransport([](const QString &model) -> QString
+  {
+    if (model.startsWith("Victron"))
+      return "ble";
+    return model == "Uni-Trend UT60BT" ? "blegatt" : QString();
+  });
 
   // --- 1. the meter keys: exactly what copyConfig() leaves out of a new
   //        instance (apart from the window position and the SCPI switch) ---
@@ -66,8 +75,11 @@ int main(int argc, char **argv)
   const QString id = lib.add(name, keys);
   check(!id.isEmpty() && changed.size() >= 1, "library: add");
   QList<MyDevice> all = lib.list();
-  check(all.size() == 1 && all.first().name == name && all.first().keys == keys,
-        "library: the entry as added, special characters in the name: " + (all.isEmpty() ? QString() : all.first().name));
+  const QVariantMap entry = DeviceLibrary::entryKeys(keys);
+  check(all.size() == 1 && all.first().name == name && all.first().keys == entry
+          && entry.size() == 5 && !entry.contains("Port settings/ble-key"),
+        "library: the entry as added (no Bluetooth key at a serial port), special characters in the name: "
+          + (all.isEmpty() ? QString() : all.first().name));
   check(all.first().where() == "/dev/ttyUSB0" && all.first().model() == "UNI-T UT61E", "library: where and model");
   check(QFile::exists(dir.path() + "/devices.conf"), "library: devices.conf next to the instances");
   check(!Settings("x", dir.path()).getConfigInstances().contains("devices"), "library: devices.conf is no instance");
@@ -78,11 +90,15 @@ int main(int argc, char **argv)
   other.save();
   other.setValues(lib.find(id)->keys);
   other.save();
-  check(other.meterKeys() == keys && other.getInt("Graph/sample-time") == 1, "apply: the meter keys, nothing else");
-  check(lib.match(other.meterKeys()) == id, "match: the device in use");
+  check(other.meterKeys() == entry && other.getInt("Graph/sample-time") == 1, "apply: the meter keys, nothing else");
   other.setString("Port settings/baud", "2400");
+  other.setString("DMM/my-device", id);
   other.save();
-  check(lib.match(other.meterKeys()).isEmpty(), "match: changed is not the same");
+  check(lib.findByPlace(other.meterKeys()) == id, "findByPlace: the same port, whatever the baud rate");
+  {
+    other.copyConfig("copied2");
+    check(Settings("copied2", dir.path()).getString("DMM/my-device").isEmpty(), "copyConfig: not which device");
+  }
 
   // --- 3. names, order, duplicate, rename, remove ---
   check(lib.uniqueName(name) == name + " (2)" && lib.uniqueName("BM869s") == "BM869s", "uniqueName");
@@ -122,8 +138,105 @@ int main(int argc, char **argv)
     check(!seen.isEmpty() && a.find(ia)->name == "A2", "two instances: a change in one is changed() in the other");
   }
 
+  // --- 5. what an entry keeps: the model, the place, what the way of
+  //        connecting needs - nothing of another transport ---
+  {
+    const QVariantMap snapshot = { { "DMM/model", "UNI-T UT61E" }, { "DMM/data-format", "CyrustekES51922" },
+                                   { "DMM/display", "22000" }, { "DMM/number-of-values", "1" },
+                                   { "DMM/configured", "true" }, { "DMM/rts", "false" }, { "DMM/dtr", "true" },
+                                   { "DMM/external-setup", "false" },
+                                   { "Port settings/device", "SERIAL /dev/ttyUSB0" },
+                                   { "Port settings/baud", "19200" }, { "Port settings/bits", "7" },
+                                   { "Port settings/parity", "2" }, { "Port settings/stop-bits", "1" },
+                                   { "DMM/virtual-formula", "sin(t)" }, { "DMM/virtual-unit", "V" },
+                                   { "DMM/calc-unit", "W" }, { "DMM/calc-expression", "u*i" },
+                                   { "Port settings/ble-address", "18:90:67:00:00:01 UT60BT" },
+                                   { "Port settings/ble-key", "0123456789abcdef0123456789abcdef" },
+                                   { "Port settings/ble-main", "PV" }, { "Port settings/ble-second", "V" },
+                                   { "Port settings/sigrok-conn", "" }, { "DMM/my-device", "abc" } };
+    QStringList serial = DeviceLibrary::entryKeys(snapshot).keys();
+    check(serial.join(',') == "DMM/data-format,DMM/display,DMM/dtr,DMM/external-setup,DMM/model,DMM/number-of-values,"
+                              "DMM/rts,Port settings/baud,Port settings/bits,Port settings/device,"
+                              "Port settings/parity,Port settings/stop-bits",
+          "entry: serial, got " + serial.join(','));
+    QVariantMap victron = snapshot;
+    victron.insert("DMM/model", "Victron SmartShunt");
+    victron.insert("Port settings/device", "ble 18:90:67:00:00:01");
+    const QStringList ble = DeviceLibrary::entryKeys(victron).keys();
+    check(ble.join(',') == "DMM/data-format,DMM/display,DMM/model,DMM/number-of-values,Port settings/ble-address,"
+                           "Port settings/ble-key,Port settings/ble-main,Port settings/ble-second,Port settings/device",
+          "entry: Victron, got " + ble.join(','));
+    QVariantMap gatt = snapshot;
+    gatt.insert("DMM/model", "Uni-Trend UT60BT");
+    const QStringList g = DeviceLibrary::entryKeys(gatt).keys();
+    check(g.contains("Port settings/ble-address") && !g.contains("Port settings/ble-key") && !g.contains("Port settings/baud"),
+          "entry: GATT by its model, got " + g.join(','));
+    QVariantMap virt = snapshot;
+    virt.insert("DMM/model", "QtDMM Virtual meter");
+    virt.insert("Port settings/device", "calc V/DC sin(t)");
+    const QStringList v = DeviceLibrary::entryKeys(virt).keys();
+    check(v.contains("DMM/virtual-formula") && v.contains("DMM/virtual-unit") && !v.contains("DMM/calc-unit")
+            && !v.contains("Port settings/baud"),
+          "entry: virtual meter, got " + v.join(','));
+  }
+
+  // --- 6. a devices.conf of whole snapshots is cut down when it is read;
+  //        a Bluetooth meter with the port of the meter before gets its own ---
+  {
+    QTemporaryDir old;
+    {
+      QSettings f(old.path() + "/devices.conf", QSettings::IniFormat);
+      f.setValue("device-0000aaaa/name", "Uni-Trend UT60BT");
+      f.setValue("device-0000aaaa/order", 1);
+      f.setValue("device-0000aaaa/DMM/model", "Uni-Trend UT60BT");
+      f.setValue("device-0000aaaa/Port settings/device", "SERIAL /dev/serial/by-id/usb-Prolific-if00-port0");
+      f.setValue("device-0000aaaa/Port settings/ble-address", "18:90:67:00:00:01 UT60BT");
+      f.setValue("device-0000aaaa/Port settings/baud", "600");
+      f.setValue("device-0000aaaa/DMM/virtual-formula", "sin(t)");
+      f.setValue("device-0000bbbb/name", "UT61E");
+      f.setValue("device-0000bbbb/order", 2);
+      f.setValue("device-0000bbbb/DMM/model", "UNI-T UT61E");
+      f.setValue("device-0000bbbb/Port settings/device", "SERIAL /dev/serial/by-id/usb-Prolific-if00-port0");
+      f.setValue("device-0000bbbb/Port settings/baud", "19200");
+      f.setValue("device-0000bbbb/Port settings/ble-address", "18:90:67:00:00:01 UT60BT");
+      f.setValue("device-0000bbbb/Port settings/ble-main", "");
+      f.setValue("device-0000bbbb/DMM/configured", "true");
+    }
+    DeviceLibrary tidied(old.path());
+    const std::optional<MyDevice> ut60 = tidied.find("0000aaaa");
+    const std::optional<MyDevice> ut61 = tidied.find("0000bbbb");
+    check(ut60 && ut60->name == "Uni-Trend UT60BT" && ut60->order == 1
+            && ut60->keys.value("Port settings/device") == "blegatt 18:90:67:00:00:01"
+            && !ut60->keys.contains("Port settings/baud") && !ut60->keys.contains("DMM/virtual-formula"),
+          "tidy: the UT60BT at its Bluetooth address, got " + (ut60 ? QStringList(ut60->keys.keys()).join(',') : QString()));
+    check(ut61 && ut61->order == 2 && ut61->keys.value("Port settings/baud") == "19200"
+            && !ut61->keys.contains("Port settings/ble-address") && !ut61->keys.contains("Port settings/ble-main")
+            && !ut61->keys.contains("DMM/configured"),
+          "tidy: the UT61E without Bluetooth keys, got " + (ut61 ? QStringList(ut61->keys.keys()).join(',') : QString()));
+    check(QSettings(old.path() + "/devices.conf", QSettings::IniFormat).value("device-0000bbbb/Port settings/ble-main",
+                                                                               "gone") == "gone",
+          "tidy: in the file as well");
+
+    // --- 7. found = known: by the place, not by all keys ---
+    check(tidied.findByPlace({ { "Port settings/ble-address", "18:90:67:00:00:01" } }) == "0000aaaa",
+          "place: a Bluetooth find by its address");
+    check(tidied.findByPlace({ { "Port settings/ble-address", "18:90:67:00:00:02" } }).isEmpty(),
+          "place: another address is another device");
+    const QString hidA = tidied.add("UT803", { { "DMM/model", "UNI-T UT803" },
+                                               { "Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw2" } });
+    check(tidied.findByPlace({ { "Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw5" } }) == hidA,
+          "place: an HID cable plugged in again (another hidraw number)");
+    const QString hidB = tidied.add("UT803 (2)", { { "DMM/model", "UNI-T UT803" },
+                                                   { "Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw3" } });
+    check(tidied.findByPlace({ { "Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw3" } }) == hidB,
+          "place: of two cables of one type the one at the path");
+    check(DeviceLibrary::place({ { "Port settings/device", "ble cb:09:e4:16:33:db 0123 PV V" } })
+            == DeviceLibrary::place({ { "Port settings/ble-address", "CB:09:E4:16:33:DB SmartShunt" } }),
+          "place: the address of a Victron device string and of a find");
+  }
+
 #ifdef Q_OS_LINUX
-  // --- 5. the stable port name: the link in by-id that points to the port ---
+  // --- 8. the stable port name: the link in by-id that points to the port ---
   {
     QDir(dir.path()).mkpath("dev/serial/by-id");
     const QString tty = dir.path() + "/dev/ttyUSB0";
@@ -140,6 +253,16 @@ int main(int argc, char **argv)
           "stable: no link, the port as it is");
     const QString link = byId + "/usb-Other_cable-if00-port0";
     check(SerialDevice::stablePortName(link, byId) == link, "stable: a by-id name stays");
+
+    // a by-id name in the entry, the ttyUSB in the find: the same place
+    DeviceLibrary ports(dir.path());
+    const QString onCable = ports.add("On the WCH cable", { { "DMM/model", "UNI-T UT61E" },
+                                      { "Port settings/device",
+                                        "SERIAL " + byId + "/usb-WCH.CN_USB_Quad_Serial_0123-if00-port0" } });
+    check(ports.findByPlace({ { "Port settings/device", "SERIAL " + tty } }) == onCable,
+          "place: by-id and ttyUSB0 are one port");
+    check(ports.findByPlace({ { "Port settings/device", "SERIAL " + dir.path() + "/dev/ttyUSB1" } }).isEmpty(),
+          "place: the other cable is not it");
   }
 #endif
 

@@ -330,52 +330,52 @@
 <context>
     <name>BleGattDevice</name>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="62"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="66"/>
         <source>No Bluetooth address configured.</source>
         <translation>Keine Bluetooth-Adresse eingestellt.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="67"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="71"/>
         <source>This meter does not use a Bluetooth LE connection.</source>
         <translation>Dieses Messgerät verwendet keine Bluetooth-LE-Verbindung.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="88"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="94"/>
         <source>The meter %1 closed the Bluetooth connection.</source>
         <translation>Das Messgerät %1 hat die Bluetooth-Verbindung beendet.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="92"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="98"/>
         <source>Bluetooth: %1</source>
         <translation>Bluetooth: %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="100"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="106"/>
         <source>No answer from %1 - is the meter on and its Bluetooth switched on?</source>
         <translation>Keine Antwort von %1 - ist das Messgerät an und sein Bluetooth eingeschaltet?</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="161"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="168"/>
         <source>%1 does not offer the expected Bluetooth service - is it the right meter?</source>
         <translation>%1 bietet den erwarteten Bluetooth-Dienst nicht an - ist es das richtige Messgerät?</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="167"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="174"/>
         <source>Could not open the Bluetooth service of %1.</source>
         <translation>Der Bluetooth-Dienst von %1 konnte nicht geöffnet werden.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="189"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="196"/>
         <source>Bluetooth service error %1 on %2.</source>
         <translation>Bluetooth-Dienstfehler %1 bei %2.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="201"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="209"/>
         <source>%1 has no notify characteristic.</source>
         <translation>%1 hat keine Notify-Characteristic.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="215"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="223"/>
         <source>%1 has no writable characteristic.</source>
         <translation>%1 hat keine beschreibbare Characteristic.</translation>
     </message>
@@ -592,7 +592,7 @@
 <context>
     <name>DeviceLibrary</name>
     <message>
-        <location filename="../../src/core/devicelibrary.cpp" line="117"/>
+        <location filename="../../src/core/devicelibrary.cpp" line="228"/>
         <source>Meter</source>
         <translation>Messgerät</translation>
     </message>
@@ -793,53 +793,63 @@ und melden Sie sich danach ab und wieder an.</translation>
     </message>
     <message>
         <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="100"/>
+        <source>Choose the model</source>
+        <translation>Modell wählen</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="101"/>
         <source>Not listed? &amp;All models</source>
         <translation>Nicht dabei? &amp;Alle Modelle</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="103"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="104"/>
         <source>&amp;Model:</source>
         <translation>&amp;Modell:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="114"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="119"/>
         <source>32 hex digits, from VictronConnect</source>
         <translation>32 Hex-Ziffern, aus VictronConnect</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="115"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="120"/>
         <source>Device &amp;key:</source>
         <translation>Geräteschlüsse&amp;l:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="119"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="124"/>
         <source>Keep in My de&amp;vices as</source>
         <translation>In Meine &amp;Geräte übernehmen als</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="127"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="132"/>
         <source>&amp;Connect</source>
         <translation>&amp;Verbinden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="176"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="182"/>
         <source>Nothing found. Is the meter switched on and its cable plugged in? Or set it up by hand on the Multimeter page.</source>
         <translation>Nichts gefunden. Ist das Messgerät eingeschaltet und das Kabel eingesteckt? Oder richten Sie es auf der Seite Multimeter von Hand ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="192"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="198"/>
         <source>Searching ...</source>
         <translation>Suche ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="221"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="223"/>
         <source>In My devices: %1</source>
         <translation>In Meine Geräte: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="247"/>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="253"/>
         <source>Tick where to look and press Search.</source>
         <translation>Haken Sie an, wo gesucht werden soll, und drücken Sie Suchen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="259"/>
+        <source>Connect uses &quot;%1&quot; of My devices.</source>
+        <translation>„Verbinden“ verwendet „%1“ aus Meine Geräte.</translation>
     </message>
 </context>
 <context>
@@ -1247,103 +1257,103 @@ Keine Berechtigung? Der Sensor braucht eine udev-Regel für die USB-ID %1:%2.</t
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="220"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="238"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: Ungesicherte Daten</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="221"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="239"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. If you quit now it will be lost.&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Ungesicherte Daten&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Es befinden sich ungesicherte Daten im Speicher. Wenn Sie das Programm beenden gehen diese verloren.&lt;p&gt;Sollen diese vorher exportiert werden?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="236"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="254"/>
         <source>Export data first</source>
         <translation>Daten erst exportieren</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="240"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="258"/>
         <source>Quit without saving</source>
         <translation>Beenden ohne speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="366"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="398"/>
         <source>Recording stopped: switched to %1</source>
         <translation>Aufnahme gestoppt: gewechselt zu %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="387"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="420"/>
         <source>Using %1</source>
         <translation>Verwende %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="574"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="634"/>
         <source>Automatic start at %1</source>
         <translation>Automatisch starten bei %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="576"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="636"/>
         <source>Raising threshold %1</source>
         <translation>Grenzwert steigent %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="578"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="638"/>
         <source>Falling threshold %1</source>
         <translation>Grenzwert fallend %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="603"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="663"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Startfehler&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Programm %1 läuft noch!&lt;p&gt;Wollen Sie es jetzt beenden?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="633"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="693"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Startfehler&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Konnte %1 nicht starten</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="650"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="710"/>
         <source>Launched %1</source>
         <translation>%1 gestartet</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="655"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="715"/>
         <source>%1 terminated with exit code %2.</source>
         <translation>%1 mit dem Rückgabecode %2 beendet.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="678"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="738"/>
         <source>calculated</source>
         <translation>berechnet</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="687"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="747"/>
         <source>no meter configured</source>
         <translation>kein Multimeter konfiguriert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="725"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="785"/>
         <source>QtDMM alarm: %1</source>
         <translation>QtDMM-Alarm: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="602"/>
-        <location filename="../../src/ui/instancewidget.cpp" line="632"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="662"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="692"/>
         <source>QtDMM: Launch error</source>
         <translation>QtDMM: Startfehler</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="615"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="675"/>
         <source>Yes, kill it!</source>
         <translation>Ja, töten!</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="619"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="679"/>
         <source>No, keep running</source>
         <translation>Nein, es laufen lassen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="644"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="704"/>
         <source>Bummer!</source>
         <translation>Reinfall!</translation>
     </message>
@@ -1685,47 +1695,57 @@ Keine Berechtigung? Der Sensor braucht eine udev-Regel für die USB-ID %1:%2.</t
         <translation>Der SCPI-Server: andere Programme können das Messgerät hier auslesen (Einstellungen, SCPI-Server).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="547"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="480"/>
+        <source>In use here</source>
+        <translation>Hier in Gebrauch</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="480"/>
+        <source>In use by the instance %1</source>
+        <translation>In Gebrauch in der Instanz %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="558"/>
         <source>&amp;Full screen</source>
         <translation>&amp;Vollbild</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="550"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="561"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Full screen&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Use the whole screen for the instruments, e.g. on a lab monitor. F11 again returns to the normal window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Vollbild&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Den ganzen Bildschirm für die Instrumente nutzen, z. B. auf einem Labormonitor. F11 erneut drücken bringt das normale Fenster zurück.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="555"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="566"/>
         <source>Zoom &amp;in</source>
         <translation>Ve&amp;rgrößern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="558"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="569"/>
         <source>Zoom &amp;out</source>
         <translation>Verk&amp;leinern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="561"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="572"/>
         <source>Show &amp;whole recording</source>
         <translation>Ganze Aufnahme ze&amp;igen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="564"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="575"/>
         <source>Cop&amp;y graph image</source>
         <translation>Graph als Bild k&amp;opieren</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="566"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="577"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copy graph image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Puts a picture of the recorder graph on the clipboard, ready to paste into a report or a chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graph als Bild kopieren&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Legt ein Bild des Aufnahme-Graphen in die Zwischenablage, bereit zum Einfügen in einen Bericht oder Chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="621"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="632"/>
         <source>Record DMM data</source>
         <translation>DMM Daten aufnehmen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="622"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="633"/>
         <source>Multiple instances of QtDMM have been detected.
 Please choose which instance should record.</source>
         <translatorcomment>Wählen Sie aus, welche Instanz aufnehmen soll.</translatorcomment>
@@ -1733,178 +1753,178 @@ Please choose which instance should record.</source>
 Please choose which instance should record.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="625"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="636"/>
         <source>This instance</source>
         <translation>Diese Instanz</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="626"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="637"/>
         <source>All instances</source>
         <translation>Alle Instanzen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="686"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="697"/>
         <source>About QtDMM</source>
         <translation>Über QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="689"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="700"/>
         <source>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;A readout and transient recorder for digital multimeters.&lt;/p&gt;&lt;p&gt;Built with &lt;b&gt;Qt&lt;/b&gt; %2. Licensed under the &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions before 0.9.0 under GPL 2).&lt;/p&gt;&lt;p&gt;0.9.5 onwards: tuxmaster and contributors, see the AUTHORS file.&lt;br&gt;0.9.3 and before: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Source and bug reports: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbols from the &lt;b&gt;Breeze&lt;/b&gt; icon theme of the KDE community (LGPL 3); QtDMM&apos;s own symbols are drawn in its style.&lt;/p&gt;</source>
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Anzeige und Transientenrekorder für digitale Multimeter.&lt;/p&gt;&lt;p&gt;Gebaut mit &lt;b&gt;Qt&lt;/b&gt; %2. Lizenziert unter der &lt;b&gt;GNU GPL 3&lt;/b&gt; (Versionen vor 0.9.0 unter GPL 2).&lt;/p&gt;&lt;p&gt;Ab 0.9.5: tuxmaster und Mitwirkende, siehe Datei AUTHORS.&lt;br&gt;0.9.3 und davor: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Kontakt: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Quellcode und Fehlermeldungen: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Die Symbole stammen aus dem Symbolthema &lt;b&gt;Breeze&lt;/b&gt; der KDE-Gemeinschaft (LGPL 3); die eigenen Symbole von QtDMM sind in seinem Stil gezeichnet.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="706"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="717"/>
         <source>Supported devices...</source>
         <translation>Unterstützte Geräte...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="856"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="867"/>
         <source>&amp;Hide window</source>
         <translation>Fenster &amp;ausblenden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="857"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="868"/>
         <source>&amp;Title bar</source>
         <translation>&amp;Titelleiste</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="862"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="873"/>
         <source>Hide &amp;controls</source>
         <translation>&amp;Bedienleiste ausblenden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="869"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="880"/>
         <source>&amp;LCD colours</source>
         <translation>&amp;LCD-Farben</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="871"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="882"/>
         <source>&amp;Classic</source>
         <translation>&amp;Klassisch</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="871"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="882"/>
         <source>&amp;Backlight blue</source>
         <translation>&amp;Hintergrundlicht blau</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="872"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="883"/>
         <source>&amp;Amber</source>
         <translation>&amp;Bernstein</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="872"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="883"/>
         <source>&amp;High contrast</source>
         <translation>Hoher Ko&amp;ntrast</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="873"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="884"/>
         <source>C&amp;ustom (from the settings)</source>
         <translation>&amp;Eigene (aus den Einstellungen)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="886"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="897"/>
         <source>Meter &amp;style</source>
         <translation>&amp;Stil der Analoganzeige</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="887"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="898"/>
         <source>&amp;Dark studio</source>
         <translation>&amp;Dunkles Studio</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="887"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="898"/>
         <source>Classic &amp;ivory</source>
         <translation>Klassisch &amp;Elfenbein</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="927"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="938"/>
         <source>No devices saved yet</source>
         <translation>Noch keine Geräte gespeichert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="930"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="941"/>
         <source>&amp;Save current device...</source>
         <translation>Aktuelles Gerät &amp;speichern ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="938"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="949"/>
         <source>Save current device</source>
         <translation>Aktuelles Gerät speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="939"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="950"/>
         <source>Name for this meter and its connection:</source>
         <translation>Name für dieses Messgerät und seine Verbindung:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="944"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="955"/>
         <source>%1 saved in My devices</source>
         <translation>%1 in Meine Geräte gespeichert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="947"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="958"/>
         <source>&amp;Manage my devices...</source>
         <translation>Meine Geräte &amp;verwalten ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="960"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="971"/>
         <source>&amp;Find device...</source>
         <translation>Gerät &amp;finden ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="980"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="991"/>
         <source>%1: readings are coming in</source>
         <translation>%1: Messwerte kommen an</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="981"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="992"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: seit 3 s kein Messwert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1094"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1105"/>
         <source>Save workspace</source>
         <translation>Arbeitsbereich speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1095"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1121"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1106"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1132"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>QtDMM-Arbeitsbereich (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1108"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1119"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Arbeitsbereich speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1108"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1119"/>
         <source>Could not write %1.</source>
         <translation>%1 konnte nicht geschrieben werden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1112"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1123"/>
         <source>Workspace saved to %1</source>
         <translation>Arbeitsbereich gespeichert in %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1120"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1131"/>
         <source>Load workspace</source>
         <translation>Arbeitsbereich laden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1127"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1138"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Arbeitsbereich laden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1128"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1139"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 ist kein QtDMM-Arbeitsbereich.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1152"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1163"/>
         <source>Workspace loaded from %1</source>
         <translation>Arbeitsbereich geladen aus %1</translation>
     </message>
@@ -2115,159 +2135,159 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
         <translation>Alle Hersteller</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="475"/>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="550"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="489"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="564"/>
         <source>Position %1: %2</source>
         <translation>Position %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="566"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="580"/>
         <source>%1: no such instance running</source>
         <translation>%1: keine solche Instanz läuft</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="576"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="590"/>
         <source>Running instances: %1</source>
         <translation>Laufende Instanzen: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="578"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="592"/>
         <source>No other instance is running.</source>
         <translation>Keine andere Instanz läuft.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="777"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="791"/>
         <source>none</source>
         <translation>keiner</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="840"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="854"/>
         <source>%1 was not found or does not run. Install sigrok-cli, or set its path under &lt;a href=&quot;ports&quot;&gt;Special ports&lt;/a&gt;.</source>
         <translation>%1 wurde nicht gefunden oder startet nicht. sigrok-cli installieren oder den Pfad unter &lt;a href=&quot;ports&quot;&gt;Spezielle Anschlüsse&lt;/a&gt; setzen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="843"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="857"/>
         <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
         <translation>%1 hat keinen Treiber „%2&quot;; siehe sigrok-cli --list-supported.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="845"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="859"/>
         <source>%1 found.</source>
         <translation>%1 gefunden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="855"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="869"/>
         <source>Running %1 --driver %2 --scan ...</source>
         <translation>%1 --driver %2 --scan läuft …</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="877"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="891"/>
         <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
         <translation>Kein Messgerät hat innerhalb von 30 s geantwortet (an einer seriellen Schnittstelle ohne SCPI-Gerät wartet sigrok-cli endlos).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="879"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="893"/>
         <source>Found: %1</source>
         <translation>Gefunden: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="881"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="895"/>
         <source>No meter answered.</source>
         <translation>Kein Messgerät hat geantwortet.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="890"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="904"/>
         <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
         <translation>Dieses QtDMM wurde ohne Bluetooth-Unterstützung gebaut und kann sich daher nicht mit diesem Messgerät verbinden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="897"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="911"/>
         <source>Pick the device or type its Bluetooth address.</source>
         <translation>Gerät auswählen oder seine Bluetooth-Adresse eingeben.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="900"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="914"/>
         <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
         <translation>Schalte das Bluetooth des Messgeräts ein (das Bluetooth-Symbol erscheint), bevor du suchst oder verbindest.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="905"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="919"/>
         <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
         <translation>Der Schlüssel ist der 32-stellige „Verschlüsselungsschlüssel&quot;, den VictronConnect unter Produktinfo, Sofortanzeige über Bluetooth zeigt.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="915"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="929"/>
         <source>Scanning for %1 (6 s)...</source>
         <translation>Suche nach %1 (6 s)...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="916"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="930"/>
         <source>Scanning for Victron devices (5 s)...</source>
         <translation>Suche Victron-Geräte (5 s)…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="927"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="941"/>
         <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
         <translation>Kein Messgerät gefunden. Ist sein Bluetooth eingeschaltet und kein anderes Programm damit verbunden?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="928"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="942"/>
         <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
         <translation>Kein Victron-Gerät gefunden. Ist Bluetooth an und die Sofortanzeige am Gerät aktiviert?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="967"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="981"/>
         <source>Load DMM description</source>
         <translation>DMM Beschreibung laden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="967"/>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="993"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="981"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1007"/>
         <source>DMM description (*.cfg)</source>
         <translation>DMM Beschreibung (*.cfg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="993"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1007"/>
         <source>Save DMM description</source>
         <translation>DMM Beschreibung speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1046"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1060"/>
         <source>(none saved yet)</source>
         <translation>(noch keine gespeichert)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1046"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1060"/>
         <source>(choose)</source>
         <translation>(auswählen)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1086"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1100"/>
         <source>My devices</source>
         <translation>Meine Geräte</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1087"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1101"/>
         <source>Update &quot;%1&quot; with these settings, or keep them as a new device?</source>
         <translation>„%1“ mit diesen Einstellungen aktualisieren oder als neues Gerät speichern?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1089"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1103"/>
         <source>&amp;Update</source>
         <translation>&amp;Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1090"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1104"/>
         <source>&amp;New device...</source>
         <translation>&amp;Neues Gerät ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1101"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1115"/>
         <source>Save to my devices</source>
         <translation>Zu meinen Geräten hinzufügen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1101"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="1115"/>
         <source>Name:</source>
         <translation>Name:</translation>
     </message>

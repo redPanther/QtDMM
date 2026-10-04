@@ -469,9 +469,20 @@ void MainWindow::welcome()
 void MainWindow::findDevice()
 {
   FindDeviceDlg dlg(m_wid->settings(), m_wid->devices(), this);
+  // the places the running instances use, for the cards
+  QMap<QString, QString> inUse;
+  for (const QString &instance : m_stateMgr->instances())
+  {
+    const bool here = instance == m_stateMgr->id();
+    const Settings other(instance == QLatin1String("default") ? QString() : instance, m_wid->settings()->configDir());
+    const QString place = DeviceLibrary::place(here ? m_wid->settings()->meterKeys() : other.meterKeys());
+    if (!place.isEmpty())
+      inUse.insert(place, here ? tr("In use here") : tr("In use by the instance %1").arg(instance));
+  }
+  dlg.setPlacesInUse(inUse);
   if (dlg.exec() != QDialog::Accepted)
     return;
-  m_wid->useFoundDevice(dlg.keys(), dlg.addToLibrary() ? dlg.name() : QString());
+  m_wid->useFoundDevice(dlg.keys(), dlg.addToLibrary() ? dlg.name() : QString(), dlg.knownDevice());
 }
 
 // "QtDMM: UNI-T UT61E", with the instance id for non-default instances
