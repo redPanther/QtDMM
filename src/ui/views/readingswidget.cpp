@@ -16,9 +16,10 @@
 #include <QScrollBar>
 #include <QSpinBox>
 #include <QStyle>
-#include <QTableView>
-#include <QToolButton>
 #include <QStyleOptionViewItem>
+#include <QTableView>
+#include <QTimer>
+#include <QToolButton>
 #include <QVBoxLayout>
 
 #include "core/siprefix.h"
@@ -169,6 +170,7 @@ void ReadingsWidget::measureRows(int first, int last)
     QStyleOptionViewItem o;
     o.initFrom(m_view);
     o.font = m_view->font();
+    o.widget = m_view;   // the delegate asks the view's style, not the application's
     return o;
   }();
   bool grown = false;
@@ -211,6 +213,23 @@ void ReadingsWidget::resizeEvent(QResizeEvent *event)
 {
   QWidget::resizeEvent(event);
   placeBar();
+  // the spare width shared out anew, also when there is less of it
+  fitColumns();
+}
+
+void ReadingsWidget::changeEvent(QEvent *event)
+{
+  QWidget::changeEvent(event);
+  // a design switch brings another style with other paddings, a font change
+  // other text widths: what was measured no longer fits. Once the view has
+  // the new style too (the children get the event in no fixed order).
+  if (event->type() == QEvent::StyleChange || event->type() == QEvent::FontChange)
+    QTimer::singleShot(0, this, [this]
+    {
+      m_need.fill(0);
+      measureRows(qMax(0, m_log->rowCount() - kMeasureRows), m_log->rowCount() - 1);
+      fitColumns();
+    });
 }
 
 // Both control groups in one row while they fit, else the right one below.

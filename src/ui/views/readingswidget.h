@@ -42,6 +42,8 @@ public Q_SLOTS:
 protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
+  /// Another design or font: the columns are measured afresh.
+  void changeEvent(QEvent *event) override;
 
 private Q_SLOTS:
   void updateStats();

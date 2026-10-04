@@ -23,6 +23,14 @@ changes range.
 **Settings → Scales** sets the visible window and the vertical scale
 (automatic, or a fixed minimum and maximum).
 
+The status bar shows how much is recorded and how much the graph keeps at
+most (**Max. length**, Settings → Scales), the time left until **Sample
+time** stops the recording, and whether it records: `0:42 / 10:00 - 1:59:17
+left - Sampling`.
+
+The vertical axis is in the unit the meter shows - mV while it shows mV -
+and in the unit that suits the values for a loaded recording.
+
 ## Starting and stopping
 
 Three start modes, chosen on the Recording page:

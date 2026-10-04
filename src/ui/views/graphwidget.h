@@ -381,9 +381,7 @@ protected:
   /// Phosphor: the centre axes with 5 fine ticks per division.
   QGraphicsPathItem *m_centreTicks;
   void             updateCentreTicks();
-  QBrush           m_defaultLabels;     ///< the chart's own label colour
   QColor           m_defaultAxisLine;   ///< the chart's own axis line colour
-  QString          m_defaultLabelFormat; ///< Qt's, for the variants without divisions
   void             applyThemeColors();
   void             placeYTitle();
   void             showUnit();
@@ -395,6 +393,19 @@ protected:
   double           m_xStep = 0;         ///< seconds between the x ticks
   QColor           m_xLabelColor;
   void             updateXLabels();
+  /// @}
+  /// @name y labels with the SI prefix of the reading
+  /// The same for the y axis: Qt's labels can only print base units
+  /// (0.35 V), these print them with the prefix the meter shows (350 mV).
+  /// @{
+  QList<QGraphicsSimpleTextItem *> m_yLabels;
+  QString          m_livePrefix;        ///< the prefix of the meter's unit (setUnit())
+  QString          m_liveBase;          ///< and its base unit
+  QString          m_yPrefix;           ///< the prefix the y labels use now
+  /// The meter's prefix while it measures what the store holds; else the
+  /// one that suits the axis range.
+  QString          yPrefix() const;
+  void             updateYLabels();
   /// @}
   QGraphicsLineItem *m_crosshairVLine;
   QGraphicsLineItem *m_crosshairHLine;

@@ -21,6 +21,9 @@
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu
+- Graph: the vertical axis in the unit the meter shows (350 mV, not 0.35 V); the status bar says what the
+  third time is ("1:59:17 left")
+- Readings table: the columns are measured again after a design or font change, so no cell is cut off
 - Readings table: min, max, mean and span only over the readings of the current function; after a switch from
   Ω to mV the old ohms showed as "Max 611 V"
 - Releases carry the source as QtDMM-<version>.tar.gz, with a fixed checksum for distributions (#184)

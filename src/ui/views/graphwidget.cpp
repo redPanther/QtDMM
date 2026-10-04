@@ -103,8 +103,9 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
 
   m_yAxis = new QValueAxis();
   m_chart->addAxis(m_yAxis, Qt::AlignLeft);
-  m_defaultLabels = m_yAxis->labelsBrush();
-  m_defaultLabelFormat = m_yAxis->labelFormat();
+  // the same for the y labels (updateYLabels())
+  m_yAxis->setLabelsBrush(Qt::transparent);
+  m_yAxis->setLabelFormat("%.4g");
   m_defaultAxisLine = m_yAxis->linePenColor();
   m_yTitle = new QGraphicsSimpleTextItem(m_chart);
   m_yTitle->setFont(m_xAxis->titleFont());
@@ -114,6 +115,7 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
     placeYTitle();
     updateCentreTicks();
     updateXLabels();
+    updateYLabels();
   });
   m_centreTicks = new QGraphicsPathItem(m_chart);
   m_centreTicks->setZValue(5);   // above the grid, below the curves' markers
@@ -594,6 +596,66 @@ void GraphWidget::updateXLabels()
   }
 }
 
+QString GraphWidget::yPrefix() const
+{
+  const QString base = m_store->unit();
+  // units that take no prefix: °C, %, none
+  if (base.isEmpty() || base.startsWith(QChar(0x00b0)) || base == QLatin1String("%"))
+    return QString();
+  if (!m_liveBase.isEmpty() && m_liveBase == base)
+    return m_livePrefix;
+  // a loaded recording, or the meter measures something else now
+  QString prefix;
+  SiPrefix::scale(qMax(std::abs(m_yAxis->min()), std::abs(m_yAxis->max())), &prefix);
+  return prefix;
+}
+
+void GraphWidget::updateYLabels()
+{
+  if (!m_yAxis)
+    return;
+  const QString prefix = yPrefix();
+  if (prefix != m_yPrefix)
+  {
+    m_yPrefix = prefix;
+    showUnit();
+  }
+  const double factor = SiPrefix::factor(prefix);
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_yAxis->min(), max = m_yAxis->max();
+  const int n = m_yAxis->tickCount();
+  QList<double> values;
+  if (max > min && plot.height() > 0 && n > 1)
+    for (int i = 0; i < n; ++i)
+      values << min + i * (max - min) / (n - 1);
+  while (m_yLabels.size() < values.size())
+  {
+    auto *item = new QGraphicsSimpleTextItem(m_chart);
+    item->setZValue(m_yTitle->zValue());
+    m_yLabels << item;
+  }
+  const QFont font = m_yAxis->labelsFont();
+  const double gap = QFontMetricsF(font).horizontalAdvance(' ') + 2;
+  for (int i = 0; i < m_yLabels.size(); ++i)
+  {
+    QGraphicsSimpleTextItem *item = m_yLabels[i];
+    item->setVisible(i < values.size());
+    if (i >= values.size())
+      continue;
+    // as precise as Qt's invisible labels that keep the room ("%.4g"), and
+    // no "-0"
+    double v = values[i] / factor;
+    if (std::abs(values[i]) < (max - min) * 1e-9)
+      v = 0;
+    item->setText(QString::number(v, 'g', 4));
+    item->setFont(font);
+    item->setBrush(m_xLabelColor.isValid() ? QBrush(m_xLabelColor) : m_yAxis->titleBrush());
+    const QRectF r = item->boundingRect();
+    const double y = plot.bottom() - (values[i] - min) / (max - min) * plot.height();
+    item->setPos(qMax(1.0, plot.left() - r.width() - gap), y - r.height() / 2);
+  }
+}
+
 double GraphWidget::niceStep(double v)
 {
   if (!(v > 0) || !std::isfinite(v))
@@ -643,6 +705,7 @@ void GraphWidget::setYRange(double min, double max)
   else
     m_yAxis->setRange(min, max);
   updateCentreTicks();
+  updateYLabels();
 }
 
 void GraphWidget::updateCentreTicks()
@@ -860,10 +923,14 @@ void GraphWidget::onAppended(bool shifted)
 
 void GraphWidget::setUnit(const QString &unit)
 {
-  // Values arrive in SI base units (see DmmResponse), so the axis shows the
-  // base unit and the prefix is dropped here.
-  m_store->setUnit(SiPrefix::split(unit).baseUnit);
+  // Values arrive in SI base units (see DmmResponse), so the store keeps the
+  // base unit; the prefix is the y labels' (yPrefix()).
+  const SiPrefix::Split split = SiPrefix::split(unit);
+  m_store->setUnit(split.baseUnit);
+  m_liveBase = split.baseUnit;
+  m_livePrefix = split.prefix == QLatin1String("u") ? QStringLiteral("µ") : split.prefix;
   showUnit();
+  updateYLabels();
 }
 
 // The axis title: the unit of the recorded values (a recording keeps its
@@ -871,7 +938,7 @@ void GraphWidget::setUnit(const QString &unit)
 void GraphWidget::showUnit()
 {
   const QString base = m_store->unit();
-  m_yTitle->setText(base.isEmpty() ? QString() : QString("[%1]").arg(base));
+  m_yTitle->setText(base.isEmpty() ? QString() : QString("[%1%2]").arg(m_yPrefix, base));
   // room above the plot for the title
   const int h = base.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
                                              + QFontMetricsF(m_yAxis->labelsFont()).height() / 2);
@@ -930,7 +997,7 @@ void GraphWidget::emitInfo()
   // recorded / kept at most - left until the recording length - state
   QString txt = QString("%1 / %2").arg(durationText(m_store->duration() / 1000), durationText(m_store->maxDuration()));
   if (m_store->remainingLength() > 0)
-    txt += " - " + durationText(m_store->remainingLength() / 10);
+    txt += " - " + tr("%1 left").arg(durationText(m_store->remainingLength() / 10));
   txt += " - " + (m_store->isRunning() ? tr("Sampling") : tr("Stopped"));
   Q_EMIT info(txt);
 }
@@ -1633,9 +1700,11 @@ void GraphWidget::applyThemeColors()
   // only keep the room for them.
   m_yAxis->setTickCount(divisions() ? 9 : 5);
   m_xAxis->setLabelFormat("%.4g");
-  m_yAxis->setLabelFormat(divisions() ? "%.4g" : m_defaultLabelFormat);
+  m_yAxis->setLabelFormat("%.4g");   // invisible, only keeps the room
   m_xLabelColor = labels;
   m_xAxis->setLabelsBrush(Qt::transparent);
+  m_yAxis->setLabelsBrush(Qt::transparent);
+  updateYLabels();
   m_yTitle->setBrush(labels);
 
   // cursor and threshold lines: a colour chosen in the settings stays,
