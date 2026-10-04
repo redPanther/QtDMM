@@ -39,7 +39,6 @@ class MeterPrefs;
 class GuiPrefs;
 class GraphPrefs;
 class IntegrationPrefs;
-class ExecutePrefs;
 class AlarmPrefs;
 class ScpiPrefs;
 #include "core/alarm.h"
@@ -69,7 +68,6 @@ public:
     Integration,
     Recorder,
     Ports,
-    External,
     Alarms,
     Scpi,
     NumItems,
@@ -108,7 +106,6 @@ public:
   QColor                dataColor() const;
   QColor                cursorColor() const;
   QColor                startColor() const;
-  QColor                externalColor() const;
   QColor                intColor() const;
   QColor                intThresholdColor() const;
   int                   lineWidth() const;
@@ -163,14 +160,6 @@ public:
   void                  setToolbarVisibility(bool, bool, bool, bool);
   /// @}
 
-  /// @name External application page
-  /// @{
-  bool                  startExternal() const;
-  bool                  externalFalling() const;
-  double                externalThreshold() const;
-  QString               externalCommand() const;
-  bool                  disconnectExternal() const;
-  /// @}
   /// The alarms as applied (Alarms page).
   QList<Alarm>          alarms() const;
   /// Base unit of the reading, for the alarm page's threshold labels.
@@ -238,7 +227,6 @@ protected:
   GuiPrefs             *m_gui;
   GraphPrefs           *m_graph;
   IntegrationPrefs     *m_integration;
-  ExecutePrefs         *m_execute;
   AlarmPrefs           *m_alarms;
   ScpiPrefs            *m_scpi;
   bool                  m_buttonBox_OK;

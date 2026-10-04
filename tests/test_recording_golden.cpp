@@ -260,23 +260,6 @@ int main(int argc, char **argv)
     check(store.isRunning() && startedAt(store) >= 5000 && startedAt(store) < 7000,
           QString("clock time: started at %1 ms, expected from 5000 on").arg(startedAt(store)));
   }
-  {
-    RecordingStore store;
-    store.setExternal(true, false, 2.0);
-    int fired = 0;
-    qint64 firedAt = -1;
-    Player p(store);
-    QObject::connect(&store, &RecordingStore::externalTriggered, [&] { ++fired; firedAt = p.now(); });
-    p.reading(-470, 1.0, "1.000");
-    p.start(0);
-    p.reading(30, 1.5, "1.500");
-    p.reading(530, 2.5, "2.500");
-    p.reading(1030, 1.0, "1.000");
-    p.reading(1530, 3.0, "3.000");
-    p.advance(2000);
-    check(fired == 1 && firedAt >= 530 && firedAt <= 630,
-          QString("external: fired %1 times, at %2 ms, the crossing came at 530").arg(fired).arg(firedAt));
-  }
 
   if (failed)
   {

@@ -38,7 +38,6 @@ public:
   QColor        gridColor() const;
   QColor        dataColor() const;
   QColor        startColor() const;
-  QColor        externalColor() const;
   QColor        cursorColor() const;
   int           lineWidth() const;
   int           lineMode() const;

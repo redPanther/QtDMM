@@ -59,6 +59,7 @@ QJsonObject Alarm::toJson() const
   o["popup"] = popup;
   o["raise-window"] = raiseWindow;
   o["command"] = command;
+  o["disconnect"] = disconnect;
   o["recorder"] = recorder == RecorderStart ? "start" : recorder == RecorderStop ? "stop" : "none";
   o["mark-graph"] = markGraph;
   o["mark-table"] = markTable;
@@ -82,6 +83,7 @@ Alarm Alarm::fromJson(const QJsonObject &o)
   al.popup = o["popup"].toBool(false);
   al.raiseWindow = o["raise-window"].toBool(false);
   al.command = o["command"].toString();
+  al.disconnect = o["disconnect"].toBool(false);
   const QString rec = o["recorder"].toString();
   al.recorder = rec == "start" ? RecorderStart : rec == "stop" ? RecorderStop : RecorderNone;
   al.markGraph = o["mark-graph"].toBool(true);

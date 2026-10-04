@@ -31,6 +31,7 @@ struct Alarm
   bool popup = false;
   bool raiseWindow = false;
   QString command;           ///< program to run, %v value %u unit %n name; empty = none
+  bool disconnect = false;   ///< close the port while the program runs, open it again after
   RecorderAction recorder = RecorderNone;
   bool markGraph = true;
   bool markTable = true;

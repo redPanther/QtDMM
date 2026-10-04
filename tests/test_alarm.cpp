@@ -168,7 +168,7 @@ int main(int argc, char **argv)
   // --- 7. JSON round trip and description ---
   {
     Alarm a = out; a.seconds = 2.5; a.hysteresis = 0.1; a.message = "Voltage odd"; a.color = QColor("#123456");
-    a.beep = false; a.popup = true; a.command = "notify-send %n %v%u"; a.recorder = Alarm::RecorderStart; a.markTable = false;
+    a.beep = false; a.popup = true; a.command = "notify-send %n %v%u"; a.disconnect = true; a.recorder = Alarm::RecorderStart; a.markTable = false;
     const QString json = Alarm::listToJson({a, low});
     const QList<Alarm> back = Alarm::listFromJson(json);
     check(back.size() == 2, "two alarms back");
@@ -176,7 +176,7 @@ int main(int argc, char **argv)
     {
       const Alarm &r = back[0];
       check(r.name == "out" && r.condition == Alarm::Outside && r.a == 11 && r.b == 13 && r.seconds == 2.5 && r.hysteresis == 0.1, "condition round trip");
-      check(r.message == "Voltage odd" && r.color == QColor("#123456") && !r.beep && r.popup && r.command == "notify-send %n %v%u"
+      check(r.message == "Voltage odd" && r.color == QColor("#123456") && !r.beep && r.popup && r.command == "notify-send %n %v%u" && r.disconnect
             && r.recorder == Alarm::RecorderStart && !r.markTable && r.markGraph, "actions round trip");
       check(back[1].condition == Alarm::Below && back[1].beep && back[1].banner, "defaults survive");
     }

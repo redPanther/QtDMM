@@ -44,7 +44,13 @@ What happens when an alarm raises; tick any of them:
 - **Run program** - a command line; `%v` is the value, `%u` its unit,
   `%n` the alarm's name. That is the hook for anything else: a
   notification (`notify-send "%n" "%v%u"`), a mail, a webhook with `curl`,
-  a relay.
+  a relay. The command is the program followed by its arguments, as in a
+  terminal but without a shell: put arguments containing spaces in double
+  quotes; for pipes or redirections call the shell yourself
+  (`sh -c "echo done > /tmp/qtdmm.log"`).
+- **Disconnect first** (with a program) - QtDMM closes the port before the
+  program starts and opens it again when the program has ended, so the
+  program can talk to the meter itself. One such program runs at a time.
 
 The status line reports every raise and clear too.
 

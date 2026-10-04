@@ -78,7 +78,6 @@ void GraphPrefs::defaultsSLOT()
     ui_dataColor->setColor(m_cfg->getColor("Graph/data", Qt::blue));
     ui_cursorColor->setColor(m_cfg->getColor("Graph/cursor", Qt::black));
     ui_startColor->setColor(m_cfg->getColor("Graph/start-trigger", Qt::magenta));
-    ui_extColor->setColor(m_cfg->getColor("Graph/external-trigger", Qt::cyan));
   }
   else
   {
@@ -87,7 +86,6 @@ void GraphPrefs::defaultsSLOT()
     ui_dataColor->setColor(Qt::blue);
     ui_cursorColor->setColor(Qt::black);
     ui_startColor->setColor(Qt::magenta);
-    ui_extColor->setColor(Qt::cyan);
     m_cfg->save();
   }
   // a config from before the variants, whose colours were set here, keeps
@@ -111,7 +109,6 @@ void GraphPrefs::factoryDefaultsSLOT()
   ui_dataColor->setColor(Qt::blue);
   ui_cursorColor->setColor(Qt::black);
   ui_startColor->setColor(Qt::magenta);   // mt: removed .rgb()
-  ui_extColor->setColor(Qt::cyan);   // mt: removed .rgb()
   m_variant->setCurrentIndex(qMax(0, m_variant->findData(QString("scope"))));
   ui_lineMode->setCurrentIndex(1);
   ui_pointMode->setCurrentIndex(0);
@@ -127,7 +124,6 @@ void GraphPrefs::applySLOT()
   m_cfg->setColor("Graph/data", ui_dataColor->color());
   m_cfg->setColor("Graph/cursor", ui_cursorColor->color());
   m_cfg->setColor("Graph/start-trigger", ui_startColor->color());
-  m_cfg->setColor("Graph/external-trigger", ui_extColor->color());
   m_cfg->setString("Graph/variant", variant());
   m_cfg->setInt("Graph/line-width", ui_lineWidth->value());
   m_cfg->setInt("Graph/line-mode", ui_lineMode->currentIndex());
@@ -153,11 +149,6 @@ QColor GraphPrefs::dataColor() const
 QColor GraphPrefs::startColor() const
 {
   return ui_startColor->color();
-}
-
-QColor GraphPrefs::externalColor() const
-{
-  return ui_extColor->color();
 }
 
 QColor GraphPrefs::cursorColor() const

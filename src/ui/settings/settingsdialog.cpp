@@ -27,7 +27,6 @@
 #include "ui/settings/settingsdialog.h"
 #include "ui/settings/settingspageitem.h"
 #include "ui/settings/meterprefs.h"
-#include "ui/settings/executeprefs.h"
 #include "ui/settings/alarmprefs.h"
 #include "ui/settings/scpiprefs.h"
 #include "ui/settings/graphprefs.h"
@@ -167,15 +166,6 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
                  ui_list);
   m_ports->setCfg(m_settings);
   addPage(m_ports);
-
-  m_execute = new ExecutePrefs(ui_stack);
-  m_execute->setId(SettingsDialog::External);
-  new SettingsPageItem(m_execute->id(),
-                 m_execute->icon(),
-                 m_execute->label(),
-                 ui_list);
-  m_execute->setCfg(m_settings);
-  addPage(m_execute);
 
   m_alarms = new AlarmPrefs(ui_stack);
   m_alarms->setId(SettingsDialog::Alarms);
@@ -448,9 +438,6 @@ void SettingsDialog::thresholdChangedSLOT(GraphWidget::CursorMode mode, double v
     case GraphWidget::Trigger:
       m_recorder->setThreshold(value);
       break;
-    case GraphWidget::External:
-      m_execute->setThreshold(value);
-      break;
     case GraphWidget::Integration:
       m_integration->setThreshold(value);
       break;
@@ -501,31 +488,6 @@ QTime SettingsDialog::startTime() const
 /////////////////////////////////////////////////////////////////
 // EXECUTE
 //
-bool SettingsDialog::startExternal() const
-{
-  return m_execute->startExternal();
-}
-
-bool SettingsDialog::externalFalling() const
-{
-  return m_execute->externalFalling();
-}
-
-double SettingsDialog::externalThreshold() const
-{
-  return m_execute->externalThreshold();
-}
-
-bool SettingsDialog::disconnectExternal() const
-{
-  return m_execute->disconnectExternal();
-}
-
-QString SettingsDialog::externalCommand() const
-{
-  return m_execute->externalCommand();
-}
-
 /////////////////////////////////////////////////////////////////
 // GUI
 //
@@ -803,11 +765,6 @@ QColor SettingsDialog::dataColor() const
 QColor SettingsDialog::startColor() const
 {
   return m_graph->startColor();
-}
-
-QColor SettingsDialog::externalColor() const
-{
-  return m_graph->externalColor();
 }
 
 QColor SettingsDialog::cursorColor() const

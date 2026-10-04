@@ -42,13 +42,6 @@ void RecordingStore::setThresholds(double falling, double raising)
   m_raisingThreshold = raising;
 }
 
-void RecordingStore::setExternal(bool on, bool falling, double threshold)
-{
-  m_startExternal = on;
-  m_externalFalling = falling;
-  m_externalThreshold = threshold;
-}
-
 qint64 RecordingStore::duration() const
 {
   if (m_running)
@@ -358,17 +351,6 @@ bool RecordingStore::trigger(double val)
     }
   }
 
-  if (!m_externalStarted && m_running && m_startExternal)
-  {
-    const bool crossed = m_externalFalling ? m_lastVal > m_externalThreshold && val <= m_externalThreshold
-                                           : m_lastVal < m_externalThreshold && val >= m_externalThreshold;
-    if (crossed)
-    {
-      m_externalStarted = true;
-      Q_EMIT externalTriggered();
-    }
-  }
-
   // a gap (NaN: overload) crosses nothing: the triggers compare with the
   // last value there was
   if (std::isfinite(val))
@@ -440,7 +422,6 @@ void RecordingStore::begin(qint64 preMs)
   clear();
   m_running = true;
   m_stopT = -1;
-  m_externalStarted = false;
   m_preUsed = 0;
 
   if (!pre.isEmpty())

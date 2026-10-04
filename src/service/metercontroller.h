@@ -32,7 +32,7 @@ struct ScpiConfig
 
 /// The meter session without any user interface: the connection (MeterConnection), the
 /// min/max memory, the alarms, the SCPI server with its mDNS announcement,
-/// the external-program trigger and the publishing of readings to the other
+/// the alarms' programs and the publishing of readings to the other
 /// instances.
 ///
 /// Views (LCD, analog meter, graph, readings table) and the window hang off
@@ -75,13 +75,6 @@ public:
   void        applyScpi(const ScpiConfig &config);
   /// Source of the SCPI screen dump (HCOPy:SDUMp:DATA?): format -> image bytes.
   void        setScreenshotSource(std::function<QByteArray(const QByteArray &)> source);
-
-  /// Runs @p command (the threshold trigger); false when it could not be
-  /// started. The UI asks first when externalRunning().
-  bool        startExternal(const QString &command);
-  bool        externalRunning() const;
-  /// Ends the running external program (waits up to a second for it).
-  void        killExternal();
 
   /// Min/max memory in SI base units; +-1e20 when empty.
   double      minimum() const { return m_minMax.minimum(); }
@@ -135,8 +128,6 @@ Q_SIGNALS:
   /// SCPI server state: a short text for the status bar (empty = off) and
   /// a sentence for the settings page.
   void        scpiStatusChanged(const QString &status, const QString &detail);
-  /// The external program exited with @p exitCode.
-  void        externalFinished(int exitCode);
 
 private:
   void        responseSLOT(const DmmDecoder::DmmResponse &response);
@@ -153,7 +144,9 @@ private:
   ReadingAdapter      m_adapter;
   ScpiServer         *m_scpi;
   MdnsResponder      *m_mdns;
-  QProcess           *m_external;
+  QProcess           *m_external;     ///< an alarm's program that wanted the port: one at a time
+  bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends
+  bool                m_externalPending = false;   ///< planned, not started yet
   SharedStateManager *m_stateMgr = nullptr;
   QString             m_instanceId = "default";
   QString             m_model;

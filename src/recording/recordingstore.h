@@ -59,7 +59,7 @@ struct LoggedReading
 /// threshold (StartMode), and stops by hand or after the recording length.
 /// The store keeps the last maxDuration() of a recording (at most
 /// kMaxPoints readings): older readings go (appended() says so). The
-/// external program threshold and the alarm marks live here too.
+/// alarm marks live here too.
 ///
 /// Next to the recording the store keeps a second series, the readings:
 /// every reading of every value at full resolution, with its own capacity and
@@ -128,12 +128,6 @@ public:
   void        setRaisingThreshold(double v) { m_raisingThreshold = v; }
   double      fallingThreshold() const { return m_fallingThreshold; }
   double      raisingThreshold() const { return m_raisingThreshold; }
-  /// External program: externalTriggered() once per recording when the
-  /// value crosses @p threshold in the given direction.
-  void        setExternal(bool on, bool falling, double threshold);
-  void        setExternalThreshold(double v) { m_externalThreshold = v; }
-  bool        externalOn() const { return m_startExternal; }
-  double      externalThreshold() const { return m_externalThreshold; }
   /// Values at or below it reset the integral to 0.
   void        setIntegrationThreshold(double v) { m_integrationThreshold = v; }
   double      integrationThreshold() const { return m_integrationThreshold; }
@@ -239,8 +233,6 @@ Q_SIGNALS:
   void        runningChanged(bool running);
   /// Duration, remaining length or running state changed (status bar).
   void        progressChanged();
-  /// The external program threshold was crossed.
-  void        externalTriggered();
   /// A mark came or went.
   void        marksChanged();
   /// A trigger started or the length stopped the recording: the UI beeps.
@@ -271,7 +263,7 @@ private:
   void        append(const RawPoint &p);
   /// Drops what is older than the store keeps; true when anything went.
   bool        trim();
-  /// The start triggers and the external threshold on a new main value.
+  /// The start triggers on a new main value.
   bool        trigger(double value);
   /// Stops at the recording length when @p t (ms since the start) reached it.
   bool        lengthReached(qint64 t);
@@ -308,10 +300,6 @@ private:
   double      m_fallingThreshold = 0;
   double      m_lastVal = 0;
   bool        m_lastValValid = false;
-  bool        m_startExternal = false;
-  bool        m_externalFalling = false;
-  double      m_externalThreshold = 0;
-  bool        m_externalStarted = false;
   double      m_integrationThreshold = 0;
 
   /// The newest main reading: the first value of a recording that starts.

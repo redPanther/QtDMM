@@ -45,7 +45,7 @@ class DeviceLibrary;
 /// the other dialogs.
 ///
 /// The meter session itself - connection, min/max memory, alarms, SCPI
-/// server, external program - is a MeterController, which InstanceWidget creates.
+/// server, the alarms' programs - is a MeterController, which InstanceWidget creates.
 /// The views (display, analog meter, readings table, graph) are connected to
 /// its signals here and know nothing of each other. MainWindow provides the
 /// frame (menus, toolbars, docks, status bar) and hooks its actions up to
@@ -205,10 +205,6 @@ protected:
   QRect       parentRect() const;
 
 protected Q_SLOTS:
-  /// Launches the configured external application (threshold trigger).
-  void        startExternalSLOT();
-  /// The external application exited.
-  void        exitedSLOT(int exitCode);
   /// Graph zoom changed; re-applies the window/total size.
   void        zoomedSLOT();
 };
