@@ -48,6 +48,13 @@ int main(int argc, char **argv)
     check(!PortKey::fromString("voltage.xyz").isValid(), "unknown part: invalid key");
     check(!PortKey::fromString("bogus").isValid(), "unknown quantity: invalid key");
     check(Quantities::fromId(Quantities::id(Quantity::StateOfCharge)) == Quantity::StateOfCharge, "own quantities round trip");
+    // every quantity has its row in the table: one without fell back on
+    // "unknown" (CarbonDioxide of the TFA AirControl did)
+    for (int q = int(Quantity::Voltage); q <= int(Quantity::HarmonicRatio); ++q)
+      check(Quantities::id(Quantity(q)) != QLatin1String("unknown"), QString("table row for sr_mq %1").arg(q));
+    for (int q = int(Quantity::Energy); q <= int(Quantity::CarbonDioxide); ++q)
+      check(Quantities::id(Quantity(q)) != QLatin1String("unknown"), QString("table row for own quantity %1").arg(q));
+    check(Quantities::id(Quantity::CarbonDioxide) == QLatin1String("carbon_dioxide"), "carbon_dioxide");
     check(int(Quantity::Voltage) == 10000 && int(Quantity::HarmonicRatio) == 10032, "sr_mq numbering");
   }
 
