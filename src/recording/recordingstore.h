@@ -8,6 +8,7 @@
 #include <QTime>
 #include <QVector>
 #include <cmath>
+#include <functional>
 
 #include "core/reading.h"
 #include "recording/recordingfile.h"
@@ -135,6 +136,9 @@ public:
   QString     unit() const { return m_unit; }
   /// A reading older than this (ms) makes the sample Stale.
   void        setStaleAfter(int ms) { m_staleMs = ms; }
+  /// The clocks the store reads: a monotonic one in ms (the core clock,
+  /// Sample::now()) and the wall clock. Tests set their own.
+  void        setClock(std::function<qint64()> monotonic, std::function<QDateTime()> wall);
   /// @}
 
   /// @name The recording
@@ -280,6 +284,9 @@ private:
   Quality     m_periodQuality = Quality::Valid;
   int         m_staleMs = 3000;
   Quality     currentQuality() const;
+
+  std::function<qint64()>    m_monotonic;
+  std::function<QDateTime()> m_wall;
 
   QList<LoggedReading> m_readings;
   int         m_readingCapacity = 10000;

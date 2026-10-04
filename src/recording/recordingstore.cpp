@@ -6,9 +6,17 @@
 
 RecordingStore::RecordingStore(QObject *parent) :
   QObject(parent),
-  m_start(QDateTime::currentDateTime())
+  m_monotonic(&Sample::now),
+  m_wall(&QDateTime::currentDateTime)
 {
+  m_start = m_wall();
   m_ring.resize(m_capacity);
+}
+
+void RecordingStore::setClock(std::function<qint64()> monotonic, std::function<QDateTime()> wall)
+{
+  m_monotonic = std::move(monotonic);
+  m_wall = std::move(wall);
 }
 
 void RecordingStore::setSampleTime(int tenths)
@@ -120,7 +128,7 @@ Quality RecordingStore::currentQuality() const
     return Quality::Stale;
   if (m_reading.overload)
     return Quality::Overload;
-  if (QDateTime::currentMSecsSinceEpoch() - m_reading.msecs > m_staleMs)
+  if (m_wall().toMSecsSinceEpoch() - m_reading.msecs > m_staleMs)
     return Quality::Stale;
   return Quality::Valid;
 }
@@ -188,7 +196,7 @@ void RecordingStore::start()
   clear();
   m_running = true;
   m_remainingLength = m_sampleLength;
-  m_start = QDateTime::currentDateTime();
+  m_start = m_wall();
   m_externalStarted = false;
 
   Q_EMIT progressChanged();
@@ -216,7 +224,7 @@ void RecordingStore::clear()
   m_firstSeq = 0;
   const bool hadMarks = !m_marks.isEmpty();
   m_marks.clear();
-  m_start = QDateTime::currentDateTime();
+  m_start = m_wall();
   m_first = true;
   m_dirty = false;
   m_periodQuality = Quality::Valid;
@@ -241,7 +249,7 @@ void RecordingStore::addValue(double val)
     if (m_mode == Time)
     {
       // a reading may miss the exact second
-      const int diff = m_startTime.secsTo(QTime::currentTime());
+      const int diff = m_startTime.secsTo(m_wall().time());
       trigger = diff >= 0 && diff < 2;
     }
     else if (m_mode == Raising)
