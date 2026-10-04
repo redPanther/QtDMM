@@ -97,6 +97,7 @@ FindDeviceDlg::FindDeviceDlg(Settings *settings, DeviceLibrary *library, QWidget
   m_model = new QComboBox(this);
   m_model->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
   m_model->setMinimumContentsLength(24);
+  m_model->setPlaceholderText(tr("Choose the model"));
   m_allModels = new QCheckBox(tr("Not listed? &All models"), this);
   modelRow->addWidget(m_model, 1);
   modelRow->addWidget(m_allModels);
@@ -107,7 +108,11 @@ FindDeviceDlg::FindDeviceDlg(Settings *settings, DeviceLibrary *library, QWidget
   connect(m_model, &QComboBox::currentTextChanged, this, [this](const QString &model)
   {
     if (!m_name->isModified())
-      m_name->setText(m_library ? m_library->uniqueName(QString(model).remove(" *")) : model);
+      m_name->setText(model.isEmpty() || !m_library ? model : m_library->uniqueName(QString(model).remove(" *")));
+    // another model than the known one at this place: another meter, a new entry
+    const bool known = !knownDevice().isEmpty();
+    m_keep->setVisible(!known);
+    m_name->setVisible(!known);
     updateButtons();
   });
   m_key = new QLineEdit(this);
@@ -152,6 +157,7 @@ void FindDeviceDlg::search()
 {
   stopSearch();
   m_found.clear();
+  m_known.clear();
   m_cards->clear();
   // the choice is remembered for the next search
   QStringList where;
@@ -205,23 +211,19 @@ void FindDeviceDlg::add(const Candidate &c)
   for (const Candidate &f : m_found)
     if (f.key == c.key && f.kind == c.kind)
       return;
+  // a device of My devices (by its place: a by-id name and its ttyUSB, an
+  // HID cable with another hidraw number, a Bluetooth address): say so
+  const QString known = m_library ? m_library->findByPlace(c.keys) : QString();
   m_found << c;
+  m_known << known;
   // symbols of the sets QtDMM brings (assets/icons/sets)
   static const char *icons[] = { "qtdmm-dmm", "network-wired", "qtdmm-dmm", "network-server" };
   QString text = c.title + '\n' + c.detail;
-  // a device of My devices: say so
-  if (m_library)
-    for (const MyDevice &d : m_library->list())
-    {
-      const bool same = c.kind == Candidate::Bluetooth
-                          ? d.keys.value("Port settings/ble-address").toString().section(' ', 0, 0) == c.key
-                          : d.keys.value("Port settings/device") == c.keys.value("Port settings/device");
-      if (same)
-      {
-        text += '\n' + tr("In My devices: %1").arg(d.name);
-        break;
-      }
-    }
+  if (const std::optional<MyDevice> d = m_library ? m_library->find(known) : std::nullopt)
+    text += '\n' + tr("In My devices: %1").arg(d->name);
+  const QString inUse = m_inUse.value(DeviceLibrary::place(c.keys));
+  if (!inUse.isEmpty())
+    text += '\n' + inUse;
   if (!c.problem.isEmpty())
     text += '\n' + c.problem;
   auto *item = new QListWidgetItem(QIcon::fromTheme(icons[c.kind]), text, m_cards);
@@ -238,7 +240,11 @@ void FindDeviceDlg::select()
   m_model->clear();
   m_fix->setVisible(any && !m_found[row].problem.isEmpty());
   m_key->clear();
-  m_needsKey = any && !m_found[row].models.isEmpty() && m_found[row].models.first().startsWith("Victron");
+  const std::optional<MyDevice> known = any && m_library ? m_library->find(m_known[row]) : std::nullopt;
+  // a Victron device asks for its key - unless it is one of My devices with a key
+  static const QRegularExpression hex32("^[0-9a-fA-F]{32}$");
+  m_needsKey = any && !m_found[row].models.isEmpty() && m_found[row].models.first().startsWith("Victron")
+               && !(known && hex32.match(known->keys.value("Port settings/ble-key").toString()).hasMatch());
   m_keyLabel->setVisible(m_needsKey);
   m_key->setVisible(m_needsKey);
   if (!any)
@@ -249,9 +255,21 @@ void FindDeviceDlg::select()
     return;
   }
   const Candidate &c = m_found[row];
-  m_hint->setText(c.problem.isEmpty() ? c.hint : c.problem);
-  m_allModels->setChecked(c.models.isEmpty());
-  showAllModels(c.models.isEmpty());
+  m_hint->setText(!c.problem.isEmpty() ? c.problem
+                  : known              ? tr("Connect uses \"%1\" of My devices.").arg(known->name)
+                                       : c.hint);
+  // a port without a known family: the model is chosen from all of them,
+  // none is chosen beforehand
+  m_allModels->setVisible(!c.models.isEmpty());
+  m_allModels->setChecked(false);
+  showAllModels(false);
+  if (known)
+  {
+    const int index = m_model->findText(known->model());
+    if (index < 0)
+      m_model->insertItem(0, known->model());
+    m_model->setCurrentIndex(qMax(0, index));
+  }
 }
 
 void FindDeviceDlg::showAllModels(bool all)
@@ -262,6 +280,9 @@ void FindDeviceDlg::showAllModels(bool all)
     models = Families::models(FrameFormat::Invalid, true) + Families::models(FrameFormat::Invalid, false);
   m_model->clear();
   m_model->addItems(models);
+  // all models for a port nothing is known of: nothing chosen yet
+  if (row >= 0 && row < m_found.size() && m_found[row].models.isEmpty())
+    m_model->setCurrentIndex(-1);
   updateButtons();
 }
 
@@ -294,7 +315,18 @@ QVariantMap FindDeviceDlg::keys() const
 
 bool FindDeviceDlg::addToLibrary() const
 {
-  return m_keep->isChecked() && !m_name->text().trimmed().isEmpty();
+  return knownDevice().isEmpty() && m_keep->isChecked() && !m_name->text().trimmed().isEmpty();
+}
+
+QString FindDeviceDlg::knownDevice() const
+{
+  const int row = m_cards->currentRow();
+  if (row < 0 || row >= m_known.size() || !m_library)
+    return QString();
+  // the known entry as long as its model is chosen - a known one is
+  // connected as it is, without a second entry
+  const std::optional<MyDevice> d = m_library->find(m_known[row]);
+  return d && QString(d->model()).remove(" *") == m_model->currentText().remove(" *") ? d->id : QString();
 }
 
 QString FindDeviceDlg::name() const

@@ -179,8 +179,9 @@ void Settings::deleteConfig(QString instance_id)
 
 bool Settings::isMeterKey(const QString &key)
 {
-  // the meter belongs to the instance; the list of custom ports and the
-  // path of sigrok-cli are the same for all of them
+  // the meter belongs to the instance (and which of My devices it is,
+  // DMM/my-device); the list of custom ports and the path of sigrok-cli are
+  // the same for all of them
   return key.startsWith("DMM/")
          || (key.startsWith("Port settings/")
              && !key.startsWith("Port settings/custom_device")

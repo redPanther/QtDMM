@@ -346,7 +346,7 @@ void MeterPrefs::defaultsSLOT()
 
   // the settings read again (not an entry chosen here): which device is it
   if (m_override.isEmpty() && m_devices)
-    ui_myDevice->setCurrentIndex(qMax(0, ui_myDevice->findData(m_devices->match(m_cfg->meterKeys()))));
+    ui_myDevice->setCurrentIndex(qMax(0, ui_myDevice->findData(m_cfg->getString("DMM/my-device"))));
 }
 
 void MeterPrefs::factoryDefaultsSLOT()
@@ -412,6 +412,10 @@ void MeterPrefs::applySLOT()
 
   m_cfg->setBool("DMM/rts", uirts->isChecked());
   m_cfg->setBool("DMM/dtr", uidtr->isChecked());
+  // the entry chosen here; whether the fields still are that meter, the
+  // instance decides (InstanceWidget::syncDevice())
+  if (m_devices)
+    m_cfg->setString("DMM/my-device", ui_myDevice->currentData().toString());
 }
 
 void MeterPrefs::on_ui_externalSetup_toggled()
@@ -1065,7 +1069,7 @@ void MeterPrefs::fillDevices()
   }
   ui_myDevice->setEnabled(!all.isEmpty());
   // the one chosen on the page, else the one this instance uses
-  int index = ui_myDevice->findData(keep.isEmpty() ? m_devices->match(m_cfg->meterKeys()) : keep);
+  int index = ui_myDevice->findData(keep.isEmpty() ? m_cfg->getString("DMM/my-device") : keep);
   ui_myDevice->setCurrentIndex(qMax(0, index));
 }
 

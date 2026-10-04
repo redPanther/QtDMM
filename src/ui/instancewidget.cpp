@@ -29,6 +29,8 @@
 #include "ui/instancewidget.h"
 #include "device/transports/serial.h"
 #include "core/devicelibrary.h"
+#include "device/dmmdecoder.h"
+#include "device/protocols.h"
 #include "ui/controlbar.h"
 #include "ui/views/graphwidget.h"
 #include "ui/settings/settingsdialog.h"
@@ -60,7 +62,22 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   m_settings  = new Settings(instance_id, config_path, this);
   // the integral is over time since 26.2: its scale once per settings file
   GraphWidget::migrateIntegralScale(m_settings);
-  // "My devices", one file for all instances next to their settings
+  // "My devices", one file for all instances next to their settings. What
+  // an entry keeps depends on how its model connects; the model table is
+  // not in QtCore
+  DeviceLibrary::setModelTransport([](const QString &model) -> QString
+  {
+    for (const DmmDecoder::DMMInfo &cfg : DmmDecoder::getDeviceConfigurations())
+      if (DmmDecoder::sameModel(model, cfg.name))
+      {
+        // baud 0: the Bluetooth entry of a protocol that also has a cable
+        const ProtocolInfo *info = protocolInfo(cfg.protocol);
+        if (cfg.baud != 0 || !info || QLatin1String(info->transport) != QLatin1String("Bluetooth LE"))
+          return QString();
+        return cfg.protocol == FrameFormat::VictronBLE ? QStringLiteral("ble") : QStringLiteral("blegatt");
+      }
+    return QString();
+  });
   m_devices = new DeviceLibrary(m_settings->configDir(), this);
   m_configDlg = new SettingsDialog(m_settings, this);
   m_configDlg->setDeviceLibrary(m_devices);
@@ -339,7 +356,8 @@ void InstanceWidget::configDmmSLOT()
 
 QString InstanceWidget::currentDevice() const
 {
-  return m_devices->match(m_settings->meterKeys());
+  const QString id = m_settings->getString("DMM/my-device");
+  return !id.isEmpty() && m_devices->find(id) ? id : QString();
 }
 
 bool InstanceWidget::switchDevice(const QString &id)
@@ -347,18 +365,31 @@ bool InstanceWidget::switchDevice(const QString &id)
   const std::optional<MyDevice> device = m_devices->find(id);
   if (!device)
     return false;
-  takeOver(device->keys, device->name, false);
+  takeOver(device->keys, device->name, false, id);
   return true;
 }
 
-void InstanceWidget::useFoundDevice(const QVariantMap &keys, const QString &name)
+void InstanceWidget::useFoundDevice(const QVariantMap &keys, const QString &name, const QString &known)
 {
-  takeOver(keys, name.isEmpty() ? keys.value("DMM/model").toString() : name, true);
+  if (const std::optional<MyDevice> device = m_devices->find(known))
+  {
+    // the entry as it is, at the place found now and with a key typed in
+    QVariantMap entry = device->keys;
+    for (const char *key : { "Port settings/device", "Port settings/ble-address", "Port settings/ble-key" })
+      if (!keys.value(key).toString().isEmpty())
+        entry.insert(key, keys.value(key));
+    entry.insert("Port settings/device", SerialDevice::stableDevice(entry.value("Port settings/device").toString()));
+    if (DeviceLibrary::entryKeys(entry) != device->keys)
+      m_devices->update(device->id, entry);
+    switchDevice(device->id);
+    return;
+  }
+  takeOver(keys, name.isEmpty() ? keys.value("DMM/model").toString() : name, true, QString());
   if (!name.isEmpty())
     saveCurrentDevice(name);
 }
 
-void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, bool complete)
+void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, bool complete, const QString &id)
 {
   // another meter is another function: one recording does not mix them
   if (m_ctl->recorder()->isRunning())
@@ -371,6 +402,7 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, bool
   connectSLOT(false);
 
   m_settings->setValues(keys);
+  m_settings->setString("DMM/my-device", id);
   m_settings->setBool("DMM/configured", true);
   m_settings->save();
   m_configDlg->reloadMeter();
@@ -398,11 +430,37 @@ QString InstanceWidget::saveCurrentDevice(const QString &name)
     // this instance uses the stable name from now on as well
     keys.insert("Port settings/device", stable);
     m_settings->setString("Port settings/device", stable);
-    m_settings->save();
-    m_configDlg->reloadMeter();
   }
-  keys.remove("DMM/configured");
-  return m_devices->add(name, keys);
+  const QString id = m_devices->add(name, keys);
+  m_settings->setString("DMM/my-device", id);
+  m_settings->save();
+  m_configDlg->reloadMeter();
+  return id;
+}
+
+void InstanceWidget::syncDevice()
+{
+  QVariantMap keys = m_settings->meterKeys();
+  keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
+  const QString model = keys.value("DMM/model").toString();
+  const QString stored = m_settings->getString("DMM/my-device");
+  std::optional<MyDevice> device = m_devices->find(stored);
+  if (!device || !DmmDecoder::sameModel(device->model(), model))
+  {
+    // another meter: one of My devices when it is at its place
+    device = m_devices->find(m_devices->findByPlace(keys));
+    if (device && !DmmDecoder::sameModel(device->model(), model))
+      device.reset();
+  }
+  const QString id = device ? device->id : QString();
+  if (id != stored)
+  {
+    m_settings->setString("DMM/my-device", id);
+    m_settings->save();
+  }
+  // the same meter: a port or a key changed here changes its entry
+  if (device && DeviceLibrary::entryKeys(keys) != device->keys)
+    m_devices->update(id, keys);
 }
 
 void InstanceWidget::configRecorderSLOT()
@@ -433,6 +491,7 @@ void InstanceWidget::applySLOT(bool reconnect)
   scpi.port = quint16(m_configDlg->scpiPort());
   scpi.mdns = m_configDlg->scpiMdns();
   m_ctl->applyScpi(scpi);
+  syncDevice();
   Q_EMIT configChanged();
 
   if (reconnect)

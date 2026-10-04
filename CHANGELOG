@@ -28,7 +28,10 @@
 - Linux packages install a udev rule for the USB-HID cables and sensors (70-qtdmm.rules)
 - My devices: your meters with their connections, kept for all windows in devices.conf. The toolbar's My
   devices button switches to one with two clicks (a running recording stops); Save current device, the choice
-  on the Multimeter page, a device for a new instance. Serial ports are kept under their /dev/serial/by-id name
+  on the Multimeter page, a device for a new instance. Serial ports are kept under their /dev/serial/by-id name.
+  An entry keeps what its way of connecting needs, and changes with the settings of the meter in use; Find
+  device recognises a saved device by its place (by-id name or ttyUSB, a USB cable plugged in again, a
+  Bluetooth address), connects it without a second entry and says which window uses a port
 - Graph: the vertical axis in the unit the meter shows (350 mV, not 0.35 V); the status bar says what the
   third time is ("1:59:17 left")
 - Readings table: the columns are measured again after a design or font change, so no cell is cut off

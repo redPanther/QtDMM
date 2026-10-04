@@ -309,6 +309,7 @@ void InstancesDlg::on_ui_instance_add_clicked()
   {
     Settings created(configId, m_settings->configDir());
     created.setValues(device->keys);
+    created.setString("DMM/my-device", device->id);
     created.setBool("DMM/configured", true);   // connects at its start
     created.save();
   }

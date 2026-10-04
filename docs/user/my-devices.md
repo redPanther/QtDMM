@@ -5,9 +5,17 @@ bench, a Brymen for the car, a Victron shunt in the van - **My devices**
 keeps each of them with its connection, so switching is two clicks
 instead of filling in the meter page again.
 
-An entry holds the meter and its connection only: model, protocol, port or
-Bluetooth address and key, line settings, sigrok options, the formula of
-the virtual meter. Display, graph, recorder and alarms stay with the window.
+An entry holds the meter and its connection only, and of the connection
+what its way needs: model and protocol, the port with its line settings, a
+Bluetooth address (and for a Victron device its key and the values to
+show), sigrok options, the signal of the virtual meter. Display, graph,
+recorder and alarms stay with the window. An older `devices.conf` with more
+in it is tidied up when QtDMM starts.
+
+The window remembers which entry it uses. Change the port or the key of
+that meter on the Multimeter page, and the entry changes with it; choose
+another model there, and it is another meter - the window uses no entry
+then, until you save one or switch.
 
 ## Switching
 

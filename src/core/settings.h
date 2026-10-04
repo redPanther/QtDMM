@@ -58,8 +58,9 @@ public:
   /// The directory of the settings files (the instances', devices.conf).
   QString        configDir() const;
   /// Whether @p key belongs to the meter and its connection - DMM/*, Port
-  /// settings/* except the list of own ports and the path of sigrok-cli:
-  /// what a new instance does not copy, and what "My devices" keep.
+  /// settings/* except the list of own ports and the path of sigrok-cli
+  /// (DMM/my-device, which of "My devices" it is, among them): what a new
+  /// instance does not copy. "My devices" keep a part (DeviceLibrary::entryKeys()).
   static bool    isMeterKey(const QString &key);
   /// The stored keys and values of the meter (isMeterKey()); with
   /// @p staged the writes not saved yet on top.

@@ -98,7 +98,8 @@ public:
   Settings   *settings() const { return m_settings; }
   /// "My devices", shared by all instances.
   DeviceLibrary *devices() const { return m_devices; }
-  /// The entry of "My devices" this instance uses now; empty when none.
+  /// The entry of "My devices" this instance uses now (its key
+  /// DMM/my-device); empty when none.
   QString     currentDevice() const;
   /// Switches to the device @p id of "My devices": disconnects, takes over
   /// its meter keys and connects again. A running recording stops with a
@@ -108,8 +109,10 @@ public:
   /// Takes over a meter found by "Find device" (or the virtual meter):
   /// where it is and the model; the meter page fills in the rest (line
   /// settings, protocol) as when the model is chosen there. Connects, and
-  /// keeps it in "My devices" as @p name unless that is empty.
-  void        useFoundDevice(const QVariantMap &keys, const QString &name);
+  /// keeps it in "My devices" as @p name unless that is empty. A find that
+  /// is the entry @p known of "My devices" uses that entry instead, with the
+  /// place as found now (a hidraw number, a key typed in).
+  void        useFoundDevice(const QVariantMap &keys, const QString &name, const QString &known = QString());
   /// Keeps the meter of this instance in "My devices" as @p name, the
   /// serial port under its stable name; returns the new id.
   QString     saveCurrentDevice(const QString &name);
@@ -189,7 +192,11 @@ protected:
   /// Disconnects, takes over @p keys (with the meter page's defaults for
   /// what they leave out when @p complete), connects; @p name for the
   /// message.
-  void        takeOver(const QVariantMap &keys, const QString &name, bool complete);
+  void        takeOver(const QVariantMap &keys, const QString &name, bool complete, const QString &id);
+  /// After the settings were applied: the entry in use follows them (same
+  /// model: the same meter, its entry changes along); another model is
+  /// another meter - the entry at its place, or none.
+  void        syncDevice();
   DeviceLibrary *m_devices;
   QString     m_instanceId;
 
