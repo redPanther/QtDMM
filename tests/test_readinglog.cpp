@@ -103,6 +103,22 @@ int main(int argc, char **argv)
   check(qFuzzyCompare(s.min, 0.0122) && qFuzzyCompare(s.max, 1.234), "stats min/max");
   check(qFuzzyCompare(s.mean, (1.234 + 0.0122) / 2), "stats mean");
   check(s.unit == "V", "stats unit is the newest main reading's base unit, not the 2nd value's: " + s.unit);
+  {
+    // another function before: not in the numbers (611 Ω were "Max 611 V")
+    ReadingsModel mixed;
+    ReadingsModel::Entry ohm = entry(611, "611.0", "Ohm", 0);
+    ohm.port = PortKey::fromString("resistance");
+    ohm.flags = 0;
+    mixed.append(ohm);
+    ReadingsModel::Entry ac = entry(5, "5.000", "V", 1);
+    ac.port = PortKey::fromString("voltage.ac");
+    mixed.append(ac);
+    mixed.append(entry(-0.17333, "-173.33", "mV", 2));
+    mixed.append(entry(0.03704, "37.04", "mV", 3));
+    const ReadingsModel::Stats m = mixed.stats();
+    check(m.count == 4 && m.numeric == 2 && qFuzzyCompare(m.max, 0.03704) && qFuzzyCompare(m.min, -0.17333) && m.unit == "V",
+          QString("stats over the newest function only: %1 of %2, max %3").arg(m.numeric).arg(m.count).arg(m.max));
+  }
 
   // --- 3. ring: the oldest rows go ---
   log.setMaxRows(3);

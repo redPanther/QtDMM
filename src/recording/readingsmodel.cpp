@@ -245,11 +245,23 @@ ReadingsModel::Stats ReadingsModel::stats() const
   static const QRegularExpression letters("[A-Za-z]");
   Stats s;
   s.count = m_store->readingCount();
+  // the function of the newest main reading (second values have their
+  // own): the numbers are over its readings only - a table that holds
+  // volts and ohms has no minimum of both
+  int newest = s.count - 1;
+  while (newest >= 0 && m_store->readingAt(newest).id != 0)
+    --newest;
+  if (newest < 0)
+    return s;
+  const PortKey port = m_store->readingAt(newest).port;
+  s.unit = SiPrefix::split(m_store->readingAt(newest).unit).baseUnit;
   double sum = 0;
-  for (int i = 0; i < s.count; ++i)
+  for (int i = 0; i <= newest; ++i)
   {
     const LoggedReading &e = m_store->readingAt(i);
     if (e.id != 0 || e.text.contains(letters) || !std::isfinite(e.value))   // secondary values, OL
+      continue;
+    if (e.port != port || SiPrefix::split(e.unit).baseUnit != s.unit)
       continue;
     if (s.numeric == 0)
       s.min = s.max = e.value;
@@ -260,13 +272,6 @@ ReadingsModel::Stats ReadingsModel::stats() const
   }
   if (s.numeric)
     s.mean = sum / s.numeric;
-  // the unit of the newest main reading (second values have their own)
-  for (int i = s.count - 1; i >= 0; --i)
-    if (m_store->readingAt(i).id == 0)
-    {
-      s.unit = SiPrefix::split(m_store->readingAt(i).unit).baseUnit;
-      break;
-    }
   return s;
 }
 

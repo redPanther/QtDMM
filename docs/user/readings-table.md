@@ -46,8 +46,9 @@ that is about forty minutes. **Clear** empties it; the recorder's graph is
 not affected, and clearing the graph (Ctrl+Del) leaves the table alone.
 
 Below the table a line sums up what it holds: the number of rows and the
-minimum, maximum, mean and span of the numeric main readings (overloads
-and second values are left out), in the unit of the newest row.
+minimum, maximum, mean and span of the main readings in the function of
+the newest one (V DC, Ω, ...; overloads, second values and readings of
+another function are left out).
 
 ## Getting the data out
 
