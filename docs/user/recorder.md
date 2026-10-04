@@ -1,19 +1,22 @@
 # The recorder
 
 The recorder graph — shown with the **Graph** toolbar button, hidden by
-default and brought up automatically when a recording starts — records one
-reading per sampling interval. What it
-records is the meter's primary value in base units — a reading of 12.3 mV is
-stored as 0.0123 V — so the curve stays continuous when the meter changes
-range.
+default and brought up automatically when a recording starts — records
+every reading of the meter's primary value, at the time it came: a short
+spike between two others is kept, and a slow meter is drawn from reading to
+reading. What it records is the value in base units — a reading of 12.3 mV
+is stored as 0.0123 V — so the curve stays continuous when the meter
+changes range.
 
 ## Sampling
 
 **Settings → Recording** (Ctrl+F2) sets:
 
-- **Sample every** — the interval, in tenths of a second, seconds, minutes,
-  hours or days. With an interval longer than the meter's own rate you get the average
-  of the readings in that interval.
+- **Sample every** — the grid of the [export](#export-and-import), in
+  tenths of a second, seconds, minutes, hours or days: one row per
+  interval, the average of the readings in it, each weighted with how long
+  it was shown. A reading counts until the next one, at most until it
+  [goes stale](#gaps). The graph always shows every reading.
 - **Sample time** — how long to record; the recorder stops by itself when it
   is reached. Leave it at zero to record until stopped.
 
@@ -56,8 +59,8 @@ Where the meter showed no value, the curve has a gap instead of a line:
   three of its intervals (at least 1 s, at most 30 s). The digital display
   and the analog meter fade their value at the same time.
 
-Hovering over a gap shows "OL" or "no value". If a sample interval holds
-some values and some gaps, the sample is the average of the values there
+Hovering over a gap shows "OL" or "no value". In the export, an interval
+that holds some values and some gaps is the average of the values there
 were; the integration curve carries on across a gap.
 
 ## External command
@@ -90,10 +93,15 @@ pipes or redirections, call the shell yourself, e.g.
   sharp at any size and can be edited in Inkscape or dropped into a document;
   **PNG** and **JPEG** are pixels. The picture is what the graph shows, so zoom
   and pan first.
-- Hovering shows a crosshair with time and value at the cursor.
-- **Integration** (Settings → Integration curve) draws a second curve: the running
-  sum of the readings above a threshold, scaled and offset as configured — for
-  charge or energy over time.
+- Hovering shows a crosshair with the time (to the millisecond) and the
+  value of the reading at the cursor.
+- **Integration** (Settings → Integration curve) draws a second curve: the
+  integral over time of the readings above a threshold, in the unit times
+  seconds (V·s, A·s, W·s), scaled and offset as configured — for charge or
+  energy over time. Each reading counts for the time it was shown. For
+  ampere-hours or watt-hours set the scale to 1/3600, `0.000277778`. A
+  scale set before version 26.2, when the curve was the sum of the samples,
+  is converted once, so the curve looks as before.
 - **Print** (Ctrl+P) prints the graph with a title and comment.
 
 ## Colours
@@ -115,9 +123,11 @@ only; *Default* goes back to the setting.
 
 ## Export and import
 
-*Export* (Ctrl+E) writes the recording as CSV, or - pick the file type in
-the dialog or just name the file `.xlsx` / `.ods` - as an Excel or
-OpenDocument spreadsheet with the same four columns. In the spreadsheet
+*Export* (Ctrl+E) writes the recording on the grid of **Sample every** as
+CSV, or - pick the file type in the dialog or just name the file `.xlsx` /
+`.ods` - as an Excel or OpenDocument spreadsheet with the same four columns.
+The file type **CSV, every reading** writes each reading at its own time
+instead, a gap as a row of its own; *Import* reads its times back. In the spreadsheet
 the timestamps are date cells (shown with milliseconds) and the values
 numbers, so charts and formulas work without converting anything; the
 header row is bold and stays put when you scroll. CSV is what *Import*

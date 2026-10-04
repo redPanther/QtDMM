@@ -159,8 +159,11 @@
       </item>
       <item row="0" column="1">
        <widget class="QSpinBox" name="sampleEvery">
+        <property name="toolTip">
+         <string>The grid of the export: one row per period, the mean of the readings in it. The recorder keeps every reading.</string>
+        </property>
         <property name="whatsThis">
-         <string>Specify the sampling period. See unit to the right.</string>
+         <string>QtDMM records every reading of the meter with its time. The sampling period is the grid of the export: one row per period, the mean of the readings in it. See unit to the right.</string>
         </property>
         <property name="minimum">
          <number>1</number>

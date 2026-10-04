@@ -652,7 +652,7 @@
     <name>GraphWidget</name>
     <message>
         <location filename="../../src/ui/views/graphwidget.cpp" line="94"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="539"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="550"/>
         <source>[sec]</source>
         <translation>[s]</translation>
     </message>
@@ -709,226 +709,225 @@
         <translation>%1 secondes</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="543"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="554"/>
         <source>[h]</source>
         <translation>[h]</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="548"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="559"/>
         <source>[min]</source>
         <translation>[min]</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="923"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="925"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="927"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="929"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="931"/>
         <source>Sampling</source>
         <translation>Échantillonnage</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="923"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="925"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="927"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="929"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="931"/>
         <source>Stopped</source>
         <translation>Arrêté</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="992"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="994"/>
         <source>Disconnect</source>
         <translation>Déconnecter</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="999"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1001"/>
         <source>Connect</source>
         <translation>Connecter</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1008"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1010"/>
         <source>Stop recorder</source>
         <translation>Arrêter l&apos;enregistreur</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1015"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1017"/>
         <source>Start recorder</source>
         <translation>Démarrer l&apos;enregistreur</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1020"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1022"/>
         <source>Clear graph</source>
         <translation>Effacer le graphe</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1026"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1028"/>
         <source>Configure...</source>
         <translation>Configurer…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1030"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1032"/>
         <source>Copy image</source>
         <translation>Copier l’image</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1033"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1035"/>
         <source>Export image...</source>
         <translation>Exporter l&apos;image...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1039"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1041"/>
         <source>Graph &amp;colours</source>
         <translation>&amp;Couleurs du graphe</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1048"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1050"/>
         <source>&amp;Default: %1</source>
         <translation>Par &amp;défaut : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1056"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1058"/>
         <source>Export data...</source>
         <translation>Exporter les données…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1060"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1062"/>
         <source>Import data...</source>
         <translation>Importer des données…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1165"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1174"/>
         <source>no value</source>
         <translation>pas de valeur</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1220"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1229"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1220"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1229"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1220"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1229"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1222"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1231"/>
+        <source>CSV, every reading (*.csv)</source>
+        <translation>CSV, chaque mesure (*.csv)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1233"/>
         <source>Export data</source>
         <translation>Exporter les données</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1255"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1267"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM : données non enregistrées</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1256"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1268"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Importing data will overwrite your measured data&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;L&apos;importation écrasera vos mesures.&lt;p&gt;Voulez-vous d&apos;abord exporter vos données non enregistrées ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1268"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1280"/>
         <source>Export data first</source>
         <translation>Exporter d&apos;abord</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1272"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1284"/>
         <source>Import &amp; overwrite data</source>
         <translation>Importer et écraser</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1283"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1295"/>
         <source>Import data</source>
         <translation>Importer les données</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1283"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1295"/>
         <source>CSV (*.csv);;All files (*)</source>
         <translation>CSV (*.csv);;Tous les fichiers (*)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1481"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1492"/>
         <source>Scope blue</source>
         <translation>Oscilloscope bleu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1482"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1493"/>
         <source>Phosphor green</source>
         <translation>Phosphore vert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1483"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1494"/>
         <source>Phosphor amber</source>
         <translation>Phosphore ambre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1484"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1495"/>
         <source>Chart recorder</source>
         <translation>Enregistreur papier</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1485"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1496"/>
         <source>Custom</source>
         <translation>Personnalisé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1486"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1497"/>
         <source>Neutral</source>
         <translation>Neutre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1819"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1851"/>
         <source>Scalable vector graphics (*.svg)</source>
         <translation>Graphique vectoriel évolutif (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1819"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1851"/>
         <source>PDF (*.pdf)</source>
         <translation>PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1820"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1852"/>
         <source>PNG image (*.png)</source>
         <translation>Image PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1820"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1852"/>
         <source>JPEG image (*.jpg)</source>
         <translation>Image JPEG (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1823"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1855"/>
         <source>Export image</source>
         <translation>Exporter l&apos;image</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1873"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1905"/>
         <source>QtDMM recording, %1</source>
         <translation>Enregistrement QtDMM, %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1874"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1891"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1906"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1922"/>
         <source>QtDMM graph</source>
         <translation>Graphique QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1875"/>
-        <source>%1 values, %2 s per sample, unit %3</source>
-        <translation>%1 valeurs, %2 s par échantillon, unité %3</translation>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1907"/>
+        <source>%1 readings, unit %2</source>
+        <translation>%1 mesures, unité %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1880"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1900"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1915"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1911"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1931"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1946"/>
         <source>Could not write %1</source>
         <translation>Impossible d&apos;écrire %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1919"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1950"/>
         <source>Graph written to %1</source>
         <translation>Graphique écrit dans %1</translation>
     </message>
@@ -1003,93 +1002,93 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="212"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="214"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM : données non enregistrées</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="213"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="215"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. If you quit now it will be lost.&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Des mesures non enregistrées sont encore en mémoire. Si vous quittez maintenant, elles seront perdues.&lt;p&gt;Voulez-vous d&apos;abord les exporter ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="228"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="230"/>
         <source>Export data first</source>
         <translation>Exporter d&apos;abord</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="232"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="234"/>
         <source>Quit without saving</source>
         <translation>Quitter sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="497"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="499"/>
         <source>Automatic start at %1</source>
         <translation>Démarrage automatique à %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="499"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="501"/>
         <source>Raising threshold %1</source>
         <translation>Seuil montant %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="501"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="503"/>
         <source>Falling threshold %1</source>
         <translation>Seuil descendant %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="525"/>
-        <location filename="../../src/ui/instancewidget.cpp" line="555"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="527"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="557"/>
         <source>QtDMM: Launch error</source>
         <translation>QtDMM : erreur de lancement</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="526"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="528"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Erreur de lancement&lt;/b&gt;&lt;/font&gt;&lt;p&gt;L&apos;application %1 est encore en cours d&apos;exécution !&lt;p&gt;Voulez-vous la terminer maintenant ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="538"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="540"/>
         <source>Yes, kill it!</source>
         <translation>Oui, la terminer !</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="542"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="544"/>
         <source>No, keep running</source>
         <translation>Non, la laisser tourner</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="556"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="558"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Erreur de lancement&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Impossible de lancer %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="567"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="569"/>
         <source>Bummer!</source>
         <translation>Dommage !</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="573"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="575"/>
         <source>Launched %1</source>
         <translation>%1 lancé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="578"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="580"/>
         <source>%1 terminated with exit code %2.</source>
         <translation>%1 s&apos;est terminé avec le code %2.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="601"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="603"/>
         <source>calculated</source>
         <translation>calculé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="610"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="612"/>
         <source>no meter configured</source>
         <translation>aucun multimètre configuré</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="648"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="650"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarme QtDMM : %1</translation>
     </message>
@@ -1696,47 +1695,47 @@ Le multimètre est-il branché et allumé ?</translation>
         <translation>%1 effacée</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="235"/>
+        <location filename="../../src/service/metercontroller.cpp" line="225"/>
         <source>%1: %2 (%3)</source>
         <translation>%1 : %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="252"/>
+        <location filename="../../src/service/metercontroller.cpp" line="242"/>
         <source>%1: could not run %2</source>
         <translation>%1 : impossible de lancer %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="306"/>
+        <location filename="../../src/service/metercontroller.cpp" line="296"/>
         <source>SCPI server: %1</source>
         <translation>Serveur SCPI : %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="328"/>
+        <location filename="../../src/service/metercontroller.cpp" line="318"/>
         <source>The server is not running.</source>
         <translation>Le serveur n&apos;est pas actif.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="333"/>
+        <location filename="../../src/service/metercontroller.cpp" line="323"/>
         <source>1 client</source>
         <translation>1 client</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="333"/>
+        <location filename="../../src/service/metercontroller.cpp" line="323"/>
         <source>%1 clients</source>
         <translation>%1 clients</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="334"/>
+        <location filename="../../src/service/metercontroller.cpp" line="324"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>À l&apos;écoute sur %1, port %2, %3 connecté(s).</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="336"/>
+        <location filename="../../src/service/metercontroller.cpp" line="326"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Annoncé sous « %1 ».</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="337"/>
+        <location filename="../../src/service/metercontroller.cpp" line="327"/>
         <source>SCPI %1:%2 (%3)</source>
         <translation>SCPI %1:%2 (%3)</translation>
     </message>
@@ -2592,7 +2591,7 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
     <name>RecordingFile</name>
     <message>
         <location filename="../../src/recording/recordingfile.cpp" line="41"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="121"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="125"/>
         <source>Cannot open file.</source>
         <translation>Impossible d&apos;ouvrir le fichier.</translation>
     </message>
@@ -2608,33 +2607,33 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
         <translation>Le fichier ne contient que l&apos;en-tête</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="115"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="150"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="119"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
         <source>Nothing to export.</source>
         <translation>Rien à exporter.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="153"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="157"/>
         <source>Recording</source>
         <translation>Enregistrement</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
         <source>timestamp</source>
         <translation>horodatage</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
         <source>time (s)</source>
         <translation>temps (s)</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
         <source>value</source>
         <translation>valeur</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
         <source>unit</source>
         <translation>unité</translation>
     </message>
@@ -4307,28 +4306,28 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="81"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="140"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="894"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="897"/>
         <source>Seconds</source>
         <translation>Secondes</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="86"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="145"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="899"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="902"/>
         <source>Minutes</source>
         <translation>Minutes</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="91"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="150"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="904"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="907"/>
         <source>Hours</source>
         <translation>Heures</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="96"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="155"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="909"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="912"/>
         <source>Days</source>
         <translation>Jours</translation>
     </message>
@@ -4339,74 +4338,79 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="136"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="890"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="893"/>
         <source>Unit for maximum sampling time.</source>
         <translation>Unité de la durée maximale d&apos;échantillonnage.</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="163"/>
-        <source>Specify the sampling period. See unit to the right.</source>
-        <translation>Indiquez la période d&apos;échantillonnage. Voir l&apos;unité à droite.</translation>
+        <source>The grid of the export: one row per period, the mean of the readings in it. The recorder keeps every reading.</source>
+        <translation>La grille de l&apos;export : une ligne par période, la moyenne des mesures qu&apos;elle contient. L&apos;enregistreur garde chaque mesure.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="179"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="871"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="166"/>
+        <source>QtDMM records every reading of the meter with its time. The sampling period is the grid of the export: one row per period, the mean of the readings in it. See unit to the right.</source>
+        <translation>QtDMM enregistre chaque mesure de l&apos;appareil avec son heure. La période d&apos;échantillonnage est la grille de l&apos;export : une ligne par période, la moyenne des mesures qu&apos;elle contient. Unité à droite.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="182"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="874"/>
         <source>Maximum sampling time. When this time expires, the recorder is stopped automatically.</source>
         <translation>Durée maximale d&apos;échantillonnage. À son expiration, l&apos;enregistreur s&apos;arrête automatiquement.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="182"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="185"/>
         <source>∞</source>
         <translation>∞</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="201"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="204"/>
         <source>Start</source>
         <translation>Démarrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="260"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="263"/>
         <source>Select this entry if you want to manually start the transient recorder. Use the &lt;b&gt;Start&lt;/b&gt; and &lt;b&gt;Stop&lt;/b&gt; buttons in the main window to start/stop sampling.</source>
         <translation>Choisissez cette entrée pour démarrer l&apos;enregistreur à la main, avec les boutons &lt;b&gt;Démarrer&lt;/b&gt; et &lt;b&gt;Stop&lt;/b&gt; de la fenêtre principale.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="263"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="266"/>
         <source>&amp;Manual</source>
         <translation>&amp;Manuel</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="308"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="311"/>
         <source>Select this entry if you want the transient recorder to be started at a predefined time.</source>
         <translation>Choisissez cette entrée pour démarrer l&apos;enregistreur à une heure prédéfinie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="311"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="314"/>
         <source>&amp;Predefined time</source>
         <translation>Heure &amp;prédéfinie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="409"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="412"/>
         <source>Hour of start time.</source>
         <translation>Heure de démarrage.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="430"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="467"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="433"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="470"/>
         <source>:</source>
         <translation>:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="446"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="449"/>
         <source>Minutes of start time.</source>
         <translation>Minutes de l&apos;heure de démarrage.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="483"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="486"/>
         <source>Seconds of start time.</source>
         <translation>Secondes de l&apos;heure de démarrage.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="535"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="538"/>
         <source>Select this entry if you want to automatically trigger the sampling. &lt;p&gt;
 You have two choices:
 &lt;ul&gt;
@@ -4421,12 +4425,12 @@ Deux possibilités :
 &lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="543"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="546"/>
         <source>&amp;Trigger</source>
         <translation>Dé&amp;clenchement</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="634"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="637"/>
         <source>Threshold for falling edge.&lt;p&gt;
 You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
 10k - 10000&lt;br&gt;100m - 0.1</source>
@@ -4435,13 +4439,13 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
 10k – 10000&lt;br&gt;100m – 0.1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="639"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="679"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="642"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="682"/>
         <source>0.0</source>
         <translation>0.0</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="674"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="677"/>
         <source>Threshold for raising edge.&lt;p&gt;
 You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Example:&lt;br&gt;
 10k - 10000&lt;br&gt;100m - 0.1</source>
@@ -4450,38 +4454,38 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
 10k – 10000&lt;br&gt;100m – 0.1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="692"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="705"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="695"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="708"/>
         <source>Threshold:</source>
         <translation>Seuil :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="754"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="757"/>
         <source>Trigger sampling on raising edge.</source>
         <translation>Déclencher sur front montant.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="757"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="760"/>
         <source>&amp;Raising edge</source>
         <translation>Front m&amp;ontant</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="808"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="811"/>
         <source>Trigger sampling on falling edge.</source>
         <translation>Déclencher sur front descendant.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="811"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="814"/>
         <source>&amp;Falling edge</source>
         <translation>Front d&amp;escendant</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="845"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="848"/>
         <source>Pre trigger</source>
         <translation>Pré-déclenchement</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="974"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="977"/>
         <source>Pre trigger time:</source>
         <translation>Durée de pré-déclenchement :</translation>
     </message>

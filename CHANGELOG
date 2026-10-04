@@ -16,6 +16,11 @@
 - Meter keys under the display with a fold button (not working yet, for the coming remote control)
 - Defaults for a new configuration: design Dark, LCD backlight blue, analog meter classic ivory, graph scope
   blue, LCD without min/max. The design can also be chosen in the settings (Appearance)
+- Recorder: keeps every reading of the meter with its time, instead of sampling the last value ten times a
+  second. Short spikes are no longer lost, a slow meter is no longer drawn as steps, and the integral is one
+  over time (unit x s; a scale from before is converted once). The export still uses the sample time as its
+  grid, now the time-weighted mean of each interval; the new file type "CSV, every reading" exports every
+  reading at its time, and the import keeps the times
 - Graph: an overload (OL) or a meter that stopped sending is a gap in the curve, no longer a 0 or the last
   value drawn on; the cursor says "OL" or "no value" there. The average of a sample time is taken over the
   values there were, the integral carries over a gap
