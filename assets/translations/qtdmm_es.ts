@@ -608,6 +608,136 @@
     </message>
 </context>
 <context>
+    <name>DeviceSettings</name>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="103"/>
+        <source>Manual settings</source>
+        <translation>Ajustes manuales</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="104"/>
+        <source>All vendors</source>
+        <translation>Todos los fabricantes</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="455"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="530"/>
+        <source>Position %1: %2</source>
+        <translation>Posición %1: %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="546"/>
+        <source>%1: no such instance running</source>
+        <translation>%1: no hay ninguna instancia con ese nombre en ejecución</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="556"/>
+        <source>Running instances: %1</source>
+        <translation>Instancias en ejecución: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="558"/>
+        <source>No other instance is running.</source>
+        <translation>No hay otra instancia en ejecución.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="757"/>
+        <source>none</source>
+        <translation>ninguno</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="820"/>
+        <source>%1 was not found or does not run. Install sigrok-cli, or set its path under &lt;a href=&quot;ports&quot;&gt;Special ports&lt;/a&gt;.</source>
+        <translation>No se encontró %1 o no arranca. Instale sigrok-cli o indique su ruta en &lt;a href=&quot;ports&quot;&gt;Puertos especiales&lt;/a&gt;.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="823"/>
+        <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
+        <translation>%1 no tiene el controlador «%2»; véase sigrok-cli --list-supported.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="825"/>
+        <source>%1 found.</source>
+        <translation>%1 encontrado.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="835"/>
+        <source>Running %1 --driver %2 --scan ...</source>
+        <translation>Ejecutando %1 --driver %2 --scan…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="857"/>
+        <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
+        <translation>Ningún instrumento respondió en 30 s (un puerto serie sin instrumento SCPI deja a sigrok-cli esperando).</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="859"/>
+        <source>Found: %1</source>
+        <translation>Encontrado: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="861"/>
+        <source>No meter answered.</source>
+        <translation>Ningún instrumento respondió.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="870"/>
+        <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
+        <translation>Este QtDMM se compiló sin soporte Bluetooth, así que no puede conectarse a este multímetro.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="877"/>
+        <source>Pick the device or type its Bluetooth address.</source>
+        <translation>Elija el dispositivo o escriba su dirección Bluetooth.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="880"/>
+        <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
+        <translation>Active el Bluetooth del multímetro (aparece el símbolo de Bluetooth) antes de buscar o conectar.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="885"/>
+        <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
+        <translation>La clave es la «clave de cifrado» de 32 dígitos que VictronConnect muestra en Información del producto, Lectura instantánea por Bluetooth.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="895"/>
+        <source>Scanning for %1 (6 s)...</source>
+        <translation>Buscando %1 (6 s)...</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="896"/>
+        <source>Scanning for Victron devices (5 s)...</source>
+        <translation>Buscando dispositivos Victron (5 s)…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="907"/>
+        <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
+        <translation>No se encontró ningún multímetro. ¿Está su Bluetooth activado y ningún otro programa conectado a él?</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="908"/>
+        <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
+        <translation>No se encontró ningún dispositivo Victron. ¿Está el Bluetooth activado y la lectura instantánea habilitada en el dispositivo?</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="947"/>
+        <source>Load DMM description</source>
+        <translation>Cargar descripción de multímetro</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="947"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="973"/>
+        <source>DMM description (*.cfg)</source>
+        <translation>Descripción de multímetro (*.cfg)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="973"/>
+        <source>Save DMM description</source>
+        <translation>Guardar descripción de multímetro</translation>
+    </message>
+</context>
+<context>
     <name>Discovery</name>
     <message>
         <location filename="../../src/device/discovery/discovery.cpp" line="85"/>
@@ -1987,73 +2117,73 @@ DMM connected and switched on?</source>
 <context>
     <name>MeterController</name>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="41"/>
+        <location filename="../../src/service/metercontroller.cpp" line="42"/>
         <source>Recording stopped: the meter measures %2 now, not %1</source>
         <translation>Grabación detenida: el multímetro mide ahora %2, no %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="42"/>
+        <location filename="../../src/service/metercontroller.cpp" line="43"/>
         <source>Function changed</source>
         <translation>Función cambiada</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="48"/>
+        <location filename="../../src/service/metercontroller.cpp" line="49"/>
         <source>%1 cleared</source>
         <translation>%1 apagada</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="64"/>
+        <location filename="../../src/service/metercontroller.cpp" line="65"/>
         <source>%1 ended with exit code %2</source>
         <translation>%1 terminó con el código de salida %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="231"/>
+        <location filename="../../src/service/metercontroller.cpp" line="232"/>
         <source>%1: %2 (%3)</source>
         <translation>%1: %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="250"/>
-        <location filename="../../src/service/metercontroller.cpp" line="264"/>
+        <location filename="../../src/service/metercontroller.cpp" line="251"/>
+        <location filename="../../src/service/metercontroller.cpp" line="272"/>
         <source>%1: could not run %2</source>
         <translation>%1: no se pudo ejecutar %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="253"/>
+        <location filename="../../src/service/metercontroller.cpp" line="254"/>
         <source>%1: %2 is still running</source>
         <translation>%1: %2 todavía se está ejecutando</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="325"/>
+        <location filename="../../src/service/metercontroller.cpp" line="334"/>
         <source>SCPI server: %1</source>
         <translation>Servidor SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="347"/>
+        <location filename="../../src/service/metercontroller.cpp" line="356"/>
         <source>The server is not running.</source>
         <translation>El servidor no está en marcha.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="352"/>
+        <location filename="../../src/service/metercontroller.cpp" line="361"/>
         <source>1 client</source>
         <translation>1 cliente</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="352"/>
+        <location filename="../../src/service/metercontroller.cpp" line="361"/>
         <source>%1 clients</source>
         <translation>%1 clientes</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="353"/>
+        <location filename="../../src/service/metercontroller.cpp" line="362"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>Escuchando en %1, puerto %2, %3 conectado(s).</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="355"/>
+        <location filename="../../src/service/metercontroller.cpp" line="364"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Anunciado como «%1».</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="356"/>
+        <location filename="../../src/service/metercontroller.cpp" line="365"/>
         <source>SCPI %1:%2 (%3)</source>
         <translation>SCPI %1:%2 (%3)</translation>
     </message>
@@ -2061,199 +2191,72 @@ DMM connected and switched on?</source>
 <context>
     <name>MeterPrefs</name>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="53"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="35"/>
         <source>Multimeter</source>
         <translation>Multímetro</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="54"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="36"/>
         <source>&lt;b&gt;Here you can configure the serial port and protocol for your DMM. There is also a number of predefined models.&lt;/b&gt;</source>
         <translation>&lt;b&gt;Aquí puede configurar el puerto serie y el protocolo de su multímetro. También hay varios modelos predefinidos.&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="80"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="45"/>
         <source>&amp;My devices:</source>
         <translation>Mis dispositivos:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="84"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="49"/>
         <source>Fill in the meter and its connection from one of your devices.</source>
         <translation>Rellenar el medidor y su conexión desde uno de sus dispositivos.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="86"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="51"/>
         <source>Sa&amp;ve to my devices...</source>
         <translation>Guardar en mis dispositivos...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="87"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="52"/>
         <source>Keep this meter and its connection under a name, to choose it again with one click.</source>
         <translation>Guardar este medidor y su conexión con un nombre, para elegirlo de nuevo con un clic.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="131"/>
-        <source>Manual settings</source>
-        <translation>Ajustes manuales</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="132"/>
-        <source>All vendors</source>
-        <translation>Todos los fabricantes</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="489"/>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="564"/>
-        <source>Position %1: %2</source>
-        <translation>Posición %1: %2</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="580"/>
-        <source>%1: no such instance running</source>
-        <translation>%1: no hay ninguna instancia con ese nombre en ejecución</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="590"/>
-        <source>Running instances: %1</source>
-        <translation>Instancias en ejecución: %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="592"/>
-        <source>No other instance is running.</source>
-        <translation>No hay otra instancia en ejecución.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="791"/>
-        <source>none</source>
-        <translation>ninguno</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="854"/>
-        <source>%1 was not found or does not run. Install sigrok-cli, or set its path under &lt;a href=&quot;ports&quot;&gt;Special ports&lt;/a&gt;.</source>
-        <translation>No se encontró %1 o no arranca. Instale sigrok-cli o indique su ruta en &lt;a href=&quot;ports&quot;&gt;Puertos especiales&lt;/a&gt;.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="857"/>
-        <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
-        <translation>%1 no tiene el controlador «%2»; véase sigrok-cli --list-supported.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="859"/>
-        <source>%1 found.</source>
-        <translation>%1 encontrado.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="869"/>
-        <source>Running %1 --driver %2 --scan ...</source>
-        <translation>Ejecutando %1 --driver %2 --scan…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="891"/>
-        <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
-        <translation>Ningún instrumento respondió en 30 s (un puerto serie sin instrumento SCPI deja a sigrok-cli esperando).</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="893"/>
-        <source>Found: %1</source>
-        <translation>Encontrado: %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="895"/>
-        <source>No meter answered.</source>
-        <translation>Ningún instrumento respondió.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="904"/>
-        <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
-        <translation>Este QtDMM se compiló sin soporte Bluetooth, así que no puede conectarse a este multímetro.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="911"/>
-        <source>Pick the device or type its Bluetooth address.</source>
-        <translation>Elija el dispositivo o escriba su dirección Bluetooth.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="914"/>
-        <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
-        <translation>Active el Bluetooth del multímetro (aparece el símbolo de Bluetooth) antes de buscar o conectar.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="919"/>
-        <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
-        <translation>La clave es la «clave de cifrado» de 32 dígitos que VictronConnect muestra en Información del producto, Lectura instantánea por Bluetooth.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="929"/>
-        <source>Scanning for %1 (6 s)...</source>
-        <translation>Buscando %1 (6 s)...</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="930"/>
-        <source>Scanning for Victron devices (5 s)...</source>
-        <translation>Buscando dispositivos Victron (5 s)…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="941"/>
-        <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
-        <translation>No se encontró ningún multímetro. ¿Está su Bluetooth activado y ningún otro programa conectado a él?</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="942"/>
-        <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
-        <translation>No se encontró ningún dispositivo Victron. ¿Está el Bluetooth activado y la lectura instantánea habilitada en el dispositivo?</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="981"/>
-        <source>Load DMM description</source>
-        <translation>Cargar descripción de multímetro</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="981"/>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1007"/>
-        <source>DMM description (*.cfg)</source>
-        <translation>Descripción de multímetro (*.cfg)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1007"/>
-        <source>Save DMM description</source>
-        <translation>Guardar descripción de multímetro</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1060"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="123"/>
         <source>(none saved yet)</source>
         <translation>(ninguno guardado aún)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1060"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="123"/>
         <source>(choose)</source>
         <translation>(elegir)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1100"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="166"/>
         <source>My devices</source>
         <translation>Mis dispositivos</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1101"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="167"/>
         <source>Update &quot;%1&quot; with these settings, or keep them as a new device?</source>
         <translation>¿Actualizar «%1» con estos ajustes o guardarlos como un dispositivo nuevo?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1103"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="169"/>
         <source>&amp;Update</source>
         <translation>&amp;Actualizar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1104"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="170"/>
         <source>&amp;New device...</source>
         <translation>&amp;Nuevo dispositivo...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1115"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="181"/>
         <source>Save to my devices</source>
         <translation>Guardar en mis dispositivos</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="1115"/>
+        <location filename="../../src/ui/settings/meterprefs.cpp" line="181"/>
         <source>Name:</source>
         <translation>Nombre:</translation>
     </message>
@@ -3259,23 +3262,23 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="76"/>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="97"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="77"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="98"/>
         <source>QtDMM: Welcome!</source>
         <translation>QtDMM: ¡Bienvenido!</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="89"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="90"/>
         <source>Continue</source>
         <translation>Continuar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="77"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="78"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Welcome!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You seem to have upgraded &lt;b&gt;QtDMM&lt;/b&gt; from a version prior to 0.8.4. Please check your configuration. There are some new parameters to be configured.&lt;p&gt;Thank you for choosing &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;¡Bienvenido!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Parece que ha actualizado &lt;b&gt;QtDMM&lt;/b&gt; desde una versión anterior a 0.8.4. Revise su configuración: hay parámetros nuevos que configurar.&lt;p&gt;Gracias por elegir &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="98"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="99"/>
         <source>Your config file has been converted to the new format.
 Please check your color settings, because they couldn&apos;t be converted automatically.
 Your old config ~/.qtdmmrc was renamed to ~/.qtdmmrc.old.</source>
@@ -3300,6 +3303,379 @@ Su antigua configuración ~/.qtdmmrc se ha renombrado a ~/.qtdmmrc.old.</transla
         <location filename="../../src/recording/spreadsheet.cpp" line="392"/>
         <source>Cannot open file.</source>
         <translation>No se puede abrir el archivo.</translation>
+    </message>
+</context>
+<context>
+    <name>UIDeviceSettings</name>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="26"/>
+        <source>&lt;b&gt;Select yor DMM or set parameter manually&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Seleccione su multímetro o ajuste los parámetros manualmente&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="41"/>
+        <source>Select your DMM&apos;s vendor to narrow the model list below.</source>
+        <translation>Seleccione el fabricante de su multímetro para acotar la lista de modelos.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="51"/>
+        <source>Here you may select your DMM model. If your DMM is not in the list, try to find working settings and open an issue at github.com/qtdmm/QtDMM/issues with them, so they can be added to the list in the next release.</source>
+        <translation>Seleccione aquí el modelo de su multímetro. Si no está en la lista, busque ajustes que funcionen y abra una incidencia en github.com/qtdmm/QtDMM/issues para que se añadan en la próxima versión.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="83"/>
+        <source>Load Settings</source>
+        <translation>Cargar configuración</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="99"/>
+        <source>Save Settings</source>
+        <translation>Guardar configuración</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="114"/>
+        <source>Port settings</source>
+        <translation>Ajustes del puerto</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="122"/>
+        <source>External device setup</source>
+        <translation>Dispositivo configurado externamente</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="148"/>
+        <source>&amp;Port:</source>
+        <translation>&amp;Puerto:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="187"/>
+        <source>Choose the serial device here. &lt;i&gt;(Hint for DOS people: /dev/ttyS0 corresponds to COM1. /dev/ttyS1 to COM2 ...)&lt;/i&gt;</source>
+        <translation>Elija aquí el dispositivo serie. &lt;i&gt;(Para los de DOS: /dev/ttyS0 corresponde a COM1, /dev/ttyS1 a COM2…)&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="210"/>
+        <source>Baud &amp;rate:</source>
+        <translation>&amp;Velocidad (baudios):</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="226"/>
+        <source>Select the baud rate for the DMM here. If you encounter problems connecting to your DMM try lowering the baud rate. I had some problems with my &lt;b&gt;Metex ME-32&lt;/b&gt;. The Documentation said 1200 baud but it only worked at 600.</source>
+        <translation>Seleccione aquí la velocidad en baudios del multímetro. Si tiene problemas de conexión, pruebe una velocidad menor. El &lt;b&gt;Metex ME-32&lt;/b&gt; del autor, documentado a 1200 baudios, solo funcionaba a 600.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="328"/>
+        <source>&amp;Bits:</source>
+        <translation>&amp;Bits:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="344"/>
+        <source>Number of bits for serial communication.</source>
+        <translation>Número de bits de datos de la comunicación serie.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="374"/>
+        <source>Parit&amp;y</source>
+        <translation>Pa&amp;ridad</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="390"/>
+        <source>Parity for serial communication. May be None, Odd or Even.</source>
+        <translation>Paridad de la comunicación serie: ninguna, impar o par.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="394"/>
+        <source>None</source>
+        <translation>Ninguno</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="399"/>
+        <source>Even</source>
+        <translation>Par</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="404"/>
+        <source>Odd</source>
+        <translation>Impar</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="416"/>
+        <source>&amp;Stop bits:</source>
+        <translation>Bits de parad&amp;a:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="432"/>
+        <source>Number of stop bits for serial communication.</source>
+        <translation>Número de bits de parada de la comunicación serie.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="452"/>
+        <source>&amp;Digits</source>
+        <translation>&amp;Dígitos</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="468"/>
+        <source>Number of display digits.
+&lt;ul&gt;&lt;li&gt;3 1/2 - 2000 Counts&lt;/li&gt;
+&lt;li&gt;3 3/4 - 4000 Counts&lt;/li&gt;
+&lt;li&gt;4 1/2 - 20000 Counts&lt;/li&gt;
+&lt;li&gt;4 3/4 - 40000 Counts&lt;/li&gt;
+&lt;/ul&gt;</source>
+        <translation>Número de dígitos de la pantalla.
+&lt;ul&gt;&lt;li&gt;3 1/2 - 2000 cuentas&lt;/li&gt;
+&lt;li&gt;3 3/4 - 4000 cuentas&lt;/li&gt;
+&lt;li&gt;4 1/2 - 20000 cuentas&lt;/li&gt;
+&lt;li&gt;4 3/4 - 40000 cuentas&lt;/li&gt;
+&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="568"/>
+        <source>Formula</source>
+        <translation>Fórmula</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="574"/>
+        <source>&amp;Unit:</source>
+        <translation>&amp;Unidad:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="584"/>
+        <source>The unit of the calculated value, without SI prefix: W, V, A, Ohm, ...</source>
+        <translation>La unidad del valor calculado, sin prefijo SI: W, V, A, Ohm…</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="600"/>
+        <source>&amp;Formula:</source>
+        <translation>&amp;Fórmula:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="610"/>
+        <source>The value this instance shows, computed from the readings of the other running instances. Their names are the variables; + - * / ^, parentheses, numbers with SI suffix (1.5k) and sqrt, abs, log10, min, max are allowed.</source>
+        <translation>El valor que muestra esta instancia, calculado a partir de las lecturas de las demás instancias en ejecución. Sus nombres son las variables; se admiten + - * / ^, paréntesis, números con sufijo SI (1.5k) y sqrt, abs, log10, min, max.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="636"/>
+        <source>Bluetooth</source>
+        <translation>Bluetooth</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="642"/>
+        <source>&amp;Device:</source>
+        <translation>&amp;Dispositivo:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="652"/>
+        <source>The Bluetooth address of the Victron device, as VictronConnect shows it under Product info, Instant readout via Bluetooth. Scan lists the Victron devices in range.</source>
+        <translation>La dirección Bluetooth del dispositivo Victron, tal como la muestra VictronConnect en Información del producto, Lectura instantánea por Bluetooth. Buscar lista los dispositivos Victron al alcance.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="668"/>
+        <source>&amp;Scan</source>
+        <translation>&amp;Buscar</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="675"/>
+        <source>&amp;Key:</source>
+        <translation>&amp;Clave:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="685"/>
+        <source>The 32-digit encryption key of the device: VictronConnect, Product info, Instant readout via Bluetooth, Encryption data.</source>
+        <translation>La clave de cifrado de 32 dígitos del dispositivo: VictronConnect, Información del producto, Lectura instantánea por Bluetooth, Datos de cifrado.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="695"/>
+        <source>&amp;Main value:</source>
+        <translation>Valor &amp;principal:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="705"/>
+        <source>Which of the device&apos;s values the display, the analog meter and the recorder show.</source>
+        <translation>Qué valor del dispositivo muestran la pantalla, el medidor analógico y el registrador.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="712"/>
+        <source>Se&amp;cond value:</source>
+        <translation>Valor se&amp;cundario:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="722"/>
+        <source>A second value shown on the display&apos;s second line and logged in the readings table.</source>
+        <translation>Un segundo valor mostrado en la segunda línea de la pantalla y registrado en la tabla de lecturas.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="742"/>
+        <source>sigrok-cli</source>
+        <translation>sigrok-cli</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="748"/>
+        <source>&amp;Driver:</source>
+        <translation>Con&amp;trolador:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="758"/>
+        <source>The libsigrok driver for this meter, filled in from the model. Change it only if sigrok-cli --list-supported names another one for your meter.</source>
+        <translation>El controlador libsigrok de este instrumento, rellenado según el modelo. Cámbielo solo si sigrok-cli --list-supported indica otro para su instrumento.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="765"/>
+        <source>&amp;Connection:</source>
+        <translation>&amp;Conexión:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="775"/>
+        <source>How sigrok-cli reaches the meter (its conn= option): a serial port such as /dev/ttyUSB0 or COM3, usbtmc/&lt;vid&gt;.&lt;pid&gt; for USB-TMC, tcp-raw/&lt;host&gt;/5025 for LAN.</source>
+        <translation>Cómo llega sigrok-cli al instrumento (su opción conn=): un puerto serie como /dev/ttyUSB0 o COM3, usbtmc/&lt;vid&gt;.&lt;pid&gt; para USB-TMC, tcp-raw/&lt;host&gt;/5025 para LAN.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="791"/>
+        <source>&amp;Test</source>
+        <translation>&amp;Probar</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="794"/>
+        <source>Runs sigrok-cli --scan with these settings and shows whether the meter answers.</source>
+        <translation>Ejecuta sigrok-cli --scan con estos ajustes y muestra si el instrumento responde.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="801"/>
+        <source>&amp;Options:</source>
+        <translation>&amp;Opciones:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="811"/>
+        <source>Further driver options, colon separated, e.g. serialcomm=9600/8n1 for a serial connection.</source>
+        <translation>Otras opciones del controlador, separadas por dos puntos, p. ej. serialcomm=9600/8n1 para una conexión serie.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="837"/>
+        <source>Signal</source>
+        <translation>Señal</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="843"/>
+        <source>&amp;Waveform:</source>
+        <translation>&amp;Forma de onda:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="853"/>
+        <source>What the virtual meter shows over time. Constant and Random stay within Min..Max; the periodic waveforms swing between Min and Max once per Period; Discharge falls from Max towards Min with the time constant Period; Custom uses your own formula (t = seconds since connecting).</source>
+        <translation>Lo que muestra el multímetro virtual a lo largo del tiempo. Constante y Aleatorio se mantienen entre Mín y Máx; las formas periódicas oscilan entre Mín y Máx una vez por periodo; Descarga cae de Máx hacia Mín con la constante de tiempo Periodo; Fórmula propia usa su propia fórmula (t = segundos desde la conexión).</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="855"/>
+        <source>Constant</source>
+        <translation>Constante</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="856"/>
+        <source>Random</source>
+        <translation>Aleatorio</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="857"/>
+        <source>Sine</source>
+        <translation>Seno</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="858"/>
+        <source>Triangle</source>
+        <translation>Triángulo</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="859"/>
+        <source>Square</source>
+        <translation>Cuadrada</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="860"/>
+        <source>Sawtooth</source>
+        <translation>Diente de sierra</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="861"/>
+        <source>Discharge</source>
+        <translation>Descarga</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="862"/>
+        <source>Custom formula</source>
+        <translation>Fórmula propia</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="868"/>
+        <source>U&amp;nit:</source>
+        <translation>U&amp;nidad:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="891"/>
+        <source>Cou&amp;pling:</source>
+        <translation>Aco&amp;plamiento:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="907"/>
+        <source>M&amp;in:</source>
+        <translation>M&amp;ín:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="924"/>
+        <source>Ma&amp;x:</source>
+        <translation>Má&amp;x:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="941"/>
+        <source>Peri&amp;od (s):</source>
+        <translation>Peri&amp;odo (s):</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="958"/>
+        <source>Noi&amp;se:</source>
+        <translation>&amp;Ruido:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="968"/>
+        <source>Peak-to-peak amplitude of random noise added to the signal, in the unit above. 0 for a clean signal.</source>
+        <translation>Amplitud pico a pico del ruido aleatorio añadido a la señal, en la unidad indicada arriba. 0 para una señal limpia.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="978"/>
+        <source>Formu&amp;la:</source>
+        <translation>Fórmu&amp;la:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="988"/>
+        <source>The formula the waveform above expands to; editable with Custom formula. t is the time in seconds since connecting, pi, sin, cos, exp, floor, sqrt, abs, rand() and the readings of other instances may be used.</source>
+        <translation>La fórmula a la que se expande la forma de onda; editable con Fórmula propia. t es el tiempo en segundos desde la conexión; se pueden usar pi, sin, cos, exp, floor, sqrt, abs, rand() y las lecturas de otras instancias.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="998"/>
+        <source>Protocol</source>
+        <translation>Protocolo</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="1004"/>
+        <source>Here you may select the Communication type. If you have a not &quot;officially&quot; supported multimeter, just try out the existing protocols. If you are lucky it may work. If you find working settings, send the to me.</source>
+        <translation>Seleccione aquí el tipo de comunicación. Si su multímetro no está «oficialmente» soportado, pruebe los protocolos existentes; con suerte alguno funcionará. Si encuentra ajustes que funcionan, comuníquelos.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="1018"/>
+        <source>&amp;Number of values:</source>
+        <translation>&amp;Número de valores:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="1028"/>
+        <source>Some multimeter send several lines of data containing different measured values. As QtDMM only shows one variable here you can set the number of lines to be ignored for each measurement (That means that QtDMM only uses the first line).</source>
+        <translation>Algunos multímetros envían varias líneas con distintas mediciones. Como QtDMM solo muestra una magnitud, indique aquí el número de líneas a ignorar por medición (QtDMM usa solo la primera línea).</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="1086"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These protocol settings have not been confirmed by a user yet. If you own this model and can confirm that they work, please open an issue at &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Estos ajustes de protocolo aún no han sido confirmados por ningún usuario. Si tiene este modelo y puede confirmar que funcionan, abra una incidencia en &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="1111"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you have a DMM not listed above and find manual settings that work, please open an issue at &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt; with the model and the settings. This way future users of this DMM can benefit from your help.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si su multímetro no aparece en la lista y encuentra ajustes manuales que funcionan, abra una incidencia en &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt; con el modelo y los ajustes. Así los futuros usuarios de este multímetro se beneficiarán de su ayuda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -4179,379 +4555,6 @@ Puede introducir los valores con un sufijo como m, u, n, p, k, M, G, T&lt;br&gt;
         <location filename="../../src/ui/forms/uimainwindow.ui" line="457"/>
         <source>Ctrl+N</source>
         <translation>Ctrl+N</translation>
-    </message>
-</context>
-<context>
-    <name>UIMeterPrefs</name>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="26"/>
-        <source>&lt;b&gt;Select yor DMM or set parameter manually&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Seleccione su multímetro o ajuste los parámetros manualmente&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="41"/>
-        <source>Select your DMM&apos;s vendor to narrow the model list below.</source>
-        <translation>Seleccione el fabricante de su multímetro para acotar la lista de modelos.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="51"/>
-        <source>Here you may select your DMM model. If your DMM is not in the list, try to find working settings and open an issue at github.com/qtdmm/QtDMM/issues with them, so they can be added to the list in the next release.</source>
-        <translation>Seleccione aquí el modelo de su multímetro. Si no está en la lista, busque ajustes que funcionen y abra una incidencia en github.com/qtdmm/QtDMM/issues para que se añadan en la próxima versión.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="83"/>
-        <source>Load Settings</source>
-        <translation>Cargar configuración</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="99"/>
-        <source>Save Settings</source>
-        <translation>Guardar configuración</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="114"/>
-        <source>Port settings</source>
-        <translation>Ajustes del puerto</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="122"/>
-        <source>External device setup</source>
-        <translation>Dispositivo configurado externamente</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="148"/>
-        <source>&amp;Port:</source>
-        <translation>&amp;Puerto:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="187"/>
-        <source>Choose the serial device here. &lt;i&gt;(Hint for DOS people: /dev/ttyS0 corresponds to COM1. /dev/ttyS1 to COM2 ...)&lt;/i&gt;</source>
-        <translation>Elija aquí el dispositivo serie. &lt;i&gt;(Para los de DOS: /dev/ttyS0 corresponde a COM1, /dev/ttyS1 a COM2…)&lt;/i&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="210"/>
-        <source>Baud &amp;rate:</source>
-        <translation>&amp;Velocidad (baudios):</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="226"/>
-        <source>Select the baud rate for the DMM here. If you encounter problems connecting to your DMM try lowering the baud rate. I had some problems with my &lt;b&gt;Metex ME-32&lt;/b&gt;. The Documentation said 1200 baud but it only worked at 600.</source>
-        <translation>Seleccione aquí la velocidad en baudios del multímetro. Si tiene problemas de conexión, pruebe una velocidad menor. El &lt;b&gt;Metex ME-32&lt;/b&gt; del autor, documentado a 1200 baudios, solo funcionaba a 600.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="328"/>
-        <source>&amp;Bits:</source>
-        <translation>&amp;Bits:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="344"/>
-        <source>Number of bits for serial communication.</source>
-        <translation>Número de bits de datos de la comunicación serie.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="374"/>
-        <source>Parit&amp;y</source>
-        <translation>Pa&amp;ridad</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="390"/>
-        <source>Parity for serial communication. May be None, Odd or Even.</source>
-        <translation>Paridad de la comunicación serie: ninguna, impar o par.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="394"/>
-        <source>None</source>
-        <translation>Ninguno</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="399"/>
-        <source>Even</source>
-        <translation>Par</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="404"/>
-        <source>Odd</source>
-        <translation>Impar</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="416"/>
-        <source>&amp;Stop bits:</source>
-        <translation>Bits de parad&amp;a:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="432"/>
-        <source>Number of stop bits for serial communication.</source>
-        <translation>Número de bits de parada de la comunicación serie.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="452"/>
-        <source>&amp;Digits</source>
-        <translation>&amp;Dígitos</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="468"/>
-        <source>Number of display digits.
-&lt;ul&gt;&lt;li&gt;3 1/2 - 2000 Counts&lt;/li&gt;
-&lt;li&gt;3 3/4 - 4000 Counts&lt;/li&gt;
-&lt;li&gt;4 1/2 - 20000 Counts&lt;/li&gt;
-&lt;li&gt;4 3/4 - 40000 Counts&lt;/li&gt;
-&lt;/ul&gt;</source>
-        <translation>Número de dígitos de la pantalla.
-&lt;ul&gt;&lt;li&gt;3 1/2 - 2000 cuentas&lt;/li&gt;
-&lt;li&gt;3 3/4 - 4000 cuentas&lt;/li&gt;
-&lt;li&gt;4 1/2 - 20000 cuentas&lt;/li&gt;
-&lt;li&gt;4 3/4 - 40000 cuentas&lt;/li&gt;
-&lt;/ul&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="568"/>
-        <source>Formula</source>
-        <translation>Fórmula</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="574"/>
-        <source>&amp;Unit:</source>
-        <translation>&amp;Unidad:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="584"/>
-        <source>The unit of the calculated value, without SI prefix: W, V, A, Ohm, ...</source>
-        <translation>La unidad del valor calculado, sin prefijo SI: W, V, A, Ohm…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="600"/>
-        <source>&amp;Formula:</source>
-        <translation>&amp;Fórmula:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="610"/>
-        <source>The value this instance shows, computed from the readings of the other running instances. Their names are the variables; + - * / ^, parentheses, numbers with SI suffix (1.5k) and sqrt, abs, log10, min, max are allowed.</source>
-        <translation>El valor que muestra esta instancia, calculado a partir de las lecturas de las demás instancias en ejecución. Sus nombres son las variables; se admiten + - * / ^, paréntesis, números con sufijo SI (1.5k) y sqrt, abs, log10, min, max.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="636"/>
-        <source>Bluetooth</source>
-        <translation>Bluetooth</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="642"/>
-        <source>&amp;Device:</source>
-        <translation>&amp;Dispositivo:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="652"/>
-        <source>The Bluetooth address of the Victron device, as VictronConnect shows it under Product info, Instant readout via Bluetooth. Scan lists the Victron devices in range.</source>
-        <translation>La dirección Bluetooth del dispositivo Victron, tal como la muestra VictronConnect en Información del producto, Lectura instantánea por Bluetooth. Buscar lista los dispositivos Victron al alcance.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="668"/>
-        <source>&amp;Scan</source>
-        <translation>&amp;Buscar</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="675"/>
-        <source>&amp;Key:</source>
-        <translation>&amp;Clave:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="685"/>
-        <source>The 32-digit encryption key of the device: VictronConnect, Product info, Instant readout via Bluetooth, Encryption data.</source>
-        <translation>La clave de cifrado de 32 dígitos del dispositivo: VictronConnect, Información del producto, Lectura instantánea por Bluetooth, Datos de cifrado.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="695"/>
-        <source>&amp;Main value:</source>
-        <translation>Valor &amp;principal:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="705"/>
-        <source>Which of the device&apos;s values the display, the analog meter and the recorder show.</source>
-        <translation>Qué valor del dispositivo muestran la pantalla, el medidor analógico y el registrador.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="712"/>
-        <source>Se&amp;cond value:</source>
-        <translation>Valor se&amp;cundario:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="722"/>
-        <source>A second value shown on the display&apos;s second line and logged in the readings table.</source>
-        <translation>Un segundo valor mostrado en la segunda línea de la pantalla y registrado en la tabla de lecturas.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="742"/>
-        <source>sigrok-cli</source>
-        <translation>sigrok-cli</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="748"/>
-        <source>&amp;Driver:</source>
-        <translation>Con&amp;trolador:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="758"/>
-        <source>The libsigrok driver for this meter, filled in from the model. Change it only if sigrok-cli --list-supported names another one for your meter.</source>
-        <translation>El controlador libsigrok de este instrumento, rellenado según el modelo. Cámbielo solo si sigrok-cli --list-supported indica otro para su instrumento.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="765"/>
-        <source>&amp;Connection:</source>
-        <translation>&amp;Conexión:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="775"/>
-        <source>How sigrok-cli reaches the meter (its conn= option): a serial port such as /dev/ttyUSB0 or COM3, usbtmc/&lt;vid&gt;.&lt;pid&gt; for USB-TMC, tcp-raw/&lt;host&gt;/5025 for LAN.</source>
-        <translation>Cómo llega sigrok-cli al instrumento (su opción conn=): un puerto serie como /dev/ttyUSB0 o COM3, usbtmc/&lt;vid&gt;.&lt;pid&gt; para USB-TMC, tcp-raw/&lt;host&gt;/5025 para LAN.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="791"/>
-        <source>&amp;Test</source>
-        <translation>&amp;Probar</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="794"/>
-        <source>Runs sigrok-cli --scan with these settings and shows whether the meter answers.</source>
-        <translation>Ejecuta sigrok-cli --scan con estos ajustes y muestra si el instrumento responde.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="801"/>
-        <source>&amp;Options:</source>
-        <translation>&amp;Opciones:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="811"/>
-        <source>Further driver options, colon separated, e.g. serialcomm=9600/8n1 for a serial connection.</source>
-        <translation>Otras opciones del controlador, separadas por dos puntos, p. ej. serialcomm=9600/8n1 para una conexión serie.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="837"/>
-        <source>Signal</source>
-        <translation>Señal</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="843"/>
-        <source>&amp;Waveform:</source>
-        <translation>&amp;Forma de onda:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="853"/>
-        <source>What the virtual meter shows over time. Constant and Random stay within Min..Max; the periodic waveforms swing between Min and Max once per Period; Discharge falls from Max towards Min with the time constant Period; Custom uses your own formula (t = seconds since connecting).</source>
-        <translation>Lo que muestra el multímetro virtual a lo largo del tiempo. Constante y Aleatorio se mantienen entre Mín y Máx; las formas periódicas oscilan entre Mín y Máx una vez por periodo; Descarga cae de Máx hacia Mín con la constante de tiempo Periodo; Fórmula propia usa su propia fórmula (t = segundos desde la conexión).</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="855"/>
-        <source>Constant</source>
-        <translation>Constante</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="856"/>
-        <source>Random</source>
-        <translation>Aleatorio</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="857"/>
-        <source>Sine</source>
-        <translation>Seno</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="858"/>
-        <source>Triangle</source>
-        <translation>Triángulo</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="859"/>
-        <source>Square</source>
-        <translation>Cuadrada</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="860"/>
-        <source>Sawtooth</source>
-        <translation>Diente de sierra</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="861"/>
-        <source>Discharge</source>
-        <translation>Descarga</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="862"/>
-        <source>Custom formula</source>
-        <translation>Fórmula propia</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="868"/>
-        <source>U&amp;nit:</source>
-        <translation>U&amp;nidad:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="891"/>
-        <source>Cou&amp;pling:</source>
-        <translation>Aco&amp;plamiento:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="907"/>
-        <source>M&amp;in:</source>
-        <translation>M&amp;ín:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="924"/>
-        <source>Ma&amp;x:</source>
-        <translation>Má&amp;x:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="941"/>
-        <source>Peri&amp;od (s):</source>
-        <translation>Peri&amp;odo (s):</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="958"/>
-        <source>Noi&amp;se:</source>
-        <translation>&amp;Ruido:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="968"/>
-        <source>Peak-to-peak amplitude of random noise added to the signal, in the unit above. 0 for a clean signal.</source>
-        <translation>Amplitud pico a pico del ruido aleatorio añadido a la señal, en la unidad indicada arriba. 0 para una señal limpia.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="978"/>
-        <source>Formu&amp;la:</source>
-        <translation>Fórmu&amp;la:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="988"/>
-        <source>The formula the waveform above expands to; editable with Custom formula. t is the time in seconds since connecting, pi, sin, cos, exp, floor, sqrt, abs, rand() and the readings of other instances may be used.</source>
-        <translation>La fórmula a la que se expande la forma de onda; editable con Fórmula propia. t es el tiempo en segundos desde la conexión; se pueden usar pi, sin, cos, exp, floor, sqrt, abs, rand() y las lecturas de otras instancias.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="998"/>
-        <source>Protocol</source>
-        <translation>Protocolo</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="1004"/>
-        <source>Here you may select the Communication type. If you have a not &quot;officially&quot; supported multimeter, just try out the existing protocols. If you are lucky it may work. If you find working settings, send the to me.</source>
-        <translation>Seleccione aquí el tipo de comunicación. Si su multímetro no está «oficialmente» soportado, pruebe los protocolos existentes; con suerte alguno funcionará. Si encuentra ajustes que funcionan, comuníquelos.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="1018"/>
-        <source>&amp;Number of values:</source>
-        <translation>&amp;Número de valores:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="1028"/>
-        <source>Some multimeter send several lines of data containing different measured values. As QtDMM only shows one variable here you can set the number of lines to be ignored for each measurement (That means that QtDMM only uses the first line).</source>
-        <translation>Algunos multímetros envían varias líneas con distintas mediciones. Como QtDMM solo muestra una magnitud, indique aquí el número de líneas a ignorar por medición (QtDMM usa solo la primera línea).</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="1086"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These protocol settings have not been confirmed by a user yet. If you own this model and can confirm that they work, please open an issue at &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Estos ajustes de protocolo aún no han sido confirmados por ningún usuario. Si tiene este modelo y puede confirmar que funcionan, abra una incidencia en &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimeterprefs.ui" line="1111"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you have a DMM not listed above and find manual settings that work, please open an issue at &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt; with the model and the settings. This way future users of this DMM can benefit from your help.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si su multímetro no aparece en la lista y encuentra ajustes manuales que funcionan, abra una incidencia en &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt; con el modelo y los ajustes. Así los futuros usuarios de este multímetro se beneficiarán de su ayuda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>

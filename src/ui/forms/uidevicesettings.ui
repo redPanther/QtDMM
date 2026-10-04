@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>UIMeterPrefs</class>
- <widget class="SettingsPage" name="UIMeterPrefs">
+ <class>UIDeviceSettings</class>
+ <widget class="QWidget" name="UIDeviceSettings">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -1127,14 +1127,6 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>SettingsPage</class>
-   <extends>QWidget</extends>
-   <header>ui/settings/settingspage.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>ui_model</tabstop>
   <tabstop>port</tabstop>
@@ -1144,9 +1136,6 @@
   <tabstop>parityCombo</tabstop>
   <tabstop>displayCombo</tabstop>
  </tabstops>
- <includes>
-  <include location="global">ui/settings/settingspage.h</include>
- </includes>
  <resources>
   <include location="../resources.qrc"/>
  </resources>
