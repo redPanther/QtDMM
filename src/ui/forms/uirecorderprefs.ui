@@ -847,6 +847,9 @@ You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Exa
           <property name="text">
            <string>Pre trigger</string>
           </property>
+          <property name="whatsThis">
+           <string>A recording started by the threshold reaches back by this time: QtDMM keeps the readings while it waits, and a green mark shows where the trigger came.</string>
+          </property>
          </widget>
         </item>
         <item row="1" column="4">
@@ -871,7 +874,7 @@ You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Exa
            <bool>false</bool>
           </property>
           <property name="whatsThis">
-           <string>Maximum sampling time. When this time expires, the recorder is stopped automatically.</string>
+           <string>How long before the trigger the recording begins. See unit to the right.</string>
           </property>
           <property name="minimum">
            <number>1</number>
@@ -890,7 +893,7 @@ You can enter your values with a suffix like m, u, n, p, k, M, G, T&lt;br&gt;Exa
            <bool>false</bool>
           </property>
           <property name="whatsThis">
-           <string>Unit for maximum sampling time.</string>
+           <string>Unit for the pre-trigger time.</string>
           </property>
           <item>
            <property name="text">

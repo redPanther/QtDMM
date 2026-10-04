@@ -16,6 +16,8 @@
 - Meter keys under the display with a fold button (not working yet, for the coming remote control)
 - Defaults for a new configuration: design Dark, LCD backlight blue, analog meter classic ivory, graph scope
   blue, LCD without min/max. The design can also be chosen in the settings (Appearance)
+- Recorder: the pre-trigger works (it was a setting without function). A recording started by a threshold
+  reaches back by the pre-trigger time, a green mark shows the trigger
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu

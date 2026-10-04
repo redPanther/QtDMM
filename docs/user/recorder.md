@@ -32,8 +32,10 @@ Three start modes, chosen on the Recording page:
 - **Predefined time** — recording begins at the given time of day.
 - **Trigger** — recording begins when the reading crosses a threshold, on its
   raising or falling edge. The threshold is drawn into the graph as a line you
-  can drag. A **pre-trigger** time keeps the readings from just before the
-  crossing.
+  can drag. With **Pre trigger** the recording reaches back by the time set
+  there: QtDMM keeps the readings while it waits, so the recording shows how
+  the value got to the threshold, and a green mark shows where it crossed.
+  **Sample time** counts from the crossing.
 
 *Clear* (Ctrl+Del) empties the recording. QtDMM warns before you lose unsaved data
 by clearing, importing or quitting; the warning can be switched off under

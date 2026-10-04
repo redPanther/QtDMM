@@ -129,6 +129,7 @@ public:
   GraphWidget::SampleMode  sampleMode() const;
   int                   sampleStep() const;
   int                   sampleLength() const;
+  int                   preTrigger() const;
   double                raisingThreshold() const;
   double                fallingThreshold() const;
   /// @}

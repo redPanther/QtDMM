@@ -1022,73 +1022,73 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <translation>Quitter sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="499"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="500"/>
         <source>Automatic start at %1</source>
         <translation>Démarrage automatique à %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="501"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="502"/>
         <source>Raising threshold %1</source>
         <translation>Seuil montant %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="503"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="504"/>
         <source>Falling threshold %1</source>
         <translation>Seuil descendant %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="527"/>
-        <location filename="../../src/ui/instancewidget.cpp" line="557"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="528"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="558"/>
         <source>QtDMM: Launch error</source>
         <translation>QtDMM : erreur de lancement</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="528"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="529"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Erreur de lancement&lt;/b&gt;&lt;/font&gt;&lt;p&gt;L&apos;application %1 est encore en cours d&apos;exécution !&lt;p&gt;Voulez-vous la terminer maintenant ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="540"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="541"/>
         <source>Yes, kill it!</source>
         <translation>Oui, la terminer !</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="544"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="545"/>
         <source>No, keep running</source>
         <translation>Non, la laisser tourner</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="558"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="559"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Erreur de lancement&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Impossible de lancer %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="569"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="570"/>
         <source>Bummer!</source>
         <translation>Dommage !</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="575"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="576"/>
         <source>Launched %1</source>
         <translation>%1 lancé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="580"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="581"/>
         <source>%1 terminated with exit code %2.</source>
         <translation>%1 s&apos;est terminé avec le code %2.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="603"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="604"/>
         <source>calculated</source>
         <translation>calculé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="612"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="613"/>
         <source>no meter configured</source>
         <translation>aucun multimètre configuré</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="650"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="651"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarme QtDMM : %1</translation>
     </message>
@@ -2685,12 +2685,12 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
 <context>
     <name>RecorderPrefs</name>
     <message>
-        <location filename="../../src/ui/settings/recorderprefs.cpp" line="38"/>
+        <location filename="../../src/ui/settings/recorderprefs.cpp" line="39"/>
         <source>Recording</source>
         <translation>Enregistrement</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/recorderprefs.cpp" line="39"/>
+        <location filename="../../src/ui/settings/recorderprefs.cpp" line="40"/>
         <source>&lt;b&gt;Here you can configure the sampling frequency and start options for the recorder.&lt;/b&gt;</source>
         <translation>&lt;b&gt;Configurez ici la fréquence d&apos;échantillonnage et les options de démarrage de l&apos;enregistreur.&lt;/b&gt;</translation>
     </message>
@@ -2744,6 +2744,14 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
         <location filename="../../src/recording/recordingfile.cpp" line="158"/>
         <source>unit</source>
         <translation>unité</translation>
+    </message>
+</context>
+<context>
+    <name>RecordingStore</name>
+    <message>
+        <location filename="../../src/recording/recordingstore.cpp" line="459"/>
+        <source>Trigger</source>
+        <translation>Déclenchement</translation>
     </message>
 </context>
 <context>
@@ -4414,28 +4422,28 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="81"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="140"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="897"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="900"/>
         <source>Seconds</source>
         <translation>Secondes</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="86"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="145"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="902"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="905"/>
         <source>Minutes</source>
         <translation>Minutes</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="91"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="150"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="907"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="910"/>
         <source>Hours</source>
         <translation>Heures</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="96"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="155"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="912"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="915"/>
         <source>Days</source>
         <translation>Jours</translation>
     </message>
@@ -4446,7 +4454,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="136"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="893"/>
         <source>Unit for maximum sampling time.</source>
         <translation>Unité de la durée maximale d&apos;échantillonnage.</translation>
     </message>
@@ -4462,7 +4469,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="182"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="874"/>
         <source>Maximum sampling time. When this time expires, the recorder is stopped automatically.</source>
         <translation>Durée maximale d&apos;échantillonnage. À son expiration, l&apos;enregistreur s&apos;arrête automatiquement.</translation>
     </message>
@@ -4593,7 +4599,22 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
         <translation>Pré-déclenchement</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="977"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="851"/>
+        <source>A recording started by the threshold reaches back by this time: QtDMM keeps the readings while it waits, and a green mark shows where the trigger came.</source>
+        <translation>Un enregistrement démarré par le seuil remonte de ce temps : QtDMM garde les mesures pendant l&apos;attente, et une marque verte montre où le déclenchement a eu lieu.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="877"/>
+        <source>How long before the trigger the recording begins. See unit to the right.</source>
+        <translation>Combien de temps avant le déclenchement l&apos;enregistrement commence. Unité à droite.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="896"/>
+        <source>Unit for the pre-trigger time.</source>
+        <translation>Unité du temps de pré-déclenchement.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="980"/>
         <source>Pre trigger time:</source>
         <translation>Durée de pré-déclenchement :</translation>
     </message>

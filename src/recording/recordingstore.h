@@ -96,6 +96,8 @@ public:
 
   /// The most readings a series keeps; the oldest go beyond it.
   static constexpr int kMaxPoints = 2000000;
+  /// The colour of the mark where a pre-triggered recording was triggered.
+  static constexpr quint32 kTriggerColor = 0xff2e9b3a;
 
   explicit RecordingStore(QObject *parent = nullptr);
 
@@ -111,6 +113,12 @@ public:
   /// Recording duration in tenths of a second after which recording stops
   /// on its own (0 = until stopped).
   void        setSampleLength(int tenths) { m_sampleLength = tenths; }
+  /// Pre-trigger in ms (0 = off): a recording started by a threshold
+  /// (Raising, Falling) reaches back this far - the store keeps the
+  /// readings of that time while it waits - and marks where the trigger
+  /// came. The recording length counts from the trigger.
+  void        setPreTrigger(int ms);
+  int         preTrigger() const { return m_preMs; }
   void        setStartMode(StartMode mode) { m_mode = mode; }
   StartMode   startMode() const { return m_mode; }
   /// Clock time for StartMode::Time.
@@ -267,6 +275,13 @@ private:
   bool        trigger(double value);
   /// Stops at the recording length when @p t (ms since the start) reached it.
   bool        lengthReached(qint64 t);
+  /// Starts a recording; with @p preMs it reaches back into the readings
+  /// kept for the pre-trigger.
+  void        begin(qint64 preMs);
+  /// Keeps @p p (t on the monotonic clock) for the pre-trigger.
+  void        bufferPre(const RawPoint &p);
+  /// Whether readings are kept for a pre-trigger now.
+  bool        preTriggerArmed() const { return !m_running && m_preMs > 0 && (m_mode == Raising || m_mode == Falling); }
 
   RecordingSeries m_series;
   qint64      m_t0 = 0;           ///< the monotonic clock at the start
@@ -278,6 +293,9 @@ private:
 
   int         m_sampleTime = 1;
   int         m_sampleLength = 0;
+  int         m_preMs = 0;
+  qint64      m_preUsed = 0;          ///< ms the current recording reaches back before its trigger
+  QVector<RawPoint> m_preBuffer;      ///< readings for the pre-trigger, t on the monotonic clock
   double      m_integral = 0;   ///< the running integral, carried over gaps
   bool        m_running = false;
   bool        m_dirty = false;

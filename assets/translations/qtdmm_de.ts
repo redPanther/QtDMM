@@ -1022,73 +1022,73 @@ Keine Berechtigung? Der Sensor braucht eine udev-Regel für die USB-ID %1:%2.</t
         <translation>Beenden ohne speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="499"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="500"/>
         <source>Automatic start at %1</source>
         <translation>Automatisch starten bei %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="501"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="502"/>
         <source>Raising threshold %1</source>
         <translation>Grenzwert steigent %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="503"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="504"/>
         <source>Falling threshold %1</source>
         <translation>Grenzwert fallend %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="528"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="529"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Application %1 is still running!&lt;p&gt;Do you want to kill it now?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Startfehler&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Programm %1 läuft noch!&lt;p&gt;Wollen Sie es jetzt beenden?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="558"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="559"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Launch error&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Couldn&apos;t launch %1</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Startfehler&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Konnte %1 nicht starten</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="575"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="576"/>
         <source>Launched %1</source>
         <translation>%1 gestartet</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="580"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="581"/>
         <source>%1 terminated with exit code %2.</source>
         <translation>%1 mit dem Rückgabecode %2 beendet.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="603"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="604"/>
         <source>calculated</source>
         <translation>berechnet</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="612"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="613"/>
         <source>no meter configured</source>
         <translation>kein Multimeter konfiguriert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="650"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="651"/>
         <source>QtDMM alarm: %1</source>
         <translation>QtDMM-Alarm: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="527"/>
-        <location filename="../../src/ui/instancewidget.cpp" line="557"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="528"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="558"/>
         <source>QtDMM: Launch error</source>
         <translation>QtDMM: Startfehler</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="540"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="541"/>
         <source>Yes, kill it!</source>
         <translation>Ja, töten!</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="544"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="545"/>
         <source>No, keep running</source>
         <translation>Nein, es laufen lassen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="569"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="570"/>
         <source>Bummer!</source>
         <translation>Reinfall!</translation>
     </message>
@@ -2686,12 +2686,12 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
 <context>
     <name>RecorderPrefs</name>
     <message>
-        <location filename="../../src/ui/settings/recorderprefs.cpp" line="38"/>
+        <location filename="../../src/ui/settings/recorderprefs.cpp" line="39"/>
         <source>Recording</source>
         <translation>Aufnahme</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/recorderprefs.cpp" line="39"/>
+        <location filename="../../src/ui/settings/recorderprefs.cpp" line="40"/>
         <source>&lt;b&gt;Here you can configure the sampling frequency and start options for the recorder.&lt;/b&gt;</source>
         <translation>&lt;b&gt;Hier werden die Startoptionen und die Aufzeichnungsfrequenz des Rekorders einstellt.&lt;/b&gt;</translation>
     </message>
@@ -2745,6 +2745,14 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
         <location filename="../../src/recording/recordingfile.cpp" line="158"/>
         <source>unit</source>
         <translation>Einheit</translation>
+    </message>
+</context>
+<context>
+    <name>RecordingStore</name>
+    <message>
+        <location filename="../../src/recording/recordingstore.cpp" line="459"/>
+        <source>Trigger</source>
+        <translation>Auslöser</translation>
     </message>
 </context>
 <context>
@@ -4417,28 +4425,28 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="81"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="140"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="897"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="900"/>
         <source>Seconds</source>
         <translation>Sekunden</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="86"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="145"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="902"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="905"/>
         <source>Minutes</source>
         <translation>Minuten</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="91"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="150"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="907"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="910"/>
         <source>Hours</source>
         <translation>Stunden</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="96"/>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="155"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="912"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="915"/>
         <source>Days</source>
         <translation>Tage</translation>
     </message>
@@ -4449,13 +4457,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="136"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="893"/>
         <source>Unit for maximum sampling time.</source>
         <translation>Einheit für die Messdauer.</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uirecorderprefs.ui" line="182"/>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="874"/>
         <source>Maximum sampling time. When this time expires, the recorder is stopped automatically.</source>
         <translation>Die maximal Messdauer. Wenn der Wert erreicht ist, wird der Rekorder automatisch angehalten.</translation>
     </message>
@@ -4596,7 +4602,22 @@ Der Wert kann auch mit einem Suffix wie m, u, n, p, k, M, G oder T angegeben wer
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="977"/>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="851"/>
+        <source>A recording started by the threshold reaches back by this time: QtDMM keeps the readings while it waits, and a green mark shows where the trigger came.</source>
+        <translation>Eine über die Schwelle gestartete Aufnahme reicht um diese Zeit zurück: QtDMM behält die Messwerte, während es wartet, und eine grüne Marke zeigt, wo ausgelöst wurde.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="877"/>
+        <source>How long before the trigger the recording begins. See unit to the right.</source>
+        <translation>Wie lange vor dem Auslösen die Aufnahme beginnt. Einheit siehe rechts.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="896"/>
+        <source>Unit for the pre-trigger time.</source>
+        <translation>Einheit der Vorlaufzeit.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uirecorderprefs.ui" line="980"/>
         <source>Pre trigger time:</source>
         <translation>Pre trigger Zeit:</translation>
     </message>

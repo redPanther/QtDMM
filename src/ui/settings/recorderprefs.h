@@ -36,6 +36,8 @@ public:
   GraphWidget::SampleMode sampleMode() const;
   int         sampleStep() const;
   int         sampleLength() const;
+  /// The pre-trigger time in ms, 0 when it is off.
+  int         preTrigger() const;
   double      fallingThreshold() const;
   double      raisingThreshold() const;
   QTime       startTime() const;

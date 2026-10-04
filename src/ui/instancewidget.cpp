@@ -431,6 +431,7 @@ void InstanceWidget::readConfig()
   // the x axis converts them back with the sample time
   ui_graph->setSampleTime(m_configDlg->sampleStep());
   ui_graph->setSampleLength(m_configDlg->sampleLength());
+  ui_graph->store()->setPreTrigger(m_configDlg->preTrigger());
   ui_graph->setGraphSize(m_configDlg->windowSeconds(), m_configDlg->totalSeconds());
   ui_graph->setStartTime(m_configDlg->startTime());
   ui_graph->setMode(m_configDlg->sampleMode());
