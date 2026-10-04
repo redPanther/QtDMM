@@ -282,6 +282,9 @@ if (NOT WIN32)
 	install(FILES assets/icons/app/qtdmm_128.png DESTINATION share/icons/hicolor/128x128/apps RENAME io.github.qtdmm.qtdmm.png)
 	install(FILES assets/icons/app/qtdmm.svg DESTINATION share/icons/hicolor/scalable/apps RENAME io.github.qtdmm.qtdmm.svg)
 	install(FILES ${CMAKE_BINARY_DIR}/qtdmm.1.gz DESTINATION share/man/man1)
+	## the USB-HID cables and sensors of meters for the logged-in user (uaccess);
+	## the same rules "Find device" shows for an AppImage or Flatpak
+	install(FILES assets/linux/70-qtdmm.rules DESTINATION lib/udev/rules.d)
 	## AppStream metadata for software centres, named after the component id
 	install(FILES assets/appimage/qtdmm.appdata.xml DESTINATION share/metainfo RENAME io.github.qtdmm.qtdmm.metainfo.xml)
 endif()

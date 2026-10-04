@@ -228,6 +228,17 @@ if (BUILD_TESTING)
 	target_link_libraries(test_devicelibrary PRIVATE Qt6::Gui Qt6::SerialPort Qt::Core Qt::Test)
 	add_test(NAME device_library COMMAND test_devicelibrary)
 
+	## "Find device": families, adapters, access check, udev rules; nothing is opened
+	add_executable(test_discovery MACOSX_BUNDLE tests/test_discovery.cpp src/device/discovery/discovery.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp src/service/mdnsbrowser.cpp ${DECODER_FILES})
+	target_include_directories(test_discovery PRIVATE src)
+	target_link_libraries(test_discovery PRIVATE Qt6::SerialPort Qt6::Network ${HIDAPI_TARGET} Qt::Core Qt::Test)
+	add_test(NAME device_discovery COMMAND test_discovery "${CMAKE_SOURCE_DIR}")
+	if (QTDMM_WITH_BLE)
+		target_link_libraries(test_discovery PRIVATE Qt6::Bluetooth)
+		target_compile_definitions(test_discovery PRIVATE QTDMM_WITH_BLE)
+		target_sources(test_discovery PRIVATE src/device/transports/blegatt.cpp src/device/transports/ble.cpp)
+	endif()
+
 	## symbol sets: under "System" QtDMM's own symbols from the plain set
 	set( TEST_ICONS test_icons)
 	add_executable(${TEST_ICONS} MACOSX_BUNDLE tests/test_icons.cpp src/ui/designs.cpp)

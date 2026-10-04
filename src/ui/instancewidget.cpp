@@ -346,20 +346,37 @@ bool InstanceWidget::switchDevice(const QString &id)
   const std::optional<MyDevice> device = m_devices->find(id);
   if (!device)
     return false;
+  takeOver(device->keys, device->name, false);
+  return true;
+}
+
+void InstanceWidget::useFoundDevice(const QVariantMap &keys, const QString &name)
+{
+  takeOver(keys, name.isEmpty() ? keys.value("DMM/model").toString() : name, true);
+  if (!name.isEmpty())
+    saveCurrentDevice(name);
+}
+
+void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, bool complete)
+{
   // another meter is another function: one recording does not mix them
   if (m_ctl->recorder()->isRunning())
   {
     ui_graph->stopSLOT();
-    Q_EMIT error(tr("Recording stopped: switched to %1").arg(device->name));
+    Q_EMIT error(tr("Recording stopped: switched to %1").arg(name));
   }
   Q_EMIT setConnect(false);
   Q_EMIT connectDMM(false);
   connectSLOT(false);
 
-  m_settings->setValues(device->keys);
+  m_settings->setValues(keys);
   m_settings->setBool("DMM/configured", true);
   m_settings->save();
   m_configDlg->reloadMeter();
+  // a found meter brings where and which model; the line settings and the
+  // protocol come with the model, as on the meter page
+  if (complete)
+    m_configDlg->applyMeter();
   applySLOT();
   // another meter: its own minimum and maximum, even at the same port
   m_ctl->resetMinMax();
@@ -367,8 +384,7 @@ bool InstanceWidget::switchDevice(const QString &id)
   Q_EMIT setConnect(true);
   Q_EMIT connectDMM(true);
   connectSLOT(true);
-  Q_EMIT info(tr("Using %1").arg(device->name));
-  return true;
+  Q_EMIT info(tr("Using %1").arg(name));
 }
 
 QString InstanceWidget::saveCurrentDevice(const QString &name)

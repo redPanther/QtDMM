@@ -122,6 +122,11 @@ protected:
   /// The devices menu anew: the entries (the one in use checked), save,
   /// manage, configure.
   void        fillDevicesMenu();
+  /// "Find device": search, choose, connect (and keep in My devices).
+  void        findDevice();
+  /// The welcome at the first start: My devices, Find device, Try without
+  /// a device, Set up by hand.
+  void        welcome();
   QAction    *m_arrangeTop;
   QAction    *m_arrangeLeft;
   QAction    *m_arrangeFixed;

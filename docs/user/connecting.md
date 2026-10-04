@@ -1,6 +1,32 @@
 # Connecting a meter
 
-## Choosing the device
+## Find device
+
+The quickest way: plug the meter in, switch it on and choose **Find
+device...** in the **My devices** menu at the left of the toolbar. The
+first start of QtDMM offers it right away, next to **Try without a
+device** - the virtual meter, a signal of its own, to see the display, the
+analog meter and the graph at work without any hardware.
+
+1. Tick where QtDMM should look - the USB cable of the meter, Bluetooth,
+   serial ports, the network (qtdmm-bridge) - and press **Search**. Only
+   what is ticked is searched, so nobody waits for a Bluetooth scan without
+   a Bluetooth meter; the choice is remembered.
+2. What turns up is listed as it comes. A USB cable names the meter family
+   it belongs to (UT-D04: the serial UNI-T meters, UT-D09: UT61B+/D+/E+ and
+   UT161, BU-86X: Brymen, the TFA AIRCO2NTROL), a Bluetooth meter its name,
+   a USB-serial adapter its chip. A device you keep in [My devices](my-devices.md)
+   says so.
+3. Choose it, confirm the **model** - the likeliest is chosen, *All models*
+   lists the rest - and for a Victron device enter its key. **Connect**, and
+   the first reading comes. *Keep in My devices* keeps it for the next time.
+
+What is behind a serial port or a UT-D04 cable QtDMM cannot tell yet: the
+list then shows the models that fit, choose yours. A device QtDMM may not
+open is listed with the reason, and **How to fix...** shows the commands -
+see [Troubleshooting](troubleshooting.md).
+
+## Choosing the device by hand
 
 Open the settings with **F2** (or the *Configure* button) and go to the
 **Multimeter** page.

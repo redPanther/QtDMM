@@ -64,28 +64,9 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   pageShortcut(QKeySequence("Ctrl+PgUp"), -1);
   pageShortcut(QKeySequence("Ctrl+PgDown"), 1);
 
-  // Check if configuration file exists. If not welcome user
-  if (!m_settings->fileExists())
-  {
-    QMessageBox welcome;
-    welcome.setWindowTitle(tr("QtDMM: Welcome!"));
-    welcome.setText(tr("<font size=+2><b>Welcome!</b></font><p>"
-                       "This seems to be your first invocation of QtDMM "
-                       "(Or you have deleted its configuration file).<p>QtDMM "
-                       "has created the file %1 in your home directory "
-                       "to save its settings.").arg(m_settings->fileName()));
-    welcome.setIcon(QMessageBox::Information);
-    welcome.setStandardButtons(QMessageBox::Yes);
-    welcome.setDefaultButton(QMessageBox::Yes);
-    welcome.setIconPixmap(QPixmap(":/Symbols/icon.xpm"));
-
-    QAbstractButton *yesButton = welcome.button(QMessageBox::Yes);
-    if (yesButton)
-      yesButton->setText(tr("Continue"));
-
-    welcome.exec();
-  }
-  else
+  // A first start is welcomed by MainWindow (WelcomeDlg); an old file
+  // gets a word about the new parameters
+  if (m_settings->fileExists())
   {
     int version = m_settings->getInt("QtDMM/version");
     int revision = m_settings->getInt("QtDMM/revision");
@@ -267,6 +248,12 @@ void SettingsDialog::setDeviceLibrary(DeviceLibrary *library)
 void SettingsDialog::reloadMeter()
 {
   m_dmm->defaultsSLOT();
+}
+
+void SettingsDialog::applyMeter()
+{
+  m_dmm->applySLOT();
+  m_settings->save();
 }
 
 void SettingsDialog::showPage(SettingsDialog::PageType page)
