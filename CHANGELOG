@@ -22,6 +22,8 @@
 - Recording: switching the meter to another function (V DC to Ω, DC to AC, °C to °F) stops the recording
   with a message and a mark in the graph, so one recording never mixes two quantities. A stopped recording
   keeps its unit, also in the export (it was relabelled with the new unit). A prefix change (mV to V) goes on
+- Min/max: a range change (mV to V, kΩ to MΩ) keeps them; they start afresh only when the meter switches to
+  another function (V DC to Ω, DC to AC, °C to °F) - before, every change of unit cleared them
 - LCD and analog meter fade the value when the meter stops sending, and are back as soon as a value arrives
 - Graph: long recordings are drawn with a minimum and a maximum per pixel column, so a spike stays visible
   and the drawing stays fast; the grid and labels are there before the first value
