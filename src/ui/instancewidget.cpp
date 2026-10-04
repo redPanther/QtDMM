@@ -83,10 +83,11 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   connect(ui_graph, SIGNAL(info(const QString &)), this, SIGNAL(info(const QString &)));
   connect(ui_graph, SIGNAL(error(const QString &)), this, SIGNAL(error(const QString &)));
   connect(ui_graph, SIGNAL(running(bool)), this, SLOT(runningSLOT(bool)));
-  connect(m_configDlg, SIGNAL(accepted()), this, SLOT(applySLOT()));
-  // Apply: take the settings over while the dialog stays open. Through a
-  // lambda so sender() is not the dialog and applySLOT() does not reconnect
-  // the meter, which only happens when the dialog closes.
+  // OK reconnects the meter; Apply takes the settings over while the dialog
+  // stays open, and the same runs at exit - neither may connect (a lambda
+  // does not hide sender(): it still was the dialog, and quitting connected
+  // a Bluetooth meter twice)
+  connect(m_configDlg, &SettingsDialog::accepted, this, [this]() { applySLOT(true); });
   connect(m_configDlg, &SettingsDialog::applied, this, [this]() { applySLOT(); });
   connect(m_configDlg, SIGNAL(zoomed()), this, SLOT(zoomedSLOT()));
   connect(ui_graph, &GraphWidget::windowRequested, m_configDlg, &SettingsDialog::setWindowSecondsSLOT);
@@ -420,7 +421,7 @@ void InstanceWidget::rejectSLOT()
   }
 }
 
-void InstanceWidget::applySLOT()
+void InstanceWidget::applySLOT(bool reconnect)
 {
   readConfig();
   m_ctl->setAlarms(m_configDlg->alarms());
@@ -434,7 +435,7 @@ void InstanceWidget::applySLOT()
   m_ctl->applyScpi(scpi);
   Q_EMIT configChanged();
 
-  if ((sender() == m_configDlg))
+  if (reconnect)
   {
     Q_EMIT setConnect(true);
     Q_EMIT connectDMM(true);

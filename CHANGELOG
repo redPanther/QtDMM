@@ -64,6 +64,8 @@
 - Import: the recording length is counted in seconds (a 54 s recording was taken for 542 s)
 - Update from 26.1: the window layout starts fresh. The analog meter is shown and the readings table is
   hidden, whatever 26.1 had; the new layout is saved from then on
+- Quitting and Apply in the settings no longer connect the meter (quitting connected a Bluetooth meter twice)
+- A Bluetooth meter that stays half connected (a UT60BT now and then) is tried again after 10 s, not 20 s
 
 
 * 04/10/2026 26.1 (the first release since 0.9.8; this section has the changes after rc2, the two release

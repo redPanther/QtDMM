@@ -28,6 +28,10 @@ const QBluetoothUuid kIsscWriteFallback(QStringLiteral("49535343-6daa-4d02-abf6-
 // connecting and finding the characteristics takes a second or two; a
 // meter that is switched off or out of range never answers
 constexpr int kConnectTimeoutMs = 20000;
+// connected, but the service not set up by then: give up, the reconnect
+// after a loss comes sooner (a UT60BT now and then stays in the discovery
+// of the service details)
+constexpr int kSetupTimeoutMs = 10000;
 }
 
 std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFormat format)
@@ -79,6 +83,8 @@ bool BleGattDevice::open(OpenMode mode)
   connect(m_controller, &QLowEnergyController::connected, this, [this]
   {
     qCDebug(lcBle) << m_address << "connected, discovering services";
+    if (m_connectTimeout)
+      m_connectTimeout->start(kSetupTimeoutMs);
     m_controller->discoverServices();
   });
   connect(m_controller, &QLowEnergyController::serviceDiscovered, this, &BleGattDevice::onServiceDiscovered);
@@ -156,6 +162,7 @@ void BleGattDevice::onServiceDiscovered(const QBluetoothUuid &uuid)
 
 void BleGattDevice::onDiscoveryFinished()
 {
+  qCDebug(lcBle) << m_address << "services discovered, own one" << m_serviceFound;
   if (!m_serviceFound)
   {
     fail(tr("%1 does not offer the expected Bluetooth service - is it the right meter?").arg(m_address));
@@ -193,6 +200,7 @@ void BleGattDevice::onDiscoveryFinished()
 
 void BleGattDevice::onServiceState()
 {
+  qCDebug(lcBle) << m_address << "service state" << m_service->state();
   if (m_service->state() != QLowEnergyService::RemoteServiceDiscovered)
     return;
   const QLowEnergyCharacteristic notify = m_service->characteristic(m_profile->notify);
@@ -229,6 +237,7 @@ void BleGattDevice::onServiceState()
     if (d.type() == QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration && !m_ready)
       setReady();
   });
+  qCDebug(lcBle) << m_address << "subscribing";
   m_service->writeDescriptor(cccd, QLowEnergyCharacteristic::CCCDEnableNotification);
 }
 
