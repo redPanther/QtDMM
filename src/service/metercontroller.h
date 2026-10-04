@@ -8,6 +8,7 @@
 #include <QString>
 #include <functional>
 
+#include "core/minmaxmemory.h"
 #include "core/alarm.h"
 #include "core/readingadapter.h"
 #include "core/reading.h"
@@ -83,8 +84,8 @@ public:
   void        killExternal();
 
   /// Min/max memory in SI base units; +-1e20 when empty.
-  double      minimum() const { return m_min; }
-  double      maximum() const { return m_max; }
+  double      minimum() const { return m_minMax.minimum(); }
+  double      maximum() const { return m_minMax.maximum(); }
   /// The text of the current reading's unit ("mV"), and its base unit ("V").
   QString     unit() const { return m_lastUnit; }
   QString     baseUnit() const { return m_baseUnit; }
@@ -104,7 +105,8 @@ Q_SIGNALS:
   void        minimumChanged(double value, const QString &text, const QString &unit);
   /// A new maximum, like minimumChanged().
   void        maximumChanged(double value, const QString &text, const QString &unit);
-  /// The min/max memory was cleared (reset or a new unit).
+  /// The min/max memory was cleared: the Reset key, or the main value
+  /// moved to another port (MinMaxMemory) - not a range change (mV -> V).
   void        minMaxReset();
   /// The main value's unit changed ("mV" -> "V").
   void        unitChanged(const QString &unit);
@@ -159,8 +161,7 @@ private:
   QString             m_instanceId = "default";
   QString             m_model;
 
-  double      m_min = 1.0E20;
-  double      m_max = -1.0E20;
+  MinMaxMemory m_minMax;   ///< min/max of the main value, SI, per port
   QString     m_lastUnit;
   QString     m_baseUnit;
   bool        m_overload = false;

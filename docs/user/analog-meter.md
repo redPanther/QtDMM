@@ -24,7 +24,8 @@ how the scale is laid out:
 
 - **Automatic** — zero at the left; as soon as a clearly negative reading
   arrives the scale switches to centre zero (−FS … 0 … +FS) and stays there
-  until you reset the min/max memory (Ctrl+R).
+  until you reset the min/max memory (Ctrl+R) or the meter switches to another function (V DC to Ω,
+  DC to AC); a range change (mV to V) keeps it, the values are shown in the current range.
 - **Zero left** and **Centre zero** fix one layout.
 
 The **red zone** starts at 90 % of full scale by default; the same settings

@@ -163,29 +163,22 @@ void MeterController::publish(const Reading &rd)
   if (id == 0 && !hold)
   {
     if (m_lastUnit != unit)
-    {
-      resetMinMax();
       Q_EMIT unitChanged(unit);
-    }
     m_lastUnit = unit;
-    if (dval > m_max)
-    {
-      m_max = dval;
-      newMax = true;
-    }
-    if (dval < m_min)
-    {
-      m_min = dval;
-      newMin = true;
-    }
+    // kept across a range change (mV -> V), afresh on another port
+    const MinMaxMemory::Result mm = m_minMax.feed(rd);
+    if (mm.reset)
+      Q_EMIT minMaxReset();
+    newMin = mm.newMin;
+    newMax = mm.newMax;
     m_dval = dval;
   }
 
   Q_EMIT reading(rd);
   if (newMax)
-    Q_EMIT maximumChanged(m_max, val, unit);
+    Q_EMIT maximumChanged(m_minMax.maximum(), val, unit);
   if (newMin)
-    Q_EMIT minimumChanged(m_min, val, unit);
+    Q_EMIT minimumChanged(m_minMax.minimum(), val, unit);
 
   if (id == 0)
   {
@@ -221,8 +214,7 @@ void MeterController::publish(const Reading &rd)
 
 void MeterController::resetMinMax()
 {
-  m_min = 1.0E20;
-  m_max = -1.0E20;
+  m_minMax.clear();
   Q_EMIT minMaxReset();
 }
 

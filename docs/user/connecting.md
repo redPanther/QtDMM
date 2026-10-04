@@ -90,8 +90,11 @@ Clicking **Connect** again disconnects and frees the port for other programs.
 The LCD-style display mirrors the meter: value, unit, the annunciators HOLD,
 AUTO, MANU, AC, DC, diode and continuity (unlit ones stay faintly visible,
 like on the meter itself), the bar graph and, below the value, the minimum
-and maximum since the last **Reset** (Ctrl+R). Min/max reset automatically
-when the meter switches to a different unit.
+and maximum since the last **Reset** (Ctrl+R), each as the meter showed it
+("MIN 221.18 mV" stays so when the meter has moved on to V). A range change
+(mV to V, kΩ to MΩ) keeps them; they start afresh when the meter switches to
+another function (V DC to Ω, DC to AC, °C to °F). An overload changes
+nothing.
 
 The display is a window like the [analog meter](analog-meter.md); digits and
 lettering scale with it. **Display** in the toolbar or the menu (Ctrl+1)

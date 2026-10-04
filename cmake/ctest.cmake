@@ -202,6 +202,13 @@ if (BUILD_TESTING)
 	get_property(ALL_TESTS DIRECTORY PROPERTY TESTS)
 	set_tests_properties(${ALL_TESTS} PROPERTIES ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;PYTHONDONTWRITEBYTECODE=1")
 
+	## the min/max memory: kept across range changes, afresh on another port
+	set( TEST_MINMAX test_minmax)
+	add_executable(${TEST_MINMAX} MACOSX_BUNDLE tests/test_minmax.cpp)
+	target_include_directories(${TEST_MINMAX} PRIVATE src)
+	target_link_libraries(${TEST_MINMAX} PRIVATE Qt::Core)
+	add_test(NAME minmax_memory COMMAND ${TEST_MINMAX})
+
 	## Alt letters used twice in a menu or among the widgets shown together
 	## (and doubled keys), in the real program in every language: it starts
 	## offscreen with a config of its own (it writes one, a missing one would
