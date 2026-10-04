@@ -28,6 +28,8 @@
 #include <vector>
 
 #include "ui/settings/meterprefs.h"
+#include "device/transports/serial.h"
+#include "core/devicelibrary.h"
 #include "device/protocols.h"
 #include "core/calcexpr.h"
 #include "device/victronble.h"
@@ -72,6 +74,25 @@ MeterPrefs::MeterPrefs(QWidget *parent) : SettingsPage(parent)
   connect(ui_virtualFormula, &QLineEdit::textChanged, this, [this]{ if (ui_virtualSignal->currentIndex() == 7) updateVirtualFormula(); });
   m_calcHintTimer.setInterval(1000);   // live values of the input instances
   connect(&m_calcHintTimer, &QTimer::timeout, this, &MeterPrefs::updateCalcHint);
+
+  // "My devices" at the top: a choice fills the fields, the button keeps them
+  auto *devices = new QHBoxLayout;
+  auto *devicesLabel = new QLabel(tr("&My devices:"), this);
+  ui_myDevice = new QComboBox(this);
+  ui_myDevice->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+  ui_myDevice->setMinimumContentsLength(16);
+  ui_myDevice->setToolTip(tr("Fill in the meter and its connection from one of your devices."));
+  devicesLabel->setBuddy(ui_myDevice);
+  ui_saveDevice = new QPushButton(tr("Sa&ve to my devices..."), this);
+  ui_saveDevice->setToolTip(tr("Keep this meter and its connection under a name, to choose it again with one click."));
+  devices->addWidget(devicesLabel);
+  devices->addWidget(ui_myDevice, 1);
+  devices->addWidget(ui_saveDevice);
+  if (auto *top = qobject_cast<QBoxLayout *>(layout()))
+    top->insertLayout(0, devices);
+  connect(ui_myDevice, &QComboBox::activated, this, &MeterPrefs::onDeviceChosen);
+  connect(ui_saveDevice, &QPushButton::clicked, this, &MeterPrefs::saveDevice);
+  ui_myDevice->setEnabled(false);
 
   m_path = QDir::currentPath();
 }
@@ -249,43 +270,51 @@ void MeterPrefs::defaultsSLOT()
   QStringList list = m_portlist->stringList();
   for(int i=0; i<10; i++)
   {
-    QString dev = m_cfg->getString(QString("Port settings/custom_device%1").arg(i), "");
+    QString dev = cfgString(QString("Port settings/custom_device%1").arg(i), "");
     if (dev.size()>0)
       list.append(dev);
   }
   m_portlist->setStringList(list);
 
-  port->setCurrentText        (m_cfg->getString("Port settings/device"));
-  ui_sigrokConn->setCurrentText(m_cfg->getString("Port settings/sigrok-conn"));
-  ui_sigrokOptions->setText   (m_cfg->getString("Port settings/sigrok-options"));
-  ui_bleAddress->setCurrentText(m_cfg->getString("Port settings/ble-address"));
-  ui_bleKey->setText          (m_cfg->getString("Port settings/ble-key"));
+  // a port that is not there now (unplugged, a /dev/serial/by-id name
+  // from "My devices") stays the choice
+  const QString device = cfgString("Port settings/device");
+  if (!device.isEmpty() && !list.contains(device))
+  {
+    list.append(device);
+    m_portlist->setStringList(list);
+  }
+  port->setCurrentText        (device);
+  ui_sigrokConn->setCurrentText(cfgString("Port settings/sigrok-conn"));
+  ui_sigrokOptions->setText   (cfgString("Port settings/sigrok-options"));
+  ui_bleAddress->setCurrentText(cfgString("Port settings/ble-address"));
+  ui_bleKey->setText          (cfgString("Port settings/ble-key"));
   updateBleFields();
-  ui_calcUnit->setText        (m_cfg->getString("DMM/calc-unit", "W"));
-  ui_calcExpression->setText  (m_cfg->getString("DMM/calc-expression"));
-  ui_virtualSignal->setCurrentIndex(m_cfg->getInt("DMM/virtual-waveform", 2));
-  ui_virtualUnit->setText     (m_cfg->getString("DMM/virtual-unit", "V"));
-  ui_virtualCoupling->setCurrentText(m_cfg->getString("DMM/virtual-coupling", "DC"));
-  ui_virtualMin->setText      (m_cfg->getString("DMM/virtual-min", "0"));
-  ui_virtualMax->setText      (m_cfg->getString("DMM/virtual-max", "10"));
-  ui_virtualPeriod->setText   (m_cfg->getString("DMM/virtual-period", "20"));
-  ui_virtualNoise->setText    (m_cfg->getString("DMM/virtual-noise", "0"));
+  ui_calcUnit->setText        (cfgString("DMM/calc-unit", "W"));
+  ui_calcExpression->setText  (cfgString("DMM/calc-expression"));
+  ui_virtualSignal->setCurrentIndex(cfgInt("DMM/virtual-waveform", 2));
+  ui_virtualUnit->setText     (cfgString("DMM/virtual-unit", "V"));
+  ui_virtualCoupling->setCurrentText(cfgString("DMM/virtual-coupling", "DC"));
+  ui_virtualMin->setText      (cfgString("DMM/virtual-min", "0"));
+  ui_virtualMax->setText      (cfgString("DMM/virtual-max", "10"));
+  ui_virtualPeriod->setText   (cfgString("DMM/virtual-period", "20"));
+  ui_virtualNoise->setText    (cfgString("DMM/virtual-noise", "0"));
   if (ui_virtualSignal->currentIndex() == 7)
-    ui_virtualFormula->setText(m_cfg->getString("DMM/virtual-formula"));
-  baudRate->setCurrentText    (m_cfg->getString("Port settings/baud"));
-  bitsCombo->setCurrentText   (m_cfg->getString("Port settings/bits", "7"));
-  stopBitsCombo->setCurrentText(m_cfg->getString("Port settings/stop-bits", "1"));
-  parityCombo->setCurrentIndex(m_cfg->getInt("Port settings/parity"));   // stored as index by applySLOT()
-  selectDisplay(m_cfg->getString("DMM/display", "4000"));
-  ui_externalSetup->setChecked(m_cfg->getBool("DMM/external-setup", false));
+    ui_virtualFormula->setText(cfgString("DMM/virtual-formula"));
+  baudRate->setCurrentText    (cfgString("Port settings/baud"));
+  bitsCombo->setCurrentText   (cfgString("Port settings/bits", "7"));
+  stopBitsCombo->setCurrentText(cfgString("Port settings/stop-bits", "1"));
+  parityCombo->setCurrentIndex(cfgInt("Port settings/parity"));   // stored as index by applySLOT()
+  selectDisplay(cfgString("DMM/display", "4000"));
+  ui_externalSetup->setChecked(cfgBool("DMM/external-setup", false));
 
-  uirts->setChecked(m_cfg->getBool("DMM/rts", true));
-  uidtr->setChecked(m_cfg->getBool("DMM/dtr", false));
+  uirts->setChecked(cfgBool("DMM/rts", true));
+  uidtr->setChecked(cfgBool("DMM/dtr", false));
 
-  selectFormat(formatFromSetting(m_cfg->getString("DMM/data-format", "Metex14")));
-  ui_numValues->setValue(m_cfg->getInt("DMM/number-of-values", 1));
+  selectFormat(formatFromSetting(cfgString("DMM/data-format", "Metex14")));
+  ui_numValues->setValue(cfgInt("DMM/number-of-values", 1));
 
-  QString model = m_cfg->getString("DMM/model");
+  QString model = cfgString("DMM/model");
 
   ui_vendor->setCurrentIndex(0);
   ui_model->clear();
@@ -311,6 +340,10 @@ void MeterPrefs::defaultsSLOT()
     enterManualMode();
   else
     on_ui_model_activated(ui_model->currentIndex());
+
+  // the settings read again (not an entry chosen here): which device is it
+  if (m_override.isEmpty() && m_devices)
+    ui_myDevice->setCurrentIndex(qMax(0, ui_myDevice->findData(m_devices->match(m_cfg->meterKeys()))));
 }
 
 void MeterPrefs::factoryDefaultsSLOT()
@@ -979,4 +1012,96 @@ void MeterPrefs::on_ui_save_clicked()
     cfg.setValue("DMM/rts", uirts->isChecked());
     cfg.setValue("DMM/dtr", uidtr->isChecked());
   }
+}
+
+QString MeterPrefs::cfgString(const QString &key, const QString &def) const
+{
+  return m_override.contains(key) ? m_override.value(key).toString() : m_cfg->getString(key, def);
+}
+
+int MeterPrefs::cfgInt(const QString &key, int def) const
+{
+  return m_override.contains(key) ? m_override.value(key).toInt() : m_cfg->getInt(key, def);
+}
+
+bool MeterPrefs::cfgBool(const QString &key, bool def) const
+{
+  return m_override.contains(key) ? m_override.value(key).toBool() : m_cfg->getBool(key, def);
+}
+
+void MeterPrefs::setDeviceLibrary(DeviceLibrary *library)
+{
+  m_devices = library;
+  connect(m_devices, &DeviceLibrary::changed, this, &MeterPrefs::fillDevices);
+  fillDevices();
+}
+
+void MeterPrefs::fillDevices()
+{
+  if (!m_devices || !m_cfg)
+    return;
+  const QString keep = ui_myDevice->currentData().toString();
+  const QList<MyDevice> all = m_devices->list();
+  ui_myDevice->clear();
+  ui_myDevice->addItem(all.isEmpty() ? tr("(none saved yet)") : tr("(choose)"), QString());
+  for (const MyDevice &d : all)
+  {
+    // the name only: a formula or a by-id path would make the page wide
+    ui_myDevice->addItem(d.name, d.id);
+    QString detail = d.model();
+    if (!d.where().isEmpty())
+      detail += QString(" · %1").arg(d.where());
+    ui_myDevice->setItemData(ui_myDevice->count() - 1, detail, Qt::ToolTipRole);
+  }
+  ui_myDevice->setEnabled(!all.isEmpty());
+  // the one chosen on the page, else the one this instance uses
+  int index = ui_myDevice->findData(keep.isEmpty() ? m_devices->match(m_cfg->meterKeys()) : keep);
+  ui_myDevice->setCurrentIndex(qMax(0, index));
+}
+
+void MeterPrefs::onDeviceChosen(int index)
+{
+  const std::optional<MyDevice> device = m_devices ? m_devices->find(ui_myDevice->itemData(index).toString())
+                                                   : std::nullopt;
+  if (!device)
+    return;
+  m_override = device->keys;
+  defaultsSLOT();
+  m_override.clear();
+}
+
+void MeterPrefs::saveDevice()
+{
+  if (!m_devices)
+    return;
+  // the fields as they are, staged like OK would (Cancel drops them again)
+  applySLOT();
+  QVariantMap keys = m_cfg->meterKeys(true);
+  keys.remove("DMM/configured");
+  keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
+
+  const std::optional<MyDevice> chosen = m_devices->find(ui_myDevice->currentData().toString());
+  if (chosen)
+  {
+    QMessageBox box(QMessageBox::Question, tr("My devices"),
+                    tr("Update \"%1\" with these settings, or keep them as a new device?").arg(chosen->name),
+                    QMessageBox::Cancel, this);
+    QPushButton *update = box.addButton(tr("&Update"), QMessageBox::AcceptRole);
+    QPushButton *asNew = box.addButton(tr("&New device..."), QMessageBox::ActionRole);
+    box.exec();
+    if (box.clickedButton() == update)
+    {
+      m_devices->update(chosen->id, keys);
+      return;
+    }
+    if (box.clickedButton() != asNew)
+      return;
+  }
+  bool ok = false;
+  const QString name = QInputDialog::getText(this, tr("Save to my devices"), tr("Name:"), QLineEdit::Normal,
+                                             m_devices->uniqueName(dmmName()), &ok);
+  if (!ok || name.trimmed().isEmpty())
+    return;
+  const QString id = m_devices->add(name.trimmed(), keys);
+  ui_myDevice->setCurrentIndex(qMax(0, ui_myDevice->findData(id)));
 }

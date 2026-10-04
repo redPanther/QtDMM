@@ -27,6 +27,8 @@
 #include <cmath>
 
 #include "ui/instancewidget.h"
+#include "device/transports/serial.h"
+#include "core/devicelibrary.h"
 #include "ui/controlbar.h"
 #include "ui/views/graphwidget.h"
 #include "ui/settings/settingsdialog.h"
@@ -58,7 +60,10 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   m_settings  = new Settings(instance_id, config_path, this);
   // the integral is over time since 26.2: its scale once per settings file
   GraphWidget::migrateIntegralScale(m_settings);
+  // "My devices", one file for all instances next to their settings
+  m_devices = new DeviceLibrary(m_settings->configDir(), this);
   m_configDlg = new SettingsDialog(m_settings, this);
+  m_configDlg->setDeviceLibrary(m_devices);
   m_configDlg->hide();
   m_configDlg->readPrinter(&m_printer);
 
@@ -66,6 +71,7 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   m_printDlg->hide();
 
   m_instancesDlg = new InstancesDlg(m_settings, instance_id, config_path,this);
+  m_instancesDlg->setDeviceLibrary(m_devices);
 
   connect(m_instancesDlg, SIGNAL(writeState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
   connect(this, SIGNAL(sendState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
@@ -328,6 +334,58 @@ void InstanceWidget::configDmmSLOT()
 {
   configSLOT();
   m_configDlg->showPage(SettingsDialog::MeterConnection);
+}
+
+QString InstanceWidget::currentDevice() const
+{
+  return m_devices->match(m_settings->meterKeys());
+}
+
+bool InstanceWidget::switchDevice(const QString &id)
+{
+  const std::optional<MyDevice> device = m_devices->find(id);
+  if (!device)
+    return false;
+  // another meter is another function: one recording does not mix them
+  if (m_ctl->recorder()->isRunning())
+  {
+    ui_graph->stopSLOT();
+    Q_EMIT error(tr("Recording stopped: switched to %1").arg(device->name));
+  }
+  Q_EMIT setConnect(false);
+  Q_EMIT connectDMM(false);
+  connectSLOT(false);
+
+  m_settings->setValues(device->keys);
+  m_settings->setBool("DMM/configured", true);
+  m_settings->save();
+  m_configDlg->reloadMeter();
+  applySLOT();
+  // another meter: its own minimum and maximum, even at the same port
+  m_ctl->resetMinMax();
+
+  Q_EMIT setConnect(true);
+  Q_EMIT connectDMM(true);
+  connectSLOT(true);
+  Q_EMIT info(tr("Using %1").arg(device->name));
+  return true;
+}
+
+QString InstanceWidget::saveCurrentDevice(const QString &name)
+{
+  QVariantMap keys = m_settings->meterKeys();
+  const QString device = keys.value("Port settings/device").toString();
+  const QString stable = SerialDevice::stableDevice(device);
+  if (stable != device)
+  {
+    // this instance uses the stable name from now on as well
+    keys.insert("Port settings/device", stable);
+    m_settings->setString("Port settings/device", stable);
+    m_settings->save();
+    m_configDlg->reloadMeter();
+  }
+  keys.remove("DMM/configured");
+  return m_devices->add(name, keys);
 }
 
 void InstanceWidget::configRecorderSLOT()

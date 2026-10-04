@@ -61,9 +61,9 @@ public:
   /// settings/* except the list of own ports and the path of sigrok-cli:
   /// what a new instance does not copy, and what "My devices" keep.
   static bool    isMeterKey(const QString &key);
-  /// The stored keys and values of the meter (isMeterKey()); staged
-  /// writes are not seen.
-  QVariantMap    meterKeys() const;
+  /// The stored keys and values of the meter (isMeterKey()); with
+  /// @p staged the writes not saved yet on top.
+  QVariantMap    meterKeys(bool staged = false) const;
   /// Stages @p keys as they are (meter keys from "My devices").
   void           setValues(const QVariantMap &keys);
   /// Commits staged writes to the file.

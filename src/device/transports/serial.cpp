@@ -68,6 +68,14 @@ QString SerialDevice::stablePortName(const QString &port, const QString &byIdDir
   return port;
 }
 
+QString SerialDevice::stableDevice(const QString &device)
+{
+  const QString type = device.section(' ', 0, 0);
+  if (type.compare(QLatin1String("SERIAL"), Qt::CaseInsensitive) != 0)
+    return device;
+  return type + ' ' + stablePortName(device.section(' ', 1).trimmed());
+}
+
 bool SerialDevice::init()
 {
   Parity parity = NoParity;

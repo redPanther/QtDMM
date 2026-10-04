@@ -192,12 +192,16 @@ QString Settings::configDir() const
   return m_configPath.isEmpty() ? QFileInfo(m_filename).absolutePath() : m_configPath;
 }
 
-QVariantMap Settings::meterKeys() const
+QVariantMap Settings::meterKeys(bool staged) const
 {
   QVariantMap keys;
   for (const QString &key : m_qsettings->allKeys())
     if (isMeterKey(key))
       keys.insert(key, m_qsettings->value(key));
+  if (staged)
+    for (auto it = m_tmpConfig->cbegin(); it != m_tmpConfig->cend(); ++it)
+      if (isMeterKey(it.key()))
+        keys.insert(it.key(), it.value());
   return keys;
 }
 

@@ -31,6 +31,7 @@
 
 class Settings;
 class SharedStateManager;
+class DeviceLibrary;
 class QPrinter;
 class RecorderPrefs;
 class ScalePrefs;
@@ -191,6 +192,10 @@ public:
   void                  showPage(PageType);
   /// Instance coordinator for the multimeter page's formula hint.
   void                  setStateManager(SharedStateManager *);
+  /// "My devices" for the meter page.
+  void                  setDeviceLibrary(DeviceLibrary *library);
+  /// The meter page reads the settings again (another device was taken over).
+  void                  reloadMeter();
 
 
 public Q_SLOTS:

@@ -27,6 +27,8 @@
 
 #include "ui/mainwindow.h"
 #include "ui/dialogs/helpdlg.h"
+#include "ui/dialogs/mydevicesdlg.h"
+#include "core/devicelibrary.h"
 #include "ui/instancewidget.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/lcdwidget.h"
@@ -166,6 +168,19 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   // the graph keeps its action from the .ui (toolbar button with Ctrl+G)
   action_Graph->setShortcuts({QKeySequence("Ctrl+G"), QKeySequence("Ctrl+3")});
   bindWindowAction(action_Graph, m_graphWin);
+
+  // "My devices": switch the meter with two clicks
+  m_devicesMenu = new QMenu(tr("My de&vices"), this);
+  QAction *devices = m_devicesMenu->menuAction();
+  devices->setIcon(QIcon::fromTheme("qtdmm-dmm"));
+  devices->setToolTip(tr("My devices: switch to another of your meters"));
+  devices->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">My devices</span></p>"
+                           "<p>Your meters with their connections: choose one to switch to it. "
+                           "<i>Save current device</i> keeps the meter set up now under a name.</p></body></html>"));
+  connect(m_devicesMenu, &QMenu::aboutToShow, this, &MainWindow::fillDevicesMenu);
+  toolBarDMM->insertAction(action_Instances, devices);
+  if (auto *button = qobject_cast<QToolButton *>(toolBarDMM->widgetForAction(devices)))
+    button->setPopupMode(QToolButton::InstantPopup);
 
   toolBarDMM->addSeparator();
   toolBarDMM->addAction(m_displayAction);
@@ -668,6 +683,7 @@ void MainWindow::on_action_Menu_triggered()
   {
     m_menu = new QMenu(this);
     m_menu->addAction(action_Configure);
+    m_menu->addMenu(m_devicesMenu);
     m_menu->addAction(action_Graph);
     m_menu->addAction(m_displayAction);
     m_menu->addAction(m_meterAction);
@@ -851,6 +867,59 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     win->hide();
   else if (chosen == title)
     m_arranger->setTitleBarHidden(win, !title->isChecked());
+}
+
+void MainWindow::fillDevicesMenu()
+{
+  m_devicesMenu->clear();
+  DeviceLibrary *library = m_wid->devices();
+  const QString current = m_wid->currentDevice();
+  const QList<MyDevice> all = library->list();
+  for (const MyDevice &d : all)
+  {
+    QString detail = d.model();
+    if (!d.where().isEmpty())
+      detail += QString(" · %1").arg(d.where());
+    QAction *a = m_devicesMenu->addAction(QString(d.name).replace('&', "&&") + '\t' + detail);
+    a->setCheckable(true);
+    a->setChecked(d.id == current);
+    connect(a, &QAction::triggered, this, [this, id = d.id] { m_wid->switchDevice(id); });
+  }
+  if (all.isEmpty())
+    m_devicesMenu->addAction(tr("No devices saved yet"))->setEnabled(false);
+  m_devicesMenu->addSeparator();
+
+  QAction *save = m_devicesMenu->addAction(tr("&Save current device..."));
+  save->setEnabled(m_wid->dmmConfigured());
+  connect(save, &QAction::triggered, this, [this, library]
+  {
+    QString model = m_wid->settings()->getString("DMM/model");
+    if (model.isEmpty())
+      model = m_wid->dmmTitle();
+    bool ok = false;
+    const QString name = QInputDialog::getText(this, tr("Save current device"),
+                                               tr("Name for this meter and its connection:"), QLineEdit::Normal,
+                                               library->uniqueName(model), &ok);
+    if (ok && !name.trimmed().isEmpty())
+    {
+      m_wid->saveCurrentDevice(name.trimmed());
+      statusBar()->showMessage(tr("%1 saved in My devices").arg(name.trimmed()), 4000);
+    }
+  });
+  QAction *manage = m_devicesMenu->addAction(tr("&Manage my devices..."));
+  manage->setEnabled(!all.isEmpty());
+  connect(manage, &QAction::triggered, this, [this, library]
+  {
+    MyDevicesDlg dlg(library, this);
+    connect(&dlg, &MyDevicesDlg::useRequested, this, [this](const QString &id) { m_wid->switchDevice(id); });
+    connect(&dlg, &MyDevicesDlg::editRequested, this, [this](const QString &id)
+    {
+      m_wid->switchDevice(id);
+      m_wid->configDmmSLOT();
+    });
+    dlg.exec();
+  });
+  m_devicesMenu->addAction(action_ConfigureDMM);
 }
 
 void MainWindow::syncArrangeActions()
