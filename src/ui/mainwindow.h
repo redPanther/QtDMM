@@ -118,6 +118,10 @@ protected:
   QAction    *m_meterAction = nullptr;
   QAction    *m_readingsAction = nullptr;
   QAction    *m_poincareAction = nullptr;
+  QMenu      *m_devicesMenu = nullptr;   ///< "My devices" at the device symbol
+  /// The devices menu anew: the entries (the one in use checked), save,
+  /// manage, configure.
+  void        fillDevicesMenu();
   QAction    *m_arrangeTop;
   QAction    *m_arrangeLeft;
   QAction    *m_arrangeFixed;

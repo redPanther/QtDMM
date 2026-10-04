@@ -9,6 +9,7 @@ nav:
   - User Guide:
       - Overview: user/index.md
       - Connecting a meter: user/connecting.md
+      - My devices: user/my-devices.md
       - Analog meter: user/analog-meter.md
       - The recorder: user/recorder.md
       - Readings table: user/readings-table.md

@@ -10,6 +10,8 @@ side, one window each, and can be combined into calculated values.
 
 - [Connecting a meter](connecting.md) — choosing the device, port types,
   manual settings, the status line.
+- [My devices](my-devices.md) — your meters with their connections, switched
+  with two clicks.
 - [Analog meter](analog-meter.md) — the moving-coil style instrument: scale,
   red zone, readouts, styles.
 - [The recorder](recorder.md) — starting manually, at a time or on a threshold;

@@ -177,17 +177,46 @@ void Settings::deleteConfig(QString instance_id)
   configFile.remove();
 }
 
+bool Settings::isMeterKey(const QString &key)
+{
+  // the meter belongs to the instance; the list of custom ports and the
+  // path of sigrok-cli are the same for all of them
+  return key.startsWith("DMM/")
+         || (key.startsWith("Port settings/")
+             && !key.startsWith("Port settings/custom_device")
+             && key != "Port settings/sigrok_exe");
+}
+
+QString Settings::configDir() const
+{
+  return m_configPath.isEmpty() ? QFileInfo(m_filename).absolutePath() : m_configPath;
+}
+
+QVariantMap Settings::meterKeys(bool staged) const
+{
+  QVariantMap keys;
+  for (const QString &key : m_qsettings->allKeys())
+    if (isMeterKey(key))
+      keys.insert(key, m_qsettings->value(key));
+  if (staged)
+    for (auto it = m_tmpConfig->cbegin(); it != m_tmpConfig->cend(); ++it)
+      if (isMeterKey(it.key()))
+        keys.insert(it.key(), it.value());
+  return keys;
+}
+
+void Settings::setValues(const QVariantMap &keys)
+{
+  for (auto it = keys.cbegin(); it != keys.cend(); ++it)
+    m_tmpConfig->insert(it.key(), it.value());
+}
+
 QString Settings::copyConfig(const QString &instance_id) const
 {
   Settings target(instance_id, m_configPath);
   for (const QString &key : m_qsettings->allKeys())
   {
-    // the meter belongs to the instance; the list of custom ports and the
-    // path of sigrok-cli are the same for all of them
-    const bool meter = key.startsWith("DMM/")
-                       || (key.startsWith("Port settings/")
-                           && !key.startsWith("Port settings/custom_device")
-                           && key != "Port settings/sigrok_exe");
+    const bool meter = isMeterKey(key);
     // the new window would open exactly over this one, and the second SCPI
     // server would find its port taken
     const bool clash = key == "Position/x" || key == "Position/y" || key == "Scpi/enabled";

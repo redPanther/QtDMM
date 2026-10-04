@@ -259,6 +259,16 @@ void SettingsDialog::setStateManager(SharedStateManager *state)
   m_dmm->setStateManager(state);
 }
 
+void SettingsDialog::setDeviceLibrary(DeviceLibrary *library)
+{
+  m_dmm->setDeviceLibrary(library);
+}
+
+void SettingsDialog::reloadMeter()
+{
+  m_dmm->defaultsSLOT();
+}
+
 void SettingsDialog::showPage(SettingsDialog::PageType page)
 {
   SettingsPage *wid = Q_NULLPTR;

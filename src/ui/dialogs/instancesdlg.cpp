@@ -2,6 +2,7 @@
 #include <QtWidgets>
 
 #include "ui/dialogs/instancesdlg.h"
+#include "core/devicelibrary.h"
 #include "core/sampletypes.h"
 #include "service/sharedstatemanager.h"
 #include "core/siprefix.h"
@@ -286,8 +287,31 @@ void InstancesDlg::on_ui_instance_add_clicked()
     return;
   }
 
+  // which meter: one of "My devices", or set it up in the new window
+  std::optional<MyDevice> device;
+  const QList<MyDevice> devices = m_devices ? m_devices->list() : QList<MyDevice>();
+  if (!devices.isEmpty())
+  {
+    QStringList names { tr("Set up in the new window") };
+    for (const MyDevice &d : devices)
+      names << d.name;
+    const QString choice = QInputDialog::getItem(this, tr("QtDMM - new instance"), tr("Meter:"), names, 0, false, &ok);
+    if (!ok)
+      return;
+    const int index = int(names.indexOf(choice)) - 1;
+    if (index >= 0)
+      device = devices[index];
+  }
+
   // start from this instance's settings, so only the meter needs setting up
   m_settings->copyConfig(configId);
+  if (device)
+  {
+    Settings created(configId, m_settings->configDir());
+    created.setValues(device->keys);
+    created.setBool("DMM/configured", true);   // connects at its start
+    created.save();
+  }
 
   QString exePath = QCoreApplication::applicationFilePath();
 

@@ -39,6 +39,7 @@ class AnalogMeter;
 class ReadingsModel;
 struct Alarm;
 class SharedStateManager;
+class DeviceLibrary;
 
 /// The recorder graph (shown in its own MDI window), plus the settings and
 /// the other dialogs.
@@ -95,6 +96,18 @@ public:
   /// The meter session (connection, alarms, SCPI); views connect to it.
   MeterController *controller() const { return m_ctl; }
   Settings   *settings() const { return m_settings; }
+  /// "My devices", shared by all instances.
+  DeviceLibrary *devices() const { return m_devices; }
+  /// The entry of "My devices" this instance uses now; empty when none.
+  QString     currentDevice() const;
+  /// Switches to the device @p id of "My devices": disconnects, takes over
+  /// its meter keys and connects again. A running recording stops with a
+  /// message - another meter is another function. False when there is no
+  /// such entry.
+  bool        switchDevice(const QString &id);
+  /// Keeps the meter of this instance in "My devices" as @p name, the
+  /// serial port under its stable name; returns the new id.
+  QString     saveCurrentDevice(const QString &name);
 
 Q_SIGNALS:
   /// Recording started/stopped (graph state).
@@ -167,6 +180,7 @@ protected:
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   InstancesDlg *m_instancesDlg;
   Settings    *m_settings;
+  DeviceLibrary *m_devices;
   QString     m_instanceId;
 
   /// Applies the settings to the MeterConnection, graph, display and meter.

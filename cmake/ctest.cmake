@@ -84,7 +84,7 @@ if (BUILD_TESTING)
 
 	## instances dialog: list from config files, delete mode, calculated instance
 	set( TEST_INSTANCES test_instances)
-	add_executable(${TEST_INSTANCES} MACOSX_BUNDLE tests/test_instances.cpp src/ui/dialogs/instancesdlg.cpp src/core/settings.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp src/core/siprefix.cpp ${DECODER_FILES}
+	add_executable(${TEST_INSTANCES} MACOSX_BUNDLE tests/test_instances.cpp src/ui/dialogs/instancesdlg.cpp src/core/settings.cpp src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp src/core/siprefix.cpp ${DECODER_FILES}
 		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uiinstancesdlg.ui)
 	target_include_directories(${TEST_INSTANCES} PRIVATE src)
 	target_link_libraries(${TEST_INSTANCES} PRIVATE Qt6::Widgets Qt::Core)
@@ -221,6 +221,12 @@ if (BUILD_TESTING)
 	target_include_directories(test_poincare PRIVATE src)
 	target_link_libraries(test_poincare PRIVATE Qt::Core)
 	add_test(NAME poincare_series COMMAND test_poincare)
+
+	## "My devices": the meter keys, devices.conf, the stable port name
+	add_executable(test_devicelibrary MACOSX_BUNDLE tests/test_devicelibrary.cpp src/core/devicelibrary.cpp src/core/settings.cpp src/device/transports/serial.cpp)
+	target_include_directories(test_devicelibrary PRIVATE src)
+	target_link_libraries(test_devicelibrary PRIVATE Qt6::Gui Qt6::SerialPort Qt::Core Qt::Test)
+	add_test(NAME device_library COMMAND test_devicelibrary)
 
 	## symbol sets: under "System" QtDMM's own symbols from the plain set
 	set( TEST_ICONS test_icons)

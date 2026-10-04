@@ -8,6 +8,7 @@
 
 class QLabel;
 class SharedStateManager;
+class DeviceLibrary;
 
 /// Dialog listing the configured instance ids, which of them are running
 /// and what they currently read, with buttons to start, raise, add or
@@ -23,6 +24,8 @@ public:
   void updateInstancesListBox();
   /// Source of the live readings shown next to each instance.
   void setStateManager(SharedStateManager *state);
+  /// "My devices": a new instance can start with one of them.
+  void setDeviceLibrary(DeviceLibrary *library) { m_devices = library; }
   /// Writes the settings of a new calculated instance and starts it.
   /// Exposed for tests: returns the settings file written.
   static QString createCalculatedInstance(const QString &configId, const QString &configPath,
@@ -38,6 +41,7 @@ protected:
   SharedStateManager *m_state = Q_NULLPTR;
   QMap<QString, QLabel *> m_valueLabels;   ///< per instance id, rebuilt with the list
   QTimer      m_refresh;
+  DeviceLibrary *m_devices = nullptr;
 
   /// Starts (or raises) the instance with this id.
   void launchInstance(const QString &configId);

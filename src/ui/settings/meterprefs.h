@@ -31,6 +31,7 @@
 #include <QTimer>
 
 class SharedStateManager;
+class DeviceLibrary;
 
 /// Settings page "Multimeter": vendor/model choice (from the registered
 /// DmmDecoder::DMMInfo entries), port and the serial parameters, which
@@ -77,6 +78,8 @@ public:
   bool           isSigrokMeter() const;
   /// Source of the other instances' readings, shown as a hint below the formula.
   void           setStateManager(SharedStateManager *state);
+  /// "My devices": the choice at the top of the page fills the fields.
+  void           setDeviceLibrary(DeviceLibrary *library);
 
 Q_SIGNALS:
   /// The hint's link: the user wants the Special ports page (sigrok-cli path).
@@ -90,6 +93,12 @@ public Q_SLOTS:
 protected Q_SLOTS:
   void           on_ui_vendor_activated(int);
   void           on_ui_model_activated(int);
+  /// Fills the "My devices" choice, the entry in use selected.
+  void           fillDevices();
+  /// A device of "My devices" chosen: its keys into the fields.
+  void           onDeviceChosen(int index);
+  /// The fields into "My devices": the chosen entry, or a new one.
+  void           saveDevice();
   /// Load a DMM description (.cfg).
   void           on_ui_load_clicked();
   /// Save the current settings as a DMM description (.cfg).
@@ -125,4 +134,15 @@ protected:
 
   SharedStateManager *m_state = Q_NULLPTR;
   QTimer m_calcHintTimer;
+
+private:
+  /// What defaultsSLOT() reads: @c m_override first (an entry of "My
+  /// devices" chosen on the page), else the settings.
+  QString        cfgString(const QString &key, const QString &def = QString()) const;
+  int            cfgInt(const QString &key, int def = 0) const;
+  bool           cfgBool(const QString &key, bool def = false) const;
+  QVariantMap    m_override;
+  DeviceLibrary *m_devices = nullptr;
+  QComboBox     *ui_myDevice = nullptr;
+  QPushButton   *ui_saveDevice = nullptr;
 };

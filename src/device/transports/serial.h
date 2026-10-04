@@ -20,6 +20,14 @@ public:
 
     /// Appends the system's serial port names to @p portlist.
     static bool availablePorts(QStringList &portlist);
+    /// The name of @p port that stays when the cable is plugged in again:
+    /// on Linux the link in @p byIdDir (/dev/serial/by-id) that points to
+    /// it - ttyUSB0 may be ttyUSB1 tomorrow. Else, or when there is none,
+    /// @p port as it is.
+    static QString stablePortName(const QString &port, const QString &byIdDir = QStringLiteral("/dev/serial/by-id"));
+    /// A device string ("SERIAL /dev/ttyUSB0") with the stable port name;
+    /// any other kind of device as it is.
+    static QString stableDevice(const QString &device);
     /// Sets baud rate, data/stop bits, parity and the DTR/RTS lines from
     /// the DMMInfo. Must be called on an open port.
     bool init();

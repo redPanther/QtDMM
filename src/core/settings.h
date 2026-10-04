@@ -55,6 +55,17 @@ public:
 
   /// Ids of all instances that have a settings file next to this one.
   QStringList    getConfigInstances();
+  /// The directory of the settings files (the instances', devices.conf).
+  QString        configDir() const;
+  /// Whether @p key belongs to the meter and its connection - DMM/*, Port
+  /// settings/* except the list of own ports and the path of sigrok-cli:
+  /// what a new instance does not copy, and what "My devices" keep.
+  static bool    isMeterKey(const QString &key);
+  /// The stored keys and values of the meter (isMeterKey()); with
+  /// @p staged the writes not saved yet on top.
+  QVariantMap    meterKeys(bool staged = false) const;
+  /// Stages @p keys as they are (meter keys from "My devices").
+  void           setValues(const QVariantMap &keys);
   /// Commits staged writes to the file.
   void           save();
   /// Drops staged writes.

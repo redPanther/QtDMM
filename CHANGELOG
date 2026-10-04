@@ -21,6 +21,9 @@
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu
+- My devices: your meters with their connections, kept for all windows in devices.conf. The toolbar's My
+  devices button switches to one with two clicks (a running recording stops); Save current device, the choice
+  on the Multimeter page, a device for a new instance. Serial ports are kept under their /dev/serial/by-id name
 - Graph: the vertical axis in the unit the meter shows (350 mV, not 0.35 V); the status bar says what the
   third time is ("1:59:17 left")
 - Readings table: the columns are measured again after a design or font change, so no cell is cut off
