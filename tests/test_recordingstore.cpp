@@ -151,6 +151,30 @@ int main(int argc, char **argv)
     check(store.series().last().value == 99, "limit: the newest is kept");
   }
 
+  // --- 3b. a fast meter keeps every reading (50 a second); at the most a
+  //         series keeps, the oldest go ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setMaxDuration(100000);
+    store.start();
+    for (int i = 0; i < 100; i++)
+      store.setReading(clock.at(i * 20, reading(i, QString::number(i), "DC")));
+    check(store.count() == 100, QString("fast: %1 of 100 readings").arg(store.count()));
+
+    Reading r = reading(1, "1.000", "DC");
+    store.setReadingsPaused(true);   // the table's series is not what this is about
+    for (int i = 100; i < RecordingStore::kMaxPoints + RecordingStore::kMaxPoints / 50; i++)
+    {
+      clock.now = r.t = i * 20;   // without the wall clock: QDateTime is slow
+      store.setReading(r);
+    }
+    check(store.count() <= RecordingStore::kMaxPoints + RecordingStore::kMaxPoints / 100
+            && store.count() >= RecordingStore::kMaxPoints && store.series().first().t > 0,
+          QString("most: %1 readings kept, from %2 ms").arg(store.count()).arg(store.series().first().t));
+  }
+
   // --- 4. marks by time: now while recording; a mark goes with the
   //        readings before what the store keeps ---
   {
