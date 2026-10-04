@@ -128,7 +128,7 @@ copies the names in `NAMES` from installed Breeze and Oxygen themes (Oxygen
 lacks five of them under that name: `OXYGEN_ALIAS`) and adds QtDMM's own
 symbols from `assets/icons/own/<style>/`: `own/breeze/` as SVG drawn with
 `currentColor`, `own/oxygen/` as SVG or 32 px PNG (DMM, display, analog
-meter, integration, instances, arrange); a symbol `own/oxygen/` lacks is taken
+meter, integration, instances, arrange, Poincaré plot); a symbol `own/oxygen/` lacks is taken
 from `own/breeze/`. To use a new symbol, add its name to `NAMES` (or files to
 `own/`), run the script and commit the result. The program icon lives in
 `assets/icons/app/`.
