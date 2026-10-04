@@ -33,6 +33,11 @@ Builds without `.git` still know their version:
 
 - The CPack source tarball carries a `.tarball-version` file.
 - GitHub's source downloads get it through `export-subst` in `.archive-version`.
+- So does the source tarball of a release (`QtDMM-26.2.tar.gz`, from 26.2 on):
+  `git archive` of the tag, the same content as GitHub's download, but with a
+  checksum that stays, which distributions keep in their package recipes.
+  The Release workflow stops when its `.archive-version` does not say the
+  tag.
 
 A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0`. `ctest -R version_scheme` checks the mapping from tag to version.
 
@@ -68,9 +73,10 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
 
 6. The **Release** workflow (`.github/workflows/release.yml`) builds the
    Linux AppImage, the Windows installer and ZIP and the universal macOS
-   `.dmg`. It then creates a **draft** release with them, marked as a
-   pre-release when the tag has a suffix. If only the macOS job fails, the
-   draft is still made, without the `.dmg`.
+   `.dmg`. It then creates a **draft** release with them and the source
+   tarball `QtDMM-<tag>.tar.gz`, marked as a pre-release when the tag has a
+   suffix. If only the macOS job fails, the draft is still made, without the
+   `.dmg`.
    If the release was made on GitHub's release page instead (which creates
    the tag), the workflow adds the files to it and leaves it as it is. Its
    builds take about 10 minutes (the universal macOS build is the slowest),

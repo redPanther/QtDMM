@@ -2,7 +2,7 @@ name: Release
 
 # A version tag (26.1-rc1, 26.1, 26.1.1 - see docs/dev/releasing.md) builds the
 # Linux AppImage, the Windows installer + ZIP and the macOS .dmg with the regular workflows and
-# puts them into a DRAFT release. A maintainer reviews it and publishes it by
+# puts them into a DRAFT release, together with the source tarball QtDMM-<tag>.tar.gz. A maintainer reviews it and publishes it by
 # hand; tags with a suffix (-rc1, -beta1) become pre-releases.
 # When the release already exists (made on GitHub's release page, which also
 # creates the tag), the files are added to it and the release is left as it is.
@@ -32,10 +32,29 @@ jobs:
     if: ${{ !cancelled() && needs.linux.result == 'success' && needs.windows.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
+    # all of the history: the tarball's .archive-version is git describe
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - uses: actions/download-artifact@v4
       with:
         path: dist
         merge-multiple: true
+
+    # the source with a name and a checksum of our own (distributions keep the
+    # checksum; GitHub's tag archives are made on the fly). git archive fills
+    # in .archive-version as GitHub does, so the build knows its version
+    - name: Source tarball
+      env:
+        TAG: ${{ github.ref_name }}
+      run: |
+        git archive --format=tar.gz --prefix="QtDMM-${TAG}/" -o "dist/QtDMM-${TAG}.tar.gz" "$TAG"
+        version=$(tar -xzOf "dist/QtDMM-${TAG}.tar.gz" "QtDMM-${TAG}/.archive-version" | head -1)
+        if [ "$version" != "$TAG" ]; then
+          echo "::error::the tarball says version '$version', expected $TAG"
+          exit 1
+        fi
 
     - name: Create the draft release, or add the files to an existing one
       env:
