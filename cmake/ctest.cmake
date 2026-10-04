@@ -216,6 +216,12 @@ if (BUILD_TESTING)
 	target_link_libraries(${TEST_MINMAX} PRIVATE Qt::Core)
 	add_test(NAME minmax_memory COMMAND ${TEST_MINMAX})
 
+	## the Poincaré plot's values: pairs, SD1/SD2, gaps, port changes
+	add_executable(test_poincare MACOSX_BUNDLE tests/test_poincare.cpp src/core/poincare.cpp src/core/readingadapter.cpp src/core/siprefix.cpp)
+	target_include_directories(test_poincare PRIVATE src)
+	target_link_libraries(test_poincare PRIVATE Qt::Core)
+	add_test(NAME poincare_series COMMAND test_poincare)
+
 	## symbol sets: under "System" QtDMM's own symbols from the plain set
 	set( TEST_ICONS test_icons)
 	add_executable(${TEST_ICONS} MACOSX_BUNDLE tests/test_icons.cpp src/ui/designs.cpp)
