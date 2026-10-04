@@ -203,12 +203,6 @@ if (BUILD_TESTING)
 		add_test(NAME appstream_metadata COMMAND ${APPSTREAMCLI} validate --no-net "${CMAKE_SOURCE_DIR}/assets/appimage/qtdmm.appdata.xml")
 	endif()
 
-	## the tests report through qWarning()/qInfo(); on Windows Qt sends those
-	## to the debugger instead of stderr unless told otherwise, and ctest's
-	## --output-on-failure would show nothing
-	get_property(ALL_TESTS DIRECTORY PROPERTY TESTS)
-	set_tests_properties(${ALL_TESTS} PROPERTIES ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;PYTHONDONTWRITEBYTECODE=1")
-
 	## the min/max memory: kept across range changes, afresh on another port
 	set( TEST_MINMAX test_minmax)
 	add_executable(${TEST_MINMAX} MACOSX_BUNDLE tests/test_minmax.cpp)
@@ -258,5 +252,18 @@ if (BUILD_TESTING)
 		add_test(NAME mnemonics_${lang} COMMAND ${PROJECT_NAME} --check-mnemonics --config-dir "${_dir}" --config-id check)
 		set_tests_properties(mnemonics_${lang} PROPERTIES TIMEOUT 120 ENVIRONMENT
 			"QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;QT_QPA_PLATFORM=offscreen;LANG=${lang}.UTF-8;LC_ALL=${lang}.UTF-8;LANGUAGE=;QTDMM_IPC_KEY=qtdmm_mnemonics_${lang}")
+	endforeach()
+
+	## the tests report through qWarning()/qInfo(); on Windows Qt sends those
+	## to the debugger instead of stderr unless told otherwise, and ctest's
+	## --output-on-failure would show nothing. Last, so it reaches every test
+	## (the ones added after it said nothing on Windows); a test with an
+	## environment of its own keeps it
+	get_property(ALL_TESTS DIRECTORY PROPERTY TESTS)
+	foreach(_test ${ALL_TESTS})
+		get_test_property(${_test} ENVIRONMENT _env)
+		if (NOT _env)
+			set_tests_properties(${_test} PROPERTIES ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;PYTHONDONTWRITEBYTECODE=1")
+		endif()
 	endforeach()
 endif()
