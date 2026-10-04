@@ -238,9 +238,9 @@ void FindDeviceDlg::select()
   m_model->clear();
   m_fix->setVisible(any && !m_found[row].problem.isEmpty());
   m_key->clear();
-  const bool victron = any && !m_found[row].models.isEmpty() && m_found[row].models.first().startsWith("Victron");
-  m_keyLabel->setVisible(victron);
-  m_key->setVisible(victron);
+  m_needsKey = any && !m_found[row].models.isEmpty() && m_found[row].models.first().startsWith("Victron");
+  m_keyLabel->setVisible(m_needsKey);
+  m_key->setVisible(m_needsKey);
   if (!any)
   {
     if (m_running.isEmpty())
@@ -274,7 +274,7 @@ void FindDeviceDlg::updateButtons()
   const int row = m_cards->currentRow();
   static const QRegularExpression hex32("^[0-9a-fA-F]{32}$");
   const bool ok = row >= 0 && row < m_found.size() && m_found[row].problem.isEmpty() && !m_model->currentText().isEmpty()
-                  && (!m_key->isVisible() || hex32.match(m_key->text().simplified().remove(' ')).hasMatch());
+                  && (!m_needsKey || hex32.match(m_key->text().simplified().remove(' ')).hasMatch());
   m_connect->setEnabled(ok);
 }
 
@@ -286,7 +286,8 @@ QVariantMap FindDeviceDlg::keys() const
     return keys;
   keys = m_found[row].keys;
   keys.insert("DMM/model", m_model->currentText());
-  if (m_key->isVisible())
+  // asked after accept(): the dialog and its fields are hidden by then
+  if (m_needsKey)
     keys.insert("Port settings/ble-key", m_key->text().simplified().remove(' '));
   return keys;
 }

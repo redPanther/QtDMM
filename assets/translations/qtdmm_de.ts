@@ -809,7 +809,7 @@ und melden Sie sich danach ab und wieder an.</translation>
     <message>
         <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="115"/>
         <source>Device &amp;key:</source>
-        <translation>Geräte&amp;schlüssel:</translation>
+        <translation>Geräteschlüsse&amp;l:</translation>
     </message>
     <message>
         <location filename="../../src/ui/dialogs/finddevicedlg.cpp" line="119"/>

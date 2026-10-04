@@ -352,6 +352,7 @@ void BleDiscoverer::start()
   connect(d->agent, &QBluetoothDeviceDiscoveryAgent::deviceUpdated, this,
           [take](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { take(info); });
   connect(d->agent, &QBluetoothDeviceDiscoveryAgent::finished, this, &Discoverer::finished);
+  connect(d->agent, &QBluetoothDeviceDiscoveryAgent::canceled, this, &Discoverer::finished);
   connect(d->agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, &Discoverer::finished);
   d->agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 #else

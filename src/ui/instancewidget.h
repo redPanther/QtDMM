@@ -163,8 +163,9 @@ public Q_SLOTS:
   void        importSLOT();
   /// Graph started/stopped recording.
   void        runningSLOT(bool);
-  /// Settings dialog OK/Apply: re-reads the configuration (readConfig()).
-  void        applySLOT();
+  /// Settings dialog OK/Apply: re-reads the configuration (readConfig());
+  /// \p reconnect (OK) connects the meter again.
+  void        applySLOT(bool reconnect = false);
   /// Settings dialog Cancel.
   void        rejectSLOT();
   /// Shows the instances dialog.

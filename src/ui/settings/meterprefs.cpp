@@ -278,13 +278,16 @@ void MeterPrefs::defaultsSLOT()
 
   // a port that is not there now (unplugged, a /dev/serial/by-id name
   // from "My devices") stays the choice
-  const QString device = cfgString("Port settings/device");
+  QString device = cfgString("Port settings/device");
+  if (device.section(' ', 0, 0).startsWith("ble", Qt::CaseInsensitive))
+    device.clear();   // a Bluetooth meter: no serial port to keep
   if (!device.isEmpty() && !list.contains(device))
   {
     list.append(device);
     m_portlist->setStringList(list);
   }
-  port->setCurrentText        (device);
+  if (!device.isEmpty())
+    port->setCurrentText(device);
   ui_sigrokConn->setCurrentText(cfgString("Port settings/sigrok-conn"));
   ui_sigrokOptions->setText   (cfgString("Port settings/sigrok-options"));
   ui_bleAddress->setCurrentText(cfgString("Port settings/ble-address"));
@@ -367,11 +370,18 @@ void MeterPrefs::factoryDefaultsSLOT()
 
 void MeterPrefs::applySLOT()
 {
-  m_cfg->setString("Port settings/device", port->currentText());
+  // a Bluetooth meter has no port: the port field still held the one of the
+  // meter before, and My devices showed it (the key stays in its own entry)
+  const QString address = ui_bleAddress->currentText().section(' ', 0, 0).trimmed();
+  m_cfg->setString("Port settings/device", isGatt()        ? "blegatt " + address
+                                           : isBluetooth() ? "ble " + address
+                                                           : port->currentText());
   m_cfg->setString("Port settings/sigrok-conn", ui_sigrokConn->currentText().trimmed());
   m_cfg->setString("Port settings/sigrok-options", ui_sigrokOptions->text().trimmed());
   m_cfg->setString("Port settings/ble-address", ui_bleAddress->currentText().trimmed());
-  m_cfg->setString("Port settings/ble-key", ui_bleKey->text().trimmed());
+  // only a Victron device has a key: another meter would carry it on into
+  // its own entry of My devices
+  m_cfg->setString("Port settings/ble-key", isBluetooth() && !isGatt() ? ui_bleKey->text().trimmed() : QString());
   m_cfg->setString("Port settings/ble-main", ui_bleMain->currentData().toString());
   m_cfg->setString("Port settings/ble-second", ui_bleSecond->currentData().toString());
   m_cfg->setString("DMM/calc-unit", ui_calcUnit->text().trimmed());
