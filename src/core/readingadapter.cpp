@@ -81,6 +81,7 @@ Meaning meaning(const QString &base, const QString &mode, FrameFormat::DataForma
     { "Wh",     Quantity::Energy,            "Wh" },
     { "cosphi", Quantity::PowerFactor,       "" },
     { "D",      Quantity::DissipationFactor, "" },
+    { "ppm",    Quantity::Unknown,           "ppm" },   // a concentration; of what, the meter says
   };
   for (const Row &r : kRows)
     if (base == QString::fromUtf8(r.base))
@@ -92,6 +93,8 @@ Meaning meaning(const QString &base, const QString &mode, FrameFormat::DataForma
         m.quantity = Quantity::RelativeHumidity;
       if (victron && m.quantity == Quantity::Time)
         m.quantity = Quantity::TimeToGo;
+      if (tfa && m.unit == QLatin1String("ppm"))   // the TFA sensor measures CO2
+        m.quantity = Quantity::CarbonDioxide;
       return m;
     }
   return { Quantity::Unknown, base };
@@ -130,6 +133,7 @@ bool hasRange(Quantity q)
     case Quantity::Unknown:
     case Quantity::Temperature:
     case Quantity::RelativeHumidity:
+    case Quantity::CarbonDioxide:
     case Quantity::DutyCycle:
     case Quantity::StateOfCharge:
     case Quantity::TimeToGo:

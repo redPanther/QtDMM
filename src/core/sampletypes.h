@@ -73,7 +73,7 @@ enum class Quantity : quint16
   ElectricCharge,       ///< Ah (dito)
   StateOfCharge,        ///< % of a battery (Victron)
   TimeToGo,             ///< remaining time of a battery (Victron)
-  CarbonDioxide
+  CarbonDioxide         ///< ppm (TFA AirControl)
 };
 
 /// State and mode of a value, a bit mask after libsigrok's sr_mqflag, plus
@@ -164,6 +164,7 @@ inline const Entry *table(int *count)
     { Quantity::ElectricCharge,      "electric_charge",      QT_TRANSLATE_NOOP("Quantity", "Electric charge") },
     { Quantity::StateOfCharge,       "state_of_charge",      QT_TRANSLATE_NOOP("Quantity", "State of charge") },
     { Quantity::TimeToGo,            "time_to_go",           QT_TRANSLATE_NOOP("Quantity", "Time to go") },
+    { Quantity::CarbonDioxide,       "carbon_dioxide",       QT_TRANSLATE_NOOP("Quantity", "Carbon dioxide") },
   };
   *count = int(sizeof(kTable) / sizeof(kTable[0]));
   return kTable;
