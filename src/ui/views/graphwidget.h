@@ -39,17 +39,19 @@ class Settings;
 
 /// The recorder's view: plots the curve a RecordingStore keeps.
 ///
-/// The store does the recording (sampling, triggers, integral, marks, the
-/// ring); the graph shows a window of @c m_size samples of it (scrollable),
+/// The store does the recording (every reading with its time, triggers,
+/// integral, marks); the graph shows a window of it in time (scrollable),
 /// scales the y axis, and draws the integral with its scale and offset, the
-/// cursor and threshold lines and the marks. Rendering uses Qt Charts; the
+/// cursor and threshold lines and the marks. The x axis is the time since
+/// the start of the recording; more readings than pixel columns are thinned
+/// to the minimum and maximum of each column. Rendering uses Qt Charts; the
 /// cursor and threshold lines are QGraphicsLineItems on top of the chart.
 /// The recorder settings (setSampleTime(), setMode(), setThresholds(), ...)
-/// and addValue() are passed on to the store, so the graph can still be
-/// driven as a whole. Data can be exported/imported as CSV and printed.
+/// are passed on to the store, so the graph can still be driven as a whole.
+/// Data can be exported/imported as CSV and printed.
 ///
-/// Times are in tenths of a second internally: a sample time of 5 means
-/// one stored sample per 0.5 s.
+/// The sample time is in tenths of a second, like the settings: the grid
+/// of the export, not the rate the graph shows.
 class GraphWidget : public QWidget
 {
   Q_OBJECT
@@ -134,8 +136,6 @@ public:
   /// Shows @p store instead of the graph's own one (the MeterController's
   /// recorder). The graph does not take ownership; the store has to outlive it.
   void             setStore(RecordingStore *store);
-  /// The current reading, every 100 ms: RecordingStore::addValue().
-  void             addValue(double v) { m_store->addValue(v); }
   /// Unit of the recorded quantity for the axis label; the SI prefix is
   /// stripped because values arrive in base units (see DmmDecoder::DmmResponse).
   void             setUnit(const QString &);
@@ -274,13 +274,12 @@ protected:
   bool             writeImage(const QString &fileName, QSize size);
 
   QScrollBar      *scrollbar;
-  int              m_size;          ///< visible window in samples
-  int              m_bucket = 1;    ///< samples per drawn min/max pair (see bucketSize())
+  qint64           m_bucket = 1;    ///< ms per drawn min/max pair (see bucketSize())
   int              m_tailData = 0;  ///< points the newest bucket gave the data line (1 or 2; a gap is 1)
   int              m_tailInt = 0;   ///< the same for the integral
   int              m_tailDataPts = 0;  ///< and the data points (a gap has none)
   int              m_tailIntPts = 0;
-  int              m_windowSeconds = 0;   ///< setGraphSize(), for setSampleTime()
+  int              m_windowSeconds = 600;   ///< the visible window, setGraphSize()
   /// @name Time buttons (All / 1 min / 5 min / 30 min) top right in the graph
   /// @{
   QWidget         *m_timeBar = nullptr;
@@ -302,13 +301,13 @@ protected:
   double           m_scaleMax;
   bool             m_autoScale;
   RecordingStore  *m_store;
-  /// Sample time in tenths of a second, as double for the x arithmetic.
-  double           sampleTenths() const { return m_store->sampleTime(); }
   SampleMode       mode() const { return SampleMode(m_store->startMode()); }
   bool             m_connected;
-  /// The store's signals: a new sample, discarded or replaced samples.
+  /// The store's signals: a new reading, discarded or replaced readings.
   void             connectStore();
-  int              bucketSize() const;
+  /// Where the window starts (ms since the start of the recording).
+  qint64           windowStart() const;
+  qint64           bucketSize() const;
   int              bucketStart(int i) const;
   int              bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const;
   static QList<QPointF> withoutGaps(const QList<QPointF> &points);

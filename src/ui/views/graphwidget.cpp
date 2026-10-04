@@ -41,7 +41,6 @@ GraphWidget::GraphWidget(QWidget *parent): GraphWidget(parent, Q_NULLPTR)
 }
 GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   QWidget(parent),
-  m_size(600),
   m_scaleMin(0),
   m_scaleMax(0),
   m_autoScale(true),
@@ -225,7 +224,7 @@ void GraphWidget::timeButtonClicked(int seconds)
 
 void GraphWidget::requestAll(bool grow)
 {
-  const double recorded = m_store->count() * sampleTenths() / 10.0;
+  const double recorded = (m_store->duration() - m_store->origin()) / 1000.0;
   // growing by a quarter at a time: the window does not change with every sample
   int target = int(std::ceil(grow ? recorded * 1.25 : recorded));
   target = qMax(target, 10);
@@ -310,7 +309,7 @@ void GraphWidget::print(QPrinter *prt, const QString &title, const QString &comm
              tr("Sampling resolution:"));
   p.drawText(maxWidth + 10, tRect.height() + 10 + tHeight,
              w - maxWidth - 10, tHeight, Qt::AlignLeft | Qt::AlignVCenter,
-             tr("%1 Seconds").arg(sampleTenths()));
+             tr("%1 Seconds").arg(m_store->sampleTime() / 10.0));
 
   //p.setFont( QFont( "Helvetica", 10 ));
 
@@ -343,45 +342,47 @@ void GraphWidget::resizeEvent(QResizeEvent *)
     rebuildSeries();
 }
 
-// Samples per pixel column (1 = every sample is a point). Counted over the
-// window or, while the recording does not fill it yet, over what is there:
-// a short recording in a long window is drawn as it is.
-int GraphWidget::bucketSize() const
+// ms per pixel column. Counted over the window or, while the recording does
+// not fill it yet, over what is there: a short recording in a long window is
+// drawn as it is. Readings further apart than a column are a bucket each.
+qint64 GraphWidget::bucketSize() const
 {
   const double plotWidth = m_chart->plotArea().width();
   const int columns = qMax(1, int(plotWidth > 0 ? plotWidth : width()));
-  const int shown = qMin(m_size, m_store->count());
-  return qMax(1, (shown + columns - 1) / columns);
+  const qint64 shown = qMin<qint64>(qint64(m_windowSeconds) * 1000, m_store->duration() - m_store->origin());
+  return qMax<qint64>(1, (shown + columns - 1) / columns);
 }
 
-// The index of the first sample in the bucket of sample @p i. The buckets
-// count from the start of the recording, not from the ring's oldest sample:
-// while a full ring scrolls, a sample stays in its bucket and the drawn
-// minima and maxima stay put instead of jittering with every new sample.
+// The index of the first reading in the bucket of reading @p i. The buckets
+// are columns of time counted from the start of the recording: while the
+// window scrolls, a reading stays in its bucket and the drawn minima and
+// maxima stay put instead of jittering with every new reading.
 int GraphWidget::bucketStart(int i) const
 {
-  const qint64 seq = m_store->firstSequence() + i;
-  return qMax(0, int(seq - seq % m_bucket - m_store->firstSequence()));
+  const RecordingSeries &series = m_store->series();
+  const qint64 begin = series.at(i).t / m_bucket * m_bucket;
+  return qMin(i, series.lowerBound(begin));
 }
 
-// The points of the samples first..last: the sample itself, or with more than
-// one the minimum and the maximum in time order, so a spike survives the
-// thinning. The store keeps every sample; only the drawing is thinned.
-// Samples without a value (NaN: overload, stale) do not count; a bucket of
+// The points of the readings first..last: the reading itself, or with more
+// than one the minimum and the maximum in time order, so a spike survives
+// the thinning. The store keeps every reading; only the drawing is thinned.
+// Readings without a value (NaN: overload, stale) do not count; a bucket of
 // nothing else is one NaN point, the gap.
 int GraphWidget::bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const
 {
-  const double step = sampleTenths() / 10.0;
+  const RecordingSeries &series = m_store->series();
   auto value = [&](int i)
   {
-    const RecordedPoint &p = m_store->at(i);
+    const RawPoint &p = series.at(i);
     return integral ? m_integrationOffset + p.integral * m_integrationScale : p.value;
   };
+  auto x = [&](int i) { return series.at(i).t / 1000.0; };
   while (first <= last && std::isnan(value(first)))
     first++;
   if (first > last)
   {
-    out.append(QPointF(last * step, qQNaN()));
+    out.append(QPointF(x(last), qQNaN()));
     return 1;
   }
   int lo = first, hi = first;
@@ -404,7 +405,7 @@ int GraphWidget::bucketPoints(int first, int last, bool integral, QList<QPointF>
   }
   if (lo == hi)
   {
-    out.append(QPointF(lo * step, loValue));
+    out.append(QPointF(x(lo), loValue));
     return 1;
   }
   if (lo > hi)
@@ -412,8 +413,8 @@ int GraphWidget::bucketPoints(int first, int last, bool integral, QList<QPointF>
     qSwap(lo, hi);
     qSwap(loValue, hiValue);
   }
-  out.append(QPointF(lo * step, loValue));
-  out.append(QPointF(hi * step, hiValue));
+  out.append(QPointF(x(lo), loValue));
+  out.append(QPointF(x(hi), hiValue));
   return 2;
 }
 
@@ -423,13 +424,16 @@ void GraphWidget::rebuildSeries()
   QList<QPointF> intPoints;
   const int count = m_store->count();
   m_bucket = bucketSize();
-  points.reserve(count / m_bucket * 2 + 2);
-  intPoints.reserve(count / m_bucket * 2 + 2);
+  points.reserve(2 * count + 2);
+  intPoints.reserve(2 * count + 2);
 
   m_tailData = m_tailInt = 0;
+  const RecordingSeries &series = m_store->series();
   for (int first = 0; first < count;)
   {
-    const int last = qMin(bucketStart(first) + m_bucket, count) - 1;
+    // the readings of this bucket
+    const qint64 end = (series.at(first).t / m_bucket + 1) * m_bucket;
+    const int last = qMin(series.lowerBound(end), count) - 1;
     m_tailData = bucketPoints(first, last, false, points);
     m_tailInt = bucketPoints(first, last, true, intPoints);
     first = last + 1;
@@ -443,7 +447,7 @@ void GraphWidget::rebuildSeries()
   m_tailIntPts = finiteTail(intPoints, m_tailInt);
 }
 
-// The newest sample went into the series: a new bucket adds its point, one
+// The newest reading went into the series: a new bucket adds its point, one
 // that is still filling replaces the points it had.
 void GraphWidget::appendToSeries()
 {
@@ -488,12 +492,18 @@ int GraphWidget::finiteTail(const QList<QPointF> &points, int tail)
   return n;
 }
 
+qint64 GraphWidget::windowStart() const
+{
+  // the scroll bar counts tenths of a second from what the store keeps
+  return m_store->origin() + qint64(qMax(0, scrollbar->value())) * 100;
+}
+
 void GraphWidget::updateXAxisRange()
 {
-  double step = sampleTenths() / 10.0;
-  int sv = qMax(0, scrollbar->value());
-
-  double start = sv * step, end = (sv + qMax(1, m_size) - 1) * step;
+  // one sample time short of the window, as it always was: no label on the
+  // right edge
+  const double window = qMax(1, m_windowSeconds);
+  double start = windowStart() / 1000.0, end = start + window - qMin(m_store->sampleTime() / 10.0, window / 10);
   double div = timeStep((end - start) / 6);   // about 5 ticks
   if (divisions() && end > start)
   {
@@ -765,12 +775,11 @@ void GraphWidget::syncMarks()
 void GraphWidget::updateMarkPositions()
 {
   const QRectF plot = m_chart->plotArea();
-  const double step = sampleTenths() / 10.0;
   const QList<RecordingStore::Mark> marks = m_store->marks();
   for (int i = 0; i < m_marks.size() && i < marks.size(); i++)
   {
     QGraphicsLineItem *line = m_marks[i];
-    const double x = marks[i].index * step;
+    const double x = marks[i].t / 1000.0;
     const bool inView = x >= m_xAxis->min() && x <= m_xAxis->max();
     line->setVisible(inView);
     if (!inView)
@@ -782,17 +791,16 @@ void GraphWidget::updateMarkPositions()
 
 void GraphWidget::setGraphSize(int size, int length)
 {
-  m_windowSeconds = size;
+  m_windowSeconds = qMax(1, size);
   m_totalSeconds = length;
-  m_size = static_cast<int>((static_cast<double>(size) / sampleTenths() * 10.));
-  const int samples = static_cast<int>((static_cast<double>(length) / sampleTenths() * 10. + 1));
 
+  // in tenths of a second, over what the store keeps
   scrollbar->setMinimum(0);
-  scrollbar->setMaximum(samples - 1 - m_size);
-  scrollbar->setSingleStep((m_size - 1) / 10);
-  scrollbar->setPageStep(m_size);
+  scrollbar->setMaximum(qMax(0, (length - m_windowSeconds) * 10));
+  scrollbar->setSingleStep(qMax(1, m_windowSeconds));
+  scrollbar->setPageStep(m_windowSeconds * 10);
 
-  m_store->setCapacity(samples);
+  m_store->setMaxDuration(length);
 
   emitInfo();
 
@@ -804,12 +812,8 @@ void GraphWidget::setGraphSize(int size, int length)
 
 void GraphWidget::setSampleTime(int v)
 {
-  if (v <= 0 || v == m_store->sampleTime())
-    return;
+  // the grid of the export: the graph shows every reading anyway
   m_store->setSampleTime(v);
-  // m_size and the store's capacity count samples of the old sample time
-  if (m_windowSeconds > 0)
-    setGraphSize(m_windowSeconds, m_totalSeconds);
 }
 
 void GraphWidget::startSLOT()
@@ -824,12 +828,17 @@ void GraphWidget::stopSLOT()
 
 void GraphWidget::onAppended(bool shifted)
 {
-  const int count = m_store->count();
-  const RecordedPoint &p = m_store->last();
+  const RawPoint &p = m_store->series().last();
 
   // "All": the window grows once the recording fills it
-  if (m_followAll && count >= m_size)
+  if (m_followAll && m_store->duration() - m_store->origin() >= qint64(m_windowSeconds) * 1000)
     requestAll(true);
+  // a full store: the window moves on with what it keeps
+  if (m_store->origin() > 0)
+  {
+    updateXAxisRange();
+    updateMarkPositions();
+  }
 
   const bool resFlag = m_autoScale && computeMinMax(p.value);
 
@@ -903,30 +912,22 @@ void GraphWidget::onCleared()
   m_tailData = m_tailInt = m_tailDataPts = m_tailIntPts = 0;
 }
 
+// "1:05:09", "5:09", "2 d 1:05:09"
+static QString durationText(qint64 seconds)
+{
+  const qint64 d = seconds / 86400, h = seconds / 3600 % 24, m = seconds / 60 % 60, sec = seconds % 60;
+  QString text = h || d ? QString("%1:%2:%3").arg(h).arg(m, 2, 10, QChar('0')).arg(sec, 2, 10, QChar('0'))
+                        : QString("%1:%2").arg(m).arg(sec, 2, 10, QChar('0'));
+  return d ? QString("%1 d %2").arg(d).arg(text) : text;
+}
+
 void GraphWidget::emitInfo()
 {
-  const int seconds = m_store->remainingLength() / 10;
-  const int pointer = m_store->count();
-  const int length = m_store->capacity();
-  const bool running = m_store->isRunning();
-
-  int w = seconds / 60 / 60 / 24 / 7;
-  int d = (seconds / 60 / 60 / 24) % 7;
-  int h = (seconds / 60 / 60) % (24);
-  int m = (seconds / 60) % 60;
-  int s = seconds % 60;
-
-  QString txt;
-
-  if (w)
-    txt = QString("%1/%2 - %3week%4 %5day&6 %7:%8:%9 - %10").arg(pointer).arg(length).arg(w).arg((w > 1 ? "s" : "")).arg(d).arg((d > 1 ? "s" : "")).arg(h).arg(m).arg(s)
-          .arg(running ? tr("Sampling") : tr("Stopped"));
-  else if (d)
-    txt = QString("%1/%2 - %3day%4 %5:%6:%7 - %8").arg(pointer).arg(length).arg(d).arg((d > 1 ? "s" : "")).arg(h).arg(m).arg(s).arg(running ? tr("Sampling") : tr("Stopped"));
-  else if (h)
-    txt = QString("%1/%2 - %3:%4:%5 - %6").arg(pointer).arg(length).arg(h).arg(m).arg(s).arg(running ? tr("Sampling") : tr("Stopped"));
-  else
-    txt = QString("%1/%2 - %3:%4 - %5").arg(pointer).arg(length).arg(m).arg(s).arg(running ? tr("Sampling") : tr("Stopped"));
+  // recorded / kept at most - left until the recording length - state
+  QString txt = QString("%1 / %2").arg(durationText(m_store->duration() / 1000), durationText(m_store->maxDuration()));
+  if (m_store->remainingLength() > 0)
+    txt += " - " + durationText(m_store->remainingLength() / 10);
+  txt += " - " + (m_store->isRunning() ? tr("Sampling") : tr("Stopped"));
   Q_EMIT info(txt);
 }
 
@@ -1080,12 +1081,12 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
 
     double pixelsPerSecond = plot.width() / range;
     double dxSeconds = (m_mpos.x() - pos.x()) / pixelsPerSecond;
-    double dxSamples = dxSeconds / (sampleTenths() / 10.0);
+    double dxTenths = dxSeconds * 10;
 
-    if (fabs(dxSamples) >= 1)
+    if (fabs(dxTenths) >= 1)
     {
       int sv = qMax(0, scrollbar->value());
-      scrollbar->setValue(qBound(0, sv + qRound(dxSamples), scrollbar->maximum()));
+      scrollbar->setValue(qBound(0, sv + qRound(dxTenths), scrollbar->maximum()));
       m_mpos = pos;
     }
     return;
@@ -1154,20 +1155,27 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
     m_crosshairVLine->setVisible(true);
 
     double xValue = m_chart->mapToValue(QPointF(x, scenePos.y()), m_dataSeries).x();
-    int idx = qRound(xValue / (sampleTenths() / 10.0));
+    const qint64 t = qRound64(xValue * 1000);
+    const RecordingSeries &series = m_store->series();
+    // the reading whose value holds there; the next one if it is nearer
+    int idx = series.holding(t);
+    if (idx + 1 < series.count() && (idx < 0 || (!series.at(idx).gap() && !series.at(idx + 1).gap()
+                                                 && series.at(idx + 1).t - t < t - series.at(idx).t)))
+      idx++;
+    const bool inside = idx >= 0 && idx < series.count() && t <= qMax(m_store->duration(), series.last().t);
 
-    QString text = m_store->startDateTime().time().addSecs(int(idx * sampleTenths() / 10)).toString();
+    QString text = m_store->startDateTime().addMSecs(inside ? series.at(idx).t : t).time().toString("HH:mm:ss.zzz");
 
-    if (idx >= 0 && idx < m_store->count() && std::isnan(m_store->at(idx).value))
+    if (inside && series.at(idx).gap())
     {
       // a gap: say why there is no value
       m_crosshairHLine->setVisible(false);
-      text += "   " + (m_store->at(idx).quality == Quality::Overload ? QStringLiteral("OL") : tr("no value"));
+      text += "   " + (series.at(idx).quality == Quality::Overload ? QStringLiteral("OL") : tr("no value"));
     }
-    else if (idx >= 0 && idx < m_store->count())
+    else if (inside)
     {
-      double val = m_store->at(idx).value;
-      QPointF scenePoint = m_chart->mapToPosition(QPointF(xValue, val), m_dataSeries);
+      double val = series.at(idx).value;
+      QPointF scenePoint = m_chart->mapToPosition(QPointF(series.at(idx).t / 1000.0, val), m_dataSeries);
       m_crosshairHLine->setLine(plot.left(), scenePoint.y(), plot.right(), scenePoint.y());
       m_crosshairHLine->setVisible(true);
       QString unit;
@@ -1302,8 +1310,8 @@ bool GraphWidget::importCsvFile(const QString &fileName)
   m_store->setSampleTime(rec->sampleTimeTenths);
   const int cnt = int(rec->values.size());
   // setGraphSize() counts in seconds, the sample time is in tenths of one
-  const int size = qMax(1, int(std::ceil(m_size * sampleTenths() / 10.0)));
-  const int length = qMax(1, int(std::ceil(cnt * sampleTenths() / 10.0)));
+  const int size = qMax(1, m_windowSeconds);
+  const int length = qMax(1, int(std::ceil(cnt * m_store->sampleTime() / 10.0)));
 
   if (cnt > 1)
     Q_EMIT sampleTime(m_store->sampleTime());
@@ -1366,10 +1374,7 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
 
 
     for (int i = 0; i < m_store->count(); i++)
-    {
-      const double val = m_store->at(i).value;
-      computeMinMax(val);
-    }
+      computeMinMax(m_store->series().at(i).value);
 
 
   }
@@ -1788,7 +1793,7 @@ bool GraphWidget::handleChartKey(QKeyEvent *ev)
 
 void GraphWidget::pan(double fraction)
 {
-  int step = qMax(1, qRound(qMax(1, m_size) * fabs(fraction)));
+  int step = qMax(1, qRound(m_windowSeconds * 10 * fabs(fraction)));
   if (fraction < 0)
     step = -step;
   scrollbar->setValue(qBound(0, scrollbar->value() + step, scrollbar->maximum()));
@@ -1872,8 +1877,7 @@ bool GraphWidget::writeImage(const QString &fileName, QSize size)
     svg.setTitle(m_store->startDateTime().isValid()
                  ? tr("QtDMM recording, %1").arg(m_store->startDateTime().toString(Qt::ISODate))
                  : tr("QtDMM graph"));
-    svg.setDescription(tr("%1 values, %2 s per sample, unit %3")
-                       .arg(m_store->count()).arg(sampleTenths() / 10.0).arg(m_store->unit()));
+    svg.setDescription(tr("%1 readings, unit %2").arg(m_store->count()).arg(m_store->unit()));
     QPainter p;
     if (!p.begin(&svg))
     {

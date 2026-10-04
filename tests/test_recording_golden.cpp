@@ -39,10 +39,10 @@ static QString readFile(const QString &path)
 
 // The MeterController around a store, on a clock of its own: readings
 // arrive at given times (ms from the start of the stream), the controller's
-// clock ticks every 100 ms in between. A reading at a tick's time comes just
-// after the tick, the start just before it: then the ten samples a second
-// are the time-weighted mean of the readings, and the store that keeps
-// every reading has to give the same numbers.
+// clock ticks every 100 ms in between (the stale check) and the store's
+// every second. A reading at a tick's time comes just after the tick, the
+// start just before it: as it was when the store sampled the main value at
+// these ticks, which golden_grid.csv was recorded with.
 class Player
 {
 public:
@@ -66,7 +66,6 @@ public:
       r.value = value;
     r.t = t;
     // MeterController::publish()
-    m_dval = r.value;
     m_stale.arrived(t + kOffset);
     m_store.setReading(r);
   }
@@ -99,7 +98,14 @@ private:
       m_ticked = tick;
       // MeterController::timerEvent()
       m_store.setStaleAfter(int(m_stale.maxAgeMs()));
-      m_store.addValue(m_stale.stale(tick + kOffset) ? qQNaN() : m_dval);
+      const bool stale = m_stale.stale(tick + kOffset);
+      if (stale != m_staleShown)
+      {
+        m_staleShown = stale;
+        m_store.setStale(stale);
+      }
+      if (tick % 1000 == 0)
+        m_store.poll();
     }
     m_now = t;
   }
@@ -112,7 +118,7 @@ private:
   StaleRule       m_stale;
   qint64          m_now = -2000;
   qint64          m_ticked = -2000;   ///< the last tick that ran
-  double          m_dval = qQNaN();
+  bool            m_staleShown = false;
 };
 
 int main(int argc, char **argv)
@@ -126,7 +132,7 @@ int main(int argc, char **argv)
   //        limit; sample time 1 s ---
   {
     RecordingStore store;
-    store.setCapacity(1000);
+    store.setMaxDuration(3600);
     store.setSampleTime(10);
     store.setUnit("V");
     Player p(store);
@@ -156,18 +162,41 @@ int main(int argc, char **argv)
     check(store.write(out, &err), "grid: write failed: " + err);
     if (writeTo.isEmpty())
     {
-      const QString want = readFile(data + "/golden_grid.csv");
-      const QString got = readFile(out);
-      check(!want.isEmpty(), "grid: no reference file in " + data);
-      check(got == want, "grid: the export differs from golden_grid.csv:\n" + got);
+      // the same rows; the means the same up to rounding (a sum over time
+      // instead of over ten samples)
+      const QStringList want = readFile(data + "/golden_grid.csv").split('\n');
+      const QStringList got = readFile(out).split('\n');
+      check(want.size() > 2, "grid: no reference file in " + data);
+      check(got.size() == want.size(), QString("grid: %1 rows, expected %2").arg(got.size()).arg(want.size()));
+      for (int i = 0; i < qMin(got.size(), want.size()); ++i)
+      {
+        const QStringList g = got[i].split(';'), w = want[i].split(';');
+        bool same = g.size() == w.size();
+        for (int c = 0; same && c < g.size(); ++c)
+        {
+          if (c != 2 || i == 0)
+            same = g[c] == w[c];
+          else
+          {
+            const double a = g[c].toDouble(), b = w[c].toDouble();
+            same = (g[c] == "nan" && w[c] == "nan") || std::abs(a - b) <= 1e-9 * qMax(1.0, std::abs(b));
+          }
+        }
+        check(same, QString("grid: row %1 is '%2', expected '%3'").arg(i).arg(got[i], want[i]));
+      }
     }
   }
 
   // --- 2. the integral at a regular rate: one reading a second, sample time
-  //        1 s, threshold 0.5; it falls back to 0 at or below it ---
+  //        1 s, threshold 0.5. With the sample clock it was the running sum
+  //        of the samples, 1 3 6 0 1 2 6, falling back to 0 at or below the
+  //        threshold; now it is the integral over time (V s): the same sum
+  //        times the sample time, without the first sample (the value at
+  //        the start had no time yet) until the first reset, the same after
+  //        it ---
   {
     RecordingStore store;
-    store.setCapacity(1000);
+    store.setMaxDuration(3600);
     store.setSampleTime(10);
     store.setIntegrationThreshold(0.5);
     Player p(store);
@@ -179,10 +208,16 @@ int main(int argc, char **argv)
       p.reading((i - 1) * 1000, values[i], QString::number(values[i], 'f', 3));
     p.stop(6050);
     QStringList got;
-    for (int i = 0; i < store.count(); ++i)
-      got << QString::number(store.at(i).integral);
-    // per sample: the running sum of the values above the threshold
-    check(got.join(' ') == "1 3 6 0 1 2 6", "integral: got " + got.join(' '));
+    for (const GridPoint &g : store.grid(10))
+      got << QString::number(g.integral);
+    check(got.join(' ') == "0 2 5 0 1 2 6", "integral: got " + got.join(' ') + ", expected 0 2 5 0 1 2 6");
+
+    // the same at another sample time: the integral does not depend on it
+    QStringList half;
+    const QVector<GridPoint> fine = store.grid(5);
+    for (int i = 0; i < fine.size(); i += 2)
+      half << QString::number(fine[i].integral);
+    check(half.join(' ') == got.join(' '), "integral: at 0.5 s got " + half.join(' '));
   }
 
   // --- 3. start triggers: when the recording starts (ms of the stream) ---

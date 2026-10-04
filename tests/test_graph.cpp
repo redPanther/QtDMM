@@ -45,6 +45,37 @@ static QString readFile(const QString &fileName)
   return QString::fromUtf8(f.readAll());
 }
 
+// The readings a MeterController gives a store, on a clock of the test's
+// own: value() is a main reading now, then the clock moves on by a step
+// (0.1 s by default). NaN is an overload.
+struct Feed
+{
+  RecordingStore *store;
+  qint64 now = 0;
+  qint64 step;
+
+  explicit Feed(GraphWidget &graph, qint64 stepMs = 100) : Feed(graph.store(), stepMs) {}
+  explicit Feed(RecordingStore *s, qint64 stepMs = 100) : store(s), step(stepMs)
+  {
+    store->setClock([this] { return now; }, [this] { return wall(now); });
+  }
+  Feed(const Feed &) = delete;
+  Feed &operator=(const Feed &) = delete;
+
+  static QDateTime wall(qint64 t) { return QDateTime(QDate(2026, 10, 4), QTime(12, 0, 0)).addMSecs(t); }
+  void value(double v)
+  {
+    Reading r;
+    r.overload = std::isnan(v);
+    r.value = v;
+    r.text = r.overload ? QStringLiteral("OL") : QString::number(v);
+    r.t = now;
+    r.msecs = wall(now).toMSecsSinceEpoch();
+    store->setReading(r);
+    now += step;
+  }
+};
+
 int main(int argc, char **argv)
 {
   if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
@@ -80,7 +111,7 @@ int main(int argc, char **argv)
   }
 
   // --- 1b. an import sizes the graph in seconds: the signal to the settings
-  //          page and the recorder's capacity follow the recording's length,
+  //          page and what the recorder keeps follow the recording's length,
   //          not ten times it ---
   {
     GraphWidget graph(nullptr, &settings);
@@ -95,8 +126,8 @@ int main(int argc, char **argv)
       check(length >= seconds && length < seconds + 1,
             QString("import size: total length %1 s for a recording of %2 s").arg(length).arg(seconds));
     }
-    check(graph.store()->capacity() <= count + graph.store()->sampleTime() * 10,
-          QString("import size: capacity %1 for %2 samples").arg(graph.store()->capacity()).arg(count));
+    check(graph.store()->maxDuration() <= seconds + 1 && graph.store()->origin() == 0,
+          QString("import size: keeps %1 s for %2 s").arg(graph.store()->maxDuration()).arg(seconds));
   }
 
   // --- 2. malformed input must be rejected, not crash or half-import ---
@@ -169,9 +200,10 @@ int main(int argc, char **argv)
       graph.setGraphSize(10, 600);
       all->click();
       check(all->isChecked(), "time buttons: All stays marked");
+      Feed feed(graph);
       graph.startSLOT();
-      for (int i = 0; i < 150; ++i)   // 15 samples at 1 s
-        graph.addValue(1.0);
+      for (int i = 0; i < 150; ++i)   // 15 s
+        feed.value(1.0);
       bool grew = !spy.isEmpty();
       for (const QList<QVariant> &args : spy)
         grew = grew && args.at(0).toInt() > 10 && args.at(0).toInt() <= 600;
@@ -204,9 +236,10 @@ int main(int argc, char **argv)
         requests << seconds;
         graph.setGraphSize(seconds, 3600);
       });
+      Feed feed(graph);
       graph.startSLOT();
       for (int i = 0; i < 3000; ++i)   // 300 s
-        graph.addValue(1.0);
+        feed.value(1.0);
       bool minutes = !requests.isEmpty();
       for (int seconds : requests)
         minutes = minutes && (seconds <= 60 || seconds % 60 == 0);
@@ -266,46 +299,52 @@ int main(int argc, char **argv)
           QString("slow: exported %1 lines, last '%2'").arg(lines.size()).arg(lines.value(lines.size() - 1).left(23)));
   }
 
-  // --- 5. smoke test for addValue()'s live-recording ring buffer against the
-  //         Qt Charts series sync (rebuildSeries()/append()): must survive a
-  //         buffer wrap without crashing, and setGraphSize() must be callable
-  //         again afterwards while data already exists. ---
+  // --- 5. smoke test for the live recording against the Qt Charts series
+  //         sync (rebuildSeries()/append()): must survive the store
+  //         dropping its oldest readings without crashing, and
+  //         setGraphSize() must be callable again afterwards while data
+  //         already exists. ---
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
-    graph.setGraphSize(5, 5); // small window -> wraps quickly
+    graph.setGraphSize(5, 5); // keeps 5 s -> drops quickly
     graph.setMode(GraphWidget::Manual);
+    Feed feed(graph, 500);
     graph.startSLOT();
 
     for (int i = 0; i < 20; i++)
-      graph.addValue(i * 0.1);
+      feed.value(i * 0.1);
 
     check(graph.dirty(), "ring-buffer smoke test: expected graph to be marked dirty after recording");
+    check(graph.store()->origin() > 0, "ring-buffer smoke test: the store must have dropped old readings");
 
     graph.setGraphSize(10, 10);
-    graph.addValue(1.23);
+    feed.value(1.23);
   }
 
-  // --- 5a. integration: the running sum of the readings above the threshold,
-  //          0 at or below it - the first sample, too (it used to be the
-  //          threshold itself, a spike at the left edge) ---
+  // --- 5a. integration: over time (unit x s) of the readings above the
+  //          threshold, 0 at or below it - the first reading, too (it used
+  //          to be the threshold itself, a spike at the left edge). A value
+  //          counts for the time it held, so 0.8 adds from the 0.9 on; with
+  //          the scale 10 a reading of 0.1 s adds its value ---
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
     graph.setGraphSize(100, 100);
-    graph.setIntegration(true, 1.0, 0.5, 0.0);
+    graph.setIntegration(true, 10.0, 0.5, 0.0);
     graph.setMode(GraphWidget::Manual);
+    Feed feed(graph);
     graph.startSLOT();
     for (double v : { 0.1, 0.2, 0.8, 0.9, 0.1, 0.6 })
-      graph.addValue(v);
+      feed.value(v);
     const QList<QAbstractSeries *> series = graph.findChild<QChartView *>()->chart()->series();
     auto *integral = series.size() > 2 ? qobject_cast<QXYSeries *>(series[2]) : nullptr;   // data line, data points, integration
     QStringList got;
     if (integral)
       for (const QPointF &p : integral->points())
         got << QString::number(p.y());
-    check(got.join(' ') == "0 0 0.8 1.7 0 0.6",
-          QString("integration: expected '0 0 0.8 1.7 0 0.6', got '%1'").arg(got.join(' ')));
+    check(got.join(' ') == "0 0 0 0.8 0 0",
+          QString("integration: expected '0 0 0 0.8 0 0', got '%1'").arg(got.join(' ')));
   }
 
   // --- 5b. window size and sample time in either order: InstanceWidget used to set
@@ -329,9 +368,7 @@ int main(int argc, char **argv)
     check(qAbs(x->max() - x->min() - 299) < 1.5, QString("300 s window, got %1 s").arg(x->max() - x->min()));
   }
 
-  // --- 5c-5i: the recorder behind addValue(), pinned down before it moves
-  //            out of the widget (RecordingStore). Only the public API is
-  //            used, so these run unchanged against the split graph. ---
+  // --- 5c-5i: the recorder behind the graph, through its public API ---
 
   // y values of series @p index (0 data line, 2 integration) as "1 4 8"
   auto seriesY = [](GraphWidget &graph, int index) -> QString
@@ -354,26 +391,32 @@ int main(int argc, char **argv)
     return got.join(' ');
   };
 
-  // --- 5c. averaging over the sample time: the first sample is stored as it
-  //          came, every later one is the mean of the readings of its sample
-  //          period (the one that closes the period included) ---
+  // --- 5c. every reading is drawn, at its time; the sample time is the
+  //          grid of the export only ---
   {
     GraphWidget graph(nullptr, &settings);
-    graph.setSampleTime(2);          // one sample per 0.2 s = per 2 readings
+    graph.setSampleTime(2);          // a grid of 0.2 s
     graph.setGraphSize(100, 100);
     graph.setMode(GraphWidget::Manual);
+    Feed feed(graph);
     graph.startSLOT();
     for (double v : { 1.0, 3.0, 5.0, 7.0, 9.0 })
-      graph.addValue(v);
-    check(seriesY(graph, 0) == "1 4 8",
-          QString("averaging: expected '1 4 8', got '%1'").arg(seriesY(graph, 0)));
-    check(seriesX(graph) == "0 0.2 0.4",
-          QString("averaging: expected x '0 0.2 0.4', got '%1'").arg(seriesX(graph)));
+      feed.value(v);
+    check(seriesY(graph, 0) == "1 3 5 7 9",
+          QString("every reading: expected '1 3 5 7 9', got '%1'").arg(seriesY(graph, 0)));
+    check(seriesX(graph) == "0 0.1 0.2 0.3 0.4",
+          QString("every reading: expected x '0 0.1 0.2 0.3 0.4', got '%1'").arg(seriesX(graph)));
     // not recording: readings pass by
     graph.stopSLOT();
-    graph.addValue(100);
-    graph.addValue(100);
-    check(seriesY(graph, 0) == "1 4 8", "averaging: stopped recorder must not store");
+    feed.value(100);
+    feed.value(100);
+    check(seriesY(graph, 0) == "1 3 5 7 9", "every reading: stopped recorder must not store");
+    // the export: the start value, then the mean of each 0.2 s
+    const QVector<double> grid = graph.store()->toRecording().values;
+    QStringList g;
+    for (double v : grid)
+      g << QString::number(v);
+    check(g.join(' ') == "1 2 6", "every reading: grid export got " + g.join(' '));
   }
 
   // --- 5d. start trigger, rising: starts on the reading that crosses the
@@ -386,13 +429,14 @@ int main(int argc, char **argv)
     graph.setThresholds(0.0, 1.0);
     graph.setMode(GraphWidget::Raising);
     QSignalSpy running(&graph, &GraphWidget::running);
-    graph.addValue(1.5);             // first reading, above: no start
-    graph.addValue(0.5);
-    graph.addValue(0.8);
+    Feed feed(graph);
+    feed.value(1.5);             // first reading, above: no start
+    feed.value(0.5);
+    feed.value(0.8);
     check(running.isEmpty(), "rising trigger: started before the crossing");
-    graph.addValue(1.0);             // crosses (>=)
+    feed.value(1.0);             // crosses (>=)
     check(running.size() == 1 && running.first().first().toBool(), "rising trigger: did not start on the crossing");
-    graph.addValue(2.0);
+    feed.value(2.0);
     check(seriesY(graph, 0) == "1 2", QString("rising trigger: expected '1 2', got '%1'").arg(seriesY(graph, 0)));
   }
 
@@ -404,33 +448,37 @@ int main(int argc, char **argv)
     graph.setThresholds(-1.0, 5.0);
     graph.setMode(GraphWidget::Falling);
     QSignalSpy running(&graph, &GraphWidget::running);
-    graph.addValue(-2.0);            // first reading, below: no start
-    graph.addValue(0.0);
-    graph.addValue(-0.5);
+    Feed feed(graph);
+    feed.value(-2.0);            // first reading, below: no start
+    feed.value(0.0);
+    feed.value(-0.5);
     check(running.isEmpty(), "falling trigger: started before the crossing");
-    graph.addValue(-1.0);            // crosses (<=)
-    graph.addValue(-3.0);
+    feed.value(-1.0);            // crosses (<=)
+    feed.value(-3.0);
     check(running.size() == 1, "falling trigger: did not start on the crossing");
     check(seriesY(graph, 0) == "-1 -3", QString("falling trigger: expected '-1 -3', got '%1'").arg(seriesY(graph, 0)));
   }
 
   // --- 5f. start trigger, clock time: starts within two seconds after the
-  //          start time (a reading may miss the exact second), not before ---
+  //          start time (the store's clock looks every second), not before ---
   {
     GraphWidget later(nullptr, &settings);
     later.setGraphSize(100, 100);
-    later.setStartTime(QTime::currentTime().addSecs(120));
+    Feed laterFeed(later);
+    later.setStartTime(Feed::wall(0).time().addSecs(120));
     later.setMode(GraphWidget::Time);
     QSignalSpy notYet(&later, &GraphWidget::running);
-    later.addValue(1.0);
+    later.store()->poll();
     check(notYet.isEmpty(), "time trigger: started before the start time");
 
     GraphWidget now(nullptr, &settings);
     now.setGraphSize(100, 100);
-    now.setStartTime(QTime::currentTime());
+    Feed nowFeed(now);
+    now.setStartTime(Feed::wall(0).time());
     now.setMode(GraphWidget::Time);
     QSignalSpy started(&now, &GraphWidget::running);
-    now.addValue(1.0);
+    nowFeed.now = 1000;
+    now.store()->poll();
     check(started.size() == 1, "time trigger: did not start at the start time");
   }
 
@@ -443,67 +491,67 @@ int main(int argc, char **argv)
     graph.setMode(GraphWidget::Manual);
     graph.setExternal(true, false, 2.0);
     QSignalSpy ext(&graph, &GraphWidget::externalTriggered);
-    graph.addValue(1.0);
-    graph.addValue(3.0);             // crosses, but not recording
+    Feed feed(graph);
+    feed.value(1.0);
+    feed.value(3.0);             // crosses, but not recording
     check(ext.isEmpty(), "external: fired while not recording");
     graph.startSLOT();
-    graph.addValue(1.0);
-    graph.addValue(3.0);
+    feed.value(1.0);
+    feed.value(3.0);
     check(ext.size() == 1, QString("external rising: expected 1 trigger, got %1").arg(ext.size()));
-    graph.addValue(1.0);
-    graph.addValue(3.0);
+    feed.value(1.0);
+    feed.value(3.0);
     check(ext.size() == 1, "external: fired twice in one recording");
     graph.startSLOT();               // a new recording arms it again
-    graph.addValue(1.0);
-    graph.addValue(3.0);
+    feed.value(1.0);
+    feed.value(3.0);
     check(ext.size() == 2, "external: not re-armed by a new recording");
 
     graph.setExternal(true, true, 2.0);   // falling
     graph.startSLOT();
-    graph.addValue(3.0);
-    graph.addValue(2.5);
+    feed.value(3.0);
+    feed.value(2.5);
     check(ext.size() == 2, "external falling: fired above the threshold");
-    graph.addValue(2.0);
+    feed.value(2.0);
     check(ext.size() == 3, "external falling: did not fire on the crossing");
   }
 
-  // --- 5h. integral and marks when the buffer overflows: the data slides
-  //          left, the integral keeps summing on the shifted data, a mark
-  //          moves with its sample and falls off with it ---
+  // --- 5h. integral and marks when the store is full: the window moves on
+  //          with what the store keeps, the integral goes on summing, a
+  //          mark falls off with the readings around it ---
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
-    graph.setGraphSize(1, 1);        // 1 s = 11 samples of 0.1 s
-    graph.setIntegration(true, 1.0, 0.0, 0.0);
+    graph.setGraphSize(1, 1);        // keeps 1 s
+    graph.setIntegration(true, 10.0, 0.0, 0.0);
     graph.setMode(GraphWidget::Manual);
+    Feed feed(graph);
     graph.startSLOT();
     for (int i = 1; i <= 5; i++)
-      graph.addValue(i);
-    graph.addMark(Qt::red, "m");     // on sample 4 (the value 5)
+      feed.value(i);
+    feed.now -= 100;                 // the mark comes with the reading of 5
+    graph.addMark(Qt::red, "m");
+    feed.now += 100;
     check(graph.markCount() == 1, "marks: addMark() did not add");
-    for (int i = 6; i <= 11; i++)
-      graph.addValue(i);             // buffer full, nothing shifted yet
-    check(seriesY(graph, 0) == "1 2 3 4 5 6 7 8 9 10 11",
-          QString("overflow: before the shift got '%1'").arg(seriesY(graph, 0)));
-    for (int i = 12; i <= 15; i++)
-      graph.addValue(i);             // four shifts: the mark is on sample 0
-    check(seriesY(graph, 0) == "5 6 7 8 9 10 11 12 13 14 15",
-          QString("overflow: after the shift got '%1'").arg(seriesY(graph, 0)));
-    check(seriesX(graph).startsWith("0 0.1 ") && seriesX(graph).endsWith(" 1"),
-          QString("overflow: x must restart at 0, got '%1'").arg(seriesX(graph)));
-    check(graph.markCount() == 1, "marks: fell off too early");
-    // the integral: 1+...+15 at the end, the shifted cells keep their sums
-    check(seriesY(graph, 2) == "15 21 28 36 45 55 66 78 91 105 120",
-          QString("overflow: integral got '%1'").arg(seriesY(graph, 2)));
-    graph.addValue(16);              // the mark's sample leaves the buffer
-    check(graph.markCount() == 0, "marks: still there after its sample left the buffer");
+    for (int i = 6; i <= 15; i++)
+      feed.value(i);
+    auto *x = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Horizontal).first());
+    // as of the newest reading; the clock has moved on by one step since
+    check(graph.store()->origin() > 0 && qAbs(x->min() - graph.store()->origin() / 1000.0) <= 0.1 + 1e-9,
+          QString("full: the window starts at %1 s, the store keeps from %2 ms").arg(x->min()).arg(graph.store()->origin()));
+    check(seriesY(graph, 0).endsWith("12 13 14 15"), "full: the newest are drawn, got " + seriesY(graph, 0));
+    // the integral: 1 + ... + 14, each held 0.1 s, scaled by 10
+    check(seriesY(graph, 2).endsWith(" 105"), QString("full: integral got '%1'").arg(seriesY(graph, 2)));
+    for (int i = 16; i <= 30; i++)
+      feed.value(i);                 // the mark's readings leave the store
+    check(graph.markCount() == 0, "marks: still there after its readings left the store");
     graph.addMark(Qt::red, "m2");
     graph.clearSLOT();
     check(graph.markCount() == 0, "marks: clearSLOT() kept a mark");
   }
 
   // --- 5i. recording length: stops on its own after setSampleLength()
-  //          (tenths of a second of readings); 0 records until stopped ---
+  //          (tenths of a second); 0 records until stopped ---
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
@@ -511,9 +559,10 @@ int main(int argc, char **argv)
     graph.setSampleLength(5);
     graph.setMode(GraphWidget::Manual);
     QSignalSpy running(&graph, &GraphWidget::running);
+    Feed feed(graph);
     graph.startSLOT();
     for (int i = 1; i <= 8; i++)
-      graph.addValue(i);
+      feed.value(i);
     check(running.size() == 2 && !running.last().first().toBool(),
           QString("length: expected start and stop, got %1 signals").arg(running.size()));
     check(seriesY(graph, 0) == "1 2 3 4 5",
@@ -522,7 +571,7 @@ int main(int argc, char **argv)
     graph.setSampleLength(0);
     graph.startSLOT();
     for (int i = 1; i <= 50; i++)
-      graph.addValue(i);
+      feed.value(i);
     check(running.size() == 3, "length 0: must record until stopped");
   }
 
@@ -530,40 +579,41 @@ int main(int argc, char **argv)
   //          shows it, takes what it already holds, and follows its signals ---
   {
     RecordingStore store;
-    store.setCapacity(100);
+    Feed feed(&store);
     store.setStartMode(RecordingStore::Manual);
     store.start();
-    store.addValue(1);
-    store.addValue(2);
+    feed.value(1);
+    feed.value(2);
 
     GraphWidget graph(nullptr, &settings);
     graph.setStore(&store);
     check(graph.store() == &store, "setStore: store() must return the new store");
     check(seriesY(graph, 0) == "1 2",
           QString("setStore: expected the store's '1 2', got '%1'").arg(seriesY(graph, 0)));
-    store.addValue(3);
+    feed.value(3);
     check(seriesY(graph, 0) == "1 2 3",
-          QString("setStore: expected '1 2 3' after a new sample, got '%1'").arg(seriesY(graph, 0)));
+          QString("setStore: expected '1 2 3' after a new reading, got '%1'").arg(seriesY(graph, 0)));
     graph.stopSLOT();
     check(!store.isRunning(), "setStore: the graph's stop must reach the shared store");
     store.clear();
     check(seriesY(graph, 0).isEmpty(), "setStore: a cleared store must empty the graph");
   }
 
-  // --- 5k. thinning: more samples in the window than pixel columns are drawn
-  //          as a minimum and a maximum per column (a spike survives), the
-  //          store and the export keep every sample, and growing the series
-  //          sample by sample gives what a rebuild gives ---
+  // --- 5k. thinning: more readings in the window than pixel columns are
+  //          drawn as a minimum and a maximum per column (a spike survives),
+  //          the store keeps every reading, and growing the series reading
+  //          by reading gives what a rebuild gives ---
   {
     GraphWidget graph(nullptr, &settings);
     graph.resize(300, 200);
     graph.setSampleTime(1);
-    graph.setGraphSize(200, 200);            // 2000 samples in the window
+    graph.setGraphSize(200, 200);            // 2000 readings in the window
     graph.setMode(GraphWidget::Manual);
+    Feed feed(graph);
     graph.startSLOT();
     const int samples = 2000;
     for (int i = 0; i < samples; i++)
-      graph.addValue(i == 777 ? 1000.0 : i == 1234 ? -500.0 : (i * 37) % 101);
+      feed.value(i == 777 ? 1000.0 : i == 1234 ? -500.0 : (i * 37) % 101);
 
     QChart *chart = graph.findChild<QChartView *>()->chart();
     const double plotWidth = chart->plotArea().width();
@@ -574,7 +624,8 @@ int main(int argc, char **argv)
           QString("thinning: expected at most %1 points, got %2").arg(2 * columns).arg(points));
     check(graph.store()->count() == samples,
           QString("thinning: the store must keep all %1 samples, has %2").arg(samples).arg(graph.store()->count()));
-    check(int(graph.store()->toRecording().values.size()) == samples, "thinning: the export must have every sample");
+    // the grid of 0.1 s: one step for each reading, and the end of the last
+    check(int(graph.store()->toRecording().values.size()) == samples + 1, "thinning: the export must have every step");
 
     double lo = 1e9, hi = -1e9;
     if (series)
@@ -591,48 +642,47 @@ int main(int argc, char **argv)
           "thinning: appended series must equal the rebuilt one");
   }
 
-  // --- 5l. thinning while the full ring scrolls: a sample stays in its
-  //          bucket, so the drawn minima and maxima of the older samples do
-  //          not change from one new sample to the next ---
+  // --- 5l. thinning while the full store moves on: a reading stays in its
+  //          bucket (columns of time from the start), so the drawn minima
+  //          and maxima of the older readings do not change from one new
+  //          reading to the next ---
   {
     GraphWidget graph(nullptr, &settings);
     graph.resize(300, 200);
     graph.setSampleTime(1);
-    graph.setGraphSize(200, 200);            // 2001 samples in the ring
+    graph.setGraphSize(200, 200);            // keeps 200 s
     graph.setMode(GraphWidget::Manual);
+    Feed feed(graph);
     graph.startSLOT();
     auto noise = [](int i) { return double((i * 37) % 101); };
     int i = 0;
     for (; i < 2500; i++)
-      graph.addValue(noise(i));
+      feed.value(noise(i));
 
     QChart *chart = graph.findChild<QChartView *>()->chart();
     auto *series = qobject_cast<QXYSeries *>(chart->series().value(0));
     const RecordingStore *store = graph.store();
-    // the drawn points by sample number, without the oldest and the newest
-    // few hundred samples (a bucket falls off or fills there)
-    auto drawn = [&](qint64 from, qint64 to)
+    // the drawn points by time, without the oldest and the newest 20 s (a
+    // bucket falls off or fills there)
+    auto drawn = [&](double from, double to)
     {
       QStringList list;
       for (const QPointF &p : series->points())
-      {
-        const qint64 seq = store->firstSequence() + qRound64(p.x() / 0.1);
-        if (seq >= from && seq < to)
-          list << QString("%1:%2").arg(seq).arg(p.y());
-      }
+        if (p.x() >= from && p.x() < to)
+          list << QString("%1:%2").arg(p.x()).arg(p.y());
       return list.join(' ');
     };
-    const qint64 from = store->firstSequence() + 200, to = store->firstSequence() + store->count() - 200;
+    const double from = store->origin() / 1000.0 + 20, to = store->duration() / 1000.0 - 20;
     const QString before = drawn(from, to);
-    graph.addValue(noise(i));
-    check(store->firstSequence() > 0, "scrolling: the ring must be full and scroll");
+    feed.value(noise(i));
+    check(store->origin() > 0, "scrolling: the store must be full and move on");
     check(!before.isEmpty() && before == drawn(from, to),
-          "scrolling: the thinned points of the older samples must stay as they were");
+          "scrolling: the thinned points of the older readings must stay as they were");
   }
 
-  // --- 5m. gaps: a sample without a value (NaN: overload, stale) breaks the
-  //          line - Qt Charts would draw straight across it - and has no
-  //          point; growing sample by sample gives what a rebuild gives,
+  // --- 5m. gaps: a reading without a value (NaN: overload, stale) breaks
+  //          the line - Qt Charts would draw straight across it - and has no
+  //          point; growing reading by reading gives what a rebuild gives,
   //          thinned or not ---
   {
     // the drawn lines: the y values of each line segment that has points
@@ -661,9 +711,10 @@ int main(int argc, char **argv)
     graph.setSampleTime(1);
     graph.setGraphSize(100, 100);
     graph.setMode(GraphWidget::Manual);
+    Feed feed(graph);
     graph.startSLOT();
     for (int i = 0; i < 30; i++)
-      graph.addValue(i >= 10 && i < 20 ? qQNaN() : i);
+      feed.value(i >= 10 && i < 20 ? qQNaN() : i);
     const QStringList grown = lines(graph);
     // data and integral, two segments each
     check(grown.size() == 4 && grown.first() == "0 1 2 3 4 5 6 7 8 9" && grown.contains("20 21 22 23 24 25 26 27 28 29"),
@@ -680,9 +731,10 @@ int main(int argc, char **argv)
     thin.setSampleTime(1);
     thin.setGraphSize(200, 200);
     thin.setMode(GraphWidget::Manual);
+    Feed thinFeed(thin);
     thin.startSLOT();
     for (int i = 0; i < 2000; i++)
-      thin.addValue((i / 300) % 2 ? qQNaN() : i % 7 == 3 ? qQNaN() : (i * 37) % 101);
+      thinFeed.value((i / 300) % 2 ? qQNaN() : i % 7 == 3 ? qQNaN() : (i * 37) % 101);
     const QStringList thinGrown = lines(thin);
     check(thinGrown.size() == 2 * 4, QString("gaps thinned: 4 runs, data and integral, got %1").arg(thinGrown.size()));
     thin.setGraphSize(200, 200);
@@ -702,8 +754,9 @@ int main(int argc, char **argv)
     GraphWidget graph(nullptr, &settings);
     graph.setUnit("mV");
     graph.setMode(GraphWidget::Manual);
+    Feed feed(graph);
     graph.startSLOT();
-    graph.addValue(0.5);
+    feed.value(0.5);
     graph.stopSLOT();
     graph.setUnit("kOhm");
     check(yTitle(graph) == "[V]" && graph.store()->unit() == "V", "unit: the recorded V stay V, got " + yTitle(graph));
@@ -726,8 +779,9 @@ int main(int argc, char **argv)
       graph.setSampleTime(10);
       graph.setGraphSize(5, 5);
       graph.setMode(GraphWidget::Manual);
+      Feed feed(graph);
       graph.startSLOT();
-      graph.addValue(rawValue);
+      feed.value(rawValue);
 
       QString path = outDir.path() + "/prefix_probe.csv";
       if (!graph.exportCsvFile(path))
@@ -752,8 +806,9 @@ int main(int argc, char **argv)
       graph.setSampleTime(10);
       graph.setGraphSize(5, 5);
       graph.setMode(GraphWidget::Manual);
+      Feed feed(graph);
       graph.startSLOT();
-      graph.addValue(2.5e-12);
+      feed.value(2.5e-12);
 
       QString exported1 = outDir.path() + "/pf_export1.csv";
       check(graph.exportCsvFile(exported1), "pF round-trip: first export failed");
@@ -784,8 +839,9 @@ int main(int argc, char **argv)
       graph.setSampleTime(10);
       graph.setGraphSize(5, 5);
       graph.setMode(GraphWidget::Manual);
+      Feed feed(graph);
       graph.startSLOT();
-      graph.addValue(2.5e-6);
+      feed.value(2.5e-6);
       QString path = outDir.path() + "/micro_export.csv";
       check(graph.exportCsvFile(path), "micro: export failed");
       QStringList lines = readFile(path).split('\n', Qt::SkipEmptyParts);

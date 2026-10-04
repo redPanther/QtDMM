@@ -48,8 +48,8 @@ public:
 
   /// The connection; the settings page configures its port and protocol.
   MeterConnection        *dmm() const { return m_dmm; }
-  /// The recorder: the sample clock and the readings feed it from here on,
-  /// views (the graph) show it. SCPI learns when it starts or stops.
+  /// The recorder: the readings feed it from here on, views (the graph)
+  /// show it. SCPI learns when it starts or stops.
   RecordingStore *recorder() const { return m_recorder; }
   /// The meter's display count (DMMInfo::display), for the range and the
   /// bar graph of the readings.
@@ -110,9 +110,6 @@ Q_SIGNALS:
   void        minMaxReset();
   /// The main value's unit changed ("mV" -> "V").
   void        unitChanged(const QString &unit);
-  /// Ten times a second: the current main value, for the recorder; NaN
-  /// when there is none (overload, or the last one is stale, StaleRule).
-  void        sample(double value);
   /// The main value went stale (StaleRule) or is current again; the views
   /// fade it. Only on a change.
   void        staleChanged(bool stale);
@@ -165,8 +162,7 @@ private:
   QString     m_lastUnit;
   QString     m_baseUnit;
   bool        m_overload = false;
-  double      m_dval = qQNaN();
-  QElapsedTimer m_clock;   ///< the sample clock's time base, monotonic
-  StaleRule   m_stale;     ///< when the main value is too old to sample
+  QElapsedTimer m_clock;   ///< the stale check's time base, monotonic
+  StaleRule   m_stale;     ///< when the main value is too old to stand for the present
   bool        m_staleShown = false;   ///< what staleChanged() said last
 };

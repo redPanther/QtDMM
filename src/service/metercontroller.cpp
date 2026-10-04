@@ -29,10 +29,10 @@ MeterController::MeterController(QObject *parent)
   connect(m_dmm, &MeterConnection::response, this, &MeterController::responseSLOT);
   connect(m_dmm, &MeterConnection::error, this, &MeterController::error);
 
-  // the recorder: the sample clock drives it, the readings give each sample
-  // its mode, text and quality
-  connect(this, &MeterController::sample, m_recorder, &RecordingStore::addValue);
+  // the recorder keeps every reading of the main value, and a gap where it
+  // went stale
   connect(this, &MeterController::reading, m_recorder, &RecordingStore::setReading);
+  connect(this, &MeterController::staleChanged, m_recorder, &RecordingStore::setStale);
   connect(m_recorder, &RecordingStore::runningChanged, this, &MeterController::setRecording);
   // another function at the meter ended the recording: say so, and mark
   // where in the graph
@@ -64,7 +64,7 @@ MeterController::MeterController(QObject *parent)
   });
 
   m_clock.start();
-  startTimer(100);   // recorder sample clock and alarm time base
+  startTimer(100);   // the stale check and the alarms' time base
 }
 
 MeterController::~MeterController() = default;
@@ -124,7 +124,6 @@ void MeterController::timerEvent(QTimerEvent *)
     m_staleShown = stale;
     Q_EMIT staleChanged(stale);
   }
-  Q_EMIT sample(stale ? qQNaN() : m_dval);
   m_alarms->tick(QDateTime::currentMSecsSinceEpoch());
 }
 
@@ -156,8 +155,8 @@ void MeterController::publish(const Reading &rd)
     return;
   }
 
-  // min/max and the sampled value follow the main value; a held display is
-  // the old reading again, so it does not count
+  // min/max follow the main value; a held display is the old reading
+  // again, so it does not count
   bool newMin = false;
   bool newMax = false;
   if (id == 0 && !hold)
@@ -171,7 +170,6 @@ void MeterController::publish(const Reading &rd)
       Q_EMIT minMaxReset();
     newMin = mm.newMin;
     newMax = mm.newMax;
-    m_dval = dval;
   }
 
   Q_EMIT reading(rd);
