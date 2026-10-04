@@ -84,6 +84,9 @@ QPalette darkPalette()
   p.setColor(QPalette::Dark, QColor(25, 25, 27));
   for (QPalette::ColorRole r : { QPalette::Text, QPalette::WindowText, QPalette::ButtonText })
     p.setColor(QPalette::Disabled, r, QColor(120, 120, 120));
+  // Qt's default is a half transparent black: invisible on the dark fields
+  p.setColor(QPalette::PlaceholderText, QColor(130, 130, 136));
+  p.setColor(QPalette::Disabled, QPalette::PlaceholderText, QColor(85, 85, 90));
   return p;
 }
 
@@ -117,8 +120,15 @@ const char *kSilverSheet =
   "  stop:0 #d9dde2, stop:1 #aab1ba); }"
   "QMdiSubWindow { background: #dfe2e6; }";
 
+// Fusion draws the frame of a text field a bit darker than the window - on
+// the dark fields it vanished, so they get a light edge of their own (not
+// inside spin and combo boxes, those draw their own frame)
 const char *kDarkSheet =
-  "QToolBar { border-bottom: 1px solid #1c1c1e; }";
+  "QToolBar { border-bottom: 1px solid #1c1c1e; }"
+  "QLineEdit { border: 1px solid #626268; border-radius: 2px; padding: 1px 2px; }"
+  "QLineEdit:focus { border-color: #4d88c2; }"
+  "QLineEdit:disabled { border-color: #48484d; }"
+  "QAbstractSpinBox QLineEdit, QComboBox QLineEdit { border: none; padding: 0; }";
 }
 
 QString Designs::name(Design d)
