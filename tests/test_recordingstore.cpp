@@ -249,7 +249,7 @@ int main(int argc, char **argv)
     QString err;
     check(store.write(raw1, &err, true), "raw: write: " + err);
     QFile f(raw1);
-    check(f.open(QIODevice::ReadOnly),  "raw: cannot open file: " + raw1);
+    check(f.open(QIODevice::ReadOnly | QIODevice::Text), "raw: cannot open file: " + raw1);
     const QString text = QString::fromUtf8(f.readAll());
     check(text == "timestamp;time (s);value;unit\n"
                   "2026-10-04T12:00:00,130;0;1.5;V\n"
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
     check(back.count() == 4 && back.series().at(1).t == 480 && back.series().at(2).gap(), "raw: loaded at its times");
     check(back.write(raw2, &err, true), "raw: write again: " + err);
     QFile f2(raw2);
-    check(f2.open(QIODevice::ReadOnly), "raw: cannot open file: " + raw2);
+    check(f2.open(QIODevice::ReadOnly | QIODevice::Text), "raw: cannot open file: " + raw2);
     check(QString::fromUtf8(f2.readAll()) == text, "raw: export, import, export is not the same file");
     // on the grid of 0.5 s: the value at the start, then each step's mean
     QStringList g;

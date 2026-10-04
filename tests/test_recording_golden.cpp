@@ -34,7 +34,7 @@ static void check(bool cond, const QString &what)
 static QString readFile(const QString &path)
 {
   QFile f(path);
-  return f.open(QIODevice::ReadOnly) ? QString::fromUtf8(f.readAll()) : QString();
+  return f.open(QIODevice::ReadOnly | QIODevice::Text) ? QString::fromUtf8(f.readAll()) : QString();
 }
 
 // The MeterController around a store, on a clock of its own: readings
