@@ -63,6 +63,7 @@ private:
   QCheckBox     *m_keep;
   QLineEdit     *m_name;
   QPushButton   *m_connect;
+  bool           m_needsKey = false;   ///< a Victron device: its key is asked
   QList<Candidate> m_found;
   QList<Discoverer *> m_running;
 };
