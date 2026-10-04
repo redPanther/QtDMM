@@ -481,6 +481,11 @@ int SettingsDialog::sampleLength() const
   return m_recorder->sampleLength();
 }
 
+int SettingsDialog::preTrigger() const
+{
+  return m_recorder->preTrigger();
+}
+
 double SettingsDialog::fallingThreshold() const
 {
   return m_recorder->fallingThreshold();

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "recording/recordingstore.h"
 
+#include <QCoreApplication>
+
 #include "core/siprefix.h"
 
 RecordingStore::RecordingStore(QObject *parent) :
@@ -65,7 +67,29 @@ int RecordingStore::remainingLength() const
 {
   if (m_sampleLength <= 0)
     return 0;
-  return int(qMax<qint64>(0, m_sampleLength - duration() / 100));
+  return int(qMax<qint64>(0, m_sampleLength - (duration() - m_preUsed) / 100));
+}
+
+void RecordingStore::setPreTrigger(int ms)
+{
+  m_preMs = qMax(0, ms);
+  if (m_preMs == 0)
+    m_preBuffer.clear();
+}
+
+void RecordingStore::bufferPre(const RawPoint &p)
+{
+  if (!m_preBuffer.isEmpty() && p.gap() && m_preBuffer.last().gap())
+    return;
+  m_preBuffer.append(p);
+  // what holds at the start of the pre-trigger time stays, older goes
+  const qint64 from = p.t - m_preMs;
+  int drop = 0;
+  while (drop + 1 < m_preBuffer.size() && m_preBuffer[drop + 1].t <= from)
+    drop++;
+  drop = qMax(drop, int(m_preBuffer.size()) - kMaxPoints);
+  if (drop > 0)
+    m_preBuffer.remove(0, drop);
 }
 
 QVector<GridPoint> RecordingStore::grid(int tenths) const
@@ -291,7 +315,18 @@ void RecordingStore::setReading(const Reading &reading)
     }
   }
 
+  if (preTriggerArmed())
+  {
+    RawPoint p;
+    p.t = reading.t;
+    p.value = value;
+    p.quality = reading.overload ? Quality::Overload : Quality::Valid;
+    p.flags = reading.flags;
+    bufferPre(p);
+  }
+
   // a trigger that starts the recording makes this reading its first value
+  // (after the pre-trigger's)
   const bool wasRunning = m_running;
   if (trigger(value) || !wasRunning || !m_running)
     return;
@@ -318,7 +353,7 @@ bool RecordingStore::trigger(double val)
     if (crossed)
     {
       Q_EMIT alert();
-      start();
+      begin(m_preMs);
       started = true;
     }
   }
@@ -346,6 +381,15 @@ bool RecordingStore::trigger(double val)
 
 void RecordingStore::setStale(bool stale)
 {
+  if (stale && preTriggerArmed() && !m_preBuffer.isEmpty() && !m_preBuffer.last().gap())
+  {
+    RawPoint p;
+    p.t = qMin(m_preBuffer.last().t + m_staleMs, qMax(m_preBuffer.last().t, m_monotonic()));
+    p.value = qQNaN();
+    p.quality = Quality::Stale;
+    bufferPre(p);
+    return;
+  }
   if (!stale || !m_running || m_series.isEmpty() || m_series.last().gap())
     return;
   // the last value held until the stale limit, no longer
@@ -374,23 +418,49 @@ void RecordingStore::poll()
 
 bool RecordingStore::lengthReached(qint64 t)
 {
-  if (!m_running || m_sampleLength <= 0 || t < qint64(m_sampleLength) * 100)
+  // counted from the trigger, after the pre-trigger time
+  const qint64 limit = qint64(m_sampleLength) * 100 + m_preUsed;
+  if (!m_running || m_sampleLength <= 0 || t < limit)
     return false;
   Q_EMIT alert();
   stop();
-  m_stopT = qint64(m_sampleLength) * 100;
+  m_stopT = limit;
   return true;
 }
 
 void RecordingStore::start()
 {
+  begin(0);
+}
+
+void RecordingStore::begin(qint64 preMs)
+{
+  const QVector<RawPoint> pre = preMs > 0 ? m_preBuffer : QVector<RawPoint>();
+  m_preBuffer.clear();
   clear();
   m_running = true;
   m_stopT = -1;
   m_externalStarted = false;
+  m_preUsed = 0;
 
+  if (!pre.isEmpty())
+  {
+    // the recording reaches back by the pre-trigger time, or as far as
+    // there were readings
+    const qint64 back = qBound<qint64>(0, m_t0 - pre.first().t, preMs);
+    m_t0 -= back;
+    m_start = m_start.addMSecs(-back);
+    m_preUsed = back;
+    for (RawPoint p : pre)
+    {
+      p.t = qMax<qint64>(0, p.t - m_t0);
+      append(p);
+    }
+    m_marks.append(Mark { back, kTriggerColor, QCoreApplication::translate("RecordingStore", "Trigger") });
+    Q_EMIT marksChanged();
+  }
   // the first value is the one the meter shows at the start
-  if (m_haveReading && m_monotonic() - m_reading.t <= m_staleMs)
+  else if (m_haveReading && m_monotonic() - m_reading.t <= m_staleMs)
   {
     RawPoint p;
     p.value = m_reading.overload ? qQNaN() : m_reading.value;

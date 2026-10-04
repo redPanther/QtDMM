@@ -175,6 +175,62 @@ int main(int argc, char **argv)
           QString("most: %1 readings kept, from %2 ms").arg(store.count()).arg(store.series().first().t));
   }
 
+  // --- 3c. pre-trigger: a recording started by a threshold reaches back by
+  //         the pre-trigger time, with the readings of that time; a mark
+  //         shows the trigger, the recording length counts from it ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setStartMode(RecordingStore::Raising);
+    store.setThresholds(0, 5);
+    store.setPreTrigger(2000);
+    store.setSampleLength(10);   // 1 s after the trigger
+    store.setReadingsPaused(true);
+    for (int i = 0; i < 10; i++)   // 0 .. 4.5 s, below the threshold
+      store.setReading(clock.at(i * 500, reading(1 + i * 0.1, "1", "DC")));
+    store.setReading(clock.at(5000, reading(6, "6.000", "DC")));   // the trigger
+    check(store.isRunning(), "pre-trigger: not started");
+    QStringList t;
+    for (int i = 0; i < store.count(); ++i)
+      t << QString::number(store.series().at(i).t);
+    check(t.join(' ') == "0 500 1000 1500 2000", "pre-trigger: points at " + t.join(' '));
+    check(store.series().first().value == 1.6 && store.series().last().value == 6,
+          QString("pre-trigger: from %1 to %2").arg(store.series().first().value).arg(store.series().last().value));
+    check(store.startDateTime() == TestClock::wall(3000), "pre-trigger: the recording starts 2 s before the trigger");
+    check(store.marks().size() == 1 && store.marks().first().t == 2000 && store.marks().first().color == RecordingStore::kTriggerColor,
+          "pre-trigger: a mark at the trigger");
+    store.setReading(clock.at(5500, reading(6, "6.000", "DC")));
+    check(store.isRunning() && store.remainingLength() == 5, QString("pre-trigger: %1 tenths left").arg(store.remainingLength()));
+    store.setReading(clock.at(6000, reading(6, "6.000", "DC")));
+    check(!store.isRunning() && store.duration() == 3000, QString("pre-trigger: stopped after %1 ms").arg(store.duration()));
+
+    // a value gone stale before the trigger is a gap in it
+    RecordingStore gap;
+    TestClock gc;
+    gc.attach(gap);
+    gap.setStartMode(RecordingStore::Falling);
+    gap.setThresholds(0, 0);
+    gap.setPreTrigger(10000);
+    gap.setStaleAfter(1500);
+    gap.setReading(gc.at(0, reading(3, "3", "DC")));
+    gc.now = 2000;
+    gap.setStale(true);
+    gap.setReading(gc.at(4000, reading(2, "2", "DC")));
+    gap.setReading(gc.at(4500, reading(-1, "-1", "DC")));   // the trigger
+    check(gap.count() == 4 && gap.series().at(1).gap() && gap.series().at(1).t == 1500,
+          QString("pre-trigger: %1 points, the gap at %2").arg(gap.count()).arg(gap.series().at(1).t));
+
+    // a manual start does not reach back
+    RecordingStore manual;
+    TestClock mc;
+    mc.attach(manual);
+    manual.setPreTrigger(2000);
+    manual.setReading(mc.at(0, reading(1, "1", "DC")));
+    manual.start();
+    check(manual.count() == 1 && manual.marks().isEmpty(), "pre-trigger: not for a manual start");
+  }
+
   // --- 4. marks by time: now while recording; a mark goes with the
   //        readings before what the store keeps ---
   {

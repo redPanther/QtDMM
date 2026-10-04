@@ -23,6 +23,7 @@
 
 #include <QtGui>
 #include <QtWidgets>
+#include <limits>
 
 #include "ui/engnumbervalidator.h"
 #include "ui/settings/recorderprefs.h"
@@ -45,6 +46,18 @@ RecorderPrefs::RecorderPrefs(QWidget *parent) : SettingsPage(parent)
 
   ui_raisingThreshold->setValidator(validator);
   ui_fallingThreshold->setValidator(validator);
+
+  // the pre-trigger belongs to the threshold start, its time to the box
+  auto enablePre = [this]
+  {
+    ui_preTrigger->setEnabled(triggerBut->isChecked());
+    const bool on = triggerBut->isChecked() && ui_preTrigger->isChecked();
+    ui_preTriggerTime->setEnabled(on);
+    ui_preTriggerUnit->setEnabled(on);
+  };
+  connect(triggerBut, &QRadioButton::toggled, this, enablePre);
+  connect(ui_preTrigger, &QCheckBox::toggled, this, enablePre);
+  enablePre();
 }
 RecorderPrefs::~RecorderPrefs()
 {
@@ -78,6 +91,9 @@ void RecorderPrefs::defaultsSLOT()
   second->setValue(m_cfg->getInt("Start/second"));
   ui_raisingThreshold->setText(m_cfg->getString("Start/raising-threshold", "0.0"));
   ui_fallingThreshold->setText(m_cfg->getString("Start/falling-threshold", "0.0"));
+  ui_preTrigger->setChecked(m_cfg->getBool("Start/pre-trigger", false));
+  ui_preTriggerTime->setValue(m_cfg->getInt("Start/pre-trigger-time", 10));
+  ui_preTriggerUnit->setCurrentIndex(m_cfg->getInt("Start/pre-trigger-unit", 0));
 }
 
 void RecorderPrefs::factoryDefaultsSLOT()
@@ -94,6 +110,9 @@ void RecorderPrefs::factoryDefaultsSLOT()
   second->setValue(0);
   ui_raisingThreshold->setText("0.0");
   ui_fallingThreshold->setText("0.0");
+  ui_preTrigger->setChecked(false);
+  ui_preTriggerTime->setValue(10);
+  ui_preTriggerUnit->setCurrentIndex(0);
 }
 
 void RecorderPrefs::applySLOT()
@@ -109,6 +128,9 @@ void RecorderPrefs::applySLOT()
   m_cfg->setInt("Start/second", second->value());
   m_cfg->setString("Start/raising-threshold", ui_raisingThreshold->text());
   m_cfg->setString("Start/falling-threshold", ui_fallingThreshold->text());
+  m_cfg->setBool("Start/pre-trigger", ui_preTrigger->isChecked());
+  m_cfg->setInt("Start/pre-trigger-time", ui_preTriggerTime->value());
+  m_cfg->setInt("Start/pre-trigger-unit", ui_preTriggerUnit->currentIndex());
 }
 
 GraphWidget::SampleMode RecorderPrefs::sampleMode() const
@@ -150,6 +172,15 @@ int RecorderPrefs::sampleLength() const
     case 3: return thenthOfSec * 10 * DAY_SECS ;
   }
   return thenthOfSec;
+}
+
+int RecorderPrefs::preTrigger() const
+{
+  if (!ui_preTrigger->isChecked())
+    return 0;
+  static const int unitSeconds[] = { 1, MINUTE_SECS, HOUR_SECS, DAY_SECS };
+  const qint64 ms = qint64(ui_preTriggerTime->value()) * unitSeconds[qBound(0, ui_preTriggerUnit->currentIndex(), 3)] * 1000;
+  return int(qMin<qint64>(ms, std::numeric_limits<int>::max()));
 }
 
 double RecorderPrefs::fallingThreshold() const
