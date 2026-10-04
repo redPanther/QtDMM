@@ -52,6 +52,22 @@ bool SerialDevice::availablePorts(QStringList &portlist)
   return !portlist.isEmpty();
 }
 
+QString SerialDevice::stablePortName(const QString &port, const QString &byIdDir)
+{
+#ifdef Q_OS_LINUX
+  const QString target = QFileInfo(port).canonicalFilePath();
+  if (target.isEmpty() || port.startsWith(byIdDir + '/'))
+    return port;
+  const QDir dir(byIdDir);
+  for (const QFileInfo &link : dir.entryInfoList(QDir::System | QDir::Files | QDir::NoDotAndDotDot, QDir::Name))
+    if (link.isSymLink() && link.canonicalFilePath() == target)
+      return link.absoluteFilePath();
+#else
+  Q_UNUSED(byIdDir)
+#endif
+  return port;
+}
+
 bool SerialDevice::init()
 {
   Parity parity = NoParity;
