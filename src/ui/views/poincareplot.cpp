@@ -278,7 +278,8 @@ void PoincarePlot::render(QPainter &p, const QRect &area)
   p.setPen(labels);
   for (double v = lo; v <= hi + step * 1e-9; v += step)
   {
-    const QString text = QString::number(v / factor, 'f', decimals);
+    // no "-0" from the sum of the steps
+    const QString text = QString::number(std::abs(v) < step * 1e-6 ? 0.0 : v / factor, 'f', decimals);
     const int w = fm.horizontalAdvance(text);
     if (v + step <= hi + step * 1e-9)   // the last x label would sit under the corner
       p.drawText(QPointF(px(v) - w / 2.0, plot.bottom() + fm.ascent() + 3), text);

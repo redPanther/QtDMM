@@ -21,6 +21,9 @@
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu
+- Graph: the vertical axis in the unit the meter shows (350 mV, not 0.35 V); the status bar says what the
+  third time is ("1:59:17 left")
+- Readings table: the columns are measured again after a design or font change, so no cell is cut off
 - Releases carry the source as QtDMM-<version>.tar.gz, with a fixed checksum for distributions (#184)
 - Recorder: keeps every reading of the meter with its time, instead of sampling the last value ten times a
   second. Short spikes are no longer lost, a slow meter is no longer drawn as steps, and the integral is one
