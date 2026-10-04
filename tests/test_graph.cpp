@@ -764,6 +764,38 @@ int main(int argc, char **argv)
     check(yTitle(graph) == "[Ohm]", "unit: a new recording is in Ohm, got " + yTitle(graph));
   }
 
+  // --- 5o. the integral's scale from before 26.2: once divided by the
+  //          sample time, so the curve stays as it was - the sum of the
+  //          0.5 s samples times 2 is the integral over time times 4 (up to
+  //          the first sample, which had no time yet) ---
+  {
+    Settings old("intscale", tmpDir.path());
+    old.setInt("Sample/rate", 5);
+    old.setInt("Sample/rate-unit", 0);   // 0.5 s
+    old.setString("Graph/int-scale", "2");
+    old.save();
+    check(GraphWidget::migrateIntegralScale(&old) && old.getString("Graph/int-scale") == "4",
+          "int-scale: 2 at 0.5 s should become 4, got " + old.getString("Graph/int-scale"));
+    check(!GraphWidget::migrateIntegralScale(&old) && old.getString("Graph/int-scale") == "4",
+          "int-scale: converted twice");
+
+    GraphWidget graph(nullptr, &old);
+    graph.setSampleTime(5);
+    graph.setGraphSize(100, 100);
+    graph.setIntegration(true, EngNumberValidator::value(old.getString("Graph/int-scale")), 0.0, 0.0);
+    graph.setMode(GraphWidget::Manual);
+    Feed feed(graph, 500);
+    graph.startSLOT();
+    for (int i = 0; i < 4; ++i)
+      feed.value(1.0);
+    // before: 2 4 6 8 (the samples 1 1 1 1, summed, times 2)
+    check(seriesY(graph, 2) == "0 2 4 6", "int-scale: the curve got " + seriesY(graph, 2));
+
+    Settings fresh("intscale-new", tmpDir.path());   // 1 s: nothing to do
+    check(!GraphWidget::migrateIntegralScale(&fresh) && fresh.getBool("Graph/int-scale-per-second"),
+          "int-scale: a sample time of 1 s keeps the scale");
+  }
+
   // --- 6. engineering-prefix export/import: setUnit() must strip a leading
   //         G or p prefix too (previously only n/u/m/k/M were recognized), and
   //         a value re-imported from a prefix-scaled export (e.g. "2.5;pF")

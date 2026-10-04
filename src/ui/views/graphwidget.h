@@ -200,6 +200,11 @@ public:
   /// it reset the sum) and offset.
   void             setIntegration(bool, double, double, double);
   void             setSettings(Settings *settings) { m_cfg = settings; }
+  /// Since 26.2 the integral is one over time (unit x s), no longer the sum
+  /// of the samples. Once per settings file Graph/int-scale is divided by
+  /// the sample time in seconds, so the curve stays as it was;
+  /// Graph/int-scale-per-second marks it done. True when the scale changed.
+  static bool      migrateIntegralScale(Settings *cfg);
 
 Q_SIGNALS:
   /// Status bar text: sample time, window and remaining length.

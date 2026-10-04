@@ -34,6 +34,7 @@
 #include "core/siprefix.h"
 #include "recording/recordingfile.h"
 #include "core/settings.h"
+#include "ui/engnumbervalidator.h"
 
 
 GraphWidget::GraphWidget(QWidget *parent): GraphWidget(parent, Q_NULLPTR)
@@ -1696,6 +1697,27 @@ Qt::PenStyle GraphWidget::penStyle(LineMode mode)
       return Qt::DotLine;
   }
   return Qt::SolidLine;
+}
+
+bool GraphWidget::migrateIntegralScale(Settings *cfg)
+{
+  if (!cfg || cfg->getBool("Graph/int-scale-per-second"))
+    return false;
+  // the sample time as RecorderPrefs keeps it: a count and its unit (0.1 s,
+  // s, min, h, days)
+  static const double unitSeconds[] = { 0.1, 1, 60, 3600, 86400 };
+  const int unit = qBound(0, cfg->getInt("Sample/rate-unit", 1), 4);
+  const double seconds = qMax(1, cfg->getInt("Sample/rate", 1)) * unitSeconds[unit];
+  bool changed = false;
+  if (seconds != 1.0)
+  {
+    const double scale = EngNumberValidator::value(cfg->getString("Graph/int-scale", "1.0"));
+    cfg->setString("Graph/int-scale", QString::number(scale / seconds, 'g', 12));
+    changed = true;
+  }
+  cfg->setBool("Graph/int-scale-per-second", true);
+  cfg->save();
+  return changed;
 }
 
 void GraphWidget::setIntegration(bool showInt, double sc, double th, double off)
