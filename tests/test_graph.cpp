@@ -1030,6 +1030,14 @@ int main(int argc, char **argv)
     check(x->tickInterval() == 1800 && x->titleText() == "[min]", QString("neutral 2 h: every 30 min, got %1").arg(x->tickInterval()));
   }
 
+  // --- 7d2. a graph without colours set (a test, a picture made
+  //          offscreen) shows its x labels once: Qt's own stay invisible ---
+  {
+    GraphWidget graph(nullptr, &settings);
+    auto *x = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Horizontal).first());
+    check(x && x->labelsBrush().color().alpha() == 0, "x labels: Qt's own must be invisible from the start");
+  }
+
   // --- 7e. no value yet: the auto scale has no range (+-1e40, or 0..0
   //          with "include zero"), the axis still gets one, so grid and
   //          labels are there before the first reading ---
