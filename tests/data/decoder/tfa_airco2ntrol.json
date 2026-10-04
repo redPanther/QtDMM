@@ -11,7 +11,8 @@
         "unit": "ppm",
         "special": "CO2",
         "id": 0,
-        "showBar": true
+        "showBar": true,
+        "port": "carbon_dioxide"
       }
     },
     {

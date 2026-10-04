@@ -209,6 +209,13 @@ if (BUILD_TESTING)
 	target_link_libraries(${TEST_MINMAX} PRIVATE Qt::Core)
 	add_test(NAME minmax_memory COMMAND ${TEST_MINMAX})
 
+	## symbol sets: under "System" QtDMM's own symbols from the plain set
+	set( TEST_ICONS test_icons)
+	add_executable(${TEST_ICONS} MACOSX_BUNDLE tests/test_icons.cpp src/ui/designs.cpp)
+	target_include_directories(${TEST_ICONS} PRIVATE src)
+	target_link_libraries(${TEST_ICONS} PRIVATE qtdmm_resources Qt6::Widgets Qt::Core)
+	add_test(NAME icon_sets COMMAND ${TEST_ICONS})
+
 	## Alt letters used twice in a menu or among the widgets shown together
 	## (and doubled keys), in the real program in every language: it starts
 	## offscreen with a config of its own (it writes one, a missing one would

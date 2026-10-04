@@ -981,6 +981,26 @@
     </message>
 </context>
 <context>
+    <name>HidHoltekDevice</name>
+    <message>
+        <location filename="../../src/device/transports/hidholtek.cpp" line="15"/>
+        <source>Cannot open %1: %2</source>
+        <translation>Impossible d’ouvrir %1 : %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/hidholtek.cpp" line="17"/>
+        <source>
+No permission? The sensor needs a udev rule for USB ID %1:%2.</source>
+        <translation>
+Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%2.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/hidholtek.cpp" line="30"/>
+        <source>Cannot initialise the sensor: %1</source>
+        <translation>Impossible d’initialiser le capteur : %1</translation>
+    </message>
+</context>
+<context>
     <name>InstanceWidget</name>
     <message>
         <location filename="../../src/ui/instancewidget.cpp" line="212"/>
@@ -1566,92 +1586,92 @@ Choisissez quelle instance doit enregistrer.</translation>
 <context>
     <name>MeterConnection</name>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="199"/>
+        <location filename="../../src/device/meterconnection.cpp" line="200"/>
         <source>Error creating port %1.</source>
         <translation>Erreur à la création du port %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="219"/>
+        <location filename="../../src/device/meterconnection.cpp" line="220"/>
         <source>Missing Permission</source>
         <translation>Permission manquante</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="222"/>
+        <location filename="../../src/device/meterconnection.cpp" line="223"/>
         <source>No such device %1.</source>
         <translation>Périphérique %1 introuvable.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="225"/>
+        <location filename="../../src/device/meterconnection.cpp" line="226"/>
         <source>Error opening %1.
 DMM connected and switched on?</source>
         <translation>Erreur à l&apos;ouverture de %1.
 Le multimètre est-il branché et allumé ?</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="237"/>
+        <location filename="../../src/device/meterconnection.cpp" line="238"/>
         <source>Error configuring serial port %1.</source>
         <translation>Erreur de configuration du port série %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="279"/>
+        <location filename="../../src/device/meterconnection.cpp" line="282"/>
         <source>Connecting ...</source>
         <translation>Connexion…</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="325"/>
+        <location filename="../../src/device/meterconnection.cpp" line="328"/>
         <source>Lost connection to %1.</source>
         <translation>Connexion à %1 perdue.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="329"/>
-        <location filename="../../src/device/meterconnection.cpp" line="383"/>
+        <location filename="../../src/device/meterconnection.cpp" line="332"/>
+        <location filename="../../src/device/meterconnection.cpp" line="386"/>
         <source>Retrying every %1 s.</source>
         <translation>Nouvel essai toutes les %1 s.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="345"/>
+        <location filename="../../src/device/meterconnection.cpp" line="348"/>
         <source>Calculating %1</source>
         <translation>Calcul de %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="356"/>
+        <location filename="../../src/device/meterconnection.cpp" line="359"/>
         <source>Access denied for %1.</source>
         <translation>Accès refusé pour %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="368"/>
+        <location filename="../../src/device/meterconnection.cpp" line="371"/>
         <source>Not connected</source>
         <translation>Non connecté</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="346"/>
+        <location filename="../../src/device/meterconnection.cpp" line="349"/>
         <source>Connected %1</source>
         <translation>Connecté à %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="198"/>
+        <location filename="../../src/device/meterconnection.cpp" line="199"/>
         <source>This QtDMM was built without Bluetooth support.</source>
         <translation>Ce QtDMM a été compilé sans prise en charge du Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="396"/>
+        <location filename="../../src/device/meterconnection.cpp" line="399"/>
         <source>Connecting to %1 over Bluetooth ...</source>
         <translation>Connexion à %1 par Bluetooth ...</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="433"/>
+        <location filename="../../src/device/meterconnection.cpp" line="436"/>
         <source>Error %1</source>
         <translation>Erreur %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="305"/>
+        <location filename="../../src/device/meterconnection.cpp" line="308"/>
         <source>The USB cable answers, but the meter sends nothing.
 Switch on the meter&apos;s serial output (on UNI-T meters: hold the RS232/USB button).</source>
         <translation>Le câble USB répond, mais le multimètre n&apos;envoie rien.
 Activez la sortie série du multimètre (sur les UNI-T : maintenez la touche RS232/USB).</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="307"/>
+        <location filename="../../src/device/meterconnection.cpp" line="310"/>
         <source>Timeout on device %1.
 DMM connected and switched on?</source>
         <translation>Délai dépassé sur %1.
@@ -1663,7 +1683,7 @@ Le multimètre est-il branché et allumé ?</translation>
     <message>
         <location filename="../../src/service/metercontroller.cpp" line="41"/>
         <source>Recording stopped: the meter measures %2 now, not %1</source>
-        <translation>Enregistrement arrêté : l'appareil mesure maintenant %2, et non plus %1</translation>
+        <translation>Enregistrement arrêté : l&apos;appareil mesure maintenant %2, et non plus %1</translation>
     </message>
     <message>
         <location filename="../../src/service/metercontroller.cpp" line="42"/>
@@ -2054,16 +2074,21 @@ Le multimètre est-il branché et allumé ?</translation>
         <source>19 bytes binary, polled (UNI-T UT61B+/D+/E+, USB or Bluetooth adapter)</source>
         <translation>19 octets binaires, interrogé (UNI-T UT61B+/D+/E+, adaptateur USB ou Bluetooth)</translation>
     </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="49"/>
+        <source>text lines from HID records, CO2/temperature/humidity (TFA AIRCO2NTROL)</source>
+        <translation>lignes de texte issues d’enregistrements HID, CO2/température/humidité (TFA AIRCO2NTROL)</translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="83"/>
+        <location filename="../../src/device/meterconnection.cpp" line="84"/>
         <source>No permission to access %1.</source>
         <translation>Pas de permission d&apos;accès à %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="87"/>
+        <location filename="../../src/device/meterconnection.cpp" line="88"/>
         <source>
 
 On this system the device is typically accessible via group &apos;%1&apos;.</source>
@@ -2072,7 +2097,7 @@ On this system the device is typically accessible via group &apos;%1&apos;.</sou
 Sur ce système, le périphérique est généralement accessible via le groupe « %1 ».</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="90"/>
+        <location filename="../../src/device/meterconnection.cpp" line="91"/>
         <source>
 Add your user with:
 
@@ -2083,7 +2108,7 @@ Ajoutez votre utilisateur avec :
 sudo pw groupmod %1 -m $USER</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="93"/>
+        <location filename="../../src/device/meterconnection.cpp" line="94"/>
         <source>
 Add your user with:
 
@@ -2094,7 +2119,7 @@ Ajoutez votre utilisateur avec :
 sudo usermod -aG %1 $USER</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="96"/>
+        <location filename="../../src/device/meterconnection.cpp" line="97"/>
         <source>
 
 Then log out and back in so the new group membership becomes active.</source>
@@ -2121,194 +2146,199 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
 <context>
     <name>Quantity</name>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="128"/>
+        <location filename="../../src/core/sampletypes.h" line="129"/>
         <source>Unknown</source>
         <translation>Inconnu</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="129"/>
+        <location filename="../../src/core/sampletypes.h" line="130"/>
         <source>Voltage</source>
         <translation>Tension</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="130"/>
+        <location filename="../../src/core/sampletypes.h" line="131"/>
         <source>Current</source>
         <translation>Courant</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="131"/>
+        <location filename="../../src/core/sampletypes.h" line="132"/>
         <source>Resistance</source>
         <translation>Résistance</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="132"/>
+        <location filename="../../src/core/sampletypes.h" line="133"/>
         <source>Capacitance</source>
         <translation>Capacité</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="133"/>
+        <location filename="../../src/core/sampletypes.h" line="134"/>
         <source>Temperature</source>
         <translation>Température</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="134"/>
+        <location filename="../../src/core/sampletypes.h" line="135"/>
         <source>Frequency</source>
         <translation>Fréquence</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="135"/>
+        <location filename="../../src/core/sampletypes.h" line="136"/>
         <source>Duty cycle</source>
         <translation>Rapport cyclique</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="136"/>
+        <location filename="../../src/core/sampletypes.h" line="137"/>
         <source>Continuity</source>
         <translation>Continuité</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="137"/>
+        <location filename="../../src/core/sampletypes.h" line="138"/>
         <source>Pulse width</source>
-        <translation>Largeur d'impulsion</translation>
+        <translation>Largeur d&apos;impulsion</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="138"/>
+        <location filename="../../src/core/sampletypes.h" line="139"/>
         <source>Conductance</source>
         <translation>Conductance</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="139"/>
+        <location filename="../../src/core/sampletypes.h" line="140"/>
         <source>Power</source>
         <translation>Puissance</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="140"/>
+        <location filename="../../src/core/sampletypes.h" line="141"/>
         <source>Gain</source>
         <translation>Gain</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="141"/>
+        <location filename="../../src/core/sampletypes.h" line="142"/>
         <source>Sound pressure level</source>
         <translation>Niveau de pression acoustique</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="142"/>
+        <location filename="../../src/core/sampletypes.h" line="143"/>
         <source>Carbon monoxide</source>
         <translation>Monoxyde de carbone</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="143"/>
+        <location filename="../../src/core/sampletypes.h" line="144"/>
         <source>Relative humidity</source>
         <translation>Humidité relative</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="144"/>
+        <location filename="../../src/core/sampletypes.h" line="145"/>
         <source>Time</source>
         <translation>Temps</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="145"/>
+        <location filename="../../src/core/sampletypes.h" line="146"/>
         <source>Wind speed</source>
         <translation>Vitesse du vent</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="146"/>
+        <location filename="../../src/core/sampletypes.h" line="147"/>
         <source>Pressure</source>
         <translation>Pression</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="147"/>
+        <location filename="../../src/core/sampletypes.h" line="148"/>
         <source>Parallel inductance</source>
         <translation>Inductance parallèle</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="148"/>
+        <location filename="../../src/core/sampletypes.h" line="149"/>
         <source>Parallel capacitance</source>
         <translation>Capacité parallèle</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="149"/>
+        <location filename="../../src/core/sampletypes.h" line="150"/>
         <source>Parallel resistance</source>
         <translation>Résistance parallèle</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="150"/>
+        <location filename="../../src/core/sampletypes.h" line="151"/>
         <source>Series inductance</source>
         <translation>Inductance série</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="151"/>
+        <location filename="../../src/core/sampletypes.h" line="152"/>
         <source>Series capacitance</source>
         <translation>Capacité série</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="152"/>
+        <location filename="../../src/core/sampletypes.h" line="153"/>
         <source>Series resistance</source>
         <translation>Résistance série</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="153"/>
+        <location filename="../../src/core/sampletypes.h" line="154"/>
         <source>Dissipation factor</source>
         <translation>Facteur de dissipation</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="154"/>
+        <location filename="../../src/core/sampletypes.h" line="155"/>
         <source>Quality factor</source>
         <translation>Facteur de qualité</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="155"/>
+        <location filename="../../src/core/sampletypes.h" line="156"/>
         <source>Phase angle</source>
         <translation>Angle de phase</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="156"/>
+        <location filename="../../src/core/sampletypes.h" line="157"/>
         <source>Difference</source>
         <translation>Différence</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="157"/>
+        <location filename="../../src/core/sampletypes.h" line="158"/>
         <source>Count</source>
         <translation>Comptage</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="158"/>
+        <location filename="../../src/core/sampletypes.h" line="159"/>
         <source>Power factor</source>
         <translation>Facteur de puissance</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="159"/>
+        <location filename="../../src/core/sampletypes.h" line="160"/>
         <source>Apparent power</source>
         <translation>Puissance apparente</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="160"/>
+        <location filename="../../src/core/sampletypes.h" line="161"/>
         <source>Mass</source>
         <translation>Masse</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="161"/>
+        <location filename="../../src/core/sampletypes.h" line="162"/>
         <source>Harmonic ratio</source>
-        <translation>Taux d'harmoniques</translation>
+        <translation>Taux d&apos;harmoniques</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="162"/>
+        <location filename="../../src/core/sampletypes.h" line="163"/>
         <source>Energy</source>
         <translation>Énergie</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="163"/>
+        <location filename="../../src/core/sampletypes.h" line="164"/>
         <source>Electric charge</source>
         <translation>Charge électrique</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="164"/>
+        <location filename="../../src/core/sampletypes.h" line="165"/>
         <source>State of charge</source>
         <translation>État de charge</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="165"/>
+        <location filename="../../src/core/sampletypes.h" line="166"/>
         <source>Time to go</source>
         <translation>Autonomie restante</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="167"/>
+        <source>Carbon dioxide</source>
+        <translation>Dioxyde de carbone</translation>
     </message>
 </context>
 <context>
@@ -3005,7 +3035,7 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="41"/>
         <source>The look of the whole window: the colours of the desktop (System), brushed metal (Silver) or dark. The same as Design in the menu.</source>
-        <translation>L'aspect de toute la fenêtre : les couleurs du bureau (Système), métal brossé (Argent) ou sombre. Comme Apparence dans le menu.</translation>
+        <translation>L&apos;aspect de toute la fenêtre : les couleurs du bureau (Système), métal brossé (Argent) ou sombre. Comme Apparence dans le menu.</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="48"/>
@@ -3015,7 +3045,7 @@ Vous pouvez saisir les valeurs avec un suffixe comme m, u, n, p, k, M, G, T&lt;b
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="58"/>
         <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the plain set.</source>
-        <translation>&lt;b&gt;Coloré&lt;/b&gt; : les symboles en couleur de QtDMM (Oxygen). &lt;b&gt;Sobre&lt;/b&gt; : symboles monochromes (Breeze), clairs ou sombres selon l'apparence. &lt;b&gt;Système&lt;/b&gt; : le thème d'icônes de votre bureau, s'il en a un ; les symboles propres à QtDMM et ce qui manque au thème viennent du jeu sobre.</translation>
+        <translation>&lt;b&gt;Coloré&lt;/b&gt; : les symboles en couleur de QtDMM (Oxygen). &lt;b&gt;Sobre&lt;/b&gt; : symboles monochromes (Breeze), clairs ou sombres selon l&apos;apparence. &lt;b&gt;Système&lt;/b&gt; : le thème d&apos;icônes de votre bureau, s&apos;il en a un ; les symboles propres à QtDMM et ce qui manque au thème viennent du jeu sobre.</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="75"/>
