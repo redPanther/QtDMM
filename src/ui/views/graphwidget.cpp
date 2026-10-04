@@ -92,6 +92,9 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
 
   m_xAxis = new QValueAxis();
   m_xAxis->setTitleText(tr("[sec]"));
+  // updateXLabels() writes the x labels; Qt's own only keep the room for
+  // them - from the start, not only once colours are set
+  m_xAxis->setLabelsBrush(Qt::transparent);
   m_chart->addAxis(m_xAxis, Qt::AlignBottom);
   m_dataSeries->attachAxis(m_xAxis);
   m_dataPoints->attachAxis(m_xAxis);
