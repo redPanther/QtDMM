@@ -7,7 +7,7 @@
 RecordingStore::RecordingStore(QObject *parent) :
   QObject(parent),
   m_monotonic(&Sample::now),
-  m_wall(&QDateTime::currentDateTime)
+  m_wall([] { return QDateTime::currentDateTime(); })
 {
   m_start = m_wall();
   m_t0 = m_monotonic();
