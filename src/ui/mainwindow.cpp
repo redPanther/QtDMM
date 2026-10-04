@@ -27,6 +27,8 @@
 
 #include "ui/mainwindow.h"
 #include "ui/dialogs/helpdlg.h"
+#include "ui/dialogs/welcomedlg.h"
+#include "ui/dialogs/finddevicedlg.h"
 #include "ui/dialogs/mydevicesdlg.h"
 #include "core/devicelibrary.h"
 #include "ui/instancewidget.h"
@@ -434,6 +436,42 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   // instance would otherwise try the first serial port it finds
   if (m_stateMgr->registerInstance() && m_wid->dmmConfigured())
     QTimer::singleShot(1000, action_Connect, &QAction::trigger);
+  // the first start (and not the test that only looks at the menus): how
+  // to get to a first reading
+  else if (!m_wid->settings()->fileExists() && !parser.isSet("check-mnemonics"))
+    QTimer::singleShot(0, this, &MainWindow::welcome);
+}
+
+void MainWindow::welcome()
+{
+  WelcomeDlg dlg(m_wid->devices(), this);
+  dlg.exec();
+  switch (dlg.choice())
+  {
+    case WelcomeDlg::Known:
+      m_wid->switchDevice(dlg.device());
+      break;
+    case WelcomeDlg::Find:
+      findDevice();
+      break;
+    case WelcomeDlg::TryVirtual:
+      // the virtual meter with its defaults: a sine, at once
+      m_wid->useFoundDevice({ { "DMM/model", "QtDMM Virtual meter" } }, QString());
+      break;
+    case WelcomeDlg::ByHand:
+      m_wid->configDmmSLOT();
+      break;
+    case WelcomeDlg::None:
+      break;
+  }
+}
+
+void MainWindow::findDevice()
+{
+  FindDeviceDlg dlg(m_wid->settings(), m_wid->devices(), this);
+  if (dlg.exec() != QDialog::Accepted)
+    return;
+  m_wid->useFoundDevice(dlg.keys(), dlg.addToLibrary() ? dlg.name() : QString());
 }
 
 // "QtDMM: UNI-T UT61E", with the instance id for non-default instances
@@ -919,6 +957,7 @@ void MainWindow::fillDevicesMenu()
     });
     dlg.exec();
   });
+  connect(m_devicesMenu->addAction(tr("&Find device...")), &QAction::triggered, this, &MainWindow::findDevice);
   m_devicesMenu->addAction(action_ConfigureDMM);
 }
 

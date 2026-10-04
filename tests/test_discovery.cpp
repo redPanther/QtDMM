@@ -135,6 +135,13 @@ int main(int argc, char **argv)
                           "\"0820\", ATTRS{idProduct}==\"0001\"", "\"04d9\", ATTRS{idProduct}==\"a052\"" })
     check(rules.contains(id), QString("udev rules: %1").arg(id));
   check(rules.count("TAG+=\"uaccess\"") == 6, "udev rules: uaccess for each");
+  if (argc > 1)
+  {
+    // the file the packages install is the same as the text the dialog shows
+    QFile file(QString::fromLocal8Bit(argv[1]) + "/assets/linux/70-qtdmm.rules");
+    check(file.open(QIODevice::ReadOnly | QIODevice::Text) && QString::fromUtf8(file.readAll()) == rules,
+          "udev rules: assets/linux/70-qtdmm.rules differs from udevRules()");
+  }
 
   // --- 4. the discoverers end their search (whatever is plugged in) ---
   {

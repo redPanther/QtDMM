@@ -1,0 +1,13 @@
+# QtDMM: the logged-in user may open the USB-HID cables and sensors of meters
+# WCH CH9325 (UNI-T UT-D04)
+KERNEL=="hidraw*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e008", TAG+="uaccess"
+# Hoitek HE2325U (UNI-T UT-D04)
+KERNEL=="hidraw*", ATTRS{idVendor}=="04fa", ATTRS{idProduct}=="2490", TAG+="uaccess"
+# SiLabs CP2110 (UNI-T UT-D09)
+KERNEL=="hidraw*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea80", TAG+="uaccess"
+# WCH CH9329 (UNI-T UT-D09)
+KERNEL=="hidraw*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e429", TAG+="uaccess"
+# Brymen BU-86X
+KERNEL=="hidraw*", ATTRS{idVendor}=="0820", ATTRS{idProduct}=="0001", TAG+="uaccess"
+# Holtek (TFA AIRCO2NTROL)
+KERNEL=="hidraw*", ATTRS{idVendor}=="04d9", ATTRS{idProduct}=="a052", TAG+="uaccess"

@@ -20,11 +20,6 @@
 
 namespace
 {
-QString tr(const char *text)
-{
-  return QCoreApplication::translate("Discovery", text);
-}
-
 QString ids(quint16 vid, quint16 pid)
 {
   return QString("%1:%2").arg(vid, 4, 16, QLatin1Char('0')).arg(pid, 4, 16, QLatin1Char('0'));
@@ -87,8 +82,8 @@ std::optional<Families::Family> Families::forUsb(quint16 vid, quint16 pid)
     QStringList models;
     for (const QString &m : Families::models(FrameFormat::UniTUT61Plus, true))
       models << m;
-    return Family { tr("UNI-T UT61B+, UT61D+, UT61E+ or UT161"), "UT-D09",
-                    tr("Switch the meter on; it sends as soon as the cable is plugged in."), "HID",
+    return Family { QCoreApplication::translate("Discovery", "UNI-T UT61B+, UT61D+, UT61E+ or UT161"), "UT-D09",
+                    QCoreApplication::translate("Discovery", "Switch the meter on; it sends as soon as the cable is plugged in."), "HID",
                     likeliestFirst(models, "Uni-Trend UT61E+ *") };
   }
   if (id == "1a86:e008" || id == "04fa:2490")
@@ -98,8 +93,8 @@ std::optional<Families::Family> Families::forUsb(quint16 vid, quint16 pid)
     for (const DmmDecoder::DMMInfo &m : DmmDecoder::getDeviceConfigurations())
       if (m.vendor == "Uni-Trend" && m.baud > 0 && m.protocol != FrameFormat::UniTUT61Plus)
         models << m.name;
-    return Family { tr("UNI-T meter with the UT-D04 cable"), "UT-D04",
-                    tr("Press RS232 (or PC) on the meter, else it sends nothing."), "HID",
+    return Family { QCoreApplication::translate("Discovery", "UNI-T meter with the UT-D04 cable"), "UT-D04",
+                    QCoreApplication::translate("Discovery", "Press RS232 (or PC) on the meter, else it sends nothing."), "HID",
                     likeliestFirst(models, "Uni-Trend UT61E") };
   }
   if (id == "0820:0001")
@@ -108,11 +103,11 @@ std::optional<Families::Family> Families::forUsb(quint16 vid, quint16 pid)
     for (const DmmDecoder::DMMInfo &m : DmmDecoder::getDeviceConfigurations())
       if (m.vendor == "Brymen" && m.baud == 0)
         models << m.name;
-    return Family { tr("Brymen BM52x, BM82x or BM86x"), "BU-86X",
-                    tr("Put the IR adapter on the meter and switch its PC link on."), "HID", likeliestFirst(models, QString()) };
+    return Family { QCoreApplication::translate("Discovery", "Brymen BM52x, BM82x or BM86x"), "BU-86X",
+                    QCoreApplication::translate("Discovery", "Put the IR adapter on the meter and switch its PC link on."), "HID", likeliestFirst(models, QString()) };
   }
   if (id == "04d9:a052")
-    return Family { tr("TFA AIRCO2NTROL CO2 monitor"), QString(), QString(), "HIDHOLTEK",
+    return Family { QCoreApplication::translate("Discovery", "TFA AIRCO2NTROL CO2 monitor"), QString(), QString(), "HIDHOLTEK",
                     likeliestFirst(Families::models(FrameFormat::TfaAirControl, false), "TFA Dostmann AIRCO2NTROL Mini *") };
   return std::nullopt;
 }
@@ -153,12 +148,12 @@ AccessProblem accessProblem(const QString &path, bool hid, quint16 vid, quint16 
   const QFileInfo info(path);
   if (!info.exists() || (info.isReadable() && info.isWritable()))
     return a;
-  a.problem = tr("No access: %1 belongs to %2:%3").arg(path, info.owner(), info.group());
+  a.problem = QCoreApplication::translate("Discovery", "No access: %1 belongs to %2:%3").arg(path, info.owner(), info.group());
   if (hid)
   {
     const QString rule = QString("KERNEL==\"hidraw*\", ATTRS{idVendor}==\"%1\", ATTRS{idProduct}==\"%2\", TAG+=\"uaccess\"")
                            .arg(vid, 4, 16, QLatin1Char('0')).arg(pid, 4, 16, QLatin1Char('0'));
-    a.fix = tr("A udev rule lets you open the cable. The packages of QtDMM install one; for the AppImage or "
+    a.fix = QCoreApplication::translate("Discovery", "A udev rule lets you open the cable. The packages of QtDMM install one; for the AppImage or "
                "Flatpak, put this line into /etc/udev/rules.d/70-qtdmm.rules:\n\n%1\n\n"
                "then load it and plug the cable in again:\n\n"
                "sudo udevadm control --reload-rules && sudo udevadm trigger").arg(rule);
@@ -166,7 +161,7 @@ AccessProblem accessProblem(const QString &path, bool hid, quint16 vid, quint16 
   else
   {
     const QString group = info.group().isEmpty() ? QStringLiteral("dialout") : info.group();
-    a.fix = tr("Serial ports belong to the group %1. Add yourself to it:\n\n"
+    a.fix = QCoreApplication::translate("Discovery", "Serial ports belong to the group %1. Add yourself to it:\n\n"
                "sudo usermod -aG %1 $USER\n\n"
                "then log out and in again.").arg(group);
   }
@@ -195,7 +190,7 @@ void UsbDiscoverer::start()
       c.kind = Candidate::UsbCable;
       c.key = path;
       c.title = family->title;
-      c.detail = family->cable.isEmpty() ? path : tr("%1 cable · %2").arg(family->cable, path);
+      c.detail = family->cable.isEmpty() ? path : QCoreApplication::translate("Discovery", "%1 cable · %2").arg(family->cable, path);
       c.hint = family->hint;
       c.models = family->models;
       c.keys.insert("Port settings/device", QString("%1 0x%2:0x%3 %4").arg(family->portType)
@@ -233,9 +228,9 @@ void SerialDiscoverer::start()
       c.key = port;
       const QString chip = p.hasVendorIdentifier() ? Families::adapter(p.vendorIdentifier(), p.productIdentifier())
                                                    : QString();
-      c.title = chip.isEmpty() ? tr("Serial port") : tr("USB-serial adapter (%1)").arg(chip);
+      c.title = chip.isEmpty() ? QCoreApplication::translate("Discovery", "Serial port") : QCoreApplication::translate("Discovery", "USB-serial adapter (%1)").arg(chip);
       c.detail = p.manufacturer().isEmpty() ? port : QString("%1 · %2").arg(p.manufacturer(), port);
-      c.hint = tr("Which meter is on it, QtDMM cannot tell yet: choose the model.");
+      c.hint = QCoreApplication::translate("Discovery", "Which meter is on it, QtDMM cannot tell yet: choose the model.");
       c.keys.insert("Port settings/device", "SERIAL " + port);
       const AccessProblem a = accessProblem(port, false);
       c.problem = a.problem;
@@ -261,9 +256,9 @@ void BridgeDiscoverer::start()
     Candidate c;
     c.kind = Candidate::Network;
     c.key = QString("%1:%2").arg(where).arg(s.port);
-    c.title = tr("qtdmm-bridge on %1").arg(host);
+    c.title = QCoreApplication::translate("Discovery", "qtdmm-bridge on %1").arg(host);
     c.detail = device.isEmpty() ? c.key : QString("%1 · %2").arg(device, c.key);
-    c.hint = tr("Which meter is on it, QtDMM cannot tell yet: choose the model.");
+    c.hint = QCoreApplication::translate("Discovery", "Which meter is on it, QtDMM cannot tell yet: choose the model.");
     c.keys.insert("Port settings/device", "RFC2217 " + c.key);
     Q_EMIT found(c);
   });
@@ -302,10 +297,10 @@ QString BleDiscoverer::unavailable()
 {
 #ifdef QTDMM_WITH_BLE
   if (QBluetoothLocalDevice::allDevices().isEmpty())
-    return tr("No Bluetooth adapter found.");
+    return QCoreApplication::translate("Discovery", "No Bluetooth adapter found.");
   return QString();
 #else
-  return tr("This build of QtDMM has no Bluetooth.");
+  return QCoreApplication::translate("Discovery", "This build of QtDMM has no Bluetooth.");
 #endif
 }
 
@@ -325,8 +320,8 @@ void BleDiscoverer::start()
     c.key = address;
     if (info.manufacturerIds().contains(VictronBle::CompanyId))
     {
-      c.title = info.name().isEmpty() ? tr("Victron device") : tr("Victron %1").arg(info.name());
-      c.hint = tr("The device key is in the VictronConnect app: Product info, Instant readout.");
+      c.title = info.name().isEmpty() ? QCoreApplication::translate("Discovery", "Victron device") : QCoreApplication::translate("Discovery", "Victron %1").arg(info.name());
+      c.hint = QCoreApplication::translate("Discovery", "The device key is in the VictronConnect app: Product info, Instant readout.");
       c.models = Families::preferByName(Families::models(FrameFormat::VictronBLE, false), info.name());
     }
     else
@@ -345,8 +340,8 @@ void BleDiscoverer::start()
       }
       if (c.models.isEmpty())
         return;
-      c.title = info.name().isEmpty() ? tr("Bluetooth meter") : info.name();
-      c.hint = tr("Switch Bluetooth on at the meter.");
+      c.title = info.name().isEmpty() ? QCoreApplication::translate("Discovery", "Bluetooth meter") : info.name();
+      c.hint = QCoreApplication::translate("Discovery", "Switch Bluetooth on at the meter.");
     }
     d->seen.insert(address);
     c.detail = info.rssi() != 0 ? QString("%1 · %2 dBm").arg(address).arg(info.rssi()) : address;

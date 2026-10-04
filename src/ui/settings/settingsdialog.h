@@ -196,6 +196,9 @@ public:
   void                  setDeviceLibrary(DeviceLibrary *library);
   /// The meter page reads the settings again (another device was taken over).
   void                  reloadMeter();
+  /// The meter page's fields into the settings, saved (after reloadMeter()
+  /// filled in what a model brings).
+  void                  applyMeter();
 
 
 public Q_SLOTS:

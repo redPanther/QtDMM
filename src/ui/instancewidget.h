@@ -105,6 +105,11 @@ public:
   /// message - another meter is another function. False when there is no
   /// such entry.
   bool        switchDevice(const QString &id);
+  /// Takes over a meter found by "Find device" (or the virtual meter):
+  /// where it is and the model; the meter page fills in the rest (line
+  /// settings, protocol) as when the model is chosen there. Connects, and
+  /// keeps it in "My devices" as @p name unless that is empty.
+  void        useFoundDevice(const QVariantMap &keys, const QString &name);
   /// Keeps the meter of this instance in "My devices" as @p name, the
   /// serial port under its stable name; returns the new id.
   QString     saveCurrentDevice(const QString &name);
@@ -180,6 +185,10 @@ protected:
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   InstancesDlg *m_instancesDlg;
   Settings    *m_settings;
+  /// Disconnects, takes over @p keys (with the meter page's defaults for
+  /// what they leave out when @p complete), connects; @p name for the
+  /// message.
+  void        takeOver(const QVariantMap &keys, const QString &name, bool complete);
   DeviceLibrary *m_devices;
   QString     m_instanceId;
 

@@ -46,6 +46,7 @@ QT_QPA_PLATFORM=offscreen %ctest
 %{_datadir}/icons/hicolor/*/apps/%{appid}.png
 %{_datadir}/icons/hicolor/scalable/apps/%{appid}.svg
 %{_mandir}/man1/%{name}.1*
+%{_prefix}/lib/udev/rules.d/70-qtdmm.rules
 %{_metainfodir}/*.xml
 %dir %{_datadir}/%{name}
 %dir %{_datadir}/%{name}/translations

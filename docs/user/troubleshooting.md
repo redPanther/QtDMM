@@ -41,8 +41,15 @@ value. If the meter is on, see the next section.
 Meters with a USB-HID cable (many Uni-Trend models) appear in the port list as
 `HID 0x1a86:0xe008 /dev/hidrawN`. If the entry is missing or cannot be opened,
 the `/dev/hidraw*` device is usually only readable by root. A udev rule grants
-access to your user; check the cable's vendor:product id with `lsusb` and match
-it in the rule. QtDMM knows three cable chips: the WCH CH9325 / Hoitek
+access to your user. The DEB and RPM packages install one,
+`/usr/lib/udev/rules.d/70-qtdmm.rules`, for every cable and sensor QtDMM
+knows; with the AppImage or the Flatpak, **Find device** shows the line for
+your cable and the commands (**How to fix...**), or copy the file from
+`assets/linux/70-qtdmm.rules` in the sources to `/etc/udev/rules.d/`, then
+`sudo udevadm control --reload-rules && sudo udevadm trigger` and plug the
+cable in again. The rules use `TAG+="uaccess"` - the user logged in at the
+computer may open the device - which only works in a file numbered below 73;
+a rule of your own with a group (`GROUP="plugdev"`) works at any number. QtDMM knows three cable chips: the WCH CH9325 / Hoitek
 HE2325U (`1a86:e008`, `04fa:2490`; UT-D04 and most older cables), whose speed
 QtDMM sets from the device table when it opens the port; and the two
 revisions of the newer UNI-T UT-D09, which look identical — a Silicon Labs

@@ -21,6 +21,11 @@
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu
+- Find device: plug the meter in, tick where to look (USB cable, Bluetooth, serial, network), Search - the
+  finds come as a list: the meter family of a USB cable, the Bluetooth meters and Victron devices, the chip of a
+  USB-serial adapter, qtdmm-bridge ports. Confirm the model, Connect, keep it in My devices. A device QtDMM may
+  not open says why, with the fix. The first start offers it, and Try without a device (the virtual meter)
+- Linux packages install a udev rule for the USB-HID cables and sensors (70-qtdmm.rules)
 - My devices: your meters with their connections, kept for all windows in devices.conf. The toolbar's My
   devices button switches to one with two clicks (a running recording stops); Save current device, the choice
   on the Multimeter page, a device for a new instance. Serial ports are kept under their /dev/serial/by-id name
