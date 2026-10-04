@@ -73,18 +73,6 @@ Hovering over a gap shows "OL" or "no value". In the export, an interval
 that holds some values and some gaps is the average of the values there
 were; the integration curve carries on across a gap.
 
-## External command
-
-**Settings → External application** runs a program when the reading crosses a threshold
-(raising or falling edge), for example to switch something off. Optionally
-QtDMM disconnects from the meter first so the command can use the serial
-port.
-
-The command is the program followed by its arguments, as in a terminal but
-without a shell: put arguments containing spaces in double quotes. For
-pipes or redirections, call the shell yourself, e.g.
-`sh -c "echo done > /tmp/qtdmm.log"`.
-
 ## Looking at the data
 
 - The buttons at the top right of the graph set the time window: **All**

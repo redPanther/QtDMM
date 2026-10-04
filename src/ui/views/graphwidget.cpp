@@ -133,10 +133,9 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_crosshairVLine   = new QGraphicsLineItem(m_chart);
   m_crosshairHLine   = new QGraphicsLineItem(m_chart);
   m_triggerLine      = new QGraphicsLineItem(m_chart);
-  m_externalLine     = new QGraphicsLineItem(m_chart);
   m_integrationLine  = new QGraphicsLineItem(m_chart);
 
-  for (QGraphicsLineItem *item : {m_crosshairVLine, m_crosshairHLine, m_triggerLine, m_externalLine, m_integrationLine})
+  for (QGraphicsLineItem *item : {m_crosshairVLine, m_crosshairHLine, m_triggerLine, m_integrationLine})
   {
     item->setZValue(1000);
     item->setVisible(false);
@@ -196,7 +195,6 @@ void GraphWidget::connectStore()
   connect(m_store, &RecordingStore::marksChanged, this, &GraphWidget::syncMarks);
   connect(m_store, &RecordingStore::progressChanged, this, &GraphWidget::emitInfo);
   connect(m_store, &RecordingStore::runningChanged, this, &GraphWidget::running);
-  connect(m_store, &RecordingStore::externalTriggered, this, &GraphWidget::externalTriggered);
   connect(m_store, &RecordingStore::alert, this, [] { QApplication::beep(); });
   // the axis names the recording's unit, which a new one may change
   connect(m_store, &RecordingStore::cleared, this, &GraphWidget::showUnit);
@@ -795,7 +793,6 @@ void GraphWidget::updateSeriesAppearance()
 void GraphWidget::updateThresholdLinesVisibility()
 {
   m_triggerLine->setVisible(mode() == Raising || mode() == Falling);
-  m_externalLine->setVisible(m_store->externalOn());
   m_integrationLine->setVisible(m_showIntegration);
 
   updateThresholdLinePositions();
@@ -814,7 +811,6 @@ void GraphWidget::updateThresholdLinePositions()
   };
 
   positionLine(m_triggerLine, mode() == Raising ? m_store->raisingThreshold() : m_store->fallingThreshold());
-  positionLine(m_externalLine, m_store->externalThreshold());
   positionLine(m_integrationLine, m_store->integrationThreshold());
   updateMarkPositions();
 }
@@ -1174,9 +1170,6 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
         if (mode() == Raising) m_store->setRaisingThreshold(value);
         else                   m_store->setFallingThreshold(value);
         break;
-      case External:
-        m_store->setExternalThreshold(value);
-        break;
       case Integration:
         m_store->setIntegrationThreshold(value);
         break;
@@ -1190,7 +1183,7 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
   }
 
   // Pure hover: hit-test the draggable threshold lines (trigger, then
-  // external, then integration - first match wins when lines overlap) and,
+  // integration - first match wins when lines overlap) and,
   // failing that, drive the crosshair.
   if (!m_mouseDown && !m_mousePan)
   {
@@ -1204,8 +1197,6 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
 
     if (near(m_triggerLine))
       m_cursorMode = Trigger;
-    else if (near(m_externalLine))
-      m_cursorMode = External;
     else if (near(m_integrationLine))
       m_cursorMode = Integration;
     else
@@ -1487,7 +1478,7 @@ bool GraphWidget::computeMinMax(double val)
 
 void GraphWidget::setColors(const QColor &bg, const QColor &grid,
                          const QColor &data, const QColor &cursor,
-                         const QColor &start, const QColor &external,
+                         const QColor &start,
                          const QColor &integration, const QColor &intThreshold)
 {
   m_bgColor           = bg;
@@ -1495,7 +1486,6 @@ void GraphWidget::setColors(const QColor &bg, const QColor &grid,
   m_dataColor         = data;
   m_cursorColor       = cursor;
   m_startColor        = start;
-  m_externalColor     = external;
   m_intColor          = integration;
   m_intThresholdColor = intThreshold;
 
@@ -1714,13 +1704,13 @@ void GraphWidget::applyThemeColors()
   {
     return own || setting != QColor(def) || !variant.isValid() ? setting : variant;
   };
-  QColor start, external;
+  QColor start;
   switch (m_variant)
   {
-    case ScopeBlue:     start = QColor("#ff5fd2"); external = QColor("#6dff6d"); break;
-    case PhosphorGreen: start = QColor::fromHsv(135, 190, 160); external = QColor::fromHsv(135, 120, 130); break;
-    case PhosphorAmber: start = QColor::fromHsv(38, 230, 160); external = QColor::fromHsv(38, 150, 130); break;
-    case ChartRecorder: start = QColor("#2e7d32"); external = QColor("#222222"); break;
+    case ScopeBlue:     start = QColor("#ff5fd2"); break;
+    case PhosphorGreen: start = QColor::fromHsv(135, 190, 160); break;
+    case PhosphorAmber: start = QColor::fromHsv(38, 230, 160); break;
+    case ChartRecorder: start = QColor("#2e7d32"); break;
     default: break;
   }
   const Qt::PenStyle lineStyle = phosphor() ? Qt::DashLine : Qt::SolidLine;
@@ -1728,7 +1718,6 @@ void GraphWidget::applyThemeColors()
   m_crosshairVLine->setPen(QPen(cursor));
   m_crosshairHLine->setPen(QPen(cursor));
   m_triggerLine->setPen(QPen(pick(m_startColor, Qt::magenta, start), 1, lineStyle));
-  m_externalLine->setPen(QPen(pick(m_externalColor, Qt::cyan, external), 1, lineStyle));
   // dotted: by default it takes the integration curve's colour and must not
   // pass for a curve (phosphor dashes the curve)
   m_integrationLine->setPen(QPen(pick(m_intThresholdColor, Qt::darkBlue, intColor()), 1, Qt::DotLine));
@@ -1753,13 +1742,6 @@ void GraphWidget::setLine(int d, int i)
   m_intLineWidth = i;
 
   updateSeriesAppearance();
-}
-
-void GraphWidget::setExternal(bool on, bool falling, double threshold)
-{
-  m_store->setExternal(on, falling, threshold);
-
-  updateThresholdLinesVisibility();
 }
 
 Qt::PenStyle GraphWidget::penStyle(LineMode mode)

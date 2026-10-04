@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QHostInfo>
 #include <QProcess>
+#include <QTimer>
 #include <QRegularExpression>
 
 #include "device/meterconnection.h"
@@ -58,9 +59,15 @@ MeterController::MeterController(QObject *parent)
   });
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
 
+  // an alarm's program that had the port to itself has ended: the meter again
   connect(m_external, &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus)
   {
-    Q_EMIT externalFinished(exitCode);
+    Q_EMIT info(tr("%1 ended with exit code %2").arg(m_external->program()).arg(exitCode));
+    if (m_reopenAfter)
+    {
+      m_reopenAfter = false;
+      Q_EMIT connectRequested(true);
+    }
   });
 
   m_clock.start();
@@ -238,8 +245,39 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
     if (!args.isEmpty())
     {
       const QString program = args.takeFirst();
-      if (!QProcess::startDetached(program, args))
-        Q_EMIT error(tr("%1: could not run %2").arg(Alarm::title(alarm.name), program));
+      if (!alarm.disconnect)
+      {
+        if (!QProcess::startDetached(program, args))
+          Q_EMIT error(tr("%1: could not run %2").arg(Alarm::title(alarm.name), program));
+      }
+      else if (m_externalPending || m_external->state() != QProcess::NotRunning)
+        Q_EMIT error(tr("%1: %2 is still running").arg(Alarm::title(alarm.name), m_external->program()));
+      else
+      {
+        // "Disconnect first": the program has the port to itself, the meter
+        // comes back when it has ended. Not here: the alarm raised while the
+        // reader is still on the frame of the port that would close
+        const QString title = Alarm::title(alarm.name);
+        m_externalPending = true;   // a second alarm in the meantime waits for it
+        m_external->setProgram(program);
+        QTimer::singleShot(0, this, [this, title, program, args]
+        {
+          m_externalPending = false;
+          m_reopenAfter = m_dmm->isOpen();
+          if (m_reopenAfter)
+            Q_EMIT connectRequested(false);
+          m_external->start(program, args);
+          if (!m_external->waitForStarted(3000))
+          {
+            Q_EMIT error(tr("%1: could not run %2").arg(title, program));
+            if (m_reopenAfter)
+            {
+              m_reopenAfter = false;
+              Q_EMIT connectRequested(true);
+            }
+          }
+        });
+      }
     }
   }
   Q_EMIT alarmRaised(alarm, shown, text);
@@ -327,25 +365,3 @@ void MeterController::updateScpiStatus()
   Q_EMIT scpiStatusChanged(tr("SCPI %1:%2 (%3)").arg(where).arg(m_scpi->port()).arg(clients), text);
 }
 
-// ---------------------------------------------------------------- external program
-
-bool MeterController::startExternal(const QString &command)
-{
-  // Qt 6 no longer runs a command line passed as the only argument of an
-  // empty program: split it into program and arguments like the alarms do
-  if (command.trimmed().isEmpty())
-    return false;
-  m_external->startCommand(command);
-  return m_external->waitForStarted(3000);
-}
-
-bool MeterController::externalRunning() const
-{
-  return m_external->state() == QProcess::Running;
-}
-
-void MeterController::killExternal()
-{
-  m_external->kill();
-  m_external->waitForFinished(1000);
-}

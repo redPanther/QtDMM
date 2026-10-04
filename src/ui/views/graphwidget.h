@@ -92,7 +92,6 @@ public:
   {
     NoCursor = 0,
     Trigger,      ///< recording start threshold
-    External,     ///< external application threshold
     Integration   ///< integration threshold
   };
 
@@ -157,7 +156,7 @@ public:
   void             setScale(bool autoScale, bool includeZero, double min, double max);
   void             setColors(const QColor &bg, const QColor &grid,
                              const QColor &data, const QColor &cursor,
-                             const QColor &start, const QColor &external,
+                             const QColor &start,
                              const QColor &integration, const QColor &intThreshold);
   /// Colours of the window design (background, grid, axis lettering); a
   /// background of Qt::NoBrush means the colours from the settings. @p data
@@ -187,9 +186,6 @@ public:
   /// move with the data and go with clearSLOT().
   void             addMark(const QColor &color, const QString &name);
   int              markCount() const { return int(m_marks.size()); }
-  /// External application trigger: fire externalTriggered() once per
-  /// recording when the reading crosses @p threshold in the given direction.
-  void             setExternal(bool on, bool falling = false, double threshold = 0);
   /// Unsaved recorded data in memory.
   bool             dirty() const { return m_store->dirty(); }
   void             setAlertUnsaved(bool on) { m_alertUnsaved = on; }
@@ -216,8 +212,6 @@ Q_SIGNALS:
   void             graphSize(int, int);
   /// Sample time changed by a CSV import (tenths of a second).
   void             sampleTime(int);
-  /// The external application threshold was crossed.
-  void             externalTriggered();
   /// The context menu chose this graph's colours: a ColorVariant, or -1
   /// for the default from the settings page.
   void             colorVariantChanged(int override);
@@ -331,7 +325,6 @@ protected:
   QColor           m_dataColor;
   QColor           m_cursorColor;
   QColor           m_startColor;
-  QColor           m_externalColor;
   QColor           m_intColor;
   QColor           m_intThresholdColor;
   int              m_lineWidth;
@@ -410,7 +403,6 @@ protected:
   QGraphicsLineItem *m_crosshairVLine;
   QGraphicsLineItem *m_crosshairHLine;
   QGraphicsLineItem *m_triggerLine;
-  QGraphicsLineItem *m_externalLine;
   QGraphicsLineItem *m_integrationLine;
   /// Alarm marks: a vertical line at the sample the alarm raised on, one
   /// per RecordingStore::marks() in the same order.

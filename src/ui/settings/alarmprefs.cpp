@@ -250,6 +250,16 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   m_command->setPlaceholderText(tr("none"));
   m_command->setToolTip(tr("Program to run when the alarm raises. %v is the value, %u its unit, %n the alarm's name."));
   af->addRow(tr("Run &program:"), m_command);
+  m_disconnect = new QCheckBox(tr("&Disconnect first"), act);
+  m_disconnect->setChecked(alarm.disconnect);
+  m_disconnect->setToolTip(tr("Close the port while the program runs and open it again when it has ended - "
+                              "so the program can talk to the meter itself."));
+  af->addRow(QString(), m_disconnect);
+  connect(m_command, &QLineEdit::textChanged, m_disconnect, [this](const QString &text)
+  {
+    m_disconnect->setEnabled(!text.trimmed().isEmpty());
+  });
+  m_disconnect->setEnabled(!alarm.command.trimmed().isEmpty());
   layout->addWidget(act);
 
   auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -298,5 +308,6 @@ Alarm AlarmDlg::alarm() const
   al.markTable = m_markTable->isChecked();
   al.recorder = Alarm::RecorderAction(m_recorder->currentData().toInt());
   al.command = m_command->text().trimmed();
+  al.disconnect = !al.command.isEmpty() && m_disconnect->isChecked();
   return al;
 }

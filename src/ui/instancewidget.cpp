@@ -54,7 +54,7 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   setupUi(this);
   setWindowIcon(QPixmap(":/Symbols/icon.xpm"));
 
-  // the meter session: connection, min/max, alarms, SCPI, external program
+  // the meter session: connection, min/max, alarms, SCPI
   m_ctl = new MeterController(this);
   m_ctl->setInstanceId(instance_id.isEmpty() ? QString("default") : instance_id);
 
@@ -111,7 +111,6 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   connect(m_configDlg, SIGNAL(rejected()), this, SLOT(rejectSLOT()));
   connect(ui_graph, SIGNAL(sampleTime(int)), m_configDlg, SLOT(setSampleTimeSLOT(int)));
   connect(ui_graph, SIGNAL(graphSize(int, int)), m_configDlg, SLOT(setGraphSizeSLOT(int, int)));
-  connect(ui_graph, SIGNAL(externalTriggered()), this, SLOT(startExternalSLOT()));
   // this graph's own colours from its context menu (empty = the default
   // from the settings page, applied in readConfig())
   connect(ui_graph, &GraphWidget::colorVariantChanged, this, [this](int v)
@@ -119,7 +118,6 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
     m_settings->setString("Windows/graph-variant",
                           v < 0 ? QString() : GraphWidget::variantName(static_cast<GraphWidget::ColorVariant>(v)));
   });
-  connect(m_ctl, &MeterController::externalFinished, this, &InstanceWidget::exitedSLOT);
   connect(ui_graph, SIGNAL(configure()), this, SLOT(configSLOT()));
   connect(ui_graph, SIGNAL(exportData()), this, SLOT(exportSLOT()));
   connect(ui_graph, SIGNAL(importData()), this, SLOT(importSLOT()));
@@ -590,13 +588,8 @@ void InstanceWidget::readConfig()
                       m_configDlg->dataColor(),
                       m_configDlg->cursorColor(),
                       m_configDlg->startColor(),
-                      m_configDlg->externalColor(),
                       m_configDlg->intColor(),
                       m_configDlg->intThresholdColor());
-
-  ui_graph->setExternal(m_configDlg->startExternal(),
-                        m_configDlg->externalFalling(),
-                        m_configDlg->externalThreshold());
 
   ui_graph->setLineStyle(m_configDlg->lineMode(),
                          m_configDlg->pointMode(),
@@ -651,68 +644,6 @@ void InstanceWidget::readConfig()
 void InstanceWidget::runningSLOT(bool on)
 {
   Q_EMIT running(on);
-}
-
-void InstanceWidget::startExternalSLOT()
-{
-  const QString command = m_configDlg->externalCommand();
-  if (m_ctl->externalRunning())
-  {
-    QMessageBox question;
-    question.setWindowTitle(tr("QtDMM: Launch error"));
-    question.setText(tr("<font size=+2><b>Launch error</b></font><p>"
-                        "Application %1 is still running!<p>"
-                        "Do you want to kill it now?")
-                     .arg(command));
-    question.setIcon(QMessageBox::Information);
-    question.setIconPixmap(QPixmap(":/Symbols/icon.xpm"));
-
-    question.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    question.setDefaultButton(QMessageBox::Yes);
-
-    QAbstractButton *yesButton = question.button(QMessageBox::Yes);
-    if (yesButton)
-      yesButton->setText(tr("Yes, kill it!"));
-
-    QAbstractButton *noButton = question.button(QMessageBox::No);
-    if (noButton)
-      noButton->setText(tr("No, keep running"));
-
-    if (question.exec() != QMessageBox::Yes)
-      return;
-    m_ctl->killExternal();
-  }
-
-  if (m_configDlg->disconnectExternal())
-    Q_EMIT setConnect(false);
-
-  if (!m_ctl->startExternal(command))
-  {
-    QMessageBox question;
-    question.setWindowTitle(tr("QtDMM: Launch error"));
-    question.setText(tr("<font size=+2><b>Launch error</b></font><p>"
-                        "Couldn't launch %1").arg(command));
-    question.setIcon(QMessageBox::Information);
-    question.setIconPixmap(QPixmap(":/Symbols/icon.xpm"));
-
-    // Nur ein "OK"-Button mit benutzerdefiniertem Text
-    question.setStandardButtons(QMessageBox::Yes);
-    question.setDefaultButton(QMessageBox::Yes);
-
-    QAbstractButton *yesButton = question.button(QMessageBox::Yes);
-    if (yesButton)
-      yesButton->setText(tr("Bummer!"));
-
-
-    question.exec();
-  }
-  else
-    Q_EMIT error(tr("Launched %1").arg(command));
-}
-
-void InstanceWidget::exitedSLOT(int exitCode)
-{
-  Q_EMIT error(tr("%1 terminated with exit code %2.").arg(m_configDlg->externalCommand()).arg(exitCode));
 }
 
 bool InstanceWidget::dmmConfigured() const

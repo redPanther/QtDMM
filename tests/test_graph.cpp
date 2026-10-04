@@ -368,7 +368,7 @@ int main(int argc, char **argv)
     check(qAbs(x->max() - x->min() - 299) < 1.5, QString("300 s window, got %1 s").arg(x->max() - x->min()));
   }
 
-  // --- 5c-5i: the recorder behind the graph, through its public API ---
+  // --- 5c-5h: the recorder behind the graph, through its public API ---
 
   // y values of series @p index (0 data line, 2 integration) as "1 4 8"
   auto seriesY = [](GraphWidget &graph, int index) -> QString
@@ -482,41 +482,7 @@ int main(int argc, char **argv)
     check(started.size() == 1, "time trigger: did not start at the start time");
   }
 
-  // --- 5g. external program threshold: once per recording, in the chosen
-  //          direction, only while recording ---
-  {
-    GraphWidget graph(nullptr, &settings);
-    graph.setSampleTime(1);
-    graph.setGraphSize(100, 100);
-    graph.setMode(GraphWidget::Manual);
-    graph.setExternal(true, false, 2.0);
-    QSignalSpy ext(&graph, &GraphWidget::externalTriggered);
-    Feed feed(graph);
-    feed.value(1.0);
-    feed.value(3.0);             // crosses, but not recording
-    check(ext.isEmpty(), "external: fired while not recording");
-    graph.startSLOT();
-    feed.value(1.0);
-    feed.value(3.0);
-    check(ext.size() == 1, QString("external rising: expected 1 trigger, got %1").arg(ext.size()));
-    feed.value(1.0);
-    feed.value(3.0);
-    check(ext.size() == 1, "external: fired twice in one recording");
-    graph.startSLOT();               // a new recording arms it again
-    feed.value(1.0);
-    feed.value(3.0);
-    check(ext.size() == 2, "external: not re-armed by a new recording");
-
-    graph.setExternal(true, true, 2.0);   // falling
-    graph.startSLOT();
-    feed.value(3.0);
-    feed.value(2.5);
-    check(ext.size() == 2, "external falling: fired above the threshold");
-    feed.value(2.0);
-    check(ext.size() == 3, "external falling: did not fire on the crossing");
-  }
-
-  // --- 5h. integral and marks when the store is full: the window moves on
+  // --- 5g. integral and marks when the store is full: the window moves on
   //          with what the store keeps, the integral goes on summing, a
   //          mark falls off with the readings around it ---
   {
@@ -550,7 +516,7 @@ int main(int argc, char **argv)
     check(graph.markCount() == 0, "marks: clearSLOT() kept a mark");
   }
 
-  // --- 5i. recording length: stops on its own after setSampleLength()
+  // --- 5h. recording length: stops on its own after setSampleLength()
   //          (tenths of a second); 0 records until stopped ---
   {
     GraphWidget graph(nullptr, &settings);

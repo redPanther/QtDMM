@@ -52,7 +52,7 @@ private:
   QString m_unit;
   class QLineEdit *m_name, *m_a, *m_b, *m_seconds, *m_hysteresis, *m_message, *m_command;
   class QComboBox *m_condition, *m_recorder;
-  class QCheckBox *m_enabled, *m_banner, *m_beep, *m_popup, *m_raise, *m_markGraph, *m_markTable;
+  class QCheckBox *m_enabled, *m_banner, *m_beep, *m_popup, *m_raise, *m_markGraph, *m_markTable, *m_disconnect;
   class QPushButton *m_color;
   class QLabel *m_aLabel, *m_bLabel, *m_secondsLabel, *m_hystLabel;
   QColor m_colorValue;
