@@ -63,6 +63,8 @@ DeviceSettings::DeviceSettings(QWidget *parent) : QWidget(parent)
   for (QLineEdit *e : {ui_virtualMin, ui_virtualMax, ui_virtualPeriod, ui_virtualNoise})
     connect(e, &QLineEdit::textChanged, this, &DeviceSettings::updateVirtualFormula);
   connect(ui_virtualFormula, &QLineEdit::textChanged, this, [this]{ if (ui_virtualSignal->currentIndex() == 7) updateVirtualFormula(); });
+  connect(ui_advanced, &QToolButton::toggled, this, &DeviceSettings::setAdvanced);
+  setAdvanced(false);
   m_calcHintTimer.setInterval(1000);   // live values of the input instances
   connect(&m_calcHintTimer, &QTimer::timeout, this, &DeviceSettings::updateCalcHint);
 
@@ -315,6 +317,20 @@ void DeviceSettings::load(const QVariantMap &keys)
     enterManualMode();
   else
     on_ui_model_activated(ui_model->currentIndex());
+  // a known model brings its port parameters and protocol
+  setAdvanced(ui_vendor->currentIndex() == 0);
+}
+
+void DeviceSettings::setAdvanced(bool open)
+{
+  ui_advanced->setChecked(open);
+  ui_advanced->setArrowType(open ? Qt::DownArrow : Qt::RightArrow);
+  ui_advancedBox->setVisible(open);
+}
+
+bool DeviceSettings::isAdvancedOpen() const
+{
+  return ui_advanced->isChecked();
 }
 
 void DeviceSettings::factoryDefaults()
@@ -470,7 +486,9 @@ void DeviceSettings::updateCalcMode()
   const bool ble = isBluetooth();
   const bool sigrok = isSigrokMeter();
   ButtonGroup11->setVisible(!calc && !virt && !ble && !sigrok);
+  ui_serialBox->setVisible(!calc && !virt && !ble && !sigrok);
   ui_protocol->setVisible(!calc && !virt);
+  ui_advanced->setVisible(!calc && !virt);
   ui_calcGroup->setVisible(calc);
   ui_virtualGroup->setVisible(virt);
   ui_bleGroup->setVisible(ble);
@@ -584,6 +602,7 @@ void DeviceSettings::enterManualMode()
 
   message->show();
   message2->hide();
+  setAdvanced(true);   // nothing to take from a model
 
   m_dmmInfo.name = "custom";
   m_dmmInfo.baud = baudRate->currentText().toInt();

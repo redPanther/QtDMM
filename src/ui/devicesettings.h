@@ -57,6 +57,9 @@ public:
   /// The ports offered in the port list (Transport::availablePorts() and the
   /// custom ports); the port of load() is added when missing.
   void           setPorts(const QStringList &ports);
+  /// Whether "Advanced" (port parameters, protocol) is open; load() closes
+  /// it for a known model and opens it for manual settings.
+  bool           isAdvancedOpen() const;
   /// Path of sigrok-cli, for the hint and the test of a sigrok meter.
   void           setSigrokExe(const QString &exe) { m_sigrokExe = exe; }
 
@@ -107,6 +110,8 @@ protected Q_SLOTS:
   /// Save the current settings as a DMM description (.cfg).
   void           on_ui_save_clicked();
   void           on_ui_externalSetup_toggled();
+  /// Opens or closes "Advanced".
+  void           setAdvanced(bool open);
   /// Re-parses the formula and refreshes the hint (variables, live values, errors).
   void           updateCalcHint();
   /// Rebuilds the virtual meter's formula from the waveform fields.

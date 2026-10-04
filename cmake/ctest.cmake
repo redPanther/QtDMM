@@ -89,6 +89,12 @@ if (BUILD_TESTING)
 	target_include_directories(${TEST_INSTANCES} PRIVATE src)
 	target_link_libraries(${TEST_INSTANCES} PRIVATE Qt6::Widgets Qt::Core)
 	add_test(NAME instances_dialog COMMAND ${TEST_INSTANCES})
+	## the meter's settings widget (DeviceSettings): keys in and out, "Advanced", groups per kind of meter
+	add_executable(test_devicesettings MACOSX_BUNDLE tests/test_devicesettings.cpp src/ui/devicesettings.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
+		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
+	target_include_directories(test_devicesettings PRIVATE src ${CMAKE_BINARY_DIR})
+	target_link_libraries(test_devicesettings PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
+	add_test(NAME device_settings COMMAND test_devicesettings)
 	## the formula evaluator of calculated instances
 	set( TEST_CALC test_calc)
 	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/core/calcexpr.cpp src/core/siprefix.cpp)

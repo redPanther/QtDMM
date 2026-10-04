@@ -171,6 +171,12 @@ QStringList MnemonicCheck::run(QWidget *mainWindow)
         if (stack->widget(i)->isAncestorOf(serial))
           stack->setCurrentIndex(i);
     QWidget *protocol = window->findChild<QWidget *>("ui_protocol");
+    // "Advanced" open, so the port parameters and the protocol count; they
+    // belong to a cable meter like the port row
+    QWidget *advanced = window->findChild<QWidget *>("ui_advanced");
+    QWidget *serialBox = window->findChild<QWidget *>("ui_serialBox");
+    if (QWidget *box = window->findChild<QWidget *>("ui_advancedBox"))
+      box->show();
     const QMap<QString, QWidget *> ports { { "serial", serial }, { "calc", window->findChild<QWidget *>("ui_calcGroup") },
                                            { "virtual", window->findChild<QWidget *>("ui_virtualGroup") },
                                            { "ble", window->findChild<QWidget *>("ui_bleGroup") },
@@ -182,8 +188,12 @@ QStringList MnemonicCheck::run(QWidget *mainWindow)
       for (QWidget *group : ports)
         if (group)
           group->setVisible(group == port.value());
+      if (serialBox)
+        serialBox->setVisible(port.value() == serial);
       if (protocol)
         protocol->setVisible(port.key() != "calc" && port.key() != "virtual");
+      if (advanced)
+        advanced->setVisible(port.key() != "calc" && port.key() != "virtual");
       checkWindow(window, " [" + port.key() + "]", out);
     }
   }
