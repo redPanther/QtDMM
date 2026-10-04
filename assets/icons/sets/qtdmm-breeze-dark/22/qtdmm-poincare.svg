@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22">
+  <style id="current-color-scheme" type="text/css">.ColorScheme-Text { color:#eff0f1; } .ColorScheme-Highlight { color:#3daee9; }</style>
+  <!-- the Poincaré plot: axes, the diagonal and a cloud of points along it -->
+  <g class="ColorScheme-Text" fill="none" stroke="currentColor" stroke-width="1">
+    <path d="M2.5 2v17.5H20"/>
+    <path d="M3 19L19 3" stroke-dasharray="1.5 1.5" opacity="0.6"/>
+  </g>
+  <g class="ColorScheme-Text" fill="currentColor">
+    <circle cx="8" cy="13.5" r="1.2"/>
+    <circle cx="10" cy="11" r="1.2"/>
+    <circle cx="11.5" cy="12.5" r="1.2"/>
+    <circle cx="12.5" cy="9.5" r="1.2"/>
+    <circle cx="14" cy="8.5" r="1.2"/>
+  </g>
+</svg>

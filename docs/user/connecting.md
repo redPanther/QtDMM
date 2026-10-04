@@ -116,9 +116,10 @@ row away.
 
 ## Window layout
 
-The main window holds four windows: the digital display, the analog meter,
-the recorder graph and the [readings table](readings-table.md). The toolbar
-buttons (or Ctrl+1 … Ctrl+4) show and hide them. A fresh QtDMM starts as a
+The main window holds five windows: the digital display, the analog meter,
+the recorder graph, the [readings table](readings-table.md) and the
+[Poincaré plot](poincare-plot.md). The toolbar buttons (or Ctrl+1 … Ctrl+5)
+show and hide them. A fresh QtDMM starts as a
 compact instrument with display and meter only; starting a recording shows
 the graph.
 

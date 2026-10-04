@@ -37,6 +37,7 @@ class LcdWidget;
 class HelpDlg;
 class AnalogMeter;
 class ReadingsWidget;
+class PoincarePlot;
 class AlarmBar;
 class ControlBar;
 class FoldButton;
@@ -100,6 +101,7 @@ protected:
   LcdWidget *m_display;
   AnalogMeter   *m_meter;
   ReadingsWidget *m_readings;
+  PoincarePlot *m_poincare;
   AlarmBar   *m_alarmBar;
   QMdiArea   *m_mdi;
   MdiArranger *m_arranger;
@@ -111,9 +113,11 @@ protected:
   QMdiSubWindow *m_meterWin;
   QMdiSubWindow *m_graphWin;
   QMdiSubWindow *m_readingsWin;
+  QMdiSubWindow *m_poincareWin;
   QAction    *m_displayAction = nullptr;
   QAction    *m_meterAction = nullptr;
   QAction    *m_readingsAction = nullptr;
+  QAction    *m_poincareAction = nullptr;
   QAction    *m_arrangeTop;
   QAction    *m_arrangeLeft;
   QAction    *m_arrangeFixed;

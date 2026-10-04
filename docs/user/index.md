@@ -16,6 +16,8 @@ side, one window each, and can be combined into calculated values.
   zoom, pan and cursor; integration; CSV export and import.
 - [Readings table](readings-table.md) — every reading the meter sent, with
   time, mode and range; copy to a spreadsheet or export as CSV.
+- [Poincaré plot](poincare-plot.md) — each reading against the next: how
+  much the value scatters, noise against drift, SD1 and SD2.
 - [Alarms](alarms.md) — a banner, beep, popup, program or the recorder when
   the reading leaves its range or stops coming.
 - [Supported devices](supported-devices.md) — every meter QtDMM knows, with

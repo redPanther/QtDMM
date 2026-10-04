@@ -30,6 +30,7 @@
 #include "ui/instancewidget.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/lcdwidget.h"
+#include "ui/views/poincareplot.h"
 #include "ui/views/analogmeter.h"
 #include "ui/views/readingswidget.h"
 #include "core/settings.h"
@@ -127,9 +128,17 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_readings->setMaxRows(m_wid->settings()->getInt("ReadingLog/max-rows", 10000));
   m_readingsWin = addView(m_readings, tr("Readings"), MdiArranger::Table, "readings");
 
+  // the scatter of the main value: every reading, also while hidden
+  m_poincare = new PoincarePlot(this);
+  m_poincare->setSettings(m_wid->settings());
+  connect(m_wid->controller(), &MeterController::reading, m_poincare, &PoincarePlot::addReading);
+  connect(m_wid->controller(), &MeterController::staleChanged, m_poincare, &PoincarePlot::setStale);
+  m_poincareWin = addView(m_poincare, tr("Poincaré plot"), MdiArranger::Table, "poincare");
+
   // right-click on display or meter: the window's menu (also without title bar)
   for (auto [view, win] : { std::pair<QWidget *, QMdiSubWindow *>{m_display, m_displayWin},
-                            std::pair<QWidget *, QMdiSubWindow *>{m_meter, m_meterWin} })
+                            std::pair<QWidget *, QMdiSubWindow *>{m_meter, m_meterWin},
+                            std::pair<QWidget *, QMdiSubWindow *>{m_poincare, m_poincareWin} })
   {
     view->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(view, &QWidget::customContextMenuRequested, this, [this, view = view, w = win](const QPoint &pos)
@@ -150,6 +159,10 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
        "<p>Every reading the meter sent, one row each, with time, mode and range - "
        "the raw protocol of the session next to the recorder's graph. Copy rows to a "
        "spreadsheet or export them as CSV.</p></body></html>"));
+  m_poincareAction = windowAction(m_poincareWin, tr("Poi&ncaré plot"), "Ctrl+5", "qtdmm-poincare",
+    tr("<html><head/><body><p><span style=\" font-weight:600;\">Poincaré plot</span></p>"
+       "<p>Each reading against the next one: noise widens the cloud across the diagonal, "
+       "drift stretches it along it. SD1 and SD2 put both in numbers.</p></body></html>"));
   // the graph keeps its action from the .ui (toolbar button with Ctrl+G)
   action_Graph->setShortcuts({QKeySequence("Ctrl+G"), QKeySequence("Ctrl+3")});
   bindWindowAction(action_Graph, m_graphWin);
@@ -158,6 +171,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   toolBarDMM->addAction(m_displayAction);
   toolBarDMM->addAction(m_meterAction);
   toolBarDMM->addAction(m_readingsAction);
+  toolBarDMM->addAction(m_poincareAction);
   connect(m_displayAction, &QAction::toggled, this, &MainWindow::setToolbarVisibilitySLOT);
 
   // arrangement: automatic (displays on top or on the left), fixed or free,
@@ -350,12 +364,12 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     move(winRect.x(), winRect.y());
   // the views shown at the start count as grown for; the table column gets
   // the width the window has for it
-  for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
+  for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin, m_poincareWin })
     if (!w->isHidden())
       m_grown.insert(w);
   if (!m_controls->isHidden())
     m_grown.insert(m_controls);
-  if (m_grown.contains(m_readingsWin))
+  if (m_grown.contains(m_readingsWin) || m_grown.contains(m_poincareWin))
     m_arranger->setTableWidth(growthFor(m_readingsWin).width());
   if (stored && m_wid->saveWindowSize())
   {
@@ -368,7 +382,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     QSize start(28 * em(), 22 * em());
     if (m_grown.contains(m_displayWin) && m_grown.contains(m_meterWin))
       start += growthFor(m_meterWin);
-    for (QMdiSubWindow *w : { m_graphWin, m_readingsWin })
+    for (QMdiSubWindow *w : { m_graphWin, m_readingsWin, m_poincareWin })
       if (m_grown.contains(w))
         start += growthFor(w);
     if (!m_controls->isHidden())
@@ -507,7 +521,7 @@ void MainWindow::createExtraActions()
   connect(toggleRecord, &QAction::triggered, this, &MainWindow::toggleRecordingSLOT);
 
   addActions({action_Configure, action_Direct_help, action_Help, action_Quit,
-              m_displayAction, m_meterAction, m_readingsAction, m_titleBars,
+              m_displayAction, m_meterAction, m_readingsAction, m_poincareAction, m_titleBars,
               m_fullScreen, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage, toggleRecord});
 }
 
@@ -658,6 +672,7 @@ void MainWindow::on_action_Menu_triggered()
     m_menu->addAction(m_displayAction);
     m_menu->addAction(m_meterAction);
     m_menu->addAction(m_readingsAction);
+    m_menu->addAction(m_poincareAction);
     m_menu->addMenu(m_arrangeMenu);
     m_menu->addMenu(m_designMenu);
     m_menu->addAction(m_fullScreen);
@@ -764,7 +779,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
   // minimizing the main window hides its children spontaneously; they are
   // not closed, so only explicit show/hide counts (isHidden() stays false)
   if ((event->type() == QEvent::Show || event->type() == QEvent::Hide) && !event->spontaneous())
-    for (QAction *a : { m_displayAction, m_meterAction, m_readingsAction, action_Graph })
+    for (QAction *a : { m_displayAction, m_meterAction, m_readingsAction, m_poincareAction, action_Graph })
       if (a && a->property("window").value<QObject *>() == watched)
       {
         const bool visible = !static_cast<QWidget *>(watched)->isHidden();
@@ -823,6 +838,11 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
       a->setChecked(m_wid->meterStyle() == s);
       connect(a, &QAction::triggered, this, [this, s = s] { m_wid->setMeterStyle(s); });
     }
+  }
+  if (win == m_poincareWin)
+  {
+    menu.addSeparator();
+    m_poincare->addMenuActions(&menu);
   }
   menu.addSeparator();
   menu.addMenu(m_arrangeMenu);
@@ -905,14 +925,14 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
   if (free)
   {
     QMap<QString, QString> geometry;
-    for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
+    for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin, m_poincareWin })
       geometry[w->objectName()] = get("Windows/geometry-" + w->objectName(), QString()).toString();
     // once the window is shown and the area has its size: the automatic
     // layout for a start, then the stored positions on top of it
     QTimer::singleShot(0, this, [this, geometry]
     {
       m_arranger->arrangeNow();
-      for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
+      for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin, m_poincareWin })
       {
         const QStringList g = geometry.value(w->objectName()).split(' ');
         if (g.size() == 4)
@@ -924,8 +944,9 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
   m_meterAction->setChecked(get("Windows/meter", true).toBool());
   action_Graph->setChecked(get("MainWindow/show-graph", false).toBool());   // a fresh start is a compact instrument
   m_readingsAction->setChecked(get("Windows/readings", false).toBool());
+  m_poincareAction->setChecked(get("Windows/poincare", false).toBool());
   // an unchecked action did not toggle: hide its window explicitly
-  for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction })
+  for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction, m_poincareAction })
     qobject_cast<QWidget *>(a->property("window").value<QObject *>())->setVisible(a->isChecked());
   m_restoring = false;
   syncArrangeActions();
@@ -940,7 +961,7 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/title-bars-hidden", m_arranger->titleBarsHidden());
   set("Windows/design", Designs::name(Designs::current()));
   if (m_arranger->mode() == MdiArranger::Free)
-    for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin })
+    for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin, m_poincareWin })
     {
       const QRect g = w->geometry();
       set("Windows/geometry-" + w->objectName(),
@@ -949,6 +970,7 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Display/show", m_displayAction->isChecked());
   set("Windows/meter", m_meterAction->isChecked());
   set("Windows/readings", m_readingsAction->isChecked());
+  set("Windows/poincare", m_poincareAction->isChecked());
   set("MainWindow/show-graph", action_Graph->isChecked());
 }
 
@@ -1033,7 +1055,7 @@ QSize MainWindow::growthFor(QMdiSubWindow *win) const
 {
   if (win == m_graphWin)
     return QSize(0, 18 * em());    // below the instruments
-  if (win == m_readingsWin)
+  if (win == m_readingsWin || win == m_poincareWin)
     return QSize(19 * em(), 0);    // a column on the right
   if (win == m_meterWin || win == m_displayWin)
     return QSize(20 * em(), 0);    // next to the other instrument
@@ -1050,9 +1072,13 @@ void MainWindow::growFor(QMdiSubWindow *win)
   if ((win == m_displayWin || win == m_meterWin)
       && !m_grown.contains(win == m_displayWin ? m_meterWin : m_displayWin))
     return;
+  // the same for the readings table and the Poincaré plot in the column
+  if ((win == m_readingsWin || win == m_poincareWin)
+      && m_grown.contains(win == m_readingsWin ? m_poincareWin : m_readingsWin))
+    return;
   const QSize before = size();
   autoGrow(growthFor(win));
-  if (win == m_readingsWin)
+  if (win == m_readingsWin || win == m_poincareWin)
     m_arranger->setTableWidth(size().width() - before.width());
 }
 
@@ -1158,6 +1184,7 @@ void MainWindow::setDesign(int design)
   updateLed();
   const Designs::GraphColors g = Designs::graphColors(d);
   m_wid->graph()->setThemeColors(g.background, g.grid, g.labels, g.data);
+  m_poincare->setThemeColors(g.background, g.grid, g.labels, g.data);
   for (QAction *a : m_designMenu->actions())
     a->setChecked(a->data().toInt() == design);
   // at once, so the settings dialog shows the design of the menu
