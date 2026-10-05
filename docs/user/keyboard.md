@@ -74,7 +74,6 @@ While the table has the focus:
 | Key | Action |
 |---|---|
 | Ctrl+PgUp / Ctrl+PgDn | Previous / next page |
-| Alt+U | Undo the changes made since the dialog was opened |
 | Alt+F | Factory defaults for the current page |
 | Enter / Esc | OK / Cancel |
 

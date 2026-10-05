@@ -536,24 +536,24 @@
 <context>
     <name>AnalogMeter</name>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="547"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="556"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="548"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="557"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="554"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="555"/>
         <location filename="../../src/ui/views/analogmeter.cpp" line="563"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="564"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="572"/>
         <source>OL</source>
         <translation>OL</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="623"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="632"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
@@ -841,7 +841,7 @@
 <context>
     <name>DeviceLibrary</name>
     <message>
-        <location filename="../../src/core/devicelibrary.cpp" line="259"/>
+        <location filename="../../src/core/devicelibrary.cpp" line="291"/>
         <source>Meter</source>
         <translation>Miernik</translation>
     </message>
@@ -4982,12 +4982,12 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
         <translation>QtDMM: ustawienia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="129"/>
-        <source>&amp;Undo</source>
-        <translation>&amp;Cofnij</translation>
+        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="140"/>
+        <source>Resets the page shown to QtDMM&apos;s defaults; OK or Apply keeps them.</source>
+        <translation>Przywraca domyślne ustawienia QtDMM na wyświetlanej stronie; OK lub Zastosuj je zachowuje.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="155"/>
+        <location filename="../../src/ui/forms/uisettingsdialog.ui" line="137"/>
         <source>&amp;Factory defaults</source>
         <translation>Ustawienia &amp;fabryczne</translation>
     </message>

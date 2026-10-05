@@ -185,7 +185,6 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   //
   on_ui_buttonBox_rejected();
   showPage(General);
-  ui_undo->hide();
   adjustSize();
 }
 
@@ -211,11 +210,28 @@ public:
 private:
   QScrollArea *m_area;
 };
+
+/// A page's scroll area asks for the whole page (QScrollArea's own hint
+/// stops at about 24 lines): the dialog is as tall as its tallest page,
+/// within the screen (adjustSize(), showEvent()), and scrolls only beyond.
+class PageScrollArea : public QScrollArea
+{
+public:
+  using QScrollArea::QScrollArea;
+
+  QSize sizeHint() const override
+  {
+    if (!widget())
+      return QScrollArea::sizeHint();
+    const int f = 2 * frameWidth();
+    return widget()->sizeHint() + QSize(f + verticalScrollBar()->sizeHint().width(), f);
+  }
+};
 }
 
 void SettingsDialog::addPage(SettingsPage *page)
 {
-  auto *scroll = new QScrollArea(ui_stack);
+  auto *scroll = new PageScrollArea(ui_stack);
   scroll->setWidgetResizable(true);
   scroll->setFrameShape(QFrame::NoFrame);
   scroll->setWidget(page);
