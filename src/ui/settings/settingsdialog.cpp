@@ -241,12 +241,6 @@ void SettingsDialog::reloadMeter()
   m_dmm->defaultsSLOT();
 }
 
-void SettingsDialog::applyMeter()
-{
-  m_dmm->applySLOT();
-  m_settings->save();
-}
-
 void SettingsDialog::showPage(SettingsDialog::PageType page)
 {
   SettingsPage *wid = Q_NULLPTR;

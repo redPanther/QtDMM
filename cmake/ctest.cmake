@@ -108,6 +108,14 @@ if (BUILD_TESTING)
 		target_sources(test_adddevice PRIVATE src/device/transports/blegatt.cpp src/device/transports/ble.cpp)
 	endif()
 	add_test(NAME add_device COMMAND test_adddevice)
+	## the sidebar "Devices": My devices in order, the one in use, click, rename, when it is shown; Settings of an entry
+	add_executable(test_devicesidebar MACOSX_BUNDLE tests/test_devicesidebar.cpp src/ui/devicesidebar.cpp
+		src/ui/dialogs/devicesettingsdlg.cpp src/ui/devicesettings.cpp
+		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
+		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
+	target_include_directories(test_devicesidebar PRIVATE src ${CMAKE_BINARY_DIR})
+	target_link_libraries(test_devicesidebar PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
+	add_test(NAME device_sidebar COMMAND test_devicesidebar)
 	## the formula evaluator of calculated instances
 	set( TEST_CALC test_calc)
 	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/core/calcexpr.cpp src/core/siprefix.cpp)

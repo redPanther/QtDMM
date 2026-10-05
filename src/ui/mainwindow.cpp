@@ -27,7 +27,9 @@
 
 #include "ui/mainwindow.h"
 #include "ui/dialogs/helpdlg.h"
-#include "ui/dialogs/mydevicesdlg.h"
+#include "ui/dialogs/devicesettingsdlg.h"
+#include "ui/devicesettings.h"
+#include "ui/devicesidebar.h"
 #include "ui/dialogs/adddevicedlg.h"
 #include "ui/settings/meterprefs.h"
 #include "device/transports/serial.h"
@@ -192,25 +194,34 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   action_Graph->setShortcuts({QKeySequence("Ctrl+G"), QKeySequence("Ctrl+3")});
   bindWindowAction(action_Graph, m_graphWin);
 
-  // "My devices": switch the meter with two clicks
-  m_devicesMenu = new QMenu(tr("My de&vices"), this);
-  QAction *devices = m_devicesMenu->menuAction();
-  devices->setIcon(QIcon::fromTheme("qtdmm-dmm"));
-  devices->setToolTip(tr("My devices: switch to another of your meters"));
-  devices->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">My devices</span></p>"
-                           "<p>Your meters with their connections: choose one to switch to it. "
-                           "<i>Save current device</i> keeps the meter set up now under a name.</p></body></html>"));
-  connect(m_devicesMenu, &QMenu::aboutToShow, this, &MainWindow::fillDevicesMenu);
-  toolBarDMM->insertAction(action_Instances, devices);
-  m_addDeviceAction = new QAction(QIcon::fromTheme("list-add"), tr("&Add device..."), this);
+  // the sidebar "Devices" at the left: My devices, a click switches
+  m_sidebar = new DeviceSidebar(m_wid->devices(), this);
+  m_sidebarDock = new QDockWidget(tr("Devices"), this);
+  m_sidebarDock->setObjectName("ui_devicesDock");
+  m_sidebarDock->setFeatures(QDockWidget::NoDockWidgetFeatures);   // the toolbar button shows and hides it
+  m_sidebarDock->setWidget(m_sidebar);
+  addDockWidget(Qt::LeftDockWidgetArea, m_sidebarDock);
+  m_sidebarDock->hide();
+  QAction *sidebar = m_sidebarDock->toggleViewAction();
+  sidebar->setIcon(QIcon::fromTheme("view-sidetree"));
+  sidebar->setText(tr("De&vices"));
+  sidebar->setToolTip(tr("Devices: show or hide the sidebar with My devices"));
+  sidebar->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Devices</span></p>"
+                           "<p>The sidebar with My devices: click one to switch to it, its context menu has its "
+                           "settings, rename, a new window and remove. Drag an entry to change the order."
+                           "</p></body></html>"));
+  connect(sidebar, &QAction::triggered, this, [this](bool on) { m_wid->settings()->setBool("Windows/sidebar", on); });
+  connect(m_sidebar, &DeviceSidebar::switchRequested, m_wid, &InstanceWidget::switchDevice);
+  connect(m_sidebar, &DeviceSidebar::settingsRequested, this, &MainWindow::deviceSettings);
+  connect(m_sidebar, &DeviceSidebar::newWindowRequested, this, &MainWindow::openInNewWindow);
+  toolBarDMM->insertAction(action_Instances, sidebar);
+  m_addDeviceAction = new QAction(QIcon::fromTheme("qtdmm-dmm"), tr("&Add device..."), this);
   m_addDeviceAction->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
   m_addDeviceAction->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Add device</span></p>"
                                      "<p>Step by step: how the meter is connected, which one it is, and whether it "
                                      "goes into this window or a new one. It is kept in My devices.</p></body></html>"));
   connect(m_addDeviceAction, &QAction::triggered, this, &MainWindow::addDevice);
-  toolBarDMM->insertAction(devices, m_addDeviceAction);
-  if (auto *button = qobject_cast<QToolButton *>(toolBarDMM->widgetForAction(devices)))
-    button->setPopupMode(QToolButton::InstantPopup);
+  toolBarDMM->insertAction(sidebar, m_addDeviceAction);
 
   toolBarDMM->addSeparator();
   toolBarDMM->addAction(m_displayAction);
@@ -467,6 +478,12 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     QTimer::singleShot(1000, action_Connect, &QAction::trigger);
   updateEmptyStart();
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateEmptyStart);
+  // the sidebar as left, with two devices or more; a window without a meter
+  // shows it when there are devices to choose from
+  const bool sidebarSet = !m_wid->settings()->getString("Windows/sidebar").isEmpty();
+  showSidebar(DeviceSidebar::shownAtStart(sidebarSet ? QVariant(m_wid->settings()->getBool("Windows/sidebar"))
+                                                     : QVariant(),
+                                          int(m_wid->devices()->list().size()), m_wid->dmmConfigured()));
 }
 
 void MainWindow::updateEmptyStart()
@@ -495,6 +512,7 @@ void MainWindow::addDevice()
     return;
   QVariantMap keys = dlg.keys();
   keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
+  const int before = int(m_wid->devices()->list().size());
   // a find that is one of My devices changes that entry: no second one
   QString id = dlg.knownDevice();
   if (id.isEmpty())
@@ -505,13 +523,15 @@ void MainWindow::addDevice()
     m_wid->devices()->rename(id, dlg.name());
   }
   if (dlg.target() == AddDeviceDlg::NewWindow)
-  {
-    const QString instance = m_wid->openInNewWindow(id);
-    m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
-    statusBar()->showMessage(tr("%1 opens in the new window %2").arg(dlg.name(), instance), 4000);
-  }
+    openInNewWindow(id);
   else
     m_wid->switchDevice(id);
+  // the second device: from now on there is a choice
+  if (DeviceSidebar::opensAfterAdd(before, int(m_wid->devices()->list().size())))
+  {
+    showSidebar(true);
+    m_wid->settings()->setBool("Windows/sidebar", true);
+  }
 }
 
 QMap<QString, QString> MainWindow::placesInUse() const
@@ -775,7 +795,7 @@ void MainWindow::on_action_Menu_triggered()
   {
     m_menu = new QMenu(this);
     m_menu->addAction(action_Configure);
-    m_menu->addMenu(m_devicesMenu);
+    m_menu->addAction(m_sidebarDock->toggleViewAction());
     m_menu->addAction(action_Graph);
     m_menu->addAction(m_displayAction);
     m_menu->addAction(m_meterAction);
@@ -963,58 +983,39 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     m_arranger->setTitleBarHidden(win, !title->isChecked());
 }
 
-void MainWindow::fillDevicesMenu()
+void MainWindow::showSidebar(bool show)
 {
-  m_devicesMenu->clear();
-  DeviceLibrary *library = m_wid->devices();
-  const QString current = m_wid->currentDevice();
-  const QList<MyDevice> all = library->list();
-  for (const MyDevice &d : all)
-  {
-    QString detail = d.model();
-    if (!d.where().isEmpty())
-      detail += QString(" · %1").arg(d.where());
-    QAction *a = m_devicesMenu->addAction(QString(d.name).replace('&', "&&") + '\t' + detail);
-    a->setCheckable(true);
-    a->setChecked(d.id == current);
-    connect(a, &QAction::triggered, this, [this, id = d.id] { m_wid->switchDevice(id); });
-  }
-  if (all.isEmpty())
-    m_devicesMenu->addAction(tr("No devices saved yet"))->setEnabled(false);
-  m_devicesMenu->addSeparator();
+  m_sidebarDock->setVisible(show);
+}
 
-  QAction *save = m_devicesMenu->addAction(tr("&Save current device..."));
-  save->setEnabled(m_wid->dmmConfigured());
-  connect(save, &QAction::triggered, this, [this, library]
-  {
-    QString model = m_wid->settings()->getString("DMM/model");
-    if (model.isEmpty())
-      model = m_wid->dmmTitle();
-    bool ok = false;
-    const QString name = QInputDialog::getText(this, tr("Save current device"),
-                                               tr("Name for this meter and its connection:"), QLineEdit::Normal,
-                                               library->uniqueName(model), &ok);
-    if (ok && !name.trimmed().isEmpty())
-    {
-      m_wid->saveCurrentDevice(name.trimmed());
-      statusBar()->showMessage(tr("%1 saved in My devices").arg(name.trimmed()), 4000);
-    }
-  });
-  QAction *manage = m_devicesMenu->addAction(tr("&Manage my devices..."));
-  manage->setEnabled(!all.isEmpty());
-  connect(manage, &QAction::triggered, this, [this, library]
-  {
-    MyDevicesDlg dlg(library, this);
-    connect(&dlg, &MyDevicesDlg::useRequested, this, [this](const QString &id) { m_wid->switchDevice(id); });
-    connect(&dlg, &MyDevicesDlg::editRequested, this, [this](const QString &id)
-    {
-      m_wid->switchDevice(id);
-      m_wid->configDmmSLOT();
-    });
-    dlg.exec();
-  });
-  m_devicesMenu->addAction(m_addDeviceAction);
-  m_devicesMenu->addAction(action_ConfigureDMM);
+void MainWindow::deviceSettings(const QString &id)
+{
+  const std::optional<MyDevice> device = m_wid->devices()->find(id);
+  if (!device)
+    return;
+  DeviceSettingsDlg dlg(device->name, this);
+  dlg.settings()->setPorts(MeterPrefs::availablePorts(m_wid->settings()));
+  dlg.settings()->setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
+  dlg.settings()->setStateManager(m_stateMgr);
+  dlg.load(device->keys);
+  if (dlg.exec() != QDialog::Accepted)
+    return;
+  QVariantMap keys = dlg.keys();
+  keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
+  m_wid->devices()->update(id, keys);
+  // the device in use takes them at once
+  if (id == m_wid->currentDevice())
+    m_wid->switchDevice(id);
+}
+
+void MainWindow::openInNewWindow(const QString &id)
+{
+  const std::optional<MyDevice> device = m_wid->devices()->find(id);
+  if (!device)
+    return;
+  const QString instance = m_wid->openInNewWindow(id);
+  m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
+  statusBar()->showMessage(tr("%1 opens in the new window %2").arg(device->name, instance), 4000);
 }
 
 void MainWindow::syncArrangeActions()
@@ -1031,6 +1032,7 @@ void MainWindow::updateLed()
   const QColor c = !m_ledActive ? QApplication::palette().color(QPalette::Disabled, QPalette::WindowText)
                                 : m_ledBlink ? QColor(0x22, 0xaa, 0x22) : QColor(0x66, 0xcc, 0x66);
   m_led->setText(QString("<span style='color:%1'>&#9679;</span>").arg(c.name()));
+  m_sidebar->setCurrent(m_wid->currentDevice(), m_ledActive);
   const QString meter = m_wid->dmmConfigured() ? QString("%1 · %2").arg(m_wid->dmmTitle(), m_wid->portName())
                                                : m_wid->dmmTitle();
   m_led->setToolTip(m_ledActive ? tr("%1: readings are coming in").arg(meter)

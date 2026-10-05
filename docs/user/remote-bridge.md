@@ -37,7 +37,7 @@ serial ports, and a udev rule for the HID cables (in the bridge's README).
 
 ## Connecting from QtDMM
 
-In QtDMM choose **Add device...** (the plus in the toolbar) and *Network*.
+In QtDMM choose **Add device...** (the device symbol in the toolbar) and *Network*.
 When the bridge runs with `mdns = true` (or `--mdns`), QtDMM asks the local
 network by mDNS and lists every bridge port it hears back from within
 three seconds - host, the port's name on the bridge, address and port.
