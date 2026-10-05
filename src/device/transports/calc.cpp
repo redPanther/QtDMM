@@ -168,13 +168,17 @@ QByteArray CalcDevice::currentLine(qint64 now, QString *status) const
 QString CalcDevice::formatValue(double value, int counts, QString *prefix)
 {
   const double scaled = SiPrefix::scale(value, prefix);
-  // a 40000 count display has 5 digits; keep that many significant digits
+  // like an autoranging meter: as many decimals as the display count
+  // allows, 40000 counts -> 3.9999 in the 4 range, 9.640 in the 40 range;
+  // the analog meter takes its range from them
   int digits = 0;
   for (int c = qMax(1, counts); c > 0; c /= 10)
     digits++;
   digits = qBound(3, digits, 9);
-  const double mag = scaled == 0.0 ? 0.0 : std::floor(std::log10(std::fabs(scaled)));
-  const int decimals = qBound(0, digits - 1 - static_cast<int>(mag), 9);
+  const double limit = qMax(1000, counts);
+  int decimals = digits - 1;
+  while (decimals > 0 && std::round(std::fabs(scaled) * std::pow(10.0, decimals)) >= limit)
+    decimals--;
   return QString::number(scaled, 'f', decimals);
 }
 

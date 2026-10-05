@@ -33,7 +33,8 @@ struct AnalogMeterStyle
   QColor bezelDark;   ///< bezel gradient bottom
   QColor scale;   ///< ticks, labels, arc
   QColor needle;
-  QColor redZone;
+  QColor redZone;   ///< labels in the red zone
+  QColor redBand;   ///< the band on the arc, paler, so labels and marks stand out on it
   QColor boxBg;   ///< readout / unit boxes
   QColor boxText;
   QColor lampOff;

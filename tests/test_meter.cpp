@@ -267,7 +267,8 @@ int main(int argc, char **argv)
     check(qAlpha(half.pixel(0, 0)) == 0 && qAlpha(half.pixel(size.width() - 1, size.height() - 1)) == 0,
           "nothing is painted outside the bezel");
 
-    // red zone has red pixels on the arc near the right end
+    // red zone has red pixels on the arc near the right end (the band is
+    // paler than the red labels, so reddish rather than pure red)
     {
       bool red = false;
       for (double a = 40.0; a <= 45.0 && !red; a += 0.5)
@@ -275,7 +276,7 @@ int main(int argc, char **argv)
         const double ar = a * M_PI / 180.0;
         const QPoint pt(int(pivot.x() + radius * 0.95 * std::sin(ar)), int(pivot.y() - radius * 0.95 * std::cos(ar)));
         const QRgb px = half.pixel(pt);
-        red = qRed(px) > 150 && qGreen(px) < 90 && qBlue(px) < 90;
+        red = qRed(px) > 120 && qRed(px) - qGreen(px) > 70 && qRed(px) - qBlue(px) > 70;
       }
       check(red, "red zone is painted at the top end of the scale");
     }

@@ -53,8 +53,8 @@ public:
   QString formula() const { return m_expr ? m_expr->text() : QString(); }
 
   /// The result as the meter would show it: scaled into [1, 1000) with an
-  /// SI prefix and rounded to the digits of the model's display count
-  /// (40000 -> 5 digits: 6.6242, 123.45). Exposed for tests.
+  /// SI prefix and with as many decimals as fit the model's display count,
+  /// like an autoranging meter (40000: 3.9999, 6.624, 123.46). Exposed for tests.
   static QString formatValue(double value, int counts, QString *prefix);
 
   /// Builds the decoder line for the current inputs; exposed for tests.

@@ -94,6 +94,7 @@ AnalogMeterStyle AnalogMeterStyle::dark()
   s.scale = QColor(0xf2, 0xf2, 0xf2);
   s.needle = QColor(0xff, 0xff, 0xff);
   s.redZone = QColor(0xd8, 0x22, 0x22);
+  s.redBand = QColor(0x8c, 0x26, 0x26);
   s.boxBg = QColor(0x2c, 0x2c, 0x2c);
   s.boxText = QColor(0xea, 0xea, 0xea);
   s.lampOff = QColor(0x4a, 0x12, 0x12);
@@ -114,6 +115,7 @@ AnalogMeterStyle AnalogMeterStyle::ivory()
   s.scale = QColor(0x1e, 0x1e, 0x1e);
   s.needle = QColor(0x10, 0x10, 0x10);
   s.redZone = QColor(0xc8, 0x18, 0x18);
+  s.redBand = QColor(0xe8, 0x8c, 0x80);
   s.boxBg = QColor(0xe4, 0xda, 0xbe);
   s.boxText = QColor(0x1e, 0x1e, 0x1e);
   s.lampOff = QColor(0x6a, 0x20, 0x20);
@@ -424,7 +426,7 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
       addArc(path, g.pivot, R * 0.94, angleOf(v1), angleOf(v0), false);
       path.closeSubpath();
       p.setPen(Qt::NoPen);
-      p.setBrush(m_style.redZone);
+      p.setBrush(m_style.redBand);
       p.drawPath(path);
     };
     const double from = m_style.redZoneFrom * m_fullScale;
