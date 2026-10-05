@@ -30,6 +30,9 @@
 #include "ui/dialogs/welcomedlg.h"
 #include "ui/dialogs/finddevicedlg.h"
 #include "ui/dialogs/mydevicesdlg.h"
+#include "ui/dialogs/adddevicedlg.h"
+#include "ui/settings/meterprefs.h"
+#include "device/transports/serial.h"
 #include "core/devicelibrary.h"
 #include "ui/instancewidget.h"
 #include "ui/views/graphwidget.h"
@@ -181,6 +184,13 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
                            "<i>Save current device</i> keeps the meter set up now under a name.</p></body></html>"));
   connect(m_devicesMenu, &QMenu::aboutToShow, this, &MainWindow::fillDevicesMenu);
   toolBarDMM->insertAction(action_Instances, devices);
+  m_addDeviceAction = new QAction(QIcon::fromTheme("list-add"), tr("&Add device..."), this);
+  m_addDeviceAction->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
+  m_addDeviceAction->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Add device</span></p>"
+                                     "<p>Step by step: how the meter is connected, which one it is, and whether it "
+                                     "goes into this window or a new one. It is kept in My devices.</p></body></html>"));
+  connect(m_addDeviceAction, &QAction::triggered, this, &MainWindow::addDevice);
+  toolBarDMM->insertAction(devices, m_addDeviceAction);
   if (auto *button = qobject_cast<QToolButton *>(toolBarDMM->widgetForAction(devices)))
     button->setPopupMode(QToolButton::InstantPopup);
 
@@ -464,6 +474,29 @@ void MainWindow::welcome()
     case WelcomeDlg::None:
       break;
   }
+}
+
+void MainWindow::addDevice()
+{
+  AddDeviceDlg dlg(m_wid->devices(), this);
+  dlg.setPorts(MeterPrefs::availablePorts(m_wid->settings()));
+  dlg.setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
+  dlg.setStateManager(m_stateMgr);
+  if (m_wid->dmmConfigured())
+    dlg.setCurrentDevice(m_wid->dmmTitle());
+  if (dlg.exec() != QDialog::Accepted)
+    return;
+  QVariantMap keys = dlg.keys();
+  keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
+  const QString id = m_wid->devices()->add(dlg.name(), keys);
+  if (dlg.target() == AddDeviceDlg::NewWindow)
+  {
+    const QString instance = m_wid->openInNewWindow(id);
+    m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
+    statusBar()->showMessage(tr("%1 opens in the new window %2").arg(dlg.name(), instance), 4000);
+  }
+  else
+    m_wid->switchDevice(id);
 }
 
 void MainWindow::findDevice()
@@ -968,6 +1001,7 @@ void MainWindow::fillDevicesMenu()
     });
     dlg.exec();
   });
+  m_devicesMenu->addAction(m_addDeviceAction);
   connect(m_devicesMenu->addAction(tr("&Find device...")), &QAction::triggered, this, &MainWindow::findDevice);
   m_devicesMenu->addAction(action_ConfigureDMM);
 }

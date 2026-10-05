@@ -71,6 +71,8 @@
   program can use the meter itself. The settings page External application is gone: an alarm with a condition
   and a program does what it did (its settings are not taken over)
 - Settings, Multimeter: the port parameters and the protocol are under Advanced, closed for a known model
+- Add device (the plus in the toolbar): how the meter is connected, which one it is with a name, then this window
+  or a new one; it is kept in My devices. The meter page offers only the models of that connection
 - Quitting and Apply in the settings no longer connect the meter (quitting connected a Bluetooth meter twice)
 - A Bluetooth meter that stays half connected (a UT60BT now and then) is tried again after 10 s, not 20 s
 

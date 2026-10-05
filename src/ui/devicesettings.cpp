@@ -39,8 +39,6 @@
 #include "core/siprefix.h"
 #include "decoders.h"
 
-std::vector<DmmDecoder::DMMInfo> dmm_info = {};
-
 DeviceSettings::DeviceSettings(QWidget *parent) : QWidget(parent)
 {
   setupUi(this);
@@ -68,7 +66,59 @@ DeviceSettings::DeviceSettings(QWidget *parent) : QWidget(parent)
   m_calcHintTimer.setInterval(1000);   // live values of the input instances
   connect(&m_calcHintTimer, &QTimer::timeout, this, &DeviceSettings::updateCalcHint);
 
+  // any edit may complete the fields or break them (isComplete())
+  for (QLineEdit *e : findChildren<QLineEdit *>())
+    connect(e, &QLineEdit::textChanged, this, &DeviceSettings::changed);
+  for (QComboBox *c : findChildren<QComboBox *>())
+    connect(c, &QComboBox::currentTextChanged, this, &DeviceSettings::changed);
+
   m_path = QDir::currentPath();
+}
+
+QStringList DeviceSettings::models() const
+{
+  QStringList names;
+  for (const auto &cfg : m_models)
+    names << cfg.name;
+  return names;
+}
+
+void DeviceSettings::setDescriptionFilesVisible(bool visible)
+{
+  for (QWidget *w : std::initializer_list<QWidget *>{ ui_hint, ui_filename, ui_load, ui_save })
+    w->setVisible(visible);
+}
+
+void DeviceSettings::setPortEditable(bool editable, const QString &placeholder)
+{
+  port->setEditable(editable);
+  if (!editable)
+    return;
+  port->setInsertPolicy(QComboBox::NoInsert);
+  port->lineEdit()->setPlaceholderText(placeholder);
+  connect(port->lineEdit(), &QLineEdit::textChanged, this, &DeviceSettings::changed, Qt::UniqueConnection);
+}
+
+bool DeviceSettings::isComplete() const
+{
+  const bool manual = ui_vendor->currentIndex() == 0;
+  if (manual)
+    return m_manualAllowed && !port->currentText().trimmed().isEmpty();
+  const int modelIdx = ui_model->currentIndex();
+  if (modelIdx < 0 || modelIdx >= static_cast<int>(m_currentVendorModels.size()))
+    return false;
+  if (isCalculated())
+    return CalcExpr::parse(ui_calcExpression->text()).has_value();
+  if (isVirtual())
+    return CalcExpr::parse(ui_virtualFormula->text()).has_value();
+  if (isSigrokMeter())
+    return !ui_sigrokDriver->text().trimmed().isEmpty();
+  const QString address = ui_bleAddress->currentText().section(' ', 0, 0).trimmed();
+  if (isGatt())
+    return !address.isEmpty();
+  if (isBluetooth())
+    return !address.isEmpty() && VictronBle::keyFromHex(ui_bleKey->text()).size() == 16;
+  return !port->currentText().trimmed().isEmpty();
 }
 
 
@@ -101,44 +151,7 @@ void DeviceSettings::setupComboBoxModel()
   for (const ProtocolInfo &p : protocols())
     protocolCombo->addItem(QCoreApplication::translate("Protocols", p.description), int(p.id));
 
-  ui_vendor->clear();
-  ui_vendor->insertItem(-1, tr("Manual settings"));
-  ui_vendor->addItem(tr("All vendors"));
-
-  std::vector<DmmDecoder::DMMInfo> configs = DmmDecoder::getDeviceConfigurations();
-
-  // Sortieren nach dem Namen
-  std::sort(configs.begin(), configs.end(), [](const auto& a, const auto& b) {
-    return a.name < b.name;
-  });
-
-  dmm_info.clear();
-  QStringList vendors;
-  for (const auto& cfg : configs) {
-    dmm_info.push_back(cfg);
-    if (!vendors.contains(cfg.vendor))
-      vendors.append(cfg.vendor);
-  }
-
-  vendors.sort(Qt::CaseInsensitive);
-  // the virtual meters of QtDMM itself go first, real vendors alphabetically
-  if (vendors.removeOne("QtDMM"))
-    vendors.prepend("QtDMM");
-  ui_vendor->addItems(vendors);
-
-  // The completer searches the full, unfiltered device list (all vendors),
-  // so typing a known model name still finds it directly - on selection the
-  // editingFinished handler below switches the vendor combo to match.
-  QStringList allNames;
-  for (const auto& cfg : dmm_info)
-    allNames.append(cfg.name);
-
-  QCompleter *completer = new QCompleter(allNames, this);
-  completer->setCaseSensitivity(Qt::CaseInsensitive);
-  completer->setFilterMode(Qt::MatchContains);
-  completer->setCompletionMode(QCompleter::PopupCompletion);
-
-  ui_model->setCompleter(completer);
+  fillModels();
 
   connect(ui_model->lineEdit(), &QLineEdit::editingFinished, this, [this]()
   {
@@ -156,16 +169,16 @@ void DeviceSettings::setupComboBoxModel()
     }
 
     // otherwise search the full device list and switch vendor if needed
-    for (size_t i = 0; i < dmm_info.size(); ++i)
+    for (size_t i = 0; i < m_models.size(); ++i)
     {
-      if (dmm_info[i].name.compare(text, Qt::CaseInsensitive) == 0)
+      if (m_models[i].name.compare(text, Qt::CaseInsensitive) == 0)
       {
-        int vendorIdx = ui_vendor->findText(dmm_info[i].vendor);
+        int vendorIdx = ui_vendor->findText(m_models[i].vendor);
         if (vendorIdx >= 0)
         {
           ui_vendor->setCurrentIndex(vendorIdx);
-          populateModelsForVendor(dmm_info[i].vendor);
-          int modelIdx = ui_model->findText(dmm_info[i].name);
+          populateModelsForVendor(m_models[i].vendor);
+          int modelIdx = ui_model->findText(m_models[i].name);
           ui_model->setCurrentIndex(modelIdx);
           on_ui_model_activated(modelIdx);
         }
@@ -177,12 +190,72 @@ void DeviceSettings::setupComboBoxModel()
   });
 }
 
+// The models offered: all registered ones, or those the filter lets through
+// (the assistant offers only the models of the chosen connection).
+void DeviceSettings::fillModels()
+{
+  ui_vendor->clear();
+  ui_vendor->insertItem(-1, tr("Manual settings"));
+  ui_vendor->addItem(tr("All vendors"));
+  // index 0 means manual settings throughout; without them it stays, disabled
+  if (auto *model = qobject_cast<QStandardItemModel *>(ui_vendor->model()))
+    model->item(0)->setEnabled(m_manualAllowed);
+
+  std::vector<DmmDecoder::DMMInfo> configs = DmmDecoder::getDeviceConfigurations();
+
+  // Sortieren nach dem Namen
+  std::sort(configs.begin(), configs.end(), [](const auto& a, const auto& b) {
+    return a.name < b.name;
+  });
+
+  m_models.clear();
+  QStringList vendors;
+  for (const auto& cfg : configs) {
+    if (m_filter && !m_filter(cfg))
+      continue;
+    m_models.push_back(cfg);
+    if (!vendors.contains(cfg.vendor))
+      vendors.append(cfg.vendor);
+  }
+
+  vendors.sort(Qt::CaseInsensitive);
+  // the virtual meters of QtDMM itself go first, real vendors alphabetically
+  if (vendors.removeOne("QtDMM"))
+    vendors.prepend("QtDMM");
+  ui_vendor->addItems(vendors);
+
+  // The completer searches the full, unfiltered device list (all vendors),
+  // so typing a known model name still finds it directly - on selection the
+  // editingFinished handler switches the vendor combo to match.
+  QStringList allNames;
+  for (const auto& cfg : m_models)
+    allNames.append(cfg.name);
+
+  if (!m_completerNames)
+  {
+    m_completerNames = new QStringListModel(this);
+    QCompleter *completer = new QCompleter(m_completerNames, this);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setFilterMode(Qt::MatchContains);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    ui_model->setCompleter(completer);
+  }
+  m_completerNames->setStringList(allNames);
+}
+
+void DeviceSettings::setModelFilter(std::function<bool(const DmmDecoder::DMMInfo &)> filter, bool manual)
+{
+  m_filter = std::move(filter);
+  m_manualAllowed = manual;
+  fillModels();
+}
+
 void DeviceSettings::populateModelsForVendor(const QString &vendor)
 {
   ui_model->clear();
 
   m_currentVendorModels.clear();
-  for (const auto& cfg : dmm_info)
+  for (const auto& cfg : m_models)
     if (cfg.vendor == vendor)
       m_currentVendorModels.push_back(cfg);
 
@@ -198,8 +271,8 @@ void DeviceSettings::populateAllModels()
 {
   ui_model->clear();
 
-  // dmm_info is already sorted by name (vendor+model) in setupComboBoxModel().
-  m_currentVendorModels = dmm_info;
+  // m_models is already sorted by name (vendor+model) in setupComboBoxModel().
+  m_currentVendorModels = m_models;
 
   for (const auto& cfg : m_currentVendorModels)
     ui_model->addItem(cfg.name);
@@ -297,7 +370,7 @@ void DeviceSettings::load(const QVariantMap &keys)
   ui_model->clear();
   m_currentVendorModels.clear();
 
-  for (const auto& cfg : dmm_info)
+  for (const auto& cfg : m_models)
   {
     if (DmmDecoder::sameModel(model, cfg.name))
     {

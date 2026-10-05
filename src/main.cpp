@@ -25,6 +25,7 @@
 
 #include "ui/mainwindow.h"
 #include "ui/mnemoniccheck.h"
+#include "ui/dialogs/adddevicedlg.h"
 #include "core/settings.h"
 
 #ifdef Q_OS_WIN
@@ -155,6 +156,9 @@ int main(int argc, char **argv)
 
   if (parser.isSet(checkMnemonics))
   {
+    // the assistant opens on demand: one here, so its pages are checked too
+    auto *addDevice = new AddDeviceDlg(nullptr, &mainWin);
+    addDevice->chooseConnection(AddDeviceDlg::Cable);
     QTimer::singleShot(0, &mainWin, [&mainWin]
     {
       const QStringList conflicts = MnemonicCheck::run(&mainWin);

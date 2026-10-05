@@ -29,6 +29,7 @@
 #include "device/frameformat.h"
 #include "device/dmmdecoder.h"
 #include <QTimer>
+#include <functional>
 
 class SharedStateManager;
 
@@ -60,6 +61,20 @@ public:
   /// Whether "Advanced" (port parameters, protocol) is open; load() closes
   /// it for a known model and opens it for manual settings.
   bool           isAdvancedOpen() const;
+  /// Offers only the models @p filter accepts (all when empty); @p manual
+  /// false disables "Manual settings". Call before load().
+  void           setModelFilter(std::function<bool(const DmmDecoder::DMMInfo &)> filter, bool manual);
+  /// The names of the models offered, sorted.
+  QStringList    models() const;
+  /// The page's hint line and the buttons for DMM description files (.cfg),
+  /// which the assistant leaves out.
+  void           setDescriptionFilesVisible(bool visible);
+  /// Lets the port be typed in, with @p placeholder as grey text in the
+  /// empty field (e.g. the form of a network address), or not.
+  void           setPortEditable(bool editable, const QString &placeholder = QString());
+  /// Everything needed is filled in: a model, and its port, address and key,
+  /// formula or sigrok driver.
+  bool           isComplete() const;
   /// Path of sigrok-cli, for the hint and the test of a sigrok meter.
   void           setSigrokExe(const QString &exe) { m_sigrokExe = exe; }
 
@@ -99,6 +114,8 @@ public:
   void           setStateManager(SharedStateManager *state);
 
 Q_SIGNALS:
+  /// A field was edited or another model chosen.
+  void           changed();
   /// The hint's link: the user wants the Special ports page (sigrok-cli path).
   void           showPortsPage();
 
@@ -134,6 +151,8 @@ protected:
   std::vector<DmmDecoder::DMMInfo> m_currentVendorModels;
 
   void setupComboBoxModel();
+  /// The vendor and model lists from the registered models, through m_filter.
+  void fillModels();
   void populateModelsForVendor(const QString &vendor);
   void populateAllModels();
   void enterManualMode();
@@ -147,5 +166,10 @@ private:
   /// The keys of the last load(): the Victron value choice falls back on
   /// them while the combos are still empty.
   QVariantMap    m_loaded;
+  /// The models offered (all registered ones through m_filter), by name.
+  std::vector<DmmDecoder::DMMInfo> m_models;
+  std::function<bool(const DmmDecoder::DMMInfo &)> m_filter;
+  bool           m_manualAllowed = true;
+  QStringListModel *m_completerNames = nullptr;   ///< what the model field completes
   QString        m_sigrokExe = QStringLiteral("sigrok-cli");
 };

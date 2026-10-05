@@ -84,6 +84,11 @@ public:
   /// entryKeys() and tidy() go by it before the device string - an entry
   /// from before kept the port of the meter before as its place.
   static void setModelTransport(std::function<QString(const QString &model)> transport);
+  /// An instance name for a new window with the device @p name: letters,
+  /// digits and '_' (it is a variable in formulas), not starting with a
+  /// digit, not "default" and none of @p taken ("Uni-Trend UT61E" ->
+  /// "Uni_Trend_UT61E", then "Uni_Trend_UT61E_2", ...).
+  static QString instanceId(const QString &name, const QStringList &taken);
 
 Q_SIGNALS:
   /// The list changed, here or in another instance.

@@ -26,7 +26,15 @@ meter is another measurement - and minimum and maximum start afresh.
 
 ## Adding a device
 
-- Set the meter up as usual on the **Multimeter** page, then choose **Save
+- **Add device...** (the plus in the toolbar) asks step by step: how
+  the meter is connected - *Cable*, *Bluetooth*, *Network*, *sigrok* or
+  *Simulated / calculated* -, which meter it is, with a name, and where it
+  goes: **In this window** instead of the meter now, or **In a new window**,
+  a new instance with the settings of this one. Either way it is kept in My
+  devices. The page of the meter offers only the models of that connection;
+  *Next* waits until what the meter needs is filled in (the port, the key of
+  a Victron device, a formula that works), or
+- set the meter up as usual on the **Multimeter** page, then choose **Save
   current device...** in the My devices menu and give it a name, or
 - on the Multimeter page, **Save to my devices...**. With a device chosen
   at the top of the page, it asks whether to update that one or to keep

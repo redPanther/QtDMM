@@ -29,6 +29,7 @@ class DeviceSettings;
 class DeviceLibrary;
 class SharedStateManager;
 class QComboBox;
+class Settings;
 class QPushButton;
 
 /// Settings page "Multimeter": the choice from "My devices" above the
@@ -42,6 +43,8 @@ public:
 
   /// The fields of the meter; SettingsDialog reads the connection from them.
   DeviceSettings *settings() const { return m_settings; }
+  /// The ports to offer: Transport::availablePorts() and the custom ports of @p cfg.
+  static QStringList availablePorts(Settings *cfg);
   /// Source of the other instances' readings, shown as a hint below the formula.
   void           setStateManager(SharedStateManager *state);
   /// "My devices": the choice at the top of the page fills the fields.

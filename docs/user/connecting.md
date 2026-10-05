@@ -1,5 +1,13 @@
 # Connecting a meter
 
+## Add device
+
+**Add device...**, the plus at the left of the toolbar, sets up a
+meter step by step and keeps it in [My devices](my-devices.md): the kind of
+connection, the meter with its settings and a name, then this window or a
+new one. *Simulated / calculated* is the virtual meter, a signal of its own
+to try QtDMM without hardware, or a value calculated from other windows.
+
 ## Find device
 
 The quickest way: plug the meter in, switch it on and choose **Find

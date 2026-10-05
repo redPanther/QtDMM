@@ -220,6 +220,37 @@ std::optional<MyDevice> DeviceLibrary::find(const QString &id) const
   return std::nullopt;
 }
 
+QString DeviceLibrary::instanceId(const QString &name, const QStringList &taken)
+{
+  QString id;
+  for (const QChar c : name.trimmed())
+  {
+    const bool ok = c.isLetterOrNumber() && c.unicode() < 128;
+    if (ok || c == '_')
+      id += c;
+    else if (!id.endsWith('_'))
+      id += '_';
+  }
+  while (id.endsWith('_'))
+    id.chop(1);
+  while (id.startsWith('_'))
+    id.remove(0, 1);
+  if (id.isEmpty())
+    id = QStringLiteral("meter");
+  else if (id.at(0).isDigit())
+    id.prepend(QStringLiteral("m_"));
+  // instance names are file names: no two that differ in case only
+  auto isTaken = [&taken](const QString &candidate)
+  {
+    return candidate.compare(QLatin1String("default"), Qt::CaseInsensitive) == 0
+           || taken.contains(candidate, Qt::CaseInsensitive);
+  };
+  const QString stem = id;
+  for (int n = 2; isTaken(id); ++n)
+    id = QString("%1_%2").arg(stem).arg(n);
+  return id;
+}
+
 QString DeviceLibrary::uniqueName(const QString &base) const
 {
   QStringList names;

@@ -118,12 +118,16 @@ protected:
   QAction    *m_meterAction = nullptr;
   QAction    *m_readingsAction = nullptr;
   QAction    *m_poincareAction = nullptr;
+  QAction    *m_addDeviceAction = nullptr;
   QMenu      *m_devicesMenu = nullptr;   ///< "My devices" at the device symbol
   /// The devices menu anew: the entries (the one in use checked), save,
   /// manage, configure.
   void        fillDevicesMenu();
   /// "Find device": search, choose, connect (and keep in My devices).
   void        findDevice();
+  /// The assistant "Add device": the device into My devices, then into
+  /// this window or a new one.
+  void        addDevice();
   /// The welcome at the first start: My devices, Find device, Try without
   /// a device, Set up by hand.
   void        welcome();

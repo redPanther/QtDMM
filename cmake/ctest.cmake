@@ -95,6 +95,13 @@ if (BUILD_TESTING)
 	target_include_directories(test_devicesettings PRIVATE src ${CMAKE_BINARY_DIR})
 	target_link_libraries(test_devicesettings PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
 	add_test(NAME device_settings COMMAND test_devicesettings)
+	## the assistant "Add device": pages per connection, models, name, Next, the buttons that finish it
+	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp src/ui/dialogs/adddevicedlg.cpp src/ui/devicesettings.cpp
+		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
+		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
+	target_include_directories(test_adddevice PRIVATE src ${CMAKE_BINARY_DIR})
+	target_link_libraries(test_adddevice PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
+	add_test(NAME add_device COMMAND test_adddevice)
 	## the formula evaluator of calculated instances
 	set( TEST_CALC test_calc)
 	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/core/calcexpr.cpp src/core/siprefix.cpp)
