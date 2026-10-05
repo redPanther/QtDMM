@@ -31,6 +31,7 @@
 #include "ui/settings/alarmprefs.h"
 #include "ui/settings/scpiprefs.h"
 #include "ui/settings/graphprefs.h"
+#include "ui/settings/generalprefs.h"
 #include "ui/settings/guiprefs.h"
 #include "ui/settings/integrationprefs.h"
 #include "ui/settings/recorderprefs.h"
@@ -108,6 +109,15 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   m_meter = new DeviceSettings(this);
   m_meter->hide();
 
+  m_general = new GeneralPrefs(ui_stack);
+  m_general->setId(SettingsDialog::General);
+  new SettingsPageItem(m_general->id(),
+                 m_general->icon(),
+                 m_general->label(),
+                 ui_list);
+  m_general->setCfg(m_settings);
+  addPage(m_general);
+
   m_gui = new GuiPrefs(ui_stack);
   m_gui->setId(SettingsDialog::GUI);
   new SettingsPageItem(m_gui->id(),
@@ -174,7 +184,7 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   // init stuff
   //
   on_ui_buttonBox_rejected();
-  showPage(GUI);
+  showPage(General);
   ui_undo->hide();
   adjustSize();
 }
@@ -460,7 +470,7 @@ QTime SettingsDialog::startTime() const
 // EXECUTE
 //
 /////////////////////////////////////////////////////////////////
-// GUI
+// General, Appearance
 //
 bool SettingsDialog::showBar() const
 {
@@ -474,7 +484,7 @@ bool SettingsDialog::showMinMax() const
 
 bool SettingsDialog::alertUnsavedData() const
 {
-  return m_gui->alertUnsavedData();
+  return m_general->alertUnsavedData();
 }
 
 bool SettingsDialog::useTextLabel() const
@@ -494,12 +504,12 @@ QColor SettingsDialog::displayBgColor() const
 
 bool SettingsDialog::saveWindowPosition() const
 {
-  return m_gui->saveWindowPosition();
+  return m_general->saveWindowPosition();
 }
 
 bool SettingsDialog::saveWindowSize() const
 {
-  return m_gui->saveWindowSize();
+  return m_general->saveWindowSize();
 }
 
 

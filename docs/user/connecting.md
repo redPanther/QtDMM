@@ -138,12 +138,12 @@ nothing.
 The display is a window like the [analog meter](analog-meter.md); digits and
 lettering scale with it. **Display** in the toolbar or the menu (Ctrl+1)
 hides and shows it. Bar graph and min/max (off by default) are set on the
-*General* settings page, in the group *Digital display (LCD)*.
+*Appearance* settings page, in the group *Digital display (LCD)*.
 
 **LCD colours** in the display's right-click menu: *Classic* (the
 yellow-green of most meters), *Backlight blue* (light segments on blue, the default),
 *Amber*, *High contrast* (black on white) or *Custom*, the tint from the
-*General* page. Changing that tint switches the display to *Custom*.
+*Appearance* page. Changing that tint switches the display to *Custom*.
 
 For meters whose keys QtDMM knows (the UNI-T UT60BT, UT61B+/D+/E+ and
 UT161), a row of the meter's keys sits under the display: SELECT and Hz/%,
@@ -209,13 +209,13 @@ the display or the meter for its window menu (hide the window, title bar on
 or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
 layouts of versions before 26.1 are not taken over.
 
-**Design** in the menu, or on the *General* settings page, sets the colours
+**Design** in the menu, or on the *Appearance* settings page, sets the colours
 of the window: *System* (the look of your desktop), *Silver* (brushed
 aluminium) or *Dark* (the default). The readings table
 and a graph in the colours *Neutral* follow; the LCD colours, the graph's
 colours and the style of the analog meter are chosen separately.
 
-**Settings → General → Symbols** chooses the toolbar and menu symbols:
+**Settings → Appearance → Symbols** chooses the toolbar and menu symbols:
 *Coloured* (KDE's Oxygen icons, the default), *Plain* (KDE's monochrome Breeze
 icons, light or dark to match the window) or, on Linux and BSD where the
 desktop has an icon theme, *System* - your desktop's symbols, with the

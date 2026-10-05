@@ -36,6 +36,7 @@ class QPrinter;
 class RecorderPrefs;
 class ScalePrefs;
 class DeviceSettings;
+class GeneralPrefs;
 class GuiPrefs;
 class GraphPrefs;
 class IntegrationPrefs;
@@ -60,7 +61,8 @@ public:
   /// order of the category list.
   enum PageType
   {
-    GUI = 0,
+    General = 0,
+    GUI,   ///< "Appearance"
     Graph,
     Scale,
     Integration,
@@ -131,13 +133,17 @@ public:
   double                fallingThreshold() const;
   /// @}
 
-  /// @name General page (window, toolbars, LCD display, analog meter, tips)
+  /// @name General page (at program exit)
   /// @{
   void                  setWinRect(const QRect &);
   QRect                 winRect() const;
   bool                  saveWindowPosition() const;
   bool                  saveWindowSize() const;
   bool                  alertUnsavedData() const;
+  /// @}
+
+  /// @name Appearance page (toolbars, LCD display, analog meter, tips)
+  /// @{
   bool                  useTextLabel() const;
   QString               iconSet() const;
   int                   currentTipId() const;
@@ -216,6 +222,7 @@ protected:
   ScalePrefs           *m_scale;
   /// Not shown: turns the meter's settings keys into the connection.
   DeviceSettings       *m_meter;
+  GeneralPrefs         *m_general;
   GuiPrefs             *m_gui;
   GraphPrefs           *m_graph;
   IntegrationPrefs     *m_integration;

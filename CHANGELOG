@@ -41,8 +41,9 @@
   name or ttyUSB, a USB cable plugged in again, a Bluetooth address), connects it without a second entry and
   says which window uses a port
 - Settings dialog: the pages Multimeter and Special ports are gone - a meter is set up with Add device and
-  changed with Settings... in the sidebar (Shift+F2 for the one in use). The page Appearance is now General
-  and has the path of sigrok-cli; ports entered on Special ports before are still offered
+  changed with Settings... in the sidebar (Shift+F2 for the one in use). A new first page General holds
+  what happens at program exit (unsaved data, window position and size) and the path of sigrok-cli; the rest
+  stays on Appearance. Ports entered on Special ports before are still offered
 - Graph: the vertical axis in the unit the meter shows (350 mV, not 0.35 V); the status bar says what the
   third time is ("1:59:17 left")
 - Readings table: the columns are measured again after a design or font change, so no cell is cut off

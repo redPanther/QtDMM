@@ -536,24 +536,24 @@
 <context>
     <name>AnalogMeter</name>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="545"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="547"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="546"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="548"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="552"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="553"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="561"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="554"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="555"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="563"/>
         <source>OL</source>
         <translation>OL</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="621"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="623"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
@@ -1206,6 +1206,79 @@ puis déconnectez-vous et reconnectez-vous.</translation>
     </message>
 </context>
 <context>
+    <name>GeneralPrefs</name>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="18"/>
+        <source>General</source>
+        <translation>Général</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="19"/>
+        <source>&lt;b&gt;What QtDMM does at program exit, and the programs it runs.&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Ce que fait QtDMM à la fermeture du programme, et les programmes qu’il lance.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="24"/>
+        <source>At program exit</source>
+        <translation>À la fermeture du programme</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="26"/>
+        <source>&amp;Alert unsaved data</source>
+        <translation>&amp;Avertir des données non enregistrées</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="28"/>
+        <source>Asks before unsaved recordings are lost: at exit, and before an import replaces them.</source>
+        <translation>Demande confirmation avant que des enregistrements non sauvegardés ne soient perdus : à la fermeture et avant qu’une importation ne les remplace.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="30"/>
+        <source>Save window &amp;position</source>
+        <translation>Enregistrer la &amp;position de la fenêtre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="32"/>
+        <source>The next start opens the window where it was.</source>
+        <translation>Le prochain démarrage ouvre la fenêtre là où elle était.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="33"/>
+        <source>Save window si&amp;ze</source>
+        <translation>Enregistrer la &amp;taille de la fenêtre</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="35"/>
+        <source>The next start opens the window in the size it had.</source>
+        <translation>Le prochain démarrage ouvre la fenêtre à la taille qu’elle avait.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="42"/>
+        <source>Programs</source>
+        <translation>Programmes</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="44"/>
+        <source>&amp;sigrok-cli:</source>
+        <translation>&amp;sigrok-cli :</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="48"/>
+        <source>The program QtDMM runs for the meters it reads through sigrok; a name is searched in the PATH.</source>
+        <translation>Le programme que QtDMM lance pour les appareils lus via sigrok ; un nom est cherché dans le PATH.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="54"/>
+        <source>Choose sigrok-cli</source>
+        <translation>Choisir sigrok-cli</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/generalprefs.cpp" line="61"/>
+        <source>Sigrok-cli executable</source>
+        <translation>Exécutable sigrok-cli</translation>
+    </message>
+</context>
+<context>
     <name>GraphPrefs</name>
     <message>
         <location filename="../../src/ui/settings/graphprefs.cpp" line="37"/>
@@ -1547,38 +1620,13 @@ puis déconnectez-vous et reconnectez-vous.</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="38"/>
-        <source>General</source>
-        <translation>Général</translation>
+        <source>Appearance</source>
+        <translation>Apparence</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="39"/>
-        <source>&lt;b&gt;QtDMM&apos;s appearance and behaviour, and the programs it runs.&lt;/b&gt;</source>
-        <translation>&lt;b&gt;L’apparence et le comportement de QtDMM, et les programmes qu’il lance.&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="48"/>
-        <source>Programs</source>
-        <translation>Programmes</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="50"/>
-        <source>&amp;sigrok-cli:</source>
-        <translation>&amp;sigrok-cli :</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="54"/>
-        <source>The program QtDMM runs for the meters it reads through sigrok; a name is searched in the PATH.</source>
-        <translation>Le programme que QtDMM lance pour les appareils lus via sigrok ; un nom est cherché dans le PATH.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="60"/>
-        <source>Choose sigrok-cli</source>
-        <translation>Choisir sigrok-cli</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="67"/>
-        <source>Sigrok-cli executable</source>
-        <translation>Exécutable sigrok-cli</translation>
+        <source>&lt;b&gt;The look of QtDMM: design, symbols, the displays and the toolbars.&lt;/b&gt;</source>
+        <translation>&lt;b&gt;L’aspect de QtDMM : design, symboles, les affichages et les barres d’outils.&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="41"/>
@@ -3257,23 +3305,23 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="76"/>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="97"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="77"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="98"/>
         <source>QtDMM: Welcome!</source>
         <translation>QtDMM : Bienvenue !</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="89"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="90"/>
         <source>Continue</source>
         <translation>Continuer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="77"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="78"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Welcome!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You seem to have upgraded &lt;b&gt;QtDMM&lt;/b&gt; from a version prior to 0.8.4. Please check your configuration. There are some new parameters to be configured.&lt;p&gt;Thank you for choosing &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Bienvenue !&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Vous semblez avoir mis à jour &lt;b&gt;QtDMM&lt;/b&gt; depuis une version antérieure à 0.8.4. Veuillez vérifier votre configuration : de nouveaux paramètres sont à régler.&lt;p&gt;Merci d&apos;avoir choisi &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="98"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="99"/>
         <source>Your config file has been converted to the new format.
 Please check your color settings, because they couldn&apos;t be converted automatically.
 Your old config ~/.qtdmmrc was renamed to ~/.qtdmmrc.old.</source>
@@ -3956,65 +4004,34 @@ Votre ancienne configuration ~/.qtdmmrc a été renommée ~/.qtdmmrc.old.</trans
     </message>
     <message>
         <location filename="../../src/ui/forms/uiguiprefs.ui" line="375"/>
-        <source>At program exit</source>
-        <translation>À la fermeture du programme</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="413"/>
-        <source>When this option is checked QtDMM will alert you if you are going to overwrite or loose unsaved data (import, quit).</source>
-        <translation>Si cette option est cochée, QtDMM vous avertit avant d&apos;écraser ou de perdre des données non enregistrées (import, fermeture).</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="416"/>
-        <source>Alert unsaved data</source>
-        <translation>Avertir des données non enregistrées</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="461"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="509"/>
-        <source>When this option is checked the window position and size saved and restored in the next session.</source>
-        <translation>Si cette option est cochée, la position et la taille de la fenêtre sont enregistrées et restaurées à la session suivante.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="464"/>
-        <source>Save window position</source>
-        <translation>Enregistrer la position de la fenêtre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="512"/>
-        <source>Save window size</source>
-        <translation>Enregistrer la taille de la fenêtre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="543"/>
         <source>Toolbar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="581"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="629"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="677"/>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="760"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="413"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="461"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="509"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="592"/>
         <source>Check this if you want text labels in the toolbar.</source>
         <translation>Cochez pour afficher des libellés dans la barre d&apos;outils.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="584"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="416"/>
         <source>Icons with text label</source>
         <translation>Icônes avec libellé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="632"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="464"/>
         <source>DMM toolbar</source>
         <translation>Barre d&apos;outils multimètre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="680"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="512"/>
         <source>File toolbar</source>
         <translation>Barre d&apos;outils fichier</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uiguiprefs.ui" line="763"/>
+        <location filename="../../src/ui/forms/uiguiprefs.ui" line="595"/>
         <source>Graph toolbar</source>
         <translation>Barre d&apos;outils graphe</translation>
     </message>
