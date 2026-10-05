@@ -49,8 +49,9 @@ jobs:
           test -f "squashfs-root/usr/plugins/$p" || { echo "::error::$p missing in the AppImage"; exit 1; }
         done
         ldd squashfs-root/usr/bin/qtdmm | tee deps.txt
-        grep -q 'squashfs-root/usr/lib/libQt6Core' deps.txt || { echo "::error::Qt does not come from the AppImage"; exit 1; }
-        if grep -q 'squashfs-root/usr/lib/libc.so' deps.txt; then echo "::error::glibc bundled"; exit 1; fi
+        # the RUNPATH resolves as squashfs-root/usr/bin/../lib/...
+        grep -E -q 'libQt6Core\.so.* => .*/squashfs-root/' deps.txt || { echo "::error::Qt does not come from the AppImage"; exit 1; }
+        if grep -E -q 'libc\.so.* => .*/squashfs-root/' deps.txt; then echo "::error::glibc bundled"; exit 1; fi
         rm -rf squashfs-root deps.txt
 
     - name: Test
