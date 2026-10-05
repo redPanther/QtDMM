@@ -51,6 +51,7 @@ What happens when an alarm raises; tick any of them:
 - **Disconnect first** (with a program) - QtDMM closes the port before the
   program starts and opens it again when the program has ended, so the
   program can talk to the meter itself. One such program runs at a time.
+  A running recording goes on; the time without readings is a gap in it.
 
 The status line reports every raise and clear too.
 

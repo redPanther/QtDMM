@@ -77,7 +77,8 @@
 - Settings dialog: Factory defaults sits at the bottom left, beside OK and Cancel; the dialog is as tall as
   its tallest page (within the screen), so the pages need no scroll bar
 - Recorder: connecting again no longer clears the recording - after the settings dialog, or after an alarm
-  program with Disconnect first, the readings were gone without a question; a new start clears it. Switching
+  program with Disconnect first, the readings were gone without a question; a new start clears it. An
+  alarm program with Disconnect first no longer stops the recording: the time it has the port is a gap. Switching
   to another device in the sidebar (or with the assistant, or by changing the one in use) asks about unsaved
   readings first, and so do Clear and Clear graph in the graph's menu; Cancel stays with the device
 - An empty window stays empty after OK in the settings dialog (it counted as set up and tried to connect

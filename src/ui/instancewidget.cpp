@@ -155,6 +155,13 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
     Q_EMIT connectDMM(on);
     connectSLOT(on);
   });
+  // an alarm's program has the port for a while: the recording runs on
+  connect(m_ctl, &MeterController::portReleased, this, [this](bool released)
+  {
+    Q_EMIT setConnect(!released);
+    Q_EMIT connectDMM(!released);
+    connectPort(!released);
+  });
   connect(m_ctl, &MeterController::scpiStatusChanged, this, [this](const QString &status, const QString &detail)
   {
     Q_EMIT scpiStatus(status);
@@ -307,18 +314,19 @@ void InstanceWidget::resetSLOT()
 
 void InstanceWidget::connectSLOT(bool on)
 {
-  if (on)
-  {
-    // the recording stays: the next start clears it (a reconnect after the
-    // settings or an alarm program must not lose it)
-    if (!m_ctl->connectMeter(true))
-      Q_EMIT setConnect(false);   // the port could not be opened: button back to "off"
-  }
-  else
-  {
-    m_ctl->connectMeter(false);
+  connectPort(on);
+  if (!on)
     ui_graph->stopSLOT();
-  }
+}
+
+void InstanceWidget::connectPort(bool on)
+{
+  // the recording stays: the next start clears it (a reconnect after the
+  // settings or an alarm program must not lose it)
+  if (on && !m_ctl->connectMeter(true))
+    Q_EMIT setConnect(false);   // the port could not be opened: button back to "off"
+  else if (!on)
+    m_ctl->connectMeter(false);
 
   m_configDlg->connectSLOT(on);
   ui_graph->connectSLOT(on);

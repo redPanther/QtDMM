@@ -188,6 +188,9 @@ protected:
   /// model: the same meter, its entry changes along); another model is
   /// another meter - the entry at its place, or none.
   void        syncDevice();
+  /// Opens or closes the port without touching the recorder (connectSLOT()
+  /// stops it on closing; an alarm's program does not).
+  void        connectPort(bool on);
   /// Asks about unsaved readings before they are lost (@p text says how,
   /// @p discard is the button that drops them): export first, drop or
   /// cancel. True when the caller may go on - nothing unsaved, exported or
