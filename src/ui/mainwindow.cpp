@@ -224,9 +224,10 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   });
   connect(m_sidebar, &DeviceSidebar::switchRequested, m_wid, [this](const QString &id)
   {
-    // Cancel at the question about unsaved data: the selection goes back
-    if (!m_wid->switchDevice(id))
-      m_sidebar->setCurrentItem(m_sidebar->deviceItem(m_wid->currentDevice()));
+    // the selection is the device in use: the new one, or after Cancel at
+    // the question about unsaved data the one before
+    m_wid->switchDevice(id);
+    m_sidebar->setCurrentItem(m_sidebar->deviceItem(m_wid->currentDevice()));
   });
   connect(m_sidebar, &DeviceSidebar::settingsRequested, this, &MainWindow::deviceSettings);
   connect(m_sidebar, &DeviceSidebar::newWindowRequested, this, &MainWindow::openInNewWindow);

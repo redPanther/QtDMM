@@ -640,8 +640,9 @@ void InstanceWidget::runningSLOT(bool on)
 bool InstanceWidget::dmmConfigured() const
 {
   // DMM/configured is set when a device is chosen (takeOver(), a new window
-  // with a device); the model check keeps configs from before that key working. "Manual" alone proves nothing: applySLOT() writes it
-  // at every exit, dialog or not.
+  // with a device); the model check keeps configs from before that key
+  // working. "Manual" alone proves nothing: applySLOT() writes it at every
+  // exit, dialog or not.
   if (m_settings->getBool("DMM/configured", false))
     return true;
   const QString model = m_settings->getString("DMM/model");
