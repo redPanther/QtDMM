@@ -30,6 +30,7 @@
 #include "ui/dialogs/devicesettingsdlg.h"
 #include "ui/devicesettings.h"
 #include "ui/devicesidebar.h"
+#include "ui/tilebutton.h"
 #include "ui/dialogs/adddevicedlg.h"
 #include "device/transport.h"
 #include "device/transports/serial.h"
@@ -94,12 +95,11 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_emptyStart = new QWidget(m_mdi);
   m_emptyStart->setAutoFillBackground(true);
   auto *emptyLayout = new QGridLayout(m_emptyStart);
-  auto *addButton = new QToolButton(m_emptyStart);
+  auto *addButton = new TileButton(m_emptyStart);
   addButton->setObjectName("ui_emptyStart");
   addButton->setIcon(QIcon::fromTheme("list-add"));
   addButton->setIconSize(QSize(64, 64));
   addButton->setText(tr("&Add device"));
-  addButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   addButton->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
   QFont big = addButton->font();
   big.setPointSizeF(big.pointSizeF() * 1.4);
@@ -567,7 +567,8 @@ QMap<QString, QString> MainWindow::placeOwners() const
     const bool here = instance == m_stateMgr->id();
     const Settings other(instance == QLatin1String("default") ? QString() : instance, m_wid->settings()->configDir());
     const QString place = DeviceLibrary::place(here ? m_wid->settings()->meterKeys() : other.meterKeys());
-    if (!place.isEmpty())
+    // a formula is no port: any number of windows may compute it
+    if (!place.isEmpty() && !place.startsWith(QLatin1String("calc ")))
       owners.insert(place, instance);
   }
   return owners;

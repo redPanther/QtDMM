@@ -426,9 +426,12 @@ QVariantMap DeviceSettings::keys() const
   // a Bluetooth meter has no port: the port field still held the one of the
   // meter before, and My devices showed it (the key stays in its own entry)
   const QString address = ui_bleAddress->currentText().section(' ', 0, 0).trimmed();
-  keys.insert("Port settings/device", isGatt()        ? "blegatt " + address
-                                      : isBluetooth() ? "ble " + address
-                                                      : port->currentText());
+  // a simulated or calculated meter has its formula there, not the port of
+  // the meter before
+  keys.insert("Port settings/device", isGatt()                        ? "blegatt " + address
+                                      : isBluetooth()                 ? "ble " + address
+                                      : isCalculated() || isVirtual() ? device()
+                                                                      : port->currentText());
   keys.insert("Port settings/sigrok-conn", ui_sigrokConn->currentText().trimmed());
   keys.insert("Port settings/sigrok-options", ui_sigrokOptions->text().trimmed());
   keys.insert("Port settings/ble-address", ui_bleAddress->currentText().trimmed());

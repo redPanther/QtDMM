@@ -85,6 +85,11 @@
   without a port, also at every start)
 - Recorder: while waiting for a threshold, another function crosses nothing (0 V, then 1000 Ω over 5), and
   the pre-trigger keeps no readings of the function before
+- My devices: a simulated meter no longer counts as using a port. Entries saved before kept the port of
+  the meter before (the UT61E's), so Open in a new window - from the sidebar or the assistant - took the
+  real meter for "in use" and opened nothing; new entries keep their formula as their device
+- Add device: symbol and text of the tiles (and of the big Add device button) sit together in the middle;
+  the target page says "In this window - as the current device"
 - AppImage: built with linuxdeploy and its Qt plugin, so it brings Qt, the Qt plugins (platform, SVG
   symbols, image formats) and a RUNPATH to them along. Before it ran only where a fitting Qt 6 was
   installed; the libraries copied in were never used. The Linux CI checks the AppImage for that

@@ -50,7 +50,7 @@ Drag a device to change the order.
 **Add device...** (the device symbol at the left of the toolbar) asks step
 by step: how the meter is connected - *Cable*, *Bluetooth*, *Network*,
 *sigrok* or *Simulated / calculated* -, which meter it is, with a name, and
-where it goes: **In this window** instead of the meter now, or **In a new
+where it goes: **In this window** as the current device, or **In a new
 window**, a new instance with the settings of this one. Either way it is
 kept in My devices. The page of the meter offers only the models of that
 connection; *Next* waits until what the meter needs is filled in (the port,

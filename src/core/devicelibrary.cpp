@@ -83,6 +83,10 @@ QString DeviceLibrary::place(const QVariantMap &keys)
   const QString device = keys.value("Port settings/device").toString().trimmed();
   const QString type = deviceType(device);
   const QString rest = device.contains(' ') ? device.section(' ', 1).trimmed() : device;
+  // the simulated and calculated meters are nowhere; entries from before
+  // 26.2 kept the port of the meter before ("serial ..." of the UT61E)
+  if (keys.value("DMM/model").toString().startsWith(QLatin1String("QtDMM ")) && type != QLatin1String("calc"))
+    return QString();
   if (type == QLatin1String("serial"))
     return "serial " + portFile(rest);
   if (type == QLatin1String("hid") || type == QLatin1String("hidholtek"))
