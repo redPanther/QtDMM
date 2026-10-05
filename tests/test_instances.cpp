@@ -1,15 +1,17 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Instances dialog without a running second QtDMM: the list is built from the
-// config files in a temporary config directory, delete mode removes the
-// selected instance's file, a calculated instance is created with the keys
-// MeterConnection and MainWindow rely on, and a new instance copies all but the meter.
+// The instances without a running second QtDMM, in a temporary config
+// directory: names, renaming a stopped one with the formulas that use it
+// (other instances and My devices), and a new instance that copies all but
+// the meter.
 
-#include <QtWidgets>
+#include <QtCore>
 #include <QTemporaryDir>
 
-#include "ui/dialogs/instancesdlg.h"
+#include "core/calcexpr.h"
+#include "core/devicelibrary.h"
+#include "core/instances.h"
 #include "core/settings.h"
 
 static int failed = 0;
@@ -23,75 +25,80 @@ static void check(bool cond, const QString &what)
   }
 }
 
-static QStringList instanceButtons(QDialog &dlg)
-{
-  // QListWidget::clear() deletes the row widgets deferred
-  QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
-  QStringList names;
-  for (QPushButton *b : dlg.findChildren<QPushButton *>())
-    if (b->property("instanceId").isValid())
-      names << b->property("instanceId").toString();
-  return names;
-}
-
 int main(int argc, char **argv)
 {
-  if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
-    qputenv("QT_QPA_PLATFORM", "offscreen");
-  QApplication app(argc, argv);
+  QCoreApplication app(argc, argv);
   app.setApplicationName("qtdmm_test");
 
   QTemporaryDir dir;
   check(dir.isValid(), "temporary config dir");
 
-  // --- 1. two instance configs on disk -> both listed ---
+  // --- 1. names: they are variables in formulas ---
+  check(Instances::isValidName("u") && Instances::isValidName("psu_1") && Instances::isValidName("_x"), "valid names");
+  check(!Instances::isValidName("1u") && !Instances::isValidName("uni-t") && !Instances::isValidName("a b")
+          && !Instances::isValidName("") && !Instances::isValidName("default"), "invalid names");
+
+  // --- 2. a variable renamed in a formula: whole names only ---
+  check(CalcExpr::renameVariable("u * i", "u", "volt") == "volt * i", "simple");
+  check(CalcExpr::renameVariable("u*u+uu-u_1", "u", "v") == "v*v+uu-u_1", "whole names only");
+  check(CalcExpr::renameVariable("2u * 1e-3 + u", "u", "v") == "2u * 1e-3 + v", "not in numbers");
+  check(CalcExpr::renameVariable("abs (abs) + max(abs, 2)", "abs", "a") == "abs (a) + max(a, 2)",
+        "not a function of that name");
+  check(CalcExpr::renameVariable("u *", "u", "v") == "v *", "also a formula that does not parse");
+
+  // --- 3. renaming a stopped instance ---
   Settings settings("default", dir.path());
   settings.setString("DMM/model", "UT61E");
   settings.save();
-  QString probeFile;
+  QString uFile;
   {
-    Settings probe("probe", dir.path());
-    probe.setString("DMM/model", "UT803");
-    probe.save();
-    probeFile = probe.fileName();
+    Settings u("u", dir.path());
+    u.setString("DMM/model", "UT803");
+    u.save();
+    uFile = u.fileName();
+    Settings p("p", dir.path());
+    p.setString("DMM/calc-expression", "u * i");
+    p.setString("DMM/calc-unit", "W");
+    p.setString("Port settings/device", "calc W u * i");
+    p.save();
+    Settings other("other", dir.path());
+    other.setString("DMM/calc-expression", "i * 2");
+    other.setString("Port settings/device", "calc A i * 2");
+    other.save();
   }
-  check(QFile::exists(probeFile), "probe config written: " + probeFile);
+  DeviceLibrary library(dir.path());
+  const QString power = library.add("Power", { { "DMM/model", "QtDMM Calculated value" },
+                                               { "DMM/calc-expression", "sqrt(u^2)" },
+                                               { "Port settings/device", "calc V sqrt(u^2)" } });
 
-  InstancesDlg dlg(&settings, "default", dir.path());
-  dlg.setInstancesOnline({"default"});
-  QStringList listed = instanceButtons(dlg);
-  check(listed.contains("default") && listed.contains("probe"),
-        "both instances listed: " + listed.join(','));
-
-  // --- 2. delete mode: check "probe", press "-" again -> file gone ---
-  auto *del = dlg.findChild<QToolButton *>("ui_instance_del");
-  check(del != nullptr, "delete button found");
-  if (del)
+  QString error;
+  QStringList changed = Instances::rename(settings, &library, "u", "1u", &error);
+  check(changed.isEmpty() && !error.isEmpty() && QFile::exists(uFile), "invalid new name refused: " + error);
+  error.clear();
+  changed = Instances::rename(settings, &library, "u", "p", &error);
+  check(!error.isEmpty() && QFile::exists(uFile), "taken name refused: " + error);
+  error.clear();
+  changed = Instances::rename(settings, &library, "u", "volt", &error);
+  check(error.isEmpty(), "renamed: " + error);
+  check(!QFile::exists(uFile), "old file gone");
+  check(settings.getConfigInstances().contains("volt") && !settings.getConfigInstances().contains("u"),
+        "listed under the new name: " + settings.getConfigInstances().join(','));
+  check(changed == QStringList({ "p" }), "changed formulas: " + changed.join(','));
   {
-    check(del->isCheckable() && !del->isChecked(), "delete button is a toggle");
-    del->click();          // enter delete mode; buttons become checkable
-    QPushButton *probeBtn = nullptr;
-    for (QPushButton *b : dlg.findChildren<QPushButton *>())
-      if (b->property("instanceId").toString() == "probe")
-        probeBtn = b;
-    check(probeBtn && probeBtn->isCheckable(), "probe button checkable in delete mode");
-    if (probeBtn)
-      probeBtn->setChecked(true);
-    del->click();          // leave delete mode: delete what is checked
-    check(!QFile::exists(probeFile), "probe config removed");
-    check(!instanceButtons(dlg).contains("probe"), "probe no longer listed");
+    Settings p("p", dir.path());
+    check(p.getString("DMM/calc-expression") == "volt * i", "formula: " + p.getString("DMM/calc-expression"));
+    check(p.getString("Port settings/device") == "calc W volt * i", "port: " + p.getString("Port settings/device"));
+    Settings volt("volt", dir.path());
+    check(volt.getString("DMM/model") == "UT803", "settings moved with it");
+    Settings other("other", dir.path());
+    check(other.getString("Port settings/device") == "calc A i * 2", "others unchanged");
   }
-
-  // --- 3. a calculated instance gets the keys the new process needs ---
-  const QString calcFile = InstancesDlg::createCalculatedInstance("p", dir.path(), "W", "u * i", false);
-  check(QFile::exists(calcFile), "calc config created: " + calcFile);
-  {
-    Settings calc("p", dir.path());
-    check(calc.getString("DMM/model") == "QtDMM Calculated value", "model key");
-    check(calc.getBool("DMM/configured"), "configured flag set (auto-connect at first start)");
-    check(calc.getString("Port settings/device") == "calc W u * i", "device string");
-    check(calc.getString("DMM/calc-expression") == "u * i", "formula key");
-  }
+  check(library.find(power)->keys.value("DMM/calc-expression") == "sqrt(volt^2)", "My devices: formula");
+  check(library.find(power)->keys.value("Port settings/device") == "calc V sqrt(volt^2)", "My devices: port");
+  check(!settings.renameConfig("default", "x"), "default is not renamed");
+  // the unit stays even when it is called like the instance
+  check(Instances::renamedInFormula({ { "Port settings/device", "calc W W * 2" } }, "W", "w")
+          .value("Port settings/device") == "calc W w * 2", "the unit stays");
 
   // --- 4. a new instance copies everything but the meter ---
   settings.setString("Port settings/device", "Serial /dev/ttyUSB0");
@@ -124,8 +131,8 @@ int main(int argc, char **argv)
   }
 
   if (failed == 0)
-    qInfo() << "All instances dialog tests passed.";
+    qInfo() << "All instances tests passed.";
   else
-    qWarning() << failed << "instances dialog test(s) failed.";
+    qWarning() << failed << "instances test(s) failed.";
   return failed == 0 ? 0 : 1;
 }

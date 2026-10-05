@@ -273,17 +273,22 @@ qtdmm [options]
 
 ### Several meters at once
 
-Every QtDMM window is one *instance*, identified by its `--config-id`. Start
-further instances from **Instances** (Ctrl+N): *Add* asks for a name and
-launches a new QtDMM with that id. The new instance starts with a copy of
-the current one's settings (graph, display, alarms, …) but without the
-meter and its connection, so only the meter needs choosing; its window does
-not take over the position, and an SCPI server stays off until you enable
-it with a free port. The list shows which instances are
-configured, which are running and what each one currently reads, and lets
-you open or remove them. The **ƒ** button creates a calculated instance
-from a name, a unit and a formula in one go (see
-[Calculated values](docs/user/calculated-values.md)). Running
+Every QtDMM window is one *instance*, identified by its `--config-id`. A
+device of [My devices](docs/user/my-devices.md) opens in an instance of its own with
+*Open in a new window* in its context menu in the sidebar, and the
+assistant *Add device* offers *In a new window* as well. The new instance
+starts with a copy of the current one's settings (graph, display, alarms,
+…) and the device; its window does not take over the position, and an SCPI
+server stays off until you enable it with a free port.
+
+The node **Instances** of the sidebar (F9) lists the configured and the
+running instances with what each one currently reads and, below it, its
+device; this window's own is bold. A click brings a running instance to
+the front or starts a stopped one. A stopped instance can be renamed (F2 or
+its context menu) and deleted. Renaming also changes the formulas that use
+the old name, in the other instances and in My devices (see
+[Calculated values](docs/user/calculated-values.md)); an instance that is running
+uses the new formula after reconnecting. Running
 instances know about each other through shared memory — the same mechanism
 that stops two windows from using the `default` id at once. An instance can
 also compute its value from the others' readings, see

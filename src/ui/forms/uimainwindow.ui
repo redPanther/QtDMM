@@ -44,7 +44,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Instances"/>
    <addaction name="separator"/>
    <addaction name="action_Connect"/>
    <addaction name="action_Reset"/>
@@ -441,20 +440,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
-   </property>
-  </action>
-  <action name="action_Instances">
-   <property name="icon">
-    <iconset theme="qtdmm-instances"/>
-   </property>
-   <property name="text">
-    <string>Instances</string>
-   </property>
-   <property name="toolTip">
-    <string>Instance Manager</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

@@ -177,6 +177,17 @@ void Settings::deleteConfig(QString instance_id)
   configFile.remove();
 }
 
+bool Settings::renameConfig(const QString &from, const QString &to)
+{
+  if (from.isEmpty() || to.isEmpty() || from == QLatin1String("default") || to == QLatin1String("default"))
+    return false;
+  const auto file = [this](const QString &id)
+  { return m_configPath + "/" + m_configBaseFileName + "_" + id + "." + m_configFileNameSuffix; };
+  if (QFile::exists(file(to)))
+    return false;
+  return QFile::rename(file(from), file(to));
+}
+
 bool Settings::isMeterKey(const QString &key)
 {
   // the meter belongs to the instance (and which of My devices it is,

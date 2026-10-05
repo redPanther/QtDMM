@@ -5,6 +5,7 @@
 #include <QContextMenuEvent>
 #include <QDropEvent>
 #include <QHeaderView>
+#include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
@@ -13,6 +14,9 @@
 
 namespace
 {
+// an instance item: running or not
+constexpr int kRunning = Qt::UserRole + 1;
+
 // the state of the device in use, as the status line's dot: readings
 // coming in or not; the others get an empty one, so the names line up
 QIcon dot(const QColor &color)
@@ -37,6 +41,11 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
 {
   setObjectName("ui_deviceSidebar");
   setHeaderHidden(true);
+  // the name, and the reading of an instance at the right
+  setColumnCount(2);
+  header()->setStretchLastSection(false);
+  header()->setSectionResizeMode(0, QHeaderView::Stretch);
+  header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
   setRootIsDecorated(true);
   setDragDropMode(QAbstractItemView::InternalMove);
   setSelectionMode(QAbstractItemView::SingleSelection);
@@ -48,19 +57,46 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   QFont bold = m_devices->font(0);
   bold.setBold(true);
   m_devices->setFont(0, bold);
+  m_devices->setFirstColumnSpanned(true);
   m_devices->setExpanded(true);
+  m_instances = new QTreeWidgetItem(this, { tr("Instances") });
+  m_instances->setFlags(Qt::ItemIsEnabled);
+  m_instances->setFont(0, bold);
+  m_instances->setFirstColumnSpanned(true);
+  m_instances->setExpanded(true);
 
   connect(this, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item)
   {
     const QString id = idOf(item);
     if (!id.isEmpty() && id != m_current)
       Q_EMIT switchRequested(id);
+    const QString instance = instanceOf(item);
+    if (!instance.isEmpty() && instance != m_ownInstance)
+      Q_EMIT instanceRequested(instance);
   });
   // renamed in place
   connect(this, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem *item)
   {
+    if (m_filling)
+      return;
+    if (item->parent() == m_instances)
+    {
+      // the new name only counts once it is checked; till then the old one
+      const QString from = item->data(0, Qt::UserRole).toString();
+      const QString to = item->text(0).trimmed();
+      {
+        QSignalBlocker block(this);
+        item->setText(0, from);
+      }
+      if (!to.isEmpty() && to != from)
+      {
+        m_selectInstance = to;   // stays selected under its new name
+        Q_EMIT renameInstanceRequested(from, to);
+      }
+      return;
+    }
     const QString id = idOf(item);
-    if (m_filling || id.isEmpty())
+    if (id.isEmpty())
       return;
     const std::optional<MyDevice> d = m_library->find(id);
     const QString name = item->text(0).trimmed();
@@ -82,6 +118,76 @@ QString DeviceSidebar::idOf(const QTreeWidgetItem *item) const
   return item && item->parent() == m_devices ? item->data(0, Qt::UserRole).toString() : QString();
 }
 
+QString DeviceSidebar::instanceOf(const QTreeWidgetItem *item) const
+{
+  if (item && item->parent() && item->parent()->parent() == m_instances)
+    item = item->parent();
+  return item && item->parent() == m_instances ? item->data(0, Qt::UserRole).toString() : QString();
+}
+
+QTreeWidgetItem *DeviceSidebar::instanceItem(const QString &id) const
+{
+  for (int i = 0; i < m_instances->childCount(); ++i)
+    if (m_instances->child(i)->data(0, Qt::UserRole).toString() == id)
+      return m_instances->child(i);
+  return nullptr;
+}
+
+void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString &own)
+{
+  if (state() == QAbstractItemView::EditingState)
+    return;
+  m_filling = true;
+  m_ownInstance = own;
+  QStringList ids, shown;
+  for (const Instance &instance : instances)
+    ids << instance.id;
+  for (int i = 0; i < m_instances->childCount(); ++i)
+    shown << m_instances->child(i)->data(0, Qt::UserRole).toString();
+  if (ids != shown)
+  {
+    const QString selected = m_selectInstance.isEmpty() ? instanceOf(currentItem()) : m_selectInstance;
+    qDeleteAll(m_instances->takeChildren());
+    for (const Instance &instance : instances)
+    {
+      auto *item = new QTreeWidgetItem(m_instances, { instance.id });
+      item->setData(0, Qt::UserRole, instance.id);
+      item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+      new QTreeWidgetItem(item);
+      item->child(0)->setFirstColumnSpanned(true);   // a long name needs no room for a value
+      if (instance.id == selected)
+        setCurrentItem(item);
+    }
+  }
+  m_selectInstance.clear();
+  const QColor grey = palette().color(QPalette::Disabled, QPalette::WindowText);
+  for (int i = 0; i < instances.size(); ++i)
+  {
+    const Instance &instance = instances[i];
+    QTreeWidgetItem *item = m_instances->child(i);
+    // renaming and deleting are for stopped ones; "default" has no name to change
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    if (!instance.running && instance.id != QLatin1String("default"))
+      flags |= Qt::ItemIsEditable;
+    item->setFlags(flags);
+    item->setData(0, kRunning, instance.running);
+    item->setText(1, instance.value);
+    item->setToolTip(0, instance.device.isEmpty() ? instance.id : QString("%1 · %2").arg(instance.id, instance.device));
+    item->setForeground(1, instance.running ? palette().color(QPalette::Text) : grey);
+    QFont font = item->font(0);
+    font.setBold(instance.id == own);
+    item->setFont(0, font);
+    item->setIcon(0, dot(instance.active ? QColor(0x22, 0xaa, 0x22) : instance.running ? grey : QColor()));
+    QTreeWidgetItem *device = item->child(0);
+    device->setText(0, instance.device);
+    device->setFlags(Qt::ItemIsEnabled);
+    device->setForeground(0, grey);
+    device->setHidden(instance.device.isEmpty());
+    item->setExpanded(true);
+  }
+  m_filling = false;
+}
+
 void DeviceSidebar::fill()
 {
   m_filling = true;
@@ -92,6 +198,7 @@ void DeviceSidebar::fill()
     auto *item = new QTreeWidgetItem(m_devices, { d.name });
     item->setData(0, Qt::UserRole, d.id);
     item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEditable);
+    item->setFirstColumnSpanned(true);
     item->setToolTip(0, d.where().isEmpty() ? d.model() : QString("%1 · %2").arg(d.model(), d.where()));
     if (d.id == selected)
       setCurrentItem(item);
@@ -153,9 +260,56 @@ void DeviceSidebar::dropEvent(QDropEvent *event)
     m_library->move(id, index);
 }
 
+bool DeviceSidebar::event(QEvent *event)
+{
+  if (event->type() == QEvent::ShortcutOverride && static_cast<QKeyEvent *>(event)->key() == Qt::Key_F2
+      && currentItem() && (currentItem()->flags() & Qt::ItemIsEditable))
+  {
+    event->accept();
+    return true;
+  }
+  return QTreeWidget::event(event);
+}
+
+void DeviceSidebar::instanceMenu(QTreeWidgetItem *item, const QPoint &pos)
+{
+  const QString id = instanceOf(item);
+  if (item->parent() != m_instances)
+    item = item->parent();
+  const bool running = item->data(0, kRunning).toBool();
+  QMenu menu(this);
+  QAction *open = menu.addAction(running ? tr("Bring to &front") : tr("&Start"));
+  open->setEnabled(id != m_ownInstance);
+  menu.addSeparator();
+  QAction *rename = menu.addAction(tr("&Rename"));
+  QAction *remove = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete"));
+  // a running instance keeps its name and its file
+  rename->setEnabled(item->flags() & Qt::ItemIsEditable);
+  remove->setEnabled(item->flags() & Qt::ItemIsEditable);
+  if (running)
+    for (QAction *a : { rename, remove })
+      a->setToolTip(tr("Only for a stopped instance"));
+  menu.setToolTipsVisible(true);
+  QAction *chosen = menu.exec(pos);
+  if (chosen == open)
+    Q_EMIT instanceRequested(id);
+  else if (chosen == rename)
+    editItem(item);
+  else if (chosen == remove
+           && QMessageBox::question(this, tr("Delete instance"),
+                                    tr("Delete the instance \"%1\" with its settings?").arg(id))
+                == QMessageBox::Yes)
+    Q_EMIT deleteInstanceRequested(id);
+}
+
 void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
 {
   QTreeWidgetItem *item = itemAt(event->pos());
+  if (!instanceOf(item).isEmpty())
+  {
+    instanceMenu(item, event->globalPos());
+    return;
+  }
   const QString id = idOf(item);
   const std::optional<MyDevice> d = m_library->find(id);
   if (!d)

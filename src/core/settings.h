@@ -48,6 +48,9 @@ public:
 
   /// Removes the settings file of another instance.
   void           deleteConfig(QString instance_id);
+  /// Renames the settings file of another (stopped) instance; false when
+  /// there is none or @p to already has one. "default" is not renamed.
+  bool           renameConfig(const QString &from, const QString &to);
   /// Writes this instance's settings as the file of a new instance, without
   /// the meter and its connection (DMM/, Port settings/), the window position
   /// and the SCPI server switch. Returns the file written.

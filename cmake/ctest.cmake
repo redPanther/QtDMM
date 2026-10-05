@@ -82,13 +82,13 @@ if (BUILD_TESTING)
 	target_link_libraries(${TEST_SHAREDSTATE} PRIVATE Qt::Core)
 	add_test(NAME shared_state COMMAND ${TEST_SHAREDSTATE})
 
-	## instances dialog: list from config files, delete mode, calculated instance
+	## instances: names, renaming one with the formulas that use it, a new one copies all but the meter
 	set( TEST_INSTANCES test_instances)
-	add_executable(${TEST_INSTANCES} MACOSX_BUNDLE tests/test_instances.cpp src/ui/dialogs/instancesdlg.cpp src/core/settings.cpp src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp src/core/siprefix.cpp ${DECODER_FILES}
-		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uiinstancesdlg.ui)
+	add_executable(${TEST_INSTANCES} MACOSX_BUNDLE tests/test_instances.cpp src/core/instances.cpp src/core/settings.cpp src/core/devicelibrary.cpp
+		src/core/calcexpr.cpp src/core/siprefix.cpp)
 	target_include_directories(${TEST_INSTANCES} PRIVATE src)
-	target_link_libraries(${TEST_INSTANCES} PRIVATE Qt6::Widgets Qt::Core)
-	add_test(NAME instances_dialog COMMAND ${TEST_INSTANCES})
+	target_link_libraries(${TEST_INSTANCES} PRIVATE Qt6::Gui Qt::Core)
+	add_test(NAME instances COMMAND ${TEST_INSTANCES})
 	## the meter's settings widget (DeviceSettings): keys in and out, "Advanced", groups per kind of meter
 	add_executable(test_devicesettings MACOSX_BUNDLE tests/test_devicesettings.cpp src/ui/devicesettings.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
 		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
@@ -108,7 +108,7 @@ if (BUILD_TESTING)
 		target_sources(test_adddevice PRIVATE src/device/transports/blegatt.cpp src/device/transports/ble.cpp)
 	endif()
 	add_test(NAME add_device COMMAND test_adddevice)
-	## the sidebar "Devices": My devices in order, the one in use, click, rename, when it is shown; Settings of an entry
+	## the sidebar "Devices": My devices in order, the one in use, click, rename, when it is shown; Settings of an entry; the instances
 	add_executable(test_devicesidebar MACOSX_BUNDLE tests/test_devicesidebar.cpp src/ui/devicesidebar.cpp
 		src/ui/dialogs/devicesettingsdlg.cpp src/ui/devicesettings.cpp
 		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}

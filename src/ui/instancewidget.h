@@ -34,7 +34,6 @@ class MeterController;
 class SettingsDialog;
 class LcdWidget;
 class Settings;
-class InstancesDlg;
 class AnalogMeter;
 class ReadingsModel;
 struct Alarm;
@@ -110,6 +109,8 @@ public:
   /// "My devices", named after the device (DeviceLibrary::instanceId());
   /// returns the instance name, empty when there is no such entry.
   QString     openInNewWindow(const QString &id);
+  /// --config-dir as given (empty: the default), for the instances started from here.
+  QString     configPath() const { return m_configPath; }
 
 Q_SIGNALS:
   /// Recording started/stopped (graph state).
@@ -165,10 +166,6 @@ public Q_SLOTS:
   void        applySLOT(bool reconnect = false);
   /// Settings dialog Cancel.
   void        rejectSLOT();
-  /// Shows the instances dialog.
-  void        instancesSLOT();
-  /// The set of running instances changed (from SharedStateManager).
-  void        instancesChangedSlot(QStringList&);
 
 protected:
   void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
@@ -181,7 +178,6 @@ protected:
   AnalogMeter   *m_meter;
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
-  InstancesDlg *m_instancesDlg;
   Settings    *m_settings;
   /// Disconnects, takes over @p keys of the entry @p id, connects; @p name
   /// for the message.

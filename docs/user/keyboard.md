@@ -24,7 +24,7 @@ share the space differently.
 | F2 | Settings |
 | Shift+F2 | Settings, Multimeter page |
 | Ctrl+F2 | Settings, Recording page |
-| Ctrl+N | Manage instances |
+| F9 | Show or hide the sidebar with My devices and the instances |
 | Ctrl+M | Open the menu |
 | F1 | This handbook |
 | Shift+F1 | Direct help — then click any control for an explanation |
@@ -88,12 +88,9 @@ While the table has the focus:
 | Enter or F3 | Next match, Shift+Enter or Shift+F3 the previous one |
 | Esc | Close |
 
-## Instances dialog
+## Sidebar
 
 | Key | Action |
 |---|---|
-| Ins | Add an instance |
-| Del | Remove the selected instances |
-| Ctrl+F | Add a calculated instance (ƒ) |
-| Esc | Close |
+| F2 | Rename the selected device or stopped instance |
 
