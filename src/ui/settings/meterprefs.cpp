@@ -69,17 +69,22 @@ void MeterPrefs::setStateManager(SharedStateManager *state)
   m_settings->setStateManager(state);
 }
 
-void MeterPrefs::loadFields(const QVariantMap &keys)
+QStringList MeterPrefs::availablePorts(Settings *cfg)
 {
   // >>> temporary solution to make rfc2217 useable
   QStringList ports = Transport::availablePorts();
   for (int i = 0; i < 10; i++)
   {
-    const QString dev = m_cfg->getString(QString("Port settings/custom_device%1").arg(i), "");
+    const QString dev = cfg->getString(QString("Port settings/custom_device%1").arg(i), "");
     if (dev.size() > 0)
       ports.append(dev);
   }
-  m_settings->setPorts(ports);
+  return ports;
+}
+
+void MeterPrefs::loadFields(const QVariantMap &keys)
+{
+  m_settings->setPorts(availablePorts(m_cfg));
   m_settings->setSigrokExe(m_cfg->getString("Port settings/sigrok_exe", "sigrok-cli"));
   m_settings->load(keys);
 }

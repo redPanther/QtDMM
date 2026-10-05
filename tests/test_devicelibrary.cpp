@@ -266,6 +266,15 @@ int main(int argc, char **argv)
   }
 #endif
 
+  // 9. instance names for "In a new window": identifiers, unique, not "default"
+  check(DeviceLibrary::instanceId("Uni-Trend UT61E", {}) == "Uni_Trend_UT61E", "instanceId: " + DeviceLibrary::instanceId("Uni-Trend UT61E", {}));
+  check(DeviceLibrary::instanceId("Uni-Trend UT61E", { "default", "uni_trend_ut61e" }) == "Uni_Trend_UT61E_2", "instanceId: taken in another case");
+  check(DeviceLibrary::instanceId("Uni-Trend UT61E", { "Uni_Trend_UT61E", "Uni_Trend_UT61E_2" }) == "Uni_Trend_UT61E_3", "instanceId: third");
+  check(DeviceLibrary::instanceId("34465A (sigrok)", {}) == "m_34465A_sigrok", "instanceId: digit first");
+  check(DeviceLibrary::instanceId("Default", {}) == "Default_2", "instanceId: not default");
+  check(DeviceLibrary::instanceId("Gerät für Öl", {}) == "Ger_t_f_r_l", "instanceId: ASCII only " + DeviceLibrary::instanceId("Gerät für Öl", {}));
+  check(DeviceLibrary::instanceId("  ", {}) == "meter", "instanceId: empty name");
+
   if (failed)
   {
     qWarning() << failed << "device library check(s) failed";
