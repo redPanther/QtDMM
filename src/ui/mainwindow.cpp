@@ -34,6 +34,9 @@
 #include "ui/settings/meterprefs.h"
 #include "device/transports/serial.h"
 #include "core/devicelibrary.h"
+#include "core/instances.h"
+#include "core/sampletypes.h"
+#include "core/siprefix.h"
 #include "ui/instancewidget.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/lcdwidget.h"
@@ -202,19 +205,35 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_sidebarDock->setWidget(m_sidebar);
   addDockWidget(Qt::LeftDockWidgetArea, m_sidebarDock);
   m_sidebarDock->hide();
-  QAction *sidebar = m_sidebarDock->toggleViewAction();
-  sidebar->setIcon(QIcon::fromTheme("view-sidetree"));
-  sidebar->setText(tr("De&vices"));
-  sidebar->setToolTip(tr("Devices: show or hide the sidebar with My devices"));
+  // an own action: without DockWidgetClosable Qt disables the toggleViewAction()
+  m_sidebarAction = new QAction(QIcon::fromTheme("view-sidetree"), tr("De&vices"), this);
+  m_sidebarAction->setObjectName("ui_sidebarAction");
+  m_sidebarAction->setCheckable(true);
+  m_sidebarAction->setShortcut(QKeySequence("F9"));   // as the sidebars of KDE's file managers
+  QAction *sidebar = m_sidebarAction;
+  sidebar->setToolTip(tr("Devices: show or hide the sidebar with My devices and the instances"));
+  addAction(sidebar);   // F9 also with the toolbar hidden
   sidebar->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Devices</span></p>"
                            "<p>The sidebar with My devices: click one to switch to it, its context menu has its "
                            "settings, rename, a new window and remove. Drag an entry to change the order."
                            "</p></body></html>"));
-  connect(sidebar, &QAction::triggered, this, [this](bool on) { m_wid->settings()->setBool("Windows/sidebar", on); });
+  connect(sidebar, &QAction::triggered, this, [this](bool on)
+  {
+    showSidebar(on);
+    m_wid->settings()->setBool("Windows/sidebar", on);
+  });
   connect(m_sidebar, &DeviceSidebar::switchRequested, m_wid, &InstanceWidget::switchDevice);
   connect(m_sidebar, &DeviceSidebar::settingsRequested, this, &MainWindow::deviceSettings);
   connect(m_sidebar, &DeviceSidebar::newWindowRequested, this, &MainWindow::openInNewWindow);
-  toolBarDMM->insertAction(action_Instances, sidebar);
+  connect(m_sidebar, &DeviceSidebar::instanceRequested, this, &MainWindow::openInstance);
+  connect(m_sidebar, &DeviceSidebar::renameInstanceRequested, this, &MainWindow::renameInstance);
+  connect(m_sidebar, &DeviceSidebar::deleteInstanceRequested, this, &MainWindow::deleteInstance);
+  // the readings of the others change all the time
+  m_instancesTimer = new QTimer(this);
+  m_instancesTimer->setInterval(1000);
+  connect(m_instancesTimer, &QTimer::timeout, this, &MainWindow::updateInstances);
+  m_instancesTimer->start();
+  toolBarDMM->insertAction(toolBarDMM->actions().value(0), sidebar);
   m_addDeviceAction = new QAction(QIcon::fromTheme("qtdmm-dmm"), tr("&Add device..."), this);
   m_addDeviceAction->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
   m_addDeviceAction->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Add device</span></p>"
@@ -599,14 +618,13 @@ void MainWindow::createActions()
   connect(action_Quit, SIGNAL(triggered()), this, SLOT(setToolbarVisibilitySLOT()));
   connect(action_Quit, SIGNAL(triggered()), m_wid, SLOT(quitSLOT()));
   connect(action_Direct_help, SIGNAL(triggered()), m_wid, SLOT(helpSLOT()));
-  connect(action_Instances, SIGNAL(triggered()), m_wid, SLOT(instancesSLOT()));
 
   connect(toolBarMenu, SIGNAL(visibilityChanged(bool)),  this, SLOT(setToolbarVisibilitySLOT()));
   connect(toolBarFile, SIGNAL(visibilityChanged(bool)), this, SLOT(setToolbarVisibilitySLOT()));
   connect(toolBarRecorder, SIGNAL(visibilityChanged(bool)), this, SLOT(setToolbarVisibilitySLOT()));
   connect(toolBarDMM, SIGNAL(visibilityChanged(bool)), this, SLOT(setToolbarVisibilitySLOT()));
 
-  connect(m_stateMgr, SIGNAL(instancesChanged(QStringList&)), m_wid, SLOT(instancesChangedSlot(QStringList&)));
+  connect(m_stateMgr, &SharedStateManager::instancesChanged, this, &MainWindow::updateInstances);
 
 }
 
@@ -795,7 +813,7 @@ void MainWindow::on_action_Menu_triggered()
   {
     m_menu = new QMenu(this);
     m_menu->addAction(action_Configure);
-    m_menu->addAction(m_sidebarDock->toggleViewAction());
+    m_menu->addAction(m_sidebarAction);
     m_menu->addAction(action_Graph);
     m_menu->addAction(m_displayAction);
     m_menu->addAction(m_meterAction);
@@ -986,6 +1004,106 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
 void MainWindow::showSidebar(bool show)
 {
   m_sidebarDock->setVisible(show);
+  m_sidebarAction->setChecked(show);
+  updateInstances();
+}
+
+void MainWindow::updateInstances()
+{
+  if (!m_sidebarDock->isVisible())
+    return;
+  const QString own = m_stateMgr->id();
+  const QStringList running = m_stateMgr->instances();
+  QStringList ids = m_wid->settings()->getConfigInstances();
+  for (const QString &id : running)
+    if (!ids.contains(id))
+      ids << id;
+  const auto readings = m_stateMgr->readings();
+  const qint64 now = QDateTime::currentMSecsSinceEpoch();
+  QList<DeviceSidebar::Instance> rows;
+  for (const QString &id : ids)
+  {
+    DeviceSidebar::Instance row;
+    row.id = id;
+    row.running = id == own || running.contains(id);
+    // its device: the entry of My devices, else the model or the formula
+    const Settings other(id == QLatin1String("default") ? QString() : id, m_wid->settings()->configDir());
+    const QVariantMap keys = id == own ? m_wid->settings()->meterKeys() : other.meterKeys();
+    const std::optional<MyDevice> device = m_wid->devices()->find(keys.value("DMM/my-device").toString());
+    const QString model = keys.value("DMM/model").toString();
+    if (device)
+      row.device = device->name;
+    else if (!keys.value("DMM/calc-expression").toString().isEmpty())
+      row.device = "= " + keys.value("DMM/calc-expression").toString();
+    else if (model != QLatin1String("Manual"))
+      row.device = model;
+    // its reading as the old instances dialog showed it
+    if (readings.contains(id) && row.running)
+    {
+      const SharedStateManager::Reading &r = readings[id];
+      if (r.valid)
+      {
+        QString prefix;
+        const QString value = SiPrefix::format(r.value, &prefix);
+        row.value = QString("%1 %2%3 %4").arg(value.left(8), prefix, r.unit,
+                                              couplingText(PortKey::fromString(r.port).defining)).trimmed();
+      }
+      else
+        row.value = QStringLiteral("OL");
+      row.active = now - r.msecs < 3000;
+    }
+    else if (!row.running)
+      row.value = tr("stopped");
+    rows << row;
+  }
+  m_sidebar->setInstances(rows, own);
+}
+
+void MainWindow::openInstance(const QString &id)
+{
+  if (m_stateMgr->instances().contains(id))
+  {
+    m_stateMgr->writeState("RAISE_" + id);
+    return;
+  }
+  QStringList args;
+  if (id != QLatin1String("default"))
+    args << "--config-id" << id;
+  if (!m_wid->configPath().isEmpty())
+    args << "--config-dir" << m_wid->configPath();
+  QProcess::startDetached(QCoreApplication::applicationFilePath(), args);
+  statusBar()->showMessage(tr("The instance %1 starts").arg(id), 4000);
+}
+
+void MainWindow::renameInstance(const QString &from, const QString &to)
+{
+  QString error;
+  const QStringList changed = Instances::rename(*m_wid->settings(), m_wid->devices(), from, to, &error);
+  if (!error.isEmpty())
+  {
+    QMessageBox::warning(this, tr("Rename instance"), error);
+    return;
+  }
+  m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
+  updateInstances();
+  // the running ones still compute with the formula they connected with
+  QStringList runningChanged;
+  for (const QString &id : changed)
+    if (m_stateMgr->instances().contains(id))
+      runningChanged << id;
+  if (!runningChanged.isEmpty())
+    QMessageBox::information(this, tr("Rename instance"),
+                             tr("The formulas now use \"%1\". The running instances %2 use it after reconnecting.")
+                               .arg(to, runningChanged.join(", ")));
+}
+
+void MainWindow::deleteInstance(const QString &id)
+{
+  if (m_stateMgr->instances().contains(id) || id == QLatin1String("default"))
+    return;
+  m_wid->settings()->deleteConfig(id);
+  m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
+  updateInstances();
 }
 
 void MainWindow::deviceSettings(const QString &id)

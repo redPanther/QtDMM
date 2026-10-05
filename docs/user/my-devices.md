@@ -70,8 +70,8 @@ nothing changes before *OK* or *Apply*.
 ## Several windows
 
 The list is the same for all instances: it is kept in `devices.conf` next
-to their settings files. A new instance (**Instances**) can start with one
-of the devices right away. Two windows cannot use the same serial port at
+to their settings files. *Open in a new window* starts a new instance
+with the device; the node **Instances** of the sidebar shows them all. Two windows cannot use the same serial port at
 the same time; the second one says the port is busy.
 
 A Victron key is kept in `devices.conf` in plain text, as in the settings

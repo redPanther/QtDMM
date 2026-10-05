@@ -233,6 +233,41 @@ struct CalcExpr::Parser
 
 // The waveforms as formulas over t (seconds since connecting). Kept as
 // plain text so the Custom choice can start from any of them.
+QString CalcExpr::renameVariable(const QString &text, const QString &from, const QString &to)
+{
+  QString out;
+  int pos = 0;
+  while (pos < text.size())
+  {
+    const QChar c = text[pos];
+    if (c.isDigit() || c == '.')
+    {
+      // a number with its exponent and SI suffix is one token
+      const int start = pos;
+      while (pos < text.size() && (Parser::isNameChar(text[pos]) || text[pos] == '.'
+                                   || ((text[pos] == '+' || text[pos] == '-') && pos > start
+                                       && (text[pos - 1] == 'e' || text[pos - 1] == 'E'))))
+        ++pos;
+      out += text.mid(start, pos - start);
+    }
+    else if (Parser::isNameStart(c))
+    {
+      const int start = pos;
+      while (pos < text.size() && Parser::isNameChar(text[pos]))
+        ++pos;
+      const QString name = text.mid(start, pos - start);
+      int next = pos;
+      while (next < text.size() && text[next].isSpace())
+        ++next;
+      const bool function = next < text.size() && text[next] == '(';
+      out += name == from && !function ? to : name;
+    }
+    else
+      out += text[pos++];
+  }
+  return out;
+}
+
 QString CalcExpr::waveformFormula(Waveform waveform, const QString &min, const QString &max,
                                  const QString &period, const QString &noise)
 {

@@ -4,7 +4,8 @@
 // The sidebar "Devices" without a main window: My devices in their order,
 // the one in use marked, a click to switch, rename in place, a change of
 // the library shown; when the sidebar is shown at the start and after the
-// assistant; the dialog "Settings..." of an entry.
+// assistant; the dialog "Settings..." of an entry; the node "Instances"
+// with its readings, clicks, rename and delete only for stopped ones.
 
 #include <QtWidgets>
 #include <QTemporaryDir>
@@ -94,6 +95,50 @@ int main(int argc, char **argv)
                { "Port settings/ble-key", "00112233445566778899aabbccddeeff" } });
     check(ok->isEnabled(), "complete: OK");
     check(dlg.keys().value("DMM/model") == "Victron SmartShunt", "keys: the model");
+  }
+
+  // 7. the instances: this window's bold, a click on another opens it
+  {
+    QList<DeviceSidebar::Instance> rows;
+    rows << DeviceSidebar::Instance { "default", "Bench UT61E", "12.01 V DC", true, true }
+         << DeviceSidebar::Instance { "p", "= u * i", "stopped", false, false }
+         << DeviceSidebar::Instance { "u", "", "OL", true, false };
+    sidebar.setInstances(rows, "default");
+    check(sidebar.instancesNode()->childCount() == 3, "three instances");
+    QTreeWidgetItem *own = sidebar.instanceItem("default");
+    QTreeWidgetItem *p = sidebar.instanceItem("p");
+    QTreeWidgetItem *u = sidebar.instanceItem("u");
+    check(own && own->font(0).bold() && !p->font(0).bold(), "this window's is bold");
+    check(own && own->text(1) == "12.01 V DC", "the reading");
+    check(own && own->child(0)->text(0) == "Bench UT61E", "the device below");
+    check(u && u->child(0)->isHidden(), "no device, no line");
+    check(p && (p->flags() & Qt::ItemIsEditable), "a stopped one can be renamed");
+    check(u && !(u->flags() & Qt::ItemIsEditable), "a running one cannot");
+    check(own && !(own->flags() & Qt::ItemIsEditable), "nor this one");
+    check(!(sidebar.instancesNode()->flags() & Qt::ItemIsDropEnabled), "no device dropped into the instances");
+
+    QStringList opened;
+    QObject::connect(&sidebar, &DeviceSidebar::instanceRequested, [&](const QString &id) { opened << id; });
+    Q_EMIT sidebar.itemClicked(own, 0);
+    Q_EMIT sidebar.itemClicked(p->child(0), 0);
+    Q_EMIT sidebar.itemClicked(u, 0);
+    check(opened == QStringList({ "p", "u" }), "click opens another: " + opened.join(','));
+
+    // the new name goes to MainWindow; the item keeps the old one till then
+    QStringList renamed;
+    QObject::connect(&sidebar, &DeviceSidebar::renameInstanceRequested,
+                     [&](const QString &from, const QString &to) { renamed << from + ">" + to; });
+    p->setText(0, " power ");
+    check(renamed == QStringList({ "p>power" }), "rename asked: " + renamed.join(','));
+    check(p->text(0) == "p", "old name until renamed");
+
+    // the values change in place, the items stay
+    rows[0].value = "12.02 V DC";
+    sidebar.setInstances(rows, "default");
+    check(sidebar.instanceItem("p") == p && own->text(1) == "12.02 V DC", "updated in place");
+    rows.removeAt(1);
+    sidebar.setInstances(rows, "default");
+    check(!sidebar.instanceItem("p") && sidebar.instancesNode()->childCount() == 2, "deleted one gone");
   }
 
   if (failed)

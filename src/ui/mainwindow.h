@@ -123,6 +123,7 @@ protected:
   QAction    *m_poincareAction = nullptr;
   QAction    *m_addDeviceAction = nullptr;
   QDockWidget   *m_sidebarDock = nullptr;
+  QAction       *m_sidebarAction = nullptr; ///< shows and hides the sidebar
   DeviceSidebar *m_sidebar = nullptr;     ///< "My devices" at the left
   /// "Settings..." of an entry: its meter's settings; the device in use
   /// takes them at once.
@@ -130,6 +131,14 @@ protected:
   /// The entry @p id in a new window (instance) of its own.
   void        openInNewWindow(const QString &id);
   void        showSidebar(bool show);
+  /// The node "Instances" anew: the configured and running instances with
+  /// their devices and readings (each second while the sidebar is shown).
+  void        updateInstances();
+  /// A click on an instance: a running one comes to the front, a stopped one starts.
+  void        openInstance(const QString &id);
+  void        renameInstance(const QString &from, const QString &to);
+  void        deleteInstance(const QString &id);
+  QTimer     *m_instancesTimer = nullptr;
   /// The places (DeviceLibrary::place()) the running instances use, with
   /// "In use here" / "In use by the instance x" for the assistant's cards.
   QMap<QString, QString> placesInUse() const;

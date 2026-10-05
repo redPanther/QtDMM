@@ -42,7 +42,6 @@
 #include "core/alarm.h"
 #include "core/siprefix.h"
 #include "core/settings.h"
-#include "ui/dialogs/instancesdlg.h"
 #include "service/sharedstatemanager.h"
 
 
@@ -88,10 +87,6 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   m_printDlg = new qtdmm::PrintDlg(this);
   m_printDlg->hide();
 
-  m_instancesDlg = new InstancesDlg(m_settings, instance_id, config_path,this);
-  m_instancesDlg->setDeviceLibrary(m_devices);
-
-  connect(m_instancesDlg, SIGNAL(writeState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
   connect(this, SIGNAL(sendState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
   connect(m_ctl, &MeterController::error, this, &InstanceWidget::error);
   connect(m_ctl, &MeterController::info, this, &InstanceWidget::info);
@@ -300,7 +295,6 @@ void InstanceWidget::setStateManager(SharedStateManager *mgr)
 {
   m_ctl->setStateManager(mgr);
   m_configDlg->setStateManager(mgr);
-  m_instancesDlg->setStateManager(mgr);
 }
 
 void InstanceWidget::resetSLOT()
@@ -374,7 +368,7 @@ QString InstanceWidget::openInNewWindow(const QString &id)
   if (!device)
     return QString();
   const QString instance = DeviceLibrary::instanceId(device->name, m_settings->getConfigInstances());
-  // as the instances dialog did: this instance's settings, the device's meter
+  // this instance's settings, the device's meter
   m_settings->copyConfig(instance);
   Settings created(instance, m_settings->configDir());
   created.setValues(device->keys);
@@ -629,7 +623,7 @@ void InstanceWidget::runningSLOT(bool on)
 bool InstanceWidget::dmmConfigured() const
 {
   // DMM/configured is set when the settings dialog is confirmed with OK (or
-  // by the instances dialog); the model check keeps configs from before
+  // for a new window with a device); the model check keeps configs from before
   // that key working. "Manual" alone proves nothing: applySLOT() writes it
   // at every exit, dialog or not.
   if (m_settings->getBool("DMM/configured", false))
@@ -665,16 +659,6 @@ QString InstanceWidget::dmmTitle() const
 void InstanceWidget::setToolbarVisibility(bool disp, bool dmm, bool graph, bool file)
 {
   m_configDlg->setToolbarVisibility(disp, dmm, graph, file);
-}
-
-void InstanceWidget::instancesSLOT()
-{
-  m_instancesDlg->show();
-}
-
-void InstanceWidget::instancesChangedSlot(QStringList& instances)
-{
-  m_instancesDlg->setInstancesOnline(instances);
 }
 
 // ---------------------------------------------------------------- alarms

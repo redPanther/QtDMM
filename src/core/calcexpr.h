@@ -33,6 +33,11 @@ public:
   /// The expression as parsed (trimmed source text).
   QString text() const { return m_text; }
 
+  /// @p text with the variable @p from renamed to @p to: whole names only,
+  /// not inside numbers ("1e3", "4.7n") and not a function of that name.
+  /// Works on any text, also one that does not parse.
+  static QString renameVariable(const QString &text, const QString &from, const QString &to);
+
   /// The signal shapes of the virtual meter; order = the settings combo.
   enum Waveform { Constant, Random, Sine, Triangle, Square, Sawtooth, Discharge, Custom };
   /// The formula over t (seconds) a waveform expands to: Constant is max,

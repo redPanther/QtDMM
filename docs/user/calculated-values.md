@@ -10,25 +10,26 @@ measured one.
 
 ## Setting it up
 
-1. Start one instance per meter and give them short names: **Instances**
-   (Ctrl+N), *Add*, e.g. `u` for the voltmeter and `i` for the ammeter.
-   Names are used as variable names in formulas, so they may contain
-   letters, digits and underscores only.
-2. Connect each of them to its meter as usual.
-3. Add a third instance, e.g. `p`. The quick way: the **ƒ** button in
-   *Instances* asks for the name, the unit and the formula, writes the
-   configuration and starts the instance already connected. The long way:
-   add a plain instance, open its settings and on the *Multimeter* page
-   choose the vendor **QtDMM** and the model **Calculated value**. Instead
-   of the port and protocol settings a *Formula* group appears:
+1. Open one instance per meter: *Add device*, *In a new window*, or *Open
+   in a new window* in the context menu of a device in the sidebar. Each
+   new instance is named after its device, e.g. `Bench_UT61E`; the node
+   **Instances** of the sidebar (F9) shows the names.
+2. Short names make short formulas, e.g. `u` for the voltmeter and `i` for
+   the ammeter: close the window, rename the stopped instance in the
+   sidebar with F2 and start it again with a click. Names are used as
+   variable names in formulas, so they may contain letters, digits and
+   underscores only.
+3. Add the calculation: *Add device*, *Simulated / calculated*, the model
+   **Calculated value**. Instead of the port and protocol settings a
+   *Formula* group appears:
     - **Unit** - the unit of the result without SI prefix: `W`, `V`, `A`,
       `Ohm`, ... QtDMM adds `m`, `k` and so on itself.
     - **Formula** - e.g. `u * i`. Below it QtDMM lists the variables with
       the values the instances currently deliver, and which instances are
       running; a formula that does not parse is shown in red with the
       position of the error.
-4. *OK*, then *Connect*. The status line reads *Calculating u * i* and the
-   display shows the power.
+4. *In a new window*: the new instance connects at its start. The status
+   line reads *Calculating u * i* and the display shows the power.
 
 Values are combined in their base units (volts, amperes, ohms), whatever
 range the meters happen to be in, and the result is shown with a fitting
