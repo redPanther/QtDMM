@@ -2,41 +2,37 @@
 
 ## Add device
 
-**Add device...**, the plus at the left of the toolbar, sets up a
-meter step by step and keeps it in [My devices](my-devices.md): the kind of
-connection, the meter with its settings and a name, then this window or a
-new one. *Simulated / calculated* is the virtual meter, a signal of its own
-to try QtDMM without hardware, or a value calculated from other windows.
+The quickest way: plug the meter in, switch it on and choose **Add
+device...**, the plus at the left of the toolbar. It sets the meter up step
+by step and keeps it in [My devices](my-devices.md).
 
-## Find device
+1. **How is it connected?** *Cable* (USB cable of the meter, USB-serial
+   adapter, serial port), *Bluetooth*, *Network*, *sigrok* or *Simulated /
+   calculated* - the virtual meter, a signal of its own to try QtDMM without
+   hardware, or a value calculated from other windows.
+2. **Where?** For a cable or Bluetooth QtDMM looks right away, only there,
+   and lists every port it finds, the recognised meters first. A USB cable
+   names the meter family it belongs to (UT-D04: the serial UNI-T meters,
+   UT-D09: UT61B+/D+/E+ and UT161, BU-86X: Brymen, the TFA AIRCO2NTROL), a
+   Bluetooth meter its name, a USB-serial adapter its chip. A device you keep
+   in My devices says so - also when the port has another name now
+   (`/dev/ttyUSB0` for the saved `/dev/serial/by-id/...`, another
+   `/dev/hidraw` number) - and a port a running window uses says *In use
+   here* or which instance has it. Click one, or type the port (a Bluetooth
+   address) into **Port**. A device QtDMM may not open is listed with the
+   reason, and **How to fix...** shows the commands - see
+   [Troubleshooting](troubleshooting.md).
+3. **Which meter?** The name, then the meter's settings, with the likeliest
+   model chosen - only the models of that connection are offered. What is
+   behind a serial port or a UT-D04 cable QtDMM cannot tell yet: choose
+   yours. A Victron device needs its key here. One of My devices comes with
+   its own name and model: it is changed, not added a second time.
+4. **Where should it go?** *In this window* instead of the meter now, or *In
+   a new window* - a new instance with the settings of this one.
 
-The quickest way: plug the meter in, switch it on and choose **Find
-device...** in the **My devices** menu at the left of the toolbar. The
-first start of QtDMM offers it right away, next to **Try without a
-device** - the virtual meter, a signal of its own, to see the display, the
-analog meter and the graph at work without any hardware.
-
-1. Tick where QtDMM should look - the USB cable of the meter, Bluetooth,
-   serial ports, the network (qtdmm-bridge) - and press **Search**. Only
-   what is ticked is searched, so nobody waits for a Bluetooth scan without
-   a Bluetooth meter; the choice is remembered.
-2. What turns up is listed as it comes. A USB cable names the meter family
-   it belongs to (UT-D04: the serial UNI-T meters, UT-D09: UT61B+/D+/E+ and
-   UT161, BU-86X: Brymen, the TFA AIRCO2NTROL), a Bluetooth meter its name,
-   a USB-serial adapter its chip. A device you keep in [My devices](my-devices.md)
-   says so - also when the port has another name now (`/dev/ttyUSB0` for
-   the saved `/dev/serial/by-id/...`, another `/dev/hidraw` number) - and a
-   port a running window uses says *In use here* or which instance has it.
-3. Choose it, confirm the **model** - the likeliest is chosen, *All models*
-   lists the rest; for a port QtDMM knows nothing of, none is chosen - and
-   for a Victron device enter its key. **Connect**, and the first reading
-   comes. *Keep in My devices* keeps it for the next time. One of My devices
-   is connected as it is, without a second entry.
-
-What is behind a serial port or a UT-D04 cable QtDMM cannot tell yet: the
-list then shows the models that fit, choose yours. A device QtDMM may not
-open is listed with the reason, and **How to fix...** shows the commands -
-see [Troubleshooting](troubleshooting.md).
+sigrok and *Simulated / calculated* skip step 2. The network gets its search
+in step 2 later; until then its address is typed in on step 3
+(`host:port` of the qtdmm-bridge).
 
 ## Choosing the device by hand
 

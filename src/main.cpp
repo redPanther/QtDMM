@@ -158,6 +158,7 @@ int main(int argc, char **argv)
   {
     // the assistant opens on demand: one here, so its pages are checked too
     auto *addDevice = new AddDeviceDlg(nullptr, &mainWin);
+    addDevice->setDiscoverers([](AddDeviceDlg::Connection) { return QList<Discoverer *>(); });
     addDevice->chooseConnection(AddDeviceDlg::Cable);
     QTimer::singleShot(0, &mainWin, [&mainWin]
     {

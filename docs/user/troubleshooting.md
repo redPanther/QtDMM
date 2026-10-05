@@ -43,7 +43,7 @@ Meters with a USB-HID cable (many Uni-Trend models) appear in the port list as
 the `/dev/hidraw*` device is usually only readable by root. A udev rule grants
 access to your user. The DEB and RPM packages install one,
 `/usr/lib/udev/rules.d/70-qtdmm.rules`, for every cable and sensor QtDMM
-knows; with the AppImage or the Flatpak, **Find device** shows the line for
+knows; with the AppImage or the Flatpak, **Add device** shows the line for
 your cable and the commands (**How to fix...**), or copy the file from
 `assets/linux/70-qtdmm.rules` in the sources to `/etc/udev/rules.d/`, then
 `sudo udevadm control --reload-rules && sudo udevadm trigger` and plug the

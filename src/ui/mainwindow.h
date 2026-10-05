@@ -123,12 +123,13 @@ protected:
   /// The devices menu anew: the entries (the one in use checked), save,
   /// manage, configure.
   void        fillDevicesMenu();
-  /// "Find device": search, choose, connect (and keep in My devices).
-  void        findDevice();
+  /// The places (DeviceLibrary::place()) the running instances use, with
+  /// "In use here" / "In use by the instance x" for the assistant's cards.
+  QMap<QString, QString> placesInUse() const;
   /// The assistant "Add device": the device into My devices, then into
   /// this window or a new one.
   void        addDevice();
-  /// The welcome at the first start: My devices, Find device, Try without
+  /// The welcome at the first start: My devices, Add device, Try without
   /// a device, Set up by hand.
   void        welcome();
   QAction    *m_arrangeTop;

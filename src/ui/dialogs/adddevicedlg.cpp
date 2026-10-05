@@ -5,6 +5,7 @@
 #include <QtWidgets>
 
 #include "core/devicelibrary.h"
+#include "device/discovery/discovery.h"
 #include "device/protocols.h"
 #include "ui/devicesettings.h"
 
@@ -40,7 +41,7 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
       tr("A meter or a Victron device over Bluetooth LE") },
     { Network,   "network-server",               tr("Net&work") + '\n' + tr("qtdmm-bridge"),
       tr("A meter at another computer, through qtdmm-bridge or another RFC 2217 server") },
-    { Sigrok,    "plugins",                      tr("sig&rok") + '\n' + tr("Bench meters"),
+    { Sigrok,    "qtdmm-sigrok",                 tr("sig&rok") + '\n' + tr("Bench meters"),
       tr("A bench meter read through sigrok-cli") },
     { Simulated, "code-function",                tr("&Simulated / calculated") + '\n' + tr("To try out, formulas"),
       tr("A simulated meter to try QtDMM, or a value calculated from the readings of other windows") },
@@ -58,6 +59,73 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
   tiles->setRowStretch(2, 1);
   m_pages->addWidget(connection);
 
+  // page 2: the search for the chosen connection, every port found, and
+  // the port field
+  auto *port = new QWidget(m_pages);
+  auto *portLayout = new QVBoxLayout(port);
+  portLayout->setContentsMargins(0, 0, 0, 0);
+  auto *searchRow = new QHBoxLayout;
+  m_progress = new QProgressBar(port);
+  m_progress->setRange(0, 0);
+  m_progress->setTextVisible(false);
+  m_searchAgain = new QPushButton(tr("Search a&gain"), port);
+  searchRow->addWidget(m_progress, 1);
+  searchRow->addStretch(0);
+  searchRow->addWidget(m_searchAgain, 0, Qt::AlignRight);
+  portLayout->addLayout(searchRow);
+  connect(m_searchAgain, &QPushButton::clicked, this, &AddDeviceDlg::startSearch);
+  m_cards = new QListWidget(port);
+  m_cards->setObjectName("ui_cards");
+  m_cards->setIconSize(QSize(32, 32));
+  m_cards->setSpacing(2);
+  portLayout->addWidget(m_cards, 1);
+  connect(m_cards, &QListWidget::itemClicked, this, [this](QListWidgetItem *item)
+  {
+    chooseCandidate(item->data(Qt::UserRole).toString());
+  });
+  connect(m_cards, &QListWidget::itemDoubleClicked, this, [this] { next(); });
+  m_hint = new QLabel(port);
+  m_hint->setWordWrap(true);
+  m_fix = new QPushButton(tr("How to &fix..."), port);
+  m_fix->hide();
+  auto *hintRow = new QHBoxLayout;
+  hintRow->addWidget(m_hint, 1);
+  hintRow->addWidget(m_fix);
+  portLayout->addLayout(hintRow);
+  connect(m_fix, &QPushButton::clicked, this, [this]
+  {
+    const int row = chosenCandidate();
+    if (row < 0)
+      return;
+    QMessageBox box(QMessageBox::Information, tr("How to fix"), m_found[row].problem, QMessageBox::Close, this);
+    box.setInformativeText(m_found[row].fix);
+    box.setTextInteractionFlags(Qt::TextSelectableByMouse);
+    box.exec();
+  });
+  auto *portRow = new QFormLayout;
+  m_port = new QLineEdit(port);
+  m_port->setObjectName("ui_port");
+  portRow->addRow(tr("Po&rt:"), m_port);
+  portLayout->addLayout(portRow);
+  connect(m_port, &QLineEdit::textChanged, this, [this]
+  {
+    // the card of the port typed or chosen, none for another one
+    const int row = chosenCandidate();
+    m_cards->setCurrentRow(row);
+    updateHint();
+    updateButtons();
+  });
+  m_pages->addWidget(port);
+
+  m_makeDiscoverers = [](Connection connection) -> QList<Discoverer *>
+  {
+    if (connection == Cable)
+      return { new UsbDiscoverer, new SerialDiscoverer };
+    if (connection == Bluetooth)
+      return { new BleDiscoverer };
+    return {};
+  };
+
   // page 3: the name, then the settings of the meter
   auto *device = new QWidget(m_pages);
   auto *deviceLayout = new QVBoxLayout(device);
@@ -71,6 +139,8 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
   m_settings = new DeviceSettings(device);
   m_settings->layout()->setContentsMargins(0, 0, 0, 0);
   m_settings->setDescriptionFilesVisible(false);
+  // the port comes from page 2
+  m_settings->setPortVisible(false);
   deviceLayout->addWidget(m_settings, 1);
   connect(m_settings, &DeviceSettings::changed, this, &AddDeviceDlg::suggestName);
   connect(m_settings, &DeviceSettings::changed, this, &AddDeviceDlg::updateButtons);
@@ -172,12 +242,222 @@ void AddDeviceDlg::chooseConnection(Connection connection)
   else if (!manual && !m_settings->models().isEmpty())
     keys.insert("DMM/model", m_settings->models().first());
   m_settings->setPortEditable(connection == Network, tr("RFC2217 host:port"));
+  // the network has no page 2 yet: its port field stays on page 3
+  m_settings->setPortVisible(connection == Network);
   m_settings->load(keys);
   m_name->clear();
   m_name->setModified(false);
   m_model.clear();
+  m_known.clear();
   suggestName();
-  showPage(DevicePage);
+  if (connection == Cable || connection == Bluetooth)
+  {
+    m_port->clear();
+    m_port->setPlaceholderText(connection == Bluetooth ? tr("Bluetooth address, e.g. AA:BB:CC:DD:EE:FF")
+                                                       : tr("e.g. /dev/ttyUSB0 or COM3"));
+    showPage(PortPage);
+    startSearch();
+  }
+  else
+    showPage(DevicePage);
+}
+
+AddDeviceDlg::~AddDeviceDlg()
+{
+  stopSearch();
+}
+
+void AddDeviceDlg::startSearch()
+{
+  stopSearch();
+  m_found.clear();
+  m_cards->clear();
+  for (Discoverer *d : m_makeDiscoverers ? m_makeDiscoverers(m_connection) : QList<Discoverer *>())
+  {
+    d->setParent(this);
+    connect(d, &Discoverer::found, this, &AddDeviceDlg::addCandidate);
+    connect(d, &Discoverer::finished, this, [this, d]
+    {
+      m_running.removeAll(d);
+      d->deleteLater();
+      updateHint();
+    });
+    m_running << d;
+  }
+  for (Discoverer *d : QList<Discoverer *>(m_running))
+    d->start();
+  updateHint();
+}
+
+void AddDeviceDlg::stopSearch()
+{
+  for (Discoverer *d : QList<Discoverer *>(m_running))
+    d->stop();
+}
+
+// what the port field shows for a find: the port without "SERIAL", the
+// Bluetooth address
+static QString portText(const Candidate &c)
+{
+  if (c.kind == Candidate::Bluetooth)
+    return c.keys.value("Port settings/ble-address").toString().section(' ', 0, 0);
+  const QString device = c.keys.value("Port settings/device").toString();
+  return device.startsWith(QLatin1String("SERIAL ")) ? device.section(' ', 1) : device;
+}
+
+void AddDeviceDlg::addCandidate(const Candidate &c)
+{
+  for (const Candidate &f : m_found)
+    if (f.key == c.key && f.kind == c.kind)
+      return;
+  // recognised meters first, then the ports nothing is known of, each in
+  // the order they came
+  const bool recognised = !c.models.isEmpty();
+  int at = int(m_found.size());
+  if (recognised)
+    for (int i = 0; i < m_found.size(); ++i)
+      if (m_found[i].models.isEmpty())
+      {
+        at = i;
+        break;
+      }
+  m_found.insert(at, c);
+
+  // symbols of the sets QtDMM brings (assets/icons/sets)
+  static const char *icons[] = { "qtdmm-dmm", "network-wired", "qtdmm-dmm", "network-server" };
+  QString text = c.title + '\n' + c.detail;
+  const QString known = m_library ? m_library->findByPlace(c.keys) : QString();
+  if (const std::optional<MyDevice> d = m_library ? m_library->find(known) : std::nullopt)
+    text += '\n' + tr("Already in My devices: %1").arg(d->name);
+  const QString inUse = m_inUse.value(DeviceLibrary::place(c.keys));
+  if (!inUse.isEmpty())
+    text += '\n' + inUse;
+  if (!c.problem.isEmpty())
+    text += '\n' + c.problem;
+  auto *item = new QListWidgetItem(QIcon::fromTheme(icons[c.kind]), text);
+  item->setData(Qt::UserRole, c.key);
+  if (!c.problem.isEmpty())
+    item->setForeground(palette().color(QPalette::Disabled, QPalette::Text));
+  m_cards->insertItem(at, item);
+  m_cards->setCurrentRow(chosenCandidate());
+  updateHint();
+}
+
+QStringList AddDeviceDlg::candidates() const
+{
+  QStringList keys;
+  for (const Candidate &c : m_found)
+    keys << c.key;
+  return keys;
+}
+
+void AddDeviceDlg::chooseCandidate(const QString &key)
+{
+  for (const Candidate &c : m_found)
+    if (c.key == key)
+      m_port->setText(portText(c));
+}
+
+void AddDeviceDlg::setPort(const QString &port)
+{
+  m_port->setText(port);
+}
+
+int AddDeviceDlg::chosenCandidate() const
+{
+  const QString port = m_port->text().trimmed();
+  if (port.isEmpty())
+    return -1;
+  for (int i = 0; i < m_found.size(); ++i)
+    if (portText(m_found[i]).compare(port, Qt::CaseInsensitive) == 0)
+      return i;
+  return -1;
+}
+
+void AddDeviceDlg::updateHint()
+{
+  m_progress->setVisible(!m_running.isEmpty());
+  m_searchAgain->setEnabled(m_running.isEmpty());
+  const int row = chosenCandidate();
+  m_fix->setVisible(row >= 0 && !m_found[row].problem.isEmpty());
+  if (row >= 0)
+  {
+    const Candidate &c = m_found[row];
+    const QString known = m_library ? m_library->findByPlace(c.keys) : QString();
+    const std::optional<MyDevice> d = m_library ? m_library->find(known) : std::nullopt;
+    m_hint->setText(!c.problem.isEmpty() ? c.problem
+                    : d                  ? tr("This is \"%1\" of My devices: the next page changes it, "
+                                              "no second entry.").arg(d->name)
+                                         : c.hint);
+  }
+  else if (!m_running.isEmpty())
+    m_hint->setText(tr("Searching ..."));
+  else if (m_found.isEmpty())
+    m_hint->setText(m_connection == Bluetooth
+                    ? tr("Nothing found. Is the meter's Bluetooth on and no other program connected to it? "
+                         "Or type its address.")
+                    : tr("Nothing found. Is the meter switched on and its cable plugged in? Or type the port."));
+  else
+    m_hint->setText(m_port->text().trimmed().isEmpty() ? tr("Choose where the meter is, or type the port.") : QString());
+}
+
+void AddDeviceDlg::takePort()
+{
+  stopSearch();
+  const int row = chosenCandidate();
+  const QString port = m_port->text().trimmed();
+  QVariantMap found;
+  QString model;
+  if (row >= 0)
+  {
+    found = m_found[row].keys;
+    if (!m_found[row].models.isEmpty())
+      model = m_found[row].models.first();
+  }
+  else if (m_connection == Bluetooth)
+    found.insert("Port settings/ble-address", port);
+  else
+    found.insert("Port settings/device", port.contains(' ') ? port : "SERIAL " + port);
+
+  m_known = m_library ? m_library->findByPlace(found) : QString();
+  const std::optional<MyDevice> entry = m_library ? m_library->find(m_known) : std::nullopt;
+  QVariantMap keys = found;
+  if (entry)
+  {
+    // the entry as it is, at the place found now
+    keys = entry->keys;
+    for (const char *key : { "Port settings/device", "Port settings/ble-address" })
+      if (!found.value(key).toString().isEmpty())
+        keys.insert(key, found.value(key));
+  }
+  else if (!model.isEmpty())
+    keys.insert("DMM/model", model);
+  else if (m_connection == Bluetooth && !m_settings->models().isEmpty())
+    keys.insert("DMM/model", m_settings->models().first());
+  m_settings->load(keys);
+  m_model.clear();
+  if (entry)
+  {
+    m_name->setText(entry->name);
+    m_name->setModified(true);   // its name, not one after the model
+    m_model = keys.value("DMM/model").toString();
+  }
+  else
+  {
+    m_name->clear();
+    m_name->setModified(false);
+    suggestName();
+  }
+}
+
+QString AddDeviceDlg::knownDevice() const
+{
+  const std::optional<MyDevice> entry = m_library ? m_library->find(m_known) : std::nullopt;
+  if (!entry)
+    return QString();
+  // another model than the entry's at this place: another meter, a new entry
+  const QString model = m_settings->keys().value("DMM/model").toString();
+  return QString(entry->model()).remove(" *") == QString(model).remove(" *") ? entry->id : QString();
 }
 
 AddDeviceDlg::Page AddDeviceDlg::page() const
@@ -187,6 +467,11 @@ AddDeviceDlg::Page AddDeviceDlg::page() const
 
 bool AddDeviceDlg::canGoNext() const
 {
+  if (page() == PortPage)
+  {
+    const int row = chosenCandidate();
+    return !m_port->text().trimmed().isEmpty() && (row < 0 || m_found[row].problem.isEmpty());
+  }
   return page() == DevicePage && m_settings->isComplete() && !m_name->text().trimmed().isEmpty();
 }
 
@@ -209,13 +494,25 @@ void AddDeviceDlg::back()
 {
   if (page() == TargetPage)
     showPage(DevicePage);
-  else if (page() == DevicePage)
+  else if (page() == DevicePage && (m_connection == Cable || m_connection == Bluetooth))
+    showPage(PortPage);
+  else if (page() == DevicePage || page() == PortPage)
+  {
+    stopSearch();
     showPage(ConnectionPage);
+  }
 }
 
 void AddDeviceDlg::next()
 {
-  if (canGoNext())
+  if (!canGoNext())
+    return;
+  if (page() == PortPage)
+  {
+    takePort();
+    showPage(DevicePage);
+  }
+  else
     showPage(TargetPage);
 }
 
@@ -225,18 +522,21 @@ void AddDeviceDlg::showPage(Page page)
   switch (page)
   {
     case ConnectionPage: m_title->setText(tr("How is the meter connected?")); break;
+    case PortPage:       m_title->setText(tr("Where is it connected?")); break;
     case DevicePage:     m_title->setText(tr("Which meter is it?")); break;
     case TargetPage:     m_title->setText(tr("Where should it go?")); break;
   }
   if (page == DevicePage)
     m_name->setFocus();
+  if (page == PortPage)
+    m_port->setFocus();
   updateButtons();
 }
 
 void AddDeviceDlg::updateButtons()
 {
   m_back->setEnabled(page() != ConnectionPage);
-  m_next->setVisible(page() == DevicePage);
+  m_next->setVisible(page() == PortPage || page() == DevicePage);
   m_next->setEnabled(canGoNext());
 }
 
@@ -254,6 +554,7 @@ void AddDeviceDlg::suggestName()
 
 void AddDeviceDlg::finish(Target target)
 {
+  stopSearch();
   m_target = target;
   accept();
 }

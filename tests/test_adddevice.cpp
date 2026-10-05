@@ -67,6 +67,7 @@ int main(int argc, char **argv)
   // 2. page order: sigrok and simulated go from page 1 straight to page 3
   {
     AddDeviceDlg dlg(&library);
+    dlg.setDiscoverers([](AddDeviceDlg::Connection) { return QList<Discoverer *>(); });
     check(dlg.page() == AddDeviceDlg::ConnectionPage, "starts on page 1");
     check(!dlg.canGoNext(), "no Next on page 1");
     dlg.chooseConnection(AddDeviceDlg::Sigrok);
@@ -92,10 +93,20 @@ int main(int argc, char **argv)
     check(dlg.keys().value("DMM/model") == "QtDMM Virtual meter", "keys: the model");
   }
 
+  // the searches of the real dialog look at this machine; here the finds are given
+  auto noSearch = [](AddDeviceDlg::Connection) { return QList<Discoverer *>(); };
+
   // 3. the name follows the model until it is typed in
   {
     AddDeviceDlg dlg(&library);
+    dlg.setDiscoverers(noSearch);
     dlg.chooseConnection(AddDeviceDlg::Bluetooth);
+    check(dlg.page() == AddDeviceDlg::PortPage, "Bluetooth: page 2");
+    check(!dlg.canGoNext(), "page 2 without a port: no Next");
+    dlg.setPort("AA:BB:CC:DD:EE:FF");
+    check(dlg.canGoNext(), "page 2 with an address typed in: Next");
+    dlg.next();
+    check(dlg.page() == AddDeviceDlg::DevicePage, "Bluetooth: page 3");
     dlg.settings()->load({ { "DMM/model", "Victron SmartShunt" } });
     check(dlg.name() == "Victron SmartShunt", "name follows the model: " + dlg.name());
     check(!dlg.canGoNext(), "Victron without address and key: no Next");
@@ -109,31 +120,96 @@ int main(int argc, char **argv)
     check(dlg.name() == "Battery", "a typed name stays: " + dlg.name());
     name->clear();
     check(!dlg.canGoNext(), "no name: no Next");
+    dlg.back();
+    check(dlg.page() == AddDeviceDlg::PortPage, "back from page 3 to page 2");
+    dlg.back();
+    check(dlg.page() == AddDeviceDlg::ConnectionPage, "back to page 1");
     dlg.reject();
     check(dlg.target() == AddDeviceDlg::NoTarget, "cancel: no target");
   }
 
-  // 4. cable: manual settings allowed, the port decides; this window
+  // 4. cable: the finds as cards, recognised ones first; a port typed in; this window
   {
     AddDeviceDlg dlg(&library);
-    dlg.setPorts({ "/dev/ttyUSB0" });
+    dlg.setDiscoverers(noSearch);
     dlg.setCurrentDevice("UT803");
+    const QString hidPlace = DeviceLibrary::place({ { "Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw3" } });
+    dlg.setPlacesInUse({ { hidPlace, "In use by the instance u" } });
     dlg.chooseConnection(AddDeviceDlg::Cable);
-    check(dlg.name() == "Meter", "manual settings: a plain name: " + dlg.name());
-    check(dlg.canGoNext(), "manual with a port: Next");
-    dlg.settings()->load({ { "DMM/model", "Uni-Trend UT61E" }, { "Port settings/device", "/dev/ttyUSB0" } });
-    check(dlg.name() == "Uni-Trend UT61E", "name follows: " + dlg.name());
+    check(dlg.page() == AddDeviceDlg::PortPage, "cable: page 2");
+    Candidate serial;
+    serial.kind = Candidate::Serial;
+    serial.key = "/dev/ttyUSB0";
+    serial.title = "USB-serial adapter (CH340)";
+    serial.keys.insert("Port settings/device", "SERIAL /dev/ttyUSB0");
+    Candidate hid;
+    hid.kind = Candidate::UsbCable;
+    hid.key = "/dev/hidraw3";
+    hid.title = "UNI-T, serial meters";
+    hid.keys.insert("Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw3");
+    hid.models = QStringList { "Uni-Trend UT61E", "Uni-Trend UT803" };
+    Candidate locked = serial;
+    locked.key = "/dev/ttyUSB1";
+    locked.keys.insert("Port settings/device", "SERIAL /dev/ttyUSB1");
+    locked.problem = "/dev/ttyUSB1 belongs to the group dialout";
+    dlg.addCandidate(serial);
+    dlg.addCandidate(hid);
+    dlg.addCandidate(locked);
+    dlg.addCandidate(serial);   // the same find twice: one card
+    check(dlg.candidates() == QStringList({ "/dev/hidraw3", "/dev/ttyUSB0", "/dev/ttyUSB1" }),
+          "recognised first, each once: " + dlg.candidates().join(", "));
+    auto *cards = dlg.findChild<QListWidget *>("ui_cards");
+    check(cards->item(0)->text().contains("In use by the instance u"), "card: in use: " + cards->item(0)->text());
+    dlg.chooseCandidate("/dev/ttyUSB1");
+    check(!dlg.canGoNext(), "a port QtDMM may not open: no Next");
+    dlg.chooseCandidate("/dev/hidraw3");
+    check(dlg.findChild<QLineEdit *>("ui_port")->text() == "HID 0x1a86:0xe008 /dev/hidraw3", "card fills the port field");
+    dlg.next();
+    check(dlg.settings()->keys().value("DMM/model") == "Uni-Trend UT61E", "the likeliest model: "
+          + dlg.settings()->keys().value("DMM/model").toString());
+    check(dlg.name() == "Uni-Trend UT61E", "name after the model: " + dlg.name());
+    check(dlg.knownDevice().isEmpty(), "a new device");
+    dlg.back();
+    dlg.setPort("/dev/ttyACM0");   // typed in
+    dlg.next();
+    check(dlg.keys().value("Port settings/device") == "SERIAL /dev/ttyACM0", "typed port: " + dlg.keys().value("Port settings/device").toString());
+    check(dlg.name() == "Meter", "nothing known of the port: manual settings: " + dlg.name());
     dlg.next();
     QToolButton *here = dlg.findChild<QToolButton *>("ui_thisWindow");
     check(here->text().contains("UT803"), "this window names the meter now: " + here->text());
     here->click();
     check(dlg.target() == AddDeviceDlg::ThisWindow, "this window finishes");
-    check(dlg.keys().value("Port settings/device") == "/dev/ttyUSB0", "keys: the port");
+  }
+
+  // 4b. a find that is one of My devices: that entry, no second one
+  {
+    const QString ut61e = library.add("Bench UT61E", { { "DMM/model", "Uni-Trend UT61E" },
+                                                       { "Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw2" } });
+    AddDeviceDlg dlg(&library);
+    dlg.setDiscoverers(noSearch);
+    dlg.chooseConnection(AddDeviceDlg::Cable);
+    Candidate hid;
+    hid.kind = Candidate::UsbCable;
+    hid.key = "/dev/hidraw5";   // plugged in again: another number, the same cable type
+    hid.title = "UNI-T, serial meters";
+    hid.keys.insert("Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw5");
+    hid.models = QStringList { "Uni-Trend UT803", "Uni-Trend UT61E" };
+    dlg.addCandidate(hid);
+    check(dlg.findChild<QListWidget *>("ui_cards")->item(0)->text().contains("Bench UT61E"), "card: already in My devices");
+    dlg.chooseCandidate("/dev/hidraw5");
+    dlg.next();
+    check(dlg.knownDevice() == ut61e, "known find: the entry");
+    check(dlg.name() == "Bench UT61E", "known find: its name: " + dlg.name());
+    check(dlg.settings()->keys().value("DMM/model") == "Uni-Trend UT61E", "known find: its model, not the family's first");
+    check(dlg.keys().value("Port settings/device").toString().endsWith("/dev/hidraw5"), "known find: the place found now");
+    dlg.settings()->load({ { "DMM/model", "Uni-Trend UT803" }, { "Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw5" } });
+    check(dlg.knownDevice().isEmpty(), "another model at that place: a new device");
   }
 
   // 5. network: an address typed in gets its port type
   {
     AddDeviceDlg dlg(&library);
+    dlg.setDiscoverers(noSearch);
     dlg.chooseConnection(AddDeviceDlg::Network);
     dlg.settings()->load({ { "DMM/model", "Uni-Trend UT61E" }, { "Port settings/device", "bench:4000" } });
     check(dlg.keys().value("Port settings/device") == "RFC2217 bench:4000",

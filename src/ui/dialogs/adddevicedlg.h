@@ -3,8 +3,11 @@
 #pragma once
 
 #include <QDialog>
+#include <QMap>
 #include <QVariantMap>
+#include <functional>
 
+#include "device/discovery/discovery.h"
 #include "device/dmmdecoder.h"
 
 class DeviceLibrary;
@@ -12,24 +15,30 @@ class DeviceSettings;
 class SharedStateManager;
 class QLabel;
 class QLineEdit;
+class QListWidget;
+class QProgressBar;
 class QPushButton;
 class QStackedWidget;
 class QToolButton;
 
-/// The assistant "Add device": how the meter is connected (page 1), which
-/// meter it is with its settings and a name (page 3), and where it goes - in
-/// this window or a new one (page 4). Page 2, the search for the port, comes
-/// for cable, Bluetooth and network; until then they go to page 3 with the
-/// port field. The caller keeps the result in My devices.
+/// The assistant "Add device": how the meter is connected (page 1), where
+/// (page 2: a passive search for that connection, every port found, the
+/// recognised ones first, or typed in), which meter it is with its settings
+/// and a name (page 3), and where it goes - in this window or a new one
+/// (page 4). sigrok and simulated meters have no page 2; the network gets
+/// its page 2 later and goes to page 3 with the port field until then.
+/// The caller keeps the result in My devices - a find that already is one
+/// of them (knownDevice()) changes that entry instead.
 class AddDeviceDlg : public QDialog
 {
   Q_OBJECT
 public:
   enum Connection { Cable, Bluetooth, Network, Sigrok, Simulated };
-  enum Page { ConnectionPage, DevicePage, TargetPage };
+  enum Page { ConnectionPage, PortPage, DevicePage, TargetPage };
   enum Target { NoTarget, ThisWindow, NewWindow };
 
   explicit AddDeviceDlg(DeviceLibrary *library, QWidget *parent = nullptr);
+  ~AddDeviceDlg() override;
 
   /// The ports for the port field (Transport::availablePorts() and the custom ports).
   void        setPorts(const QStringList &ports);
@@ -38,6 +47,13 @@ public:
   void        setStateManager(SharedStateManager *state);
   /// The meter of this window, named on the button "In this window".
   void        setCurrentDevice(const QString &name);
+  /// Places (DeviceLibrary::place()) the running instances use, with what a
+  /// find at that place says ("In use by the instance u").
+  void        setPlacesInUse(const QMap<QString, QString> &places) { m_inUse = places; }
+  /// The searches of a connection; by default UsbDiscoverer and
+  /// SerialDiscoverer for a cable, BleDiscoverer for Bluetooth. The test
+  /// gives none and adds the finds itself.
+  void        setDiscoverers(std::function<QList<Discoverer *>(Connection)> make) { m_makeDiscoverers = std::move(make); }
 
   /// Page 1: the connection; goes on to the next page.
   void        chooseConnection(Connection connection);
@@ -45,6 +61,17 @@ public:
   Page        page() const;
   /// Whether "Next" may be pressed now.
   bool        canGoNext() const;
+  /// Page 2: a find of the search, shown as a card (recognised meters first).
+  void        addCandidate(const Candidate &candidate);
+  /// Page 2: the cards in their order, by Candidate::key.
+  QStringList candidates() const;
+  /// Page 2: chooses the card @p key; its port goes into the port field.
+  void        chooseCandidate(const QString &key);
+  /// Page 2: the port field (a port, or a Bluetooth address).
+  void        setPort(const QString &port);
+  /// The entry of My devices the device is (found at its place, the model
+  /// unchanged on page 3); empty for a new device.
+  QString     knownDevice() const;
 
   /// The device's meter keys, as DeviceSettings::keys() gives them.
   QVariantMap keys() const;
@@ -67,6 +94,14 @@ private:
   /// The name follows the model until it is typed in.
   void        suggestName();
   void        finish(Target target);
+  void        startSearch();
+  void        stopSearch();
+  /// The card for the port field's text, or -1 when it was typed in.
+  int         chosenCandidate() const;
+  void        updateHint();
+  /// From page 2 to page 3: the find (or the typed port) into the fields,
+  /// a known entry with its name.
+  void        takePort();
 
   DeviceLibrary  *m_library = nullptr;
   DeviceSettings *m_settings = nullptr;
@@ -75,6 +110,17 @@ private:
   QLineEdit      *m_name = nullptr;
   QToolButton    *m_thisWindow = nullptr;
   QToolButton    *m_newWindow = nullptr;
+  QProgressBar   *m_progress = nullptr;
+  QListWidget    *m_cards = nullptr;
+  QLabel         *m_hint = nullptr;
+  QPushButton    *m_fix = nullptr;
+  QPushButton    *m_searchAgain = nullptr;
+  QLineEdit      *m_port = nullptr;
+  QList<Candidate> m_found;   ///< in the order of the cards
+  QMap<QString, QString> m_inUse;
+  QList<Discoverer *> m_running;
+  std::function<QList<Discoverer *>(Connection)> m_makeDiscoverers;
+  QString         m_known;    ///< the entry of My devices at the chosen place
   QPushButton    *m_back = nullptr;
   QPushButton    *m_next = nullptr;
   Connection      m_connection = Cable;
