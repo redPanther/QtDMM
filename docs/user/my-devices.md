@@ -12,10 +12,9 @@ show), sigrok options, the signal of the virtual meter. Display, graph,
 recorder and alarms stay with the window. An older `devices.conf` with more
 in it is tidied up when QtDMM starts.
 
-The window remembers which entry it uses. Change the port or the key of
-that meter on the Multimeter page, and the entry changes with it; choose
-another model there, and it is another meter - the window uses no entry
-then, until you switch.
+The window remembers which entry it uses. **Settings...** of an entry in
+the sidebar changes the entry (Shift+F2: the one in use); the window that
+uses it takes the change at once.
 
 ## The sidebar
 
@@ -54,18 +53,9 @@ kept in My devices. The page of the meter offers only the models of that
 connection; *Next* waits until what the meter needs is filled in (the port,
 the key of a Victron device, a formula that works).
 
-On the Multimeter page, **Save to my devices...** keeps the settings there;
-with a device chosen at the top of the page, it asks whether to update that
-one or to keep the settings as a new device.
-
 A serial port is saved under its stable name on Linux, the link in
 `/dev/serial/by-id/` (`usb-WCH.CN_USB_Quad_Serial_…`): `/dev/ttyUSB0` may be
 `/dev/ttyUSB1` after plugging the cable in again, the by-id name stays.
-
-## The Multimeter page
-
-**My devices** at the top of the page fills in the fields from an entry;
-nothing changes before *OK* or *Apply*.
 
 ## Several windows
 

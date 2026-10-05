@@ -56,6 +56,9 @@ public:
   /// and the SCPI server switch. Returns the file written.
   QString        copyConfig(const QString &instance_id) const;
 
+  /// The ports set up by hand on the former page "Special ports"
+  /// (custom_device0..9, "<type> <address>"): still offered, no new ones.
+  QStringList    customPorts() const;
   /// Ids of all instances that have a settings file next to this one.
   QStringList    getConfigInstances();
   /// The directory of the settings files (the instances', devices.conf).

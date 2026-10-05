@@ -22,7 +22,7 @@ share the space differently.
 | Ctrl+P | Print the graph |
 | Ctrl+Shift+C | Copy the graph as an image to the clipboard |
 | F2 | Settings |
-| Shift+F2 | Settings, Multimeter page |
+| Shift+F2 | Settings of the device in use (without one: Add device) |
 | Ctrl+F2 | Settings, Recording page |
 | F9 | Show or hide the sidebar with My devices and the instances |
 | Ctrl+M | Open the menu |

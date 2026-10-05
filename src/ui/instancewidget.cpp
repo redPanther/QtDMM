@@ -80,7 +80,6 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   });
   m_devices = new DeviceLibrary(m_settings->configDir(), this);
   m_configDlg = new SettingsDialog(m_settings, this);
-  m_configDlg->setDeviceLibrary(m_devices);
   m_configDlg->hide();
   m_configDlg->readPrinter(&m_printer);
 
@@ -294,7 +293,6 @@ QRect InstanceWidget::parentRect() const
 void InstanceWidget::setStateManager(SharedStateManager *mgr)
 {
   m_ctl->setStateManager(mgr);
-  m_configDlg->setStateManager(mgr);
 }
 
 void InstanceWidget::resetSLOT()
@@ -339,12 +337,6 @@ void InstanceWidget::configSLOT()
 
   m_configDlg->show();
   m_configDlg->raise();
-}
-
-void InstanceWidget::configDmmSLOT()
-{
-  configSLOT();
-  m_configDlg->showPage(SettingsDialog::MeterConnection);
 }
 
 QString InstanceWidget::currentDevice() const
@@ -570,7 +562,7 @@ void InstanceWidget::readConfig()
                          m_configDlg->intLineMode(),
                          m_configDlg->intPointMode());
 
-  // a tint changed on the Appearance page is meant to be seen: Custom
+  // a tint changed on the General page is meant to be seen: Custom
   const QColor tint = m_configDlg->displayBgColor();
   if (m_lcdTint.isValid() && tint != m_lcdTint && m_display->lcdVariant() != LcdWidget::Custom)
     setLcdVariant(LcdWidget::Custom);

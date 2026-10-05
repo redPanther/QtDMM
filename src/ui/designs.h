@@ -44,7 +44,7 @@ namespace Designs
   };
   GraphColors graphColors(Design d);
 
-  /// The symbols (Settings -> Appearance -> Symbols):
+  /// The symbols (Settings -> General -> Symbols):
   /// - Coloured: Oxygen (:/icons/qtdmm-oxygen), the default
   /// - Plain: monochrome Breeze (:/icons/qtdmm-breeze, -dark), light or dark
   ///   to match the palette

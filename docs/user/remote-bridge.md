@@ -47,8 +47,8 @@ model; see [Add device](connecting.md#add-device). No Avahi or Bonjour is
 needed on the QtDMM side; the search only needs multicast to reach the
 bridge, i.e. the same network segment.
 
-An *RFC2217* entry under **Settings → Special ports** still works for the
-port list of the *Multimeter* page. When QtDMM
+An *RFC2217* port set up on the former settings page *Special ports* is
+still offered in the port list. When QtDMM
 connects, the bridge applies the model's baud rate, data bits, parity and
 DTR/RTS to the device; the status line shows *Connected 192.168.1.20:4000*
 once readings arrive.

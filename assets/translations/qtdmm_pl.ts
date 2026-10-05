@@ -849,129 +849,129 @@
 <context>
     <name>DeviceSettings</name>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="194"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="193"/>
         <source>Manual settings</source>
         <translation>Ustawienia ręczne</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="195"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="194"/>
         <source>All vendors</source>
         <translation>Wszyscy producenci</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="540"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="617"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="539"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="616"/>
         <source>Position %1: %2</source>
         <translation>Pozycja %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="633"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="632"/>
         <source>%1: no such instance running</source>
         <translation>%1: nie działa instancja o takiej nazwie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="643"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="642"/>
         <source>Running instances: %1</source>
         <translation>Działające instancje: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="645"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="644"/>
         <source>No other instance is running.</source>
         <translation>Nie działa żadna inna instancja.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="845"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="844"/>
         <source>none</source>
         <translation>brak</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="908"/>
-        <source>%1 was not found or does not run. Install sigrok-cli, or set its path under &lt;a href=&quot;ports&quot;&gt;Special ports&lt;/a&gt;.</source>
-        <translation>Nie znaleziono %1 lub nie da się uruchomić. Zainstaluj sigrok-cli lub ustaw jego ścieżkę w &lt;a href=&quot;ports&quot;&gt;Portach specjalnych&lt;/a&gt;.</translation>
+        <location filename="../../src/ui/devicesettings.cpp" line="907"/>
+        <source>%1 was not found or does not run. Install sigrok-cli, or set its path in the settings, page General.</source>
+        <translation>Nie znaleziono %1 lub program nie działa. Zainstaluj sigrok-cli lub podaj jego ścieżkę w ustawieniach, strona Ogólne.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="911"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="910"/>
         <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
         <translation>%1 nie ma sterownika „%2”; zobacz sigrok-cli --list-supported.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="913"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="912"/>
         <source>%1 found.</source>
         <translation>Znaleziono %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="923"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="922"/>
         <source>Running %1 --driver %2 --scan ...</source>
         <translation>Trwa %1 --driver %2 --scan…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="945"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="944"/>
         <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
         <translation>Żaden miernik nie odpowiedział w ciągu 30 s (port szeregowy bez miernika SCPI każe sigrok-cli czekać bez końca).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="947"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="946"/>
         <source>Found: %1</source>
         <translation>Znaleziono: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="949"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="948"/>
         <source>No meter answered.</source>
         <translation>Żaden miernik nie odpowiedział.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="958"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="957"/>
         <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
         <translation>Ten QtDMM zbudowano bez obsługi Bluetooth, więc nie może połączyć się z tym miernikiem.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="965"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="964"/>
         <source>Pick the device or type its Bluetooth address.</source>
         <translation>Wybierz urządzenie lub wpisz jego adres Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="968"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="967"/>
         <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
         <translation>Włącz Bluetooth miernika (pojawi się symbol Bluetooth) przed wyszukiwaniem lub łączeniem.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="973"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="972"/>
         <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
         <translation>Klucz to 32-cyfrowy „klucz szyfrowania&quot;, który VictronConnect pokazuje w Informacjach o produkcie, Natychmiastowy odczyt przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="983"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="982"/>
         <source>Scanning for %1 (6 s)...</source>
         <translation>Wyszukiwanie %1 (6 s)...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="984"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="983"/>
         <source>Scanning for Victron devices (5 s)...</source>
         <translation>Wyszukiwanie urządzeń Victron (5 s)…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="995"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="994"/>
         <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
         <translation>Nie znaleziono miernika. Czy jego Bluetooth jest włączony i żaden inny program nie jest z nim połączony?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="996"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="995"/>
         <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
         <translation>Nie znaleziono urządzenia Victron. Czy Bluetooth jest włączony, a natychmiastowy odczyt włączony w urządzeniu?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1035"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1034"/>
         <source>Load DMM description</source>
         <translation>Wczytaj opis multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1035"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="1061"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1034"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1060"/>
         <source>DMM description (*.cfg)</source>
         <translation>Opis multimetru (*.cfg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1061"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1060"/>
         <source>Save DMM description</source>
         <translation>Zapisz opis multimetru</translation>
     </message>
@@ -992,68 +992,68 @@
         <translation>Moje urządzenia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="309"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="318"/>
         <source>&amp;Settings...</source>
         <translation>&amp;Ustawienia...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="275"/>
-        <location filename="../../src/ui/devicesidebar.cpp" line="310"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="284"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="319"/>
         <source>&amp;Rename</source>
         <translation>Zmień &amp;nazwę</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="61"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="62"/>
         <source>Instances</source>
         <translation>Instancje</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="272"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="281"/>
         <source>Bring to &amp;front</source>
         <translation>Przenieś na &amp;wierzch</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="272"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="281"/>
         <source>&amp;Start</source>
         <translation>&amp;Uruchom</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="276"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="285"/>
         <source>&amp;Delete</source>
         <translation>&amp;Usuń</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="282"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="291"/>
         <source>Only for a stopped instance</source>
         <translation>Tylko dla zatrzymanej instancji</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="290"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="299"/>
         <source>Delete instance</source>
         <translation>Usuń instancję</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="291"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="300"/>
         <source>Delete the instance &quot;%1&quot; with its settings?</source>
         <translation>Usunąć instancję „%1” wraz z jej ustawieniami?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="311"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="320"/>
         <source>Open in a &amp;new window</source>
         <translation>Otwórz w n&amp;owym oknie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="313"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="322"/>
         <source>Re&amp;move from My devices</source>
         <translation>U&amp;suń z Moich urządzeń</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="322"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="331"/>
         <source>Remove device</source>
         <translation>Usuń urządzenie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="322"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="331"/>
         <source>Remove &quot;%1&quot; from My devices?</source>
         <translation>Usunąć „%1” z Moich urządzeń?</translation>
     </message>
@@ -1531,7 +1531,7 @@ a potem wyloguj się i zaloguj ponownie.</translation>
     <name>GuiPrefs</name>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="35"/>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="46"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="45"/>
         <source>System</source>
         <translation>Systemowy</translation>
     </message>
@@ -1547,21 +1547,46 @@ a potem wyloguj się i zaloguj ponownie.</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="38"/>
-        <source>Appearance</source>
-        <translation>Wygląd</translation>
+        <source>General</source>
+        <translation>Ogólne</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="39"/>
-        <source>&lt;b&gt;Here you can configure QtDMM&apos;s visual appearance and behaviour.&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Tutaj ustawisz wygląd i zachowanie QtDMM.&lt;/b&gt;</translation>
+        <source>&lt;b&gt;QtDMM&apos;s appearance and behaviour, and the programs it runs.&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Wygląd i zachowanie QtDMM oraz uruchamiane przez niego programy.&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="42"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="48"/>
+        <source>Programs</source>
+        <translation>Programy</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="50"/>
+        <source>&amp;sigrok-cli:</source>
+        <translation>&amp;sigrok-cli:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="54"/>
+        <source>The program QtDMM runs for the meters it reads through sigrok; a name is searched in the PATH.</source>
+        <translation>Program, który QtDMM uruchamia dla mierników odczytywanych przez sigrok; nazwa jest szukana w PATH.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="60"/>
+        <source>Choose sigrok-cli</source>
+        <translation>Wybierz sigrok-cli</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="67"/>
+        <source>Sigrok-cli executable</source>
+        <translation>Program sigrok-cli</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="41"/>
         <source>Coloured</source>
         <translation>Kolorowe</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="43"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="42"/>
         <source>Plain</source>
         <translation>Proste</translation>
     </message>
@@ -1597,62 +1622,62 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="232"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="231"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: niezapisane dane</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="233"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="232"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. If you quit now it will be lost.&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Niezapisane dane&lt;/b&gt;&lt;/font&gt;&lt;p&gt;W pamięci są jeszcze niezapisane pomiary. Jeśli teraz zakończysz, zostaną utracone.&lt;p&gt;Czy najpierw je wyeksportować?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="248"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="247"/>
         <source>Export data first</source>
         <translation>Najpierw eksportuj</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="252"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="251"/>
         <source>Quit without saving</source>
         <translation>Zakończ bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="392"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="384"/>
         <source>Recording stopped: switched to %1</source>
         <translation>Nagrywanie zatrzymane: przełączono na %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="410"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="402"/>
         <source>Using %1</source>
         <translation>Używany: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="601"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="593"/>
         <source>Automatic start at %1</source>
         <translation>Automatyczny start o %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="603"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="595"/>
         <source>Raising threshold %1</source>
         <translation>Próg narastający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="605"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="597"/>
         <source>Falling threshold %1</source>
         <translation>Próg opadający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="643"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="635"/>
         <source>calculated</source>
         <translation>obliczony</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="652"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="644"/>
         <source>no meter configured</source>
         <translation>nie skonfigurowano multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="680"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="672"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarm QtDMM: %1</translation>
     </message>
@@ -1942,7 +1967,7 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>Działa już inna instancja.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1136"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1143"/>
         <source>%1 opens in the new window %2</source>
         <translation>%1 otwiera się w nowym oknie %2</translation>
     </message>
@@ -1972,211 +1997,211 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>Używane przez instancję %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="639"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="646"/>
         <source>&amp;Full screen</source>
         <translation>Pełny &amp;ekran</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="642"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="649"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Full screen&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Use the whole screen for the instruments, e.g. on a lab monitor. F11 again returns to the normal window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Pełny ekran&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Wykorzystaj cały ekran na przyrządy, np. na monitorze laboratoryjnym. Ponowne F11 przywraca zwykłe okno.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="647"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="654"/>
         <source>Zoom &amp;in</source>
         <translation>Pow&amp;iększ</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="650"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="657"/>
         <source>Zoom &amp;out</source>
         <translation>Po&amp;mniejsz</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="653"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="660"/>
         <source>Show &amp;whole recording</source>
         <translation>Pokaż &amp;całe nagranie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="656"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="663"/>
         <source>Cop&amp;y graph image</source>
         <translation>Kopi&amp;uj wykres jako obraz</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="658"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="665"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copy graph image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Puts a picture of the recorder graph on the clipboard, ready to paste into a report or a chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Kopiuj wykres jako obraz&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Umieszcza obraz wykresu rejestratora w schowku, gotowy do wklejenia do raportu lub czatu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="713"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="720"/>
         <source>Record DMM data</source>
         <translation>Rejestruj dane multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="714"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="721"/>
         <source>Multiple instances of QtDMM have been detected.
 Please choose which instance should record.</source>
         <translation>Wykryto wiele instancji QtDMM.
 Wybierz, która instancja ma rejestrować.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="717"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="724"/>
         <source>This instance</source>
         <translation>Ta instancja</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="718"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="725"/>
         <source>All instances</source>
         <translation>Wszystkie instancje</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="778"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="785"/>
         <source>About QtDMM</source>
         <translation>O QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="781"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="788"/>
         <source>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;A readout and transient recorder for digital multimeters.&lt;/p&gt;&lt;p&gt;Built with &lt;b&gt;Qt&lt;/b&gt; %2. Licensed under the &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions before 0.9.0 under GPL 2).&lt;/p&gt;&lt;p&gt;0.9.5 onwards: tuxmaster and contributors, see the AUTHORS file.&lt;br&gt;0.9.3 and before: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Source and bug reports: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbols from the &lt;b&gt;Breeze&lt;/b&gt; icon theme of the KDE community (LGPL 3); QtDMM&apos;s own symbols are drawn in its style.&lt;/p&gt;</source>
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Odczyt i rejestrator przebiegów dla multimetrów cyfrowych.&lt;/p&gt;&lt;p&gt;Zbudowany z użyciem &lt;b&gt;Qt&lt;/b&gt; %2. Licencja &lt;b&gt;GNU GPL 3&lt;/b&gt; (wersje przed 0.9.0 na GPL 2).&lt;/p&gt;&lt;p&gt;Od 0.9.5: tuxmaster i współtwórcy, zob. plik AUTHORS.&lt;br&gt;0.9.3 i wcześniejsze: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Strona: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Kontakt: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Kod źródłowy i zgłoszenia błędów: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbole pochodzą z motywu ikon &lt;b&gt;Breeze&lt;/b&gt; społeczności KDE (LGPL 3); własne symbole QtDMM są narysowane w jego stylu.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="798"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="805"/>
         <source>Supported devices...</source>
         <translation>Obsługiwane urządzenia…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="950"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="957"/>
         <source>&amp;Hide window</source>
         <translation>&amp;Ukryj okno</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="951"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="958"/>
         <source>&amp;Title bar</source>
         <translation>Pasek &amp;tytułu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="956"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="963"/>
         <source>Hide &amp;controls</source>
         <translation>Ukryj &amp;przyciski</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="963"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="970"/>
         <source>&amp;LCD colours</source>
         <translation>Kolory &amp;LCD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="965"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="972"/>
         <source>&amp;Classic</source>
         <translation>&amp;Klasyczny</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="965"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="972"/>
         <source>&amp;Backlight blue</source>
         <translation>Podświetlenie &amp;niebieskie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="966"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="973"/>
         <source>&amp;Amber</source>
         <translation>&amp;Bursztynowy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="966"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="973"/>
         <source>&amp;High contrast</source>
         <translation>Wysoki k&amp;ontrast</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="967"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="974"/>
         <source>C&amp;ustom (from the settings)</source>
         <translation>&amp;Własne (z ustawień)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="980"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="987"/>
         <source>Meter &amp;style</source>
         <translation>&amp;Styl miernika</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="981"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="988"/>
         <source>&amp;Dark studio</source>
         <translation>&amp;Ciemne studio</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="981"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="988"/>
         <source>Classic &amp;ivory</source>
         <translation>&amp;Klasyczna kość słoniowa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1056"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1063"/>
         <source>stopped</source>
         <translation>zatrzymana</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1075"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1082"/>
         <source>The instance %1 starts</source>
         <translation>Instancja %1 uruchamia się</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1084"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1095"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1091"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1102"/>
         <source>Rename instance</source>
         <translation>Zmień nazwę instancji</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1096"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1103"/>
         <source>The formulas now use &quot;%1&quot;. The running instances %2 use it after reconnecting.</source>
         <translation>Formuły używają teraz „%1”. Uruchomione instancje %2 zastosują to po ponownym połączeniu.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1156"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1163"/>
         <source>%1: readings are coming in</source>
         <translation>%1: napływają odczyty</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1157"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1164"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: brak odczytu od 3 s</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1270"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1277"/>
         <source>Save workspace</source>
         <translation>Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1271"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1297"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1278"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1304"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Obszar roboczy QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1284"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1291"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1284"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1291"/>
         <source>Could not write %1.</source>
         <translation>Nie można zapisać %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1288"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1295"/>
         <source>Workspace saved to %1</source>
         <translation>Obszar roboczy zapisany w %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1296"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1303"/>
         <source>Load workspace</source>
         <translation>Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1303"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1310"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1304"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1311"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 nie jest obszarem roboczym QtDMM.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1328"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1335"/>
         <source>Workspace loaded from %1</source>
         <translation>Obszar roboczy wczytany z %1</translation>
     </message>
@@ -2351,79 +2376,6 @@ Czy multimetr jest podłączony i włączony?</translation>
     </message>
 </context>
 <context>
-    <name>MeterPrefs</name>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="35"/>
-        <source>Multimeter</source>
-        <translation>Multimetr</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="36"/>
-        <source>&lt;b&gt;Here you can configure the serial port and protocol for your DMM. There is also a number of predefined models.&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Tutaj skonfigurujesz port szeregowy i protokół multimetru. Dostępnych jest też wiele predefiniowanych modeli.&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="45"/>
-        <source>&amp;My devices:</source>
-        <translation>Moje urządzenia:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="49"/>
-        <source>Fill in the meter and its connection from one of your devices.</source>
-        <translation>Wypełnij miernik i połączenie na podstawie jednego z twoich urządzeń.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="51"/>
-        <source>Sa&amp;ve to my devices...</source>
-        <translation>Dodaj do moich urządzeń...</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="52"/>
-        <source>Keep this meter and its connection under a name, to choose it again with one click.</source>
-        <translation>Zapamiętaj ten miernik i jego połączenie pod nazwą, aby wybrać go ponownie jednym kliknięciem.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="128"/>
-        <source>(none saved yet)</source>
-        <translation>(jeszcze brak)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="128"/>
-        <source>(choose)</source>
-        <translation>(wybierz)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="171"/>
-        <source>My devices</source>
-        <translation>Moje urządzenia</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="172"/>
-        <source>Update &quot;%1&quot; with these settings, or keep them as a new device?</source>
-        <translation>Zaktualizować „%1” tymi ustawieniami czy zapisać jako nowe urządzenie?</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="174"/>
-        <source>&amp;Update</source>
-        <translation>&amp;Aktualizuj</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="175"/>
-        <source>&amp;New device...</source>
-        <translation>&amp;Nowe urządzenie...</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="186"/>
-        <source>Save to my devices</source>
-        <translation>Dodaj do moich urządzeń</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/meterprefs.cpp" line="186"/>
-        <source>Name:</source>
-        <translation>Nazwa:</translation>
-    </message>
-</context>
-<context>
     <name>PoincarePlot</name>
     <message>
         <location filename="../../src/ui/views/poincareplot.cpp" line="139"/>
@@ -2514,24 +2466,6 @@ Czy multimetr jest podłączony i włączony?</translation>
         <location filename="../../src/ui/views/poincareplot.cpp" line="349"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
-    </message>
-</context>
-<context>
-    <name>PortsPrefs</name>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="10"/>
-        <source>Special ports</source>
-        <translation>Porty specjalne</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="11"/>
-        <source>&lt;b&gt;Here you can configure custom ports for RFC2217 and SIGROK.&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Tutaj skonfigurujesz własne porty RFC2217 i SIGROK.&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="107"/>
-        <source>Sigrok-cli executable</source>
-        <translation>Program sigrok-cli</translation>
     </message>
 </context>
 <context>
@@ -3324,23 +3258,23 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="77"/>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="98"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="76"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="97"/>
         <source>QtDMM: Welcome!</source>
         <translation>QtDMM: Witamy!</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="90"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="89"/>
         <source>Continue</source>
         <translation>Kontynuuj</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="78"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="77"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Welcome!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You seem to have upgraded &lt;b&gt;QtDMM&lt;/b&gt; from a version prior to 0.8.4. Please check your configuration. There are some new parameters to be configured.&lt;p&gt;Thank you for choosing &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Witamy!&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Wygląda na to, że &lt;b&gt;QtDMM&lt;/b&gt; został zaktualizowany z wersji starszej niż 0.8.4. Sprawdź konfigurację – pojawiły się nowe parametry.&lt;p&gt;Dziękujemy za wybór &lt;b&gt;QtDMM&lt;/b&gt;.&lt;p&gt;&lt;i&gt;Matthias Toussaint&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/settingsdialog.cpp" line="99"/>
+        <location filename="../../src/ui/settings/settingsdialog.cpp" line="98"/>
         <source>Your config file has been converted to the new format.
 Please check your color settings, because they couldn&apos;t be converted automatically.
 Your old config ~/.qtdmmrc was renamed to ~/.qtdmmrc.old.</source>
@@ -4414,13 +4348,11 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="185"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="285"/>
         <source>&amp;Configure</source>
         <translation>&amp;Konfiguruj</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="188"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="288"/>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="368"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configure QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will open QtDMM&apos;s configuration dialog. Here you can configure it&apos;s visual appearance and all options regarding the multimeter hardware and the recorder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Konfiguruj QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Otwiera okno konfiguracji QtDMM: wygląd oraz wszystkie opcje multimetru i rejestratora.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
@@ -4479,6 +4411,16 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
         <location filename="../../src/ui/forms/uimainwindow.ui" line="274"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Reset min/max values&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The min/max values in the display will be reset. You can activate this option at any time. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Zeruj min/maks&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Wartości min/maks na wyświetlaczu zostaną wyzerowane. Można to zrobić w każdej chwili. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="285"/>
+        <source>&amp;Device settings...</source>
+        <translation>Ustawienia &amp;urządzenia...</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="288"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Device settings&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The settings of the device in use, as Settings... in its context menu in the sidebar. Without a device: Add device.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Ustawienia urządzenia&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ustawienia używanego urządzenia, jak Ustawienia... w jego menu kontekstowym w panelu bocznym. Bez urządzenia: Dodaj urządzenie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="305"/>
@@ -4574,47 +4516,6 @@ Wartości można podawać z przyrostkiem m, u, n, p, k, M, G, T&lt;br&gt;Przykł
         <location filename="../../src/ui/forms/uimainwindow.ui" line="442"/>
         <source>Ctrl+M</source>
         <translation>Ctrl+M</translation>
-    </message>
-</context>
-<context>
-    <name>UIPortsPrefs</name>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="17"/>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Sans Serif&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This is a list of custom ports. Select &lt;span style=&quot; font-weight:700;&quot;&gt;RFC2217&lt;/span&gt; for remote serial port and &lt;span style=&quot; font-weight:700;&quot;&gt;SIGROK&lt;/span&gt; for using external sigrok-cli tool. Usage below:&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;RFC2217&lt;/span&gt; port: &amp;lt;hostname|ip&amp;gt;:&amp;lt;port&amp;gt; e.g. localhost:4000&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;SIGROK&lt;/span&gt; port: sigrok string, see &lt;a href=&quot;https://sigrok.org/wiki/Supported_hardware#Multimeters&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;Sigrok Multimeters&lt;/span&gt;&lt;/a&gt;e.g. &lt;span style=&quot; font-family:&apos;monospace&apos;;&quot;&gt;uni-t-ut61e-ser:conn=/dev/ttyUSB0&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Sans Serif&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Lista własnych portów. Wybierz &lt;span style=&quot; font-weight:700;&quot;&gt;RFC2217&lt;/span&gt; dla zdalnego portu szeregowego i &lt;span style=&quot; font-weight:700;&quot;&gt;SIGROK&lt;/span&gt; dla zewnętrznego narzędzia sigrok-cli. Użycie:&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;RFC2217&lt;/span&gt; port: &amp;lt;host|ip&amp;gt;:&amp;lt;port&amp;gt;, np. localhost:4000&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;SIGROK&lt;/span&gt; port: ciąg sigrok, zob. &lt;a href=&quot;https://sigrok.org/wiki/Supported_hardware#Multimeters&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;Multimetry Sigrok&lt;/span&gt;&lt;/a&gt;np. &lt;span style=&quot; font-family:&apos;monospace&apos;;&quot;&gt;uni-t-ut61e-ser:conn=/dev/ttyUSB0&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="349"/>
-        <source>Type</source>
-        <translation>Typ</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="361"/>
-        <source>Port</source>
-        <translation>Port</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="377"/>
-        <source>Sigrok executable</source>
-        <translation>Program sigrok</translation>
     </message>
 </context>
 <context>

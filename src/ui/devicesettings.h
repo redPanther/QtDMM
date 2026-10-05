@@ -116,8 +116,6 @@ public:
 Q_SIGNALS:
   /// A field was edited or another model chosen.
   void           changed();
-  /// The hint's link: the user wants the Special ports page (sigrok-cli path).
-  void           showPortsPage();
 
 protected Q_SLOTS:
   void           on_ui_vendor_activated(int);

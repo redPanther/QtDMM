@@ -35,14 +35,13 @@ class DeviceLibrary;
 class QPrinter;
 class RecorderPrefs;
 class ScalePrefs;
-class MeterPrefs;
+class DeviceSettings;
 class GuiPrefs;
 class GraphPrefs;
 class IntegrationPrefs;
 class AlarmPrefs;
 class ScpiPrefs;
 #include "core/alarm.h"
-class PortsPrefs;
 class SettingsPage;
 
 /// The settings dialog: a category list beside a stack of SettingsPage pages.
@@ -61,13 +60,11 @@ public:
   /// order of the category list.
   enum PageType
   {
-    MeterConnection = 0,
-    GUI,
+    GUI = 0,
     Graph,
     Scale,
     Integration,
     Recorder,
-    Ports,
     Alarms,
     Scpi,
     NumItems,
@@ -75,7 +72,9 @@ public:
 
   SettingsDialog(Settings* settings, QWidget *parent = Q_NULLPTR);
 
-  /// @name Multimeter page
+  /// @name The meter of this instance
+  /// From its settings keys (DMM/, Port settings/); it has no page here:
+  /// the assistant and the sidebar set it up.
   /// @{
   QString               device() const;
   int                   speed() const;
@@ -132,7 +131,7 @@ public:
   double                fallingThreshold() const;
   /// @}
 
-  /// @name Appearance page (window, toolbars, LCD display, analog meter, tips)
+  /// @name General page (window, toolbars, LCD display, analog meter, tips)
   /// @{
   void                  setWinRect(const QRect &);
   QRect                 winRect() const;
@@ -179,16 +178,12 @@ public:
   void                  readPrinter(QPrinter *);
   /// Raises the dialog on the given page.
   void                  showPage(PageType);
-  /// Instance coordinator for the multimeter page's formula hint.
-  void                  setStateManager(SharedStateManager *);
-  /// "My devices" for the meter page.
-  void                  setDeviceLibrary(DeviceLibrary *library);
-  /// The meter page reads the settings again (another device was taken over).
+  /// The meter is read from the settings again (another device was taken over).
   void                  reloadMeter();
 
 
 public Q_SLOTS:
-  /// Connected state: the multimeter page is disabled while connected.
+  /// Connected state (nothing to do now that the meter has no page).
   void                  connectSLOT(bool);
   /// OK or Apply: applies all pages and saves.
   void                  on_ui_buttonBox_accepted();
@@ -219,8 +214,8 @@ protected:
   QRect                 m_winRect;
   RecorderPrefs        *m_recorder;
   ScalePrefs           *m_scale;
-  PortsPrefs           *m_ports;
-  MeterPrefs             *m_dmm;
+  /// Not shown: turns the meter's settings keys into the connection.
+  DeviceSettings       *m_meter;
   GuiPrefs             *m_gui;
   GraphPrefs           *m_graph;
   IntegrationPrefs     *m_integration;
