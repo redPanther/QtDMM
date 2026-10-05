@@ -50,6 +50,11 @@ class Settings;
 /// are passed on to the store, so the graph can still be driven as a whole.
 /// Data can be exported/imported as CSV and printed.
 ///
+/// The store's state shows: in Live the window follows the newest reading
+/// (the scroll bar rests), while recording "● REC 0:42 / 5:00" stands top
+/// left in the plot, in View where the curve comes from (the start of the
+/// recording or the file).
+///
 /// The sample time is in tenths of a second, like the settings: the grid
 /// of the export, not the rate the graph shows.
 class GraphWidget : public QWidget
@@ -122,7 +127,8 @@ public:
     IDImportData,
     IDCopyImage,
     IDExportImage,
-    IDColorVariant   ///< property "variant" says which
+    IDColorVariant,  ///< property "variant" says which
+    IDLive
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -208,6 +214,8 @@ Q_SIGNALS:
   void             error(const QString &);
   /// Recording started/stopped.
   void             running(bool);
+  /// The store's state changed (RecordingStore::State).
+  void             stateChanged(int state);
   /// Window/total size changed by zooming (seconds).
   void             graphSize(int, int);
   /// Sample time changed by a CSV import (tenths of a second).
@@ -230,6 +238,11 @@ Q_SIGNALS:
   /// "Clear graph" in the context menu: the window asks about unsaved data
   /// first (InstanceWidget::clearSLOT()).
   void             clearRequested();
+  /// "Start recorder" (true) or "Stop recorder" in the context menu: the
+  /// window starts it as its Record button does (MainWindow::startSLOT()).
+  void             recordRequested(bool start);
+  /// "Live" in the context menu (InstanceWidget::liveSLOT()).
+  void             liveRequested();
   void             exportData();
   void             importData();
   /// @}
@@ -253,6 +266,8 @@ public Q_SLOTS:
   /// @}
   void             startSLOT();
   void             stopSLOT();
+  /// The store goes Live (RecordingStore::live()), the curve viewed goes.
+  void             liveSLOT();
   /// Export with a file dialog; returns false when cancelled or failed.
   bool             exportDataSLOT();
   void             importDataSLOT();
@@ -262,6 +277,9 @@ public Q_SLOTS:
   /// split out so the CSV parsing/writing logic can be exercised from tests.
   bool             exportCsvFile(const QString &fileName, bool raw = false);
   bool             importCsvFile(const QString &fileName);
+  /// The text top left in the plot: "● REC 0:42 / 5:00", the source of what
+  /// is viewed, or empty (Live). Public for the tests.
+  QString          stateText() const;
   /// Writes the graph to @p fileName, format taken from the suffix (svg, pdf,
   /// png, jpg, bmp). SVG and PDF keep the curve, the axes and their labels as
   /// vectors; @p size is the drawing size in points, the widget's own when
@@ -317,6 +335,14 @@ protected:
   void             appendToSeries();
   void             onAppended(bool shifted);
   void             onCleared();
+  void             onStateChanged();
+  /// @name The state top left in the plot (stateText())
+  /// @{
+  QLabel          *m_stateLabel = nullptr;
+  QColor           m_stateColor;          ///< the lettering colour, for View
+  QString          m_sourceFile;          ///< the file viewed (importCsvFile()), empty = a recording
+  void             updateStateLabel();
+  /// @}
   /// The mark lines anew from the store's marks.
   void             syncMarks();
   QPoint           m_mpos;

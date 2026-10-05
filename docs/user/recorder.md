@@ -1,12 +1,37 @@
 # The recorder
 
 The recorder graph — shown with the **Graph** toolbar button, hidden by
-default and brought up automatically when a recording starts — records
+default and brought up automatically when a recording starts — shows
 every reading of the meter's primary value, at the time it came: a short
 spike between two others is kept, and a slow meter is drawn from reading to
 reading. What it records is the value in base units — a reading of 12.3 mV
 is stored as 0.0123 V — so the curve stays continuous when the meter
 changes range.
+
+## Live, recording and view
+
+The graph is in one of three modes:
+
+- **Live** — right after connecting the graph runs with the meter: it
+  holds the readings of the last **Sample time** (or of **Max. length**
+  when the sample time is zero) and older ones fall out on the left. The
+  newest reading is at the right edge. Live is no recording: there is
+  nothing to lose, and leaving it asks nothing.
+- **Recording** — *Record* (the grey dot ● in the toolbar, Space) clears
+  the graph and records from now on, until **Sample time** is reached or
+  you press the button again (now a red square ■, *Stop*). Top left in
+  the graph stands `● REC 0:42 / 10:00`.
+- **View** — a recording that ended, or a file loaded with *Import*,
+  stands in the graph to zoom, scroll, save and export. Top left in grey
+  stands where it comes from: `Recording of 06.10.26 14:32 · 10:00`, or
+  the file's name.
+
+▶ *Live* in the toolbar is pressed while live and locked while recording;
+in View it goes back to Live. Going back to Live, starting a new recording
+and importing a file ask first when the readings viewed are not saved yet:
+**Export data first**, drop them, or cancel.
+
+*Export* while live saves what the graph holds up to now.
 
 ## Sampling
 
@@ -26,7 +51,8 @@ changes range.
 The status bar shows how much is recorded and how much the graph keeps at
 most (**Max. length**, Settings → Scales), the time left until **Sample
 time** stops the recording, and whether it records: `0:42 / 10:00 - 1:59:17
-left - Sampling`.
+left - Sampling`. While live it shows how much the live graph holds of what
+it keeps: `0:42 / 10:00 - Live`.
 
 The vertical axis is in the unit the meter shows - mV while it shows mV -
 and in the unit that suits the values for a loaded recording.
@@ -35,18 +61,25 @@ and in the unit that suits the values for a loaded recording.
 
 Three start modes, chosen on the Recording page:
 
-- **Manual** — *Start* (Ctrl+S) and *Stop* (Ctrl+X) in the toolbar, or the
+- **Manual** — *Record* in the toolbar (Space), Ctrl+S and Ctrl+X, or the
   graph's right-click menu.
 - **Predefined time** — recording begins at the given time of day.
 - **Trigger** — recording begins when the reading crosses a threshold, on its
   raising or falling edge. The threshold is drawn into the graph as a line you
   can drag. With **Pre trigger** the recording reaches back by the time set
-  there: QtDMM keeps the readings while it waits, so the recording shows how
-  the value got to the threshold, and a green mark shows where it crossed.
-  **Sample time** counts from the crossing.
+  there: it takes the readings of that time from the live graph, so the
+  recording shows how the value got to the threshold, and a green mark shows
+  where it crossed. **Sample time** counts from the crossing.
 
-*Clear* (Ctrl+Del) empties the recording. QtDMM warns before you lose unsaved data
-by clearing, importing, switching to another device or quitting; the warning can be switched off under
+The predefined time and the trigger wait while the graph is live. A
+recording that ended stands in View and is not overwritten by the next
+crossing: press ▶ *Live* to wait for the next one. *Record* starts at once
+in every mode.
+
+*Clear* (Ctrl+Del) empties the recording, or the live graph; in View it
+goes back to Live. QtDMM warns before you lose unsaved data
+by clearing, importing, going back to Live, starting a new recording, switching to another device or
+quitting; the warning can be switched off under
 **Settings → General → At program exit**.
 
 [Alarms](alarms.md) can start and stop the recorder as well, on any of
@@ -55,7 +88,7 @@ their conditions.
 A recording measures one thing. When you switch the meter to another
 function while it runs - V DC to Ω, DC to AC, °C to °F - the recording
 stops, the status bar says what changed, and an orange mark in the graph
-shows where. *Start* begins a new recording in the new function. The
+shows where. *Record* begins a new recording in the new function. The
 stopped one keeps its unit, on the axis and in the export. A change of the
 range or prefix (mV to V) is no new function; the recording goes on.
 

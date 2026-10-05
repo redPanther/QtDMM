@@ -113,12 +113,17 @@ public:
   /// "My devices", named after the device (DeviceLibrary::instanceId());
   /// returns the instance name, empty when there is no such entry.
   QString     openInNewWindow(const QString &id);
+  /// Before a new recording: unsaved readings viewed are exported or
+  /// dropped, or the user cancels (false). True at once in Live.
+  bool        confirmRecording();
   /// --config-dir as given (empty: the default), for the instances started from here.
   QString     configPath() const { return m_configPath; }
 
 Q_SIGNALS:
   /// Recording started/stopped (graph state).
   void        running(bool);
+  /// The recorder is in View, Live or Recording now (RecordingStore::State).
+  void        recorderState(int state);
   /// Message for the status bar's info field.
   void        info(const QString &);
   /// Message for the status bar's connection field (from MeterConnection::error()).
@@ -154,6 +159,8 @@ public Q_SLOTS:
   /// Starts recording (also triggered remotely via the shared state).
   void        startSLOT();
   void        stopSLOT();
+  /// Back to Live from View: unsaved readings are offered for export first.
+  void        liveSLOT();
   /// Opens the settings dialog on its first page.
   void        configSLOT();
   /// Opens the settings dialog on the recording page.

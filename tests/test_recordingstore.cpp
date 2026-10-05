@@ -187,6 +187,7 @@ int main(int argc, char **argv)
     store.setPreTrigger(2000);
     store.setSampleLength(10);   // 1 s after the trigger
     store.setReadingsPaused(true);
+    store.live();                // the triggers wait in Live
     for (int i = 0; i < 10; i++)   // 0 .. 4.5 s, below the threshold
       store.setReading(clock.at(i * 500, reading(1 + i * 0.1, "1", "DC")));
     store.setReading(clock.at(5000, reading(6, "6.000", "DC")));   // the trigger
@@ -213,6 +214,7 @@ int main(int argc, char **argv)
     gap.setThresholds(0, 0);
     gap.setPreTrigger(10000);
     gap.setStaleAfter(1500);
+    gap.live();
     gap.setReading(gc.at(0, reading(3, "3", "DC")));
     gc.now = 2000;
     gap.setStale(true);
@@ -370,6 +372,7 @@ int main(int argc, char **argv)
     tc.attach(trig);
     trig.setStartMode(RecordingStore::Raising);
     trig.setThresholds(0, 1);
+    trig.live();
     trig.setReading(tc.at(0, reading(0, "0.000", "DC")));
     trig.setReading(tc.at(500, reading(0, "OL", "DC")));
     check(!trig.isRunning(), "gap: an OL crosses no threshold");
@@ -446,6 +449,7 @@ int main(int argc, char **argv)
     store.setStartMode(RecordingStore::Raising);
     store.setThresholds(0, 5);
     store.setPreTrigger(2000);
+    store.live();
     store.setReading(clock.at(0, rd("0.000", "V", "DC")));
     store.setReading(clock.at(500, rd("1000", "Ohm", "OH")));
     check(!store.isRunning(), "trigger: V -> Ohm crosses nothing");
@@ -519,6 +523,144 @@ int main(int argc, char **argv)
     // logReading() feeds the series only, not the recording
     store.logReading(reading(5, "5.000", "AC"));
     check(store.readingCount() == 1, "readings: logReading");
+  }
+
+  // --- 6. the states: View at first; Live runs through the live window and
+  //        is never dirty; a recording starts from it cleared and ends in
+  //        View; the triggers wait in Live only ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    QList<RecordingStore::State> states;
+    QObject::connect(&store, &RecordingStore::stateChanged, [&](RecordingStore::State st) { states << st; });
+    QSignalSpy running(&store, &RecordingStore::runningChanged);
+    check(store.state() == RecordingStore::View, "states: a new store views");
+    store.setReading(clock.at(0, reading(1, "1", "DC")));
+    check(store.count() == 0, "states: View records nothing");
+
+    // the live window: the recording length, or what the store keeps
+    store.setMaxDuration(60);
+    store.setSampleLength(20);   // 2 s
+    check(store.liveWindow() == 2000, QString("live window: %1 ms, expected the length").arg(store.liveWindow()));
+    store.setPreTrigger(5000);
+    check(store.liveWindow() == 5000, "live window: at least the pre-trigger");
+    store.setPreTrigger(0);
+    store.setSampleLength(0);
+    check(store.liveWindow() == 60000, "live window: until stopped - what the store keeps");
+    store.setSampleLength(20);
+
+    clock.now = 100;
+    store.live();
+    check(store.state() == RecordingStore::Live && states == QList<RecordingStore::State>{ RecordingStore::Live },
+          "live: Live, said once");
+    check(running.isEmpty() && !store.isRunning(), "live: is no recording");
+    check(store.count() == 1 && store.series().first().value == 1, "live: starts with the value shown");
+    for (int i = 1; i <= 100; ++i)   // 10 s
+      store.setReading(clock.at(100 + i * 100, reading(i, QString::number(i), "DC")));
+    check(!store.dirty(), "live: nothing unsaved");
+    check(store.duration() == 10000 && store.origin() == 8000,
+          QString("live: covers %1 ms from %2 on").arg(store.duration()).arg(store.origin()));
+    check(store.series().first().t <= 8000 && store.series().first().t >= 8000 - 1100,
+          QString("live: keeps from %1 ms, the window and a step of slack").arg(store.series().first().t));
+    check(store.remainingLength() == 0, "live: no length left to show");
+
+    // saved while live: the window up to now, and still live
+    const Recording rec = store.toRecording(true);
+    check(!rec.values.isEmpty() && rec.values.last() == 100 && rec.start == TestClock::wall(100 + 8000),
+          QString("live export: %1 values from %2").arg(rec.values.size()).arg(rec.start.toString("hh:mm:ss.zzz")));
+    QTemporaryDir dir;
+    check(store.write(dir.filePath("live.csv")) && store.state() == RecordingStore::Live,
+          "live export: written, Live goes on");
+
+    // another function in Live: the window starts anew, no recording stopped
+    QSignalSpy changed(&store, &RecordingStore::functionChanged);
+    static ReadingAdapter ohms;
+    Reading ohm = ReadingAdapter::reading(ohms.adaptValue(1000, "1000", "Ohm", "OH", "AUTO", false, true, false, 0,
+                                                          QDateTime::currentMSecsSinceEpoch()));
+    store.setReading(clock.at(10200, ohm));
+    check(store.state() == RecordingStore::Live && changed.isEmpty() && store.count() == 1
+            && store.series().first().value == 1000,
+          QString("live: another function starts the window anew, %1 points").arg(store.count()));
+
+    // a recording starts cleared, from the value shown, and ends in View
+    store.start();
+    check(store.state() == RecordingStore::Record && store.isRunning() && running.size() == 1,
+          "record: started");
+    check(store.count() == 1 && store.series().first().t == 0, "record: cleared, the value shown first");
+    store.setReading(clock.at(10700, ohm));
+    check(store.dirty(), "record: unsaved");
+    check(store.remainingLength() == 15, QString("record: %1 tenths left").arg(store.remainingLength()));
+    store.setReading(clock.at(12300, ohm));   // past the length
+    check(store.state() == RecordingStore::View && running.size() == 2 && store.dirty(),
+          "record: the length ends it in View, unsaved");
+    const int kept = store.count();
+    store.setReading(clock.at(12500, ohm));
+    check(store.count() == kept && store.duration() == 2000, "view: stands");
+    store.stop();
+    check(running.size() == 2, "view: stop says nothing");
+
+    // back to Live: cleared, nothing unsaved
+    store.live();
+    check(store.state() == RecordingStore::Live && !store.dirty() && store.count() == 1 && store.marks().isEmpty(),
+          "live again: cleared");
+    check(states == QList<RecordingStore::State>({ RecordingStore::Live, RecordingStore::Record, RecordingStore::View,
+                                                   RecordingStore::Live }),
+          "states: Live, Record, View, Live");
+
+    // stopped by hand: View, unsaved; a load views too
+    store.start();
+    store.setReading(clock.at(13000, ohm));
+    store.stop();
+    check(store.state() == RecordingStore::View && store.dirty(), "stop: View, unsaved");
+    store.live();
+    Recording file;
+    file.start = TestClock::wall(0);
+    file.sampleTimeTenths = 10;
+    file.values = { 1, 2, 3 };
+    store.load(file);
+    check(store.state() == RecordingStore::View && !store.dirty() && store.count() == 3, "load: View");
+  }
+
+  // --- 6b. the triggers wait in Live, not in View: a recording viewed is
+  //         not overwritten; the pre-trigger reaches into the live window ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setStartMode(RecordingStore::Raising);
+    store.setThresholds(0, 5);
+    store.setReading(clock.at(0, reading(1, "1", "DC")));
+    store.setReading(clock.at(500, reading(6, "6", "DC")));
+    check(!store.isRunning(), "trigger: not in View");
+    store.setStartMode(RecordingStore::Time);
+    store.setStartTime(TestClock::wall(1000).time());
+    clock.now = 1000;
+    store.poll();
+    check(!store.isRunning(), "clock time: not in View");
+
+    // Live: the crossing starts it; the pre-trigger takes the window's readings
+    store.setStartMode(RecordingStore::Raising);
+    store.setPreTrigger(1000);
+    store.setSampleLength(100);   // 10 s
+    clock.now = 2000;
+    store.live();
+    for (int i = 1; i <= 20; ++i)   // 2 s at 1 V
+      store.setReading(clock.at(2000 + i * 100, reading(1, "1", "DC")));
+    store.setReading(clock.at(4100, reading(6, "6", "DC")));
+    check(store.isRunning() && store.marks().size() == 1 && store.marks().first().t == 1000,
+          "pre-trigger from Live: started, the mark 1 s in");
+    check(store.series().first().t == 0 && store.series().last().value == 6 && store.series().last().t == 1000,
+          QString("pre-trigger from Live: %1 points, the crossing at %2 ms")
+            .arg(store.count()).arg(store.series().last().t));
+    check(store.startDateTime() == TestClock::wall(3100), "pre-trigger from Live: starts 1 s before the trigger");
+    // the length counts from the trigger
+    check(store.remainingLength() == 100, QString("pre-trigger from Live: %1 tenths left").arg(store.remainingLength()));
+    // ended: no trigger until Live again
+    store.stop();
+    store.setReading(clock.at(5000, reading(1, "1", "DC")));
+    store.setReading(clock.at(5100, reading(6, "6", "DC")));
+    check(store.state() == RecordingStore::View, "trigger: not again in View after a recording");
   }
 
   if (failed)

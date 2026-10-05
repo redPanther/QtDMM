@@ -44,7 +44,7 @@ void RecordingStore::setThresholds(double falling, double raising)
 
 qint64 RecordingStore::duration() const
 {
-  if (m_running)
+  if (m_state != View)
     return elapsed();
   if (m_stopT >= 0)
     return m_stopT;
@@ -53,12 +53,26 @@ qint64 RecordingStore::duration() const
 
 qint64 RecordingStore::origin() const
 {
-  return qMax<qint64>(0, duration() - m_maxMs);
+  return qMax<qint64>(0, duration() - (m_state == Live ? liveWindow() : m_maxMs));
+}
+
+qint64 RecordingStore::liveWindow() const
+{
+  // as wide as a recording will be, so the picture does not jump at the start
+  const qint64 length = m_sampleLength > 0 ? qint64(m_sampleLength) * 100 : m_maxMs;
+  return qMin(m_maxMs, qMax<qint64>(length, m_preMs));
+}
+
+void RecordingStore::setSampleLength(int tenths)
+{
+  m_sampleLength = tenths;
+  if (m_state == Live)
+    trim();
 }
 
 int RecordingStore::remainingLength() const
 {
-  if (m_sampleLength <= 0)
+  if (m_state != Record || m_sampleLength <= 0)
     return 0;
   return int(qMax<qint64>(0, m_sampleLength - (duration() - m_preUsed) / 100));
 }
@@ -66,23 +80,8 @@ int RecordingStore::remainingLength() const
 void RecordingStore::setPreTrigger(int ms)
 {
   m_preMs = qMax(0, ms);
-  if (m_preMs == 0)
-    m_preBuffer.clear();
-}
-
-void RecordingStore::bufferPre(const RawPoint &p)
-{
-  if (!m_preBuffer.isEmpty() && p.gap() && m_preBuffer.last().gap())
-    return;
-  m_preBuffer.append(p);
-  // what holds at the start of the pre-trigger time stays, older goes
-  const qint64 from = p.t - m_preMs;
-  int drop = 0;
-  while (drop + 1 < m_preBuffer.size() && m_preBuffer[drop + 1].t <= from)
-    drop++;
-  drop = qMax(drop, int(m_preBuffer.size()) - kMaxPoints);
-  if (drop > 0)
-    m_preBuffer.remove(0, drop);
+  if (m_state == Live)
+    trim();
 }
 
 QVector<GridPoint> RecordingStore::grid(int tenths) const
@@ -221,7 +220,8 @@ bool RecordingStore::write(const QString &path, QString *error, bool raw)
 
 void RecordingStore::load(const Recording &rec)
 {
-  m_running = false;
+  const State was = m_state;
+  m_state = View;
   m_start = rec.start;
   m_unit = rec.unit;
   m_unitPending = false;
@@ -249,6 +249,12 @@ void RecordingStore::load(const Recording &rec)
   m_dirty = false;
   Q_EMIT marksChanged();
   Q_EMIT loaded();
+  if (was != View)
+  {
+    Q_EMIT stateChanged(View);
+    if (was == Record)
+      Q_EMIT runningChanged(false);
+  }
 }
 
 // "Voltage DC (V)", "Temperature (°F)": what a recording measures, for the UI
@@ -266,8 +272,9 @@ QString RecordingStore::describe(const PortKey &port, const QString &baseUnit)
 void RecordingStore::setUnit(const QString &baseUnit)
 {
   // the readings keep the unit they were recorded in: switching the meter
-  // from V to Ohm after a recording must not relabel it
-  if (count() > 0)
+  // from V to Ohm after a recording must not relabel it. Live follows the
+  // meter: another function starts its window anew anyway
+  if (count() > 0 && m_state != Live)
   {
     m_nextUnit = baseUnit;
     m_unitPending = baseUnit != m_unit;
@@ -291,8 +298,10 @@ void RecordingStore::setReading(const Reading &reading)
   // one recording, one quantity: the first value says which; another port
   // (V DC -> Ohm, DC -> AC) or another unit (°C -> °F) stops it. A prefix
   // (mV -> V) is no change, and an overload or a value without a known
-  // quantity says nothing about the function.
-  if (m_running && !reading.overload && reading.port.quantity != Quantity::Unknown)
+  // quantity says nothing about the function. Live starts its window anew:
+  // a trigger compares within one function (0 V, then 1000 Ohm crosses
+  // nothing), and the pre-trigger takes no other one into a recording
+  if (m_state != View && !reading.overload && reading.port.quantity != Quantity::Unknown)
   {
     if (!m_recordPort.isValid())
     {
@@ -301,57 +310,42 @@ void RecordingStore::setReading(const Reading &reading)
     }
     else if (reading.port != m_recordPort || reading.baseUnit != m_recordBaseUnit)
     {
-      const QString from = describe(m_recordPort, m_recordBaseUnit);
-      stop();
-      Q_EMIT functionChanged(from, describe(reading.port, reading.baseUnit));
-      return;
-    }
-  }
-
-  // waiting for a trigger: another function crosses no threshold (0 V, then
-  // 1000 Ohm), and the readings kept for the pre-trigger time were another one
-  if (!m_running && !reading.overload && reading.port.quantity != Quantity::Unknown)
-  {
-    if (m_armedPort.isValid() && (reading.port != m_armedPort || reading.baseUnit != m_armedBaseUnit))
-    {
+      if (m_state == Record)
+      {
+        const QString from = describe(m_recordPort, m_recordBaseUnit);
+        stop();
+        Q_EMIT functionChanged(from, describe(reading.port, reading.baseUnit));
+        return;
+      }
+      clear();
       m_lastValValid = false;
-      m_preBuffer.clear();
+      m_recordPort = reading.port;
+      m_recordBaseUnit = reading.baseUnit;
     }
-    m_armedPort = reading.port;
-    m_armedBaseUnit = reading.baseUnit;
   }
-
-  if (preTriggerArmed())
-  {
-    RawPoint p;
-    p.t = reading.t;
-    p.value = value;
-    p.quality = reading.overload ? Quality::Overload : Quality::Valid;
-    p.flags = reading.flags;
-    bufferPre(p);
-  }
-
-  // a trigger that starts the recording makes this reading its first value
-  // (after the pre-trigger's)
-  const bool wasRunning = m_running;
-  if (trigger(value) || !wasRunning || !m_running)
+  if (m_state == View)
     return;
 
-  const qint64 t = reading.t - m_t0;
-  if (lengthReached(t))
-    return;
   RawPoint p;
-  p.t = t;
+  p.t = qMax<qint64>(0, reading.t - m_t0);
   p.value = value;
   p.quality = reading.overload ? Quality::Overload : Quality::Valid;
   p.flags = reading.flags;
-  append(p);
+  if (m_state == Live)
+  {
+    // into the window first: the pre-trigger takes the crossing reading along
+    append(p);
+    trigger(value);
+    return;
+  }
+  if (!lengthReached(p.t))
+    append(p);
 }
 
 bool RecordingStore::trigger(double val)
 {
   bool started = false;
-  if (!m_running && (m_mode == Raising || m_mode == Falling))
+  if (m_state == Live && (m_mode == Raising || m_mode == Falling))
   {
     const bool crossed = m_mode == Raising
                            ? m_lastValValid && m_lastVal < m_raisingThreshold && val >= m_raisingThreshold
@@ -376,16 +370,7 @@ bool RecordingStore::trigger(double val)
 
 void RecordingStore::setStale(bool stale)
 {
-  if (stale && preTriggerArmed() && !m_preBuffer.isEmpty() && !m_preBuffer.last().gap())
-  {
-    RawPoint p;
-    p.t = qMin(m_preBuffer.last().t + m_staleMs, qMax(m_preBuffer.last().t, m_monotonic()));
-    p.value = qQNaN();
-    p.quality = Quality::Stale;
-    bufferPre(p);
-    return;
-  }
-  if (!stale || !m_running || m_series.isEmpty() || m_series.last().gap())
+  if (!stale || m_state == View || m_series.isEmpty() || m_series.last().gap())
     return;
   // the last value held until the stale limit, no longer
   RawPoint p;
@@ -397,7 +382,7 @@ void RecordingStore::setStale(bool stale)
 
 void RecordingStore::poll()
 {
-  if (!m_running && m_mode == Time)
+  if (m_state == Live && m_mode == Time)
   {
     // a timer may miss the exact second
     const int diff = m_startTime.secsTo(m_wall().time());
@@ -407,7 +392,7 @@ void RecordingStore::poll()
       start();
     }
   }
-  if (m_running && !lengthReached(elapsed()))
+  if (m_state == Record && !lengthReached(elapsed()))
     Q_EMIT progressChanged();
 }
 
@@ -415,7 +400,7 @@ bool RecordingStore::lengthReached(qint64 t)
 {
   // counted from the trigger, after the pre-trigger time
   const qint64 limit = qint64(m_sampleLength) * 100 + m_preUsed;
-  if (!m_running || m_sampleLength <= 0 || t < limit)
+  if (m_state != Record || m_sampleLength <= 0 || t < limit)
     return false;
   Q_EMIT alert();
   stop();
@@ -430,10 +415,16 @@ void RecordingStore::start()
 
 void RecordingStore::begin(qint64 preMs)
 {
-  const QVector<RawPoint> pre = preMs > 0 ? m_preBuffer : QVector<RawPoint>();
-  m_preBuffer.clear();
+  // the pre-trigger: what the live window holds of that time, from the
+  // reading that held at its start on
+  QVector<RawPoint> pre;
+  const qint64 liveT0 = m_t0;
+  if (preMs > 0 && m_state == Live)
+    for (int i = qMax(0, m_series.holding(elapsed() - preMs)); i < m_series.count(); ++i)
+      pre.append(m_series.at(i));
+  const State was = m_state;
+  m_state = Record;
   clear();
-  m_running = true;
   m_stopT = -1;
   m_preUsed = 0;
 
@@ -441,39 +432,64 @@ void RecordingStore::begin(qint64 preMs)
   {
     // the recording reaches back by the pre-trigger time, or as far as
     // there were readings
-    const qint64 back = qBound<qint64>(0, m_t0 - pre.first().t, preMs);
+    const qint64 back = qBound<qint64>(0, m_t0 - (liveT0 + pre.first().t), preMs);
     m_t0 -= back;
     m_start = m_start.addMSecs(-back);
     m_preUsed = back;
     for (RawPoint p : pre)
     {
-      p.t = qMax<qint64>(0, p.t - m_t0);
+      p.t = qMax<qint64>(0, liveT0 + p.t - m_t0);
       append(p);
     }
     m_marks.append(Mark { back, kTriggerColor, QCoreApplication::translate("RecordingStore", "Trigger") });
     Q_EMIT marksChanged();
   }
-  // the first value is the one the meter shows at the start
-  else if (m_haveReading && m_monotonic() - m_reading.t <= m_staleMs)
-  {
-    RawPoint p;
-    p.value = m_reading.overload ? qQNaN() : m_reading.value;
-    p.quality = m_reading.overload ? Quality::Overload : Quality::Valid;
-    p.flags = m_reading.flags;
-    append(p);
-  }
+  else
+    appendCurrent();
 
   Q_EMIT progressChanged();
+  if (was != Record)
+    Q_EMIT stateChanged(Record);
   Q_EMIT runningChanged(true);
+}
+
+void RecordingStore::appendCurrent()
+{
+  // the first value is the one the meter shows at the start
+  if (!m_haveReading || m_monotonic() - m_reading.t > m_staleMs)
+    return;
+  RawPoint p;
+  p.value = m_reading.overload ? qQNaN() : m_reading.value;
+  p.quality = m_reading.overload ? Quality::Overload : Quality::Valid;
+  p.flags = m_reading.flags;
+  append(p);
 }
 
 void RecordingStore::stop()
 {
-  if (m_running)
-    m_stopT = elapsed();
-  m_running = false;
+  if (m_state != Record)
+    return;
+  m_stopT = elapsed();
+  m_state = View;
   Q_EMIT progressChanged();
+  Q_EMIT stateChanged(View);
   Q_EMIT runningChanged(false);
+}
+
+void RecordingStore::live()
+{
+  const State was = m_state;
+  m_state = Live;
+  clear();
+  m_preUsed = 0;
+  // the first reading in the window has nothing to cross from
+  m_lastValValid = false;
+  appendCurrent();
+  Q_EMIT progressChanged();
+  if (was != Live)
+    Q_EMIT stateChanged(Live);
+  if (was == Record)
+    Q_EMIT runningChanged(false);
 }
 
 void RecordingStore::clear()
@@ -490,7 +506,7 @@ void RecordingStore::clear()
   m_marks.clear();
   m_t0 = m_monotonic();
   m_start = m_wall();
-  m_stopT = m_running ? -1 : 0;
+  m_stopT = m_state != View ? -1 : 0;
   m_loadedGrid = 0;
   m_integral = 0;
   m_dirty = false;
@@ -501,8 +517,8 @@ void RecordingStore::clear()
 
 void RecordingStore::addMark(quint32 argb, const QString &name)
 {
-  // now while recording; else on the newest reading
-  const qint64 t = m_running ? elapsed() : m_series.isEmpty() ? 0 : m_series.last().t;
+  // now while recording or live; else on the newest reading
+  const qint64 t = m_state != View ? elapsed() : m_series.isEmpty() ? 0 : m_series.last().t;
   m_marks.append(Mark { t, argb, name });
   Q_EMIT marksChanged();
 }
@@ -530,7 +546,9 @@ void RecordingStore::appendPoint(RawPoint p)
 void RecordingStore::append(const RawPoint &p)
 {
   appendPoint(p);
-  m_dirty = true;
+  // the live window is no recording: nothing to lose
+  if (m_state == Record)
+    m_dirty = true;
   Q_EMIT appended(trim());
 }
 
@@ -541,7 +559,7 @@ bool RecordingStore::trim()
   // what holds at the origin stays, everything before it goes; in steps of
   // a twentieth, so a full store does not drop something with every reading
   const qint64 from = origin();
-  const qint64 slack = qMax<qint64>(1000, m_maxMs / 20);
+  const qint64 slack = qMax<qint64>(1000, (m_state == Live ? liveWindow() : m_maxMs) / 20);
   int drop = 0;
   if (m_series.count() > 1 && m_series.at(1).t < from - slack)
     drop = qMax(0, m_series.holding(from));

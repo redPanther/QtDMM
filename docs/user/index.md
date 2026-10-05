@@ -14,7 +14,7 @@ side, one window each, and can be combined into calculated values.
   with two clicks.
 - [Analog meter](analog-meter.md) — the moving-coil style instrument: scale,
   red zone, readouts, styles.
-- [The recorder](recorder.md) — starting manually, at a time or on a threshold;
+- [The recorder](recorder.md) — live graph, recording and view; starting manually, at a time or on a threshold;
   zoom, pan and cursor; integration; CSV export and import.
 - [Readings table](readings-table.md) — every reading the meter sent, with
   time, mode and range; copy to a spreadsheet or export as CSV.

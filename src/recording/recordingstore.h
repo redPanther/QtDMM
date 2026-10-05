@@ -55,11 +55,18 @@ struct LoggedReading
 /// step. The integral is one over time (unit x s) of the values above the
 /// integration threshold.
 ///
+/// The store is in one of three states (State): Live, the readings of the
+/// last liveWindow() running through without being a recording; Record,
+/// cleared at the start and kept until it stops; View, standing still - a
+/// recording that ended, or a file loaded. Live shows what the meter does
+/// right after connecting; a recording starts from it and ends in View.
+///
 /// Recording starts by hand, at a clock time or when the value crosses a
 /// threshold (StartMode), and stops by hand or after the recording length.
-/// The store keeps the last maxDuration() of a recording (at most
-/// kMaxPoints readings): older readings go (appended() says so). The
-/// alarm marks live here too.
+/// The clock time and the thresholds start it from Live only: a recording
+/// in View is not overwritten by a trigger. The store keeps the last
+/// maxDuration() of a recording (at most kMaxPoints readings): older
+/// readings go (appended() says so). The alarm marks live here too.
 ///
 /// Next to the recording the store keeps a second series, the readings:
 /// every reading of every value at full resolution, with its own capacity and
@@ -85,6 +92,15 @@ public:
     Raising,      ///< when the value rises through the raising threshold
     Falling       ///< when the value falls through the falling threshold
   };
+
+  /// What the store does with the main readings.
+  enum State
+  {
+    View = 0,    ///< stands: a recording that ended, a file loaded, or nothing yet
+    Live,        ///< the last liveWindow() of readings, running through
+    Record       ///< recording since start(), until stop() or the length
+  };
+  Q_ENUM(State)
 
   /// An alarm mark at a time of the recording.
   struct Mark
@@ -112,11 +128,11 @@ public:
   int         maxDuration() const { return int(m_maxMs / 1000); }
   /// Recording duration in tenths of a second after which recording stops
   /// on its own (0 = until stopped).
-  void        setSampleLength(int tenths) { m_sampleLength = tenths; }
+  void        setSampleLength(int tenths);
   /// Pre-trigger in ms (0 = off): a recording started by a threshold
-  /// (Raising, Falling) reaches back this far - the store keeps the
-  /// readings of that time while it waits - and marks where the trigger
-  /// came. The recording length counts from the trigger.
+  /// (Raising, Falling) reaches back this far - into the live window, which
+  /// keeps at least that much - and marks where the trigger came. The
+  /// recording length counts from the trigger.
   void        setPreTrigger(int ms);
   int         preTrigger() const { return m_preMs; }
   void        setStartMode(StartMode mode) { m_mode = mode; }
@@ -146,22 +162,31 @@ public:
 
   /// @name The recording
   /// @{
+  /// The readings of the live window, of the recording or of what is viewed.
   const RecordingSeries &series() const { return m_series; }
   /// The readings kept (series().count()).
   int         count() const { return m_series.count(); }
-  /// ms since the start the recording covers: up to now while it runs, up to
-  /// the stop, or up to the last reading of a loaded one.
+  /// ms since the start the recording covers: up to now while it runs (and
+  /// in Live), up to the stop, or up to the last reading of a loaded one.
   qint64      duration() const;
   /// The start of what the store still keeps (ms since the start of the
   /// recording): 0 until older readings had to go.
   qint64      origin() const;
-  /// When the recording started (for an import: the file's first time stamp).
+  /// When the recording started (for an import: the file's first time stamp;
+  /// in Live: when the live window started).
   QDateTime   startDateTime() const { return m_start; }
-  bool        isRunning() const { return m_running; }
-  /// Recorded data not exported yet.
+  State       state() const { return m_state; }
+  /// Recording (not Live).
+  bool        isRunning() const { return m_state == Record; }
+  /// How much Live keeps (ms): the recording length, or what the store keeps
+  /// when it records until stopped; at least the pre-trigger, at most
+  /// maxDuration().
+  qint64      liveWindow() const;
+  /// Recorded data not exported yet; never in Live.
   bool        dirty() const { return m_dirty; }
   void        setDirty(bool dirty) { m_dirty = dirty; }
-  /// Tenths of a second left until the recording length is reached.
+  /// Tenths of a second left until the recording length is reached (0 when
+  /// not recording).
   int         remainingLength() const;
   QList<Mark> marks() const { return m_marks; }
   /// The recording on a grid of @p tenths (the sample time): step k is the
@@ -175,11 +200,12 @@ public:
   /// starting at the first.
   Recording   toRecording(bool raw = false) const;
   /// Writes the recording (CSV, .xlsx or .ods by suffix), on the grid or
-  /// with @p raw every reading; clears dirty().
+  /// with @p raw every reading; clears dirty(). In Live: the live window up
+  /// to now.
   bool        write(const QString &path, QString *error = nullptr, bool raw = false);
   /// Replaces the recording by @p rec: start, sample time and values, each
-  /// at its time. A recording on the grid of its sample time stays one: it
-  /// exports as it came.
+  /// at its time; the store is in View then. A recording on the grid of its
+  /// sample time stays one: it exports as it came.
   void        load(const Recording &rec);
   /// @}
 
@@ -205,19 +231,27 @@ public Q_SLOTS:
   /// Empties the readings series.
   void        clearReadings();
   /// A reading from the MeterController: every one goes into the readings
-  /// series; the main value (id 0) into the recording, the triggers and the
-  /// check that the recording keeps its function.
+  /// series; the main value (id 0) into the live window or the recording, the
+  /// triggers and the check that a recording keeps its function (in Live
+  /// another function starts the window anew).
   void        setReading(const Reading &reading);
-  /// The main value went stale (MeterController::staleChanged()): the
-  /// recording gets a gap from where the last value stopped holding.
+  /// The main value went stale (MeterController::staleChanged()): the live
+  /// window or the recording gets a gap from where the last value stopped
+  /// holding.
   void        setStale(bool stale);
   /// The clock: the start at a clock time and the recording length.
   /// A timer calls it every second.
   void        poll();
-  /// Clears the recording and starts it.
+  /// Clears the recording and starts it; from Live with the pre-trigger's
+  /// readings when a threshold started it.
   void        start();
+  /// Ends a recording: View. Nothing in Live or View.
   void        stop();
-  /// Discards the recorded readings and marks; a running recording goes on.
+  /// Live: the live window starts anew, empty but for the value the meter
+  /// shows. Ends a recording too (the UI does not offer that).
+  void        live();
+  /// Discards the recorded readings and marks; a running recording goes on,
+  /// and so does Live.
   void        clear();
   /// A mark at the newest reading (now, while recording).
   void        addMark(quint32 argb, const QString &name);
@@ -231,6 +265,8 @@ Q_SIGNALS:
   /// load() replaced the recording.
   void        loaded();
   void        runningChanged(bool running);
+  /// View, Live or Record now.
+  void        stateChanged(RecordingStore::State state);
   /// Duration, remaining length or running state changed (status bar).
   void        progressChanged();
   /// A mark came or went.
@@ -267,13 +303,12 @@ private:
   bool        trigger(double value);
   /// Stops at the recording length when @p t (ms since the start) reached it.
   bool        lengthReached(qint64 t);
-  /// Starts a recording; with @p preMs it reaches back into the readings
-  /// kept for the pre-trigger.
+  /// Starts a recording; with @p preMs (from Live) it reaches back into
+  /// the live window.
   void        begin(qint64 preMs);
-  /// Keeps @p p (t on the monotonic clock) for the pre-trigger.
-  void        bufferPre(const RawPoint &p);
-  /// Whether readings are kept for a pre-trigger now.
-  bool        preTriggerArmed() const { return !m_running && m_preMs > 0 && (m_mode == Raising || m_mode == Falling); }
+  /// The value the meter shows, as the first point at the start (when it
+  /// is not stale).
+  void        appendCurrent();
 
   RecordingSeries m_series;
   qint64      m_t0 = 0;           ///< the monotonic clock at the start
@@ -287,9 +322,8 @@ private:
   int         m_sampleLength = 0;
   int         m_preMs = 0;
   qint64      m_preUsed = 0;          ///< ms the current recording reaches back before its trigger
-  QVector<RawPoint> m_preBuffer;      ///< readings for the pre-trigger, t on the monotonic clock
   double      m_integral = 0;   ///< the running integral, carried over gaps
-  bool        m_running = false;
+  State       m_state = View;
   bool        m_dirty = false;
   QDateTime   m_start;
   QString     m_unit;
@@ -307,9 +341,7 @@ private:
   bool        m_haveReading = false;
   QString     m_nextUnit;        ///< setUnit() while readings are held
   bool        m_unitPending = false;
-  PortKey     m_armedPort;       ///< what the readings measure while a trigger waits
-  QString     m_armedBaseUnit;
-  PortKey     m_recordPort;      ///< what this recording measures, from its first value
+  PortKey     m_recordPort;      ///< what this recording (or the live window) measures, from its first value
   QString     m_recordBaseUnit;  ///< and in which unit (°C or °F)
   int         m_staleMs = 3000;
 

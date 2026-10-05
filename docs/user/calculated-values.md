@@ -94,5 +94,5 @@ overload from a real meter.
 Readings arrive at the pace of the slowest meter and the poll interval, so
 a calculated value can lag its inputs by up to a quarter of a second plus
 one meter update. For synchronised recordings start all instances together
-with *Start* (see [The recorder](recorder.md)); every CSV export carries
+with *Record* (see [The recorder](recorder.md)); every CSV export carries
 timestamps.

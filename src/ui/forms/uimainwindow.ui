@@ -69,8 +69,8 @@
    </attribute>
    <addaction name="action_Graph"/>
    <addaction name="separator"/>
-   <addaction name="action_Start"/>
-   <addaction name="action_Stop"/>
+   <addaction name="action_Record"/>
+   <addaction name="action_Live"/>
    <addaction name="separator"/>
    <addaction name="action_Clear"/>
   </widget>
@@ -335,6 +335,46 @@
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+X</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="action_Record">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Record</string>
+   </property>
+   <property name="toolTip">
+    <string>Start recording</string>
+   </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Record&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Starts a recording: the graph is cleared and fills from now on, until the recording length or until you press the button again (a red square while it records). The recording then stands in the graph to zoom, save and export. Press F2 to set the recording length and the start options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Space</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="action_Live">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="media-playback-start"/>
+   </property>
+   <property name="text">
+    <string>&amp;Live</string>
+   </property>
+   <property name="toolTip">
+    <string>Live: the graph runs with the last readings</string>
+   </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Live&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The graph shows the readings of the last recording length, running through; older ones fall out on the left. QtDMM is live after connecting. After a recording or a loaded file, Live leaves them (unsaved readings are offered for export first). Saving or exporting while live saves what the graph holds up to now.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>

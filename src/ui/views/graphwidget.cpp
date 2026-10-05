@@ -37,6 +37,15 @@
 #include "ui/engnumbervalidator.h"
 
 
+// "1:05:09", "5:09", "2 d 1:05:09"
+static QString durationText(qint64 seconds)
+{
+  const qint64 d = seconds / 86400, h = seconds / 3600 % 24, m = seconds / 60 % 60, sec = seconds % 60;
+  QString text = h || d ? QString("%1:%2:%3").arg(h).arg(m, 2, 10, QChar('0')).arg(sec, 2, 10, QChar('0'))
+                        : QString("%1:%2").arg(m).arg(sec, 2, 10, QChar('0'));
+  return d ? QString("%1 d %2").arg(d).arg(text) : text;
+}
+
 GraphWidget::GraphWidget(QWidget *parent): GraphWidget(parent, Q_NULLPTR)
 {
 }
@@ -116,6 +125,7 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
     updateCentreTicks();
     updateXLabels();
     updateYLabels();
+    updateStateLabel();
   });
   m_centreTicks = new QGraphicsPathItem(m_chart);
   m_centreTicks->setZValue(5);   // above the grid, below the curves' markers
@@ -185,6 +195,11 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_cursorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);   // no Leave for the view
   m_cursorLabel->hide();
 
+  m_stateLabel = new QLabel(m_chartView);
+  m_stateLabel->setObjectName("ui_graphState");
+  m_stateLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+  m_stateLabel->hide();
+
   connectStore();
 }
 
@@ -199,6 +214,11 @@ void GraphWidget::connectStore()
   // the axis names the recording's unit, which a new one may change
   connect(m_store, &RecordingStore::cleared, this, &GraphWidget::showUnit);
   connect(m_store, &RecordingStore::loaded, this, &GraphWidget::showUnit);
+  connect(m_store, &RecordingStore::stateChanged, this, &GraphWidget::onStateChanged);
+  // the time of a recording, and what a load or a clear left to view
+  connect(m_store, &RecordingStore::progressChanged, this, &GraphWidget::updateStateLabel);
+  connect(m_store, &RecordingStore::loaded, this, &GraphWidget::updateStateLabel);
+  connect(m_store, &RecordingStore::cleared, this, &GraphWidget::updateStateLabel);
 }
 
 void GraphWidget::setStore(RecordingStore *store)
@@ -213,7 +233,7 @@ void GraphWidget::setStore(RecordingStore *store)
   showUnit();
   rebuildSeries();
   syncMarks();
-  emitInfo();
+  onStateChanged();
 }
 
 void GraphWidget::timeButtonClicked(int seconds)
@@ -498,6 +518,14 @@ int GraphWidget::finiteTail(const QList<QPointF> &points, int tail)
 
 qint64 GraphWidget::windowStart() const
 {
+  // Live: the newest reading at the right edge once the window is full (the
+  // axis ends a sample time short of the window, updateXAxisRange())
+  if (m_store->state() == RecordingStore::Live)
+  {
+    const qint64 window = qint64(qMax(1, m_windowSeconds)) * 1000;
+    const qint64 shortOf = qMin<qint64>(m_store->sampleTime() * 100, window / 10);
+    return qMax(m_store->origin(), m_store->duration() - window + shortOf);
+  }
   // the scroll bar counts tenths of a second from what the store keeps
   return m_store->origin() + qint64(qMax(0, scrollbar->value())) * 100;
 }
@@ -889,6 +917,76 @@ void GraphWidget::stopSLOT()
   m_store->stop();
 }
 
+void GraphWidget::liveSLOT()
+{
+  m_store->live();
+}
+
+void GraphWidget::onStateChanged()
+{
+  const bool live = m_store->state() == RecordingStore::Live;
+  // a file viewed is gone with Live or a recording
+  if (m_store->state() != RecordingStore::View)
+    m_sourceFile.clear();
+  // Live follows the newest reading: nothing to scroll
+  scrollbar->setEnabled(!live);
+  updateXAxisRange();
+  updateMarkPositions();
+  updateStateLabel();
+  emitInfo();
+  Q_EMIT stateChanged(int(m_store->state()));
+}
+
+QString GraphWidget::stateText() const
+{
+  switch (m_store->state())
+  {
+    case RecordingStore::Live:
+      return QString();
+    case RecordingStore::Record:
+    {
+      const qint64 seconds = m_store->duration() / 1000;
+      const int left = m_store->remainingLength();
+      if (left <= 0)
+        return tr("● REC %1").arg(durationText(seconds));
+      return tr("● REC %1 / %2").arg(durationText(seconds), durationText((m_store->duration() / 100 + left) / 10));
+    }
+    case RecordingStore::View:
+      break;
+  }
+  if (m_store->count() == 0)
+    return QString();
+  const QString length = durationText((m_store->duration() - m_store->origin()) / 1000);
+  if (!m_sourceFile.isEmpty())
+    return tr("%1 · %2").arg(m_sourceFile, length);
+  return tr("Recording of %1 · %2").arg(QLocale().toString(m_store->startDateTime(), QLocale::ShortFormat), length);
+}
+
+void GraphWidget::updateStateLabel()
+{
+  if (!m_stateLabel)
+    return;
+  const QString text = stateText();
+  if (text.isEmpty())
+  {
+    m_stateLabel->hide();
+    return;
+  }
+  // a recording in red; what is viewed in the lettering colour, dimmed
+  const QColor grey = m_stateColor.isValid() ? m_stateColor : palette().color(QPalette::WindowText);
+  const QColor color = m_store->isRunning() ? QColor(0xd3, 0x2f, 0x2f)
+                                            : QColor(grey.red(), grey.green(), grey.blue(), 170);
+  m_stateLabel->setStyleSheet(QString("QLabel { color: %1; background: transparent; font-weight: %2; }")
+                                .arg(color.name(QColor::HexArgb), m_store->isRunning() ? "bold" : "normal"));
+  m_stateLabel->setText(text);
+  m_stateLabel->adjustSize();
+  // top left inside the plot: the line above it is the crosshair's
+  const QPoint topLeft = m_chartView->mapFromScene(m_chart->plotArea().topLeft());
+  m_stateLabel->move(topLeft.x() + 6, topLeft.y() + 4);
+  m_stateLabel->show();
+  m_stateLabel->raise();
+}
+
 void GraphWidget::onAppended(bool shifted)
 {
   const RawPoint &p = m_store->series().last();
@@ -896,8 +994,8 @@ void GraphWidget::onAppended(bool shifted)
   // "All": the window grows once the recording fills it
   if (m_followAll && m_store->duration() - m_store->origin() >= qint64(m_windowSeconds) * 1000)
     requestAll(true);
-  // a full store: the window moves on with what it keeps
-  if (m_store->origin() > 0)
+  // a full store, or Live: the window moves on with what it keeps
+  if (m_store->origin() > 0 || m_store->state() == RecordingStore::Live)
   {
     updateXAxisRange();
     updateMarkPositions();
@@ -979,22 +1077,28 @@ void GraphWidget::onCleared()
   m_tailData = m_tailInt = m_tailDataPts = m_tailIntPts = 0;
 }
 
-// "1:05:09", "5:09", "2 d 1:05:09"
-static QString durationText(qint64 seconds)
-{
-  const qint64 d = seconds / 86400, h = seconds / 3600 % 24, m = seconds / 60 % 60, sec = seconds % 60;
-  QString text = h || d ? QString("%1:%2:%3").arg(h).arg(m, 2, 10, QChar('0')).arg(sec, 2, 10, QChar('0'))
-                        : QString("%1:%2").arg(m).arg(sec, 2, 10, QChar('0'));
-  return d ? QString("%1 d %2").arg(d).arg(text) : text;
-}
-
 void GraphWidget::emitInfo()
 {
   // recorded / kept at most - left until the recording length - state
-  QString txt = QString("%1 / %2").arg(durationText(m_store->duration() / 1000), durationText(m_store->maxDuration()));
+  // Live: what the window holds of what it keeps
+  const bool live = m_store->state() == RecordingStore::Live;
+  QString txt = live ? QString("%1 / %2").arg(durationText((m_store->duration() - m_store->origin()) / 1000),
+                                              durationText(m_store->liveWindow() / 1000))
+                     : QString("%1 / %2").arg(durationText(m_store->duration() / 1000), durationText(m_store->maxDuration()));
   if (m_store->remainingLength() > 0)
     txt += " - " + tr("%1 left").arg(durationText(m_store->remainingLength() / 10));
-  txt += " - " + (m_store->isRunning() ? tr("Sampling") : tr("Stopped"));
+  switch (m_store->state())
+  {
+    case RecordingStore::Live:
+      txt += " - " + tr("Live");
+      break;
+    case RecordingStore::Record:
+      txt += " - " + tr("Sampling");
+      break;
+    case RecordingStore::View:
+      txt += " - " + tr("Stopped");
+      break;
+  }
   Q_EMIT info(txt);
 }
 
@@ -1084,6 +1188,12 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
       action->setProperty("ID", IDStartRecorder);
       m_popup->addAction(action);
       //m_popup->insertItem( tr("Start recorder"), IDStartRecorder );
+    }
+    if (m_store->state() == RecordingStore::View)
+    {
+      QAction *action = new QAction(tr("Live"), m_popup);
+      action->setProperty("ID", IDLive);
+      m_popup->addAction(action);
     }
     QAction *action = new QAction(tr("Clear graph"), m_popup);
     action->setProperty("ID", IDClearGraph);
@@ -1322,37 +1432,7 @@ bool GraphWidget::exportCsvFile(const QString &fileName, bool raw)
 
 void GraphWidget::importDataSLOT()
 {
-  if (m_store->dirty() && m_alertUnsaved)
-  {
-    QMessageBox question;
-    question.setWindowTitle(tr("QtDMM: Unsaved data"));
-    question.setText(tr("<font size=+2><b>Unsaved data</b></font><p>"
-                        "Importing data will overwrite your measured data"
-                        "<p>Do you want to export your unsaved data first?"));
-    question.setIcon(QMessageBox::Question);
-
-    // Standard-Buttons
-    question.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    question.setDefaultButton(QMessageBox::Yes);
-    question.setEscapeButton(QMessageBox::Cancel);
-
-    QAbstractButton *yesButton = question.button(QMessageBox::Yes);
-    if (yesButton)
-      yesButton->setText(tr("Export data first"));
-
-    QAbstractButton *noButton = question.button(QMessageBox::No);
-    if (noButton)
-      noButton->setText(tr("Import & overwrite data"));
-
-    switch (question.exec())
-    {
-      case QMessageBox::Yes:
-        exportDataSLOT();
-        return;
-      case QMessageBox::Cancel:
-        return;
-    }
-  }
+  // unsaved data: InstanceWidget::importSLOT() asks first
   QString fn = QFileDialog::getOpenFileName(this, tr("Import data"), m_cfg->getString("QtDMM/LastUsesPath", tr("CSV (*.csv);;All files (*)")));
 
   if (!fn.isNull())
@@ -1378,7 +1458,10 @@ bool GraphWidget::importCsvFile(const QString &fileName)
   // the length covers the last row and one sample time after it
   const int size = qMax(1, m_windowSeconds);
   const qint64 span = cnt > 0 ? rec->timeAt(cnt - 1) + m_store->sampleTime() * 100 : 0;
-  const int length = qMax(1, int(std::ceil(span / 1000.0)));
+  // grown for a longer file, never shrunk: the length goes to the settings,
+  // and a short file cut the next recording (and Live) down to its length
+  const int length = qMax(qMax(1, int(std::ceil(span / 1000.0))), m_totalSeconds);
+  const bool grown = length != m_totalSeconds;
 
   if (cnt > 1)
     Q_EMIT sampleTime(m_store->sampleTime());
@@ -1387,7 +1470,9 @@ bool GraphWidget::importCsvFile(const QString &fileName)
   m_scaleMax = -1e40;
 
   setGraphSize(size, length);
+  m_sourceFile = QFileInfo(fileName).fileName();
   m_store->load(*rec);
+  updateStateLabel();
 
   setScale(true, true, 0, 0);
   // setGraphSize() above built the series before the values were in; the
@@ -1398,7 +1483,8 @@ bool GraphWidget::importCsvFile(const QString &fileName)
 
   Q_EMIT error(fileName);
   update();
-  Q_EMIT graphSize(size, length);
+  if (grown)
+    Q_EMIT graphSize(size, length);
   return true;
 }
 
@@ -1671,6 +1757,8 @@ void GraphWidget::applyThemeColors()
                                .arg(labels.name(), QColor(labels.red(), labels.green(), labels.blue(), 110).name(QColor::HexArgb)));
   if (m_cursorLabel)
     m_cursorLabel->setStyleSheet(QString("QLabel { color: %1; background: transparent; }").arg(labels.name()));
+  m_stateColor = labels;
+  updateStateLabel();
   m_chart->setPlotAreaBackgroundBrush(plot);
   m_chart->setPlotAreaBackgroundVisible(plot.style() != Qt::NoBrush);
   for (QValueAxis *axis : { m_xAxis, m_yAxis })
@@ -1803,10 +1891,13 @@ void GraphWidget::popupSLOT(QAction *action)
       Q_EMIT connectDMM(false);
       break;
     case IDStopRecorder:
-      stopSLOT();
+      Q_EMIT recordRequested(false);
       break;
     case IDStartRecorder:
-      startSLOT();
+      Q_EMIT recordRequested(true);
+      break;
+    case IDLive:
+      Q_EMIT liveRequested();
       break;
     case IDClearGraph:
       Q_EMIT clearRequested();
