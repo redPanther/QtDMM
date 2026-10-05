@@ -85,6 +85,8 @@ int main(int argc, char **argv)
   check(w.isVirtual() && shown(w, "ui_virtualGroup") && !shown(w, "ui_advanced"), "virtual: group");
   check(w.device().startsWith("calc V/DC "), "virtual: device " + w.device());
   check(w.keys().value("DMM/virtual-min") == "5", "virtual: min");
+  check(w.keys().value("Port settings/device").toString().startsWith("calc "),
+        "virtual: the formula as its device, not a port: " + w.keys().value("Port settings/device").toString());
 
   // 6. Victron: the Bluetooth group instead of the port, the key only here
   w.load({{"DMM/model", "Victron SmartShunt"}, {"Port settings/device", "ble AA:BB:CC:DD:EE:FF"},

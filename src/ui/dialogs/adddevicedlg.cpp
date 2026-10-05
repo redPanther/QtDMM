@@ -8,6 +8,7 @@
 #include "device/discovery/discovery.h"
 #include "device/protocols.h"
 #include "ui/devicesettings.h"
+#include "ui/tilebutton.h"
 
 namespace
 {
@@ -152,7 +153,7 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
   // page 4: where it goes; a click finishes
   auto *target = new QWidget(m_pages);
   auto *targets = new QHBoxLayout(target);
-  m_thisWindow = tile("go-next", QString(), tr("The device takes the place of the one in this window"));
+  m_thisWindow = tile("go-next", QString(), QString());
   m_thisWindow->setObjectName("ui_thisWindow");
   m_thisWindow->setFixedSize(kTargetSize);
   m_newWindow = tile("window-new", tr("In a ne&w window") + '\n' + tr("with the settings of this one"),
@@ -184,12 +185,11 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
 
 QToolButton *AddDeviceDlg::tile(const QString &icon, const QString &text, const QString &toolTip)
 {
-  auto *button = new QToolButton(this);
+  auto *button = new TileButton(this);
   button->setIcon(QIcon::fromTheme(icon));
   button->setIconSize(QSize(48, 48));
   button->setText(text);
   button->setToolTip(toolTip);
-  button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   button->setFixedSize(kTileSize);
   return button;
 }
@@ -212,8 +212,10 @@ void AddDeviceDlg::setStateManager(SharedStateManager *state)
 void AddDeviceDlg::setCurrentDevice(const QString &name)
 {
   m_currentDevice = name;
-  m_thisWindow->setText(tr("In &this window") + '\n'
-                        + (name.isEmpty() ? tr("instead of the meter now") : tr("instead of %1").arg(name)));
+  // a long name or a formula made the tile wide: the name in the tooltip only
+  m_thisWindow->setText(tr("In &this window") + '\n' + tr("as the current device"));
+  m_thisWindow->setToolTip(name.isEmpty() ? tr("The device takes the place of the one in this window")
+                                          : tr("The device takes the place of %1 in this window").arg(name));
 }
 
 void AddDeviceDlg::setTargetChoice(bool choice)

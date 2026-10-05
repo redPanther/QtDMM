@@ -238,6 +238,10 @@ int main(int argc, char **argv)
     check(DeviceLibrary::place({ { "Port settings/device", "ble cb:09:e4:16:33:db 0123 PV V" } })
             == DeviceLibrary::place({ { "Port settings/ble-address", "CB:09:E4:16:33:DB SmartShunt" } }),
           "place: the address of a Victron device string and of a find");
+    // a simulated meter is nowhere, also with a port left over from before 26.2
+    check(DeviceLibrary::place({ { "DMM/model", "QtDMM Virtual meter" },
+                                 { "Port settings/device", "SERIAL /dev/ttyUSB0" } }).isEmpty(),
+          "place: none for a simulated meter with an old port");
   }
 
 #ifdef Q_OS_LINUX

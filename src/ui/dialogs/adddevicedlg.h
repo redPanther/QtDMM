@@ -45,7 +45,7 @@ public:
   void        setSigrokExe(const QString &exe);
   /// The other instances' readings for the formula of a calculated value.
   void        setStateManager(SharedStateManager *state);
-  /// The meter of this window, named on the button "In this window".
+  /// The meter of this window, named in the tooltip of "In this window".
   void        setCurrentDevice(const QString &name);
   /// Whether page 4 asks where the device goes. Without it (an empty
   /// window) the button on page 3 is "Add" and the device goes into this

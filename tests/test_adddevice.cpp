@@ -193,7 +193,8 @@ int main(int argc, char **argv)
     check(dlg.name() == "Meter", "nothing known of the port: manual settings: " + dlg.name());
     dlg.next();
     QToolButton *here = dlg.findChild<QToolButton *>("ui_thisWindow");
-    check(here->text().contains("UT803"), "this window names the meter now: " + here->text());
+    check(here->text().contains("as the current device") && here->toolTip().contains("UT803"),
+          "this window: as the current device, the meter now in the tooltip: " + here->toolTip());
     here->click();
     check(dlg.target() == AddDeviceDlg::ThisWindow, "this window finishes");
   }

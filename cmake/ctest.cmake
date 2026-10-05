@@ -96,7 +96,7 @@ if (BUILD_TESTING)
 	target_link_libraries(test_devicesettings PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
 	add_test(NAME device_settings COMMAND test_devicesettings)
 	## the assistant "Add device": pages per connection, models, name, Next, the buttons that finish it
-	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp src/ui/dialogs/adddevicedlg.cpp src/ui/devicesettings.cpp
+	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp src/ui/dialogs/adddevicedlg.cpp src/ui/tilebutton.cpp src/ui/devicesettings.cpp
 		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
 		src/device/discovery/discovery.cpp src/service/mdnsbrowser.cpp
 		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
