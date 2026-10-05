@@ -22,8 +22,10 @@ uses it takes the change at once.
 window, with the node **My devices**. The device in use is bold, with a dot
 that is green while its readings come in; where a device is connected shows
 when the mouse rests on it. Click another one: QtDMM disconnects, takes over
-its settings and connects again. A running recording stops - another meter
-is another measurement - and minimum and maximum start afresh.
+its settings and connects again. A running recording stops and the graph
+starts empty - another meter is another measurement; readings not exported
+yet are offered for export first, and **Cancel** stays with the current
+device. Minimum and maximum start afresh.
 
 With a single device the sidebar stays closed; adding the second one opens
 it, and the window remembers whether you leave it open. A window without a
@@ -36,7 +38,8 @@ The context menu of a device:
   use takes them at once.
 - **Rename** - in place (F2 does the same).
 - **Open in a new window** - a new instance with the settings of this one
-  and the device.
+  and the device. A device another window already uses brings that window
+  to the front instead.
 - **Remove from My devices** - after a question; a window using it keeps its
   meter.
 

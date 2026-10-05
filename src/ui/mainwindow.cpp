@@ -222,7 +222,13 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     showSidebar(on);
     m_wid->settings()->setBool("Windows/sidebar", on);
   });
-  connect(m_sidebar, &DeviceSidebar::switchRequested, m_wid, &InstanceWidget::switchDevice);
+  connect(m_sidebar, &DeviceSidebar::switchRequested, m_wid, [this](const QString &id)
+  {
+    // the selection is the device in use: the new one, or after Cancel at
+    // the question about unsaved data the one before
+    m_wid->switchDevice(id);
+    m_sidebar->setCurrentItem(m_sidebar->deviceItem(m_wid->currentDevice()));
+  });
   connect(m_sidebar, &DeviceSidebar::settingsRequested, this, &MainWindow::deviceSettings);
   connect(m_sidebar, &DeviceSidebar::newWindowRequested, this, &MainWindow::openInNewWindow);
   connect(m_sidebar, &DeviceSidebar::instanceRequested, this, &MainWindow::openInstance);
@@ -553,17 +559,27 @@ void MainWindow::addDevice()
   }
 }
 
-QMap<QString, QString> MainWindow::placesInUse() const
+QMap<QString, QString> MainWindow::placeOwners() const
 {
-  QMap<QString, QString> inUse;
+  QMap<QString, QString> owners;
   for (const QString &instance : m_stateMgr->instances())
   {
     const bool here = instance == m_stateMgr->id();
     const Settings other(instance == QLatin1String("default") ? QString() : instance, m_wid->settings()->configDir());
     const QString place = DeviceLibrary::place(here ? m_wid->settings()->meterKeys() : other.meterKeys());
     if (!place.isEmpty())
-      inUse.insert(place, here ? tr("In use here") : tr("In use by the instance %1").arg(instance));
+      owners.insert(place, instance);
   }
+  return owners;
+}
+
+QMap<QString, QString> MainWindow::placesInUse() const
+{
+  QMap<QString, QString> inUse;
+  const QMap<QString, QString> owners = placeOwners();
+  for (auto it = owners.constBegin(); it != owners.constEnd(); ++it)
+    inUse.insert(it.key(), it.value() == m_stateMgr->id() ? tr("In use here")
+                                                          : tr("In use by the instance %1").arg(it.value()));
   return inUse;
 }
 
@@ -1093,14 +1109,14 @@ void MainWindow::renameInstance(const QString &from, const QString &to)
   }
   m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
   updateInstances();
-  // the running ones still compute with the formula they connected with
+  // the running ones still compute with the formula they started with
   QStringList runningChanged;
   for (const QString &id : changed)
     if (m_stateMgr->instances().contains(id))
       runningChanged << id;
   if (!runningChanged.isEmpty())
     QMessageBox::information(this, tr("Rename instance"),
-                             tr("The formulas now use \"%1\". The running instances %2 use it after reconnecting.")
+                             tr("The formulas now use \"%1\". The running instances %2 use it after a restart.")
                                .arg(to, runningChanged.join(", ")));
 }
 
@@ -1127,10 +1143,15 @@ void MainWindow::deviceSettings(const QString &id)
     return;
   QVariantMap keys = dlg.keys();
   keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
+  if (DeviceLibrary::entryKeys(keys) == device->keys)
+    return;   // nothing changed: the meter stays connected, the recording too
+  // the device in use takes them at once; its unsaved readings first
+  const bool inUse = id == m_wid->currentDevice();
+  if (inUse && !m_wid->confirmSwitch(device->name))
+    return;
   m_wid->devices()->update(id, keys);
-  // the device in use takes them at once
-  if (id == m_wid->currentDevice())
-    m_wid->switchDevice(id);
+  if (inUse)
+    m_wid->switchDevice(id, false);
 }
 
 void MainWindow::openInNewWindow(const QString &id)
@@ -1138,6 +1159,19 @@ void MainWindow::openInNewWindow(const QString &id)
   const std::optional<MyDevice> device = m_wid->devices()->find(id);
   if (!device)
     return;
+  // one port, one reader: the window that has it comes to the front
+  const QString owner = placeOwners().value(DeviceLibrary::place(device->keys));
+  if (owner == m_stateMgr->id())
+  {
+    statusBar()->showMessage(tr("%1 is in use in this window").arg(device->name), 4000);
+    return;
+  }
+  if (!owner.isEmpty())
+  {
+    m_stateMgr->writeState("RAISE_" + owner);
+    statusBar()->showMessage(tr("%1 is in use by the instance %2").arg(device->name, owner), 4000);
+    return;
+  }
   const QString instance = m_wid->openInNewWindow(id);
   m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
   statusBar()->showMessage(tr("%1 opens in the new window %2").arg(device->name, instance), 4000);

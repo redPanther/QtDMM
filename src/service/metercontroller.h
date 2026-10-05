@@ -125,6 +125,10 @@ Q_SIGNALS:
 
   /// A SCPI client asked to connect/disconnect the meter.
   void        connectRequested(bool on);
+  /// An alarm's program with "Disconnect first" takes the port (true) or
+  /// has ended and gives it back (false). A recording goes on; the time
+  /// without readings is a gap in it.
+  void        portReleased(bool released);
   /// SCPI server state: a short text for the status bar (empty = off) and
   /// a sentence for the settings page.
   void        scpiStatusChanged(const QString &status, const QString &detail);

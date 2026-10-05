@@ -227,6 +227,9 @@ Q_SIGNALS:
   /// @{
   void             connectDMM(bool);
   void             configure();
+  /// "Clear graph" in the context menu: the window asks about unsaved data
+  /// first (InstanceWidget::clearSLOT()).
+  void             clearRequested();
   void             exportData();
   void             importData();
   /// @}

@@ -77,6 +77,10 @@ public:
   void           save();
   /// Drops staged writes.
   void           clear();
+  /// Writes the saved values to the file and reads what other processes
+  /// changed there meanwhile (a renamed instance in a formula); without it
+  /// QSettings keeps answering from its cache.
+  void           sync();
 
   int            getInt(const QString &name, const int &def = 0) const;
   void           setInt(const QString &name, const int &value);

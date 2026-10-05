@@ -35,7 +35,7 @@
   come in; Settings, Rename, Open in a new window and Remove in its context menu, drag to reorder. The sidebar
   opens with the second device and in a window without a meter when there are devices; Devices in the toolbar
   (F9) shows and hides it. Its node Instances lists the instances with their reading and device: a click
-  brings one to the front or starts it, a stopped one can be renamed - the formulas that use it follow - and
+  brings one to the front, a double click starts a stopped one, which can also be renamed - the formulas that use it follow - and
   deleted. The instances dialog is gone. Serial ports are kept under their /dev/serial/by-id name.
   An entry keeps what its way of connecting needs; Find device recognises a saved device by its place (by-id
   name or ttyUSB, a USB cable plugged in again, a Bluetooth address), connects it without a second entry and
@@ -76,6 +76,18 @@
   (scrolling down Appearance could switch the analog meter to Centre zero)
 - Settings dialog: Factory defaults sits at the bottom left, beside OK and Cancel; the dialog is as tall as
   its tallest page (within the screen), so the pages need no scroll bar
+- Recorder: connecting again no longer clears the recording - after the settings dialog, or after an alarm
+  program with Disconnect first, the readings were gone without a question; a new start clears it. An
+  alarm program with Disconnect first no longer stops the recording: the time it has the port is a gap. Switching
+  to another device in the sidebar (or with the assistant, or by changing the one in use) asks about unsaved
+  readings first, and so do Clear and Clear graph in the graph's menu; Cancel stays with the device
+- An empty window stays empty after OK in the settings dialog (it counted as set up and tried to connect
+  without a port, also at every start)
+- Recorder: while waiting for a threshold, another function crosses nothing (0 V, then 1000 Ω over 5), and
+  the pre-trigger keeps no readings of the function before
+- Instances: renaming refuses a name that differs from another only in case; the message says the running
+  instances take the new formula after a restart (not after reconnecting), and they no longer write the old one
+  back into My devices. Open in a new window brings the window that already uses the device to the front
 - Virtual meter and calculated values: rounded like an autoranging meter (9.640 V on a 40000 count model,
   not 9.6402), so the analog meter shows the 40 V range instead of 0..4 with OL
 - SCPI: CONF? answers CONT for continuity (it said RES); READ? on "-OL" gives -9.9E37

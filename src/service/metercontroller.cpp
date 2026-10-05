@@ -66,7 +66,7 @@ MeterController::MeterController(QObject *parent)
     if (m_reopenAfter)
     {
       m_reopenAfter = false;
-      Q_EMIT connectRequested(true);
+      Q_EMIT portReleased(false);
     }
   });
 
@@ -265,7 +265,11 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
           m_externalPending = false;
           m_reopenAfter = m_dmm->isOpen();
           if (m_reopenAfter)
-            Q_EMIT connectRequested(false);
+          {
+            // the recording goes on: no readings while the program runs
+            m_recorder->setStale(true);
+            Q_EMIT portReleased(true);
+          }
           m_external->start(program, args);
           if (!m_external->waitForStarted(3000))
           {
@@ -273,7 +277,7 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
             if (m_reopenAfter)
             {
               m_reopenAfter = false;
-              Q_EMIT connectRequested(true);
+              Q_EMIT portReleased(false);
             }
           }
         });

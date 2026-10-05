@@ -430,6 +430,34 @@ int main(int argc, char **argv)
     check(changed.size() == 3, "function: no recording, nothing to stop");
   }
 
+  // --- 5d. waiting for a trigger: another function is no crossing (0 V, then
+  //          1000 Ohm over a threshold of 5), and the pre-trigger readings of
+  //          the function before go ---
+  {
+    auto rd = [](const QString &text, const QString &unit, const QString &special)
+    {
+      static ReadingAdapter adapter;
+      return ReadingAdapter::reading(adapter.adaptValue(text.toDouble(), text, unit, special, "AUTO", false, true,
+                                                        false, 0, QDateTime::currentMSecsSinceEpoch()));
+    };
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setStartMode(RecordingStore::Raising);
+    store.setThresholds(0, 5);
+    store.setPreTrigger(2000);
+    store.setReading(clock.at(0, rd("0.000", "V", "DC")));
+    store.setReading(clock.at(500, rd("1000", "Ohm", "OH")));
+    check(!store.isRunning(), "trigger: V -> Ohm crosses nothing");
+    store.setReading(clock.at(1000, rd("2", "Ohm", "OH")));
+    store.setReading(clock.at(1500, rd("6", "Ohm", "OH")));   // a crossing in Ohm
+    check(store.isRunning(), "trigger: a crossing in the new function starts it");
+    QStringList v;
+    for (int i = 0; i < store.count(); ++i)
+      v << QString::number(store.series().at(i).value);
+    check(v.join(' ') == "1000 2 6", "trigger: only Ohm before the trigger, got " + v.join(' '));
+  }
+
   // --- 2. the readings series: every reading of every value, whether or
   //        not a recording runs, with its own capacity and pause ---
   {
