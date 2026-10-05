@@ -27,6 +27,7 @@
 #include "ui/settings/settingsdialog.h"
 #include "ui/settings/settingspageitem.h"
 #include "ui/settings/meterprefs.h"
+#include "ui/devicesettings.h"
 #include "ui/settings/alarmprefs.h"
 #include "ui/settings/scpiprefs.h"
 #include "ui/settings/graphprefs.h"
@@ -669,69 +670,69 @@ int SettingsDialog::intPointMode() const
 
 DmmDecoder::DMMInfo SettingsDialog::dmmInfo() const
 {
-  DmmDecoder::DMMInfo info = m_dmm->dmmInfo();
+  DmmDecoder::DMMInfo info = m_dmm->settings()->dmmInfo();
   info.sigrokExe = m_ports->sigrokExecutable();
   return info;
 }
 
 bool SettingsDialog::rts() const
 {
-  return m_dmm->rts();
+  return m_dmm->settings()->rts();
 }
 
 bool SettingsDialog::dtr() const
 {
-  return m_dmm->dtr();
+  return m_dmm->settings()->dtr();
 }
 
 QSerialPort::Parity SettingsDialog::parity() const
 {
-  return m_dmm->parity();
+  return m_dmm->settings()->parity();
 }
 
 bool SettingsDialog::externalSetup() const
 {
-  return m_dmm->externalSetup();
+  return m_dmm->settings()->externalSetup();
 }
 
 int SettingsDialog::bits() const
 {
-  return m_dmm->bits();
+  return m_dmm->settings()->bits();
 }
 
 int SettingsDialog::stopBits() const
 {
-  return m_dmm->stopBits();
+  return m_dmm->settings()->stopBits();
 }
 
 int SettingsDialog::speed() const
 {
-  return m_dmm->speed();
+  return m_dmm->settings()->speed();
 }
 
 int SettingsDialog::numValues() const
 {
-  return m_dmm->numValues();
+  return m_dmm->settings()->numValues();
 }
 
 FrameFormat::DataFormat SettingsDialog::format() const
 {
-  return m_dmm->format();
+  return m_dmm->settings()->format();
 }
 
 int SettingsDialog::display() const
 {
-  return m_dmm->display();
+  return m_dmm->settings()->display();
 }
 
 QString SettingsDialog::dmmName() const
 {
-  return m_dmm->dmmName();
+  return m_dmm->settings()->dmmName();
 }
 
 QString SettingsDialog::device() const
 {
-  return m_dmm->device();
+  return m_dmm->settings()->device();
 }
 
 /////////////////////////////////////////////////////////////////

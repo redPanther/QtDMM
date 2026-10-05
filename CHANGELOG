@@ -70,6 +70,7 @@
 - Alarms: Disconnect first - the port is closed while the alarm's program runs and opened again after it, so the
   program can use the meter itself. The settings page External application is gone: an alarm with a condition
   and a program does what it did (its settings are not taken over)
+- Settings, Multimeter: the port parameters and the protocol are under Advanced, closed for a known model
 - Quitting and Apply in the settings no longer connect the meter (quitting connected a Bluetooth meter twice)
 - A Bluetooth meter that stays half connected (a UT60BT now and then) is tried again after 10 s, not 20 s
 

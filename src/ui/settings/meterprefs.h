@@ -1,5 +1,5 @@
 //======================================================================
-// File:		dmmprefs.h
+// File:		meterprefs.h
 // Author:	Matthias Toussaint
 // Created:	Sat Oct 19 15:08:57 CEST 2002
 //----------------------------------------------------------------------
@@ -20,62 +20,28 @@
 // Copyright (c) 2002 Matthias Toussaint
 //======================================================================
 
+
 #pragma once
 
-#include <QtSerialPort>
-#include <vector>
+#include "ui/settings/settingspage.h"
 
-#include "ui_uimeterprefs.h"
-#include "device/frameformat.h"
-#include "device/dmmdecoder.h"
-#include <QTimer>
-
-class SharedStateManager;
+class DeviceSettings;
 class DeviceLibrary;
+class SharedStateManager;
+class QComboBox;
+class QPushButton;
 
-/// Settings page "Multimeter": vendor/model choice (from the registered
-/// DmmDecoder::DMMInfo entries), port and the serial parameters, which
-/// become editable in manual mode. Descriptions can be saved to and loaded
-/// from .cfg files.
-class MeterPrefs : public SettingsPage, private Ui::UIMeterPrefs
+/// Settings page "Multimeter": the choice from "My devices" above the
+/// settings of the meter (DeviceSettings), which it fills from the instance's
+/// Settings and writes back.
+class MeterPrefs : public SettingsPage
 {
   Q_OBJECT
 public:
   MeterPrefs(QWidget *parent = Q_NULLPTR);
-  ~MeterPrefs();
 
-  /// The DMMInfo of the chosen model, or the manual settings.
-  DmmDecoder::DMMInfo dmmInfo() { return m_dmmInfo; };
-  QSerialPort::Parity parity() const;
-  QSerialPort::DataBits bits() const;
-  QSerialPort::StopBits stopBits() const;
-  int            speed() const;
-  int            numValues() const;
-  bool           externalSetup() const;
-  bool           rts() const;
-  bool           dtr() const;
-  FrameFormat::DataFormat format() const;
-  /// Display counts (4000, 6000, ...).
-  int            display() const;
-  /// Selects the display counts, adding the entry when the combo lacks it.
-  void           selectDisplay(const QString &counts);
-  /// Selects the protocol combo entry for @p df.
-  void           selectFormat(FrameFormat::DataFormat df);
-  /// Protocol from a settings value: name, or the enum number of old files.
-  static FrameFormat::DataFormat formatFromSetting(const QVariant &value);
-  QString        dmmName() const;
-  /// The port entry as typed or chosen, e.g. "/dev/ttyUSB0" or "HID 0x1a86:0xe008 ...";
-  /// for a calculated value "calc <unit> <formula>".
-  QString        device() const;
-  /// True while the model "QtDMM / Calculated value" is chosen.
-  bool           isCalculated() const;
-  /// True while the model "QtDMM / Virtual meter" is chosen.
-  bool           isVirtual() const;
-  /// Victron over Bluetooth LE: the Bluetooth group replaces the port.
-  bool           isBluetooth() const;
-  bool           isGatt() const;
-  /// A bench meter read through sigrok-cli: the sigrok group replaces the port.
-  bool           isSigrokMeter() const;
+  /// The fields of the meter; SettingsDialog reads the connection from them.
+  DeviceSettings *settings() const { return m_settings; }
   /// Source of the other instances' readings, shown as a hint below the formula.
   void           setStateManager(SharedStateManager *state);
   /// "My devices": the choice at the top of the page fills the fields.
@@ -91,57 +57,18 @@ public Q_SLOTS:
   virtual void   applySLOT() Q_DECL_OVERRIDE;
 
 protected Q_SLOTS:
-  void           on_ui_vendor_activated(int);
-  void           on_ui_model_activated(int);
   /// Fills the "My devices" choice, the entry in use selected.
   void           fillDevices();
   /// A device of "My devices" chosen: its keys into the fields.
   void           onDeviceChosen(int index);
   /// The fields into "My devices": the chosen entry, or a new one.
   void           saveDevice();
-  /// Load a DMM description (.cfg).
-  void           on_ui_load_clicked();
-  /// Save the current settings as a DMM description (.cfg).
-  void           on_ui_save_clicked();
-  void           on_ui_externalSetup_toggled();
-  /// Re-parses the formula and refreshes the hint (variables, live values, errors).
-  void           updateCalcHint();
-  /// Rebuilds the virtual meter's formula from the waveform fields.
-  void           updateVirtualFormula();
-  /// Validates address and key, explains what is missing.
-  void           updateBleHint();
-  /// Fills the main/second value combos with the fields of the chosen model.
-  void           updateBleFields();
-  /// Five-second scan for Victron devices, fills the device combo.
-  void           on_ui_bleScan_clicked();
-  /// Checks sigrok-cli and the driver, explains what is missing.
-  void           updateSigrokHint();
-  /// sigrok-cli --scan with the current settings.
-  void           on_ui_sigrokTest_clicked();
-
-protected:
-  QString        m_path;
-  DmmDecoder::DMMInfo m_dmmInfo;
-  QStringListModel *m_portlist;
-  std::vector<DmmDecoder::DMMInfo> m_currentVendorModels;
-
-  void setupComboBoxModel();
-  void populateModelsForVendor(const QString &vendor);
-  void populateAllModels();
-  void enterManualMode();
-  /// Shows the formula group instead of the port/protocol groups, or back.
-  void updateCalcMode();
-
-  SharedStateManager *m_state = Q_NULLPTR;
-  QTimer m_calcHintTimer;
 
 private:
-  /// What defaultsSLOT() reads: @c m_override first (an entry of "My
-  /// devices" chosen on the page), else the settings.
-  QString        cfgString(const QString &key, const QString &def = QString()) const;
-  int            cfgInt(const QString &key, int def = 0) const;
-  bool           cfgBool(const QString &key, bool def = false) const;
-  QVariantMap    m_override;
+  /// The ports and the sigrok-cli path into the fields, then @p keys.
+  void           loadFields(const QVariantMap &keys);
+
+  DeviceSettings *m_settings = nullptr;
   DeviceLibrary *m_devices = nullptr;
   QComboBox     *ui_myDevice = nullptr;
   QPushButton   *ui_saveDevice = nullptr;

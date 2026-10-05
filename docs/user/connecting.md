@@ -38,13 +38,15 @@ Open the settings with **F2** (or the *Configure* button) and go to the
 1. Pick the **vendor** in the first box. The second box then lists only that
    vendor's models. *All vendors* shows the complete list; *Manual settings*
    lets you enter the serial parameters yourself.
-2. Pick the **model**. Baud rate, data bits, parity, stop bits, protocol and
-   display resolution are filled in from QtDMM's device table and locked. You
-   can also start typing into the model box; the search covers every vendor
-   and switches the vendor box for you.
+2. Pick the **model**. Baud rate, data bits, parity, stop bits, DTR / RTS,
+   protocol and display resolution are filled in from QtDMM's device table and
+   locked; they are folded away under **Advanced**. You can also start typing
+   into the model box; the search covers every vendor and switches the vendor
+   box for you.
 3. Choose the **port** (see below).
-4. Set **DTR** / **RTS** if the meter's cable needs them powered — the
-   defaults come from the device table.
+
+With *Manual settings* **Advanced** is open: set the serial parameters, the
+protocol and **DTR** / **RTS** if the meter's cable needs them powered.
 
 Manual settings are for meters that are not in the table yet. If you find a
 combination that works, please report it on the project page so it can be
