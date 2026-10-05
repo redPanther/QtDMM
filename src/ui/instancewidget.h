@@ -116,6 +116,10 @@ public:
   /// Keeps the meter of this instance in "My devices" as @p name, the
   /// serial port under its stable name; returns the new id.
   QString     saveCurrentDevice(const QString &name);
+  /// Starts a new instance with this one's settings and the device @p id of
+  /// "My devices", named after the device (DeviceLibrary::instanceId());
+  /// returns the instance name, empty when there is no such entry.
+  QString     openInNewWindow(const QString &id);
 
 Q_SIGNALS:
   /// Recording started/stopped (graph state).
@@ -199,6 +203,7 @@ protected:
   void        syncDevice();
   DeviceLibrary *m_devices;
   QString     m_instanceId;
+  QString     m_configPath;   ///< --config-dir, passed on to new instances
 
   /// Applies the settings to the MeterConnection, graph, display and meter.
   void        readConfig();

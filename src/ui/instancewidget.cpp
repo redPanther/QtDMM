@@ -59,6 +59,7 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   m_ctl->setInstanceId(instance_id.isEmpty() ? QString("default") : instance_id);
 
   m_instanceId = instance_id;
+  m_configPath = config_path;
   m_settings  = new Settings(instance_id, config_path, this);
   // the integral is over time since 26.2: its scale once per settings file
   GraphWidget::migrateIntegralScale(m_settings);
@@ -385,6 +386,27 @@ void InstanceWidget::useFoundDevice(const QVariantMap &keys, const QString &name
   takeOver(keys, name.isEmpty() ? keys.value("DMM/model").toString() : name, true, QString());
   if (!name.isEmpty())
     saveCurrentDevice(name);
+}
+
+QString InstanceWidget::openInNewWindow(const QString &id)
+{
+  const std::optional<MyDevice> device = m_devices->find(id);
+  if (!device)
+    return QString();
+  const QString instance = DeviceLibrary::instanceId(device->name, m_settings->getConfigInstances());
+  // as the instances dialog did: this instance's settings, the device's meter
+  m_settings->copyConfig(instance);
+  Settings created(instance, m_settings->configDir());
+  created.setValues(device->keys);
+  created.setString("DMM/my-device", device->id);
+  created.setBool("DMM/configured", true);   // connects at its start
+  created.save();
+
+  QStringList args { "--config-id", instance };
+  if (!m_configPath.isEmpty())
+    args << "--config-dir" << m_configPath;
+  QProcess::startDetached(QCoreApplication::applicationFilePath(), args);
+  return instance;
 }
 
 void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, bool complete, const QString &id)
