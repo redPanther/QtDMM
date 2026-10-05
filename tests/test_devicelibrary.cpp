@@ -129,13 +129,18 @@ int main(int argc, char **argv)
     DeviceLibrary a(dir.path()), b(dir.path());
     const QString ia = a.add("A", { { "DMM/model", "A" } });
     const QString ib = b.add("B", { { "DMM/model", "B" } });
-    check(a.find(ib) && b.find(ia) && a.list().size() == 5, "two instances: both entries kept");
+    check(!ia.isEmpty() && !ib.isEmpty() && a.find(ib) && b.find(ia) && a.list().size() == 5,
+          QString("two instances: both entries kept, got ids '%1' '%2', %3 entries")
+            .arg(ia, ib).arg(a.list().size()));
     QSignalSpy seen(&a, &DeviceLibrary::changed);
     b.rename(ia, "A2");
     QDeadlineTimer wait(2000);
     while (seen.isEmpty() && !wait.hasExpired())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
-    check(!seen.isEmpty() && a.find(ia)->name == "A2", "two instances: a change in one is changed() in the other");
+    const std::optional<MyDevice> renamed = a.find(ia);
+    check(!seen.isEmpty() && renamed && renamed->name == "A2",
+          QString("two instances: a change in one is changed() in the other, signal %1, name '%2'")
+            .arg(seen.isEmpty() ? "missing" : "seen", renamed ? renamed->name : QString("(no entry)")));
   }
 
   // --- 5. what an entry keeps: the model, the place, what the way of

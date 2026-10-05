@@ -8,6 +8,8 @@
 #include <functional>
 #include <optional>
 
+class QSettings;
+
 /// One of "My devices": a meter and its connection under a name.
 struct MyDevice
 {
@@ -96,6 +98,11 @@ Q_SIGNALS:
 
 private:
   void        watch();
+  /// Runs @p edit on the file and writes it; a write that fails (on
+  /// Windows a virus scanner or indexer may hold the file a moment, the
+  /// replacement then cannot take its place) is tried again a few times.
+  /// False when it never succeeded.
+  bool        write(const std::function<void(QSettings &)> &edit) const;
   /// entryKeys() for every entry: snapshots of all meter keys from before
   /// are cut down (name, order and id stay).
   void        tidy();
