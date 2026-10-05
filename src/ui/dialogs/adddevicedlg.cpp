@@ -40,7 +40,7 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
       tr("A meter or a Victron device over Bluetooth LE") },
     { Network,   "network-server",               tr("Net&work") + '\n' + tr("qtdmm-bridge"),
       tr("A meter at another computer, through qtdmm-bridge or another RFC 2217 server") },
-    { Sigrok,    "plugins",                      tr("sig&rok") + '\n' + tr("Bench meters"),
+    { Sigrok,    "qtdmm-sigrok",                 tr("sig&rok") + '\n' + tr("Bench meters"),
       tr("A bench meter read through sigrok-cli") },
     { Simulated, "code-function",                tr("&Simulated / calculated") + '\n' + tr("To try out, formulas"),
       tr("A simulated meter to try QtDMM, or a value calculated from the readings of other windows") },
