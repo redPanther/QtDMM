@@ -41,8 +41,9 @@
   name or ttyUSB, a USB cable plugged in again, a Bluetooth address), connects it without a second entry and
   says which window uses a port
 - Settings dialog: the pages Multimeter and Special ports are gone - a meter is set up with Add device and
-  changed with Settings... in the sidebar (Shift+F2 for the one in use). The page Appearance is now General
-  and has the path of sigrok-cli; ports entered on Special ports before are still offered
+  changed with Settings... in the sidebar (Shift+F2 for the one in use). A new first page General holds
+  what happens at program exit (unsaved data, window position and size) and the path of sigrok-cli; the rest
+  stays on Appearance. Ports entered on Special ports before are still offered
 - Graph: the vertical axis in the unit the meter shows (350 mV, not 0.35 V); the status bar says what the
   third time is ("1:59:17 left")
 - Readings table: the columns are measured again after a design or font change, so no cell is cut off
@@ -69,6 +70,12 @@
   import "nan" is a gap again instead of a 0
 - Temperature: no bar graph, the analog scale follows the values (1-2-5)
 - Same bezel thickness for the LCD and the analog meter
+- Analog meter: the red zone's band on the arc is paler, so the red labels and the min/max marks stand out;
+  the scale arc runs through it. ppm and % start at zero also with the scale Centre zero
+- Settings: the mouse wheel over a list or number field scrolls the page instead of changing the value
+  (scrolling down Appearance could switch the analog meter to Centre zero)
+- Virtual meter and calculated values: rounded like an autoranging meter (9.640 V on a 40000 count model,
+  not 9.6402), so the analog meter shows the 40 V range instead of 0..4 with OL
 - SCPI: CONF? answers CONT for continuity (it said RES); READ? on "-OL" gives -9.9E37
 - Readings table: the Mode column names the quantity (Frequency, Duty cycle, ...) where it showed the meter's
   code (HZ, PC, ...)

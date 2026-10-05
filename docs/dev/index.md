@@ -117,7 +117,7 @@ into the resources (`:/icons`); the code asks for symbols by name with
 `QIcon::fromTheme()`:
 
 - `qtdmm-oxygen` - KDE's **Oxygen**, coloured PNGs in 16 to 48 px, the default
-  (*General → Symbols → Coloured*).
+  (*Appearance → Symbols → Coloured*).
 - `qtdmm-breeze`, `qtdmm-breeze-dark` - KDE's **Breeze**, monochrome SVG
   (*Plain*); `Designs` picks light or dark by the window colour.
 

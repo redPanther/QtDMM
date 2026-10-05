@@ -33,7 +33,8 @@ struct AnalogMeterStyle
   QColor bezelDark;   ///< bezel gradient bottom
   QColor scale;   ///< ticks, labels, arc
   QColor needle;
-  QColor redZone;
+  QColor redZone;   ///< labels in the red zone
+  QColor redBand;   ///< the band on the arc, paler, so labels and marks stand out on it
   QColor boxBg;   ///< readout / unit boxes
   QColor boxText;
   QColor lampOff;
@@ -73,6 +74,7 @@ public:
     Unipolar,   ///< 0 at the left end, negative values push the needle below it
     Bipolar,    ///< -FS .. 0 .. +FS, zero in the middle
     Auto        ///< Unipolar until a value below -5 % FS arrives, then Bipolar until reset()
+    // a quantity that is never negative (neverNegative()) is Unipolar in every mode
   };
 
   explicit AnalogMeter(QWidget *parent = nullptr);
@@ -127,6 +129,9 @@ public:
   /// The same, but a percentage (unit "%": state of charge, duty cycle) is
   /// always a 0..100 scale, whatever the display count says.
   static double fullScaleFromReading(const QString &value, int counts, const QString &unit);
+  /// True for a unit whose quantity cannot be negative (ppm, %): its scale
+  /// starts at 0 also in the modes Bipolar and Auto.
+  static bool neverNegative(const QString &unit);
   /// Full scale for a value without a measuring range (a temperature): the
   /// next step of 10, 20, 50, 100, ... that keeps @p value below the red
   /// zone, and never less than @p current (NaN: none yet), so the scale only
@@ -178,6 +183,8 @@ private:
   static double niceStep(double range, int targetMajors);
 
   void applyMinMax();   ///< m_minBase/m_maxBase -> marks and peak
+  /// m_bipolar from the mode, the Auto latch and m_neverNegative.
+  void updatePolarity();
 
   int m_counts = 4000;
   QString m_unitText;   ///< unit of the last reading, with prefix
@@ -187,7 +194,9 @@ private:
   double m_rangelessScale = std::numeric_limits<double>::quiet_NaN();   ///< grown scale of a temperature, NaN otherwise
   AnalogMeterStyle m_style = AnalogMeterStyle::dark();
   ScaleMode m_scaleMode = Auto;
-  bool m_bipolar = false;
+  bool m_bipolar = false;   ///< the scale shown: -FS .. FS
+  bool m_latched = false;   ///< Auto: a clearly negative value came since reset()
+  bool m_neverNegative = false;   ///< the unit of the last reading, neverNegative()
   double m_fullScale = 4.0;
   double m_value = 0.0;
   QString m_text;

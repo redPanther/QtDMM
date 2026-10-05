@@ -31,6 +31,7 @@
 #include "ui/settings/alarmprefs.h"
 #include "ui/settings/scpiprefs.h"
 #include "ui/settings/graphprefs.h"
+#include "ui/settings/generalprefs.h"
 #include "ui/settings/guiprefs.h"
 #include "ui/settings/integrationprefs.h"
 #include "ui/settings/recorderprefs.h"
@@ -108,6 +109,15 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   m_meter = new DeviceSettings(this);
   m_meter->hide();
 
+  m_general = new GeneralPrefs(ui_stack);
+  m_general->setId(SettingsDialog::General);
+  new SettingsPageItem(m_general->id(),
+                 m_general->icon(),
+                 m_general->label(),
+                 ui_list);
+  m_general->setCfg(m_settings);
+  addPage(m_general);
+
   m_gui = new GuiPrefs(ui_stack);
   m_gui->setId(SettingsDialog::GUI);
   new SettingsPageItem(m_gui->id(),
@@ -174,9 +184,33 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   // init stuff
   //
   on_ui_buttonBox_rejected();
-  showPage(GUI);
+  showPage(General);
   ui_undo->hide();
   adjustSize();
+}
+
+namespace
+{
+/// The mouse wheel over a combo box or spin box that has no focus scrolls
+/// the page instead of changing the value: scrolling down the page must
+/// not switch, say, the analog meter to Centre zero on the way.
+class WheelGuard : public QObject
+{
+public:
+  WheelGuard(QScrollArea *area) : QObject(area), m_area(area) {}
+
+  bool eventFilter(QObject *watched, QEvent *event) override
+  {
+    auto *w = qobject_cast<QWidget *>(watched);
+    if (event->type() != QEvent::Wheel || !w || w->hasFocus())
+      return false;
+    QCoreApplication::sendEvent(m_area->verticalScrollBar(), event);
+    return true;
+  }
+
+private:
+  QScrollArea *m_area;
+};
 }
 
 void SettingsDialog::addPage(SettingsPage *page)
@@ -186,6 +220,18 @@ void SettingsDialog::addPage(SettingsPage *page)
   scroll->setFrameShape(QFrame::NoFrame);
   scroll->setWidget(page);
   ui_stack->insertWidget(page->id(), scroll);
+
+  auto *guard = new WheelGuard(scroll);
+  QList<QWidget *> fields;
+  for (QComboBox *combo : page->findChildren<QComboBox *>())
+    fields << combo;
+  for (QAbstractSpinBox *spin : page->findChildren<QAbstractSpinBox *>())
+    fields << spin;
+  for (QWidget *field : fields)
+  {
+    field->setFocusPolicy(Qt::StrongFocus);   // the wheel alone does not focus it
+    field->installEventFilter(guard);
+  }
 }
 
 SettingsPage *SettingsDialog::page(int index) const
@@ -460,7 +506,7 @@ QTime SettingsDialog::startTime() const
 // EXECUTE
 //
 /////////////////////////////////////////////////////////////////
-// GUI
+// General, Appearance
 //
 bool SettingsDialog::showBar() const
 {
@@ -474,7 +520,7 @@ bool SettingsDialog::showMinMax() const
 
 bool SettingsDialog::alertUnsavedData() const
 {
-  return m_gui->alertUnsavedData();
+  return m_general->alertUnsavedData();
 }
 
 bool SettingsDialog::useTextLabel() const
@@ -494,12 +540,12 @@ QColor SettingsDialog::displayBgColor() const
 
 bool SettingsDialog::saveWindowPosition() const
 {
-  return m_gui->saveWindowPosition();
+  return m_general->saveWindowPosition();
 }
 
 bool SettingsDialog::saveWindowSize() const
 {
-  return m_gui->saveWindowSize();
+  return m_general->saveWindowSize();
 }
 
 

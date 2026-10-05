@@ -134,6 +134,14 @@ int main(int argc, char **argv)
     check(near(m.fullScale(), 50.0), "reset: starts again from the value");
     m.showReading(reading("3.8560", "V", "DC"));
     check(near(m.fullScale(), 5.0), QString("a voltage keeps the count rule (5.0000 @50000), got %1").arg(m.fullScale()));
+    // ppm and % are never negative: zero at the left also in Centre zero
+    m.setScaleMode(AnalogMeter::Bipolar);
+    m.showReading(reading("734", "ppm", ""));
+    check(!m.bipolar(), "centre zero: ppm keeps zero at the left");
+    m.showReading(reading("3.8560", "V", "DC"));
+    check(m.bipolar(), "centre zero: a voltage is bipolar");
+    check(AnalogMeter::neverNegative("ppm") && AnalogMeter::neverNegative("%") && !AnalogMeter::neverNegative("mV"),
+          "neverNegative: ppm, %, not mV");
   }
   check(std::isnan(AnalogMeter::fullScaleFromReading("3.856", 0)), "no counts, no scale");
 
@@ -267,7 +275,8 @@ int main(int argc, char **argv)
     check(qAlpha(half.pixel(0, 0)) == 0 && qAlpha(half.pixel(size.width() - 1, size.height() - 1)) == 0,
           "nothing is painted outside the bezel");
 
-    // red zone has red pixels on the arc near the right end
+    // red zone has red pixels on the arc near the right end (the band is
+    // paler than the red labels, so reddish rather than pure red)
     {
       bool red = false;
       for (double a = 40.0; a <= 45.0 && !red; a += 0.5)
@@ -275,9 +284,19 @@ int main(int argc, char **argv)
         const double ar = a * M_PI / 180.0;
         const QPoint pt(int(pivot.x() + radius * 0.95 * std::sin(ar)), int(pivot.y() - radius * 0.95 * std::cos(ar)));
         const QRgb px = half.pixel(pt);
-        red = qRed(px) > 150 && qGreen(px) < 90 && qBlue(px) < 90;
+        red = qRed(px) > 120 && qRed(px) - qGreen(px) > 70 && qRed(px) - qBlue(px) > 70;
       }
       check(red, "red zone is painted at the top end of the scale");
+      // the arc runs through the red zone (drawn over the band)
+      bool line = false;
+      for (double a = 42.0; a <= 44.0 && !line; a += 0.5)
+        for (double f = 0.99; f <= 1.01 && !line; f += 0.002)
+        {
+          const double ar = a * M_PI / 180.0;
+          const QRgb px = half.pixel(int(pivot.x() + radius * f * std::sin(ar)), int(pivot.y() - radius * f * std::cos(ar)));
+          line = qRed(px) > 200 && qGreen(px) > 200 && qBlue(px) > 200;
+        }
+      check(line, "the scale arc is visible in the red zone");
     }
 
     // min/max marks: a green triangle just outside the arc at the max value,

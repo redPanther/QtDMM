@@ -69,7 +69,7 @@ public:
   /// The LCD's colours (LcdWidget::LcdVariant), stored as Display/lcd.
   void        setLcdVariant(int variant);
   /// The analog meter's style from its context menu (0 dark, 1 ivory):
-  /// shown at once, saved, and the General page follows.
+  /// shown at once, saved, and the Appearance page follows.
   void        setMeterStyle(int style);
   int         meterStyle() const;
   /// The analog meter to feed; created and docked by MainWindow.
@@ -172,7 +172,7 @@ protected:
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;
   LcdWidget *m_display;
-  QColor      m_lcdTint;   ///< the General page's tint last applied
+  QColor      m_lcdTint;   ///< the Appearance page's tint last applied
   AnalogMeter   *m_meter;
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);

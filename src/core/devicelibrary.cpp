@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
+#include <QThread>
 #include <QUuid>
 #include <algorithm>
 
@@ -131,14 +132,16 @@ void DeviceLibrary::tidy()
       keys.insert("Port settings/device", byModel + ' ' + address);
     if (keys == d.keys)
       continue;
-    QSettings s(m_file, QSettings::IniFormat);
-    s.beginGroup(kPrefix + d.id);
-    for (auto it = d.keys.cbegin(); it != d.keys.cend(); ++it)
-      if (!keys.contains(it.key()))
-        s.remove(it.key());
-    for (auto it = keys.cbegin(); it != keys.cend(); ++it)
-      s.setValue(it.key(), it.value());
-    s.endGroup();
+    write([&](QSettings &s)
+    {
+      s.beginGroup(kPrefix + d.id);
+      for (auto it = d.keys.cbegin(); it != d.keys.cend(); ++it)
+        if (!keys.contains(it.key()))
+          s.remove(it.key());
+      for (auto it = keys.cbegin(); it != keys.cend(); ++it)
+        s.setValue(it.key(), it.value());
+      s.endGroup();
+    });
   }
 }
 
@@ -186,8 +189,37 @@ void DeviceLibrary::watch()
     m_watcher.addPath(m_file);
 }
 
+namespace
+{
+constexpr int kAttempts = 6;   ///< reading/writing devices.conf, 20 ... 320 ms apart
+}
+
+bool DeviceLibrary::write(const std::function<void(QSettings &)> &edit) const
+{
+  for (int attempt = 0; attempt < kAttempts; ++attempt)
+  {
+    if (attempt > 0)
+      QThread::msleep(20u << (attempt - 1));
+    QSettings s(m_file, QSettings::IniFormat);
+    edit(s);
+    s.sync();
+    if (s.status() == QSettings::NoError)
+      return true;
+  }
+  return false;
+}
+
 QList<MyDevice> DeviceLibrary::list() const
 {
+  // the file is replaced on every write; an attempt that cannot read it is
+  // tried again (see write())
+  for (int attempt = 1; attempt < kAttempts; ++attempt)
+  {
+    QSettings probe(m_file, QSettings::IniFormat);
+    if (probe.status() == QSettings::NoError)
+      break;
+    QThread::msleep(20u << (attempt - 1));
+  }
   QSettings s(m_file, QSettings::IniFormat);
   QList<MyDevice> out;
   for (const QString &group : s.childGroups())
@@ -267,66 +299,65 @@ QString DeviceLibrary::add(const QString &name, const QVariantMap &keys)
 {
   const QList<MyDevice> before = list();
   const QString id = QUuid::createUuid().toString(QUuid::Id128).left(8);
-  QSettings s(m_file, QSettings::IniFormat);
-  s.beginGroup(kPrefix + id);
-  s.setValue("name", name);
-  s.setValue("order", before.isEmpty() ? 1 : before.last().order + 1);
   const QVariantMap own = entryKeys(keys);
-  for (auto it = own.cbegin(); it != own.cend(); ++it)
-    s.setValue(it.key(), it.value());
-  s.endGroup();
-  s.sync();
+  const bool ok = write([&](QSettings &s)
+  {
+    s.beginGroup(kPrefix + id);
+    s.setValue("name", name);
+    s.setValue("order", before.isEmpty() ? 1 : before.last().order + 1);
+    for (auto it = own.cbegin(); it != own.cend(); ++it)
+      s.setValue(it.key(), it.value());
+    s.endGroup();
+  });
   watch();
   Q_EMIT changed();
-  return s.status() == QSettings::NoError ? id : QString();
+  return ok ? id : QString();
 }
 
 bool DeviceLibrary::update(const QString &id, const QVariantMap &keys)
 {
   if (!find(id))
     return false;
-  QSettings s(m_file, QSettings::IniFormat);
-  s.beginGroup(kPrefix + id);
-  for (const QString &key : s.allKeys())
-    if (!ownKey(key))
-      s.remove(key);
   const QVariantMap own = entryKeys(keys);
-  for (auto it = own.cbegin(); it != own.cend(); ++it)
-    s.setValue(it.key(), it.value());
-  s.endGroup();
-  s.sync();
+  const bool ok = write([&](QSettings &s)
+  {
+    s.beginGroup(kPrefix + id);
+    for (const QString &key : s.allKeys())
+      if (!ownKey(key))
+        s.remove(key);
+    for (auto it = own.cbegin(); it != own.cend(); ++it)
+      s.setValue(it.key(), it.value());
+    s.endGroup();
+  });
   Q_EMIT changed();
-  return s.status() == QSettings::NoError;
+  return ok;
 }
 
 bool DeviceLibrary::rename(const QString &id, const QString &name)
 {
   if (!find(id) || name.trimmed().isEmpty())
     return false;
-  QSettings s(m_file, QSettings::IniFormat);
-  s.setValue(kPrefix + id + "/name", name.trimmed());
-  s.sync();
+  const bool ok = write([&](QSettings &s) { s.setValue(kPrefix + id + "/name", name.trimmed()); });
   Q_EMIT changed();
-  return s.status() == QSettings::NoError;
+  return ok;
 }
 
 bool DeviceLibrary::remove(const QString &id)
 {
   if (!find(id))
     return false;
-  QSettings s(m_file, QSettings::IniFormat);
-  s.remove(kPrefix + id);
-  s.sync();
+  const bool ok = write([&](QSettings &s) { s.remove(kPrefix + id); });
   Q_EMIT changed();
-  return s.status() == QSettings::NoError;
+  return ok;
 }
 
 void DeviceLibrary::writeOrder(const QStringList &ids)
 {
-  QSettings s(m_file, QSettings::IniFormat);
-  for (int i = 0; i < ids.size(); ++i)
-    s.setValue(kPrefix + ids[i] + "/order", i + 1);
-  s.sync();
+  write([&](QSettings &s)
+  {
+    for (int i = 0; i < ids.size(); ++i)
+      s.setValue(kPrefix + ids[i] + "/order", i + 1);
+  });
 }
 
 bool DeviceLibrary::move(const QString &id, int index)
