@@ -89,6 +89,12 @@ void DeviceSettings::setDescriptionFilesVisible(bool visible)
     w->setVisible(visible);
 }
 
+void DeviceSettings::setPortVisible(bool visible)
+{
+  m_portVisible = visible;
+  updateCalcMode();
+}
+
 void DeviceSettings::setPortEditable(bool editable, const QString &placeholder)
 {
   port->setEditable(editable);
@@ -558,7 +564,7 @@ void DeviceSettings::updateCalcMode()
   const bool virt = isVirtual();
   const bool ble = isBluetooth();
   const bool sigrok = isSigrokMeter();
-  ButtonGroup11->setVisible(!calc && !virt && !ble && !sigrok);
+  ButtonGroup11->setVisible(m_portVisible && !calc && !virt && !ble && !sigrok);
   ui_serialBox->setVisible(!calc && !virt && !ble && !sigrok);
   ui_protocol->setVisible(!calc && !virt);
   ui_advanced->setVisible(!calc && !virt);

@@ -7,7 +7,7 @@
 class DeviceLibrary;
 
 /// "Connect a meter", at the first start: My devices first when there are
-/// some, then Find device, Try without a device (the virtual meter) and,
+/// some, then Find device (the assistant Add device), Try without a device (the virtual meter) and,
 /// small, Set up by hand.
 class WelcomeDlg : public QDialog
 {

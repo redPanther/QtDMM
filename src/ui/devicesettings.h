@@ -69,6 +69,9 @@ public:
   /// The page's hint line and the buttons for DMM description files (.cfg),
   /// which the assistant leaves out.
   void           setDescriptionFilesVisible(bool visible);
+  /// Shows the port row of a cable meter, or not (the assistant asks for
+  /// the port on a page of its own).
+  void           setPortVisible(bool visible);
   /// Lets the port be typed in, with @p placeholder as grey text in the
   /// empty field (e.g. the form of a network address), or not.
   void           setPortEditable(bool editable, const QString &placeholder = QString());
@@ -170,6 +173,7 @@ private:
   std::vector<DmmDecoder::DMMInfo> m_models;
   std::function<bool(const DmmDecoder::DMMInfo &)> m_filter;
   bool           m_manualAllowed = true;
+  bool           m_portVisible = true;
   QStringListModel *m_completerNames = nullptr;   ///< what the model field completes
   QString        m_sigrokExe = QStringLiteral("sigrok-cli");
 };

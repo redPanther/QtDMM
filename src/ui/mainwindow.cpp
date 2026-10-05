@@ -28,7 +28,6 @@
 #include "ui/mainwindow.h"
 #include "ui/dialogs/helpdlg.h"
 #include "ui/dialogs/welcomedlg.h"
-#include "ui/dialogs/finddevicedlg.h"
 #include "ui/dialogs/mydevicesdlg.h"
 #include "ui/dialogs/adddevicedlg.h"
 #include "ui/settings/meterprefs.h"
@@ -462,7 +461,7 @@ void MainWindow::welcome()
       m_wid->switchDevice(dlg.device());
       break;
     case WelcomeDlg::Find:
-      findDevice();
+      addDevice();
       break;
     case WelcomeDlg::TryVirtual:
       // the virtual meter with its defaults: a sine, at once
@@ -482,13 +481,22 @@ void MainWindow::addDevice()
   dlg.setPorts(MeterPrefs::availablePorts(m_wid->settings()));
   dlg.setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
   dlg.setStateManager(m_stateMgr);
+  dlg.setPlacesInUse(placesInUse());
   if (m_wid->dmmConfigured())
     dlg.setCurrentDevice(m_wid->dmmTitle());
   if (dlg.exec() != QDialog::Accepted)
     return;
   QVariantMap keys = dlg.keys();
   keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
-  const QString id = m_wid->devices()->add(dlg.name(), keys);
+  // a find that is one of My devices changes that entry: no second one
+  QString id = dlg.knownDevice();
+  if (id.isEmpty())
+    id = m_wid->devices()->add(dlg.name(), keys);
+  else
+  {
+    m_wid->devices()->update(id, keys);
+    m_wid->devices()->rename(id, dlg.name());
+  }
   if (dlg.target() == AddDeviceDlg::NewWindow)
   {
     const QString instance = m_wid->openInNewWindow(id);
@@ -499,10 +507,8 @@ void MainWindow::addDevice()
     m_wid->switchDevice(id);
 }
 
-void MainWindow::findDevice()
+QMap<QString, QString> MainWindow::placesInUse() const
 {
-  FindDeviceDlg dlg(m_wid->settings(), m_wid->devices(), this);
-  // the places the running instances use, for the cards
   QMap<QString, QString> inUse;
   for (const QString &instance : m_stateMgr->instances())
   {
@@ -512,10 +518,7 @@ void MainWindow::findDevice()
     if (!place.isEmpty())
       inUse.insert(place, here ? tr("In use here") : tr("In use by the instance %1").arg(instance));
   }
-  dlg.setPlacesInUse(inUse);
-  if (dlg.exec() != QDialog::Accepted)
-    return;
-  m_wid->useFoundDevice(dlg.keys(), dlg.addToLibrary() ? dlg.name() : QString(), dlg.knownDevice());
+  return inUse;
 }
 
 // "QtDMM: UNI-T UT61E", with the instance id for non-default instances
@@ -1002,7 +1005,6 @@ void MainWindow::fillDevicesMenu()
     dlg.exec();
   });
   m_devicesMenu->addAction(m_addDeviceAction);
-  connect(m_devicesMenu->addAction(tr("&Find device...")), &QAction::triggered, this, &MainWindow::findDevice);
   m_devicesMenu->addAction(action_ConfigureDMM);
 }
 

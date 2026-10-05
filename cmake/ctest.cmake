@@ -98,9 +98,15 @@ if (BUILD_TESTING)
 	## the assistant "Add device": pages per connection, models, name, Next, the buttons that finish it
 	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp src/ui/dialogs/adddevicedlg.cpp src/ui/devicesettings.cpp
 		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
+		src/device/discovery/discovery.cpp src/service/mdnsbrowser.cpp
 		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
 	target_include_directories(test_adddevice PRIVATE src ${CMAKE_BINARY_DIR})
-	target_link_libraries(test_adddevice PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
+	target_link_libraries(test_adddevice PRIVATE Qt6::Widgets Qt6::SerialPort Qt6::Network ${HIDAPI_TARGET} Qt::Core)
+	if (QTDMM_WITH_BLE)
+		target_link_libraries(test_adddevice PRIVATE Qt6::Bluetooth)
+		target_compile_definitions(test_adddevice PRIVATE QTDMM_WITH_BLE)
+		target_sources(test_adddevice PRIVATE src/device/transports/blegatt.cpp src/device/transports/ble.cpp)
+	endif()
 	add_test(NAME add_device COMMAND test_adddevice)
 	## the formula evaluator of calculated instances
 	set( TEST_CALC test_calc)
