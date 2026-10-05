@@ -85,6 +85,9 @@
   without a port, also at every start)
 - Recorder: while waiting for a threshold, another function crosses nothing (0 V, then 1000 Ω over 5), and
   the pre-trigger keeps no readings of the function before
+- Recording in all instances: after a recording that ended without Stop (its length, a switch to another
+  device), the next "All instances" started none, not even the own one - the command was the same as the
+  last one and went unnoticed. Start and stop are new commands each time now
 - My devices: a simulated meter no longer counts as using a port. Entries saved before kept the port of
   the meter before (the UT61E's), so Open in a new window - from the sidebar or the assistant - took the
   real meter for "in use" and opened nothing; new entries keep their formula as their device
