@@ -84,7 +84,7 @@ public:
   void        setToolbarVisibility(bool, bool, bool, bool);
   /// The recorder graph (for the zoom/pan shortcuts in MainWindow).
   GraphWidget   *graph() const { return ui_graph; }
-  /// False until a meter has been chosen in the settings once; a fresh
+  /// False until a device has been chosen once (sidebar, Add device); a fresh
   /// instance does not try to connect to a guessed port on its own.
   bool        dmmConfigured() const;
   /// What the window title shows: the model, else the port, else a hint.
@@ -102,9 +102,13 @@ public:
   QString     currentDevice() const;
   /// Switches to the device @p id of "My devices": disconnects, takes over
   /// its meter keys and connects again. A running recording stops with a
-  /// message - another meter is another function. False when there is no
-  /// such entry.
-  bool        switchDevice(const QString &id);
+  /// message - another meter is another function; unsaved readings are
+  /// offered for export first unless @p ask is false (confirmSwitch()).
+  /// False when there is no such entry or the user cancels.
+  bool        switchDevice(const QString &id, bool ask = true);
+  /// Before a switch to the device @p name: unsaved readings are exported
+  /// or dropped, or the user cancels (false).
+  bool        confirmSwitch(const QString &name);
   /// Starts a new instance with this one's settings and the device @p id of
   /// "My devices", named after the device (DeviceLibrary::instanceId());
   /// returns the instance name, empty when there is no such entry.
@@ -177,13 +181,18 @@ protected:
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   Settings    *m_settings;
-  /// Disconnects, takes over @p keys of the entry @p id, connects; @p name
-  /// for the message.
+  /// Disconnects, takes over @p keys of the entry @p id, clears the graph,
+  /// connects; @p name for the messages.
   void        takeOver(const QVariantMap &keys, const QString &name, const QString &id);
   /// After the settings were applied: the entry in use follows them (same
   /// model: the same meter, its entry changes along); another model is
   /// another meter - the entry at its place, or none.
   void        syncDevice();
+  /// Asks about unsaved readings before they are lost (@p text says how,
+  /// @p discard is the button that drops them): export first, drop or
+  /// cancel. True when the caller may go on - nothing unsaved, exported or
+  /// dropped; false for Cancel or a failed export.
+  bool        keepUnsavedData(const QString &text, const QString &discard);
   DeviceLibrary *m_devices;
   QString     m_instanceId;
   QString     m_configPath;   ///< --config-dir, passed on to new instances

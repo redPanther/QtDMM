@@ -78,6 +78,9 @@ int main(int argc, char **argv)
   changed = Instances::rename(settings, &library, "u", "p", &error);
   check(!error.isEmpty() && QFile::exists(uFile), "taken name refused: " + error);
   error.clear();
+  changed = Instances::rename(settings, &library, "u", "P", &error);
+  check(!error.isEmpty() && QFile::exists(uFile), "a taken name in another case refused: " + error);
+  error.clear();
   changed = Instances::rename(settings, &library, "u", "volt", &error);
   check(error.isEmpty(), "renamed: " + error);
   check(!QFile::exists(uFile), "old file gone");
@@ -95,6 +98,10 @@ int main(int argc, char **argv)
   }
   check(library.find(power)->keys.value("DMM/calc-expression") == "sqrt(volt^2)", "My devices: formula");
   check(library.find(power)->keys.value("Port settings/device") == "calc V sqrt(volt^2)", "My devices: port");
+  // only the case of its own name changes: allowed
+  changed = Instances::rename(settings, &library, "volt", "Volt", &error);
+  check(error.isEmpty() && settings.getConfigInstances().contains("Volt"), "case of its own name: " + error);
+  error.clear();
   check(!settings.renameConfig("default", "x"), "default is not renamed");
   // the unit stays even when it is called like the instance
   check(Instances::renamedInFormula({ { "Port settings/device", "calc W W * 2" } }, "W", "w")

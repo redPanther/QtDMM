@@ -1809,7 +1809,7 @@ void GraphWidget::popupSLOT(QAction *action)
       startSLOT();
       break;
     case IDClearGraph:
-      clearSLOT();
+      Q_EMIT clearRequested();
       break;
     case IDConfigure:
       Q_EMIT configure();

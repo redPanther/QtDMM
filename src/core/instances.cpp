@@ -45,7 +45,11 @@ QStringList Instances::rename(Settings &settings, DeviceLibrary *library, const 
   };
   if (!isValidName(to))
     return fail(QT_TRANSLATE_NOOP("Instances", "Instance names may contain letters, digits and underscores and must not start with a digit."));
-  if (settings.getConfigInstances().contains(to))
+  // instance names are file names: "Volt" next to "volt" is one file on
+  // Windows and macOS (only the case of the same one may change)
+  QStringList others = settings.getConfigInstances();
+  others.removeAll(from);
+  if (others.contains(to, Qt::CaseInsensitive))
     return fail(QT_TRANSLATE_NOOP("Instances", "Instance already exists."));
   if (!settings.renameConfig(from, to))
     return fail(QT_TRANSLATE_NOOP("Instances", "The settings file could not be renamed."));

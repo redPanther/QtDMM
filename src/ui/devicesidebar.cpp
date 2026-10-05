@@ -9,6 +9,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
+#include <QTimer>
 
 #include "core/devicelibrary.h"
 
@@ -70,8 +71,16 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
     const QString id = idOf(item);
     if (!id.isEmpty() && id != m_current)
       Q_EMIT switchRequested(id);
+    // a click brings a running instance to the front; starting a stopped
+    // one takes a double click or its menu - no new window by a stray click
     const QString instance = instanceOf(item);
-    if (!instance.isEmpty() && instance != m_ownInstance)
+    if (!instance.isEmpty() && instance != m_ownInstance && instanceRunning(item))
+      Q_EMIT instanceRequested(instance);
+  });
+  connect(this, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item)
+  {
+    const QString instance = instanceOf(item);
+    if (!instance.isEmpty() && instance != m_ownInstance && !instanceRunning(item))
       Q_EMIT instanceRequested(instance);
   });
   // renamed in place
@@ -123,6 +132,12 @@ QString DeviceSidebar::instanceOf(const QTreeWidgetItem *item) const
   if (item && item->parent() && item->parent()->parent() == m_instances)
     item = item->parent();
   return item && item->parent() == m_instances ? item->data(0, Qt::UserRole).toString() : QString();
+}
+
+bool DeviceSidebar::instanceRunning(const QTreeWidgetItem *item) const
+{
+  const QTreeWidgetItem *own = instanceItem(instanceOf(item));
+  return own && own->data(0, kRunning).toBool();
 }
 
 QTreeWidgetItem *DeviceSidebar::instanceItem(const QString &id) const
@@ -190,6 +205,12 @@ void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString
 
 void DeviceSidebar::fill()
 {
+  // a name being typed (F2) would go: later, once it is done
+  if (state() == QAbstractItemView::EditingState)
+  {
+    QTimer::singleShot(250, this, &DeviceSidebar::fill);
+    return;
+  }
   m_filling = true;
   const QString selected = idOf(currentItem());
   qDeleteAll(m_devices->takeChildren());

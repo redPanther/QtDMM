@@ -46,7 +46,7 @@ Three start modes, chosen on the Recording page:
   **Sample time** counts from the crossing.
 
 *Clear* (Ctrl+Del) empties the recording. QtDMM warns before you lose unsaved data
-by clearing, importing or quitting; the warning can be switched off under
+by clearing, importing, switching to another device or quitting; the warning can be switched off under
 **Settings → General → At program exit**.
 
 [Alarms](alarms.md) can start and stop the recorder as well, on any of

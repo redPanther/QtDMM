@@ -81,6 +81,8 @@ private:
   QString     idOf(const QTreeWidgetItem *item) const;
   /// The instance of an instance item or of the device below it.
   QString     instanceOf(const QTreeWidgetItem *item) const;
+  /// Whether the instance of @p item (its row or its device row) runs.
+  bool        instanceRunning(const QTreeWidgetItem *item) const;
   void        instanceMenu(QTreeWidgetItem *item, const QPoint &pos);
 
   DeviceLibrary   *m_library = nullptr;

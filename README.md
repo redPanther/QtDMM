@@ -284,11 +284,12 @@ server stays off until you enable it with a free port.
 The node **Instances** of the sidebar (F9) lists the configured and the
 running instances with what each one currently reads and, below it, its
 device; this window's own is bold. A click brings a running instance to
-the front or starts a stopped one. A stopped instance can be renamed (F2 or
+the front; a double click (or **Start** in its context menu) starts a
+stopped one. A stopped instance can be renamed (F2 or
 its context menu) and deleted. Renaming also changes the formulas that use
 the old name, in the other instances and in My devices (see
 [Calculated values](docs/user/calculated-values.md)); an instance that is running
-uses the new formula after reconnecting. Running
+uses the new formula after a restart. Running
 instances know about each other through shared memory — the same mechanism
 that stops two windows from using the `default` id at once. An instance can
 also compute its value from the others' readings, see

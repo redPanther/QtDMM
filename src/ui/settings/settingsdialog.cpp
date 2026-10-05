@@ -414,10 +414,8 @@ void SettingsDialog::on_ui_buttonBox_accepted()
 
   if ((sender() == ui_buttonBox) && m_buttonBox_OK)
   {
-    // the user confirmed the dialog - only now does a meter count as chosen
-    // (applySLOT() also runs at exit, which must not turn on auto-connect)
-    m_settings->setBool("DMM/configured", true);
-    m_settings->save();
+    // no meter here: a device is chosen in the sidebar or Add device
+    // (InstanceWidget::takeOver()), OK on these pages leaves an empty window empty
     Q_EMIT accepted();
     hide();
   }

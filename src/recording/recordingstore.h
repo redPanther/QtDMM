@@ -307,6 +307,8 @@ private:
   bool        m_haveReading = false;
   QString     m_nextUnit;        ///< setUnit() while readings are held
   bool        m_unitPending = false;
+  PortKey     m_armedPort;       ///< what the readings measure while a trigger waits
+  QString     m_armedBaseUnit;
   PortKey     m_recordPort;      ///< what this recording measures, from its first value
   QString     m_recordBaseUnit;  ///< and in which unit (°C or °F)
   int         m_staleMs = 3000;

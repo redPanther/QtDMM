@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     check(dlg.keys().value("DMM/model") == "Victron SmartShunt", "keys: the model");
   }
 
-  // 7. the instances: this window's bold, a click on another opens it
+  // 7. the instances: this window's bold, a click raises another, a double click starts it
   {
     QList<DeviceSidebar::Instance> rows;
     rows << DeviceSidebar::Instance { "default", "Bench UT61E", "12.01 V DC", true, true }
@@ -122,7 +122,13 @@ int main(int argc, char **argv)
     Q_EMIT sidebar.itemClicked(own, 0);
     Q_EMIT sidebar.itemClicked(p->child(0), 0);
     Q_EMIT sidebar.itemClicked(u, 0);
-    check(opened == QStringList({ "p", "u" }), "click opens another: " + opened.join(','));
+    check(opened == QStringList({ "u" }), "a click brings a running one to the front, starts none: "
+                                           + opened.join(','));
+    opened.clear();
+    Q_EMIT sidebar.itemDoubleClicked(own, 0);
+    Q_EMIT sidebar.itemDoubleClicked(p->child(0), 0);
+    Q_EMIT sidebar.itemDoubleClicked(u, 0);
+    check(opened == QStringList({ "p" }), "a double click starts a stopped one: " + opened.join(','));
 
     // the new name goes to MainWindow; the item keeps the old one till then
     QStringList renamed;

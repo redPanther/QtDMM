@@ -308,6 +308,19 @@ void RecordingStore::setReading(const Reading &reading)
     }
   }
 
+  // waiting for a trigger: another function crosses no threshold (0 V, then
+  // 1000 Ohm), and the readings kept for the pre-trigger time were another one
+  if (!m_running && !reading.overload && reading.port.quantity != Quantity::Unknown)
+  {
+    if (m_armedPort.isValid() && (reading.port != m_armedPort || reading.baseUnit != m_armedBaseUnit))
+    {
+      m_lastValValid = false;
+      m_preBuffer.clear();
+    }
+    m_armedPort = reading.port;
+    m_armedBaseUnit = reading.baseUnit;
+  }
+
   if (preTriggerArmed())
   {
     RawPoint p;

@@ -98,8 +98,8 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   // OK reconnects the meter; Apply takes the settings over while the dialog
   // stays open, and the same runs at exit - neither may connect (a lambda
   // does not hide sender(): it still was the dialog, and quitting connected
-  // a Bluetooth meter twice)
-  connect(m_configDlg, &SettingsDialog::accepted, this, [this]() { applySLOT(true); });
+  // a Bluetooth meter twice); an empty window has nothing to connect
+  connect(m_configDlg, &SettingsDialog::accepted, this, [this]() { applySLOT(dmmConfigured()); });
   connect(m_configDlg, &SettingsDialog::applied, this, [this]() { applySLOT(); });
   connect(m_configDlg, SIGNAL(zoomed()), this, SLOT(zoomedSLOT()));
   connect(ui_graph, &GraphWidget::windowRequested, m_configDlg, &SettingsDialog::setWindowSecondsSLOT);
@@ -114,6 +114,7 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
                           v < 0 ? QString() : GraphWidget::variantName(static_cast<GraphWidget::ColorVariant>(v)));
   });
   connect(ui_graph, SIGNAL(configure()), this, SLOT(configSLOT()));
+  connect(ui_graph, &GraphWidget::clearRequested, this, &InstanceWidget::clearSLOT);
   connect(ui_graph, SIGNAL(exportData()), this, SLOT(exportSLOT()));
   connect(ui_graph, SIGNAL(importData()), this, SLOT(importSLOT()));
 
@@ -225,42 +226,46 @@ bool InstanceWidget::closeWin()
 
   Q_EMIT setConnect(false);
 
-  if (ui_graph->dirty() && m_configDlg->alertUnsavedData())
+  return keepUnsavedData(tr("If you quit now it will be lost."), tr("Quit without saving"));
+}
+
+bool InstanceWidget::keepUnsavedData(const QString &text, const QString &discard)
+{
+  if (!ui_graph->dirty() || !m_configDlg->alertUnsavedData())
+    return true;
+
+  QMessageBox question;
+  question.setWindowTitle(tr("QtDMM: Unsaved data"));
+  question.setText(tr("<font size=+2><b>Unsaved data</b></font><p>"
+                      "You still have unsaved measured data in memory. %1"
+                      "<p>Do you want to export your unsaved data first?").arg(text));
+  question.setIcon(QMessageBox::Information);
+  question.setIconPixmap(QPixmap(":/Symbols/icon.xpm"));
+
+  // Set standard buttons
+  question.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+  question.setDefaultButton(QMessageBox::Yes);
+  question.setEscapeButton(QMessageBox::Cancel);
+
+  // Set custom button texts
+  QAbstractButton *yesButton = question.button(QMessageBox::Yes);
+  if (yesButton)
+    yesButton->setText(tr("Export data first"));
+
+  QAbstractButton *noButton = question.button(QMessageBox::No);
+  if (noButton)
+    noButton->setText(discard);
+
+  switch (question.exec())
   {
-    QMessageBox question;
-    question.setWindowTitle(tr("QtDMM: Unsaved data"));
-    question.setText(tr("<font size=+2><b>Unsaved data</b></font><p>"
-                        "You still have unsaved measured data in memory."
-                        " If you quit now it will be lost."
-                        "<p>Do you want to export your unsaved data first?"));
-    question.setIcon(QMessageBox::Information);
-    question.setIconPixmap(QPixmap(":/Symbols/icon.xpm"));
+    case QMessageBox::Yes:
+      return ui_graph->exportDataSLOT();
 
-    // Set standard buttons
-    question.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    question.setDefaultButton(QMessageBox::Yes);
-    question.setEscapeButton(QMessageBox::Cancel);
+    case QMessageBox::No:
+      break;
 
-    // Set custom button texts
-    QAbstractButton *yesButton = question.button(QMessageBox::Yes);
-    if (yesButton)
-      yesButton->setText(tr("Export data first"));
-
-    QAbstractButton *noButton = question.button(QMessageBox::No);
-    if (noButton)
-      noButton->setText(tr("Quit without saving"));
-
-    switch (question.exec())
-    {
-      case QMessageBox::Yes:
-        return ui_graph->exportDataSLOT();
-
-      case QMessageBox::No:
-        break;
-
-      case QMessageBox::Cancel:
-        return false;
-    }
+    case QMessageBox::Cancel:
+      return false;
   }
 
   return true;
@@ -304,9 +309,9 @@ void InstanceWidget::connectSLOT(bool on)
 {
   if (on)
   {
-    if (m_ctl->connectMeter(true))
-      ui_graph->clearSLOT();
-    else
+    // the recording stays: the next start clears it (a reconnect after the
+    // settings or an alarm program must not lose it)
+    if (!m_ctl->connectMeter(true))
       Q_EMIT setConnect(false);   // the port could not be opened: button back to "off"
   }
   else
@@ -345,13 +350,19 @@ QString InstanceWidget::currentDevice() const
   return !id.isEmpty() && m_devices->find(id) ? id : QString();
 }
 
-bool InstanceWidget::switchDevice(const QString &id)
+bool InstanceWidget::switchDevice(const QString &id, bool ask)
 {
   const std::optional<MyDevice> device = m_devices->find(id);
-  if (!device)
+  if (!device || (ask && !confirmSwitch(device->name)))
     return false;
   takeOver(device->keys, device->name, id);
   return true;
+}
+
+bool InstanceWidget::confirmSwitch(const QString &name)
+{
+  // the readings of the meter before are another function: export or drop them
+  return keepUnsavedData(tr("Switching to %1 clears it.").arg(name), tr("Switch without saving"));
 }
 
 QString InstanceWidget::openInNewWindow(const QString &id)
@@ -395,6 +406,7 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   applySLOT();
   // another meter: its own minimum and maximum, even at the same port
   m_ctl->resetMinMax();
+  ui_graph->clearSLOT();
 
   Q_EMIT setConnect(true);
   Q_EMIT connectDMM(true);
@@ -404,6 +416,9 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
 
 void InstanceWidget::syncDevice()
 {
+  // another instance may have changed a formula here (renaming): the stale
+  // cache must not go back into the entry
+  m_settings->sync();
   QVariantMap keys = m_settings->meterKeys();
   keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
   const QString model = keys.value("DMM/model").toString();
@@ -435,7 +450,7 @@ void InstanceWidget::configRecorderSLOT()
 
 void InstanceWidget::rejectSLOT()
 {
-  if ((sender() == m_configDlg))
+  if (sender() == m_configDlg && dmmConfigured())
   {
     Q_EMIT setConnect(true);
     Q_EMIT connectDMM(true);
@@ -494,6 +509,8 @@ void InstanceWidget::printSLOT()
 
 void InstanceWidget::clearSLOT()
 {
+  if (!keepUnsavedData(tr("Clear deletes it."), tr("Clear without saving")))
+    return;
   ui_graph->clearSLOT();
 }
 
@@ -614,9 +631,8 @@ void InstanceWidget::runningSLOT(bool on)
 
 bool InstanceWidget::dmmConfigured() const
 {
-  // DMM/configured is set when the settings dialog is confirmed with OK (or
-  // for a new window with a device); the model check keeps configs from before
-  // that key working. "Manual" alone proves nothing: applySLOT() writes it
+  // DMM/configured is set when a device is chosen (takeOver(), a new window
+  // with a device); the model check keeps configs from before that key working. "Manual" alone proves nothing: applySLOT() writes it
   // at every exit, dialog or not.
   if (m_settings->getBool("DMM/configured", false))
     return true;

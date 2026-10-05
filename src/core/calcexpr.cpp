@@ -231,8 +231,6 @@ struct CalcExpr::Parser
   }
 };
 
-// The waveforms as formulas over t (seconds since connecting). Kept as
-// plain text so the Custom choice can start from any of them.
 QString CalcExpr::renameVariable(const QString &text, const QString &from, const QString &to)
 {
   QString out;
@@ -268,6 +266,8 @@ QString CalcExpr::renameVariable(const QString &text, const QString &from, const
   return out;
 }
 
+// The waveforms as formulas over t (seconds since connecting). Kept as
+// plain text so the Custom choice can start from any of them.
 QString CalcExpr::waveformFormula(Waveform waveform, const QString &min, const QString &max,
                                  const QString &period, const QString &noise)
 {

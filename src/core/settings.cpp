@@ -167,6 +167,11 @@ void Settings::clear()
   m_tmpConfig->clear();
 }
 
+void Settings::sync()
+{
+  m_qsettings->sync();
+}
+
 
 void Settings::deleteConfig(QString instance_id)
 {
@@ -195,7 +200,10 @@ bool Settings::renameConfig(const QString &from, const QString &to)
     return false;
   const auto file = [this](const QString &id)
   { return m_configPath + "/" + m_configBaseFileName + "_" + id + "." + m_configFileNameSuffix; };
-  if (QFile::exists(file(to)))
+  // only the case changes: on Windows and macOS that is the same file, and
+  // QFile::rename() knows that case
+  const bool caseOnly = from.compare(to, Qt::CaseInsensitive) == 0;
+  if (!caseOnly && QFile::exists(file(to)))
     return false;
   return QFile::rename(file(from), file(to));
 }

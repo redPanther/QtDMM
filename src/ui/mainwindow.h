@@ -126,9 +126,10 @@ protected:
   QAction       *m_sidebarAction = nullptr; ///< shows and hides the sidebar
   DeviceSidebar *m_sidebar = nullptr;     ///< "My devices" at the left
   /// "Settings..." of an entry: its meter's settings; the device in use
-  /// takes them at once.
+  /// takes them at once (unsaved readings first), unchanged ones change nothing.
   void        deviceSettings(const QString &id);
-  /// The entry @p id in a new window (instance) of its own.
+  /// The entry @p id in a new window (instance) of its own; a device that a
+  /// running instance uses brings that one to the front instead.
   void        openInNewWindow(const QString &id);
   void        showSidebar(bool show);
   /// The node "Instances" anew: the configured and running instances with
@@ -139,6 +140,9 @@ protected:
   void        renameInstance(const QString &from, const QString &to);
   void        deleteInstance(const QString &id);
   QTimer     *m_instancesTimer = nullptr;
+  /// The places (DeviceLibrary::place()) the running instances use, with
+  /// the instance that uses each.
+  QMap<QString, QString> placeOwners() const;
   /// The places (DeviceLibrary::place()) the running instances use, with
   /// "In use here" / "In use by the instance x" for the assistant's cards.
   QMap<QString, QString> placesInUse() const;
