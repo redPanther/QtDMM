@@ -44,7 +44,7 @@ public:
   static constexpr double kMinAspect = 1.8;
   static constexpr double kMaxAspect = 3.2;
   /// The LCD's colours (context menu "LCD colours", Display/lcd). Custom is
-  /// the tint from the Appearance page, with dark segments, as before the
+  /// the tint from the General page, with dark segments, as before the
   /// variants.
   enum LcdVariant
   {
@@ -81,7 +81,7 @@ public:
   void setAuto(bool);
   void setManu(bool);
   /// @}
-  /// The tint for Custom (Appearance page); the others bring their own.
+  /// The tint for Custom (General page); the others bring their own.
   void setFaceColor(const QColor &);
   void setLcdVariant(LcdVariant variant);
   LcdVariant lcdVariant() const { return m_variant; }
@@ -92,7 +92,7 @@ public:
   /// "classic", "blue", "amber", "contrast", "custom"
   static QString lcdVariantName(LcdVariant variant);
   static LcdVariant lcdVariantFromName(const QString &name);
-  /// The Appearance page's default tint (Classic's face).
+  /// The General page's default tint (Classic's face).
   static QColor classicFace();
 
 public Q_SLOTS:

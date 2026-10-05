@@ -38,8 +38,8 @@ sigrok and *Simulated / calculated* skip step 2.
 
 ## Choosing the device by hand
 
-Open the settings with **F2** (or the *Configure* button) and go to the
-**Multimeter** page.
+Step 3 of [Add device](#add-device) and **Settings...** of a device in the
+sidebar (Shift+F2 for the one in use) hold the settings of the meter:
 
 1. Pick the **vendor** in the first box. The second box then lists only that
    vendor's models. *All vendors* shows the complete list; *Manual settings*
@@ -73,12 +73,13 @@ The port box lists everything QtDMM found, prefixed with its type:
 
 RFC2217 and sigrok entries are not detected automatically - except the
 ports of a [qtdmm-bridge](remote-bridge.md) announcing itself by mDNS, which
-[Add device](#add-device) lists under *Network*. Otherwise add them under
-**Settings → Special ports**: choose the type and type the host:port or the
-`sigrok-cli` driver string. For sigrok, `sigrok-cli --help` and the
+[Add device](#add-device) lists under *Network*, where a `host:port` can be
+typed as well. A sigrok meter is set up with its model, see
+[Bench meters](bench-meters.md); `sigrok-cli --help` and the
 [sigrok hardware list](https://sigrok.org/wiki/Supported_hardware#Multimeters)
-tell you the driver string; the path to `sigrok-cli` can be set on the same
-page if it is not in your `PATH`.
+tell you the driver string. The path to `sigrok-cli` is under **Settings →
+General → Programs** if it is not in your `PATH`. Ports set up on the former
+settings page *Special ports* are still offered.
 
 Any program that fully implements RFC 2217 (including remote port setup) works
 as the server, e.g. `ser2net`. QtDMM ships its own: **qtdmm-bridge**
@@ -137,12 +138,12 @@ nothing.
 The display is a window like the [analog meter](analog-meter.md); digits and
 lettering scale with it. **Display** in the toolbar or the menu (Ctrl+1)
 hides and shows it. Bar graph and min/max (off by default) are set on the
-*Appearance* settings page, in the group *Digital display (LCD)*.
+*General* settings page, in the group *Digital display (LCD)*.
 
 **LCD colours** in the display's right-click menu: *Classic* (the
 yellow-green of most meters), *Backlight blue* (light segments on blue, the default),
 *Amber*, *High contrast* (black on white) or *Custom*, the tint from the
-*Appearance* page. Changing that tint switches the display to *Custom*.
+*General* page. Changing that tint switches the display to *Custom*.
 
 For meters whose keys QtDMM knows (the UNI-T UT60BT, UT61B+/D+/E+ and
 UT161), a row of the meter's keys sits under the display: SELECT and Hz/%,
@@ -208,13 +209,13 @@ the display or the meter for its window menu (hide the window, title bar on
 or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
 layouts of versions before 26.1 are not taken over.
 
-**Design** in the menu, or on the *Appearance* settings page, sets the colours
+**Design** in the menu, or on the *General* settings page, sets the colours
 of the window: *System* (the look of your desktop), *Silver* (brushed
 aluminium) or *Dark* (the default). The readings table
 and a graph in the colours *Neutral* follow; the LCD colours, the graph's
 colours and the style of the analog meter are chosen separately.
 
-**Settings → Appearance → Symbols** chooses the toolbar and menu symbols:
+**Settings → General → Symbols** chooses the toolbar and menu symbols:
 *Coloured* (KDE's Oxygen icons, the default), *Plain* (KDE's monochrome Breeze
 icons, light or dark to match the window) or, on Linux and BSD where the
 desktop has an icon theme, *System* - your desktop's symbols, with the

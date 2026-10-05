@@ -31,7 +31,7 @@
 #include "ui/devicesettings.h"
 #include "ui/devicesidebar.h"
 #include "ui/dialogs/adddevicedlg.h"
-#include "ui/settings/meterprefs.h"
+#include "device/transport.h"
 #include "device/transports/serial.h"
 #include "core/devicelibrary.h"
 #include "core/instances.h"
@@ -346,7 +346,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   updateWindowTitle();
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateWindowTitle);
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateLed);
-  // the design can be chosen in the settings (Appearance), too
+  // the design can be chosen in the settings (General), too
   connect(m_wid, &InstanceWidget::configChanged, this, [this]
   {
     const Designs::Design d = Designs::fromName(m_wid->settings()->getString("Windows/design", "dark"));
@@ -519,7 +519,7 @@ void MainWindow::updateEmptyStart()
 void MainWindow::addDevice()
 {
   AddDeviceDlg dlg(m_wid->devices(), this);
-  dlg.setPorts(MeterPrefs::availablePorts(m_wid->settings()));
+  dlg.setPorts(Transport::availablePorts() + m_wid->settings()->customPorts());
   dlg.setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
   dlg.setStateManager(m_stateMgr);
   dlg.setPlacesInUse(placesInUse());
@@ -613,7 +613,14 @@ void MainWindow::createActions()
   connect(action_Import, SIGNAL(triggered()), m_wid, SLOT(importSLOT()));
   connect(action_Export, SIGNAL(triggered()), m_wid, SLOT(exportSLOT()));
   connect(action_Configure, SIGNAL(triggered()), m_wid, SLOT(configSLOT()));
-  connect(action_ConfigureDMM, SIGNAL(triggered()), m_wid, SLOT(configDmmSLOT()));
+  // Shift+F2: the settings of the device in use, as its context menu in the sidebar
+  connect(action_ConfigureDMM, &QAction::triggered, this, [this]
+  {
+    if (m_wid->devices()->find(m_wid->currentDevice()))
+      deviceSettings(m_wid->currentDevice());
+    else
+      addDevice();
+  });
   connect(actionConfigureRecorder, SIGNAL(triggered()), m_wid, SLOT(configRecorderSLOT()));
   connect(action_Quit, SIGNAL(triggered()), this, SLOT(setToolbarVisibilitySLOT()));
   connect(action_Quit, SIGNAL(triggered()), m_wid, SLOT(quitSLOT()));
@@ -665,7 +672,7 @@ void MainWindow::createExtraActions()
   toggleRecord->setShortcut(QKeySequence(Qt::Key_Space));
   connect(toggleRecord, &QAction::triggered, this, &MainWindow::toggleRecordingSLOT);
 
-  addActions({action_Configure, action_Direct_help, action_Help, action_Quit,
+  addActions({action_Configure, action_ConfigureDMM, action_Direct_help, action_Help, action_Quit,
               m_displayAction, m_meterAction, m_readingsAction, m_poincareAction, m_titleBars,
               m_fullScreen, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage, toggleRecord});
 }
@@ -1112,7 +1119,7 @@ void MainWindow::deviceSettings(const QString &id)
   if (!device)
     return;
   DeviceSettingsDlg dlg(device->name, this);
-  dlg.settings()->setPorts(MeterPrefs::availablePorts(m_wid->settings()));
+  dlg.settings()->setPorts(Transport::availablePorts() + m_wid->settings()->customPorts());
   dlg.settings()->setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
   dlg.settings()->setStateManager(m_stateMgr);
   dlg.load(device->keys);

@@ -51,7 +51,6 @@ DeviceSettings::DeviceSettings(QWidget *parent) : QWidget(parent)
   ui_calcGroup->hide();
   ui_bleGroup->hide();
   ui_sigrokGroup->hide();
-  connect(ui_sigrokHint, &QLabel::linkActivated, this, &DeviceSettings::showPortsPage);
   connect(ui_sigrokDriver, &QLineEdit::textChanged, this, &DeviceSettings::updateSigrokHint);
   connect(ui_bleKey, &QLineEdit::textChanged, this, &DeviceSettings::updateBleHint);
   connect(ui_bleAddress, &QComboBox::currentTextChanged, this, &DeviceSettings::updateBleHint);
@@ -905,8 +904,8 @@ void DeviceSettings::updateSigrokHint()
   const QString driver = ui_sigrokDriver->text().trimmed();
   QString hint;
   if (cli.version.isEmpty())
-    hint = tr("%1 was not found or does not run. Install sigrok-cli, or set its path under "
-              "<a href=\"ports\">Special ports</a>.").arg(exe.toHtmlEscaped());
+    hint = tr("%1 was not found or does not run. Install sigrok-cli, or set its path in the settings, "
+              "page General.").arg(exe.toHtmlEscaped());
   else if (!driver.isEmpty() && !cli.drivers.isEmpty() && !cli.drivers.contains(driver))
     hint = tr("%1 has no driver \"%2\"; see sigrok-cli --list-supported.").arg(cli.version.toHtmlEscaped(), driver.toHtmlEscaped());
   else

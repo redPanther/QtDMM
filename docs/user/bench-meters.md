@@ -3,9 +3,9 @@
 Keysight, Agilent, HP and Siglent bench multimeters speak SCPI over USB or
 LAN. QtDMM does not implement SCPI itself; it lets
 [sigrok-cli](https://sigrok.org/wiki/Sigrok-cli) talk to the meter and reads
-the values sigrok-cli prints - the same path as the `Sigrok` entries under
-[Special ports](connecting.md#port-types), just with the model in the list
-and the settings in one group.
+the values sigrok-cli prints - the `Sigrok` port type of
+[Port types](connecting.md#port-types), with the model in the list and the
+settings in one group.
 
 ## Which meters
 
@@ -21,9 +21,8 @@ entered in the **Driver** field.
 
 1. Install sigrok-cli (Debian/Ubuntu: `apt install sigrok-cli`; Windows and
    macOS builds are on the sigrok download page). If it is not on your
-   `PATH`, set its location under **Settings → Special ports**.
-2. **Settings → Multimeter**: choose the vendor and the model with
-   *(sigrok)*. The port and serial settings make way for a **sigrok-cli**
+   `PATH`, set its location under **Settings → General → Programs**.
+2. **Add device**, *sigrok*: choose the model with *(sigrok)*. The port and serial settings make way for a **sigrok-cli**
    group:
     - **Driver** - the libsigrok driver, filled in from the model.
     - **Connection** - how sigrok-cli reaches the meter, its `conn=`

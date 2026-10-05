@@ -177,6 +177,18 @@ void Settings::deleteConfig(QString instance_id)
   configFile.remove();
 }
 
+QStringList Settings::customPorts() const
+{
+  QStringList ports;
+  for (int i = 0; i < 10; i++)
+  {
+    const QString dev = getString(QString("Port settings/custom_device%1").arg(i)).trimmed();
+    if (!dev.isEmpty())
+      ports << dev;
+  }
+  return ports;
+}
+
 bool Settings::renameConfig(const QString &from, const QString &to)
 {
   if (from.isEmpty() || to.isEmpty() || from == QLatin1String("default") || to == QLatin1String("default"))

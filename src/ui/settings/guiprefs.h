@@ -25,9 +25,11 @@
 #include <QtGui>
 #include "ui_uiguiprefs.h"
 
-/// Settings page "Appearance": window and toolbar options, the LCD display
-/// (colour, bar graph, min/max) and the analog meter (scale mode, style,
-/// ballistics, red zone).
+class QLineEdit;
+
+/// Settings page "General": window and toolbar options, the LCD display
+/// (colour, bar graph, min/max), the analog meter (scale mode, style,
+/// ballistics, red zone) and the path of sigrok-cli.
 class GuiPrefs : public SettingsPage, private Ui::UIGuiPrefs
 {
   Q_OBJECT
@@ -53,12 +55,16 @@ public:
   void      setMeterStyle(int style);
   bool      meterBallistics() const;
   int       meterRedZone() const;   ///< percent of full scale
+  /// The program for sigrok meters (Port settings/sigrok_exe, the same for all instances).
+  QString   sigrokExecutable() const;
 
 public Q_SLOTS:
   virtual void defaultsSLOT();
   virtual void factoryDefaultsSLOT();
   virtual void applySLOT();
 
+private:
+  QLineEdit *ui_sigrokExe = nullptr;
 };
 
 

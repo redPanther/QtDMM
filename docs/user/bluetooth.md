@@ -14,8 +14,8 @@ The UT60BT has Bluetooth built in. Switch it on with the meter's Bluetooth
 key (the Bluetooth symbol appears on the LCD); the meter switches it off
 again after a while without a connection.
 
-In QtDMM, **Settings → Multimeter**: choose vendor **Uni-Trend** and the
-model **UT60BT**. Instead of the port box a **Bluetooth** group appears:
+In QtDMM, **Add device**, *Bluetooth*: choose the meter found, then vendor
+**Uni-Trend** and the model **UT60BT**. Instead of the port box a **Bluetooth** group appears:
 
 - **Device** - press **Scan** to list the UT60BT meters in range (six
   seconds), or type the address. The meter advertises as *UT60BT*.
@@ -85,8 +85,8 @@ Instant readout via Bluetooth** and tap **Show** under *Instant readout
 details* (or *Encryption data*): it shows the **MAC address** and the
 **encryption key** (32 hex digits). Instant readout must be enabled there.
 
-In QtDMM, **Settings → Multimeter**: choose vendor **Victron** and the
-model. The port and serial settings make way for a **Bluetooth** group:
+In QtDMM, **Add device**, *Bluetooth*: choose the device found, then vendor
+**Victron** and the model. The port and serial settings make way for a **Bluetooth** group:
 
 - **Device** - press **Scan** to list the Victron devices in range (five
   seconds; their names as in VictronConnect), or type the address.

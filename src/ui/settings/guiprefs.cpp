@@ -35,15 +35,52 @@ GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
   ui_design->addItem(tr("System"), QString("system"));
   ui_design->addItem(tr("Silver"), QString("silver"));
   ui_design->addItem(tr("Dark"), QString("dark"));
-  m_label = tr("Appearance");
-  m_description = tr("<b>Here you can configure QtDMM's visual"
-                     " appearance and behaviour.</b>");
+  m_label = tr("General");
+  m_description = tr("<b>QtDMM's appearance and behaviour, and the programs it runs.</b>");
   m_iconName = "preferences-desktop-theme-global";
   ui_iconSet->addItem(tr("Coloured"), QString("colored"));
   ui_iconSet->addItem(tr("Plain"), QString("plain"));
   // only where the desktop has an icon theme (not on Windows, macOS)
   if (Designs::systemIconsAvailable())
     ui_iconSet->addItem(tr("System"), QString("system"));
+
+  // the programs QtDMM runs: sigrok-cli for the meters it reads through sigrok
+  auto *programs = new QGroupBox(tr("Programs"), this);
+  auto *row = new QHBoxLayout(programs);
+  auto *label = new QLabel(tr("&sigrok-cli:"), programs);
+  ui_sigrokExe = new QLineEdit(programs);
+  ui_sigrokExe->setObjectName("ui_sigrokExe");
+  ui_sigrokExe->setPlaceholderText("sigrok-cli");
+  ui_sigrokExe->setToolTip(tr("The program QtDMM runs for the meters it reads through sigrok; "
+                              "a name is searched in the PATH."));
+  label->setBuddy(ui_sigrokExe);
+  auto *browse = new QToolButton(programs);
+  browse->setObjectName("ui_sigrokExeButton");
+  browse->setIcon(QIcon::fromTheme("document-open"));
+  browse->setToolTip(tr("Choose sigrok-cli"));
+  connect(browse, &QToolButton::clicked, this, [this]
+  {
+    QString filter = "sigrok-cli";
+#ifdef Q_OS_WIN
+    filter += ".exe";
+#endif
+    const QString file = QFileDialog::getOpenFileName(this, tr("Sigrok-cli executable"), QString(),
+                                                      QString("sigrok (%1)").arg(filter));
+    if (!file.isEmpty())
+      ui_sigrokExe->setText(file);
+  });
+  row->addWidget(label);
+  row->addWidget(ui_sigrokExe, 1);
+  row->addWidget(browse);
+  // above the spacer at the end
+  auto *page = qobject_cast<QBoxLayout *>(layout());
+  page->insertWidget(page->count() - 1, programs);
+}
+
+QString GuiPrefs::sigrokExecutable() const
+{
+  const QString exe = ui_sigrokExe->text().trimmed();
+  return exe.isEmpty() ? QStringLiteral("sigrok-cli") : exe;
 }
 GuiPrefs::~GuiPrefs()
 {
@@ -51,6 +88,7 @@ GuiPrefs::~GuiPrefs()
 
 void GuiPrefs::defaultsSLOT()
 {
+  ui_sigrokExe->setText(m_cfg->getString("Port settings/sigrok_exe", "sigrok-cli"));
   ui_design->setCurrentIndex(qMax(0, ui_design->findData(m_cfg->getString("Windows/design", "dark"))));
   ui_saveWindowPos->setChecked(m_cfg->getBool("Save/window-pos", true));
   ui_saveWindowSize->setChecked(m_cfg->getBool("Save/window-size", true));
@@ -110,6 +148,7 @@ void GuiPrefs::factoryDefaultsSLOT()
   ui_meterStyle->setCurrentIndex(1);   // classic ivory
   ui_meterBallistics->setChecked(true);
   ui_meterRedZone->setValue(90);
+  ui_sigrokExe->setText("sigrok-cli");
 }
 
 void GuiPrefs::setToolbarVisibility(bool disp, bool dmm, bool graph, bool file)
@@ -141,6 +180,7 @@ void GuiPrefs::applySLOT()
   m_cfg->setInt("Meter/style", meterStyle());
   m_cfg->setBool("Meter/ballistics", meterBallistics());
   m_cfg->setInt("Meter/red-zone", meterRedZone());
+  m_cfg->setString("Port settings/sigrok_exe", sigrokExecutable());
 }
 
 int GuiPrefs::meterScaleMode() const

@@ -26,7 +26,7 @@
 
 #include "ui/settings/settingsdialog.h"
 #include "ui/settings/settingspageitem.h"
-#include "ui/settings/meterprefs.h"
+#include "ui/devicesettings.h"
 #include "ui/devicesettings.h"
 #include "ui/settings/alarmprefs.h"
 #include "ui/settings/scpiprefs.h"
@@ -35,7 +35,6 @@
 #include "ui/settings/integrationprefs.h"
 #include "ui/settings/recorderprefs.h"
 #include "ui/settings/scaleprefs.h"
-#include "ui/settings/portsprefs.h"
 #include "core/settings.h"
 
 #include <iostream>
@@ -104,15 +103,10 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
 
   // CREATE PAGES, in the order the list shows them
 
-  m_dmm = new MeterPrefs(ui_stack);
-  connect(m_dmm, &MeterPrefs::showPortsPage, this, [this] { showPage(Ports); });
-  m_dmm->setId(SettingsDialog::MeterConnection);
-  new SettingsPageItem(m_dmm->id(),
-                 m_dmm->icon(),
-                 m_dmm->label(),
-                 ui_list);
-  m_dmm->setCfg(m_settings);
-  addPage(m_dmm);
+  // the meter has no page: the assistant and the sidebar set it up; its
+  // fields still turn the keys into the connection
+  m_meter = new DeviceSettings(this);
+  m_meter->hide();
 
   m_gui = new GuiPrefs(ui_stack);
   m_gui->setId(SettingsDialog::GUI);
@@ -159,15 +153,6 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   m_recorder->setCfg(m_settings);
   addPage(m_recorder);
 
-  m_ports = new PortsPrefs(ui_stack);
-  m_ports->setId(SettingsDialog::Ports);
-  new SettingsPageItem(m_ports->id(),
-                 m_ports->icon(),
-                 m_ports->label(),
-                 ui_list);
-  m_ports->setCfg(m_settings);
-  addPage(m_ports);
-
   m_alarms = new AlarmPrefs(ui_stack);
   m_alarms->setId(SettingsDialog::Alarms);
   new SettingsPageItem(m_alarms->id(),
@@ -189,7 +174,7 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   // init stuff
   //
   on_ui_buttonBox_rejected();
-  showPage(MeterConnection);
+  showPage(GUI);
   ui_undo->hide();
   adjustSize();
 }
@@ -226,19 +211,9 @@ void SettingsDialog::showEvent(QShowEvent *event)
     move(r.topLeft());
 }
 
-void SettingsDialog::setStateManager(SharedStateManager *state)
-{
-  m_dmm->setStateManager(state);
-}
-
-void SettingsDialog::setDeviceLibrary(DeviceLibrary *library)
-{
-  m_dmm->setDeviceLibrary(library);
-}
-
 void SettingsDialog::reloadMeter()
 {
-  m_dmm->defaultsSLOT();
+  m_meter->load(m_settings->meterKeys());
 }
 
 void SettingsDialog::showPage(SettingsDialog::PageType page)
@@ -331,6 +306,7 @@ void SettingsDialog::reloadSettings()
     QColorDialog::setCustomColor(i, m_settings->getColor(QString("Custom colors/color_%1").arg(i)));
   for (int i = 0; i < NumItems; ++i)
     page(i)->defaultsSLOT();
+  reloadMeter();
 }
 
 void SettingsDialog::on_ui_buttonBox_rejected()
@@ -664,69 +640,69 @@ int SettingsDialog::intPointMode() const
 
 DmmDecoder::DMMInfo SettingsDialog::dmmInfo() const
 {
-  DmmDecoder::DMMInfo info = m_dmm->settings()->dmmInfo();
-  info.sigrokExe = m_ports->sigrokExecutable();
+  DmmDecoder::DMMInfo info = m_meter->dmmInfo();
+  info.sigrokExe = m_settings->getString("Port settings/sigrok_exe", "sigrok-cli");
   return info;
 }
 
 bool SettingsDialog::rts() const
 {
-  return m_dmm->settings()->rts();
+  return m_meter->rts();
 }
 
 bool SettingsDialog::dtr() const
 {
-  return m_dmm->settings()->dtr();
+  return m_meter->dtr();
 }
 
 QSerialPort::Parity SettingsDialog::parity() const
 {
-  return m_dmm->settings()->parity();
+  return m_meter->parity();
 }
 
 bool SettingsDialog::externalSetup() const
 {
-  return m_dmm->settings()->externalSetup();
+  return m_meter->externalSetup();
 }
 
 int SettingsDialog::bits() const
 {
-  return m_dmm->settings()->bits();
+  return m_meter->bits();
 }
 
 int SettingsDialog::stopBits() const
 {
-  return m_dmm->settings()->stopBits();
+  return m_meter->stopBits();
 }
 
 int SettingsDialog::speed() const
 {
-  return m_dmm->settings()->speed();
+  return m_meter->speed();
 }
 
 int SettingsDialog::numValues() const
 {
-  return m_dmm->settings()->numValues();
+  return m_meter->numValues();
 }
 
 FrameFormat::DataFormat SettingsDialog::format() const
 {
-  return m_dmm->settings()->format();
+  return m_meter->format();
 }
 
 int SettingsDialog::display() const
 {
-  return m_dmm->settings()->display();
+  return m_meter->display();
 }
 
 QString SettingsDialog::dmmName() const
 {
-  return m_dmm->settings()->dmmName();
+  return m_meter->dmmName();
 }
 
 QString SettingsDialog::device() const
 {
-  return m_dmm->settings()->device();
+  return m_meter->device();
 }
 
 /////////////////////////////////////////////////////////////////
