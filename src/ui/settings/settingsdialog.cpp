@@ -189,6 +189,30 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   adjustSize();
 }
 
+namespace
+{
+/// The mouse wheel over a combo box or spin box that has no focus scrolls
+/// the page instead of changing the value: scrolling down the page must
+/// not switch, say, the analog meter to Centre zero on the way.
+class WheelGuard : public QObject
+{
+public:
+  WheelGuard(QScrollArea *area) : QObject(area), m_area(area) {}
+
+  bool eventFilter(QObject *watched, QEvent *event) override
+  {
+    auto *w = qobject_cast<QWidget *>(watched);
+    if (event->type() != QEvent::Wheel || !w || w->hasFocus())
+      return false;
+    QCoreApplication::sendEvent(m_area->verticalScrollBar(), event);
+    return true;
+  }
+
+private:
+  QScrollArea *m_area;
+};
+}
+
 void SettingsDialog::addPage(SettingsPage *page)
 {
   auto *scroll = new QScrollArea(ui_stack);
@@ -196,6 +220,18 @@ void SettingsDialog::addPage(SettingsPage *page)
   scroll->setFrameShape(QFrame::NoFrame);
   scroll->setWidget(page);
   ui_stack->insertWidget(page->id(), scroll);
+
+  auto *guard = new WheelGuard(scroll);
+  QList<QWidget *> fields;
+  for (QComboBox *combo : page->findChildren<QComboBox *>())
+    fields << combo;
+  for (QAbstractSpinBox *spin : page->findChildren<QAbstractSpinBox *>())
+    fields << spin;
+  for (QWidget *field : fields)
+  {
+    field->setFocusPolicy(Qt::StrongFocus);   // the wheel alone does not focus it
+    field->installEventFilter(guard);
+  }
 }
 
 SettingsPage *SettingsDialog::page(int index) const

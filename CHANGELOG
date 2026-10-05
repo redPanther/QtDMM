@@ -70,7 +70,10 @@
   import "nan" is a gap again instead of a 0
 - Temperature: no bar graph, the analog scale follows the values (1-2-5)
 - Same bezel thickness for the LCD and the analog meter
-- Analog meter: the red zone's band on the arc is paler, so the red labels and the min/max marks stand out
+- Analog meter: the red zone's band on the arc is paler, so the red labels and the min/max marks stand out;
+  the scale arc runs through it. ppm and % start at zero also with the scale Centre zero
+- Settings: the mouse wheel over a list or number field scrolls the page instead of changing the value
+  (scrolling down Appearance could switch the analog meter to Centre zero)
 - Virtual meter and calculated values: rounded like an autoranging meter (9.640 V on a 40000 count model,
   not 9.6402), so the analog meter shows the 40 V range instead of 0..4 with OL
 - SCPI: CONF? answers CONT for continuity (it said RES); READ? on "-OL" gives -9.9E37

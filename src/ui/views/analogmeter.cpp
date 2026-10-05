@@ -211,13 +211,29 @@ void AnalogMeter::setReading(double value, const QString &text, const QString &u
   }
   m_hold = hold;
 
-  if (m_scaleMode == Auto && !overload && value < -0.05 * m_fullScale && !m_bipolar)
+  if (m_scaleMode == Auto && !overload && value < -0.05 * m_fullScale && !m_latched)
   {
-    m_bipolar = true;
-    m_staticDirty = true;
+    m_latched = true;
+    updatePolarity();
   }
   retarget();
   update();
+}
+
+void AnalogMeter::updatePolarity()
+{
+  const bool bipolar = !m_neverNegative && (m_scaleMode == Bipolar || (m_scaleMode == Auto && m_latched));
+  if (bipolar != m_bipolar)
+  {
+    m_bipolar = bipolar;
+    m_staticDirty = true;
+  }
+}
+
+bool AnalogMeter::neverNegative(const QString &unit)
+{
+  const QString base = SiPrefix::split(unit).baseUnit;
+  return base == QLatin1String("ppm") || base == QLatin1String("%");
 }
 
 void AnalogMeter::setFullScale(double fs)
@@ -246,12 +262,7 @@ void AnalogMeter::setMinMax(double minValue, double maxValue)
 void AnalogMeter::setScaleMode(ScaleMode mode)
 {
   m_scaleMode = mode;
-  const bool bipolar = (mode == Bipolar);
-  if (bipolar != m_bipolar)
-  {
-    m_bipolar = bipolar;
-    m_staticDirty = true;
-  }
+  updatePolarity();
   retarget();
   update();
 }
@@ -275,11 +286,8 @@ void AnalogMeter::reset()
   m_markMax = kNaN;
   m_decimals = 0;
   m_rangelessScale = kNaN;
-  if (m_scaleMode == Auto && m_bipolar)
-  {
-    m_bipolar = false;
-    m_staticDirty = true;
-  }
+  m_latched = false;
+  updatePolarity();
   retarget();
   update();
 }
@@ -409,15 +417,8 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
   const double minor = step / minorsPerMajor;
   auto angleOf = [&](double v) { return angleForValue(v, m_fullScale, m_bipolar); };
 
-  // main arc, with the underswing stub left of zero
-  QPainterPath arc;
-  addArc(arc, g.pivot, R, -kStop, kSweep, true);
-  p.setPen(QPen(m_style.scale, qMax(1.0, R * 0.012), Qt::SolidLine, Qt::FlatCap));
-  p.setBrush(Qt::NoBrush);
-  p.drawPath(arc);
-
   // red zone: band on the arc from redZoneFrom * FS to the end (both ends
-  // when bipolar); the ticks are drawn over it afterwards
+  // when bipolar); the arc and the ticks are drawn over it afterwards
   {
     auto band = [&](double v0, double v1)
     {
@@ -434,6 +435,14 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
     if (m_bipolar)
       band(-vMax, -from);
   }
+
+  // main arc, with the underswing stub left of zero; over the red zone, so
+  // the scale line runs through it
+  QPainterPath arc;
+  addArc(arc, g.pivot, R, -kStop, kSweep, true);
+  p.setPen(QPen(m_style.scale, qMax(1.0, R * 0.012), Qt::SolidLine, Qt::FlatCap));
+  p.setBrush(Qt::NoBrush);
+  p.drawPath(arc);
 
   // ticks and labels, on multiples of the step counted from 0 - so 0 is
   // always labelled, also when the full scale is no multiple of the step
@@ -790,6 +799,8 @@ void AnalogMeter::showReading(const Reading &r)
     label += " " + couplingText(r.flags);
 
   m_unitText = unit;
+  m_neverNegative = neverNegative(unit);
+  updatePolarity();
   const double value = r.overload ? 0.0 : QString(val).remove(' ').toDouble();
   setReading(value, val, label, r.overload, r.hold);
   applyMinMax();
