@@ -10,29 +10,29 @@ by step and keeps it in [My devices](my-devices.md).
    adapter, serial port), *Bluetooth*, *Network*, *sigrok* or *Simulated /
    calculated* - the virtual meter, a signal of its own to try QtDMM without
    hardware, or a value calculated from other windows.
-2. **Where?** For a cable or Bluetooth QtDMM looks right away, only there,
-   and lists every port it finds, the recognised meters first. A USB cable
+2. **Where?** For a cable, Bluetooth or the network QtDMM looks right away,
+   only there, and lists every port it finds, the recognised meters first. A USB cable
    names the meter family it belongs to (UT-D04: the serial UNI-T meters,
    UT-D09: UT61B+/D+/E+ and UT161, BU-86X: Brymen, the TFA AIRCO2NTROL), a
    Bluetooth meter its name, a USB-serial adapter its chip. A device you keep
    in My devices says so - also when the port has another name now
    (`/dev/ttyUSB0` for the saved `/dev/serial/by-id/...`, another
    `/dev/hidraw` number) - and a port a running window uses says *In use
-   here* or which instance has it. Click one, or type the port (a Bluetooth
-   address) into **Port**. A device QtDMM may not open is listed with the
+   here* or which instance has it. In the network these are the ports of a
+   [qtdmm-bridge](remote-bridge.md) announcing itself by mDNS. Click one, or
+   type the port (a Bluetooth address, `host:port` of a bridge or another
+   RFC 2217 server) into **Port**. A device QtDMM may not open is listed with the
    reason, and **How to fix...** shows the commands - see
    [Troubleshooting](troubleshooting.md).
 3. **Which meter?** The name, then the meter's settings, with the likeliest
    model chosen - only the models of that connection are offered. What is
-   behind a serial port or a UT-D04 cable QtDMM cannot tell yet: choose
+   behind a serial port, a UT-D04 cable or a bridge port QtDMM cannot tell yet: choose
    yours. A Victron device needs its key here. One of My devices comes with
    its own name and model: it is changed, not added a second time.
 4. **Where should it go?** *In this window* instead of the meter now, or *In
    a new window* - a new instance with the settings of this one.
 
-sigrok and *Simulated / calculated* skip step 2. The network gets its search
-in step 2 later; until then its address is typed in on step 3
-(`host:port` of the qtdmm-bridge).
+sigrok and *Simulated / calculated* skip step 2.
 
 ## Choosing the device by hand
 
@@ -71,7 +71,7 @@ The port box lists everything QtDMM found, prefixed with its type:
 
 RFC2217 and sigrok entries are not detected automatically - except the
 ports of a [qtdmm-bridge](remote-bridge.md) announcing itself by mDNS, which
-**Find bridges** on the Special ports page lists. Otherwise add them under
+[Add device](#add-device) lists under *Network*. Otherwise add them under
 **Settings → Special ports**: choose the type and type the host:port or the
 `sigrok-cli` driver string. For sigrok, `sigrok-cli --help` and the
 [sigrok hardware list](https://sigrok.org/wiki/Supported_hardware#Multimeters)

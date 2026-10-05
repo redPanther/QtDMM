@@ -72,9 +72,6 @@ public:
   /// Shows the port row of a cable meter, or not (the assistant asks for
   /// the port on a page of its own).
   void           setPortVisible(bool visible);
-  /// Lets the port be typed in, with @p placeholder as grey text in the
-  /// empty field (e.g. the form of a network address), or not.
-  void           setPortEditable(bool editable, const QString &placeholder = QString());
   /// Everything needed is filled in: a model, and its port, address and key,
   /// formula or sigrok driver.
   bool           isComplete() const;

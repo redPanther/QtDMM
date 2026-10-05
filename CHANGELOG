@@ -21,9 +21,10 @@
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu
-- Add device (the plus in the toolbar): how the meter is connected, then for a cable or Bluetooth a search
-  there - every port found, the recognised meters first: the meter family of a USB cable, the Bluetooth meters
-  and Victron devices, the chip of a USB-serial adapter; a device QtDMM may not open says why, with the fix -,
+- Add device (the plus in the toolbar): how the meter is connected, then for a cable, Bluetooth or the network
+  a search there - every port found, the recognised meters first: the meter family of a USB cable, the
+  Bluetooth meters and Victron devices, the chip of a USB-serial adapter, the ports of qtdmm-bridge (mDNS;
+  Find bridges on the Special ports page is gone); a device QtDMM may not open says why, with the fix -,
   which meter it is with a name, then this window or a new one; it is kept in My devices, one found there is
   changed instead of added twice. The first start offers it, and Try without a device (the virtual meter)
 - Linux packages install a udev rule for the USB-HID cables and sensors (70-qtdmm.rules)

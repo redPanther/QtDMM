@@ -25,8 +25,7 @@ class QToolButton;
 /// (page 2: a passive search for that connection, every port found, the
 /// recognised ones first, or typed in), which meter it is with its settings
 /// and a name (page 3), and where it goes - in this window or a new one
-/// (page 4). sigrok and simulated meters have no page 2; the network gets
-/// its page 2 later and goes to page 3 with the port field until then.
+/// (page 4). sigrok and simulated meters have no page 2.
 /// The caller keeps the result in My devices - a find that already is one
 /// of them (knownDevice()) changes that entry instead.
 class AddDeviceDlg : public QDialog
@@ -51,7 +50,8 @@ public:
   /// find at that place says ("In use by the instance u").
   void        setPlacesInUse(const QMap<QString, QString> &places) { m_inUse = places; }
   /// The searches of a connection; by default UsbDiscoverer and
-  /// SerialDiscoverer for a cable, BleDiscoverer for Bluetooth. The test
+  /// SerialDiscoverer for a cable, BleDiscoverer for Bluetooth,
+  /// BridgeDiscoverer for the network. The test
   /// gives none and adds the finds itself.
   void        setDiscoverers(std::function<QList<Discoverer *>(Connection)> make) { m_makeDiscoverers = std::move(make); }
 
@@ -67,7 +67,7 @@ public:
   QStringList candidates() const;
   /// Page 2: chooses the card @p key; its port goes into the port field.
   void        chooseCandidate(const QString &key);
-  /// Page 2: the port field (a port, or a Bluetooth address).
+  /// Page 2: the port field (a port, a Bluetooth address, or host:port).
   void        setPort(const QString &port);
   /// The entry of My devices the device is (found at its place, the model
   /// unchanged on page 3); empty for a new device.
@@ -82,6 +82,8 @@ public:
 
   /// The models a connection offers on page 3.
   static bool offers(Connection connection, const DmmDecoder::DMMInfo &info);
+  /// Whether the connection has page 2 (cable, Bluetooth, network).
+  static bool hasPortPage(Connection connection);
 
 public Q_SLOTS:
   void        back();

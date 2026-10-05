@@ -206,14 +206,31 @@ int main(int argc, char **argv)
     check(dlg.knownDevice().isEmpty(), "another model at that place: a new device");
   }
 
-  // 5. network: an address typed in gets its port type
+  // 5. network: page 2 with the bridges found, or host:port typed in
   {
     AddDeviceDlg dlg(&library);
     dlg.setDiscoverers(noSearch);
     dlg.chooseConnection(AddDeviceDlg::Network);
-    dlg.settings()->load({ { "DMM/model", "Uni-Trend UT61E" }, { "Port settings/device", "bench:4000" } });
+    check(dlg.page() == AddDeviceDlg::PortPage, "network: page 2");
+    Candidate bridge;
+    bridge.kind = Candidate::Network;
+    bridge.key = "192.168.1.20:4711";
+    bridge.title = "qtdmm-bridge on dory";
+    bridge.keys.insert("Port settings/device", "RFC2217 192.168.1.20:4711");
+    dlg.addCandidate(bridge);
+    dlg.chooseCandidate(bridge.key);
+    check(dlg.findChild<QLineEdit *>("ui_port")->text() == "192.168.1.20:4711",
+          "network: the bridge port without its type: " + dlg.findChild<QLineEdit *>("ui_port")->text());
+    dlg.next();
+    check(dlg.page() == AddDeviceDlg::DevicePage, "network: on to page 3");
+    check(dlg.keys().value("Port settings/device") == "RFC2217 192.168.1.20:4711",
+          "network: the bridge port: " + dlg.keys().value("Port settings/device").toString());
+    dlg.back();
+    check(dlg.page() == AddDeviceDlg::PortPage, "network: back to page 2");
+    dlg.setPort("bench:4000");
+    dlg.next();
     check(dlg.keys().value("Port settings/device") == "RFC2217 bench:4000",
-          "network: " + dlg.keys().value("Port settings/device").toString());
+          "network typed: " + dlg.keys().value("Port settings/device").toString());
   }
 
   if (failed)
