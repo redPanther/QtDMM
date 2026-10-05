@@ -104,32 +104,34 @@ fi
 
 if [ "$(uname)" = "Linux" ] && ${APPIMG}
 then
-	rm -rf AppDir appimagetool-x86_64.AppImage ../packages/QtDMM.AppImage
-	mkdir -p AppDir/usr/share/metainfo
-	wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-	chmod +x appimagetool-x86_64.AppImage
-	DESTDIR=AppDir cmake --install .
-	# appimagetool looks the metadata and the icon up by the desktop file's
-	# name (the application id)
-	rm -f AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.metainfo.xml
-	cp -v ../assets/io.github.qtdmm.qtdmm.desktop AppDir
-	cp -v ../assets/icons/app/qtdmm.svg AppDir/io.github.qtdmm.qtdmm.svg
-	cp -v ../assets/appimage/qtdmm.appdata.xml AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.appdata.xml
-	# pass the command line on (--version, --config-id, ...); quoted, as the
-	# AppImage may be mounted below a path with spaces
-	echo '#!/bin/sh' > AppDir/AppRun
-	echo 'exec "$APPDIR/usr/bin/qtdmm" "$@"' >> AppDir/AppRun
-	chmod +x AppDir/AppRun
-
-	for lib in $(ldd -r AppDir/usr/bin/qtdmm | awk '{ print $3 }' | grep -v '^$')
+	# linuxdeploy with its Qt plugin: the libraries the binary needs (not glibc
+	# and the others every system has), the Qt plugins (platforms, the SVG
+	# symbols, image formats, TLS) and a RUNPATH to them - a plain copy of
+	# ldd's list was never used, the AppImage ran on the host's Qt
+	rm -rf AppDir ../packages/QtDMM.AppImage
+	for tool in linuxdeploy/linuxdeploy-x86_64 linuxdeploy-plugin-qt/linuxdeploy-plugin-qt-x86_64
 	do
-		d="$(dirname "${lib}")"
-		mkdir -p "AppDir/$d"
-		cp -v "${lib}" "AppDir/$d"
+		file="$(basename ${tool}).AppImage"
+		if [ ! -x "${file}" ]
+		then
+			wget -q "https://github.com/linuxdeploy/$(dirname ${tool})/releases/download/continuous/${file}" || exit 1
+			chmod +x "${file}"
+		fi
 	done
-
-	ARCH=x86_64 ./appimagetool-x86_64.AppImage -n AppDir QtDMM.AppImage
-	rm -rf AppDir appimagetool-x86_64.AppImage
+	DESTDIR=AppDir cmake --install .
+	# appimagetool looks the metadata up by the desktop file's name (the
+	# application id), as .appdata.xml
+	mv AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.metainfo.xml AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.appdata.xml
+	# a build host without FUSE (containers, CI) runs the tools extracted
+	export APPIMAGE_EXTRACT_AND_RUN=1
+	export QMAKE="$(command -v qmake6 || command -v qmake)"
+	export EXTRA_QT_PLUGINS="svg"
+	export LDAI_OUTPUT=QtDMM.AppImage
+	export LDAI_NO_APPSTREAM=1
+	ARCH=x86_64 ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin qt --output appimage \
+		--desktop-file AppDir/usr/share/applications/io.github.qtdmm.qtdmm.desktop \
+		--icon-file AppDir/usr/share/icons/hicolor/scalable/apps/io.github.qtdmm.qtdmm.svg || exit 1
+	rm -rf AppDir
 	mkdir -p ../packages
 	mv QtDMM.AppImage ../packages
 fi

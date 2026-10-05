@@ -38,6 +38,22 @@ jobs:
       working-directory: ${{github.workspace}}/
       run: ./compile.sh appimage
 
+    # the AppImage has to bring its Qt along: plugins inside, and the binary
+    # finds the bundled libraries before the runner's
+    - name: Check the AppImage
+      working-directory: ${{github.workspace}}/
+      run: |
+        rm -rf squashfs-root
+        ./packages/QtDMM.AppImage --appimage-extract > /dev/null
+        for p in platforms/libqxcb.so iconengines/libqsvgicon.so imageformats/libqsvg.so; do
+          test -f "squashfs-root/usr/plugins/$p" || { echo "::error::$p missing in the AppImage"; exit 1; }
+        done
+        ldd squashfs-root/usr/bin/qtdmm | tee deps.txt
+        # the RUNPATH resolves as squashfs-root/usr/bin/../lib/...
+        grep -E -q 'libQt6Core\.so.* => .*/squashfs-root/' deps.txt || { echo "::error::Qt does not come from the AppImage"; exit 1; }
+        if grep -E -q 'libc\.so.* => .*/squashfs-root/' deps.txt; then echo "::error::glibc bundled"; exit 1; fi
+        rm -rf squashfs-root deps.txt
+
     - name: Test
       working-directory: ${{github.workspace}}/
       run: ./compile.sh ctest

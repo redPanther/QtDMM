@@ -51,6 +51,8 @@ instead of
 .BR default .
 Each id has its own settings file, so one meter can be set up per id; several
 instances with different ids run side by side and know about each other.
+An id of letters, digits and underscores (not starting with a digit) can be
+used in the formula of a calculated value.
 .TP
 .BI \-\-config\-dir " dir"
 Keep the configuration files in
@@ -82,11 +84,16 @@ Settings of the configuration
 .I %APPDATA%\eQtDMM\eQtDMM.ini
 Settings on Windows; further ids as
 .IR QtDMM_ id .ini .
+.TP
+.I ~/.config/QtDMM/devices.conf
+My devices: the meters with their connections, shared by all instances
+(on Windows
+.IR %APPDATA%\eQtDMM\edevices.conf ).
 .SH EXAMPLES
 Start a second instance for another meter:
 .PP
 .RS
-.B qtdmm \-\-config\-id power\-supply
+.B qtdmm \-\-config\-id psu
 .RE
 .PP
 Capture the raw frames of a meter for a bug report:

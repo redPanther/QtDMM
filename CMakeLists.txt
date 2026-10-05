@@ -5,7 +5,7 @@ project(qtdmm VERSION "0.0.0" HOMEPAGE_URL "https://qtdmm.de" LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
-set(PROJECT_LICENSE "GPL-3.0-or-later")
+set(PROJECT_LICENSE "GPL-3.0-or-later AND LGPL-3.0-or-later")
 set(RESOURCES "${CMAKE_BINARY_DIR}/resources.qrc")
 set(APP_NAME "QtDMM")
 set(APP_ORGANIZATION "QtDMM")
@@ -287,6 +287,15 @@ if (NOT WIN32)
 	install(FILES assets/linux/70-qtdmm.rules DESTINATION lib/udev/rules.d)
 	## AppStream metadata for software centres, named after the component id
 	install(FILES assets/appimage/qtdmm.appdata.xml DESTINATION share/metainfo RENAME io.github.qtdmm.qtdmm.metainfo.xml)
+endif()
+
+## the licence texts: QtDMM's (GPL) and those of the symbol sets built in
+## (Breeze, Oxygen: LGPL); the macOS bundle gets them in the workflow
+set(QTDMM_LICENSE_FILES LICENSE assets/icons/sets/LICENSE.breeze assets/icons/sets/LICENSE.oxygen)
+if (WIN32)
+	install(FILES ${QTDMM_LICENSE_FILES} DESTINATION licenses)
+elseif (NOT APPLE)
+	install(FILES ${QTDMM_LICENSE_FILES} DESTINATION share/licenses/${PROJECT_NAME})
 endif()
 
 ## main.cpp looks for them next to the binary: <prefix>/bin/../share/qtdmm/translations

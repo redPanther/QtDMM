@@ -85,6 +85,13 @@
   without a port, also at every start)
 - Recorder: while waiting for a threshold, another function crosses nothing (0 V, then 1000 Ω over 5), and
   the pre-trigger keeps no readings of the function before
+- AppImage: built with linuxdeploy and its Qt plugin, so it brings Qt, the Qt plugins (platform, SVG
+  symbols, image formats) and a RUNPATH to them along. Before it ran only where a fitting Qt 6 was
+  installed; the libraries copied in were never used. The Linux CI checks the AppImage for that
+- Licences: the symbol sets Oxygen and Breeze are LGPL-3.0-or-later. Packages carry their licence texts
+  (Linux share/licenses/qtdmm, Windows licenses\, macOS inside the bundle), the RPM, PKGBUILD and AppStream
+  name GPL-3.0-or-later AND LGPL-3.0-or-later, and the About box names Oxygen too
+- Man page: the example instance name works in formulas (psu, not power-supply); devices.conf under FILES
 - Instances: renaming refuses a name that differs from another only in case; the message says the running
   instances take the new formula after a restart (not after reconnecting), and they no longer write the old one
   back into My devices. Open in a new window brings the window that already uses the device to the front
