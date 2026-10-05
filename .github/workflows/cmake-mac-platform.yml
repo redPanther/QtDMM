@@ -85,6 +85,9 @@ jobs:
         rm -rf stage packages && mkdir -p stage packages
         cp -R "$BUILD_DIR/qtdmm.app" stage/QtDMM.app
         macdeployqt stage/QtDMM.app -always-overwrite
+        # the licence texts: QtDMM's and those of the symbol sets built in
+        mkdir -p stage/QtDMM.app/Contents/Resources/licenses
+        cp LICENSE assets/icons/sets/LICENSE.breeze assets/icons/sets/LICENSE.oxygen stage/QtDMM.app/Contents/Resources/licenses/
         # every library the bundle uses is inside it or part of macOS
         # file prints an extra "(for architecture ...)" line per slice of a
         # universal binary; keep one line per file

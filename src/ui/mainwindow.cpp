@@ -811,7 +811,7 @@ void MainWindow::on_action_About_triggered()
                    "<p>Website: <a href='https://qtdmm.de'>qtdmm.de</a> &middot; "
                    "Contact: <a href='mailto:hello@qtdmm.de'>hello@qtdmm.de</a><br>"
                    "Source and bug reports: <a href='https://github.com/qtdmm/QtDMM'>github.com/qtdmm/QtDMM</a><br>"
-                   "Symbols from the <b>Breeze</b> icon theme of the KDE community (LGPL 3); "
+                   "Symbols from the <b>Oxygen</b> and <b>Breeze</b> icon themes of the KDE community (LGPL 3); "
                    "QtDMM's own symbols are drawn in its style.</p>")
                 .arg(APP_VERSION).arg(qVersion()));
 

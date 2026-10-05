@@ -9,7 +9,7 @@ Version:	26.1
 # Sonst -p -e weglassen
 Release:	%autorelease
 Summary:	DMM Readout Software Including a Configurable Recorder
-License:	GPL-3.0-or-later
+License:	GPL-3.0-or-later AND LGPL-3.0-or-later
 URL:		https://www.qtdmm.de
 BuildSystem:	cmake
 %if %{with test}
@@ -31,6 +31,8 @@ Bluetooth LE and the network.
 
 %install
 %cmake_install
+# the licence texts go to %%{_licensedir} by %%license below
+rm -rf %{buildroot}%{_datadir}/licenses/%{name}
 %find_lang %{name} --with-qt
 
 %check
@@ -39,7 +41,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/*.metainfo.xml
 QT_QPA_PLATFORM=offscreen %ctest
 
 %files -f %{name}.lang
-%license LICENSE
+%license LICENSE assets/icons/sets/LICENSE.breeze assets/icons/sets/LICENSE.oxygen
 %doc AUTHORS README.md CHANGELOG
 %{_bindir}/%{name}
 %{_datadir}/applications/%{appid}.desktop

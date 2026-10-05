@@ -4,7 +4,7 @@
   <name>QtDMM</name>
   <summary>Read out and record digital multimeters</summary>
   <metadata_license>CC-BY-SA-4.0</metadata_license>
-  <project_license>GPL-3.0-or-later</project_license>
+  <project_license>GPL-3.0-or-later AND LGPL-3.0-or-later</project_license>
 
   <description>
     <p>

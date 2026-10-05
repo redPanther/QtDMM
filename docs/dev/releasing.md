@@ -16,7 +16,8 @@ year. A version number thus says how current a build is:
 
 There is no fixed release calendar; N simply counts the releases of the year.
 
-The version comes from **git tags**, and there is nothing to bump by hand.
+The version comes from **git tags**; the one thing to bump by hand is
+`Version:` in `qtdmm.spec` (step 2).
 `cmake/git_version.cmake` runs `git describe` on the newest tag of the form
 `YY.N[.P][-rcK]`. The old tags `0.9.x` and `1.0.0-alpha.1` do not match and
 are ignored. The same version appears in different forms:
@@ -57,8 +58,9 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    </releases>
    ```
 
-   In `qtdmm.spec`, a release candidate has `Release: %autorelease -p -e rcN`;
-   the final release drops `-p -e rcN`.
+   In `qtdmm.spec`, set `Version:` to the new version (`26.2`) at its first
+   release candidate - Copr builds `master` with it. A release candidate has
+   `Release: %autorelease -p -e rcN`; the final release drops `-p -e rcN`.
 3. Merge that as a normal PR.
 4. Before tagging, try the macOS release path once: *Actions → macOS test
    build → Run workflow* on `master` with **release** ticked. It builds the
