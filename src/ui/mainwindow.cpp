@@ -474,15 +474,23 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_expectSize = size();
 
   connect(m_stateMgr, &SharedStateManager::stateChanged, this, [=](const QString& state){
-    if (state == "RECORD")
+    // RECORD_<ms> / STOP_<ms>: a command is new each time - a plain "RECORD"
+    // after a recording that ended without Stop (its length, another
+    // device) was the same state again, and no instance started
+    if (state.startsWith("RECORD_"))
     {
       QMetaObject::invokeMethod(m_wid, "startSLOT", Qt::DirectConnection);
       m_localRecord = false;
     }
-    else if (state == "STOP")
+    else if (state.startsWith("STOP_"))
     {
+      // the others stop too, without sending a STOP of their own
       if (!m_localRecord)
+      {
+        m_remoteStop = true;
         action_Stop->trigger();
+        m_remoteStop = false;
+      }
     }
     else if (state == "RAISE_"+(m_config_id.isEmpty()?"default":m_config_id))
     {
@@ -749,7 +757,7 @@ void MainWindow::startSLOT()
         m_localRecord = true;
         return;
       case QMessageBox::No:
-        m_stateMgr->writeState("RECORD");
+        m_stateMgr->writeState("RECORD_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
         m_localRecord = false;
         return;
     }
@@ -759,8 +767,8 @@ void MainWindow::startSLOT()
 void MainWindow::stopSLOT()
 {
   qInfo() << "stop" << m_localRecord;
-  if (! m_localRecord)
-    m_stateMgr->writeState("STOP");
+  if (!m_localRecord && !m_remoteStop)
+    m_stateMgr->writeState("STOP_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
   m_localRecord = false;
 
 }

@@ -13,7 +13,7 @@
 /// the list of registered instances (id + pid) and a single state string.
 /// writeState() replaces that string; every instance polls the segment on a
 /// timer and emits stateChanged() when it differs from what it saw last.
-/// MainWindow uses this for synchronised recording ("RECORD"/"STOP") and to
+/// MainWindow uses this for synchronised recording ("RECORD_<ms>"/"STOP_<ms>", new each time) and to
 /// raise a specific instance ("RAISE_<id>"). Registrations of instances that
 /// died without unregistering are detected by their pid and removed.
 ///

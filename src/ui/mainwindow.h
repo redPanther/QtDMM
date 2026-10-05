@@ -53,7 +53,7 @@ class QMdiSubWindow;
 /// and readings table - placed by an MdiArranger.
 ///
 /// Also the place where several QtDMM instances talk to each other: the
-/// SharedStateManager's state changes ("RECORD", "STOP", "RAISE_<id>") are
+/// SharedStateManager's state changes ("RECORD_<ms>", "STOP_<ms>", "RAISE_<id>") are
 /// turned into actions here, and a second instance with the same id is
 /// refused.
 class MainWindow : public QMainWindow, private Ui::UIMainWindow
@@ -201,6 +201,7 @@ protected:
   SharedStateManager* m_stateMgr;
   QString     m_config_id;
   bool        m_localRecord;
+  bool        m_remoteStop = false;   ///< stopping on another instance's STOP
 
   void        setupIcons();
   void        createActions();
