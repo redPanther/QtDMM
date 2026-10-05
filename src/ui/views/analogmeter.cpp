@@ -423,7 +423,7 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
     auto band = [&](double v0, double v1)
     {
       QPainterPath path;
-      addArc(path, g.pivot, R * 1.012, angleOf(v0), angleOf(v1), true);
+      addArc(path, g.pivot, R, angleOf(v0), angleOf(v1), true);   // the arc is its outer edge
       addArc(path, g.pivot, R * 0.94, angleOf(v1), angleOf(v0), false);
       path.closeSubpath();
       p.setPen(Qt::NoPen);
