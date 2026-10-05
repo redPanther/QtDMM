@@ -216,6 +216,12 @@ void AddDeviceDlg::setCurrentDevice(const QString &name)
                         + (name.isEmpty() ? tr("instead of the meter now") : tr("instead of %1").arg(name)));
 }
 
+void AddDeviceDlg::setTargetChoice(bool choice)
+{
+  m_targetChoice = choice;
+  updateButtons();
+}
+
 bool AddDeviceDlg::offers(Connection connection, const DmmDecoder::DMMInfo &info)
 {
   const ProtocolInfo *protocol = protocolInfo(info.protocol);
@@ -517,6 +523,8 @@ void AddDeviceDlg::next()
     takePort();
     showPage(DevicePage);
   }
+  else if (!m_targetChoice)
+    finish(ThisWindow);
   else
     showPage(TargetPage);
 }
@@ -542,6 +550,8 @@ void AddDeviceDlg::updateButtons()
 {
   m_back->setEnabled(page() != ConnectionPage);
   m_next->setVisible(page() == PortPage || page() == DevicePage);
+  // without page 4 the last page finishes
+  m_next->setText(page() == DevicePage && !m_targetChoice ? tr("A&dd") : tr("&Next >"));
   m_next->setEnabled(canGoNext());
 }
 
