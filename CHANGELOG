@@ -26,7 +26,9 @@
   Bluetooth meters and Victron devices, the chip of a USB-serial adapter, the ports of qtdmm-bridge (mDNS;
   Find bridges on the Special ports page is gone); a device QtDMM may not open says why, with the fix -,
   which meter it is with a name, then this window or a new one; it is kept in My devices, one found there is
-  changed instead of added twice. The first start offers it, and Try without a device (the virtual meter)
+  changed instead of added twice. A window without a meter (the first start) shows only a big Add device
+  button and skips the question where the device goes; the welcome dialog is gone - to try QtDMM without a
+  meter, choose Simulated
 - Linux packages install a udev rule for the USB-HID cables and sensors (70-qtdmm.rules)
 - My devices: your meters with their connections, kept for all windows in devices.conf. The toolbar's My
   devices button switches to one with two clicks (a running recording stops); Save current device, the choice

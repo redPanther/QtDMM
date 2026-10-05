@@ -64,7 +64,7 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   pageShortcut(QKeySequence("Ctrl+PgUp"), -1);
   pageShortcut(QKeySequence("Ctrl+PgDown"), 1);
 
-  // A first start is welcomed by MainWindow (WelcomeDlg); an old file
+  // A first start shows the empty window (MainWindow); an old file
   // gets a word about the new parameters
   if (m_settings->fileExists())
   {

@@ -25,7 +25,8 @@ class QToolButton;
 /// (page 2: a passive search for that connection, every port found, the
 /// recognised ones first, or typed in), which meter it is with its settings
 /// and a name (page 3), and where it goes - in this window or a new one
-/// (page 4). sigrok and simulated meters have no page 2.
+/// (page 4). sigrok and simulated meters have no page 2. An empty window
+/// skips page 4: the device goes into it.
 /// The caller keeps the result in My devices - a find that already is one
 /// of them (knownDevice()) changes that entry instead.
 class AddDeviceDlg : public QDialog
@@ -46,6 +47,10 @@ public:
   void        setStateManager(SharedStateManager *state);
   /// The meter of this window, named on the button "In this window".
   void        setCurrentDevice(const QString &name);
+  /// Whether page 4 asks where the device goes. Without it (an empty
+  /// window) the button on page 3 is "Add" and the device goes into this
+  /// window.
+  void        setTargetChoice(bool choice);
   /// Places (DeviceLibrary::place()) the running instances use, with what a
   /// find at that place says ("In use by the instance u").
   void        setPlacesInUse(const QMap<QString, QString> &places) { m_inUse = places; }
@@ -129,4 +134,5 @@ private:
   Target          m_target = NoTarget;
   QString         m_currentDevice;
   QString         m_model;   ///< the model the name was suggested for
+  bool            m_targetChoice = true;
 };

@@ -4,7 +4,8 @@
 
 The quickest way: plug the meter in, switch it on and choose **Add
 device...**, the plus at the left of the toolbar. It sets the meter up step
-by step and keeps it in [My devices](my-devices.md).
+by step and keeps it in [My devices](my-devices.md). A window without a
+meter - the first start - shows nothing but a big **Add device** button.
 
 1. **How is it connected?** *Cable* (USB cable of the meter, USB-serial
    adapter, serial port), *Bluetooth*, *Network*, *sigrok* or *Simulated /
@@ -30,7 +31,8 @@ by step and keeps it in [My devices](my-devices.md).
    yours. A Victron device needs its key here. One of My devices comes with
    its own name and model: it is changed, not added a second time.
 4. **Where should it go?** *In this window* instead of the meter now, or *In
-   a new window* - a new instance with the settings of this one.
+   a new window* - a new instance with the settings of this one. A window
+   without a meter skips this: **Add** on step 3 puts the device into it.
 
 sigrok and *Simulated / calculated* skip step 2.
 

@@ -27,7 +27,6 @@
 
 #include "ui/mainwindow.h"
 #include "ui/dialogs/helpdlg.h"
-#include "ui/dialogs/welcomedlg.h"
 #include "ui/dialogs/mydevicesdlg.h"
 #include "ui/dialogs/adddevicedlg.h"
 #include "ui/settings/meterprefs.h"
@@ -85,6 +84,26 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   centralLayout->addWidget(m_mdi, 1);
   setCentralWidget(central);
   m_arranger = new MdiArranger(m_mdi, this);
+  // the empty start: one big button on the area's background, over the
+  // views, which stay arranged below it
+  m_emptyStart = new QWidget(m_mdi);
+  m_emptyStart->setAutoFillBackground(true);
+  auto *emptyLayout = new QGridLayout(m_emptyStart);
+  auto *addButton = new QToolButton(m_emptyStart);
+  addButton->setObjectName("ui_emptyStart");
+  addButton->setIcon(QIcon::fromTheme("list-add"));
+  addButton->setIconSize(QSize(64, 64));
+  addButton->setText(tr("&Add device"));
+  addButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+  addButton->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
+  QFont big = addButton->font();
+  big.setPointSizeF(big.pointSizeF() * 1.4);
+  addButton->setFont(big);
+  addButton->setMinimumSize(260, 160);
+  emptyLayout->addWidget(addButton, 0, 0, Qt::AlignCenter);
+  m_emptyStart->hide();
+  m_mdi->installEventFilter(this);
+  connect(addButton, &QToolButton::clicked, this, &MainWindow::addDevice);
 
   MeterController *ctl = m_wid->controller();
   connect(ctl, &MeterController::alarmBannerChanged, m_alarmBar, &AlarmBar::setAlarms);
@@ -442,37 +461,23 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   });
 
   // auto-connect at start, but not before a meter was ever chosen: a fresh
-  // instance would otherwise try the first serial port it finds
+  // instance would otherwise try the first serial port it finds; without
+  // one the window starts empty
   if (m_stateMgr->registerInstance() && m_wid->dmmConfigured())
     QTimer::singleShot(1000, action_Connect, &QAction::trigger);
-  // the first start (and not the test that only looks at the menus): how
-  // to get to a first reading
-  else if (!m_wid->settings()->fileExists() && !parser.isSet("check-mnemonics"))
-    QTimer::singleShot(0, this, &MainWindow::welcome);
+  updateEmptyStart();
+  connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateEmptyStart);
 }
 
-void MainWindow::welcome()
+void MainWindow::updateEmptyStart()
 {
-  WelcomeDlg dlg(m_wid->devices(), this);
-  dlg.exec();
-  switch (dlg.choice())
+  const bool empty = !m_wid->dmmConfigured();
+  if (empty)
   {
-    case WelcomeDlg::Known:
-      m_wid->switchDevice(dlg.device());
-      break;
-    case WelcomeDlg::Find:
-      addDevice();
-      break;
-    case WelcomeDlg::TryVirtual:
-      // the virtual meter with its defaults: a sine, at once
-      m_wid->useFoundDevice({ { "DMM/model", "QtDMM Virtual meter" } }, QString());
-      break;
-    case WelcomeDlg::ByHand:
-      m_wid->configDmmSLOT();
-      break;
-    case WelcomeDlg::None:
-      break;
+    m_emptyStart->setGeometry(m_mdi->rect());
+    m_emptyStart->raise();
   }
+  m_emptyStart->setVisible(empty);
 }
 
 void MainWindow::addDevice()
@@ -484,6 +489,8 @@ void MainWindow::addDevice()
   dlg.setPlacesInUse(placesInUse());
   if (m_wid->dmmConfigured())
     dlg.setCurrentDevice(m_wid->dmmTitle());
+  else
+    dlg.setTargetChoice(false);   // an empty window: the device goes into it
   if (dlg.exec() != QDialog::Accepted)
     return;
   QVariantMap keys = dlg.keys();
@@ -868,6 +875,8 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
   if (watched == m_display && event->type() == QEvent::Resize)
     m_fold->move(m_display->width() - m_fold->width() - 6, 6);
+  if (watched == m_mdi && event->type() == QEvent::Resize)
+    m_emptyStart->setGeometry(m_mdi->rect());
   // closing a window (its title bar button, Ctrl+F4) only hides it: a real
   // close would close the view inside as well, and it would not come back
   if (event->type() == QEvent::Close)
@@ -1323,6 +1332,9 @@ void MainWindow::setDesign(int design)
   const auto d = static_cast<Designs::Design>(design);
   Designs::apply(d);
   m_mdi->setBackground(Designs::areaBrush(d));
+  QPalette empty = m_emptyStart->palette();
+  empty.setBrush(QPalette::Window, Designs::areaBrush(d));
+  m_emptyStart->setPalette(empty);
   // the instruments are drawn on a transparent background: the window's
   // (brushed metal in Silver) shows around them
   const QBrush frame = Designs::frameBrush(d);

@@ -43,6 +43,7 @@ class ControlBar;
 class FoldButton;
 class MdiArranger;
 class QMdiArea;
+class QToolButton;
 class QMdiSubWindow;
 
 /// The application window: toolbars, status bar, the alarm banner and an
@@ -129,9 +130,10 @@ protected:
   /// The assistant "Add device": the device into My devices, then into
   /// this window or a new one.
   void        addDevice();
-  /// The welcome at the first start: My devices, Add device, Try without
-  /// a device, Set up by hand.
-  void        welcome();
+  /// The empty start: a window without a meter shows the big button "Add
+  /// device" over the area instead of the views.
+  void        updateEmptyStart();
+  QWidget    *m_emptyStart = nullptr;   ///< covers the area, with the button
   QAction    *m_arrangeTop;
   QAction    *m_arrangeLeft;
   QAction    *m_arrangeFixed;

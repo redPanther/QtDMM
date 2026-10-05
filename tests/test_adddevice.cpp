@@ -96,6 +96,23 @@ int main(int argc, char **argv)
   // the searches of the real dialog look at this machine; here the finds are given
   auto noSearch = [](AddDeviceDlg::Connection) { return QList<Discoverer *>(); };
 
+  // 2b. the empty start: no page 4, page 3 finishes with Add into this window
+  {
+    AddDeviceDlg dlg(&library);
+    dlg.setDiscoverers(noSearch);
+    dlg.setTargetChoice(false);
+    dlg.chooseConnection(AddDeviceDlg::Simulated);
+    QPushButton *add = nullptr;
+    for (QPushButton *b : dlg.findChildren<QPushButton *>())
+      if (b->text() == "A&dd" && !b->isHidden())
+        add = b;
+    check(add && add->isEnabled(), "empty start: Add on page 3");
+    dlg.next();
+    check(dlg.page() != AddDeviceDlg::TargetPage, "empty start: no page 4");
+    check(dlg.result() == QDialog::Accepted && dlg.target() == AddDeviceDlg::ThisWindow,
+          "empty start: into this window");
+  }
+
   // 3. the name follows the model until it is typed in
   {
     AddDeviceDlg dlg(&library);
