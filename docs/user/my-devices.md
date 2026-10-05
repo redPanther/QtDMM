@@ -2,8 +2,8 @@
 
 If you own several meters and use them one at a time - a UT61E on the
 bench, a Brymen for the car, a Victron shunt in the van - **My devices**
-keeps each of them with its connection, so switching is two clicks
-instead of filling in the meter page again.
+keeps each of them with its connection, so switching is one click in the
+sidebar instead of filling in the meter page again.
 
 An entry holds the meter and its connection only, and of the connection
 what its way needs: model and protocol, the port with its line settings, a
@@ -15,30 +15,48 @@ in it is tidied up when QtDMM starts.
 The window remembers which entry it uses. Change the port or the key of
 that meter on the Multimeter page, and the entry changes with it; choose
 another model there, and it is another meter - the window uses no entry
-then, until you save one or switch.
+then, until you switch.
 
-## Switching
+## The sidebar
 
-The **My devices** button at the left of the toolbar opens the list; the
-device in use has a check mark. Click another one: QtDMM disconnects, takes
-over its settings and connects again. A running recording stops - another
-meter is another measurement - and minimum and maximum start afresh.
+**Devices** in the toolbar shows and hides the sidebar at the left of the
+window, with the node **My devices**. The device in use is bold, with a dot
+that is green while its readings come in; where a device is connected shows
+when the mouse rests on it. Click another one: QtDMM disconnects, takes over
+its settings and connects again. A running recording stops - another meter
+is another measurement - and minimum and maximum start afresh.
+
+With a single device the sidebar stays closed; adding the second one opens
+it, and the window remembers whether you leave it open. A window without a
+meter shows it whenever there are devices to choose from - pick one, or add
+a new one with the big **Add device** button.
+
+The context menu of a device:
+
+- **Settings...** - the meter's settings as in the assistant; the device in
+  use takes them at once.
+- **Rename** - in place (F2 does the same).
+- **Open in a new window** - a new instance with the settings of this one
+  and the device.
+- **Remove from My devices** - after a question; a window using it keeps its
+  meter.
+
+Drag a device to change the order.
 
 ## Adding a device
 
-- **Add device...** (the plus in the toolbar) asks step by step: how
-  the meter is connected - *Cable*, *Bluetooth*, *Network*, *sigrok* or
-  *Simulated / calculated* -, which meter it is, with a name, and where it
-  goes: **In this window** instead of the meter now, or **In a new window**,
-  a new instance with the settings of this one. Either way it is kept in My
-  devices. The page of the meter offers only the models of that connection;
-  *Next* waits until what the meter needs is filled in (the port, the key of
-  a Victron device, a formula that works), or
-- set the meter up as usual on the **Multimeter** page, then choose **Save
-  current device...** in the My devices menu and give it a name, or
-- on the Multimeter page, **Save to my devices...**. With a device chosen
-  at the top of the page, it asks whether to update that one or to keep
-  the settings as a new device.
+**Add device...** (the device symbol at the left of the toolbar) asks step
+by step: how the meter is connected - *Cable*, *Bluetooth*, *Network*,
+*sigrok* or *Simulated / calculated* -, which meter it is, with a name, and
+where it goes: **In this window** instead of the meter now, or **In a new
+window**, a new instance with the settings of this one. Either way it is
+kept in My devices. The page of the meter offers only the models of that
+connection; *Next* waits until what the meter needs is filled in (the port,
+the key of a Victron device, a formula that works).
+
+On the Multimeter page, **Save to my devices...** keeps the settings there;
+with a device chosen at the top of the page, it asks whether to update that
+one or to keep the settings as a new device.
 
 A serial port is saved under its stable name on Linux, the link in
 `/dev/serial/by-id/` (`usb-WCH.CN_USB_Quad_Serial_…`): `/dev/ttyUSB0` may be
@@ -48,11 +66,6 @@ A serial port is saved under its stable name on Linux, the link in
 
 **My devices** at the top of the page fills in the fields from an entry;
 nothing changes before *OK* or *Apply*.
-
-## Managing
-
-**Manage my devices...** lists them: rename, duplicate, delete, drag to
-reorder, *Use* to switch, *Edit...* to switch and open the Multimeter page.
 
 ## Several windows
 

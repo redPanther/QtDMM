@@ -3,7 +3,7 @@
 ## Add device
 
 The quickest way: plug the meter in, switch it on and choose **Add
-device...**, the plus at the left of the toolbar. It sets the meter up step
+device...**, the device symbol at the left of the toolbar. It sets the meter up step
 by step and keeps it in [My devices](my-devices.md). A window without a
 meter - the first start - shows nothing but a big **Add device** button.
 

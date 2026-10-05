@@ -106,16 +106,6 @@ public:
   /// message - another meter is another function. False when there is no
   /// such entry.
   bool        switchDevice(const QString &id);
-  /// Takes over a meter by its keys (the virtual meter of the welcome):
-  /// where it is and the model; the meter page fills in the rest (line
-  /// settings, protocol) as when the model is chosen there. Connects, and
-  /// keeps it in "My devices" as @p name unless that is empty. A find that
-  /// is the entry @p known of "My devices" uses that entry instead, with the
-  /// place as found now (a hidraw number, a key typed in).
-  void        useFoundDevice(const QVariantMap &keys, const QString &name, const QString &known = QString());
-  /// Keeps the meter of this instance in "My devices" as @p name, the
-  /// serial port under its stable name; returns the new id.
-  QString     saveCurrentDevice(const QString &name);
   /// Starts a new instance with this one's settings and the device @p id of
   /// "My devices", named after the device (DeviceLibrary::instanceId());
   /// returns the instance name, empty when there is no such entry.
@@ -193,10 +183,9 @@ protected:
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   InstancesDlg *m_instancesDlg;
   Settings    *m_settings;
-  /// Disconnects, takes over @p keys (with the meter page's defaults for
-  /// what they leave out when @p complete), connects; @p name for the
-  /// message.
-  void        takeOver(const QVariantMap &keys, const QString &name, bool complete, const QString &id);
+  /// Disconnects, takes over @p keys of the entry @p id, connects; @p name
+  /// for the message.
+  void        takeOver(const QVariantMap &keys, const QString &name, const QString &id);
   /// After the settings were applied: the entry in use follows them (same
   /// model: the same meter, its entry changes along); another model is
   /// another meter - the entry at its place, or none.

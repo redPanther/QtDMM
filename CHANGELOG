@@ -21,7 +21,7 @@
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu
-- Add device (the plus in the toolbar): how the meter is connected, then for a cable, Bluetooth or the network
+- Add device (the device symbol in the toolbar): how the meter is connected, then for a cable, Bluetooth or the network
   a search there - every port found, the recognised meters first: the meter family of a USB cable, the
   Bluetooth meters and Victron devices, the chip of a USB-serial adapter, the ports of qtdmm-bridge (mDNS;
   Find bridges on the Special ports page is gone); a device QtDMM may not open says why, with the fix -,
@@ -30,9 +30,11 @@
   button and skips the question where the device goes; the welcome dialog is gone - to try QtDMM without a
   meter, choose Simulated
 - Linux packages install a udev rule for the USB-HID cables and sensors (70-qtdmm.rules)
-- My devices: your meters with their connections, kept for all windows in devices.conf. The toolbar's My
-  devices button switches to one with two clicks (a running recording stops); Save current device, the choice
-  on the Multimeter page, a device for a new instance. Serial ports are kept under their /dev/serial/by-id name.
+- My devices: your meters with their connections, kept for all windows in devices.conf, in the sidebar
+  Devices at the left: a click switches (a running recording stops), the one in use shows whether readings
+  come in; Settings, Rename, Open in a new window and Remove in its context menu, drag to reorder. The sidebar
+  opens with the second device and in a window without a meter when there are devices; Devices in the toolbar
+  shows and hides it. The choice on the Multimeter page, a device for a new instance. Serial ports are kept under their /dev/serial/by-id name.
   An entry keeps what its way of connecting needs, and changes with the settings of the meter in use; Find
   device recognises a saved device by its place (by-id name or ttyUSB, a USB cable plugged in again, a
   Bluetooth address), connects it without a second entry and says which window uses a port

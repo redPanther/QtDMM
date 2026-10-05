@@ -364,28 +364,8 @@ bool InstanceWidget::switchDevice(const QString &id)
   const std::optional<MyDevice> device = m_devices->find(id);
   if (!device)
     return false;
-  takeOver(device->keys, device->name, false, id);
+  takeOver(device->keys, device->name, id);
   return true;
-}
-
-void InstanceWidget::useFoundDevice(const QVariantMap &keys, const QString &name, const QString &known)
-{
-  if (const std::optional<MyDevice> device = m_devices->find(known))
-  {
-    // the entry as it is, at the place found now and with a key typed in
-    QVariantMap entry = device->keys;
-    for (const char *key : { "Port settings/device", "Port settings/ble-address", "Port settings/ble-key" })
-      if (!keys.value(key).toString().isEmpty())
-        entry.insert(key, keys.value(key));
-    entry.insert("Port settings/device", SerialDevice::stableDevice(entry.value("Port settings/device").toString()));
-    if (DeviceLibrary::entryKeys(entry) != device->keys)
-      m_devices->update(device->id, entry);
-    switchDevice(device->id);
-    return;
-  }
-  takeOver(keys, name.isEmpty() ? keys.value("DMM/model").toString() : name, true, QString());
-  if (!name.isEmpty())
-    saveCurrentDevice(name);
 }
 
 QString InstanceWidget::openInNewWindow(const QString &id)
@@ -409,7 +389,7 @@ QString InstanceWidget::openInNewWindow(const QString &id)
   return instance;
 }
 
-void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, bool complete, const QString &id)
+void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, const QString &id)
 {
   // another meter is another function: one recording does not mix them
   if (m_ctl->recorder()->isRunning())
@@ -426,10 +406,6 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, bool
   m_settings->setBool("DMM/configured", true);
   m_settings->save();
   m_configDlg->reloadMeter();
-  // a found meter brings where and which model; the line settings and the
-  // protocol come with the model, as on the meter page
-  if (complete)
-    m_configDlg->applyMeter();
   applySLOT();
   // another meter: its own minimum and maximum, even at the same port
   m_ctl->resetMinMax();
@@ -438,24 +414,6 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, bool
   Q_EMIT connectDMM(true);
   connectSLOT(true);
   Q_EMIT info(tr("Using %1").arg(name));
-}
-
-QString InstanceWidget::saveCurrentDevice(const QString &name)
-{
-  QVariantMap keys = m_settings->meterKeys();
-  const QString device = keys.value("Port settings/device").toString();
-  const QString stable = SerialDevice::stableDevice(device);
-  if (stable != device)
-  {
-    // this instance uses the stable name from now on as well
-    keys.insert("Port settings/device", stable);
-    m_settings->setString("Port settings/device", stable);
-  }
-  const QString id = m_devices->add(name, keys);
-  m_settings->setString("DMM/my-device", id);
-  m_settings->save();
-  m_configDlg->reloadMeter();
-  return id;
 }
 
 void InstanceWidget::syncDevice()

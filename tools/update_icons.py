@@ -33,6 +33,8 @@ NAMES = [
     "office-chart-line", "preferences-desktop-theme-global", "system-run", "table",
     # the tiles of the assistant "Add device"
     "code-function", "drive-removable-media-usb", "preferences-system-bluetooth", "window-new",
+    # the device sidebar
+    "view-sidetree",
 ]
 # Oxygen has these under another name (chosen by eye, paket_26_2 §1a)
 OXYGEN_ALIAS = {

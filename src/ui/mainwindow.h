@@ -44,6 +44,8 @@ class FoldButton;
 class MdiArranger;
 class QMdiArea;
 class QToolButton;
+class QDockWidget;
+class DeviceSidebar;
 class QMdiSubWindow;
 
 /// The application window: toolbars, status bar, the alarm banner and an
@@ -120,10 +122,14 @@ protected:
   QAction    *m_readingsAction = nullptr;
   QAction    *m_poincareAction = nullptr;
   QAction    *m_addDeviceAction = nullptr;
-  QMenu      *m_devicesMenu = nullptr;   ///< "My devices" at the device symbol
-  /// The devices menu anew: the entries (the one in use checked), save,
-  /// manage, configure.
-  void        fillDevicesMenu();
+  QDockWidget   *m_sidebarDock = nullptr;
+  DeviceSidebar *m_sidebar = nullptr;     ///< "My devices" at the left
+  /// "Settings..." of an entry: its meter's settings; the device in use
+  /// takes them at once.
+  void        deviceSettings(const QString &id);
+  /// The entry @p id in a new window (instance) of its own.
+  void        openInNewWindow(const QString &id);
+  void        showSidebar(bool show);
   /// The places (DeviceLibrary::place()) the running instances use, with
   /// "In use here" / "In use by the instance x" for the assistant's cards.
   QMap<QString, QString> placesInUse() const;
