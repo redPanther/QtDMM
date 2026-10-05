@@ -104,127 +104,132 @@
         <translation>P&amp;ort:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="136"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="138"/>
         <source>The name in My devices</source>
         <translation>Nazwa w Moich urządzeniach</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="137"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="139"/>
         <source>Na&amp;me:</source>
         <translation>N&amp;azwa:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="153"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="155"/>
         <source>The device takes the place of the one in this window</source>
         <translation>Urządzenie zastępuje to w tym oknie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="156"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="158"/>
         <source>with the settings of this one</source>
         <translation>z ustawieniami tego okna</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="156"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="158"/>
         <source>In a ne&amp;w window</source>
         <translation>W n&amp;owym oknie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="157"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="159"/>
         <source>A new window of its own for the device; this one keeps its meter</source>
         <translation>Nowe, własne okno dla urządzenia; to zachowuje swój miernik</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="170"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="172"/>
         <source>&lt; &amp;Back</source>
         <translation>&lt; &amp;Wstecz</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="171"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="173"/>
         <source>&amp;Next &gt;</source>
         <translation>&amp;Dalej &gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="213"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="215"/>
         <source>In &amp;this window</source>
         <translation>W &amp;tym oknie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="214"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="216"/>
         <source>instead of the meter now</source>
         <translation>zamiast obecnego miernika</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="214"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="216"/>
         <source>instead of %1</source>
         <translation>zamiast %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="244"/>
-        <source>RFC2217 host:port</source>
-        <translation>RFC2217 host:port</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="256"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="260"/>
         <source>Bluetooth address, e.g. AA:BB:CC:DD:EE:FF</source>
         <translation>Adres Bluetooth, np. AA:BB:CC:DD:EE:FF</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="257"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="261"/>
+        <source>host:port, e.g. 192.168.1.20:4711</source>
+        <translation>host:port, np. 192.168.1.20:4711</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="262"/>
         <source>e.g. /dev/ttyUSB0 or COM3</source>
         <translation>np. /dev/ttyUSB0 lub COM3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="331"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="337"/>
         <source>Already in My devices: %1</source>
         <translation>Już w Moich urządzeniach: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="389"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="395"/>
         <source>This is &quot;%1&quot; of My devices: the next page changes it, no second entry.</source>
         <translation>To „%1” z Moich urządzeń: następna strona zmienia ten wpis, bez drugiego.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="394"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="400"/>
         <source>Searching ...</source>
         <translation>Szukanie ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="397"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="403"/>
         <source>Nothing found. Is the meter&apos;s Bluetooth on and no other program connected to it? Or type its address.</source>
         <translation>Nic nie znaleziono. Czy Bluetooth miernika jest włączony i żaden inny program nie jest z nim połączony? Albo wpisz jego adres.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="399"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="406"/>
+        <source>No bridge found. Is qtdmm-bridge running with --mdns in this network? Or type host:port of the bridge or another RFC 2217 server.</source>
+        <translation>Nie znaleziono mostka. Czy qtdmm-bridge działa z --mdns w tej sieci? Albo wpisz host:port mostka lub innego serwera RFC 2217.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="408"/>
         <source>Nothing found. Is the meter switched on and its cable plugged in? Or type the port.</source>
         <translation>Nic nie znaleziono. Czy miernik jest włączony, a kabel podłączony? Albo wpisz port.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="401"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="410"/>
         <source>Choose where the meter is, or type the port.</source>
         <translation>Wybierz, gdzie jest miernik, albo wpisz port.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="524"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="529"/>
         <source>How is the meter connected?</source>
         <translation>Jak podłączony jest miernik?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="525"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="530"/>
         <source>Where is it connected?</source>
         <translation>Gdzie jest podłączony?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="526"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="531"/>
         <source>Which meter is it?</source>
         <translation>Jaki to miernik?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="527"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="532"/>
         <source>Where should it go?</source>
         <translation>Gdzie ma trafić?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="551"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="556"/>
         <source>Meter</source>
         <translation>Miernik</translation>
     </message>
@@ -838,129 +843,129 @@
 <context>
     <name>DeviceSettings</name>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="204"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="194"/>
         <source>Manual settings</source>
         <translation>Ustawienia ręczne</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="205"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="195"/>
         <source>All vendors</source>
         <translation>Wszyscy producenci</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="550"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="627"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="540"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="617"/>
         <source>Position %1: %2</source>
         <translation>Pozycja %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="643"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="633"/>
         <source>%1: no such instance running</source>
         <translation>%1: nie działa instancja o takiej nazwie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="653"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="643"/>
         <source>Running instances: %1</source>
         <translation>Działające instancje: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="655"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="645"/>
         <source>No other instance is running.</source>
         <translation>Nie działa żadna inna instancja.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="855"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="845"/>
         <source>none</source>
         <translation>brak</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="918"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="908"/>
         <source>%1 was not found or does not run. Install sigrok-cli, or set its path under &lt;a href=&quot;ports&quot;&gt;Special ports&lt;/a&gt;.</source>
         <translation>Nie znaleziono %1 lub nie da się uruchomić. Zainstaluj sigrok-cli lub ustaw jego ścieżkę w &lt;a href=&quot;ports&quot;&gt;Portach specjalnych&lt;/a&gt;.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="921"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="911"/>
         <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
         <translation>%1 nie ma sterownika „%2”; zobacz sigrok-cli --list-supported.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="923"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="913"/>
         <source>%1 found.</source>
         <translation>Znaleziono %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="933"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="923"/>
         <source>Running %1 --driver %2 --scan ...</source>
         <translation>Trwa %1 --driver %2 --scan…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="955"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="945"/>
         <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
         <translation>Żaden miernik nie odpowiedział w ciągu 30 s (port szeregowy bez miernika SCPI każe sigrok-cli czekać bez końca).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="957"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="947"/>
         <source>Found: %1</source>
         <translation>Znaleziono: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="959"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="949"/>
         <source>No meter answered.</source>
         <translation>Żaden miernik nie odpowiedział.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="968"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="958"/>
         <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
         <translation>Ten QtDMM zbudowano bez obsługi Bluetooth, więc nie może połączyć się z tym miernikiem.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="975"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="965"/>
         <source>Pick the device or type its Bluetooth address.</source>
         <translation>Wybierz urządzenie lub wpisz jego adres Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="978"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="968"/>
         <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
         <translation>Włącz Bluetooth miernika (pojawi się symbol Bluetooth) przed wyszukiwaniem lub łączeniem.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="983"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="973"/>
         <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
         <translation>Klucz to 32-cyfrowy „klucz szyfrowania&quot;, który VictronConnect pokazuje w Informacjach o produkcie, Natychmiastowy odczyt przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="993"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="983"/>
         <source>Scanning for %1 (6 s)...</source>
         <translation>Wyszukiwanie %1 (6 s)...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="994"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="984"/>
         <source>Scanning for Victron devices (5 s)...</source>
         <translation>Wyszukiwanie urządzeń Victron (5 s)…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1005"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="995"/>
         <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
         <translation>Nie znaleziono miernika. Czy jego Bluetooth jest włączony i żaden inny program nie jest z nim połączony?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1006"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="996"/>
         <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
         <translation>Nie znaleziono urządzenia Victron. Czy Bluetooth jest włączony, a natychmiastowy odczyt włączony w urządzeniu?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1045"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1035"/>
         <source>Load DMM description</source>
         <translation>Wczytaj opis multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1045"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="1071"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1035"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1061"/>
         <source>DMM description (*.cfg)</source>
         <translation>Opis multimetru (*.cfg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1071"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1061"/>
         <source>Save DMM description</source>
         <translation>Zapisz opis multimetru</translation>
     </message>
@@ -2560,51 +2565,7 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>&lt;b&gt;Tutaj skonfigurujesz własne porty RFC2217 i SIGROK.&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="44"/>
-        <source>Bridge %1 on %2, port %3, serving %4 (version %5)</source>
-        <translation>Mostek %1 na %2, port %3, obsługuje %4 (wersja %5)</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="51"/>
-        <source>No bridge found. Is qtdmm-bridge running with --mdns in this network?</source>
-        <translation>Nie znaleziono mostka. Czy qtdmm-bridge działa z --mdns w tej sieci?</translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="52"/>
-        <source>%n port(s) found.</source>
-        <translation>
-            <numerusform>Znaleziono %n port.</numerusform>
-            <numerusform>Znaleziono %n porty.</numerusform>
-            <numerusform>Znaleziono %n portów.</numerusform>
-        </translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="64"/>
-        <source>Searching (3 s)...</source>
-        <translation>Wyszukiwanie (3 s)…</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="67"/>
-        <source>No network interface for multicast.</source>
-        <translation>Brak interfejsu sieciowego dla multicastu.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="80"/>
-        <source>%1 is already in line %2.</source>
-        <translation>%1 jest już w wierszu %2.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="88"/>
-        <source>Added as custom port %1; it appears in the port list after Apply.</source>
-        <translation>Dodano jako port specjalny %1; pojawi się na liście portów po „Zastosuj”.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="91"/>
-        <source>All ten custom port lines are in use.</source>
-        <translation>Wszystkie dziesięć wierszy portów specjalnych jest zajętych.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/portsprefs.cpp" line="171"/>
+        <location filename="../../src/ui/settings/portsprefs.cpp" line="107"/>
         <source>Sigrok-cli executable</source>
         <translation>Program sigrok-cli</translation>
     </message>
@@ -4743,31 +4704,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <location filename="../../src/ui/forms/uiportsprefs.ui" line="377"/>
         <source>Sigrok executable</source>
         <translation>Program sigrok</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="400"/>
-        <source>Bridges in the network</source>
-        <translation>Mostki w sieci</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="408"/>
-        <source>Find &amp;bridges</source>
-        <translation>Szukaj &amp;mostków</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="411"/>
-        <source>Looks for qtdmm-bridge instances announcing themselves by mDNS in the local network and lists their ports.</source>
-        <translation>Szuka instancji qtdmm-bridge ogłaszających się przez mDNS w sieci lokalnej i wypisuje ich porty.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="430"/>
-        <source>Ports the bridges serve. Double-click one, or select it and press Add, to put it into the next free custom port line as an RFC2217 entry.</source>
-        <translation>Porty obsługiwane przez mostki. Kliknij dwukrotnie lub zaznacz i naciśnij Dodaj, aby wpisać go jako wpis RFC2217 w następnym wolnym wierszu.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uiportsprefs.ui" line="452"/>
-        <source>&amp;Add as custom port</source>
-        <translation>&amp;Dodaj jako port specjalny</translation>
     </message>
 </context>
 <context>

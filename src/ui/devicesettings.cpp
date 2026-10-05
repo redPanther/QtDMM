@@ -95,16 +95,6 @@ void DeviceSettings::setPortVisible(bool visible)
   updateCalcMode();
 }
 
-void DeviceSettings::setPortEditable(bool editable, const QString &placeholder)
-{
-  port->setEditable(editable);
-  if (!editable)
-    return;
-  port->setInsertPolicy(QComboBox::NoInsert);
-  port->lineEdit()->setPlaceholderText(placeholder);
-  connect(port->lineEdit(), &QLineEdit::textChanged, this, &DeviceSettings::changed, Qt::UniqueConnection);
-}
-
 bool DeviceSettings::isComplete() const
 {
   const bool manual = ui_vendor->currentIndex() == 0;

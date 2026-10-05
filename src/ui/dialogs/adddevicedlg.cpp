@@ -123,6 +123,8 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
       return { new UsbDiscoverer, new SerialDiscoverer };
     if (connection == Bluetooth)
       return { new BleDiscoverer };
+    if (connection == Network)
+      return { new BridgeDiscoverer };
     return {};
   };
 
@@ -231,6 +233,11 @@ bool AddDeviceDlg::offers(Connection connection, const DmmDecoder::DMMInfo &info
   return false;
 }
 
+bool AddDeviceDlg::hasPortPage(Connection connection)
+{
+  return connection == Cable || connection == Bluetooth || connection == Network;
+}
+
 void AddDeviceDlg::chooseConnection(Connection connection)
 {
   m_connection = connection;
@@ -241,19 +248,17 @@ void AddDeviceDlg::chooseConnection(Connection connection)
     keys.insert("DMM/model", "QtDMM Virtual meter");
   else if (!manual && !m_settings->models().isEmpty())
     keys.insert("DMM/model", m_settings->models().first());
-  m_settings->setPortEditable(connection == Network, tr("RFC2217 host:port"));
-  // the network has no page 2 yet: its port field stays on page 3
-  m_settings->setPortVisible(connection == Network);
   m_settings->load(keys);
   m_name->clear();
   m_name->setModified(false);
   m_model.clear();
   m_known.clear();
   suggestName();
-  if (connection == Cable || connection == Bluetooth)
+  if (hasPortPage(connection))
   {
     m_port->clear();
     m_port->setPlaceholderText(connection == Bluetooth ? tr("Bluetooth address, e.g. AA:BB:CC:DD:EE:FF")
+                               : connection == Network ? tr("host:port, e.g. 192.168.1.20:4711")
                                                        : tr("e.g. /dev/ttyUSB0 or COM3"));
     showPage(PortPage);
     startSearch();
@@ -296,13 +301,14 @@ void AddDeviceDlg::stopSearch()
 }
 
 // what the port field shows for a find: the port without "SERIAL", the
-// Bluetooth address
+// Bluetooth address, host:port without "RFC2217"
 static QString portText(const Candidate &c)
 {
   if (c.kind == Candidate::Bluetooth)
     return c.keys.value("Port settings/ble-address").toString().section(' ', 0, 0);
   const QString device = c.keys.value("Port settings/device").toString();
-  return device.startsWith(QLatin1String("SERIAL ")) ? device.section(' ', 1) : device;
+  return device.startsWith(QLatin1String("SERIAL ")) || device.startsWith(QLatin1String("RFC2217 "))
+           ? device.section(' ', 1) : device;
 }
 
 void AddDeviceDlg::addCandidate(const Candidate &c)
@@ -396,6 +402,9 @@ void AddDeviceDlg::updateHint()
     m_hint->setText(m_connection == Bluetooth
                     ? tr("Nothing found. Is the meter's Bluetooth on and no other program connected to it? "
                          "Or type its address.")
+                    : m_connection == Network
+                    ? tr("No bridge found. Is qtdmm-bridge running with --mdns in this network? "
+                         "Or type host:port of the bridge or another RFC 2217 server.")
                     : tr("Nothing found. Is the meter switched on and its cable plugged in? Or type the port."));
   else
     m_hint->setText(m_port->text().trimmed().isEmpty() ? tr("Choose where the meter is, or type the port.") : QString());
@@ -417,7 +426,8 @@ void AddDeviceDlg::takePort()
   else if (m_connection == Bluetooth)
     found.insert("Port settings/ble-address", port);
   else
-    found.insert("Port settings/device", port.contains(' ') ? port : "SERIAL " + port);
+    found.insert("Port settings/device", port.contains(' ') ? port
+                                         : (m_connection == Network ? "RFC2217 " : "SERIAL ") + port);
 
   m_known = m_library ? m_library->findByPlace(found) : QString();
   const std::optional<MyDevice> entry = m_library ? m_library->find(m_known) : std::nullopt;
@@ -477,12 +487,7 @@ bool AddDeviceDlg::canGoNext() const
 
 QVariantMap AddDeviceDlg::keys() const
 {
-  QVariantMap keys = m_settings->keys();
-  // a network address typed without the port type
-  const QString device = keys.value("Port settings/device").toString().trimmed();
-  if (m_connection == Network && !device.isEmpty() && !device.contains(' '))
-    keys.insert("Port settings/device", "RFC2217 " + device);
-  return keys;
+  return m_settings->keys();
 }
 
 QString AddDeviceDlg::name() const
@@ -494,7 +499,7 @@ void AddDeviceDlg::back()
 {
   if (page() == TargetPage)
     showPage(DevicePage);
-  else if (page() == DevicePage && (m_connection == Cable || m_connection == Bluetooth))
+  else if (page() == DevicePage && hasPortPage(m_connection))
     showPage(PortPage);
   else if (page() == DevicePage || page() == PortPage)
   {
