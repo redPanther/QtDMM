@@ -9,6 +9,8 @@
 
 #include "device/dmmdecoder.h"
 
+class QBluetoothDeviceDiscoveryAgent;
+class QBluetoothDeviceInfo;
 class QLowEnergyController;
 class QLowEnergyService;
 class QTimer;
@@ -23,8 +25,12 @@ class QTimer;
 /// Which service and characteristics a meter uses comes from the protocol
 /// (profile()); the UNI-T iDMM meters (UT60BT, UT161) use the Microchip/ISSC
 /// "Transparent UART" service. Port string: "<address>". open() returns at
-/// once and the connection is set up in the background; a lost link emits
-/// finished() and MeterConnection reconnects as for the other port types.
+/// once and the connection is set up in the background: first a short scan
+/// for the address - BlueZ forgets a meter that is not paired a while after
+/// it was last seen, and a connect to an address it does not know never
+/// answers (the assistant's search hid that: it had just seen the meter) -
+/// then the connect. A lost link emits finished() and MeterConnection
+/// reconnects as for the other port types.
 ///
 /// Polled meters answer one request with one frame. The reader asks once a
 /// second; to follow the meter's own update rate the device repeats the last
@@ -58,6 +64,10 @@ public:
   /// is sent on becoming ready.
   bool isReady() const { return m_ready; }
 
+  /// Writes @p frame once (a key of the meter), without making it the poll
+  /// that write() keeps and repeats. False while the link is not ready.
+  bool sendCommand(const QByteArray &frame);
+
   /// Shortest time between two repeated polls.
   static constexpr int kRepollMs = 300;
 
@@ -70,6 +80,8 @@ Q_SIGNALS:
   void finished(const QString &reason);
 
 private:
+  /// Connects to @p info (from the scan, or the bare address).
+  void connectTo(const QBluetoothDeviceInfo &info);
   void onServiceDiscovered(const QBluetoothUuid &uuid);
   void onDiscoveryFinished();
   void onServiceState();
@@ -80,6 +92,7 @@ private:
 
   QString m_address;
   std::optional<Profile> m_profile;
+  QBluetoothDeviceDiscoveryAgent *m_finder = nullptr;
   QLowEnergyController *m_controller = nullptr;
   QLowEnergyService *m_service = nullptr;
   QLowEnergyCharacteristic m_writeChar;

@@ -26,6 +26,13 @@ AC/DC, HOLD, manual/auto range, the diode and continuity symbols and OL.
 When the meter goes out of range or switches Bluetooth off, the status line
 says so and QtDMM connects again as soon as the meter is back.
 
+**Connecting takes about five seconds.** QtDMM first looks for the meter
+(the computer's Bluetooth forgets a meter that is not paired a while after
+it last saw it), then connects; meanwhile the status line says
+*Connecting ... over Bluetooth*. The keys under the display work once the
+first reading is in. If nothing comes after 20 seconds, the status line
+says so: switch on the meter's Bluetooth, and QtDMM tries again by itself.
+
 Only one program can be connected to the meter at a time: close the UNI-T
 app or any other tool first.
 

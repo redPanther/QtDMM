@@ -255,6 +255,8 @@ QList<PortSample> ReadingAdapter::adapt(const DmmDecoder::DmmResponse &r, qint64
 {
   QList<PortSample> out;
   out << adaptValue(r.dval, r.val, r.unit, r.special, r.range, r.hold, r.showBar, r.lowBat, r.id, wall);
+  // MAX/MIN, REL, PEAK: states of the value, not of the port
+  out.first().sample.flags |= r.states & (SampleFlag::Max | SampleFlag::Min | SampleFlag::Relative | SampleFlag::Peak);
   if (r.id2 > 0)
     out << adaptValue(r.dval2, r.val2, r.unit2, r.special2, r.range, r.hold, r.showBar, r.lowBat, r.id2, wall);
   return out;

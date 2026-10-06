@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QElapsedTimer>
 #include <QToolButton>
 
 #include "core/reading.h"
@@ -13,6 +14,19 @@
 namespace
 {
 constexpr int kGap = 6;   // between groups and rows
+
+// A key in a colour of its own: darker while pressed or on, faded while off
+QString keyColour(const QColor &face, const QColor &text)
+{
+  QColor faded = face;
+  faded.setAlpha(90);
+  return QString("QToolButton { background: %1; color: %2; border: 1px solid %3; border-radius: 3px;"
+                 " padding: 2px 6px; }"
+                 " QToolButton:pressed, QToolButton:checked { background: %3; }"
+                 " QToolButton:disabled { background: %4; color: %5; }")
+    .arg(face.name(), text.name(), face.darker(135).name(), faded.name(QColor::HexArgb),
+         QColor(text.red(), text.green(), text.blue(), 120).name(QColor::HexArgb));
+}
 }
 
 ControlBar::ControlBar(QWidget *parent) :
@@ -24,11 +38,12 @@ ControlBar::ControlBar(QWidget *parent) :
       { "select2", QT_TR_NOOP("Hz/%"), QT_TR_NOOP("Frequency and duty cycle"), false } },
     { { "range", QT_TR_NOOP("RANGE"), QT_TR_NOOP("The next range (switches to manual ranging)"), false },
       { "auto", QT_TR_NOOP("AUTO"), QT_TR_NOOP("Automatic ranging"), true } },
-    { { "hold", QT_TR_NOOP("HOLD"), QT_TR_NOOP("Freeze the display"), true },
-      { "rel", QT_TR_NOOP("REL"), QT_TR_NOOP("Relative reading: the current value becomes zero"), true },
+    { { "rel", QT_TR_NOOP("REL"), QT_TR_NOOP("Relative reading: the current value becomes zero"), true },
       { "minmax", QT_TR_NOOP("MIN/MAX"), QT_TR_NOOP("The meter's own minimum and maximum"), true },
       { "peak", QT_TR_NOOP("PEAK"), QT_TR_NOOP("Peak minimum and maximum"), true } },
-    { { "lamp", QT_TR_NOOP("LIGHT"), QT_TR_NOOP("The display backlight"), false } },
+    // HOLD on the right, as on the UT60BT, where it shares its key with LIGHT
+    { { "lamp", QT_TR_NOOP("LIGHT"), QT_TR_NOOP("The display backlight"), false },
+      { "hold", QT_TR_NOOP("HOLD"), QT_TR_NOOP("Freeze the display"), true } },
   };
   for (const QList<Key> &keys : groups)
   {
@@ -45,19 +60,49 @@ ControlBar::ControlBar(QWidget *parent) :
       b->setAutoRaise(false);
       b->setToolButtonStyle(Qt::ToolButtonTextOnly);
       const QString key = k.key;
-      // a state key shows what the meter reports, not the click
-      connect(b, &QToolButton::clicked, this, [this, b, key, state = k.state]
+      // MIN/MAX and PEAK: held down, the key leaves the mode, as on the meter
+      const bool leave = key == QLatin1String("minmax") || key == QLatin1String("peak");
+      if (leave)
       {
-        if (state)
-          b->setChecked(!b->isChecked());
-        Q_EMIT keyPressed(key);
-      });
+        b->setToolTip(tr(k.tip) + "\n" + tr("Hold the key to leave it, as on the meter."));
+        auto *held = new QElapsedTimer;
+        connect(b, &QObject::destroyed, b, [held] { delete held; });
+        connect(b, &QToolButton::pressed, b, [held] { held->start(); });
+        connect(b, &QToolButton::clicked, this, [this, b, key, held]
+        {
+          // Qt has toggled the check already: on before the click is unchecked now
+          const bool wasOn = !b->isChecked();
+          const bool off = wasOn && held->isValid() && held->elapsed() >= kLongPressMs;
+          b->setChecked(!off);
+          Q_EMIT keyPressed(off ? key + "_off" : key);
+        });
+      }
+      else
+        // a state key shows what the meter reports, not the click
+        connect(b, &QToolButton::clicked, this, [this, b, key, state = k.state]
+        {
+          if (state)
+            b->setChecked(!b->isChecked());
+          Q_EMIT keyPressed(key);
+        });
       row->addWidget(b);
       m_keys << b;
+      b->setProperty("key", key);
+      // SELECT and HOLD in the colours of the meter's keys (UT60BT)
+      if (key == "select1")
+        b->setStyleSheet(keyColour(QColor(0xff, 0xc6, 0x1c), QColor(0x20, 0x20, 0x20)));
+      else if (key == "hold")
+        b->setStyleSheet(keyColour(QColor(0x3c, 0x9a, 0xff), Qt::white));
       if (key == "hold")
         m_hold = b;
       else if (key == "auto")
         m_auto = b;
+      else if (key == "rel")
+        m_rel = b;
+      else if (key == "minmax")
+        m_minmax = b;
+      else if (key == "peak")
+        m_peak = b;
     }
     m_groups << group;
   }
@@ -76,10 +121,23 @@ void ControlBar::setConnected(bool connected)
     b->setEnabled(connected);
 }
 
+void ControlBar::setProtocol(FrameFormat::DataFormat format)
+{
+  const std::shared_ptr<DmmDecoder> decoder = DmmDecoder::getInstance(format);
+  for (QToolButton *b : std::as_const(m_keys))
+    b->setVisible(decoder && !decoder->keyRequest(b->property("key").toString()).isEmpty());
+  updateGeometry();
+}
+
 void ControlBar::showReading(const Reading &reading)
 {
+  if (reading.id != 0)
+    return;
   m_hold->setChecked(reading.hold);
   m_auto->setChecked(reading.range == "AUTO");
+  m_rel->setChecked(reading.flags & SampleFlag::Relative);
+  m_minmax->setChecked(reading.flags & (SampleFlag::Max | SampleFlag::Min));
+  m_peak->setChecked(reading.flags & SampleFlag::Peak);
 }
 
 int ControlBar::layoutGroups(int width, bool apply) const

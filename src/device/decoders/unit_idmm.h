@@ -24,6 +24,12 @@
 /// point exactly as on the LCD. Other frames (the 11-byte name answer) fail
 /// the length/checksum test and are skipped.
 ///
+/// The meter's keys are frames of the same kind, `AB CD 03 <cmd> <16 bit BE
+/// sum>` (keyRequest()): 0x46 RANGE, 0x47 AUTO, 0x48 REL, 0x4A HOLD, 0x4B
+/// LIGHT, 0x4C SELECT; the UT61x+ also 0x41 MAX/MIN, 0x42 leave MAX/MIN,
+/// 0x49 Hz/%, 0x4D PEAK and 0x4E leave PEAK. HOLD, REL, MAX/MIN and PEAK
+/// come back in flags A and C (DmmResponse::states).
+///
 /// Spec with vectors in docs/protocols/spec/unit_idmm.yaml. Sources:
 /// ble-multimeter (docs/protocols/uni-t.md, hardware-verified on a UT60BTk)
 /// and ut61xpy (adapters/ut61xp.py), both in ablage/.
@@ -35,6 +41,9 @@ public:
 
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   QByteArray pollRequest() const override;
+  QByteArray keyRequest(const QString &key) const override;
+  /// The frame for command byte @p cmd: AB CD 03 cmd and the 16-bit BE sum.
+  static QByteArray commandFrame(quint8 cmd);
   bool checkFormat(const char *data, size_t idx) override;
   size_t getPacketLength() override { return kFrameLength; }
 

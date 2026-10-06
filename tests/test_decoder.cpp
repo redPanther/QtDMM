@@ -29,6 +29,90 @@ int main(int argc, char **argv)
 {
   QCoreApplication app(argc, argv);
 
+  if (argc == 2 && QString::fromLocal8Bit(argv[1]) == "--keys")
+  {
+    // the meter's keys: UNI-T iDMM frames AB CD 03 <cmd> <16-bit BE sum>,
+    // the codes ble-multimeter tried on a UT60BTk (ablage/ut60bt/uni-t.md)
+    int problems = 0;
+    auto expect = [&](FrameFormat::DataFormat df, const QString &key, const char *hex)
+    {
+      const QByteArray got = DmmDecoder::getInstance(df)->keyRequest(key);
+      if (got != QByteArray::fromHex(hex))
+      {
+        qWarning() << FrameFormat::toString(df) << key << "gives" << got.toHex(' ') << "expected" << hex;
+        ++problems;
+      }
+    };
+    const FrameFormat::DataFormat ut60bt = FrameFormat::UniTiDMM, ut61plus = FrameFormat::UniTUT61Plus;
+    expect(ut60bt, "lamp", "abcd034b01c6");
+    expect(ut60bt, "range", "abcd034601c1");
+    expect(ut60bt, "auto", "abcd034701c2");
+    expect(ut60bt, "rel", "abcd034801c3");
+    expect(ut60bt, "hold", "abcd034a01c5");
+    expect(ut60bt, "select1", "abcd034c01c7");
+    // the UT60BT has no Hz/%, MAX/MIN and PEAK keys (tried: they do nothing)
+    expect(ut60bt, "select2", "");
+    expect(ut60bt, "minmax", "");
+    expect(ut60bt, "peak", "");
+    expect(ut60bt, "nosuchkey", "");
+    expect(ut61plus, "hold", "abcd034a01c5");
+    expect(ut61plus, "minmax", "abcd034101bc");
+    expect(ut61plus, "minmax_off", "abcd034201bd");
+    expect(ut61plus, "select2", "abcd034901c4");
+    expect(ut61plus, "peak", "abcd034d01c8");
+    expect(ut61plus, "peak_off", "abcd034e01c9");
+    expect(FrameFormat::Metex14, "hold", "");   // no remote control
+
+    // the states the keys switch come back in the frame: flags A MAX, MIN,
+    // HOLD, REL; flags C peak - into the reading's flags
+    auto frame = [](unsigned char a, unsigned char c)
+    {
+      QByteArray f = QByteArray::fromHex("abcd10003020203237342e370000");
+      f.append(char(a)).append(char(0)).append(char(0x08 | c));
+      unsigned sum = 0;
+      for (char ch : std::as_const(f))
+        sum += static_cast<unsigned char>(ch);
+      return f.append(char(sum >> 8)).append(char(sum & 0xFF));
+    };
+    auto flagsOf = [&](const QByteArray &f) -> quint32
+    {
+      auto decoder = DmmDecoder::getInstance(ut60bt);
+      const auto r = decoder->decode(f, 0);
+      if (!r)
+        return 0xFFFFFFFF;
+      ReadingAdapter adapter;
+      return adapter.adapt(*r, 0).first().sample.flags;
+    };
+    const quint32 states = SampleFlag::Max | SampleFlag::Min | SampleFlag::Relative | SampleFlag::Peak;
+    const quint32 none = flagsOf(frame(0, 0));
+    const quint32 all = flagsOf(frame(0x0F, 0x06));
+    if (none == 0xFFFFFFFF || (none & states) || (none & SampleFlag::Hold))
+    {
+      qWarning() << "a frame without flags gives states" << Qt::hex << none;
+      ++problems;
+    }
+    if ((all & states) != states || !(all & SampleFlag::Hold))
+    {
+      qWarning() << "MAX, MIN, HOLD, REL and peak give" << Qt::hex << all;
+      ++problems;
+    }
+    if ((flagsOf(frame(0x08, 0)) & states) != SampleFlag::Max || (flagsOf(frame(0x01, 0)) & states) != SampleFlag::Relative
+        || (flagsOf(frame(0, 0x02)) & states) != SampleFlag::Peak)
+    {
+      qWarning() << "MAX, REL or peak min alone not told apart";
+      ++problems;
+    }
+    // they are states of the value: V AC stays the same port
+    if ((none & SampleFlag::Defining) != (all & SampleFlag::Defining))
+    {
+      qWarning() << "the states change the port";
+      ++problems;
+    }
+    if (problems == 0)
+      qInfo() << "Meter keys and their states consistent.";
+    return problems == 0 ? 0 : 1;
+  }
+
   if (argc == 2 && QString::fromLocal8Bit(argv[1]) == "--table")
   {
     // the protocol table: one row per enum value, names round-trip, every

@@ -12,15 +12,15 @@ struct Reading;
 
 /// The meter's keys under the display, for meters QtDMM can remote-control
 /// (the UNI-T iDMM protocol: UT60BT, UT61B+/D+/E+, UT161). Groups from left
-/// to right as on the meter's front - function, range, display, device -
-/// that wrap to a second row when the window is narrow.
+/// to right as on the meter's front - function, range, display, LIGHT and
+/// HOLD on the right - that wrap to a second row when the window is narrow.
 ///
 /// HOLD, AUTO, REL, MIN/MAX and PEAK show the meter's state as the readings
 /// report it, not the last click; RANGE, SELECT, Hz/% and LIGHT are plain
-/// keys. The keys are enabled while the meter is connected.
-///
-/// For now the bar only signals keyPressed(): sending the key codes to the
-/// meter comes with the remote control itself (a later branch).
+/// keys. MIN/MAX and PEAK are left as on the meter: by holding the key
+/// (keyPressed("minmax_off")). The keys are enabled while the meter is
+/// connected; setProtocol() hides those the meter does not have (PEAK on
+/// the UT60BT). MainWindow sends them (MeterController::pressKey()).
 class ControlBar : public QWidget
 {
   Q_OBJECT
@@ -31,6 +31,11 @@ public:
   static bool supported(const DmmDecoder::DMMInfo &info);
 
   void setConnected(bool connected);
+  /// Shows the keys the decoder of @p format can press
+  /// (DmmDecoder::keyRequest()).
+  void setProtocol(FrameFormat::DataFormat format);
+  /// Holding MIN/MAX or PEAK this long leaves it (ms).
+  static constexpr int kLongPressMs = 700;
 
   QSize sizeHint() const override;
   QSize minimumSizeHint() const override;
@@ -43,7 +48,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
   /// "select1", "select2", "range", "auto", "hold", "rel", "minmax",
-  /// "peak", "lamp" - the names of ut61eplus.py's command table.
+  /// "minmax_off", "peak", "peak_off", "lamp" (DmmDecoder::keyRequest()).
   void keyPressed(const QString &key);
 
 protected:
@@ -54,6 +59,9 @@ private:
   QList<QToolButton *> m_keys;
   QToolButton *m_hold = nullptr;
   QToolButton *m_auto = nullptr;
+  QToolButton *m_rel = nullptr;
+  QToolButton *m_minmax = nullptr;
+  QToolButton *m_peak = nullptr;
   /// Places the groups in rows for @p width; returns the height used.
   int layoutGroups(int width, bool apply) const;
 };

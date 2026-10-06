@@ -60,6 +60,8 @@ public:
     int id2;          ///< id of the second value, 0 when there is none. A meter
                       ///< with a secondary display sends id2 = 1 with an empty
                       ///< val2 when that display is off, so it is cleared
+    quint32 states = 0; ///< other annunciators of the main value: SampleFlag
+                        ///< Max, Min, Relative, Peak (the meter's own keys)
   };
 
   /// Describes one supported meter: what the settings page fills in when the
@@ -97,6 +99,11 @@ public:
   /// Bytes to send to the meter to make it emit a frame; empty for meters
   /// that stream on their own. FrameReader writes it once per read cycle.
   virtual QByteArray pollRequest() const { return QByteArray(); }
+  /// Bytes that press the meter's key @p key once (ControlBar's names:
+  /// "select1", "select2", "range", "auto", "hold", "rel", "minmax",
+  /// "minmax_off", "peak", "peak_off", "lamp"); empty when the meter has no
+  /// such key or cannot be remote-controlled.
+  virtual QByteArray keyRequest(const QString &key) const { Q_UNUSED(key); return QByteArray(); }
   /// Decodes one frame (getPacketLength() bytes, or a variable-length one
   /// with its terminator). @p id tells which of
   /// DMMInfo::numValues frames this is. Returns nothing when the frame is

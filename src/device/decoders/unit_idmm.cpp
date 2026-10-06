@@ -4,6 +4,8 @@
 
 #include <QRegularExpression>
 
+#include "core/sampletypes.h"
+
 static const bool registered = []() {
   // Bluetooth LE: no baud rate; the address is chosen on the Multimeter page
   DmmDecoder::addConfig({"Uni-Trend", "UT60BT", "", 0, FrameFormat::UniTiDMM, 8, 1, 1, 0, 10000, 0, 0, 0});
@@ -128,6 +130,38 @@ QByteArray DecoderUniTiDMM::pollRequest() const
   return kPoll;
 }
 
+QByteArray DecoderUniTiDMM::commandFrame(quint8 cmd)
+{
+  QByteArray f = QByteArray::fromHex("abcd03");
+  f.append(char(cmd));
+  unsigned sum = 0;
+  for (char c : std::as_const(f))
+    sum += static_cast<unsigned char>(c);
+  f.append(char((sum >> 8) & 0xFF));
+  f.append(char(sum & 0xFF));
+  return f;
+}
+
+// The key codes: ble-multimeter (uni-t.md, Controls, tried on a UT60BTk) and
+// ut61eplus.py (_COMMANDS) agree. The UT60BT has no Hz/%, MAX/MIN and PEAK
+// keys (its Hz is a dial position; tried 2026-10-06: they do nothing), the
+// UT61x+ has them
+QByteArray DecoderUniTiDMM::keyRequest(const QString &key) const
+{
+  static const QHash<QString, quint8> codes = {
+    { "range", 0x46 }, { "auto", 0x47 }, { "rel", 0x48 }, { "hold", 0x4A }, { "lamp", 0x4B }, { "select1", 0x4C },
+  };
+  static const QHash<QString, quint8> codes61Plus = {
+    { "minmax", 0x41 }, { "minmax_off", 0x42 }, { "select2", 0x49 }, { "peak", 0x4D }, { "peak_off", 0x4E },
+  };
+  auto it = codes.constFind(key);
+  if (it != codes.constEnd())
+    return commandFrame(it.value());
+  if (m_type == FrameFormat::UniTUT61Plus && (it = codes61Plus.constFind(key)) != codes61Plus.constEnd())
+    return commandFrame(it.value());
+  return QByteArray();
+}
+
 bool DecoderUniTiDMM::frameValid(const unsigned char *f)
 {
   if (f[0] != 0xAB || f[1] != 0xCD || f[2] != kFrameLength - 3)
@@ -186,6 +220,16 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
   if (plus && fn == 25 && (flagsC & 0x08))
     m_result.id = id + 1;
   m_result.hold = flagsA & 0x02;
+  // the meter's other keys: A bit3 MAX, bit2 MIN, bit0 REL; C bit2/bit1 peak
+  // max/min
+  if (flagsA & 0x08)
+    m_result.states |= SampleFlag::Max;
+  if (flagsA & 0x04)
+    m_result.states |= SampleFlag::Min;
+  if (flagsA & 0x01)
+    m_result.states |= SampleFlag::Relative;
+  if (flagsC & 0x06)
+    m_result.states |= SampleFlag::Peak;
   m_result.range = (flagsB & 0x04) ? "MANU" : "AUTO";
   m_result.unit = QString::fromUtf8(prefix) + QString::fromLatin1(func.unit);
 
