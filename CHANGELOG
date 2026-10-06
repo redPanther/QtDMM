@@ -49,9 +49,13 @@
   table, Poincaré, graph), recording (Record, Live, Clear), file (Export, Import, Print) - with clearer
   symbols: Add device with a +, an eraser for Clear (it was a red X, like close), Export and Import of their own
 - Status bar: "Simulated" or "Calculated" instead of the formula, no "Using ..." after a switch
-- Live starts with "All": the graph fills with what there is instead of a needle at the left of a long window
+- Live starts with "All": the graph fills with what there is instead of a needle at the left of a long window;
+  without a recording length Live keeps an hour at most
+- Graph: the time begins with the first reading - the curve starts at 0, also when the meter took a while to
+  connect or after Clear
 - Device settings and the assistant: no frames; the fixed port parameters and protocol of a known model are no
-  longer shown (they were greyed under "Advanced"), manual settings show them at once
+  longer shown (they were greyed under "Advanced"), manual settings show them at once - also when a model is
+  chosen after manual settings
 - "QtDMM Virtual meter" is "Simulated meter" (a new entry: "Simulated meter"); old configurations keep working
 - Record asks in a larger window, with "Until Stop" as a choice of its own and a word on a start at a clock time
   or threshold

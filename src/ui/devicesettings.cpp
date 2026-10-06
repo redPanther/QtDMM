@@ -738,6 +738,9 @@ void DeviceSettings::on_ui_model_activated(int id)
   if (id < 0 || id >= static_cast<int>(m_currentVendorModels.size()))
     return;
 
+  // a model brings its port parameters and protocol: nothing to show, also
+  // after manual settings had shown them
+  showPortParameters(false);
   ui_filename->setDisabled(true);
   ui_save->setDisabled(true);
   ui_load->setDisabled(true);

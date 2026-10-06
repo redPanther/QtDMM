@@ -66,6 +66,10 @@ int main(int argc, char **argv)
         "manual: port parameters and protocol shown, with its title");
   check(w.keys().value("DMM/model") == "Manual", "manual: model " + w.keys().value("DMM/model").toString());
   check(w.speed() == 2400, "manual: baud");
+  // a model chosen after manual settings: its fixed parameters go again
+  w.findChild<QComboBox *>("ui_vendor")->setCurrentText("Uni-Trend");
+  Q_EMIT w.findChild<QComboBox *>("ui_vendor")->activated(w.findChild<QComboBox *>("ui_vendor")->currentIndex());
+  check(!w.portParametersShown() && !shown(w, "ui_advancedBox"), "manual, then a model: the fixed parameters hidden");
 
   // 3. no frames: the groups are sections with a title above
   check(w.findChild<QGroupBox *>("ui_protocol")->title().isEmpty() && w.findChild<QLabel *>("ui_protocol_title"),
