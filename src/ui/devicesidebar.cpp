@@ -50,7 +50,8 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   setRootIsDecorated(true);
   setDragDropMode(QAbstractItemView::InternalMove);
   setSelectionMode(QAbstractItemView::SingleSelection);
-  setEditTriggers(QAbstractItemView::EditKeyPressed);
+  // renamed through the context menu only: F2 is Settings, wherever the focus is
+  setEditTriggers(QAbstractItemView::NoEditTriggers);
   // only the node takes entries: they cannot become children of each other
   invisibleRootItem()->setFlags(Qt::ItemIsEnabled);
   m_devices = new QTreeWidgetItem(this, { tr("My devices") });
@@ -205,7 +206,7 @@ void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString
 
 void DeviceSidebar::fill()
 {
-  // a name being typed (F2) would go: later, once it is done
+  // a name being typed (Rename) would go: later, once it is done
   if (state() == QAbstractItemView::EditingState)
   {
     QTimer::singleShot(250, this, &DeviceSidebar::fill);
@@ -279,17 +280,6 @@ void DeviceSidebar::dropEvent(QDropEvent *event)
   const int index = int(deviceIds().indexOf(id));
   if (!id.isEmpty() && index >= 0)
     m_library->move(id, index);
-}
-
-bool DeviceSidebar::event(QEvent *event)
-{
-  if (event->type() == QEvent::ShortcutOverride && static_cast<QKeyEvent *>(event)->key() == Qt::Key_F2
-      && currentItem() && (currentItem()->flags() & Qt::ItemIsEditable))
-  {
-    event->accept();
-    return true;
-  }
-  return QTreeWidget::event(event);
 }
 
 void DeviceSidebar::instanceMenu(QTreeWidgetItem *item, const QPoint &pos)

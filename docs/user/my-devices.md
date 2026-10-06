@@ -36,7 +36,7 @@ The context menu of a device:
 
 - **Settings...** - the meter's settings as in the assistant; the device in
   use takes them at once.
-- **Rename** - in place (F2 does the same).
+- **Rename** - in place.
 - **Open in a new window** - a new instance with the settings of this one
   and the device. A device another window already uses brings that window
   to the front instead.

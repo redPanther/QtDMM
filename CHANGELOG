@@ -40,6 +40,7 @@
   records; old tool tips (export as tab separated list, F2 for the recorder options) describe what QtDMM does now
 - Record works right after a meter is connected by Add device, the sidebar or the start; it stayed off until
   Connect was clicked by hand
+- Sidebar: F2 opens the settings there too (it renamed the device); Rename is in the context menu
 - Settings: opening the dialog no longer disconnects the meter and no longer stops a recording; OK and Apply
   open the port again only when the meter changed (before, every OK reconnected - seconds for a Bluetooth meter -
   and reconnected a meter you had disconnected yourself). The gap this left in the graph was drawn as a line
