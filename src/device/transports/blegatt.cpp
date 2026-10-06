@@ -32,6 +32,9 @@ constexpr int kConnectTimeoutMs = 20000;
 // after a loss comes sooner (a UT60BT now and then stays in the discovery
 // of the service details)
 constexpr int kSetupTimeoutMs = 10000;
+// the scan for the meter before connecting: a meter that advertises shows
+// within a second or two
+constexpr int kFindMs = 8000;
 }
 
 std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFormat format)
@@ -74,11 +77,63 @@ bool BleGattDevice::open(OpenMode mode)
   if (!lcBle().isDebugEnabled())
     QLoggingCategory::setFilterRules(QStringLiteral("qt.bluetooth.bluez.warning=false\nqt.bluetooth.bluez.info=false"));
 
-  QBluetoothDeviceInfo info(QBluetoothAddress(m_address), QString(), 0);
-  info.setCoreConfigurations(QBluetoothDeviceInfo::LowEnergyCoreConfiguration);
-  m_controller = QLowEnergyController::createCentral(info, this);
   m_serviceFound = false;
   m_ready = false;
+
+  m_connectTimeout = new QTimer(this);
+  m_connectTimeout->setSingleShot(true);
+  connect(m_connectTimeout, &QTimer::timeout, this, [this]
+  {
+    if (!m_ready)
+      fail(tr("No answer from %1 - is the meter on and its Bluetooth switched on?").arg(m_address));
+  });
+  m_connectTimeout->start(kConnectTimeoutMs);
+
+  m_repoll = new QTimer(this);
+  m_repoll->setSingleShot(true);
+  m_repoll->setInterval(kRepollMs);
+  connect(m_repoll, &QTimer::timeout, this, &BleGattDevice::sendPoll);
+
+  // look for the meter first: BlueZ connects only to a device it has seen
+  // lately. Seen, it connects at once; not seen within kFindMs, the connect
+  // is tried anyway (another stack, a meter BlueZ still knows)
+  QBluetoothDeviceInfo bare(QBluetoothAddress(m_address), QString(), 0);
+  bare.setCoreConfigurations(QBluetoothDeviceInfo::LowEnergyCoreConfiguration);
+  m_finder = new QBluetoothDeviceDiscoveryAgent(this);
+  m_finder->setLowEnergyDiscoveryTimeout(kFindMs);
+  auto seen = [this](const QBluetoothDeviceInfo &info)
+  {
+    if (m_finder && !m_controller && info.address().toString().compare(m_address, Qt::CaseInsensitive) == 0)
+    {
+      qCDebug(lcBle) << m_address << "seen as" << info.name() << "rssi" << info.rssi();
+      m_finder->stop();
+      connectTo(info);
+    }
+  };
+  connect(m_finder, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, seen);
+  connect(m_finder, &QBluetoothDeviceDiscoveryAgent::deviceUpdated, this,
+          [seen](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { seen(info); });
+  auto notSeen = [this, bare]
+  {
+    if (!m_controller && isOpen())
+    {
+      qCDebug(lcBle) << m_address << "not seen in the scan, connecting anyway";
+      connectTo(bare);
+    }
+  };
+  connect(m_finder, &QBluetoothDeviceDiscoveryAgent::finished, this, notSeen);
+  connect(m_finder, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, notSeen);
+  qCDebug(lcBle) << m_address << "looking for the meter";
+  m_finder->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+  return QIODevice::open(mode | QIODevice::Unbuffered);
+}
+
+void BleGattDevice::connectTo(const QBluetoothDeviceInfo &info)
+{
+  m_controller = QLowEnergyController::createCentral(info, this);
+  // the connect has its own time, the scan took some of it
+  if (m_connectTimeout)
+    m_connectTimeout->start(kConnectTimeoutMs);
 
   connect(m_controller, &QLowEnergyController::connected, this, [this]
   {
@@ -97,23 +152,7 @@ bool BleGattDevice::open(OpenMode mode)
   {
     fail(tr("Bluetooth: %1").arg(m_controller->errorString()));
   });
-
-  m_connectTimeout = new QTimer(this);
-  m_connectTimeout->setSingleShot(true);
-  connect(m_connectTimeout, &QTimer::timeout, this, [this]
-  {
-    if (!m_ready)
-      fail(tr("No answer from %1 - is the meter on and its Bluetooth switched on?").arg(m_address));
-  });
-  m_connectTimeout->start(kConnectTimeoutMs);
-
-  m_repoll = new QTimer(this);
-  m_repoll->setSingleShot(true);
-  m_repoll->setInterval(kRepollMs);
-  connect(m_repoll, &QTimer::timeout, this, &BleGattDevice::sendPoll);
-
   m_controller->connectToDevice();
-  return QIODevice::open(mode | QIODevice::Unbuffered);
 }
 
 void BleGattDevice::close()
@@ -127,6 +166,13 @@ void BleGattDevice::close()
       (*t)->deleteLater();
       *t = nullptr;
     }
+  if (m_finder)
+  {
+    m_finder->disconnect(this);
+    m_finder->stop();
+    m_finder->deleteLater();
+    m_finder = nullptr;
+  }
   if (m_service)
   {
     m_service->disconnect(this);
