@@ -592,7 +592,27 @@ void AnalogMeter::readoutRects(const Geometry &g, QRectF *min, QRectF *max) cons
 
 QString AnalogMeter::readoutText(double value) const
 {
-  return readoutString(value, m_decimals);
+  return readoutFor(value, m_decimals, m_fullScale, m_counts, m_unitText);
+}
+
+QString AnalogMeter::readoutFor(double value, int decimals, double fullScale, int counts, const QString &unit)
+{
+  if (std::isnan(value))
+    return readoutString(value, decimals);
+  const int digits = counts > 0 ? int(QString::number(counts).size()) : 5;
+  auto intDigits = [](double v) { return std::fabs(v) < 1.0 ? 1 : int(std::floor(std::log10(std::fabs(v)))) + 1; };
+  const SiPrefix::Split split = SiPrefix::split(unit);
+  const QString base = split.baseUnit;
+  const bool prefixable = !base.isEmpty() && !base.startsWith(QChar(0x00b0)) && base != QLatin1String("%")
+                          && base != QLatin1String("ppm");
+  if (prefixable && fullScale > 0.0 && std::fabs(value) > fullScale * 1.0001)
+  {
+    // from another range: its own prefix, and the unit says which
+    QString prefix;
+    const double scaled = SiPrefix::scale(value * SiPrefix::factor(split.prefix), &prefix);
+    return readoutString(scaled, qBound(0, digits - intDigits(scaled), 6)) + " " + SiPrefix::displayText(prefix + base);
+  }
+  return readoutString(value, qBound(0, qMin(decimals, digits - intDigits(value)), 6));
 }
 
 QString AnalogMeter::readoutString(double value, int decimals)

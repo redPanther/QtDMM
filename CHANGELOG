@@ -43,6 +43,8 @@
 - Sidebar: F2 opens the settings there too (it renamed the device); Rename is in the context menu
 - Graph: the vertical axis takes its prefix from its range, not from the last reading; a meter switching
   between V and mV turned the whole axis to mV with labels like 1.6e+04
+- Analog meter: MIN and MAX with no more digits than the display has, and from another range in a prefix of
+  their own with the unit ("10.000 V" in the mV range, not "10000.0000")
 - Settings: opening the dialog no longer disconnects the meter and no longer stops a recording; OK and Apply
   open the port again only when the meter changed (before, every OK reconnected - seconds for a Bluetooth meter -
   and reconnected a meter you had disconnected yourself). The gap this left in the graph was drawn as a line
