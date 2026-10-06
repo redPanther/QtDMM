@@ -42,8 +42,6 @@ public:
 
   /// False on the very first start (no settings file yet).
   const bool    &fileExists() const { return m_fileExists; }
-  /// Set when an old-format file was migrated; pages then reset a few keys.
-  const bool    &fileConverted() const { return m_fileConverted; }
   const QString &fileName() const { return m_filename; }
 
   /// Removes the settings file of another instance.
@@ -96,7 +94,6 @@ public:
 
 private:
   bool          m_fileExists;
-  bool          m_fileConverted;
   QString       m_filename;
   QSettings    *m_qsettings;
   QString       m_configPath;

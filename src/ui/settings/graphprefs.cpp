@@ -240,28 +240,13 @@ QString GraphPrefs::variant() const
 
 void GraphPrefs::defaultsSLOT()
 {
-  // mt: removed .rgb()
-  if (!m_cfg->fileConverted())
-  {
-    ui_bgColor->setColor(m_cfg->getColor("Graph/background"));
-    ui_gridColor->setColor(m_cfg->getColor("Graph/grid", Qt::gray));
-    ui_dataColor->setColor(m_cfg->getColor("Graph/data", Qt::blue));
-    ui_cursorColor->setColor(m_cfg->getColor("Graph/cursor", Qt::black));
-    ui_startColor->setColor(m_cfg->getColor("Graph/start-trigger", Qt::magenta));
-    ui_intColor->setColor(m_cfg->getColor("Graph/integration", Qt::darkBlue));
-    ui_intThresholdColor->setColor(m_cfg->getColor("Graph/integration-threshold", Qt::darkBlue));
-  }
-  else
-  {
-    ui_bgColor->setColor(Qt::white);
-    ui_gridColor->setColor(Qt::gray);
-    ui_dataColor->setColor(Qt::blue);
-    ui_cursorColor->setColor(Qt::black);
-    ui_startColor->setColor(Qt::magenta);
-    ui_intColor->setColor(Qt::darkBlue);
-    ui_intThresholdColor->setColor(Qt::darkBlue);
-    m_cfg->save();
-  }
+  ui_bgColor->setColor(m_cfg->getColor("Graph/background"));
+  ui_gridColor->setColor(m_cfg->getColor("Graph/grid", Qt::gray));
+  ui_dataColor->setColor(m_cfg->getColor("Graph/data", Qt::blue));
+  ui_cursorColor->setColor(m_cfg->getColor("Graph/cursor", Qt::black));
+  ui_startColor->setColor(m_cfg->getColor("Graph/start-trigger", Qt::magenta));
+  ui_intColor->setColor(m_cfg->getColor("Graph/integration", Qt::darkBlue));
+  ui_intThresholdColor->setColor(m_cfg->getColor("Graph/integration-threshold", Qt::darkBlue));
   // a config from before the variants, whose colours were set here, keeps
   // them as Custom
   QString variant = m_cfg->getString("Graph/variant");

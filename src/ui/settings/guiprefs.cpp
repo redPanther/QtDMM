@@ -138,13 +138,7 @@ void GuiPrefs::defaultsSLOT()
 
   ui_textLabel->setChecked(m_cfg->getBool("Icons/text-label", false));
   ui_showDisplay->setChecked(m_cfg->getBool("Display/show", true));
-  if (!m_cfg->fileConverted())
-    ui_bgColorDisplay->setColor(m_cfg->getColor("Display/display-background", QColor(0xda, 0xdc, 0x77)));
-  else
-  {
-    ui_bgColorDisplay->setColor(QColor(0xda, 0xdc, 0x77));
-    m_cfg->save();
-  }
+  ui_bgColorDisplay->setColor(m_cfg->getColor("Display/display-background", QColor(0xda, 0xdc, 0x77)));
   ui_showBar->setChecked(m_cfg->getBool("Display/display-bar", true));
   ui_showMinMax->setChecked(m_cfg->getBool("Display/display-min-max", false));
 
@@ -191,8 +185,6 @@ void GuiPrefs::setShowDisplay(bool show)
 
 void GuiPrefs::applySLOT()
 {
-  m_cfg->setInt("QtDMM/version", 0);   // TODO set version by cmake
-  m_cfg->setInt("QtDMM/revision", 84); // TODO set revision by cmake
   m_cfg->setBool("Display/show", showDisplay());
   m_cfg->setBool("Icons/text-label", useTextLabel());
   m_cfg->setColor("Display/display-background", ui_bgColorDisplay->color());

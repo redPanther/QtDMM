@@ -61,44 +61,6 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   pageShortcut(QKeySequence("Ctrl+PgUp"), -1);
   pageShortcut(QKeySequence("Ctrl+PgDown"), 1);
 
-  // A first start shows the empty window (MainWindow); an old file
-  // gets a word about the new parameters
-  if (m_settings->fileExists())
-  {
-    int version = m_settings->getInt("QtDMM/version");
-    int revision = m_settings->getInt("QtDMM/revision");
-
-    if ((version <= 0 && revision < 84) || version >= 7)
-    {
-      QMessageBox welcome;
-      welcome.setWindowTitle(tr("QtDMM: Welcome!"));
-      welcome.setText(tr("<font size=+2><b>Welcome!</b></font><p>"
-                         "You seem to have upgraded <b>QtDMM</b> from a version prior to 0.8.4. "
-                         "Please check your configuration. There are some new parameters to be "
-                         "configured."
-                         "<p>Thank you for choosing <b>QtDMM</b>.<p><i>Matthias Toussaint</i>"));
-      welcome.setIcon(QMessageBox::Information);
-      welcome.setStandardButtons(QMessageBox::Yes);
-      welcome.setDefaultButton(QMessageBox::Yes);
-      welcome.setIconPixmap(QPixmap(":/Symbols/icon.xpm"));
-
-      QAbstractButton *yesButton = welcome.button(QMessageBox::Yes);
-      if (yesButton)
-        yesButton->setText(tr("Continue"));
-
-      welcome.exec();
-    }
-
-    if (m_settings->fileConverted())
-    {
-      QMessageBox::information(nullptr,
-                               tr("QtDMM: Welcome!"),
-                               tr("Your config file has been converted to the new format.\n"
-                                  "Please check your color settings, because they couldn't be converted automatically.\n"
-                                  "Your old config ~/.qtdmmrc was renamed to ~/.qtdmmrc.old."));
-    }
-  }
-
   // CREATE PAGES, in the order the list shows them
 
   // the meter has no page: the assistant and the sidebar set it up; its
