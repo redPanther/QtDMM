@@ -95,6 +95,10 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   connect(ui_graph, SIGNAL(info(const QString &)), this, SIGNAL(info(const QString &)));
   connect(ui_graph, SIGNAL(error(const QString &)), this, SIGNAL(error(const QString &)));
   connect(ui_graph, SIGNAL(running(bool)), this, SLOT(runningSLOT(bool)));
+  connect(ui_graph, &GraphWidget::stateChanged, this, &InstanceWidget::recorderState);
+  connect(ui_graph, &GraphWidget::liveRequested, this, &InstanceWidget::liveSLOT);
+  // the graph runs from the start: Live, until a recording
+  m_ctl->recorder()->live();
   // OK reconnects the meter; Apply takes the settings over while the dialog
   // stays open, and the same runs at exit - neither may connect (a lambda
   // does not hide sender(): it still was the dialog, and quitting connected
@@ -414,7 +418,7 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   applySLOT();
   // another meter: its own minimum and maximum, even at the same port
   m_ctl->resetMinMax();
-  ui_graph->clearSLOT();
+  ui_graph->liveSLOT();
 
   Q_EMIT setConnect(true);
   Q_EMIT connectDMM(true);
@@ -501,6 +505,8 @@ void InstanceWidget::exportSLOT()
 
 void InstanceWidget::importSLOT()
 {
+  if (!keepUnsavedData(tr("Loading a file replaces it."), tr("Load without saving")))
+    return;
   ui_graph->importDataSLOT();
 }
 
@@ -519,7 +525,31 @@ void InstanceWidget::clearSLOT()
 {
   if (!keepUnsavedData(tr("Clear deletes it."), tr("Clear without saving")))
     return;
-  ui_graph->clearSLOT();
+  // an empty view is nothing to look at: Live again
+  if (m_ctl->recorder()->state() == RecordingStore::View)
+    ui_graph->liveSLOT();
+  else
+    ui_graph->clearSLOT();
+}
+
+void InstanceWidget::liveSLOT()
+{
+  if (m_ctl->recorder()->state() != RecordingStore::View)
+  {
+    Q_EMIT recorderState(int(m_ctl->recorder()->state()));   // the button shows the state again
+    return;
+  }
+  if (keepUnsavedData(tr("Live clears it."), tr("Live without saving")))
+    ui_graph->liveSLOT();
+  else
+    Q_EMIT recorderState(int(m_ctl->recorder()->state()));
+}
+
+bool InstanceWidget::confirmRecording()
+{
+  if (m_ctl->recorder()->state() != RecordingStore::View)
+    return true;
+  return keepUnsavedData(tr("A new recording clears it."), tr("Record without saving"));
 }
 
 void InstanceWidget::startSLOT()

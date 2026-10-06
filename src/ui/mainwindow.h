@@ -90,8 +90,11 @@ protected Q_SLOTS:
   void      setUseTextLabel(bool on);
   /// Title = app name, instance id and the configured meter.
   void      updateWindowTitle();
-  /// Space: starts the recorder, or stops it when it is running.
+  /// Record (Space): starts the recorder, or stops it when it is running.
   void      toggleRecordingSLOT();
+  /// Record and Live follow the recorder: grey dot or red square, Live
+  /// pressed while live and locked while recording.
+  void      updateRecorderActions();
   /// F11
   void      setFullScreen(bool on);
   /// Arrange actions and the title-bar action follow the arranger.

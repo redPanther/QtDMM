@@ -14,7 +14,7 @@ share the space differently.
 | Ctrl+C or Ctrl+D | Connect / disconnect the meter |
 | Ctrl+S | Start the recorder |
 | Ctrl+X | Stop the recorder |
-| Space | Start the recorder, or stop it when it is running |
+| Space | Record: start the recorder, or stop it when it is running |
 | Ctrl+Del | Clear the recording |
 | Ctrl+R | Reset the min/max memory |
 | Ctrl+E | Export the recording as CSV |

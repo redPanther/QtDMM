@@ -53,6 +53,49 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QLoggingCategory>
+#include <QIconEngine>
+
+namespace
+{
+// The Record button's symbol, drawn at any size: a grey dot to start, a red
+// square while it records
+class RecordIconEngine : public QIconEngine
+{
+public:
+  explicit RecordIconEngine(bool stop) : m_stop(stop) {}
+  void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State) override
+  {
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
+    const qreal side = qMin(rect.width(), rect.height()) * (m_stop ? 0.56 : 0.62);
+    const QRectF r(QPointF(rect.center()) + QPointF(0.5, 0.5) - QPointF(side / 2, side / 2), QSizeF(side, side));
+    QColor fill = m_stop ? QColor(0xd3, 0x2f, 0x2f) : QColor(0x8c, 0x8c, 0x8c);
+    if (mode == QIcon::Disabled)
+      fill.setAlpha(80);
+    QColor edge = fill.darker(140);
+    edge.setAlpha(fill.alpha());
+    painter->setPen(QPen(edge, qMax<qreal>(1.0, side / 12)));
+    painter->setBrush(fill);
+    if (m_stop)
+      painter->drawRoundedRect(r, side * 0.12, side * 0.12);
+    else
+      painter->drawEllipse(r);
+    painter->restore();
+  }
+  QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override
+  {
+    QPixmap pm(size);
+    pm.fill(Qt::transparent);
+    QPainter painter(&pm);
+    paint(&painter, QRect(QPoint(0, 0), size), mode, state);
+    return pm;
+  }
+  QIconEngine *clone() const override { return new RecordIconEngine(m_stop); }
+
+private:
+  bool m_stop;
+};
+}
 
 MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   : QMainWindow(parent)
@@ -364,6 +407,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   addShortcutsToToolTips();
 
   connect(m_wid, SIGNAL(running(bool)), this, SLOT(runningSLOT(bool)));
+  connect(m_wid, &InstanceWidget::recorderState, this, &MainWindow::updateRecorderActions);
 
   connectSLOT(false);
 
@@ -631,6 +675,21 @@ void MainWindow::createActions()
   connect(action_Connect, SIGNAL(triggered(bool)), this, SLOT(connectSLOT(bool)));
   connect(action_Reset, SIGNAL(triggered()), m_wid, SLOT(resetSLOT()));
   connect(action_Start, SIGNAL(triggered()), this, SLOT(startSLOT()));
+  // one button for both: a grey dot starts, the red square stops
+  connect(action_Record, &QAction::triggered, this, &MainWindow::toggleRecordingSLOT);
+  connect(action_Live, &QAction::triggered, this, [this]
+  {
+    m_wid->liveSLOT();
+    updateRecorderActions();   // pressed again when the question was cancelled
+  });
+  // the graph's context menu starts and stops like the button
+  connect(m_wid->graph(), &GraphWidget::recordRequested, this, [this](bool start)
+  {
+    if (!start)
+      action_Stop->trigger();
+    else if (action_Start->isEnabled())
+      action_Start->trigger();
+  });
   connect(action_Stop, SIGNAL(triggered()), m_wid, SLOT(stopSLOT()));
   connect(action_Stop, SIGNAL(triggered()), this, SLOT(stopSLOT()));
   connect(action_Clear, SIGNAL(triggered()), m_wid, SLOT(clearSLOT()));
@@ -692,14 +751,11 @@ void MainWindow::createExtraActions()
                                "report or a chat.</p></body></html>"));
   connect(m_copyImage, &QAction::triggered, m_wid->graph(), &GraphWidget::copyImageSLOT);
 
-  // Space toggles the recorder; a bare key, so only while this window is active
-  QAction *toggleRecord = new QAction(this);
-  toggleRecord->setShortcut(QKeySequence(Qt::Key_Space));
-  connect(toggleRecord, &QAction::triggered, this, &MainWindow::toggleRecordingSLOT);
-
+  // Space (Record) toggles the recorder; Start (Ctrl+S) and Stop (Ctrl+X)
+  // have no button of their own any more
   addActions({action_Configure, action_ConfigureDMM, action_Direct_help, action_Help, action_Quit,
               m_displayAction, m_meterAction, m_readingsAction, m_poincareAction, m_titleBars,
-              m_fullScreen, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage, toggleRecord});
+              m_fullScreen, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage, action_Start, action_Stop});
 }
 
 void MainWindow::addShortcutsToToolTips()
@@ -733,6 +789,9 @@ void MainWindow::setFullScreen(bool on)
 
 void MainWindow::startSLOT()
 {
+  // a recording viewed and not saved yet: the new one clears it
+  if (!m_wid->confirmRecording())
+    return;
   if (m_stateMgr->instances().count()<=1)
   {
     QMetaObject::invokeMethod(m_wid, "startSLOT", Qt::DirectConnection);
@@ -784,6 +843,7 @@ void MainWindow::runningSLOT(bool on)
   action_Print->setEnabled(!on);
   action_Export->setEnabled(!on);
   action_Import->setEnabled(!on);
+  updateRecorderActions();
 }
 
 void MainWindow::connectSLOT(bool on)
@@ -793,6 +853,20 @@ void MainWindow::connectSLOT(bool on)
 
   if (!on)
     m_running = false;
+  updateRecorderActions();
+}
+
+void MainWindow::updateRecorderActions()
+{
+  const RecordingStore::State state = m_wid->controller()->recorder()->state();
+  const bool recording = state == RecordingStore::Record;
+  action_Record->setEnabled(recording ? action_Stop->isEnabled() : action_Start->isEnabled());
+  action_Record->setIcon(QIcon(new RecordIconEngine(recording)));
+  action_Record->setText(recording ? tr("S&top") : tr("&Record"));
+  const QString key = action_Record->shortcut().toString(QKeySequence::NativeText);
+  action_Record->setToolTip(QString("%1 (%2)").arg(recording ? tr("Stop recording") : tr("Start recording"), key));
+  action_Live->setEnabled(!recording);
+  action_Live->setChecked(state == RecordingStore::Live);
 }
 
 void MainWindow::on_action_Help_triggered()

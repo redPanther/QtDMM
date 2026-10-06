@@ -227,6 +227,7 @@ int main(int argc, char **argv)
     store.setStartMode(RecordingStore::Raising);
     store.setThresholds(0, 1.0);
     Player p(store);
+    store.live();   // the triggers wait in Live
     p.reading(130, 0.2, "0.200");
     p.reading(630, 0.5, "0.500");
     p.advance(900);
@@ -243,6 +244,7 @@ int main(int argc, char **argv)
     store.setStartMode(RecordingStore::Falling);
     store.setThresholds(1.0, 0);
     Player p(store);
+    store.live();   // the triggers wait in Live
     p.reading(130, 2.0, "2.000");
     p.reading(630, 1.5, "1.500");
     p.reading(1130, 0.8, "0.800");
@@ -255,6 +257,7 @@ int main(int argc, char **argv)
     store.setStartMode(RecordingStore::Time);
     store.setStartTime(Player::wall(5000).time());
     Player p(store);
+    store.live();   // the triggers wait in Live
     for (qint64 t = 130; t < 8000; t += 500)
       p.reading(t, 1, "1.000");
     check(store.isRunning() && startedAt(store) >= 5000 && startedAt(store) < 7000,

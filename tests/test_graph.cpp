@@ -10,6 +10,7 @@
 #include <QFileInfo>
 
 #include "ui/views/graphwidget.h"
+#include "recording/recordingfile.h"
 #include "recording/recordingstore.h"
 #include <QChartView>
 #include <QValueAxis>
@@ -128,6 +129,19 @@ int main(int argc, char **argv)
     }
     check(graph.store()->maxDuration() <= seconds + 1 && graph.store()->origin() == 0,
           QString("import size: keeps %1 s for %2 s").arg(graph.store()->maxDuration()).arg(seconds));
+  }
+
+  // --- 1c. a file shorter than what the graph keeps does not shrink it: the
+  //          length goes to the settings, and the next recording (and Live)
+  //          kept only the file's length ---
+  {
+    GraphWidget graph(nullptr, &settings);
+    graph.setGraphSize(60, 3600);
+    QSignalSpy sized(&graph, &GraphWidget::graphSize);
+    check(graph.importCsvFile(dataDir + "/new_larger.csv"), "import short: import failed");
+    check(sized.isEmpty() && graph.store()->maxDuration() == 3600,
+          QString("import short: %1 signals, keeps %2 s").arg(sized.size()).arg(graph.store()->maxDuration()));
+    check(graph.store()->state() == RecordingStore::View, "import short: viewed");
   }
 
   // --- 2. malformed input must be rejected, not crash or half-import ---
@@ -430,6 +444,7 @@ int main(int argc, char **argv)
     graph.setMode(GraphWidget::Raising);
     QSignalSpy running(&graph, &GraphWidget::running);
     Feed feed(graph);
+    graph.liveSLOT();            // the triggers wait in Live
     feed.value(1.5);             // first reading, above: no start
     feed.value(0.5);
     feed.value(0.8);
@@ -449,6 +464,7 @@ int main(int argc, char **argv)
     graph.setMode(GraphWidget::Falling);
     QSignalSpy running(&graph, &GraphWidget::running);
     Feed feed(graph);
+    graph.liveSLOT();            // the triggers wait in Live
     feed.value(-2.0);            // first reading, below: no start
     feed.value(0.0);
     feed.value(-0.5);
@@ -467,6 +483,7 @@ int main(int argc, char **argv)
     Feed laterFeed(later);
     later.setStartTime(Feed::wall(0).time().addSecs(120));
     later.setMode(GraphWidget::Time);
+    later.liveSLOT();
     QSignalSpy notYet(&later, &GraphWidget::running);
     later.store()->poll();
     check(notYet.isEmpty(), "time trigger: started before the start time");
@@ -476,6 +493,7 @@ int main(int argc, char **argv)
     Feed nowFeed(now);
     now.setStartTime(Feed::wall(0).time());
     now.setMode(GraphWidget::Time);
+    now.liveSLOT();
     QSignalSpy started(&now, &GraphWidget::running);
     nowFeed.now = 1000;
     now.store()->poll();
@@ -1076,6 +1094,60 @@ int main(int argc, char **argv)
     }
     check(qFuzzyCompare(EngNumberValidator::value("1.5u"), 1.5e-6),
           "value() should accept the ASCII 'u' for micro");
+  }
+
+  // --- 9. the modes: Live follows the newest reading; recording shows
+  //         "● REC" top left, View where the curve comes from; export while
+  //         live saves the window up to now; a file loaded is viewed ---
+  {
+    GraphWidget graph(nullptr, &settings);
+    graph.setSampleTime(10);
+    graph.setGraphSize(10, 600);        // a window of 10 s
+    graph.setSampleLength(300);         // live keeps 30 s
+    graph.setMode(GraphWidget::Manual);
+    Feed feed(graph, 500);
+    QSignalSpy states(&graph, &GraphWidget::stateChanged);
+    graph.liveSLOT();
+    check(states.size() == 1 && states.first().first().toInt() == RecordingStore::Live, "modes: Live said");
+    check(graph.stateText().isEmpty(), "modes: nothing top left while live");
+    for (int i = 0; i < 80; ++i)        // 40 s
+      feed.value(i);
+    auto *x = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Horizontal).first());
+    const double newest = graph.store()->series().last().t / 1000.0;
+    check(qAbs(x->max() - newest) < 0.01 && qAbs(x->max() - x->min() - 9) < 0.01,
+          QString("live: the window %1..%2 s follows the newest at %3 s").arg(x->min()).arg(x->max()).arg(newest));
+    check(graph.store()->origin() == graph.store()->duration() - 30000, "live: keeps the recording length");
+    check(!graph.findChild<QScrollBar *>()->isEnabled(), "live: the scroll bar rests");
+
+    const QString liveFile = tmpDir.filePath("live.csv");
+    check(graph.exportCsvFile(liveFile, true), "live export: written");
+    const std::optional<Recording> saved = RecordingFile::read(liveFile);
+    check(saved && saved->values.size() >= 60 && saved->values.last() == 79,
+          QString("live export: %1 values up to the newest").arg(saved ? saved->values.size() : -1));
+    check(graph.store()->state() == RecordingStore::Live, "live export: still live");
+
+    graph.setSampleLength(50);          // 5 s
+    graph.startSLOT();
+    check(graph.store()->count() == 1 && graph.findChild<QScrollBar *>()->isEnabled(), "record: cleared");
+    for (int i = 0; i < 4; ++i)         // 2 s
+      feed.value(i);
+    graph.store()->poll();              // the clock of the label, every second
+    check(graph.stateText() == QString::fromUtf8("● REC 0:02 / 0:05"),
+          "record: top left " + graph.stateText());
+    auto *label = graph.findChild<QLabel *>("ui_graphState");
+    check(label && label->isVisible() == graph.isVisible() && label->text() == graph.stateText(), "record: the label shows it");
+    graph.setSampleLength(0);
+    check(graph.stateText() == QString::fromUtf8("● REC 0:02"), "record without a length: " + graph.stateText());
+    graph.stopSLOT();
+    const QString shown = QLocale().toString(Feed::wall(40000), QLocale::ShortFormat);
+    check(graph.stateText() == QString::fromUtf8("Recording of %1 · 0:02").arg(shown),
+          "view: top left " + graph.stateText());
+
+    check(graph.importCsvFile(dataDir + "/new_larger.csv"), "view: import");
+    check(graph.store()->state() == RecordingStore::View && graph.stateText().startsWith("new_larger.csv · "),
+          "view: the file top left, got " + graph.stateText());
+    graph.liveSLOT();
+    check(graph.stateText().isEmpty() && graph.store()->count() <= 1, "live again: the file goes");
   }
 
   if (failed == 0)
