@@ -970,8 +970,15 @@ void GraphWidget::onStateChanged()
   // a file viewed is gone with Live or a recording
   if (m_store->state() != RecordingStore::View)
     m_sourceFile.clear();
-  // Live follows the newest reading: nothing to scroll
+  // Live follows the newest reading: nothing to scroll; it starts with
+  // "All", so the graph fills with what there is instead of a needle at the
+  // left of a long window
   scrollbar->setEnabled(!live);
+  if (live)
+  {
+    m_followAll = true;
+    requestAll(false);
+  }
   updateScrollRange();
   updateXAxisRange();
   updateTimeButtons();
@@ -1039,8 +1046,12 @@ void GraphWidget::onAppended(bool shifted)
   // "All": the window grows once the recording fills it. The new window
   // comes back at once (InstanceWidget, through the settings) and rebuilds
   // the series with this reading in it: then it must not be appended again
+  // A window much longer than what there is (Live starts with All, the
+  // window from the settings) comes down to it.
   const int rebuilds = m_rebuilds;
-  if (m_followAll && m_store->duration() - m_store->origin() >= qint64(m_windowSeconds) * 1000)
+  const qint64 recorded = m_store->duration() - m_store->origin();
+  const qint64 window = qint64(m_windowSeconds) * 1000;
+  if (m_followAll && (recorded >= window || window > 2 * qMax<qint64>(10000, recorded)))
     requestAll(true);
   const bool rebuilt = m_rebuilds != rebuilds;
   updateScrollRange();

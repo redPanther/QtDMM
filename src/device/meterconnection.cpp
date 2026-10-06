@@ -360,8 +360,9 @@ QString MeterConnection::deviceName() const
 
 QString MeterConnection::connectedMessage() const
 {
+  // the formula is long and says little: what kind of source it is
   if (m_portType == Transport::PortType::Calc)
-    return tr("Calculating %1").arg(m_device.section(' ', 1));
+    return m_dmmInfo.model == QLatin1String("Simulated meter") ? tr("Simulated") : tr("Calculated");
   return tr("Connected %1").arg(deviceName());
 }
 

@@ -4,7 +4,7 @@ Bench multimeters have a LAN port and answer SCPI queries - `*IDN?`,
 `READ?` - from any program that can open a TCP socket. QtDMM can do the
 same for the meter it reads: switch on the **SCPI server** under
 **Settings → SCPI server** and a consumer multimeter on a USB cable, a
-Victron device over Bluetooth or the virtual meter becomes an instrument
+Victron device over Bluetooth or the simulated meter becomes an instrument
 that [lxi-tools](https://github.com/lxi-tools/lxi-tools), LabVIEW,
 a Python script or a second QtDMM can query.
 

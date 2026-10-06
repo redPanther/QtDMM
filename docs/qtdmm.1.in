@@ -37,7 +37,7 @@ inverters);
 for SCPI bench meters.
 .PP
 Further features are a readings table, alarms with actions, calculated values
-across several meters, a virtual meter for trying QtDMM without hardware, and
+across several meters, a simulated meter for trying QtDMM without hardware, and
 an SCPI server through which other programs read the meter over the network.
 The complete handbook is built into the program (Help) and online at
 .UR https://qtdmm.de/docs/

@@ -60,11 +60,11 @@ Examples:
 | Magnitude of two components | `V` | `sqrt(a^2 + b^2)` |
 | A reading scaled by a probe factor | `V` | `probe * 10` |
 
-## The virtual meter
+## The simulated meter
 
 For trying QtDMM without a multimeter, for demonstrations or for feeding a
 known signal into a calculation there is a second built-in model,
-**QtDMM / Virtual meter**. It is the calculated instance with the formula
+**QtDMM / Simulated meter** (Virtual meter before 26.2). It is the calculated instance with the formula
 built for you from a few fields:
 
 - **Waveform** — *Constant* (the Max value), *Random* (a new value between
@@ -79,7 +79,7 @@ built for you from a few fields:
   it directly and may use everything from the section above, including the
   readings of other instances.
 
-The virtual meter needs no other instance and publishes its value like a
+The simulated meter needs no other instance and publishes its value like a
 real one, so `u * i` works just as well with a virtual `u`.
 
 ## When an input is missing

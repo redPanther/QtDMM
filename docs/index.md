@@ -27,7 +27,7 @@ Source code and bug reports: <https://github.com/qtdmm/QtDMM>.
 - Several meters at once, one window each, recording in sync
 - Calculated values across meters (power from voltage and current, ...)
 - SCPI server: the meter answers `*IDN?` and `READ?` on a TCP port for lxi-tools, Python or LabVIEW, announced by mDNS (see [SCPI server](user/scpi-server.md))
-- Virtual meter (sine, square, noise, discharge curve, ...) for demos and testing
+- Simulated meter (sine, square, noise, discharge curve, ...) for demos and testing
 - various connection backends
   - RS232 Serial (USB-Serial and native UART)
   - USB HID-serial support (HOITEK HE2325U & compatible)

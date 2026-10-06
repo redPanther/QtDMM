@@ -418,7 +418,6 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   Q_EMIT setConnect(true);
   Q_EMIT connectDMM(true);
   connectSLOT(true);
-  Q_EMIT info(tr("Using %1").arg(name));
 }
 
 void InstanceWidget::syncDevice()
@@ -532,7 +531,13 @@ bool InstanceWidget::confirmRecording()
 
 bool InstanceWidget::askRecordingLength()
 {
-  RecordLengthDlg dlg(m_configDlg->recordingLengthValue(), m_configDlg->recordingLengthUnit(), this);
+  // a start the settings set up waits in Live; this one starts now
+  QString hint;
+  if (m_configDlg->sampleMode() == GraphWidget::Time)
+    hint = tr("It starts now. A recording at %1 starts by itself from Live.").arg(m_configDlg->startTime().toString());
+  else if (m_configDlg->sampleMode() == GraphWidget::Raising || m_configDlg->sampleMode() == GraphWidget::Falling)
+    hint = tr("It starts now. A recording at the threshold starts by itself from Live.");
+  RecordLengthDlg dlg(m_configDlg->recordingLengthValue(), m_configDlg->recordingLengthUnit(), hint, this);
   if (dlg.exec() != QDialog::Accepted)
     return false;
   m_configDlg->setRecordingLength(dlg.value(), dlg.unit());

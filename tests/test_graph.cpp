@@ -713,6 +713,21 @@ int main(int argc, char **argv)
     check(lines(thin) == thinGrown, "gaps thinned: rebuilt = grown");
   }
 
+  // --- 5n0. Live starts with "All": the window as long as what there is
+  //           (at least 10 s), growing with it ---
+  {
+    GraphWidget graph(nullptr, &settings);
+    graph.setGraphSize(600);
+    int asked = -1;
+    QObject::connect(&graph, &GraphWidget::windowRequested, [&](int s) { asked = s; });
+    graph.liveSLOT();
+    QToolButton *all = nullptr;
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "All")
+        all = b;
+    check(all && all->isChecked() && asked == 10, QString("live: starts with All, window asked %1 s").arg(asked));
+  }
+
   // --- 5n. a meter silent for minutes (every 2 s, then 5.5 min nothing),
   //          Live with "All": thinned, the column of the last value also
   //          holds the gap - the line must not bridge it, whatever the

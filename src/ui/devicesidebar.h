@@ -65,6 +65,8 @@ Q_SIGNALS:
   void        instanceRequested(const QString &id);
   void        renameInstanceRequested(const QString &from, const QString &to);
   void        deleteInstanceRequested(const QString &id);
+  /// The row "+ Add device..." at the end of My devices.
+  void        addDeviceRequested();
 
 public Q_SLOTS:
   /// The entries anew from the library.
@@ -77,6 +79,8 @@ protected:
 private:
   void        updateMarks();
   QString     idOf(const QTreeWidgetItem *item) const;
+  /// The last row of My devices, which adds one.
+  QTreeWidgetItem *m_addItem = nullptr;
   /// The instance of an instance item or of the device below it.
   QString     instanceOf(const QTreeWidgetItem *item) const;
   /// Whether the instance of @p item (its row or its device row) runs.

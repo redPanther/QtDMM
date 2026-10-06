@@ -253,7 +253,7 @@ void AddDeviceDlg::chooseConnection(Connection connection)
   m_settings->setModelFilter([connection](const DmmDecoder::DMMInfo &info) { return offers(connection, info); }, manual);
   QVariantMap keys;
   if (connection == Simulated)
-    keys.insert("DMM/model", "QtDMM Virtual meter");
+    keys.insert("DMM/model", "QtDMM Simulated meter");
   else if (!manual && !m_settings->models().isEmpty())
     keys.insert("DMM/model", m_settings->models().first());
   m_settings->load(keys);
@@ -565,7 +565,9 @@ void AddDeviceDlg::suggestName()
   if (model == m_model)
     return;
   m_model = model;
-  const QString base = model == QLatin1String("Manual") ? tr("Meter") : QString(model).remove(" *");
+  const QString base = model == QLatin1String("Manual") ? tr("Meter")
+                       : DmmDecoder::sameModel(model, QStringLiteral("QtDMM Simulated meter")) ? tr("Simulated meter")
+                                                                                              : QString(model).remove(" *");
   m_name->setText(m_library ? m_library->uniqueName(base) : base);
 }
 

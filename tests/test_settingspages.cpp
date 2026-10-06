@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include <QDebug>
 #include <QRadioButton>
+#include <QLabel>
 #include <QSpinBox>
 #include <QTemporaryDir>
 
@@ -156,9 +157,14 @@ int main(int argc, char **argv)
   {
     RecordLengthDlg dlg(25, 1);
     check(dlg.value() == 25 && dlg.unit() == 1, "length dialog: the last length ready");
-    dlg.findChild<QSpinBox *>("ui_length")->setValue(0);
-    check(dlg.value() == 0 && dlg.findChild<QSpinBox *>("ui_length")->text() == QStringLiteral("∞"),
-          "length dialog: 0 is ∞");
+    dlg.findChild<QRadioButton *>("ui_untilStop")->setChecked(true);
+    check(dlg.value() == 0, "length dialog: until Stop is 0");
+    dlg.findChild<QSpinBox *>("ui_length")->setValue(3);
+    check(dlg.value() == 3, "length dialog: typing a length chooses it");
+    RecordLengthDlg open(0, 0, "starts at 12:00");
+    check(open.value() == 0 && open.findChild<QRadioButton *>("ui_untilStop")->isChecked()
+            && open.findChild<QLabel *>("ui_intro")->text().contains("12:00"),
+          "length dialog: until Stop ready, the start hint shown");
   }
 
   if (failed)

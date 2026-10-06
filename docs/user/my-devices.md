@@ -8,7 +8,7 @@ sidebar instead of filling in the meter page again.
 An entry holds the meter and its connection only, and of the connection
 what its way needs: model and protocol, the port with its line settings, a
 Bluetooth address (and for a Victron device its key and the values to
-show), sigrok options, the signal of the virtual meter. Display, graph,
+show), sigrok options, the signal of the simulated meter. Display, graph,
 recorder and alarms stay with the window. An older `devices.conf` with more
 in it is tidied up when QtDMM starts.
 
@@ -47,7 +47,8 @@ Drag a device to change the order.
 
 ## Adding a device
 
-**Add device...** (the device symbol at the left of the toolbar) asks step
+**Add device...** (the device symbol with a + at the left of the toolbar,
+or **+ Add device...** at the end of My devices in the sidebar) asks step
 by step: how the meter is connected - *Cable*, *Bluetooth*, *Network*,
 *sigrok* or *Simulated / calculated* -, which meter it is, with a name, and
 where it goes: **In this window** as the current device, or **In a new

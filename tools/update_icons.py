@@ -25,7 +25,7 @@ import sys
 # the names QtDMM asks for (QIcon::fromTheme / <iconset theme=...>)
 NAMES = [
     "application-exit", "application-menu", "configure", "document-open",
-    "document-print", "document-save", "document-save-as", "edit-delete", "edit-reset", "go-home",
+    "document-print", "document-save", "document-save-as", "edit-delete", "go-home",
     "go-next", "go-previous", "media-playback-pause", "media-playback-start",
     "help-about", "help-contents", "help-whatsthis", "list-add", "list-remove",
     "measure", "media-playback-stop", "media-record", "network-connect",
@@ -35,10 +35,12 @@ NAMES = [
     "code-function", "drive-removable-media-usb", "preferences-system-bluetooth", "window-new",
     # the device sidebar
     "view-sidetree",
+    # the toolbar (26.2): export/import, clear the graph, reset min/max
+    "document-export", "document-import", "draw-eraser", "edit-clear-history",
 ]
 # Oxygen has these under another name (chosen by eye, paket_26_2 §1a)
 OXYGEN_ALIAS = {
-    "edit-reset": "edit-clear",
+    "edit-clear-history": "edit-clear",   # the broom; Oxygen's own is an hourglass
     "help-whatsthis": "help-contextual",
     "notifications": "preferences-desktop-notification",
     "preferences-desktop-theme-global": "preferences-desktop-theme",
