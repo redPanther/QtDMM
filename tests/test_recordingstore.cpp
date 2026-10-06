@@ -74,7 +74,9 @@ int main(int argc, char **argv)
     store.setReading(clock.at(260, second));
     check(store.count() == 1, QString("point: expected 1, got %1").arg(store.count()));
     const RawPoint &p = store.series().last();
-    check(p.t == 250 && p.value == 0.01234, QString("point: t %1 value %2").arg(p.t).arg(p.value));
+    // the time starts with the first reading, not with start()
+    check(p.t == 0 && p.value == 0.01234 && store.startDateTime() == TestClock::wall(250),
+          QString("point: t %1 value %2").arg(p.t).arg(p.value));
     check(p.flags == (SampleFlag::DC | SampleFlag::Autorange), QString("point: flags 0x%1").arg(p.flags, 0, 16));
     check(p.quality == Quality::Valid, "point: quality not Valid");
 
@@ -91,6 +93,25 @@ int main(int argc, char **argv)
     check(store.count() == 0, "start: a stale value is no start value");
   }
 
+  // --- 1b. the time starts with the first reading: Live started while the
+  //         meter was still connecting, or the graph cleared, begins at 0 ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.live();
+    store.setReading(clock.at(5000, reading(1, "1.000", "DC")));
+    store.setReading(clock.at(5500, reading(2, "2.000", "DC")));
+    check(store.series().first().t == 0 && store.series().last().t == 500 && store.duration() == 500
+            && store.startDateTime() == TestClock::wall(5000),
+          QString("first reading: t %1, duration %2").arg(store.series().first().t).arg(store.duration()));
+    // a recording with the value shown begins with it at 0 anyway
+    clock.now = 6000;
+    store.start();
+    store.setReading(clock.at(6500, reading(3, "3.000", "DC")));
+    check(store.series().first().t == 0 && store.series().last().t == 500, "start: from the value shown");
+  }
+
   // --- 2. quality: an overload is a point without a value, Overload; the
   //        value going stale a point without one, Stale, where the last
   //        one stopped holding; the grid takes the worst in each step ---
@@ -101,6 +122,7 @@ int main(int argc, char **argv)
     store.setSampleTime(10);
     store.setStaleAfter(1500);
     store.start();
+    store.setReading(clock.at(0, reading(1, "1.000", "DC")));
     store.setReading(clock.at(100, reading(1, "1.000", "DC")));
     store.setReading(clock.at(600, reading(0, "OL", "DC")));
     check(store.series().last().gap() && store.series().last().quality == Quality::Overload,
@@ -112,7 +134,7 @@ int main(int argc, char **argv)
             && store.series().last().t == 2400,
           QString("quality: stale gap at %1, expected 2400").arg(store.series().last().t));
     store.setStale(true);   // once
-    check(store.count() == 4, QString("quality: %1 points, expected 4").arg(store.count()));
+    check(store.count() == 5, QString("quality: %1 points, expected 5").arg(store.count()));
     store.setReading(clock.at(4100, reading(2, "2.000", "DC")));
     clock.now = 5000;
     store.stop();
@@ -120,8 +142,8 @@ int main(int argc, char **argv)
     QStringList q;
     for (const GridPoint &p : g)
       q << QString::number(int(p.quality));
-    // 0: nothing yet, 1: the OL, 2: valid, 3: stale from 2.4 s, 4: none, 5: 2 V from 4.1 s
-    check(g.size() == 6 && g[0].quality == Quality::Stale && g[1].quality == Quality::Overload
+    // 0: the first reading, 1: the OL, 2: valid, 3: stale from 2.4 s, 4: none, 5: 2 V from 4.1 s
+    check(g.size() == 6 && g[0].quality == Quality::Valid && g[1].quality == Quality::Overload
             && g[2].quality == Quality::Valid && g[3].quality == Quality::Stale && std::isnan(g[4].value)
             && g[5].value == 2 && g[5].quality == Quality::Stale,
           "quality: grid qualities " + q.join(' '));
@@ -252,6 +274,7 @@ int main(int argc, char **argv)
     clock.attach(store);
     store.setMaxPoints(20);
     store.start();
+    store.setReading(clock.at(0, reading(1, "1", "DC")));
     store.setReading(clock.at(100, reading(1, "1", "DC")));
     clock.now = 350;
     store.addMark(0xffff0000u, "alarm");
@@ -558,6 +581,9 @@ int main(int argc, char **argv)
     store.setPreTrigger(0);
     store.setSampleLength(0);
     check(store.liveWindow() == 60000, "live window: until stopped - the graph's window");
+    store.setLiveWidth(7200);
+    check(store.liveWindow() == RecordingStore::kLiveMaxMs, "live window: until stopped - at most an hour");
+    store.setLiveWidth(60);
     store.setSampleLength(20);
 
     clock.now = 100;
