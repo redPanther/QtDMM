@@ -579,52 +579,52 @@
 <context>
     <name>BleGattDevice</name>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="66"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="69"/>
         <source>No Bluetooth address configured.</source>
         <translation>No hay dirección Bluetooth configurada.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="71"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="74"/>
         <source>This meter does not use a Bluetooth LE connection.</source>
         <translation>Este multímetro no usa una conexión Bluetooth LE.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="94"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="149"/>
         <source>The meter %1 closed the Bluetooth connection.</source>
         <translation>El multímetro %1 cerró la conexión Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="98"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="153"/>
         <source>Bluetooth: %1</source>
         <translation>Bluetooth: %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="106"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="88"/>
         <source>No answer from %1 - is the meter on and its Bluetooth switched on?</source>
         <translation>Sin respuesta de %1 - ¿está el multímetro encendido y su Bluetooth activado?</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="168"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="214"/>
         <source>%1 does not offer the expected Bluetooth service - is it the right meter?</source>
         <translation>%1 no ofrece el servicio Bluetooth esperado - ¿es el multímetro correcto?</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="174"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="220"/>
         <source>Could not open the Bluetooth service of %1.</source>
         <translation>No se pudo abrir el servicio Bluetooth de %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="196"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="242"/>
         <source>Bluetooth service error %1 on %2.</source>
         <translation>Error %1 del servicio Bluetooth en %2.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="209"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="255"/>
         <source>%1 has no notify characteristic.</source>
         <translation>%1 no tiene característica de notificación.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="223"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="269"/>
         <source>%1 has no writable characteristic.</source>
         <translation>%1 no tiene característica escribible.</translation>
     </message>
@@ -726,97 +726,97 @@
 <context>
     <name>ControlBar</name>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="24"/>
+        <location filename="../../src/ui/controlbar.cpp" line="37"/>
         <source>SELECT</source>
         <translation>SELECT</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="24"/>
+        <location filename="../../src/ui/controlbar.cpp" line="37"/>
         <source>The meter&apos;s SELECT key (the orange one): the next function on this switch position</source>
         <translation>La tecla SELECT del multímetro (la naranja): la siguiente función de esta posición del selector</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="25"/>
+        <location filename="../../src/ui/controlbar.cpp" line="38"/>
         <source>Hz/%</source>
         <translation>Hz/%</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="25"/>
+        <location filename="../../src/ui/controlbar.cpp" line="38"/>
         <source>Frequency and duty cycle</source>
         <translation>Frecuencia y ciclo de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="26"/>
+        <location filename="../../src/ui/controlbar.cpp" line="39"/>
         <source>RANGE</source>
         <translation>RANGE</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="26"/>
+        <location filename="../../src/ui/controlbar.cpp" line="39"/>
         <source>The next range (switches to manual ranging)</source>
         <translation>El siguiente rango (pasa a rango manual)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="27"/>
+        <location filename="../../src/ui/controlbar.cpp" line="40"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="27"/>
+        <location filename="../../src/ui/controlbar.cpp" line="40"/>
         <source>Automatic ranging</source>
         <translation>Rango automático</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="28"/>
+        <location filename="../../src/ui/controlbar.cpp" line="46"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="28"/>
+        <location filename="../../src/ui/controlbar.cpp" line="46"/>
         <source>Freeze the display</source>
         <translation>Congelar la pantalla</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="29"/>
+        <location filename="../../src/ui/controlbar.cpp" line="41"/>
         <source>REL</source>
         <translation>REL</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="29"/>
+        <location filename="../../src/ui/controlbar.cpp" line="41"/>
         <source>Relative reading: the current value becomes zero</source>
         <translation>Medida relativa: el valor actual pasa a ser cero</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="30"/>
+        <location filename="../../src/ui/controlbar.cpp" line="42"/>
         <source>MIN/MAX</source>
         <translation>MIN/MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="30"/>
+        <location filename="../../src/ui/controlbar.cpp" line="42"/>
         <source>The meter&apos;s own minimum and maximum</source>
         <translation>Mínimo y máximo del propio multímetro</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="31"/>
+        <location filename="../../src/ui/controlbar.cpp" line="43"/>
         <source>PEAK</source>
         <translation>PEAK</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="31"/>
+        <location filename="../../src/ui/controlbar.cpp" line="43"/>
         <source>Peak minimum and maximum</source>
         <translation>Mínimo y máximo de pico</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="32"/>
+        <location filename="../../src/ui/controlbar.cpp" line="45"/>
         <source>LIGHT</source>
         <translation>LIGHT</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="32"/>
+        <location filename="../../src/ui/controlbar.cpp" line="45"/>
         <source>The display backlight</source>
         <translation>La retroiluminación de la pantalla</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="53"/>
+        <location filename="../../src/ui/controlbar.cpp" line="67"/>
         <source>Hold the key to leave it, as on the meter.</source>
         <translation>Mantenga pulsada la tecla para salir, como en el multímetro.</translation>
     </message>
@@ -1200,12 +1200,12 @@ y cierre la sesión y vuelva a entrar.</translation>
 <context>
     <name>FoldButton</name>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="189"/>
+        <location filename="../../src/ui/controlbar.cpp" line="208"/>
         <source>Show controls</source>
         <translation>Mostrar controles</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="189"/>
+        <location filename="../../src/ui/controlbar.cpp" line="208"/>
         <source>Hide controls</source>
         <translation>Ocultar controles</translation>
     </message>
@@ -1830,29 +1830,19 @@ No permission? The sensor needs a udev rule for USB ID %1:%2.</source>
 <context>
     <name>LcdWidget</name>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="494"/>
-        <source>HOLD</source>
-        <translation>HOLD</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="494"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="529"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="494"/>
-        <source>MANU</source>
-        <translation>MANU</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="517"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="599"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="615"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="555"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="639"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="655"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="614"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="654"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>

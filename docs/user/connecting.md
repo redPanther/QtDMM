@@ -126,9 +126,11 @@ Clicking **Connect** again disconnects and frees the port for other programs.
 
 ## The display
 
-The LCD-style display mirrors the meter: value, unit, the annunciators HOLD,
-AUTO, MANU, AC, DC, diode and continuity (unlit ones stay faintly visible,
-like on the meter itself), the bar graph and, below the value, the minimum
+The LCD-style display mirrors the meter: value, unit, the annunciators -
+AUTO at the left (lit while the meter ranges by itself, off in a manual
+range), AC, DC, diode, continuity and HOLD (an H in a square) at the right;
+for AC+DC a "+" lights between AC and DC. Unlit ones stay faintly visible,
+like on the meter itself. Then the bar graph and, below the value, the minimum
 and maximum since the last **Reset** (Ctrl+R), each as the meter showed it
 ("MIN 221.18 mV" stays so when the meter has moved on to V). A range change
 (mV to V, kΩ to MΩ) keeps them; they start afresh when the meter switches to

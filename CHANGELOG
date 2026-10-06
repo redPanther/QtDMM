@@ -13,6 +13,8 @@
 - The tip-of-the-day dialog is gone
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
+- Digital display: HOLD is an H in a square at the right of the annunciators, MANU is gone (AUTO off is a
+  manual range, as on the meters), a "+" between AC and DC lights for AC+DC
 - Meter keys under the display with a fold button: UNI-T UT60BT, UT61B+/D+/E+ and UT161 - SELECT, RANGE,
   AUTO, HOLD, REL and LIGHT (the UT61x+ also Hz/%, MIN/MAX and PEAK) press the meter's keys; the states
   light up as the meter reports them, holding MIN/MAX or PEAK leaves it
