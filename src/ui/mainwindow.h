@@ -177,10 +177,14 @@ protected:
   // Window size (package 26.2, 4a): the window starts at the size its
   // content needs and grows when a view is shown for the first time, up to
   // 84 % of the screen per side. It never shrinks by itself and stops
-  // growing for good once the user sized, maximized or went full screen.
+  // growing for good once the user sized it. Views shown while it is
+  // maximized or full screen get their room once when it comes back.
   bool        m_userSized = false;   ///< persisted as Windows/user-sized
   bool        m_growEnabled = false; ///< off until the window is on screen
   QSize       m_expectSize;          ///< the size we asked for last
+  QSize       m_pendingGrow{0, 0};   ///< growth asked for while maximized
+  bool        m_wasFull = false;     ///< maximized or full screen before the last state change
+  bool        m_unmaximizing = false;   ///< back from maximized, the size settling
   QSet<QObject *> m_grown;           ///< views the window already grew for
   int         em() const;            ///< a font height, the unit of all sizes
   /// Width and height a view adds to the window (0 = none in that direction).

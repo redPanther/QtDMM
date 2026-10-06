@@ -163,7 +163,7 @@ or **Hide controls** in its right-click menu, folds the row away.
 ## Window layout
 
 The main window holds five windows: the digital display, the analog meter,
-the recorder graph, the [readings table](readings-table.md) and the
+the graph, the [readings table](readings-table.md) and the
 [Poincaré plot](poincare-plot.md). The toolbar buttons (or Ctrl+1 … Ctrl+5)
 show and hide them. A fresh QtDMM starts as a
 compact instrument with display and meter only; starting a recording shows
@@ -172,8 +172,9 @@ the graph.
 The first start sizes the main window for what it shows. When you switch on
 the graph or the table for the first time, the window grows to make room -
 down for the graph, to the right for the table - up to most of the screen;
-it never shrinks by itself. Once you have sized, maximized or snapped the
-window yourself, it keeps your size. The window title names the configured meter; in the status bar a
+it never shrinks by itself. Once you have sized or snapped the window
+yourself, it keeps your size. A view switched on while the window is
+maximized gets its room when the window comes back to its size. The window title names the configured meter; in the status bar a
 dot blinks green while readings come in and turns grey when none has come
 for three seconds.
 

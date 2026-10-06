@@ -235,7 +235,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_readingsAction = windowAction(m_readingsWin, tr("&Readings table"), "Ctrl+4", "table",
     tr("<html><head/><body><p><span style=\" font-weight:600;\">Readings table</span></p>"
        "<p>Every reading the meter sent, one row each, with time, mode and range - "
-       "the raw protocol of the session next to the recorder's graph. Copy rows to a "
+       "the raw protocol of the session next to the graph. Copy rows to a "
        "spreadsheet or export them as CSV.</p></body></html>"));
   m_poincareAction = windowAction(m_poincareWin, tr("Poi&ncaré plot"), "Ctrl+5", "qtdmm-poincare",
     tr("<html><head/><body><p><span style=\" font-weight:600;\">Poincaré plot</span></p>"
@@ -752,7 +752,7 @@ void MainWindow::createExtraActions()
   m_copyImage = new QAction(tr("Cop&y graph image"), this);
   m_copyImage->setShortcut(QKeySequence("Ctrl+Shift+C"));
   m_copyImage->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Copy graph image</span></p>"
-                               "<p>Puts a picture of the recorder graph on the clipboard, ready to paste into a "
+                               "<p>Puts a picture of the graph on the clipboard, ready to paste into a "
                                "report or a chat.</p></body></html>"));
   connect(m_copyImage, &QAction::triggered, m_wid->graph(), &GraphWidget::copyImageSLOT);
 
@@ -1499,8 +1499,14 @@ void MainWindow::growFor(QMdiSubWindow *win)
 
 void MainWindow::autoGrow(const QSize &delta)
 {
-  if (m_userSized || !m_growEnabled || isMaximized() || isFullScreen())
+  if (m_userSized || !m_growEnabled)
     return;
+  // maximized: the room is kept for when the window comes back
+  if (isMaximized() || isFullScreen())
+  {
+    m_pendingGrow += delta;
+    return;
+  }
   const QRect av = screen()->availableGeometry();
   // Wayland neither tells a window where it is nor lets it move, so a
   // grown frame cannot be pulled back onto the screen: grow less there.
@@ -1527,7 +1533,7 @@ void MainWindow::autoGrow(const QSize &delta)
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
   QMainWindow::resizeEvent(event);
-  if (m_growEnabled && event->size() != m_expectSize && event->oldSize().isValid()
+  if (m_growEnabled && !m_unmaximizing && event->size() != m_expectSize && event->oldSize().isValid()
       && !isMaximized() && !isFullScreen())
     m_userSized = true;
 }
@@ -1535,8 +1541,27 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 void MainWindow::changeEvent(QEvent *event)
 {
   QMainWindow::changeEvent(event);
-  if (event->type() == QEvent::WindowStateChange && (isMaximized() || isFullScreen()))
-    m_userSized = true;
+  if (event->type() != QEvent::WindowStateChange)
+    return;
+  // maximized is no size chosen: back from it, the window grows once for
+  // the views shown meanwhile
+  const bool full = isMaximized() || isFullScreen();
+  if (!full && m_wasFull)
+  {
+    m_unmaximizing = true;
+    // the window manager restores the size in steps; what it settles on is
+    // the size the window had
+    QTimer::singleShot(300, this, [this]
+    {
+      m_unmaximizing = false;
+      m_expectSize = size();
+      const QSize pending = m_pendingGrow;
+      m_pendingGrow = QSize(0, 0);
+      if (!pending.isNull() && !isMaximized() && !isFullScreen())
+        autoGrow(pending);
+    });
+  }
+  m_wasFull = full;
 }
 
 void MainWindow::showEvent(QShowEvent *event)
