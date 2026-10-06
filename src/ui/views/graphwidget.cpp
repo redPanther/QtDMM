@@ -394,7 +394,8 @@ int GraphWidget::bucketStart(int i) const
 // than one the minimum and the maximum in time order, so a spike survives
 // the thinning. The store keeps every reading; only the drawing is thinned.
 // Readings without a value (NaN: overload, stale) do not count; a bucket of
-// nothing else is one NaN point, the gap.
+// nothing else is one NaN point, the gap, and one that ends where the meter
+// fell silent ends with it.
 int GraphWidget::bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const
 {
   const RecordingSeries &series = m_store->series();
@@ -429,23 +430,37 @@ int GraphWidget::bucketPoints(int first, int last, bool integral, QList<QPointF>
       hi = i;
     }
   }
+  // a bucket that ends where the meter fell silent: the gap goes on to the
+  // next reading, in a later bucket - the line must not bridge it (a sensor
+  // silent for minutes was drawn as a straight line whenever its last value
+  // and the gap fell into one column). An overload comes at the meter's
+  // pace and is as short as a reading.
+  const bool gapAfter = std::isnan(value(last)) && series.at(last).quality == Quality::Stale;
+  int n = 1;
   if (lo == hi)
-  {
     out.append(QPointF(x(lo), loValue));
-    return 1;
-  }
-  if (lo > hi)
+  else
   {
-    qSwap(lo, hi);
-    qSwap(loValue, hiValue);
+    if (lo > hi)
+    {
+      qSwap(lo, hi);
+      qSwap(loValue, hiValue);
+    }
+    out.append(QPointF(x(lo), loValue));
+    out.append(QPointF(x(hi), hiValue));
+    n = 2;
   }
-  out.append(QPointF(x(lo), loValue));
-  out.append(QPointF(x(hi), hiValue));
-  return 2;
+  if (gapAfter)
+  {
+    out.append(QPointF(x(last), qQNaN()));
+    n++;
+  }
+  return n;
 }
 
 void GraphWidget::rebuildSeries()
 {
+  m_rebuilds++;
   QList<QPointF> points;
   QList<QPointF> intPoints;
   const int count = m_store->count();
@@ -1018,9 +1033,13 @@ void GraphWidget::onAppended(bool shifted)
 {
   const RawPoint &p = m_store->series().last();
 
-  // "All": the window grows once the recording fills it
+  // "All": the window grows once the recording fills it. The new window
+  // comes back at once (InstanceWidget, through the settings) and rebuilds
+  // the series with this reading in it: then it must not be appended again
+  const int rebuilds = m_rebuilds;
   if (m_followAll && m_store->duration() - m_store->origin() >= qint64(m_windowSeconds) * 1000)
     requestAll(true);
+  const bool rebuilt = m_rebuilds != rebuilds;
   updateScrollRange();
   // a full store, or Live: the window moves on with what it keeps
   if (m_store->origin() > 0 || m_store->state() == RecordingStore::Live)
@@ -1033,7 +1052,7 @@ void GraphWidget::onAppended(bool shifted)
 
   if (shifted || bucketSize() != m_bucket)
     rebuildSeries();
-  else
+  else if (!rebuilt)
     appendToSeries();
 
   if (resFlag)

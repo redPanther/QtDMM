@@ -713,6 +713,66 @@ int main(int argc, char **argv)
     check(lines(thin) == thinGrown, "gaps thinned: rebuilt = grown");
   }
 
+  // --- 5n. a meter silent for minutes (every 2 s, then 5.5 min nothing),
+  //          Live with "All": thinned, the column of the last value also
+  //          holds the gap - the line must not bridge it, whatever the
+  //          column width; and a reading is not drawn twice when the window
+  //          grows with it ---
+  {
+    GraphWidget graph(nullptr, &settings);
+    graph.resize(220, 300);   // columns of several seconds, wider than the stale limit
+    graph.setSampleTime(10);
+    graph.setSampleLength(300000);   // 8:20:00
+    graph.setGraphSize(60);
+    // the window comes back at once, as through the settings
+    QObject::connect(&graph, &GraphWidget::windowRequested, [&](int s) { graph.setGraphSize(s); });
+    Feed feed(graph, 2000);
+    graph.liveSLOT();
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "All")
+        b->click();
+    auto *data = qobject_cast<QLineSeries *>(graph.findChild<QChartView *>()->chart()->series().first());
+    auto bridged = [&](double from, double to)
+    {
+      for (QAbstractSeries *a : graph.findChild<QChartView *>()->chart()->series())
+      {
+        auto *line = qobject_cast<QLineSeries *>(a);
+        if (!line || line->count() == 0 || line->pen() != data->pen())
+          continue;
+        if (line->at(0).x() < from && line->at(line->count() - 1).x() > to)
+          return true;
+      }
+      return false;
+    };
+    int bridges = 0, doubled = 0;
+    QString first;
+    for (int i = 0; i < 570; i++)
+    {
+      if (i == 285)
+      {
+        // silent from 9:30: stale after the meter's interval, nothing until 15:00
+        feed.now += 6000;
+        graph.store()->setStale(true);
+        feed.now = 900000;
+        continue;
+      }
+      if (i > 285 && i < 450)
+        continue;
+      feed.value(650 + i * 0.3);
+      if (i > 450 && bridged(570, 899))
+      {
+        bridges++;
+        if (first.isEmpty())
+          first = QString("reading %1").arg(i);
+      }
+      // the newest point once
+      if (data->count() >= 2 && data->at(data->count() - 1) == data->at(data->count() - 2))
+        doubled++;
+    }
+    check(bridges == 0, QString("silent meter: the line bridged the gap %1 times, first at %2").arg(bridges).arg(first));
+    check(doubled == 0, QString("silent meter: the newest reading drawn twice %1 times").arg(doubled));
+  }
+
   // --- 5n. the axis names the recording's unit: a meter switched from V to
   //          Ohm after a recording does not relabel it; a new one does ---
   {
