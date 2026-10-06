@@ -934,6 +934,7 @@ void GraphWidget::onStateChanged()
   updateMarkPositions();
   updateStateLabel();
   emitInfo();
+  m_chartView->viewport()->update();
   Q_EMIT stateChanged(int(m_store->state()));
 }
 
@@ -1075,6 +1076,9 @@ void GraphWidget::onCleared()
   m_intLine->clear();
   m_intPoints->clear();
   m_tailData = m_tailInt = m_tailDataPts = m_tailIntPts = 0;
+  // Qt Charts does not repaint a series emptied: without this the old curve
+  // stood after Record until the next click
+  m_chartView->viewport()->update();
 }
 
 void GraphWidget::emitInfo()
