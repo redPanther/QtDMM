@@ -36,7 +36,7 @@ share the space differently.
 |---|---|
 | Ctrl+1 | Show / hide the digital display |
 | Ctrl+2 | Show / hide the analog meter |
-| Ctrl+3 or Ctrl+G | Show / hide the recorder graph |
+| Ctrl+3 or Ctrl+G | Show / hide the graph |
 | Ctrl+4 | Show / hide the readings table |
 | Ctrl+5 | Show / hide the Poincaré plot |
 | Ctrl+L | Hide / show the title bars of the windows |

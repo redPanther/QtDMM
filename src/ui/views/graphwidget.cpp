@@ -1125,7 +1125,7 @@ void GraphWidget::emitInfo()
       txt += " - " + tr("Live");
       break;
     case RecordingStore::Record:
-      txt += " - " + tr("Sampling");
+      txt += " - " + tr("Recording");
       break;
     case RecordingStore::View:
       txt += " - " + tr("Stopped");
@@ -1209,14 +1209,14 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
 
     if (m_store->isRunning())
     {
-      QAction *action = new QAction(tr("Stop recorder"), m_popup);
+      QAction *action = new QAction(tr("Stop recording"), m_popup);
       action->setProperty("ID", IDStopRecorder);
       m_popup->addAction(action);
       //m_popup->insertItem( tr("Stop recorder"), IDStopRecorder );
     }
     else
     {
-      QAction *action = new QAction(tr("Start recorder"), m_popup);
+      QAction *action = new QAction(tr("Start recording"), m_popup);
       action->setProperty("ID", IDStartRecorder);
       m_popup->addAction(action);
       //m_popup->insertItem( tr("Start recorder"), IDStartRecorder );

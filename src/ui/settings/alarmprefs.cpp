@@ -30,7 +30,7 @@ AlarmPrefs::AlarmPrefs(QWidget *parent) : SettingsPage(parent)
   m_list->setToolTip(tr("Each alarm watches the main reading. It raises when its condition has held for the "
                         "given time and clears once the reading is back beyond the hysteresis. Untick an "
                         "alarm to keep it without it firing. An alarm can show a banner over the display, "
-                        "beep, open a popup, run a program or start the recorder."));
+                        "beep, open a popup, run a program or start a recording."));
   layout->addWidget(m_list, 1);
   // the empty list says what to do
   m_empty = new QLabel(tr("No alarms yet. Add one with Add..."), m_list->viewport());
@@ -240,7 +240,7 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   m_popup->setChecked(alarm.popup);
   m_raise = new QCheckBox(tr("Bring the QtDMM window to the front"), act);
   m_raise->setChecked(alarm.raiseWindow);
-  m_markGraph = new QCheckBox(tr("Mark in the recorder graph"), act);
+  m_markGraph = new QCheckBox(tr("Mark in the graph"), act);
   m_markGraph->setChecked(alarm.markGraph);
   m_markTable = new QCheckBox(tr("Mark in the readings table"), act);
   m_markTable->setChecked(alarm.markTable);
@@ -251,7 +251,7 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   m_recorder->addItem(tr("start"), Alarm::RecorderStart);
   m_recorder->addItem(tr("stop"), Alarm::RecorderStop);
   m_recorder->setCurrentIndex(m_recorder->findData(alarm.recorder));
-  af->addRow(tr("&Recorder:"), m_recorder);
+  af->addRow(tr("&Recording:"), m_recorder);
   m_command = new QLineEdit(alarm.command, act);
   m_command->setPlaceholderText(tr("none"));
   m_command->setToolTip(tr("Program to run when the alarm raises. %v is the value, %u its unit, %n the alarm's name."));

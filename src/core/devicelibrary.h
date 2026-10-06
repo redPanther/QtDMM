@@ -102,8 +102,11 @@ private:
   /// Runs @p edit on the file and writes it; a write that fails (on
   /// Windows a virus scanner or indexer may hold the file a moment, the
   /// replacement then cannot take its place) is tried again a few times.
+  /// QSettings may report an error on Windows although the change is in
+  /// the file: @p landed, read from the file, says whether it is.
   /// False when it never succeeded.
-  bool        write(const std::function<void(QSettings &)> &edit) const;
+  bool        write(const std::function<void(QSettings &)> &edit,
+                    const std::function<bool()> &landed = {}) const;
   /// entryKeys() for every entry: snapshots of all meter keys from before
   /// are cut down (name, order and id stay).
   void        tidy();

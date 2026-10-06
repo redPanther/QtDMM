@@ -237,7 +237,7 @@ Q_SIGNALS:
   /// "Clear graph" in the context menu: the window asks about unsaved data
   /// first (InstanceWidget::clearSLOT()).
   void             clearRequested();
-  /// "Start recorder" (true) or "Stop recorder" in the context menu: the
+  /// "Start recording" (true) or "Stop recording" in the context menu: the
   /// window starts it as its Record button does (MainWindow::startSLOT()).
   void             recordRequested(bool start);
   /// "Live" in the context menu (InstanceWidget::liveSLOT()).

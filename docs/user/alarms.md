@@ -40,7 +40,7 @@ What happens when an alarm raises; tick any of them:
 - **Mark in the recorder graph** - a dashed vertical line in the alarm's
   colour at the moment it raised, kept with the recording; and **in the
   readings table** - the row gets the colour.
-- **Recorder** - start or stop the recording.
+- **Recording** - start or stop a recording.
 - **Run program** - a command line; `%v` is the value, `%u` its unit,
   `%n` the alarm's name. That is the hook for anything else: a
   notification (`notify-send "%n" "%v%u"`), a mail, a webhook with `curl`,
