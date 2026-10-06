@@ -143,19 +143,23 @@ QByteArray DecoderUniTiDMM::commandFrame(quint8 cmd)
 }
 
 // The key codes: ble-multimeter (uni-t.md, Controls, tried on a UT60BTk) and
-// ut61eplus.py (_COMMANDS) agree; PEAK only the UT61x+ has
+// ut61eplus.py (_COMMANDS) agree. The UT60BT has no Hz/%, MAX/MIN and PEAK
+// keys (its Hz is a dial position; tried 2026-10-06: they do nothing), the
+// UT61x+ has them
 QByteArray DecoderUniTiDMM::keyRequest(const QString &key) const
 {
   static const QHash<QString, quint8> codes = {
-    { "minmax", 0x41 }, { "minmax_off", 0x42 }, { "range", 0x46 }, { "auto", 0x47 }, { "rel", 0x48 },
-    { "select2", 0x49 }, { "hold", 0x4A }, { "lamp", 0x4B }, { "select1", 0x4C },
+    { "range", 0x46 }, { "auto", 0x47 }, { "rel", 0x48 }, { "hold", 0x4A }, { "lamp", 0x4B }, { "select1", 0x4C },
   };
-  if (m_type == FrameFormat::UniTUT61Plus && key == QLatin1String("peak"))
-    return commandFrame(0x4D);
-  if (m_type == FrameFormat::UniTUT61Plus && key == QLatin1String("peak_off"))
-    return commandFrame(0x4E);
-  const auto it = codes.constFind(key);
-  return it == codes.constEnd() ? QByteArray() : commandFrame(it.value());
+  static const QHash<QString, quint8> codes61Plus = {
+    { "minmax", 0x41 }, { "minmax_off", 0x42 }, { "select2", 0x49 }, { "peak", 0x4D }, { "peak_off", 0x4E },
+  };
+  auto it = codes.constFind(key);
+  if (it != codes.constEnd())
+    return commandFrame(it.value());
+  if (m_type == FrameFormat::UniTUT61Plus && (it = codes61Plus.constFind(key)) != codes61Plus.constEnd())
+    return commandFrame(it.value());
+  return QByteArray();
 }
 
 bool DecoderUniTiDMM::frameValid(const unsigned char *f)

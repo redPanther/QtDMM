@@ -13,9 +13,9 @@
 - The tip-of-the-day dialog is gone
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
-- Meter keys under the display with a fold button: UNI-T UT60BT, UT61B+/D+/E+ and UT161 - SELECT, Hz/%,
-  RANGE, AUTO, HOLD, REL, MIN/MAX, PEAK and LIGHT press the meter's keys; the states light up as the meter
-  reports them, holding MIN/MAX or PEAK leaves it
+- Meter keys under the display with a fold button: UNI-T UT60BT, UT61B+/D+/E+ and UT161 - SELECT, RANGE,
+  AUTO, HOLD, REL and LIGHT (the UT61x+ also Hz/%, MIN/MAX and PEAK) press the meter's keys; the states
+  light up as the meter reports them, holding MIN/MAX or PEAK leaves it
 - Defaults for a new configuration: design Dark, LCD backlight blue, analog meter classic ivory, graph scope
   blue, LCD without min/max. The design can also be chosen in the settings (Appearance)
 - Recorder: the pre-trigger works (it was a setting without function). A recording started by a threshold

@@ -14,6 +14,19 @@
 namespace
 {
 constexpr int kGap = 6;   // between groups and rows
+
+// A key in a colour of its own: darker while pressed or on, faded while off
+QString keyColour(const QColor &face, const QColor &text)
+{
+  QColor faded = face;
+  faded.setAlpha(90);
+  return QString("QToolButton { background: %1; color: %2; border: 1px solid %3; border-radius: 3px;"
+                 " padding: 2px 6px; }"
+                 " QToolButton:pressed, QToolButton:checked { background: %3; }"
+                 " QToolButton:disabled { background: %4; color: %5; }")
+    .arg(face.name(), text.name(), face.darker(135).name(), faded.name(QColor::HexArgb),
+         QColor(text.red(), text.green(), text.blue(), 120).name(QColor::HexArgb));
+}
 }
 
 ControlBar::ControlBar(QWidget *parent) :
@@ -25,11 +38,12 @@ ControlBar::ControlBar(QWidget *parent) :
       { "select2", QT_TR_NOOP("Hz/%"), QT_TR_NOOP("Frequency and duty cycle"), false } },
     { { "range", QT_TR_NOOP("RANGE"), QT_TR_NOOP("The next range (switches to manual ranging)"), false },
       { "auto", QT_TR_NOOP("AUTO"), QT_TR_NOOP("Automatic ranging"), true } },
-    { { "hold", QT_TR_NOOP("HOLD"), QT_TR_NOOP("Freeze the display"), true },
-      { "rel", QT_TR_NOOP("REL"), QT_TR_NOOP("Relative reading: the current value becomes zero"), true },
+    { { "rel", QT_TR_NOOP("REL"), QT_TR_NOOP("Relative reading: the current value becomes zero"), true },
       { "minmax", QT_TR_NOOP("MIN/MAX"), QT_TR_NOOP("The meter's own minimum and maximum"), true },
       { "peak", QT_TR_NOOP("PEAK"), QT_TR_NOOP("Peak minimum and maximum"), true } },
-    { { "lamp", QT_TR_NOOP("LIGHT"), QT_TR_NOOP("The display backlight"), false } },
+    // HOLD on the right, as on the UT60BT, where it shares its key with LIGHT
+    { { "lamp", QT_TR_NOOP("LIGHT"), QT_TR_NOOP("The display backlight"), false },
+      { "hold", QT_TR_NOOP("HOLD"), QT_TR_NOOP("Freeze the display"), true } },
   };
   for (const QList<Key> &keys : groups)
   {
@@ -74,6 +88,11 @@ ControlBar::ControlBar(QWidget *parent) :
       row->addWidget(b);
       m_keys << b;
       b->setProperty("key", key);
+      // SELECT and HOLD in the colours of the meter's keys (UT60BT)
+      if (key == "select1")
+        b->setStyleSheet(keyColour(QColor(0xff, 0xc6, 0x1c), QColor(0x20, 0x20, 0x20)));
+      else if (key == "hold")
+        b->setStyleSheet(keyColour(QColor(0x3c, 0x9a, 0xff), Qt::white));
       if (key == "hold")
         m_hold = b;
       else if (key == "auto")

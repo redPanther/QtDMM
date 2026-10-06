@@ -45,17 +45,20 @@ int main(int argc, char **argv)
     };
     const FrameFormat::DataFormat ut60bt = FrameFormat::UniTiDMM, ut61plus = FrameFormat::UniTUT61Plus;
     expect(ut60bt, "lamp", "abcd034b01c6");
-    expect(ut60bt, "minmax", "abcd034101bc");
-    expect(ut60bt, "minmax_off", "abcd034201bd");
     expect(ut60bt, "range", "abcd034601c1");
     expect(ut60bt, "auto", "abcd034701c2");
     expect(ut60bt, "rel", "abcd034801c3");
-    expect(ut60bt, "select2", "abcd034901c4");
     expect(ut60bt, "hold", "abcd034a01c5");
     expect(ut60bt, "select1", "abcd034c01c7");
-    expect(ut60bt, "peak", "");          // the UT60BT has no PEAK key
+    // the UT60BT has no Hz/%, MAX/MIN and PEAK keys (tried: they do nothing)
+    expect(ut60bt, "select2", "");
+    expect(ut60bt, "minmax", "");
+    expect(ut60bt, "peak", "");
     expect(ut60bt, "nosuchkey", "");
     expect(ut61plus, "hold", "abcd034a01c5");
+    expect(ut61plus, "minmax", "abcd034101bc");
+    expect(ut61plus, "minmax_off", "abcd034201bd");
+    expect(ut61plus, "select2", "abcd034901c4");
     expect(ut61plus, "peak", "abcd034d01c8");
     expect(ut61plus, "peak_off", "abcd034e01c9");
     expect(FrameFormat::Metex14, "hold", "");   // no remote control

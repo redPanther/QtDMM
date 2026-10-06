@@ -12,8 +12,8 @@ struct Reading;
 
 /// The meter's keys under the display, for meters QtDMM can remote-control
 /// (the UNI-T iDMM protocol: UT60BT, UT61B+/D+/E+, UT161). Groups from left
-/// to right as on the meter's front - function, range, display, device -
-/// that wrap to a second row when the window is narrow.
+/// to right as on the meter's front - function, range, display, LIGHT and
+/// HOLD on the right - that wrap to a second row when the window is narrow.
 ///
 /// HOLD, AUTO, REL, MIN/MAX and PEAK show the meter's state as the readings
 /// report it, not the last click; RANGE, SELECT, Hz/% and LIGHT are plain

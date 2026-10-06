@@ -42,14 +42,22 @@ int main(int argc, char **argv)
   bar.show();
   bar.setConnected(true);
 
-  // --- 1. the keys the meter has: no PEAK on the UT60BT, on the UT61x+ ---
+  // --- 1. the keys the meter has: no Hz/%, MIN/MAX and PEAK on the UT60BT,
+  //        on the UT61x+ ---
   bar.setProtocol(FrameFormat::UniTiDMM);
   check(key(bar, "hold") && !key(bar, "hold")->isHidden(), "UT60BT: HOLD shown");
   check(key(bar, "lamp") && !key(bar, "lamp")->isHidden(), "UT60BT: LIGHT shown");
-  check(key(bar, "peak") && key(bar, "peak")->isHidden(), "UT60BT: no PEAK");
+  check(key(bar, "select1") && !key(bar, "select1")->isHidden(), "UT60BT: SELECT shown");
+  check(key(bar, "peak")->isHidden() && key(bar, "minmax")->isHidden() && key(bar, "select2")->isHidden(),
+        "UT60BT: no PEAK, MIN/MAX, Hz/%");
   bar.setProtocol(FrameFormat::UniTUT61Plus);
-  check(!key(bar, "peak")->isHidden(), "UT61x+: PEAK shown");
-  bar.setProtocol(FrameFormat::UniTiDMM);
+  check(!key(bar, "peak")->isHidden() && !key(bar, "minmax")->isHidden() && !key(bar, "select2")->isHidden(),
+        "UT61x+: PEAK, MIN/MAX, Hz/% shown");
+
+  // SELECT and HOLD in the colours of the meter's keys
+  check(key(bar, "select1")->styleSheet().contains("#ffc61c") && key(bar, "hold")->styleSheet().contains("#3c9aff")
+          && key(bar, "range")->styleSheet().isEmpty(),
+        "colours: SELECT yellow, HOLD blue, the others plain");
 
   // --- 2. a click sends the key; MIN/MAX held while on leaves it ---
   QSignalSpy sent(&bar, &ControlBar::keyPressed);
@@ -91,6 +99,20 @@ int main(int argc, char **argv)
   second.hold = true;
   bar.showReading(second);
   check(!key(bar, "hold")->isChecked(), "states: a secondary value is ignored");
+
+  // a picture to look at: QTDMM_SHOT=<dir> writes the bar per meter
+  if (qEnvironmentVariableIsSet("QTDMM_SHOT"))
+  {
+    const QString dir = qEnvironmentVariable("QTDMM_SHOT");
+    bar.resize(bar.sizeHint());
+    for (auto [format, name] : { std::pair{ FrameFormat::UniTiDMM, "ut60bt" }, std::pair{ FrameFormat::UniTUT61Plus, "ut61plus" } })
+    {
+      bar.setProtocol(format);
+      bar.resize(bar.sizeHint());
+      QTest::qWait(50);
+      bar.grab().save(dir + "/controlbar_" + name + ".png");
+    }
+  }
 
   // --- 4. not connected: no keys ---
   bar.setConnected(false);

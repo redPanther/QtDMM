@@ -146,9 +146,10 @@ yellow-green of most meters), *Backlight blue* (light segments on blue, the defa
 *Appearance* page. Changing that tint switches the display to *Custom*.
 
 For meters whose keys QtDMM knows (the UNI-T UT60BT, UT61B+/D+/E+ and
-UT161), a row of the meter's keys sits under the display: SELECT and Hz/%,
-RANGE and AUTO, HOLD, REL, MIN/MAX, PEAK (not on the UT60BT) and LIGHT.
-A click presses the key on the meter. HOLD, AUTO, REL, MIN/MAX and PEAK
+UT161), a row of the meter's keys sits under the display: SELECT (yellow),
+RANGE and AUTO, REL, LIGHT and HOLD (blue, on the right as on the meter);
+the UT61B+/D+/E+ and UT161 also
+have Hz/%, MIN/MAX and PEAK. A click presses the key on the meter. HOLD, AUTO, REL, MIN/MAX and PEAK
 light up as the meter reports them. As on the meter, MIN/MAX and PEAK are
 left by holding the key down (about a second). Over Bluetooth the keys
 work once the link is up; before that the status bar says the key did
