@@ -228,6 +228,38 @@ int main(int argc, char **argv)
     render(w, QSize(300, 400)).save(QDir(dump).filePath("display_very_tall.png"));
   }
 
+  // --- 6. the annunciators: AUTO lit or not (no MANU), HOLD as the H symbol
+  //        at the right, "+" between AC and DC for AC+DC ---
+  {
+    LcdWidget f;
+    f.setDisplayMode(4000, false, false, 1);
+    f.setValue(0, "1.000");
+    f.setUnit(0, "V");
+    auto lit = [&](quint32 flags, bool hold, bool autoRange)
+    {
+      f.setMode(0, flags);
+      f.setHold(hold);
+      f.setAuto(autoRange);
+      return darkPixels(render(f, QSize(520, 200)));
+    };
+    const int none = lit(0, false, false);
+    const int ac = lit(SampleFlag::AC, false, false);
+    const int dc = lit(SampleFlag::DC, false, false);
+    const int acdc = lit(SampleFlag::AC | SampleFlag::DC, false, false);
+    check(acdc > ac + dc - none + 5, QString("AC+DC lights the plus: %1 > %2 + %3 - %4").arg(acdc).arg(ac).arg(dc).arg(none));
+    check(lit(0, true, false) > none + 20, "HOLD lights its symbol");
+    check(lit(0, false, true) > none + 20, "AUTO lights");
+    f.setManu(true);
+    check(darkPixels(render(f, QSize(520, 200))) == none, "manual range: AUTO off, nothing else lit");
+    if (!dump.isEmpty())
+    {
+      f.setMode(0, SampleFlag::AC | SampleFlag::DC);
+      f.setHold(true);
+      f.setAuto(true);
+      render(f, QSize(520, 200)).save(QDir(dump).filePath("display_flags.png"));
+    }
+  }
+
   if (failed == 0)
     qInfo() << "All digital display tests passed.";
   else

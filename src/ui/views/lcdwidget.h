@@ -29,9 +29,10 @@
 #include "core/sampletypes.h"
 
 /// The digital display: an LCD panel in the same housing as the analog
-/// meter. Seven-segment digits, unit, annunciators (HOLD, AUTO, MANU, AC,
-/// DC, diode, continuity), the min/max memory, a bar graph and up to three
-/// secondary values are all drawn with QPainter and scale with the widget.
+/// meter. Seven-segment digits, unit, annunciators (AUTO; AC, "+" for AC+DC,
+/// DC, diode, continuity, HOLD as an H in a square), the min/max memory, a
+/// bar graph and up to three secondary values are all drawn with QPainter
+/// and scale with the widget.
 /// Unlit segments and annunciators stay faintly visible, like on a real LCD.
 struct Reading;
 
@@ -175,7 +176,6 @@ private:
   bool m_hold = false;
   bool m_auto = false;
   bool m_stale = false;
-  bool m_manu = false;
 
   QPixmap m_static;
   bool m_staticDirty = true;

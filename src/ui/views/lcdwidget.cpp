@@ -93,12 +93,10 @@ void LcdWidget::setHold(bool on) { m_hold = on; }
 void LcdWidget::setAuto(bool on)
 {
   m_auto = on;
-  m_manu = !on;
 }
 
 void LcdWidget::setManu(bool on)
 {
-  m_manu = on;
   m_auto = !on;
 }
 
@@ -389,6 +387,23 @@ namespace
 // (triangle, bar, a line through) as on a meter's LCD
 const QString kDiodeFlag = QStringLiteral("\x01diode");
 double diodeWidth(double fontPx) { return fontPx * 1.7; }
+// HOLD is drawn too: a filled square with an H cut out, the symbol of the
+// old hold.xpm and of many meters' LCDs
+const QString kHoldFlag = QStringLiteral("\x01hold");
+double holdWidth(double fontPx) { return fontPx * 0.95; }
+// the gap after annunciator @p t when @p next follows: "AC+DC" stays together
+double flagGap(const QString &t, const QString &next, double gap)
+{
+  return t == QLatin1String("+") || next == QLatin1String("+") ? gap * 0.25 : gap;
+}
+double flagWidth(const QString &t, const QFontMetricsF &fm, double fontPx)
+{
+  if (t == kDiodeFlag)
+    return diodeWidth(fontPx);
+  if (t == kHoldFlag)
+    return holdWidth(fontPx);
+  return fm.horizontalAdvance(t);
+}
 }
 
 void LcdWidget::drawAnnunciator(QPainter &p, const QRectF &r, const QString &text, bool on, double fontPx) const
@@ -416,6 +431,25 @@ void LcdWidget::drawAnnunciator(QPainter &p, const QRectF &r, const QString &tex
     p.drawPath(tri);
     p.drawLine(QPointF(triR, cy - h / 2), QPointF(triR, cy + h / 2));   // cathode bar
     p.drawLine(QPointF(triR, cy), QPointF(x1, cy));   // cathode lead
+    p.restore();
+    return;
+  }
+  if (text == kHoldFlag)
+  {
+    // the square, the H as a hole in it (14 x 14 in the old XPM: posts 3
+    // wide, inside 2..11, the bar at rows 6 and 7)
+    const double s = holdWidth(fontPx);
+    const QRectF sq(r.left(), r.center().y() - s / 2, s, s);
+    const double u = s / 14.0;
+    QPainterPath square;
+    square.addRoundedRect(sq, 2 * u, 2 * u);
+    QPainterPath h;
+    h.addRect(QRectF(sq.left() + 3 * u, sq.top() + 2 * u, 2 * u, 10 * u));
+    h.addRect(QRectF(sq.left() + 9 * u, sq.top() + 2 * u, 2 * u, 10 * u));
+    h.addRect(QRectF(sq.left() + 5 * u, sq.top() + 6 * u, 4 * u, 2 * u));
+    p.save();
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.fillPath(square.subtracted(h.simplified()), c);
     p.restore();
     return;
   }
@@ -476,7 +510,7 @@ LcdWidget::Layout LcdWidget::layout() const
   l.smallH = sh;
   l.minMaxBlockW = minMaxBlockWidth(sh);
 
-  // annunciators: HOLD/AUTO/MANU left, AC/DC/diode/continuity right, all
+  // annunciators: AUTO left, AC + DC, diode, continuity and HOLD right, all
   // present as ghosts - shrink the font until the row holds them
   // (font sizes are whole pixels, so one proportional step may still be a
   // little too wide - repeat until it fits)
@@ -491,12 +525,15 @@ namespace
 {
 const QStringList &leftFlags()
 {
-  static const QStringList l = { LcdWidget::tr("HOLD"), LcdWidget::tr("AUTO"), LcdWidget::tr("MANU") };
+  // manual range is AUTO off, as on the meters
+  static const QStringList l = { LcdWidget::tr("AUTO") };
   return l;
 }
 const QStringList &rightFlags()
 {
-  static const QStringList l = { QStringLiteral("AC"), QStringLiteral("DC"), kDiodeFlag, QStringLiteral("●))") };
+  // "+" between AC and DC lights for AC+DC
+  static const QStringList l = { QStringLiteral("AC"), QStringLiteral("+"), QStringLiteral("DC"), kDiodeFlag,
+                                 QStringLiteral("●))"), kHoldFlag };
   return l;
 }
 }
@@ -506,9 +543,10 @@ double LcdWidget::flagsWidth(double fontPx) const
   const QFontMetricsF fm(sansFont(fontPx));
   const double gap = fontPx * 0.9;
   double w = gap;   // between the two groups at least one gap
-  for (const QString &t : leftFlags() + rightFlags())
-    w += (t == kDiodeFlag ? diodeWidth(fontPx) : fm.horizontalAdvance(t)) + 2 + gap;
-  return w - gap;   // no gap after the last one
+  const QStringList all = leftFlags() + rightFlags();
+  for (int i = 0; i < all.size(); ++i)
+    w += flagWidth(all[i], fm, fontPx) + 2 + (i + 1 < all.size() ? flagGap(all[i], all[i + 1], gap) : 0);
+  return w;
 }
 
 double LcdWidget::minMaxBlockWidth(double h) const
@@ -538,20 +576,21 @@ void LcdWidget::drawFlags(QPainter &p, const Layout &l) const
   struct Flag { QString text; bool on; };
   const QStringList &lt = leftFlags();
   const QStringList &rt = rightFlags();
+  const bool ac = flags & SampleFlag::AC, dc = flags & SampleFlag::DC;
   const Flag left[] = {
-    { lt[0], m_hold },
-    { lt[1], m_auto },
-    { lt[2], m_manu },
+    { lt[0], m_auto },
   };
   const Flag right[] = {
-    { rt[0], bool(flags & SampleFlag::AC) },
-    { rt[1], bool(flags & SampleFlag::DC) },
-    { rt[2], bool(flags & SampleFlag::Diode) },
-    { rt[3], m_quantity[0] == Quantity::Continuity },
+    { rt[0], ac },
+    { rt[1], ac && dc },
+    { rt[2], dc },
+    { rt[3], bool(flags & SampleFlag::Diode) },
+    { rt[4], m_quantity[0] == Quantity::Continuity },
+    { rt[5], m_hold },
   };
 
   double x = l.flags.left();
-  auto width = [&](const QString &t) { return t == kDiodeFlag ? diodeWidth(fontPx) : fm.horizontalAdvance(t); };
+  auto width = [&](const QString &t) { return flagWidth(t, fm, fontPx); };
   for (const Flag &f : left)
   {
     const double w = width(f.text);
@@ -564,7 +603,8 @@ void LcdWidget::drawFlags(QPainter &p, const Layout &l) const
     const double w = width(right[i].text);
     xr -= w;
     drawAnnunciator(p, QRectF(xr, l.flags.top(), w + 2, l.flags.height()), right[i].text, right[i].on, fontPx);
-    xr -= gap;
+    if (i > 0)
+      xr -= flagGap(right[i - 1].text, right[i].text, gap);
   }
 }
 
