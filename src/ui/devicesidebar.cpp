@@ -69,6 +69,11 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
 
   connect(this, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item)
   {
+    if (item && item == m_addItem)
+    {
+      Q_EMIT addDeviceRequested();
+      return;
+    }
     const QString id = idOf(item);
     if (!id.isEmpty() && id != m_current)
       Q_EMIT switchRequested(id);
@@ -125,7 +130,7 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
 
 QString DeviceSidebar::idOf(const QTreeWidgetItem *item) const
 {
-  return item && item->parent() == m_devices ? item->data(0, Qt::UserRole).toString() : QString();
+  return item && item != m_addItem && item->parent() == m_devices ? item->data(0, Qt::UserRole).toString() : QString();
 }
 
 QString DeviceSidebar::instanceOf(const QTreeWidgetItem *item) const
@@ -215,6 +220,7 @@ void DeviceSidebar::fill()
   m_filling = true;
   const QString selected = idOf(currentItem());
   qDeleteAll(m_devices->takeChildren());
+  m_addItem = nullptr;
   for (const MyDevice &d : m_library->list())
   {
     auto *item = new QTreeWidgetItem(m_devices, { d.name });
@@ -225,6 +231,12 @@ void DeviceSidebar::fill()
     if (d.id == selected)
       setCurrentItem(item);
   }
+  // a device more: the assistant, from where the devices are
+  m_addItem = new QTreeWidgetItem(m_devices, { tr("+ Add device...") });
+  m_addItem->setFlags(Qt::ItemIsEnabled);
+  m_addItem->setFirstColumnSpanned(true);
+  m_addItem->setForeground(0, palette().color(QPalette::Disabled, QPalette::WindowText));
+  m_addItem->setToolTip(0, tr("Set up another meter (the assistant)."));
   m_devices->setExpanded(true);
   updateMarks();
   m_filling = false;
@@ -246,6 +258,8 @@ void DeviceSidebar::updateMarks()
   for (int i = 0; i < m_devices->childCount(); ++i)
   {
     QTreeWidgetItem *item = m_devices->child(i);
+    if (item == m_addItem)
+      continue;
     const bool current = idOf(item) == m_current;
     QFont font = item->font(0);
     font.setBold(current);
@@ -268,7 +282,8 @@ QStringList DeviceSidebar::deviceIds() const
 {
   QStringList ids;
   for (int i = 0; i < m_devices->childCount(); ++i)
-    ids << idOf(m_devices->child(i));
+    if (m_devices->child(i) != m_addItem)
+      ids << idOf(m_devices->child(i));
   return ids;
 }
 

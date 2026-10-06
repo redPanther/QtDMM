@@ -120,8 +120,12 @@ public:
   static void                        addConfig(DMMInfo info);
   /// True when two model names ("vendor model") name the same meter. A
   /// trailing " *" (not yet confirmed on hardware) is ignored, so a saved
-  /// setting keeps its meter when the mark goes away after a confirmation.
+  /// setting keeps its meter when the mark goes away after a confirmation;
+  /// a renamed model's old name (canonicalModel()) is the new one.
   static bool                        sameModel(const QString &a, const QString &b);
+  /// A model name as registered now: "QtDMM Virtual meter" (before 26.2)
+  /// is "QtDMM Simulated meter".
+  static QString                     canonicalModel(const QString &name);
   /// Factory: the decoder for a protocol, null for FrameFormat::Invalid.
   static std::shared_ptr<DmmDecoder> getInstance(FrameFormat::DataFormat df);
   /// Factory by protocol name (FrameFormat::toString()).

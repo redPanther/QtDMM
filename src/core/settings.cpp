@@ -22,7 +22,6 @@
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
-  m_fileConverted = false;
   // Linux/macOS keep QSettings' native format (~/.config/QtDMM/QtDMM.conf).
   // On Windows the native format is the registry, which has no file name -
   // the first-start check, the per-instance config files and the instance
@@ -68,7 +67,6 @@ Settings::Settings(const QString &instance_id, const QString &config_path, QObje
     QFile file(m_qsettings->fileName());
     m_fileExists = file.exists();
     m_filename = m_qsettings->fileName();
-    m_fileConverted = false;
     //qInfo() << "config file: " << m_qsettings->fileName();
   }
 }

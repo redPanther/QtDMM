@@ -12,7 +12,7 @@
 static const bool registered = []()
 {
   DmmDecoder::addConfig({"QtDMM", "Calculated value", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 400000, 0, 0, 0});
-  DmmDecoder::addConfig({"QtDMM", "Virtual meter", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 40000, 0, 0, 0});
+  DmmDecoder::addConfig({"QtDMM", "Simulated meter", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 40000, 0, 0, 0});
   return true;
 }();
 

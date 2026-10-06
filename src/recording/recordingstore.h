@@ -112,6 +112,8 @@ public:
 
   /// The most readings a series keeps; the oldest go beyond it.
   static constexpr int kMaxPoints = 2000000;
+  /// The most Live keeps when the recording has no length (ms): an hour.
+  static constexpr qint64 kLiveMaxMs = 3600 * 1000;
   /// The colour of the mark where a pre-triggered recording was triggered.
   static constexpr quint32 kTriggerColor = 0xff2e9b3a;
 
@@ -180,10 +182,11 @@ public:
   /// Recording (not Live).
   bool        isRunning() const { return m_state == Record; }
   /// How much Live keeps (ms): the recording length, or the graph's window
-  /// when it records until stopped; at least the pre-trigger.
+  /// when it records until stopped, then at most kLiveMaxMs; at least the
+  /// pre-trigger.
   qint64      liveWindow() const;
-  /// How long the graph can get (ms, 0 = open): Live's window when it has a
-  /// recording length, a recording's length plus its pre-trigger, what a
+  /// How long the graph can get (ms, 0 = open): Live's window (an hour
+  /// without a recording length), a recording's length plus its pre-trigger, what a
   /// stopped recording or a file holds.
   qint64      lengthLimit() const;
   /// Recorded data not exported yet; never in Live.

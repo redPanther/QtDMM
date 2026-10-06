@@ -58,6 +58,14 @@ int main(int argc, char **argv)
   Q_EMIT sidebar.itemClicked(sidebar.devicesNode(), 0);
   check(switched == QStringList({ ut61e }), "click switches: " + switched.join(','));
 
+  // the last row adds a device; it is no device itself
+  QTreeWidgetItem *add = sidebar.devicesNode()->child(sidebar.devicesNode()->childCount() - 1);
+  int adds = 0;
+  QObject::connect(&sidebar, &DeviceSidebar::addDeviceRequested, [&] { adds++; });
+  Q_EMIT sidebar.itemClicked(add, 0);
+  check(add->text(0).startsWith('+') && adds == 1 && switched.size() == 1, "the last row asks for Add device");
+  check(!(add->flags() & (Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable)), "the add row stays put");
+
   // 3. rename in place; an empty name is not taken
   sidebar.deviceItem(shunt)->setText(0, "House battery");
   check(library.find(shunt)->name == "House battery", "renamed in place");

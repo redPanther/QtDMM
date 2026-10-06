@@ -22,9 +22,16 @@ bool DmmDecoder::sameModel(const QString &a, const QString &b)
   {
     if (name.endsWith(QLatin1String(" *")))
       name.chop(2);
-    return name;
+    return canonicalModel(name);
   };
   return bare(a) == bare(b);
+}
+
+QString DmmDecoder::canonicalModel(const QString &name)
+{
+  if (name == QLatin1String("QtDMM Virtual meter"))
+    return QStringLiteral("QtDMM Simulated meter");
+  return name;
 }
 
 std::vector<DmmDecoder::DMMInfo> DmmDecoder::getDeviceConfigurations()

@@ -19,7 +19,7 @@ class SharedStateManager;
 /// unchanged. Instance ids are the variables; a hyphen in an id can be
 /// written as an underscore in the formula. The variable t is reserved: the
 /// seconds since the device was opened, which together with sin(), rand()
-/// and friends makes a signal generator ("QtDMM / Virtual meter" is this
+/// and friends makes a signal generator ("QtDMM / Simulated meter" is this
 /// device with a formula built from a few fields). While an input is missing,
 /// invalid or older than three seconds the line carries "inf", which the
 /// display shows as OL, and status() explains which input is the problem.

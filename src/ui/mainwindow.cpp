@@ -96,6 +96,33 @@ public:
 private:
   bool m_stop;
 };
+
+/// A theme symbol with a "+" in its lower right corner (Add device: the
+/// meter and "add"), looked up when painted, so it follows the symbol set.
+class PlusIconEngine : public QIconEngine
+{
+public:
+  explicit PlusIconEngine(const QString &name) : m_name(name) {}
+  void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State state) override
+  {
+    QIcon::fromTheme(m_name).paint(painter, rect, Qt::AlignCenter, mode, state);
+    const int side = qMax(6, int(qMin(rect.width(), rect.height()) * 0.55));
+    const QRect corner(rect.right() + 1 - side, rect.bottom() + 1 - side, side, side);
+    QIcon::fromTheme("list-add").paint(painter, corner, Qt::AlignCenter, mode, state);
+  }
+  QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override
+  {
+    QPixmap pm(size);
+    pm.fill(Qt::transparent);
+    QPainter painter(&pm);
+    paint(&painter, QRect(QPoint(0, 0), size), mode, state);
+    return pm;
+  }
+  QIconEngine *clone() const override { return new PlusIconEngine(m_name); }
+
+private:
+  QString m_name;
+};
 }
 
 MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
@@ -282,13 +309,14 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   connect(m_sidebar, &DeviceSidebar::instanceRequested, this, &MainWindow::openInstance);
   connect(m_sidebar, &DeviceSidebar::renameInstanceRequested, this, &MainWindow::renameInstance);
   connect(m_sidebar, &DeviceSidebar::deleteInstanceRequested, this, &MainWindow::deleteInstance);
+  connect(m_sidebar, &DeviceSidebar::addDeviceRequested, this, &MainWindow::addDevice);
   // the readings of the others change all the time
   m_instancesTimer = new QTimer(this);
   m_instancesTimer->setInterval(1000);
   connect(m_instancesTimer, &QTimer::timeout, this, &MainWindow::updateInstances);
   m_instancesTimer->start();
   toolBarDMM->insertAction(toolBarDMM->actions().value(0), sidebar);
-  m_addDeviceAction = new QAction(QIcon::fromTheme("qtdmm-dmm"), tr("&Add device..."), this);
+  m_addDeviceAction = new QAction(QIcon(new PlusIconEngine("qtdmm-dmm")), tr("&Add device..."), this);
   m_addDeviceAction->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
   m_addDeviceAction->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Add device</span></p>"
                                      "<p>Step by step: how the meter is connected, which one it is, and whether it "
@@ -301,6 +329,8 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   toolBarDMM->addAction(m_meterAction);
   toolBarDMM->addAction(m_readingsAction);
   toolBarDMM->addAction(m_poincareAction);
+  // the graph is a window like the others (it sat with the recording)
+  toolBarDMM->addAction(action_Graph);
   connect(m_displayAction, &QAction::toggled, this, &MainWindow::storeDisplaySLOT);
 
   // arrangement: automatic (displays on top or on the left), fixed or free,

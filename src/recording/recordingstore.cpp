@@ -70,8 +70,9 @@ qint64 RecordingStore::origin() const
 qint64 RecordingStore::liveWindow() const
 {
   // as wide as a recording will be, so the picture does not jump at the start
-  // until stopped: as wide as the graph shows
-  const qint64 length = m_sampleLength > 0 ? qint64(m_sampleLength) * 100 : m_liveWidthMs;
+  // until stopped: as wide as the graph shows, at most an hour (with All
+  // the window grows with what there is, Live with it)
+  const qint64 length = m_sampleLength > 0 ? qint64(m_sampleLength) * 100 : qMin(m_liveWidthMs, kLiveMaxMs);
   return qMax<qint64>(length, m_preMs);
 }
 
@@ -79,7 +80,7 @@ qint64 RecordingStore::lengthLimit() const
 {
   switch (m_state)
   {
-    case Live:   return m_sampleLength > 0 ? liveWindow() : 0;
+    case Live:   return m_sampleLength > 0 ? liveWindow() : qMax<qint64>(kLiveMaxMs, m_preMs);
     case Record: return m_sampleLength > 0 ? qint64(m_sampleLength) * 100 + m_preUsed : 0;
     default:     return duration() - origin();
   }
@@ -345,6 +346,15 @@ void RecordingStore::setReading(const Reading &reading)
   }
   if (m_state == View)
     return;
+
+  // the time starts with the first reading, not when the graph was cleared
+  // or the meter was still connecting: the curve begins at 0
+  if (m_series.isEmpty() && m_marks.isEmpty() && reading.t > m_t0)
+  {
+    m_start = m_start.addMSecs(reading.t - m_t0);
+    m_t0 = reading.t;
+    Q_EMIT progressChanged();
+  }
 
   RawPoint p;
   p.t = qMax<qint64>(0, reading.t - m_t0);

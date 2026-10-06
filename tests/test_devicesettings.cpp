@@ -13,7 +13,7 @@
 // src/device/transports/calc.cpp registers these with its CalcDevice
 static const bool registered = [] {
   DmmDecoder::addConfig({"QtDMM", "Calculated value", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 400000, 0, 0, 0});
-  DmmDecoder::addConfig({"QtDMM", "Virtual meter", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 40000, 0, 0, 0});
+  DmmDecoder::addConfig({"QtDMM", "Simulated meter", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 40000, 0, 0, 0});
   return true;
 }();
 
@@ -55,34 +55,37 @@ int main(int argc, char **argv)
     check(out.value(it.key()).toString() == it.value().toString(),
           QString("UT61E %1: %2 != %3").arg(it.key(), out.value(it.key()).toString(), it.value().toString()));
   check(w.device() == "/dev/serial/by-id/usb-Prolific-if00-port0", "UT61E keeps a port not in the list: " + w.device());
-  check(!w.isAdvancedOpen(), "UT61E: Advanced closed");
-  check(shown(w, "ButtonGroup11") && shown(w, "ui_advanced"), "UT61E: port row and Advanced button");
-  check(!shown(w, "ui_advancedBox"), "UT61E: port parameters hidden");
+  check(!w.portParametersShown(), "UT61E: port parameters not shown");
+  check(shown(w, "ButtonGroup11") && !w.findChild<QWidget *>("ui_advanced"), "UT61E: port row, no Advanced button");
+  check(!shown(w, "ui_advancedBox") && !shown(w, "ui_protocol_title"), "UT61E: port parameters and protocol hidden");
 
   // 2. manual settings: Advanced open, the model "Manual"
   w.load({{"DMM/model", "Manual"}, {"Port settings/device", "/dev/ttyUSB1"}, {"Port settings/baud", "2400"}});
-  check(w.isAdvancedOpen(), "manual: Advanced open");
-  check(shown(w, "ui_serialBox") && shown(w, "ui_protocol"), "manual: port parameters and protocol shown");
+  check(w.portParametersShown(), "manual: port parameters shown");
+  check(shown(w, "ui_serialBox") && shown(w, "ui_protocol") && shown(w, "ui_protocol_title"),
+        "manual: port parameters and protocol shown, with its title");
   check(w.keys().value("DMM/model") == "Manual", "manual: model " + w.keys().value("DMM/model").toString());
   check(w.speed() == 2400, "manual: baud");
+  // a model chosen after manual settings: its fixed parameters go again
+  w.findChild<QComboBox *>("ui_vendor")->setCurrentText("Uni-Trend");
+  Q_EMIT w.findChild<QComboBox *>("ui_vendor")->activated(w.findChild<QComboBox *>("ui_vendor")->currentIndex());
+  check(!w.portParametersShown() && !shown(w, "ui_advancedBox"), "manual, then a model: the fixed parameters hidden");
 
-  // 3. the button opens and closes
-  w.load(ut61e);
-  w.findChild<QToolButton *>("ui_advanced")->click();
-  check(w.isAdvancedOpen() && shown(w, "ui_serialBox"), "click opens Advanced");
-  w.findChild<QToolButton *>("ui_advanced")->click();
-  check(!w.isAdvancedOpen() && !shown(w, "ui_advancedBox"), "second click closes it");
+  // 3. no frames: the groups are sections with a title above
+  check(w.findChild<QGroupBox *>("ui_protocol")->title().isEmpty() && w.findChild<QLabel *>("ui_protocol_title"),
+        "sections: the title above the group");
 
   // 4. calculated value: the formula group, no port, no Advanced
   w.load({{"DMM/model", "QtDMM Calculated value"}, {"DMM/calc-unit", "W"}, {"DMM/calc-expression", "u * i"}});
   check(w.isCalculated(), "calc: model");
   check(w.device() == "calc W u * i", "calc: device " + w.device());
-  check(shown(w, "ui_calcGroup") && !shown(w, "ButtonGroup11") && !shown(w, "ui_advanced"), "calc: formula group only");
+  check(shown(w, "ui_calcGroup") && !shown(w, "ButtonGroup11") && !shown(w, "ui_advancedBox")
+          && shown(w, "ui_calcGroup_title"), "calc: formula group only");
 
   // 5. virtual meter: its own group, the formula from the waveform
   w.load({{"DMM/model", "QtDMM Virtual meter"}, {"DMM/virtual-waveform", 0}, {"DMM/virtual-min", "5"},
           {"DMM/virtual-unit", "V"}, {"DMM/virtual-coupling", "DC"}});
-  check(w.isVirtual() && shown(w, "ui_virtualGroup") && !shown(w, "ui_advanced"), "virtual: group");
+  check(w.isVirtual() && shown(w, "ui_virtualGroup") && !shown(w, "ui_advancedBox"), "virtual: group");
   check(w.device().startsWith("calc V/DC "), "virtual: device " + w.device());
   check(w.keys().value("DMM/virtual-min") == "5", "virtual: min");
   check(w.keys().value("Port settings/device").toString().startsWith("calc "),

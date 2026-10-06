@@ -22,6 +22,8 @@
 
 #pragma once
 
+class QGroupBox;
+
 #include <QtSerialPort>
 #include <vector>
 
@@ -58,9 +60,9 @@ public:
   /// The ports offered in the port list (Transport::availablePorts() and the
   /// custom ports); the port of load() is added when missing.
   void           setPorts(const QStringList &ports);
-  /// Whether "Advanced" (port parameters, protocol) is open; load() closes
-  /// it for a known model and opens it for manual settings.
-  bool           isAdvancedOpen() const;
+  /// The port parameters and the protocol are shown: set by hand (a known
+  /// model brings its own, so they are hidden).
+  bool           portParametersShown() const;
   /// Offers only the models @p filter accepts (all when empty); @p manual
   /// false disables "Manual settings". Call before load().
   void           setModelFilter(std::function<bool(const DmmDecoder::DMMInfo &)> filter, bool manual);
@@ -103,7 +105,7 @@ public:
   QString        device() const;
   /// True while the model "QtDMM / Calculated value" is chosen.
   bool           isCalculated() const;
-  /// True while the model "QtDMM / Virtual meter" is chosen.
+  /// True while the model "QtDMM / Simulated meter" is chosen.
   bool           isVirtual() const;
   /// Victron over Bluetooth LE: the Bluetooth group replaces the port.
   bool           isBluetooth() const;
@@ -126,7 +128,10 @@ protected Q_SLOTS:
   void           on_ui_save_clicked();
   void           on_ui_externalSetup_toggled();
   /// Opens or closes "Advanced".
-  void           setAdvanced(bool open);
+  void           showPortParameters(bool show);
+  /// Turns a group box into a section: no frame, its title a bold label
+  /// above it that comes and goes with it.
+  void           sectionTitle(QGroupBox *group);
   /// Re-parses the formula and refreshes the hint (variables, live values, errors).
   void           updateCalcHint();
   /// Rebuilds the virtual meter's formula from the waveform fields.
@@ -169,6 +174,7 @@ private:
   std::function<bool(const DmmDecoder::DMMInfo &)> m_filter;
   bool           m_manualAllowed = true;
   bool           m_portVisible = true;
+  bool           m_portParameters = false;   ///< showPortParameters()
   QStringListModel *m_completerNames = nullptr;   ///< what the model field completes
   QString        m_sigrokExe = QStringLiteral("sigrok-cli");
 };

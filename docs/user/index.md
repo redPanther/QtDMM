@@ -26,7 +26,7 @@ side, one window each, and can be combined into calculated values.
   protocol and serial settings.
 - [Calculated values](calculated-values.md) — power from a voltage and a
   current instance: formulas over the readings of other instances; the
-  virtual meter for demos without hardware.
+  simulated meter for demos without hardware.
 - [Bench meters through sigrok-cli](bench-meters.md) — Keysight, Agilent, HP
   and Siglent SCPI meters over USB-TMC, LAN or serial, with sigrok-cli doing
   the talking.

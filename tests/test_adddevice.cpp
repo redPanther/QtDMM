@@ -16,7 +16,7 @@
 // src/device/transports/calc.cpp registers these with its CalcDevice
 static const bool registered = [] {
   DmmDecoder::addConfig({"QtDMM", "Calculated value", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 400000, 0, 0, 0});
-  DmmDecoder::addConfig({"QtDMM", "Virtual meter", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 40000, 0, 0, 0});
+  DmmDecoder::addConfig({"QtDMM", "Simulated meter", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 40000, 0, 0, 0});
   return true;
 }();
 
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   QApplication app(argc, argv);
   QTemporaryDir dir;
   DeviceLibrary library(dir.path());
-  library.add("QtDMM Virtual meter", { { "DMM/model", "QtDMM Virtual meter" } });
+  library.add("Simulated meter", { { "DMM/model", "QtDMM Virtual meter" } });   // the old model name
 
   // 1. the models per connection
   for (const DmmDecoder::DMMInfo &info : DmmDecoder::getDeviceConfigurations())
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 
     dlg.chooseConnection(AddDeviceDlg::Simulated);
     check(dlg.page() == AddDeviceDlg::DevicePage && dlg.settings()->isVirtual(), "simulated: page 3, the virtual meter");
-    check(dlg.name() == "QtDMM Virtual meter (2)", "name: unique in My devices: " + dlg.name());
+    check(dlg.name() == "Simulated meter (2)", "name: unique in My devices: " + dlg.name());
     check(dlg.canGoNext(), "virtual meter: Next");
     dlg.next();
     check(dlg.page() == AddDeviceDlg::TargetPage, "page 4");
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     dlg.next();
     dlg.findChild<QToolButton *>("ui_newWindow")->click();
     check(dlg.result() == QDialog::Accepted && dlg.target() == AddDeviceDlg::NewWindow, "new window finishes");
-    check(dlg.keys().value("DMM/model") == "QtDMM Virtual meter", "keys: the model");
+    check(dlg.keys().value("DMM/model") == "QtDMM Simulated meter", "keys: the model");
   }
 
   // the searches of the real dialog look at this machine; here the finds are given

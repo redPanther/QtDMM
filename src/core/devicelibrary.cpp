@@ -60,7 +60,9 @@ QVariantMap DeviceLibrary::entryKeys(const QVariantMap &keys)
     wanted << "Port settings/ble-address";
   else if (type == QLatin1String("sigrok"))
     wanted << "Port settings/sigrok-conn" << "Port settings/sigrok-options";
-  else if (type == QLatin1String("calc") && model.endsWith(QLatin1String("Virtual meter")))
+  // the simulated meter, "Virtual meter" before 26.2 (DmmDecoder::canonicalModel())
+  else if (type == QLatin1String("calc")
+           && (model.endsWith(QLatin1String("Simulated meter")) || model.endsWith(QLatin1String("Virtual meter"))))
   {
     for (auto it = keys.cbegin(); it != keys.cend(); ++it)
       if (it.key().startsWith(QLatin1String("DMM/virtual-")))

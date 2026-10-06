@@ -15,11 +15,15 @@ The graph is in one of three modes:
 - **Live** — right after connecting the graph runs with the meter: it
   holds the readings of the last recording length (or of the visible
   window when the recording has no length) and older ones fall out on the
-  left. The newest reading is at the right edge. Live is no recording: there is
+  left; without a recording length it keeps an hour at most. The newest
+  reading is at the right edge. Live starts with **All**: the graph shows
+  what there is and grows with it up to the recording length (or the
+  hour). The time begins with the first reading, so the curve starts at 0
+  also when the meter took a while to connect or after *Clear*. Live is no recording: there is
   nothing to lose, and leaving it asks nothing.
 - **Recording** — *Record* (the grey dot ● in the toolbar, Space) asks
-  for the **Length** of the recording, with the last one ready: Enter
-  starts it, ∞ records until stopped. Then it clears the graph and records
+  how long to record, with the last length ready: Enter starts it, *Until
+  Stop* records until you stop it. Then it clears the graph and records
   from now on, until the length is reached or you press the button again
   (now a red square ■, *Stop*). Top left in the graph stands
   `● REC 0:42 / 10:00`. A recording keeps all its readings from the start,
