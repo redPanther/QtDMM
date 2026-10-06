@@ -100,15 +100,12 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   connect(ui_graph, &GraphWidget::liveRequested, this, &InstanceWidget::liveSLOT);
   // the graph runs from the start: Live, until a recording
   m_ctl->recorder()->live();
-  // OK reconnects the meter; Apply takes the settings over while the dialog
-  // stays open, and the same runs at exit - neither may connect (a lambda
-  // does not hide sender(): it still was the dialog, and quitting connected
-  // a Bluetooth meter twice); an empty window has nothing to connect
-  connect(m_configDlg, &SettingsDialog::accepted, this, [this]() { applySLOT(dmmConfigured()); });
+  // OK and Apply take the settings over; the meter stays as it is - the
+  // dialog has no meter page, a meter is changed through takeOver()
+  connect(m_configDlg, &SettingsDialog::accepted, this, [this]() { applySLOT(); });
   connect(m_configDlg, &SettingsDialog::applied, this, [this]() { applySLOT(); });
   connect(m_configDlg, SIGNAL(zoomed()), this, SLOT(zoomedSLOT()));
   connect(ui_graph, &GraphWidget::windowRequested, m_configDlg, &SettingsDialog::setWindowSecondsSLOT);
-  connect(m_configDlg, SIGNAL(rejected()), this, SLOT(rejectSLOT()));
   connect(ui_graph, SIGNAL(sampleTime(int)), m_configDlg, SLOT(setSampleTimeSLOT(int)));
   // this graph's own colours from its context menu (empty = the default
   // from the settings page, applied in readConfig())
@@ -347,10 +344,9 @@ void InstanceWidget::helpSLOT()
 
 void InstanceWidget::configSLOT()
 {
-  Q_EMIT setConnect(false);
-  Q_EMIT connectDMM(false);
-  connectSLOT(false);
-
+  // the meter goes on reading, and a recording on recording: the dialog
+  // has no meter page any more (it disconnected for that, and stopped a
+  // recording)
   m_configDlg->show();
   m_configDlg->raise();
 }
@@ -459,17 +455,7 @@ void InstanceWidget::configRecorderSLOT()
   m_configDlg->showPage(SettingsDialog::Recorder);
 }
 
-void InstanceWidget::rejectSLOT()
-{
-  if (sender() == m_configDlg && dmmConfigured())
-  {
-    Q_EMIT setConnect(true);
-    Q_EMIT connectDMM(true);
-    connectSLOT(true);
-  }
-}
-
-void InstanceWidget::applySLOT(bool reconnect)
+void InstanceWidget::applySLOT()
 {
   readConfig();
   m_ctl->setAlarms(m_configDlg->alarms());
@@ -483,13 +469,6 @@ void InstanceWidget::applySLOT(bool reconnect)
   m_ctl->applyScpi(scpi);
   syncDevice();
   Q_EMIT configChanged();
-
-  if (reconnect)
-  {
-    Q_EMIT setConnect(true);
-    Q_EMIT connectDMM(true);
-    connectSLOT(true);
-  }
 }
 
 void InstanceWidget::zoomedSLOT()
@@ -576,18 +555,26 @@ void InstanceWidget::readConfig()
   MeterConnection *dmm = m_ctl->dmm();
   bool reopen = false;
 
-  if (dmm->isOpen())
+  // the port only when the meter changed: a reopen costs a Bluetooth meter
+  // seconds, and the readings and a recording a gap
+  QVariantMap meter = m_settings->meterKeys();
+  meter.insert("sigrok", m_configDlg->dmmInfo().sigrokExe);
+  if (!dmm->isOpen() || meter != m_appliedMeter)
   {
-    dmm->close();
-    reopen = true;
-  }
+    m_appliedMeter = meter;
+    if (dmm->isOpen())
+    {
+      dmm->close();
+      reopen = true;
+    }
 
-  dmm->setDmmInfo(m_configDlg->dmmInfo());
-  dmm->setDevice(m_configDlg->device());
-  dmm->setSpeed(m_configDlg->speed());
-  dmm->setFormat(m_configDlg->format());
-  dmm->setPortSettings(static_cast<QSerialPort::DataBits>(m_configDlg->bits()), static_cast<QSerialPort::StopBits>(m_configDlg->stopBits()),
+    dmm->setDmmInfo(m_configDlg->dmmInfo());
+    dmm->setDevice(m_configDlg->device());
+    dmm->setSpeed(m_configDlg->speed());
+    dmm->setFormat(m_configDlg->format());
+    dmm->setPortSettings(static_cast<QSerialPort::DataBits>(m_configDlg->bits()), static_cast<QSerialPort::StopBits>(m_configDlg->stopBits()),
                          m_configDlg->parity(), m_configDlg->externalSetup(), m_configDlg->rts(), m_configDlg->dtr() );
+  }
 
   // the sample time first: setGraphSize() counts the window in samples, and
   // the x axis converts them back with the sample time
