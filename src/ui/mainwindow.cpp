@@ -677,7 +677,9 @@ void MainWindow::setUseTextLabel(bool on)
 void MainWindow::createActions()
 {
   connect(action_Connect, SIGNAL(triggered(bool)), m_wid, SLOT(connectSLOT(bool)));
-  connect(action_Connect, SIGNAL(triggered(bool)), this, SLOT(connectSLOT(bool)));
+  // toggled, not triggered: a connection made by the program (Add device, the
+  // sidebar, the start, SCPI) sets the check mark only - Record stayed off
+  connect(action_Connect, &QAction::toggled, this, &MainWindow::connectSLOT);
   connect(action_Reset, SIGNAL(triggered()), m_wid, SLOT(resetSLOT()));
   connect(action_Start, SIGNAL(triggered()), this, SLOT(startSLOT()));
   // one button for both: a grey dot starts, the red square stops
@@ -857,9 +859,8 @@ void MainWindow::connectSLOT(bool on)
 {
   action_Start->setEnabled(on);
   action_Stop->setEnabled(on && m_running);
-
-  if (!on)
-    m_running = false;
+  // whether it records is runningSLOT()'s: an alarm's program has the port
+  // a while and the recording runs on
   updateRecorderActions();
 }
 
