@@ -25,8 +25,8 @@
 #include <QtGui>
 #include <QtWidgets>
 
-//class SimpleCfg;
 class Settings;
+class QFormLayout;
 
 /// Base class of the pages in the settings dialog (SettingsDialog).
 ///
@@ -41,9 +41,11 @@ public:
   SettingsPage(QWidget *parent = Q_NULLPTR);
   /// Category name shown in the dialog's list.
   QString label() const { return m_label; }
+  /// One line under the page's title: what the page is for.
   QString description() const { return m_description; }
-  /// The page's symbol, from the icon theme (follows the design).
-  QIcon   icon() const { return QIcon::fromTheme(m_iconName); }
+  /// The page's symbol: from the plain set, whichever symbols the toolbar
+  /// has, so the list looks alike.
+  QIcon   icon() const;
   /// Page id = SettingsDialog::PageType, also the index in the page stack.
   void    setId(int id) { m_id = id; }
   int     id() const { return m_id; }
@@ -58,6 +60,23 @@ public Q_SLOTS:
   virtual void applySLOT() = 0;
 
 protected:
+  /// The page's form on @p parent (default: the page): labels right-aligned,
+  /// the fields at their own width.
+  QFormLayout *createForm(QWidget *parent = nullptr);
+  /// A section title, bold and without a frame; space above it separates
+  /// it from the section before.
+  QLabel  *addSection(QFormLayout *form, const QString &title);
+  /// The same with a widget as the title (a check box that switches the
+  /// section on).
+  void     addSection(QFormLayout *form, QWidget *title);
+  /// All labels of @p form as wide as the widest, shown or not: the
+  /// fields stay put when rows come and go.
+  static void alignLabels(QFormLayout *form);
+  /// Shows or hides the row of @p field with its label.
+  static void showRow(QFormLayout *form, QWidget *field, bool show);
+  /// Fields side by side in one form row (a value and its unit, a pair).
+  static QWidget *row(std::initializer_list<QWidget *> widgets, bool stretch = true);
+
   Settings *m_cfg;
   QString   m_label;
   QString   m_description;

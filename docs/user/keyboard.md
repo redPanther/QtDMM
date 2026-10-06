@@ -74,7 +74,7 @@ While the table has the focus:
 | Key | Action |
 |---|---|
 | Ctrl+PgUp / Ctrl+PgDn | Previous / next page |
-| Alt+F | Factory defaults for the current page |
+| Alt+R | Reset the current page to the defaults |
 | Enter / Esc | OK / Cancel |
 
 ## Handbook window

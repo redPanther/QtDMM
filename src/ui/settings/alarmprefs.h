@@ -35,6 +35,7 @@ private:
   QList<Alarm> m_alarms;
   QString m_unit = "V";
   QListWidget *m_list;
+  QLabel *m_empty;   ///< the hint in the empty list
   QPushButton *m_edit, *m_remove;
 };
 

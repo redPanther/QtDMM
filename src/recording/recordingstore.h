@@ -64,9 +64,9 @@ struct LoggedReading
 /// Recording starts by hand, at a clock time or when the value crosses a
 /// threshold (StartMode), and stops by hand or after the recording length.
 /// The clock time and the thresholds start it from Live only: a recording
-/// in View is not overwritten by a trigger. The store keeps the last
-/// maxDuration() of a recording (at most kMaxPoints readings): older
-/// readings go (appended() says so). The alarm marks live here too.
+/// in View is not overwritten by a trigger. The store keeps all of a
+/// recording, up to kMaxPoints readings: beyond that the oldest go
+/// (appended() says so). The alarm marks live here too.
 ///
 /// Next to the recording the store keeps a second series, the readings:
 /// every reading of every value at full resolution, with its own capacity and
@@ -122,10 +122,11 @@ public:
   /// The grid of the export in tenths of a second (>= 1).
   void        setSampleTime(int tenths);
   int         sampleTime() const { return m_sampleTime; }
-  /// How much of a recording the store keeps, in seconds (>= 1): older
-  /// readings go.
-  void        setMaxDuration(int seconds);
-  int         maxDuration() const { return int(m_maxMs / 1000); }
+  /// How wide Live is when the recording has no length (seconds, >= 1):
+  /// the graph's visible window.
+  void        setLiveWidth(int seconds);
+  /// The most readings a series keeps (kMaxPoints; smaller for tests).
+  void        setMaxPoints(int points);
   /// Recording duration in tenths of a second after which recording stops
   /// on its own (0 = until stopped).
   void        setSampleLength(int tenths);
@@ -178,10 +179,13 @@ public:
   State       state() const { return m_state; }
   /// Recording (not Live).
   bool        isRunning() const { return m_state == Record; }
-  /// How much Live keeps (ms): the recording length, or what the store keeps
-  /// when it records until stopped; at least the pre-trigger, at most
-  /// maxDuration().
+  /// How much Live keeps (ms): the recording length, or the graph's window
+  /// when it records until stopped; at least the pre-trigger.
   qint64      liveWindow() const;
+  /// How long the graph can get (ms, 0 = open): Live's window when it has a
+  /// recording length, a recording's length plus its pre-trigger, what a
+  /// stopped recording or a file holds.
+  qint64      lengthLimit() const;
   /// Recorded data not exported yet; never in Live.
   bool        dirty() const { return m_dirty; }
   void        setDirty(bool dirty) { m_dirty = dirty; }
@@ -313,7 +317,9 @@ private:
   RecordingSeries m_series;
   qint64      m_t0 = 0;           ///< the monotonic clock at the start
   qint64      m_stopT = -1;       ///< ms since the start when it stopped; -1 = running or never ran
-  qint64      m_maxMs = 3600 * 1000;
+  qint64      m_liveWidthMs = 600 * 1000;
+  qint64      m_floorMs = 0;      ///< a recording beyond m_maxPoints: the time of the first reading kept
+  int         m_maxPoints = kMaxPoints;
   int         m_loadedGrid = 0;   ///< load(): the points are the steps of this grid (tenths); 0 = readings
   QList<Mark> m_marks;
   QTimer      m_poll;

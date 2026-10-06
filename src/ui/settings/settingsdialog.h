@@ -34,12 +34,10 @@ class SharedStateManager;
 class DeviceLibrary;
 class QPrinter;
 class RecorderPrefs;
-class ScalePrefs;
 class DeviceSettings;
 class GeneralPrefs;
 class GuiPrefs;
 class GraphPrefs;
-class IntegrationPrefs;
 class AlarmPrefs;
 class ScpiPrefs;
 #include "core/alarm.h"
@@ -63,9 +61,7 @@ public:
   {
     General = 0,
     GUI,   ///< "Appearance"
-    Graph,
-    Scale,
-    Integration,
+    Graph,      ///< with the Y axis, the time window and the integration curve
     Recorder,
     Alarms,
     Scpi,
@@ -96,7 +92,6 @@ public:
   /// @name Graph, scale and integration pages
   /// @{
   int                   windowSeconds() const;
-  int                   totalSeconds() const;
   double                scaleMin() const;
   double                scaleMax() const;
   bool                  automaticScale() const;
@@ -128,6 +123,12 @@ public:
   GraphWidget::SampleMode  sampleMode() const;
   int                   sampleStep() const;
   int                   sampleLength() const;
+  /// The recording length as asked when Record is pressed (RecordLengthDlg):
+  /// a value, 0 = until stopped, and its unit (0 s, 1 min, 2 h, 3 d). Set
+  /// stores it at once.
+  int                   recordingLengthValue() const;
+  int                   recordingLengthUnit() const;
+  void                  setRecordingLength(int value, int unit);
   int                   preTrigger() const;
   double                raisingThreshold() const;
   double                fallingThreshold() const;
@@ -196,13 +197,11 @@ public Q_SLOTS:
   void                  on_ui_buttonBox_rejected();
   /// The graph changed the sample time (recorder page follows).
   void                  setSampleTimeSLOT(int);
-  void                  setGraphSizeSLOT(int, int);
   /// A time button of the graph: the visible window, applied like a zoom.
   void                  setWindowSecondsSLOT(int seconds);
   void                  setCurrentTipSLOT(int);
   void                  zoomInSLOT(double);
   void                  zoomOutSLOT(double);
-  void                  zoomFitSLOT();
   /// A threshold cursor was dragged in the graph; updates the spin box.
   void                  thresholdChangedSLOT(GraphWidget::CursorMode, double);
 
@@ -212,20 +211,18 @@ Q_SIGNALS:
   /// OK pressed: settings saved, dialog closes.
   void                  accepted();
   void                  rejected();
-  /// Window/total size changed on the graph page.
+  /// The visible window changed on the graph page.
   void                  zoomed();
 
 protected:
   QPrinter             *m_printer;
   QRect                 m_winRect;
   RecorderPrefs        *m_recorder;
-  ScalePrefs           *m_scale;
   /// Not shown: turns the meter's settings keys into the connection.
   DeviceSettings       *m_meter;
   GeneralPrefs         *m_general;
   GuiPrefs             *m_gui;
   GraphPrefs           *m_graph;
-  IntegrationPrefs     *m_integration;
   AlarmPrefs           *m_alarms;
   ScpiPrefs            *m_scpi;
   bool                  m_buttonBox_OK;
@@ -238,6 +235,10 @@ protected:
   SettingsPage           *page(int index) const;
   /// Keeps the dialog within the available area of its screen.
   void                  showEvent(QShowEvent *event) override;
+  /// The page's name and its line in the header.
+  void                  showHeader(SettingsPage *page);
+  /// The list's symbols after the design changed (light or dark).
+  void                  updateIcons();
 
 protected Q_SLOTS:
   void                  on_ui_list_currentItemChanged(QListWidgetItem *current, QListWidgetItem *);

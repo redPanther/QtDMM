@@ -111,37 +111,18 @@ int main(int argc, char **argv)
     check(ok, QString("importCsvFile() failed for fixture '%1'").arg(name));
   }
 
-  // --- 1b. an import sizes the graph in seconds: the signal to the settings
-  //          page and what the recorder keeps follow the recording's length,
-  //          not ten times it ---
+  // --- 1b. an import keeps all of the file and leaves the window as it
+  //          was; the time buttons go up to the file's length ---
   {
     GraphWidget graph(nullptr, &settings);
-    QSignalSpy sized(&graph, &GraphWidget::graphSize);
+    graph.setGraphSize(60);
     check(graph.importCsvFile(dataDir + "/new_larger.csv"), "import size: import failed");
     const int count = graph.store()->count();
-    const double seconds = count * graph.store()->sampleTime() / 10.0;
-    check(count > 1 && sized.size() == 1, "import size: expected one graphSize signal");
-    if (sized.size() == 1)
-    {
-      const int length = sized.first().at(1).toInt();
-      check(length >= seconds && length < seconds + 1,
-            QString("import size: total length %1 s for a recording of %2 s").arg(length).arg(seconds));
-    }
-    check(graph.store()->maxDuration() <= seconds + 1 && graph.store()->origin() == 0,
-          QString("import size: keeps %1 s for %2 s").arg(graph.store()->maxDuration()).arg(seconds));
-  }
-
-  // --- 1c. a file shorter than what the graph keeps does not shrink it: the
-  //          length goes to the settings, and the next recording (and Live)
-  //          kept only the file's length ---
-  {
-    GraphWidget graph(nullptr, &settings);
-    graph.setGraphSize(60, 3600);
-    QSignalSpy sized(&graph, &GraphWidget::graphSize);
-    check(graph.importCsvFile(dataDir + "/new_larger.csv"), "import short: import failed");
-    check(sized.isEmpty() && graph.store()->maxDuration() == 3600,
-          QString("import short: %1 signals, keeps %2 s").arg(sized.size()).arg(graph.store()->maxDuration()));
-    check(graph.store()->state() == RecordingStore::View, "import short: viewed");
+    const double seconds = (count - 1) * graph.store()->sampleTime() / 10.0;
+    const double limit = graph.store()->lengthLimit() / 1000.0;
+    check(count > 1 && graph.store()->origin() == 0 && limit >= seconds && limit < seconds + 1,
+          QString("import size: %1 points, limit %2 s for %3 s").arg(count).arg(limit).arg(seconds));
+    check(graph.store()->state() == RecordingStore::View, "import size: viewed");
   }
 
   // --- 2. malformed input must be rejected, not crash or half-import ---
@@ -184,7 +165,7 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(10);   // one sample per second
-    graph.setGraphSize(300, 3600);
+    graph.setGraphSize(300);
     const QList<QToolButton *> buttons = graph.findChildren<QToolButton *>();
     auto button = [&](const QString &text) -> QToolButton *
     {
@@ -202,16 +183,20 @@ int main(int argc, char **argv)
       one->click();
       check(spy.size() == 1 && spy.last().at(0).toInt() == 60, "time buttons: 1 min asks for a 60 s window");
       // InstanceWidget applies the request through the settings, like a zoom
-      graph.setGraphSize(60, 3600);
+      graph.setGraphSize(60);
       check(one->isChecked() && !five->isChecked(), "time buttons: the applied window is marked");
-      graph.setGraphSize(45, 3600);
+      graph.setGraphSize(45);
       check(!one->isChecked() && !five->isChecked() && !thirty->isChecked(), "time buttons: a zoomed window marks none");
-      graph.setGraphSize(60, 600);
+      graph.setGraphSize(60);
+      graph.setSampleLength(6000);   // a recording of 10 min, waited for in Live
+      graph.liveSLOT();
       check(thirty->isHidden() && !five->isHidden(), "time buttons: 30 min is hidden for a 10 min recording");
+      graph.setSampleLength(0);
+      check(!thirty->isHidden(), "time buttons: 30 min is back without a length");
 
       // All: the recording so far (at least 10 s), growing with it
       spy.clear();
-      graph.setGraphSize(10, 600);
+      graph.setGraphSize(10);
       all->click();
       check(all->isChecked(), "time buttons: All stays marked");
       Feed feed(graph);
@@ -223,7 +208,7 @@ int main(int argc, char **argv)
         grew = grew && args.at(0).toInt() > 10 && args.at(0).toInt() <= 600;
       check(grew, QString("time buttons: All grows the window with the recording (%1 requests)").arg(spy.size()));
       graph.zoomInSLOT();
-      graph.setGraphSize(8, 600);
+      graph.setGraphSize(8);
       check(!all->isChecked(), "time buttons: zooming ends All");
     }
   }
@@ -234,7 +219,7 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(10);   // one sample per second
-    graph.setGraphSize(10, 3600);
+    graph.setGraphSize(10);
     QToolButton *all = nullptr;
     for (QToolButton *b : graph.findChildren<QToolButton *>())
       if (b->text() == "All")
@@ -248,7 +233,7 @@ int main(int argc, char **argv)
       QObject::connect(&graph, &GraphWidget::windowRequested, &graph, [&](int seconds)
       {
         requests << seconds;
-        graph.setGraphSize(seconds, 3600);
+        graph.setGraphSize(seconds);
       });
       Feed feed(graph);
       graph.startSLOT();
@@ -321,7 +306,8 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
-    graph.setGraphSize(5, 5); // keeps 5 s -> drops quickly
+    graph.setGraphSize(5);
+    graph.store()->setMaxPoints(10);   // drops quickly
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph, 500);
     graph.startSLOT();
@@ -332,7 +318,7 @@ int main(int argc, char **argv)
     check(graph.dirty(), "ring-buffer smoke test: expected graph to be marked dirty after recording");
     check(graph.store()->origin() > 0, "ring-buffer smoke test: the store must have dropped old readings");
 
-    graph.setGraphSize(10, 10);
+    graph.setGraphSize(10);
     feed.value(1.23);
   }
 
@@ -344,7 +330,7 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
-    graph.setGraphSize(100, 100);
+    graph.setGraphSize(100);
     graph.setIntegration(true, 10.0, 0.5, 0.0);
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph);
@@ -369,7 +355,7 @@ int main(int argc, char **argv)
     GraphWidget graph(nullptr, &cfg);
     graph.resize(800, 500);
     auto *x = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Horizontal).first());
-    graph.setGraphSize(600, 3600);   // with the default sample time of 0.1 s
+    graph.setGraphSize(600);   // with the default sample time of 0.1 s
     graph.setSampleTime(10);         // then 1 s
     // the error showed on the next x axis update, e.g. scrolling
     auto *bar = graph.findChild<QScrollBar *>(QString(), Qt::FindDirectChildrenOnly);   // not the chart view's
@@ -378,7 +364,7 @@ int main(int argc, char **argv)
     check(qAbs(x->max() - x->min() - 599) < 1.5,
           QString("window stays 600 s after a new sample time, got %1 s").arg(x->max() - x->min()));
     graph.setSampleTime(10);         // unchanged: nothing to do
-    graph.setGraphSize(300, 3600);
+    graph.setGraphSize(300);
     check(qAbs(x->max() - x->min() - 299) < 1.5, QString("300 s window, got %1 s").arg(x->max() - x->min()));
   }
 
@@ -410,7 +396,7 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(2);          // a grid of 0.2 s
-    graph.setGraphSize(100, 100);
+    graph.setGraphSize(100);
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph);
     graph.startSLOT();
@@ -439,7 +425,7 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
-    graph.setGraphSize(100, 100);
+    graph.setGraphSize(100);
     graph.setThresholds(0.0, 1.0);
     graph.setMode(GraphWidget::Raising);
     QSignalSpy running(&graph, &GraphWidget::running);
@@ -459,7 +445,7 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
-    graph.setGraphSize(100, 100);
+    graph.setGraphSize(100);
     graph.setThresholds(-1.0, 5.0);
     graph.setMode(GraphWidget::Falling);
     QSignalSpy running(&graph, &GraphWidget::running);
@@ -479,7 +465,7 @@ int main(int argc, char **argv)
   //          start time (the store's clock looks every second), not before ---
   {
     GraphWidget later(nullptr, &settings);
-    later.setGraphSize(100, 100);
+    later.setGraphSize(100);
     Feed laterFeed(later);
     later.setStartTime(Feed::wall(0).time().addSecs(120));
     later.setMode(GraphWidget::Time);
@@ -489,7 +475,7 @@ int main(int argc, char **argv)
     check(notYet.isEmpty(), "time trigger: started before the start time");
 
     GraphWidget now(nullptr, &settings);
-    now.setGraphSize(100, 100);
+    now.setGraphSize(100);
     Feed nowFeed(now);
     now.setStartTime(Feed::wall(0).time());
     now.setMode(GraphWidget::Time);
@@ -506,7 +492,8 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
-    graph.setGraphSize(1, 1);        // keeps 1 s
+    graph.setGraphSize(1);
+    graph.store()->setMaxPoints(10);  // keeps 1 s
     graph.setIntegration(true, 10.0, 0.0, 0.0);
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph);
@@ -539,7 +526,7 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(1);
-    graph.setGraphSize(100, 100);
+    graph.setGraphSize(100);
     graph.setSampleLength(5);
     graph.setMode(GraphWidget::Manual);
     QSignalSpy running(&graph, &GraphWidget::running);
@@ -591,7 +578,7 @@ int main(int argc, char **argv)
     GraphWidget graph(nullptr, &settings);
     graph.resize(300, 200);
     graph.setSampleTime(1);
-    graph.setGraphSize(200, 200);            // 2000 readings in the window
+    graph.setGraphSize(200);            // 2000 readings in the window
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph);
     graph.startSLOT();
@@ -621,7 +608,7 @@ int main(int argc, char **argv)
     check(hi == 1000.0 && lo == -500.0, QString("thinning: spike and dip must be drawn, got %1 .. %2").arg(lo).arg(hi));
 
     const QString grown = seriesY(graph, 0) + "|" + seriesY(graph, 2);
-    graph.setGraphSize(200, 200);            // rebuilds the series
+    graph.setGraphSize(200);            // rebuilds the series
     check(grown == seriesY(graph, 0) + "|" + seriesY(graph, 2),
           "thinning: appended series must equal the rebuilt one");
   }
@@ -634,7 +621,8 @@ int main(int argc, char **argv)
     GraphWidget graph(nullptr, &settings);
     graph.resize(300, 200);
     graph.setSampleTime(1);
-    graph.setGraphSize(200, 200);            // keeps 200 s
+    graph.setGraphSize(200);
+    graph.store()->setMaxPoints(2000);  // keeps 200 s
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph);
     graph.startSLOT();
@@ -693,7 +681,7 @@ int main(int argc, char **argv)
     GraphWidget graph(nullptr, &settings);
     graph.resize(800, 300);
     graph.setSampleTime(1);
-    graph.setGraphSize(100, 100);
+    graph.setGraphSize(100);
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph);
     graph.startSLOT();
@@ -704,7 +692,7 @@ int main(int argc, char **argv)
     check(grown.size() == 4 && grown.first() == "0 1 2 3 4 5 6 7 8 9" && grown.contains("20 21 22 23 24 25 26 27 28 29"),
           "gaps: two segments, got " + grown.join(" | "));
     check(dataPoints(graph) == 20, QString("gaps: no point in the gap, got %1").arg(dataPoints(graph)));
-    graph.setGraphSize(100, 100);   // rebuilds the series
+    graph.setGraphSize(100);   // rebuilds the series
     check(lines(graph) == grown, "gaps: rebuilt = grown, got " + lines(graph).join(" | "));
     graph.clearSLOT();
     check(lines(graph).isEmpty() && dataPoints(graph) == 0, "gaps: cleared");
@@ -713,7 +701,7 @@ int main(int argc, char **argv)
     GraphWidget thin(nullptr, &settings);
     thin.resize(300, 200);
     thin.setSampleTime(1);
-    thin.setGraphSize(200, 200);
+    thin.setGraphSize(200);
     thin.setMode(GraphWidget::Manual);
     Feed thinFeed(thin);
     thin.startSLOT();
@@ -721,7 +709,7 @@ int main(int argc, char **argv)
       thinFeed.value((i / 300) % 2 ? qQNaN() : i % 7 == 3 ? qQNaN() : (i * 37) % 101);
     const QStringList thinGrown = lines(thin);
     check(thinGrown.size() == 2 * 4, QString("gaps thinned: 4 runs, data and integral, got %1").arg(thinGrown.size()));
-    thin.setGraphSize(200, 200);
+    thin.setGraphSize(200);
     check(lines(thin) == thinGrown, "gaps thinned: rebuilt = grown");
   }
 
@@ -797,7 +785,7 @@ int main(int argc, char **argv)
 
     GraphWidget graph(nullptr, &old);
     graph.setSampleTime(5);
-    graph.setGraphSize(100, 100);
+    graph.setGraphSize(100);
     graph.setIntegration(true, EngNumberValidator::value(old.getString("Graph/int-scale")), 0.0, 0.0);
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph, 500);
@@ -825,7 +813,7 @@ int main(int argc, char **argv)
       GraphWidget graph(nullptr, &settings);
       graph.setUnit(unit);
       graph.setSampleTime(10);
-      graph.setGraphSize(5, 5);
+      graph.setGraphSize(5);
       graph.setMode(GraphWidget::Manual);
       Feed feed(graph);
       graph.startSLOT();
@@ -852,7 +840,7 @@ int main(int argc, char **argv)
       GraphWidget graph(nullptr, &settings);
       graph.setUnit("F");
       graph.setSampleTime(10);
-      graph.setGraphSize(5, 5);
+      graph.setGraphSize(5);
       graph.setMode(GraphWidget::Manual);
       Feed feed(graph);
       graph.startSLOT();
@@ -885,7 +873,7 @@ int main(int argc, char **argv)
       GraphWidget graph(nullptr, &settings);
       graph.setUnit("A");
       graph.setSampleTime(10);
-      graph.setGraphSize(5, 5);
+      graph.setGraphSize(5);
       graph.setMode(GraphWidget::Manual);
       Feed feed(graph);
       graph.startSLOT();
@@ -1017,7 +1005,7 @@ int main(int argc, char **argv)
     GraphWidget graph(nullptr, &cfg);
     graph.resize(800, 500);
     graph.setSampleTime(10);
-    graph.setGraphSize(600, 3600);
+    graph.setGraphSize(600);
     graph.show();
     QTest::qWait(50);
     QChart *chart = graph.findChild<QChartView *>()->chart();
@@ -1038,9 +1026,9 @@ int main(int argc, char **argv)
     check(x->tickInterval() == 60 && qFuzzyCompare(x->max() - x->min(), 600.0),
           QString("scope 600 s: 10 x 1 min, got %1 x %2 s").arg((x->max() - x->min()) / x->tickInterval()).arg(x->tickInterval()));
     check(labels().join(' ') == "0 1 2 3 4 5 6 7 8 9 10", "scope 600 s: labels 0..10 min, got " + labels().join(' '));
-    graph.setGraphSize(20, 3600);
+    graph.setGraphSize(20);
     check(x->tickInterval() == 2 && x->titleText() == "[sec]", QString("scope 20 s: 10 x 2 s, got %1").arg(x->tickInterval()));
-    graph.setGraphSize(7200, 36000);
+    graph.setGraphSize(7200);
     check(x->tickInterval() == 900 && x->titleText() == "[min]", QString("scope 2 h: 10 x 15 min, got %1").arg(x->tickInterval()));
     graph.setColorVariant(GraphWidget::Neutral);
     check(x->tickInterval() == 1800 && x->titleText() == "[min]", QString("neutral 2 h: every 30 min, got %1").arg(x->tickInterval()));
@@ -1102,7 +1090,7 @@ int main(int argc, char **argv)
   {
     GraphWidget graph(nullptr, &settings);
     graph.setSampleTime(10);
-    graph.setGraphSize(10, 600);        // a window of 10 s
+    graph.setGraphSize(10);        // a window of 10 s
     graph.setSampleLength(300);         // live keeps 30 s
     graph.setMode(GraphWidget::Manual);
     Feed feed(graph, 500);

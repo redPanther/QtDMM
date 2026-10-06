@@ -16,23 +16,19 @@
 ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
 {
   m_label = tr("SCPI server");
-  m_description = tr("<b>Lets other programs read the meter over the network:</b> QtDMM answers "
-                     "SCPI queries (*IDN?, READ?, ...) on a TCP port, like a bench instrument.");
+  m_description = tr("Lets other programs read the meter over the network, like a bench instrument.");
   m_iconName = "network-server";
 
-  auto *layout = new QVBoxLayout(this);
-  auto *intro = new QLabel(tr("With the server on, lxi-tools, LabVIEW, PyVISA or a "
-                              "few lines of Python can read the current value as if the multimeter "
-                              "were a bench instrument with a LAN port. The server only reports; "
-                              "it never sends anything to the meter. INITiate/ABORt start and stop "
-                              "the recorder, INPut ON/OFF connect and disconnect."), this);
-  intro->setWordWrap(true);
-  layout->addWidget(intro);
-
-  auto *group = new QGroupBox(tr("Server"), this);
-  auto *form = new QFormLayout(group);
+  QFormLayout *form = createForm();
+  addSection(form, tr("Server"));
+  QWidget *group = this;
   m_enabled = new QCheckBox(tr("&Enable the SCPI server"), group);
-  form->addRow(m_enabled);
+  m_enabled->setToolTip(tr("QtDMM answers SCPI queries (*IDN?, READ?, ...) on a TCP port. With the server on, "
+                           "lxi-tools, LabVIEW, PyVISA or a few lines of Python can read the current value as "
+                           "if the multimeter were a bench instrument with a LAN port. The server only reports; "
+                           "it never sends anything to the meter. INITiate/ABORt start and stop the recorder, "
+                           "INPut ON/OFF connect and disconnect."));
+  form->addRow(QString(), m_enabled);
   m_port = new QSpinBox(group);
   m_port->setRange(1, 65535);
   m_port->setValue(5025);
@@ -50,23 +46,21 @@ ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
   bindLabel->setBuddy(m_bind);
   form->addRow(bindLabel, m_bind);
   m_mdns = new QCheckBox(tr("&Announce by mDNS (_scpi-raw._tcp), so lxi discover finds it"), group);
-  form->addRow(m_mdns);
-  layout->addWidget(group);
+  form->addRow(QString(), m_mdns);
 
   m_hint = new QLabel(this);
   m_hint->setWordWrap(true);
   m_hint->setTextInteractionFlags(Qt::TextSelectableByMouse);
-  layout->addWidget(m_hint);
+  form->addRow(QString(), m_hint);
 
   m_status = new QLabel(this);
   m_status->setWordWrap(true);
-  layout->addWidget(m_status);
-  layout->addStretch(1);
+  form->addRow(QString(), m_status);
 
   connect(m_enabled, &QCheckBox::toggled, this, &ScpiPrefs::updateHint);
   connect(m_bind, &QComboBox::currentIndexChanged, this, &ScpiPrefs::updateHint);
   connect(m_port, &QSpinBox::valueChanged, this, &ScpiPrefs::updateHint);
-  connect(m_enabled, &QCheckBox::toggled, group, [this](bool on)
+  connect(m_enabled, &QCheckBox::toggled, this, [this](bool on)
   {
     m_port->setEnabled(on);
     m_bind->setEnabled(on);

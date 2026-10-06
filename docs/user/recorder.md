@@ -13,14 +13,17 @@ changes range.
 The graph is in one of three modes:
 
 - **Live** — right after connecting the graph runs with the meter: it
-  holds the readings of the last **Sample time** (or of **Max. length**
-  when the sample time is zero) and older ones fall out on the left. The
-  newest reading is at the right edge. Live is no recording: there is
+  holds the readings of the last recording length (or of the visible
+  window when the recording has no length) and older ones fall out on the
+  left. The newest reading is at the right edge. Live is no recording: there is
   nothing to lose, and leaving it asks nothing.
-- **Recording** — *Record* (the grey dot ● in the toolbar, Space) clears
-  the graph and records from now on, until **Sample time** is reached or
-  you press the button again (now a red square ■, *Stop*). Top left in
-  the graph stands `● REC 0:42 / 10:00`.
+- **Recording** — *Record* (the grey dot ● in the toolbar, Space) asks
+  for the **Length** of the recording, with the last one ready: Enter
+  starts it, ∞ records until stopped. Then it clears the graph and records
+  from now on, until the length is reached or you press the button again
+  (now a red square ■, *Stop*). Top left in the graph stands
+  `● REC 0:42 / 10:00`. A recording keeps all its readings from the start,
+  up to two million; beyond that the oldest go.
 - **View** — a recording that ended, or a file loaded with *Import*,
   stands in the graph to zoom, scroll, save and export. Top left in grey
   stands where it comes from: `Recording of 06.10.26 14:32 · 10:00`, or
@@ -42,34 +45,37 @@ and importing a file ask first when the readings viewed are not saved yet:
   interval, the average of the readings in it, each weighted with how long
   it was shown. A reading counts until the next one, at most until it
   [goes stale](#gaps). The graph always shows every reading.
-- **Sample time** — how long to record; the recorder stops by itself when it
-  is reached. Leave it at zero to record until stopped.
 
-**Settings → Scales** sets the visible window and the vertical scale
-(automatic, or a fixed minimum and maximum).
+How long a recording runs is asked when you press *Record* (see above).
 
-The status bar shows how much is recorded and how much the graph keeps at
-most (**Max. length**, Settings → Scales), the time left until **Sample
-time** stops the recording, and whether it records: `0:42 / 10:00 - 1:59:17
-left - Sampling`. While live it shows how much the live graph holds of what
-it keeps: `0:42 / 10:00 - Live`.
+**Settings → Graph** sets the visible window (**Time axis**) and the
+vertical scale (**Y axis**: automatic, or a fixed minimum and maximum).
+
+The status bar shows how much is recorded and the recording's length, the
+time left until the length stops the recording, and whether it records:
+`0:42 / 10:00 - 9:18 left - Sampling`. While live it shows how much the
+live graph holds of what it keeps: `0:42 / 10:00 - Live`.
 
 The vertical axis is in the unit the meter shows - mV while it shows mV -
 and in the unit that suits the values for a loaded recording.
 
 ## Starting and stopping
 
-Three start modes, chosen on the Recording page:
+Three ways to start, chosen under **Start** on the Recording page:
 
-- **Manual** — *Record* in the toolbar (Space), Ctrl+S and Ctrl+X, or the
+- **By hand** — *Record* in the toolbar (Space), Ctrl+S and Ctrl+X, or the
   graph's right-click menu.
-- **Predefined time** — recording begins at the given time of day.
-- **Trigger** — recording begins when the reading crosses a threshold, on its
-  raising or falling edge. The threshold is drawn into the graph as a line you
-  can drag. With **Pre trigger** the recording reaches back by the time set
-  there: it takes the readings of that time from the live graph, so the
-  recording shows how the value got to the threshold, and a green mark shows
-  where it crossed. **Sample time** counts from the crossing.
+- **At a clock time** — recording begins at the given time of day.
+- **At a threshold** — recording begins when the reading crosses a
+  threshold, rising above it or falling below it. The threshold is drawn
+  into the graph as a line you can drag. With **Pre-trigger** the recording
+  reaches back by the time set there: it takes the readings of that time
+  from the live graph, so the recording shows how the value got to the
+  threshold, and a green mark shows where it crossed. The length counts
+  from the crossing.
+
+A recording started at a clock time or a threshold runs for the length
+last chosen when *Record* asked.
 
 The predefined time and the trigger wait while the graph is live. A
 recording that ended stands in View and is not overwritten by the next
@@ -110,9 +116,11 @@ were; the integration curve carries on across a gap.
 
 - The buttons at the top right of the graph set the time window: **All**
   shows the whole recording so far and grows with it, **1 min**, **5 min**
-  and **30 min** show the last minutes. Buttons longer than the graph's
-  **Max. length** (**Settings → Scales**) are left out. Zooming ends **All**; the window set under
-  **Settings → Scales** stays the start.
+  and **30 min** show the last minutes. Buttons longer than the recording
+  (its length, or what a stopped recording or a file holds) are left out.
+  Zooming ends **All**; the window set under **Settings → Graph → Time
+  axis** stays the start. While a recording runs and the graph shows its
+  end, the graph follows it; scroll back to stay at a part.
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see
@@ -126,7 +134,7 @@ were; the integration curve carries on across a gap.
   and pan first.
 - Hovering shows a crosshair with the time (to the millisecond) and the
   value of the reading at the cursor.
-- **Integration** (Settings → Integration curve) draws a second curve: the
+- **Integration** (**Settings → Graph → Integration curve**) draws a second curve: the
   integral over time of the readings above a threshold, in the unit times
   seconds (V·s, A·s, W·s), scaled and offset as configured — for charge or
   energy over time. Each reading counts for the time it was shown. For
@@ -137,7 +145,7 @@ were; the integration curve carries on across a gap.
 
 ## Colours
 
-**Settings → Graph → Graph colours** sets the colours of the graph:
+**Settings → Graph → Colours** sets the colours of the graph:
 
 - **Neutral** follows the window's design.
 - **Scope blue** (the default), **Phosphor green**, **Phosphor amber** and **Chart
@@ -146,7 +154,7 @@ were; the integration curve carries on across a gap.
   ...), so the visible time and the vertical scale grow to whole squares.
   The phosphor colours add a fine scale on the centre lines and dash the
   integration curve.
-- **Custom** uses the colour buttons on the same page.
+- **Custom** uses the colour buttons that show up beside it.
 
 A curve colour you chose yourself stays in every variant. The graph's
 right-click menu, **Graph colours**, can choose other colours for this graph

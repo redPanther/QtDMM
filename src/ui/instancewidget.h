@@ -116,6 +116,9 @@ public:
   /// Before a new recording: unsaved readings viewed are exported or
   /// dropped, or the user cancels (false). True at once in Live.
   bool        confirmRecording();
+  /// Before a recording started by hand: asks for its length, the last
+  /// one ready (RecordLengthDlg); false when the user cancels.
+  bool        askRecordingLength();
   /// --config-dir as given (empty: the default), for the instances started from here.
   QString     configPath() const { return m_configPath; }
 

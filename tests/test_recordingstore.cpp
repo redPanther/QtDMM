@@ -128,26 +128,38 @@ int main(int argc, char **argv)
     check(g[2].value == 1, QString("quality: step 2 the held 1 V, got %1").arg(g[2].value));
   }
 
-  // --- 3. the limits: the store keeps the last maxDuration(); older points
-  //        go in steps (appended(true) says so), the one holding at the
-  //        origin stays ---
+  // --- 3. the limits: a recording keeps all of it, from its start (a
+  //        recording longer than the old maximum length lost its start);
+  //        beyond the most points the oldest go in steps (appended(true)
+  //        says so), and the origin moves to what is left ---
   {
     RecordingStore store;
     TestClock clock;
     clock.attach(store);
-    store.setMaxDuration(2);
+    store.setLiveWidth(2);   // Live's width, nothing to do with a recording
+    store.start();
+    for (int i = 0; i < 100; i++)
+      store.setReading(clock.at(i * 100, reading(i, QString::number(i), "DC")));
+    check(store.count() == 100 && store.origin() == 0 && store.series().first().value == 0,
+          QString("keeps all: %1 points, origin %2").arg(store.count()).arg(store.origin()));
+  }
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setMaxPoints(20);
     QSignalSpy appended(&store, &RecordingStore::appended);
     store.start();
     for (int i = 0; i < 100; i++)
       store.setReading(clock.at(i * 100, reading(i, QString::number(i), "DC")));
-    check(store.duration() == 9900 && store.origin() == 7900,
+    check(store.duration() == 9900 && store.origin() == store.series().first().t && store.origin() >= 7900,
           QString("limit: duration %1 origin %2").arg(store.duration()).arg(store.origin()));
-    check(store.series().first().t <= store.origin() && store.count() <= 32,
+    check(store.count() <= 20,
           QString("limit: %1 points from %2").arg(store.count()).arg(store.series().first().t));
     int shifts = 0;
     for (const auto &args : appended)
       shifts += args.first().toBool() ? 1 : 0;
-    check(shifts > 0 && shifts < 10, QString("limit: %1 shifts").arg(shifts));
+    check(shifts > 0, QString("limit: %1 shifts").arg(shifts));
     check(store.series().last().value == 99, "limit: the newest is kept");
   }
 
@@ -157,7 +169,6 @@ int main(int argc, char **argv)
     RecordingStore store;
     TestClock clock;
     clock.attach(store);
-    store.setMaxDuration(100000);
     store.start();
     for (int i = 0; i < 100; i++)
       store.setReading(clock.at(i * 20, reading(i, QString::number(i), "DC")));
@@ -239,7 +250,7 @@ int main(int argc, char **argv)
     RecordingStore store;
     TestClock clock;
     clock.attach(store);
-    store.setMaxDuration(2);
+    store.setMaxPoints(20);
     store.start();
     store.setReading(clock.at(100, reading(1, "1", "DC")));
     clock.now = 350;
@@ -262,7 +273,6 @@ int main(int argc, char **argv)
     rec.values = { 1.0, 2.0, qQNaN(), 3.0 };
 
     RecordingStore store;
-    store.setMaxDuration(1);   // too small: load widens it
     store.setUnit("V");
     store.load(rec);
     check(store.count() == 4 && store.series().last().value == 3.0 && store.series().last().t == 3000, "load: points");
@@ -539,15 +549,15 @@ int main(int argc, char **argv)
     store.setReading(clock.at(0, reading(1, "1", "DC")));
     check(store.count() == 0, "states: View records nothing");
 
-    // the live window: the recording length, or what the store keeps
-    store.setMaxDuration(60);
+    // the live window: the recording length, or the graph's window
+    store.setLiveWidth(60);
     store.setSampleLength(20);   // 2 s
     check(store.liveWindow() == 2000, QString("live window: %1 ms, expected the length").arg(store.liveWindow()));
     store.setPreTrigger(5000);
     check(store.liveWindow() == 5000, "live window: at least the pre-trigger");
     store.setPreTrigger(0);
     store.setSampleLength(0);
-    check(store.liveWindow() == 60000, "live window: until stopped - what the store keeps");
+    check(store.liveWindow() == 60000, "live window: until stopped - the graph's window");
     store.setSampleLength(20);
 
     clock.now = 100;

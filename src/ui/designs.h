@@ -64,4 +64,7 @@ namespace Designs
   /// The built-in set in use ("qtdmm-oxygen", "qtdmm-breeze" or
   /// "qtdmm-breeze-dark"); under SystemIcons the plain one, as the fallback.
   QString iconTheme();
+  /// A symbol of the plain set (light or dark to match the palette),
+  /// whichever set the toolbar has: for lists that should look alike.
+  QIcon plainIcon(const QString &name);
 }

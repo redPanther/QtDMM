@@ -29,7 +29,17 @@
   10:00" top left; a recording that ended or a file imported stands to zoom, save and export. Live, a new
   recording and an import ask about unsaved readings first; the clock time and the threshold start wait in
   Live only, the pre-trigger takes its seconds from the live graph
-- Import no longer shrinks the graph's Max. length to the length of the file
+- Record asks for the length of the recording, the last one ready - Enter starts it, ∞ records until stopped.
+  The length (Sample time) is no longer on the Recording page
+- Recorder: Max. length is gone. A recording keeps all its readings from the start, up to two million; one
+  longer than Max. length (1 hour by default) lost its beginning without a word. Live without a recording
+  length is as wide as the visible window, the time buttons go as far as there is a recording, and while
+  recording the graph follows the newest reading until you scroll back
+- Settings dialog tidied: six pages - General (now with the toolbars), Appearance, Graph (colours, line,
+  Y axis, time axis and the integration curve, whose section opens when it is switched on), Recording,
+  Alarms, SCPI server. Section titles without frames, one column, fields that belong to a choice show up
+  with it, the explanations in tool tips, a narrower page list with plain symbols; "Reset page" instead of
+  "Factory defaults"
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu

@@ -27,15 +27,12 @@
 #include "ui/settings/settingsdialog.h"
 #include "ui/settings/settingspageitem.h"
 #include "ui/devicesettings.h"
-#include "ui/devicesettings.h"
 #include "ui/settings/alarmprefs.h"
 #include "ui/settings/scpiprefs.h"
 #include "ui/settings/graphprefs.h"
 #include "ui/settings/generalprefs.h"
 #include "ui/settings/guiprefs.h"
-#include "ui/settings/integrationprefs.h"
 #include "ui/settings/recorderprefs.h"
-#include "ui/settings/scaleprefs.h"
 #include "core/settings.h"
 
 #include <iostream>
@@ -110,76 +107,34 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   m_meter->hide();
 
   m_general = new GeneralPrefs(ui_stack);
-  m_general->setId(SettingsDialog::General);
-  new SettingsPageItem(m_general->id(),
-                 m_general->icon(),
-                 m_general->label(),
-                 ui_list);
-  m_general->setCfg(m_settings);
-  addPage(m_general);
-
   m_gui = new GuiPrefs(ui_stack);
-  m_gui->setId(SettingsDialog::GUI);
-  new SettingsPageItem(m_gui->id(),
-                 m_gui->icon(),
-                 m_gui->label(),
-                 ui_list);
-  m_gui->setCfg(m_settings);
-  addPage(m_gui);
-
   m_graph = new GraphPrefs(ui_stack);
-  m_graph->setId(SettingsDialog::Graph);
-  new SettingsPageItem(m_graph->id(),
-                 m_graph->icon(),
-                 m_graph->label(),
-                 ui_list);
-  m_graph->setCfg(m_settings);
-  addPage(m_graph);
-
-  m_scale = new ScalePrefs(ui_stack);
-  m_scale->setId(SettingsDialog::Scale);
-  new SettingsPageItem(m_scale->id(),
-                 m_scale->icon(),
-                 m_scale->label(),
-                 ui_list);
-  m_scale->setCfg(m_settings);
-  addPage(m_scale);
-
-  m_integration = new IntegrationPrefs(ui_stack);
-  m_integration->setId(SettingsDialog::Integration);
-  new SettingsPageItem(m_integration->id(),
-                 m_integration->icon(),
-                 m_integration->label(),
-                 ui_list);
-  m_integration->setCfg(m_settings);
-  addPage(m_integration);
-
   m_recorder = new RecorderPrefs(ui_stack);
-  m_recorder->setId(SettingsDialog::Recorder);
-  new SettingsPageItem(m_recorder->id(),
-                 m_recorder->icon(),
-                 m_recorder->label(),
-                 ui_list);
-  m_recorder->setCfg(m_settings);
-  addPage(m_recorder);
-
   m_alarms = new AlarmPrefs(ui_stack);
-  m_alarms->setId(SettingsDialog::Alarms);
-  new SettingsPageItem(m_alarms->id(),
-                 m_alarms->icon(),
-                 m_alarms->label(),
-                 ui_list);
-  m_alarms->setCfg(m_settings);
-  addPage(m_alarms);
-
   m_scpi = new ScpiPrefs(ui_stack);
-  m_scpi->setId(SettingsDialog::Scpi);
-  new SettingsPageItem(m_scpi->id(),
-                 m_scpi->icon(),
-                 m_scpi->label(),
-                 ui_list);
-  m_scpi->setCfg(m_settings);
-  addPage(m_scpi);
+  const QList<QPair<SettingsPage *, PageType>> pages = {
+    { m_general, General }, { m_gui, GUI }, { m_graph, Graph },
+    { m_recorder, Recorder }, { m_alarms, Alarms }, { m_scpi, Scpi } };
+  for (const auto &[p, id] : pages)
+  {
+    p->setId(id);
+    new SettingsPageItem(p->id(), p->icon(), p->label(), ui_list);
+    p->setCfg(m_settings);
+    addPage(p);
+  }
+
+  // the list as wide as its longest name, not more
+  ui_list->setIconSize(QSize(22, 22));
+  int listWidth = 0;
+  for (int i = 0; i < ui_list->count(); ++i)
+    listWidth = qMax(listWidth, ui_list->fontMetrics().horizontalAdvance(ui_list->item(i)->text()));
+  ui_list->setFixedWidth(listWidth + 22 + 6 * ui_list->fontMetrics().horizontalAdvance('x'));
+
+  // the header: the page's name, one grey line under it
+  QFont title = ui_pageTitle->font();
+  title.setPointSizeF(title.pointSizeF() * 1.3);
+  title.setBold(true);
+  ui_pageTitle->setFont(title);
 
   // init stuff
   //
@@ -259,6 +214,10 @@ SettingsPage *SettingsDialog::page(int index) const
 void SettingsDialog::showEvent(QShowEvent *event)
 {
   QDialog::showEvent(event);
+  // symbols and the grey of the header after the design changed
+  updateIcons();
+  if (SettingsPage *p = page(ui_stack->currentIndex()))
+    showHeader(p);
   // the pages scroll, so the dialog may be smaller than its content; leave
   // room for the window frame, which frameGeometry() only knows once shown
   const QRect avail = screen()->availableGeometry();
@@ -293,10 +252,27 @@ void SettingsDialog::showPage(SettingsDialog::PageType page)
     }
   }
   if (wid)
-  {
-    ui_helpText->setText(wid->description());
-    ui_helpPixmap->setPixmap(wid->icon().pixmap(32));
-  }
+    showHeader(wid);
+}
+
+void SettingsDialog::showHeader(SettingsPage *page)
+{
+  // grey: two thirds of the way from the background to the text, readable
+  // in every design
+  const QColor text = palette().color(QPalette::WindowText), back = palette().color(QPalette::Window);
+  const QColor grey((text.red() * 2 + back.red()) / 3, (text.green() * 2 + back.green()) / 3,
+                    (text.blue() * 2 + back.blue()) / 3);
+  ui_pageHint->setStyleSheet(QString("color: %1;").arg(grey.name()));
+  ui_pageTitle->setText(page->label());
+  ui_pageHint->setText(page->description());
+}
+
+void SettingsDialog::updateIcons()
+{
+  // the design may have turned light or dark
+  for (int i = 0; i < ui_list->count(); ++i)
+    if (auto *item = dynamic_cast<SettingsPageItem *>(ui_list->item(i)))
+      item->setIcon(page(item->id())->icon());
 }
 
 void SettingsDialog::on_ui_factoryDefaults_clicked()
@@ -306,19 +282,13 @@ void SettingsDialog::on_ui_factoryDefaults_clicked()
 
 void SettingsDialog::zoomInSLOT(double fac)
 {
-  m_scale->zoomInSLOT(fac);
+  m_graph->zoomInSLOT(fac);
   Q_EMIT zoomed();
 }
 
 void SettingsDialog::zoomOutSLOT(double fac)
 {
-  m_scale->zoomOutSLOT(fac);
-  Q_EMIT zoomed();
-}
-
-void SettingsDialog::zoomFitSLOT()
-{
-  m_scale->zoomFitSLOT();
+  m_graph->zoomOutSLOT(fac);
   Q_EMIT zoomed();
 }
 
@@ -330,14 +300,27 @@ void SettingsDialog::setSampleTimeSLOT(int sampleTime)
 
 void SettingsDialog::setWindowSecondsSLOT(int seconds)
 {
-  m_scale->setWindowSecondsSLOT(seconds);
+  m_graph->setWindowSecondsSLOT(seconds);
   Q_EMIT zoomed();
 }
 
-void SettingsDialog::setGraphSizeSLOT(int size, int length)
+void SettingsDialog::setRecordingLength(int value, int unit)
 {
-  m_scale->setGraphSizeSLOT(size, length);
-  on_ui_buttonBox_accepted();
+  // kept at once, without applying the pages: OK on them reconnects the meter
+  m_recorder->setLength(value, unit);
+  m_settings->setInt("Sample/time", m_recorder->lengthValue());
+  m_settings->setInt("Sample/time-unit", m_recorder->lengthUnit());
+  m_settings->save();
+}
+
+int SettingsDialog::recordingLengthValue() const
+{
+  return m_recorder->lengthValue();
+}
+
+int SettingsDialog::recordingLengthUnit() const
+{
+  return m_recorder->lengthUnit();
 }
 
 void SettingsDialog::connectSLOT(bool /*connected*/)
@@ -457,9 +440,7 @@ void SettingsDialog::on_ui_list_currentItemChanged(QListWidgetItem *current, QLi
   int id = dynamic_cast<SettingsPageItem *>(current)->id();
   SettingsPage *wid = page(id);
   ui_stack->setCurrentIndex(id);
-
-  ui_helpText->setText(wid->description());
-  ui_helpPixmap->setPixmap(wid->icon().pixmap(32));
+  showHeader(wid);
 }
 
 void SettingsDialog::thresholdChangedSLOT(GraphWidget::CursorMode mode, double value)
@@ -470,7 +451,7 @@ void SettingsDialog::thresholdChangedSLOT(GraphWidget::CursorMode mode, double v
       m_recorder->setThreshold(value);
       break;
     case GraphWidget::Integration:
-      m_integration->setThreshold(value);
+      m_graph->setIntThreshold(value);
       break;
     default:
       std::cerr << "Unexpected CursorMode in configdlg.cpp:418" << std::endl;
@@ -539,7 +520,7 @@ bool SettingsDialog::alertUnsavedData() const
 
 bool SettingsDialog::useTextLabel() const
 {
-  return m_gui->useTextLabel();
+  return m_general->useTextLabel();
 }
 
 QString SettingsDialog::iconSet() const
@@ -565,17 +546,17 @@ bool SettingsDialog::saveWindowSize() const
 
 bool SettingsDialog::showDmmToolbar() const
 {
-  return m_gui->showDmmToolbar();
+  return m_general->showDmmToolbar();
 }
 
 bool SettingsDialog::showGraphToolbar() const
 {
-  return m_gui->showGraphToolbar();
+  return m_general->showGraphToolbar();
 }
 
 bool SettingsDialog::showFileToolbar() const
 {
-  return m_gui->showFileToolbar();
+  return m_general->showFileToolbar();
 }
 
 bool SettingsDialog::showDisplay() const
@@ -610,7 +591,8 @@ int SettingsDialog::meterRedZone() const
 
 void SettingsDialog::setToolbarVisibility(bool disp, bool dmm, bool graph, bool file)
 {
-  m_gui->setToolbarVisibility(disp, dmm, graph, file);
+  m_gui->setShowDisplay(disp);
+  m_general->setToolbarVisibility(dmm, graph, file);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -618,80 +600,76 @@ void SettingsDialog::setToolbarVisibility(bool disp, bool dmm, bool graph, bool 
 //
 bool SettingsDialog::automaticScale() const
 {
-  return m_scale->automaticScale();
+  return m_graph->automaticScale();
 }
 
 bool SettingsDialog::includeZero() const
 {
-  return m_scale->includeZero();
+  return m_graph->includeZero();
 }
 
 double SettingsDialog::scaleMin() const
 {
-  return m_scale->scaleMin();
+  return m_graph->scaleMin();
 }
 
 double SettingsDialog::scaleMax() const
 {
-  return m_scale->scaleMax();
+  return m_graph->scaleMax();
 }
 
 int SettingsDialog::windowSeconds() const
 {
-  return m_scale->windowSeconds();
+  return m_graph->windowSeconds();
 }
 
-int SettingsDialog::totalSeconds() const
-{
-  return m_scale->totalSeconds();
-}
 
 /////////////////////////////////////////////////////////////////
 // INTEGRATION
 //
 double SettingsDialog::intScale() const
 {
-  return m_integration->intScale();
+  return m_graph->intScale();
 }
 
 double SettingsDialog::intThreshold() const
 {
-  return m_integration->intThreshold();
+  return m_graph->intThreshold();
 }
 
 double SettingsDialog::intOffset() const
 {
-  return m_integration->intOffset();
+  return m_graph->intOffset();
 }
 
 bool SettingsDialog::showIntegration() const
 {
-  return m_integration->showIntegration();
+  return m_graph->showIntegration();
 }
 
 QColor SettingsDialog::intColor() const
 {
-  return m_integration->intColor();
+  return m_graph->intColor();
 }
 
 QColor SettingsDialog::intThresholdColor() const
 {
-  return m_integration->intThresholdColor();
+  return m_graph->intThresholdColor();
 }
 
 int SettingsDialog::intLineWidth() const
 {
-  return m_integration->intLineWidth();
+  return m_graph->intLineWidth();
 }
 
 int SettingsDialog::intLineMode() const
 {
-  return m_integration->intLineMode();
+  return m_graph->intLineMode();
 }
 
 int SettingsDialog::intPointMode() const
 {
-  return m_integration->intPointMode();
+  return m_graph->intPointMode();
 }
 
 /////////////////////////////////////////////////////////////////

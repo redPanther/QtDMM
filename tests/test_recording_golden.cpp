@@ -132,7 +132,6 @@ int main(int argc, char **argv)
   //        limit; sample time 1 s ---
   {
     RecordingStore store;
-    store.setMaxDuration(3600);
     store.setSampleTime(10);
     store.setUnit("V");
     Player p(store);
@@ -196,7 +195,6 @@ int main(int argc, char **argv)
   //        it ---
   {
     RecordingStore store;
-    store.setMaxDuration(3600);
     store.setSampleTime(10);
     store.setIntegrationThreshold(0.5);
     Player p(store);

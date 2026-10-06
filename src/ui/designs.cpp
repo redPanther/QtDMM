@@ -3,6 +3,7 @@
 #include "ui/designs.h"
 
 #include <QApplication>
+#include <QFile>
 #include <QIcon>
 #include <QWidget>
 #include <QLinearGradient>
@@ -183,6 +184,13 @@ QString Designs::iconTheme()
     return "qtdmm-oxygen";   // good on light and dark alike
   // by the window colour, so System on a dark desktop gets the dark set
   return QApplication::palette().color(QPalette::Window).lightness() < 128 ? "qtdmm-breeze-dark" : "qtdmm-breeze";
+}
+
+QIcon Designs::plainIcon(const QString &name)
+{
+  const bool dark = QApplication::palette().color(QPalette::Window).lightness() < 128;
+  const QString file = QString(":/icons/%1/22/%2.svg").arg(dark ? "qtdmm-breeze-dark" : "qtdmm-breeze", name);
+  return QFile::exists(file) ? QIcon(file) : QIcon::fromTheme(name);
 }
 
 QString Designs::iconSetName(IconSet set)
