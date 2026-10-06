@@ -22,6 +22,12 @@
   blue, LCD without min/max. The design can also be chosen in the settings (Appearance)
 - Recorder: the pre-trigger works (it was a setting without function). A recording started by a threshold
   reaches back by the pre-trigger time, a green mark shows the trigger
+- Graph: Live, Record and View. The graph runs right after connecting (the last recording length, newest at
+  the right edge); Record (one button, grey dot / red square, Space) clears it and records, "● REC 0:42 /
+  10:00" top left; a recording that ended or a file imported stands to zoom, save and export. Live, a new
+  recording and an import ask about unsaved readings first; the clock time and the threshold start wait in
+  Live only, the pre-trigger takes its seconds from the live graph
+- Import no longer shrinks the graph's Max. length to the length of the file
 - Poincaré plot (Ctrl+5): each reading against the next, so the scatter of a value shows at a glance -
   noise across the diagonal, drift along it, with SD1 and SD2 and their ellipse. Distance, number of points,
   hold and image export in its context menu
