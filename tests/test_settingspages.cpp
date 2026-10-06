@@ -57,7 +57,6 @@ int main(int argc, char **argv)
     Settings cfg("pages", dir.path());
     const QList<QPair<QString, QVariant>> keys = {
       { "Alert/unsaved-file", false }, { "Save/window-pos", false }, { "Icons/text-label", true },
-      { "Toolbar/dmm", false }, { "Toolbar/graph", false }, { "Toolbar/file", false },
       { "Port settings/sigrok_exe", QString("/opt/sigrok-cli") },
       { "Windows/design", QString("silver") }, { "Display/display-bar", false }, { "Display/display-min-max", true },
       { "Meter/scale-mode", 2 }, { "Meter/style", 0 }, { "Meter/ballistics", false }, { "Meter/red-zone", 75 },

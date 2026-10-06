@@ -73,8 +73,6 @@ public Q_SLOTS:
 protected:
   void        dropEvent(QDropEvent *event) override;
   void        contextMenuEvent(QContextMenuEvent *event) override;
-  /// F2 renames here; in the window it opens the settings.
-  bool        event(QEvent *event) override;
 
 private:
   void        updateMarks();

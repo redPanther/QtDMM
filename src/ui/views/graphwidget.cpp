@@ -645,9 +645,12 @@ QString GraphWidget::yPrefix() const
   // units that take no prefix: °C, %, none
   if (base.isEmpty() || base.startsWith(QChar(0x00b0)) || base == QLatin1String("%"))
     return QString();
-  if (!m_liveBase.isEmpty() && m_liveBase == base)
+  // by the axis, not by the reading: a meter that changes range (V, mV, µV)
+  // turned the whole axis to mV with labels like 1.6e+04; 350 mV on an axis
+  // up to 0.4 V are still mV. Without readings yet the axis says nothing:
+  // the meter's prefix
+  if (m_store->count() == 0 && !m_liveBase.isEmpty() && m_liveBase == base)
     return m_livePrefix;
-  // a loaded recording, or the meter measures something else now
   QString prefix;
   SiPrefix::scale(qMax(std::abs(m_yAxis->min()), std::abs(m_yAxis->max())), &prefix);
   return prefix;

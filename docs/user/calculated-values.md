@@ -16,7 +16,7 @@ measured one.
    **Instances** of the sidebar (F9) shows the names.
 2. Short names make short formulas, e.g. `u` for the voltmeter and `i` for
    the ammeter: close the window, rename the stopped instance in the
-   sidebar with F2 and start it again with a click. Names are used as
+   sidebar (Rename in its context menu) and start it again with a click. Names are used as
    variable names in formulas, so they may contain letters, digits and
    underscores only.
 3. Add the calculation: *Add device*, *Simulated / calculated*, the model

@@ -89,7 +89,6 @@ While the table has the focus:
 
 ## Sidebar
 
-| Key | Action |
-|---|---|
-| F2 | Rename the selected device or stopped instance |
+F2 opens the settings here too; a device or a stopped instance is renamed
+through its context menu (**Rename**).
 

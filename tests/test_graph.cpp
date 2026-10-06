@@ -794,6 +794,7 @@ int main(int argc, char **argv)
     // 0.5 V of a meter that measures ohms now: the prefix that suits the values
     check(yTitle(graph) == "[mV]" && graph.store()->unit() == "V", "unit: the recorded V stay V, got " + yTitle(graph));
     graph.startSLOT();
+    feed.value(4700);   // ohms now; the prefix by the axis
     check(yTitle(graph) == "[kOhm]", "unit: a new recording is in kOhm as the meter shows, got " + yTitle(graph));
   }
 
@@ -826,6 +827,36 @@ int main(int argc, char **argv)
     check(mv && hi >= 300, "y labels in mV, got " + labels.join(' '));
     check(qobject_cast<QValueAxis *>(chart->axes(Qt::Vertical).first())->labelsBrush().color().alpha() == 0,
           "y labels: Qt's own invisible");
+  }
+
+  // --- 5n3. a meter that changes range keeps the axis: up to 16 V, the
+  //          reading now in mV - the labels stay volts (they were mV with
+  //          1.6e+04) ---
+  {
+    GraphWidget graph(nullptr, &settings);
+    graph.resize(800, 500);
+    graph.setUnit("V");
+    graph.setScale(true, true, 0, 0);
+    graph.setMode(GraphWidget::Manual);
+    Feed feed(graph);
+    graph.startSLOT();
+    for (double v : { 5.0, 12.0, 15.5 })
+      feed.value(v);
+    graph.setUnit("mV");
+    feed.value(0.004);
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QStringList labels;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *text = dynamic_cast<QGraphicsSimpleTextItem *>(item); text && text->isVisible()
+          && text->pos().x() + text->boundingRect().width() < chart->plotArea().left())
+        labels << text->text();
+    double hi = 0;
+    for (const QString &l : labels)
+      hi = qMax(hi, l.toDouble());
+    check(!labels.isEmpty() && hi >= 15 && hi < 100 && !labels.join(' ').contains('e'),
+          "range change: the y labels stay volts, got " + labels.join(' '));
   }
 
   // --- 5o. the integral's scale from before 26.2: once divided by the

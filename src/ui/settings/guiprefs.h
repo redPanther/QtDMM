@@ -40,6 +40,8 @@ public:
   ~GuiPrefs();
   bool      showBar() const;
   bool      showMinMax() const;
+  /// Toolbar buttons with their names under the symbols.
+  bool      useTextLabel() const;
   /// The symbols: "colored", "plain" or "system" (Designs::IconSet).
   QString   iconSet() const;
   QColor    displayBgColor() const;
@@ -58,7 +60,7 @@ public Q_SLOTS:
 
 private:
   QComboBox   *ui_design, *ui_iconSet, *ui_meterScale, *ui_meterStyle;
-  QCheckBox   *ui_showDisplay, *ui_showBar, *ui_showMinMax, *ui_meterBallistics;
+  QCheckBox   *ui_textLabel, *ui_showDisplay, *ui_showBar, *ui_showMinMax, *ui_meterBallistics;
   ColorButton *ui_bgColorDisplay;
   QSpinBox    *ui_meterRedZone;
 };

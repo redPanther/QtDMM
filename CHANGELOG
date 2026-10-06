@@ -38,13 +38,22 @@
   recording the graph follows the newest reading until you scroll back
 - Texts: "recorder" is "recording" or "graph" in the tool tips, the status bar says "Recording" while it
   records; old tool tips (export as tab separated list, F2 for the recorder options) describe what QtDMM does now
+- Record works right after a meter is connected by Add device, the sidebar or the start; it stayed off until
+  Connect was clicked by hand
+- Sidebar: F2 opens the settings there too (it renamed the device); Rename is in the context menu
+- Graph: the vertical axis takes its prefix from its range, not from the last reading; a meter switching
+  between V and mV turned the whole axis to mV with labels like 1.6e+04
+- Analog meter: MIN and MAX with no more digits than the display has, and from another range in a prefix of
+  their own with the unit ("10.000 V" in the mV range, not "10000.0000")
+- Toolbars are always shown and fixed: the switches for the DMM, graph and file toolbars and the right-click menu
+  that hid them are gone (a toolbar hidden before comes back); "Symbols with text" is on the Appearance page
 - Settings: opening the dialog no longer disconnects the meter and no longer stops a recording; OK and Apply
   open the port again only when the meter changed (before, every OK reconnected - seconds for a Bluetooth meter -
   and reconnected a meter you had disconnected yourself). The gap this left in the graph was drawn as a line
 - Graph: where the meter fell silent the line no longer bridges the gap. In a long recording or Live with "All",
   a pause of minutes was now and then drawn as a straight line, so a part of the curve seemed to come and go; and
   the newest reading was drawn twice when the window grew with it
-- Settings dialog tidied: six pages - General (now with the toolbars), Appearance, Graph (colours, line,
+- Settings dialog tidied: six pages - General, Appearance (now with "Symbols with text"), Graph (colours, line,
   Y axis, time axis and the integration curve, whose section opens when it is switched on), Recording,
   Alarms, SCPI server. Section titles without frames, one column, fields that belong to a choice show up
   with it, the explanations in tool tips, a narrower page list with plain symbols; "Reset page" instead of

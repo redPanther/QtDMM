@@ -80,8 +80,8 @@ public:
   void        setStateManager(SharedStateManager *);
   /// --debug: pass on to MeterConnection::setConsoleLogging().
   void        setConsoleLogging(bool);
-  /// Stores the toolbar visibility (display, dmm, graph, file) in the settings.
-  void        setToolbarVisibility(bool, bool, bool, bool);
+  /// Stores whether the display is shown in the settings.
+  void        setShowDisplay(bool show);
   /// The recorder graph (for the zoom/pan shortcuts in MainWindow).
   GraphWidget   *graph() const { return ui_graph; }
   /// False until a device has been chosen once (sidebar, Add device); a fresh
@@ -139,8 +139,8 @@ Q_SIGNALS:
   void        remoteControl(bool supported);
   /// Asks MainWindow to connect/disconnect (drives the Connect action).
   void        setConnect(bool);
-  /// Toolbar visibility read from the settings, for MainWindow to apply.
-  void        toolbarVisibility(bool, bool, bool, bool);
+  /// Whether the display is shown, read from the settings, for MainWindow.
+  void        showDisplay(bool show);
   /// The connection state changed; MainWindow checks the Connect action.
   void        connectDMM(bool);
   /// The settings were applied; the meter shown in the title may have changed.

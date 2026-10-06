@@ -285,8 +285,8 @@ The node **Instances** of the sidebar (F9) lists the configured and the
 running instances with what each one currently reads and, below it, its
 device; this window's own is bold. A click brings a running instance to
 the front; a double click (or **Start** in its context menu) starts a
-stopped one. A stopped instance can be renamed (F2 or
-its context menu) and deleted. Renaming also changes the formulas that use
+stopped one. A stopped instance can be renamed and deleted through its
+context menu. Renaming also changes the formulas that use
 the old name, in the other instances and in My devices (see
 [Calculated values](docs/user/calculated-values.md)); an instance that is running
 uses the new formula after a restart. Running

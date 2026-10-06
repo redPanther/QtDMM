@@ -301,7 +301,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   toolBarDMM->addAction(m_meterAction);
   toolBarDMM->addAction(m_readingsAction);
   toolBarDMM->addAction(m_poincareAction);
-  connect(m_displayAction, &QAction::toggled, this, &MainWindow::setToolbarVisibilitySLOT);
+  connect(m_displayAction, &QAction::toggled, this, &MainWindow::storeDisplaySLOT);
 
   // arrangement: automatic (displays on top or on the left), fixed or free,
   // title bars on/off
@@ -476,8 +476,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
           { Designs::setIconSet(Designs::iconSetFromName(set)); });
   connect(m_wid, SIGNAL(setConnect(bool)), this, SLOT(setConnectSLOT(bool)));
   connect(m_wid, SIGNAL(connectDMM(bool)), action_Connect, SLOT(setChecked(bool)));
-  connect(m_wid, SIGNAL(toolbarVisibility(bool, bool, bool, bool)),
-          this, SLOT(toolbarVisibilitySLOT(bool, bool, bool, bool)));
+  connect(m_wid, &InstanceWidget::showDisplay, this, &MainWindow::showDisplaySLOT);
 
   QRect winRect = m_wid->winRect();
 
@@ -677,7 +676,9 @@ void MainWindow::setUseTextLabel(bool on)
 void MainWindow::createActions()
 {
   connect(action_Connect, SIGNAL(triggered(bool)), m_wid, SLOT(connectSLOT(bool)));
-  connect(action_Connect, SIGNAL(triggered(bool)), this, SLOT(connectSLOT(bool)));
+  // toggled, not triggered: a connection made by the program (Add device, the
+  // sidebar, the start, SCPI) sets the check mark only - Record stayed off
+  connect(action_Connect, &QAction::toggled, this, &MainWindow::connectSLOT);
   connect(action_Reset, SIGNAL(triggered()), m_wid, SLOT(resetSLOT()));
   connect(action_Start, SIGNAL(triggered()), this, SLOT(startSLOT()));
   // one button for both: a grey dot starts, the red square stops
@@ -711,14 +712,10 @@ void MainWindow::createActions()
       addDevice();
   });
   connect(actionConfigureRecorder, SIGNAL(triggered()), m_wid, SLOT(configRecorderSLOT()));
-  connect(action_Quit, SIGNAL(triggered()), this, SLOT(setToolbarVisibilitySLOT()));
+  connect(action_Quit, SIGNAL(triggered()), this, SLOT(storeDisplaySLOT()));
   connect(action_Quit, SIGNAL(triggered()), m_wid, SLOT(quitSLOT()));
   connect(action_Direct_help, SIGNAL(triggered()), m_wid, SLOT(helpSLOT()));
 
-  connect(toolBarMenu, SIGNAL(visibilityChanged(bool)),  this, SLOT(setToolbarVisibilitySLOT()));
-  connect(toolBarFile, SIGNAL(visibilityChanged(bool)), this, SLOT(setToolbarVisibilitySLOT()));
-  connect(toolBarRecorder, SIGNAL(visibilityChanged(bool)), this, SLOT(setToolbarVisibilitySLOT()));
-  connect(toolBarDMM, SIGNAL(visibilityChanged(bool)), this, SLOT(setToolbarVisibilitySLOT()));
 
   connect(m_stateMgr, &SharedStateManager::instancesChanged, this, &MainWindow::updateInstances);
 
@@ -857,9 +854,8 @@ void MainWindow::connectSLOT(bool on)
 {
   action_Start->setEnabled(on);
   action_Stop->setEnabled(on && m_running);
-
-  if (!on)
-    m_running = false;
+  // whether it records is runningSLOT()'s: an alarm's program has the port
+  // a while and the recording runs on
   updateRecorderActions();
 }
 
@@ -960,12 +956,11 @@ void MainWindow::on_action_Menu_triggered()
 
 void MainWindow::closeEvent(QCloseEvent *ev)
 {
-  setToolbarVisibilitySLOT();
+  storeDisplaySLOT();
   // the settings dialog saves "Show display" as well: without auto-save it
   // keeps the start layout's
   if (!m_autoSaveLayout->isChecked())
-    m_wid->setToolbarVisibility(m_startDisplay, toolBarDMM->isVisible(), toolBarRecorder->isVisible(),
-                                toolBarFile->isVisible());
+    m_wid->setShowDisplay(m_startDisplay);
   // dock layout (meter position, floating state, size) and toolbar layout
   saveWindows();
   m_wid->settings()->setInt("ReadingLog/max-rows", m_readings->maxRows());
@@ -1051,7 +1046,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
           // the settings dialog keeps its own "Show display": update it, or
           // the next OK there would bring the display back
           if (a == m_displayAction)
-            setToolbarVisibilitySLOT();
+            storeDisplaySLOT();
         }
       }
   return QMainWindow::eventFilter(watched, event);
@@ -1634,12 +1629,9 @@ void MainWindow::setDesign(int design)
   m_wid->settings()->setString("Windows/design", Designs::name(d));
 }
 
-void MainWindow::setToolbarVisibilitySLOT()
+void MainWindow::storeDisplaySLOT()
 {
-  m_wid->setToolbarVisibility(m_displayAction->isChecked(),
-                              toolBarDMM->isVisible(),
-                              toolBarRecorder->isVisible(),
-                              toolBarFile->isVisible());
+  m_wid->setShowDisplay(m_displayAction->isChecked());
 }
 
 void MainWindow::setConnectSLOT(bool on)
@@ -1647,12 +1639,15 @@ void MainWindow::setConnectSLOT(bool on)
   action_Connect->setChecked(on);
 }
 
-void MainWindow::toolbarVisibilitySLOT(bool disp, bool dmm, bool graph, bool file)
+void MainWindow::showDisplaySLOT(bool show)
 {
-  toolBarDMM->setVisible(dmm);
-  toolBarRecorder->setVisible(graph);
-  toolBarFile->setVisible(file);
-  m_displayAction->setChecked(disp);
+  m_displayAction->setChecked(show);
+}
+
+QMenu *MainWindow::createPopupMenu()
+{
+  // the toolbars are always there: no menu to hide them
+  return nullptr;
 }
 
 void MainWindow::setupIcons()
