@@ -425,12 +425,12 @@ protected:
   /// (0.35 V), these print them with the prefix the meter shows (350 mV).
   /// @{
   QList<QGraphicsSimpleTextItem *> m_yLabels;
-  QString          m_livePrefix;        ///< the prefix of the meter's unit (setUnit())
-  QString          m_liveBase;          ///< and its base unit
   QString          m_yPrefix;           ///< the prefix the y labels use now
   /// The meter's prefix while it measures what the store holds; else the
   /// one that suits the axis range.
   QString          yPrefix() const;
+  QString          m_livePrefix;        ///< the prefix of the meter's unit (setUnit()), for an axis without readings
+  QString          m_liveBase;          ///< and its base unit
   void             updateYLabels();
   /// @}
   QGraphicsLineItem *m_crosshairVLine;

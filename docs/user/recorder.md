@@ -56,8 +56,8 @@ time left until the length stops the recording, and whether it records:
 `0:42 / 10:00 - 9:18 left - Recording`. While live it shows how much the
 live graph holds of what it keeps: `0:42 / 10:00 - Live`.
 
-The vertical axis is in the unit the meter shows - mV while it shows mV -
-and in the unit that suits the values for a loaded recording.
+The vertical axis is in the unit that suits its range - mV for an axis up to
+0.4 V. A meter that changes range (V, mV) does not change the axis.
 
 ## Starting and stopping
 
