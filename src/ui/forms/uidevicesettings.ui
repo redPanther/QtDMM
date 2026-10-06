@@ -180,28 +180,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QToolButton" name="ui_advanced">
-     <property name="toolTip">
-      <string>Port parameters and protocol; a known model brings its own.</string>
-     </property>
-     <property name="text">
-      <string>&amp;Advanced</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="toolButtonStyle">
-      <enum>Qt::ToolButtonTextBesideIcon</enum>
-     </property>
-     <property name="autoRaise">
-      <bool>true</bool>
-     </property>
-     <property name="arrowType">
-      <enum>Qt::RightArrow</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QWidget" name="ui_advancedBox" native="true">
      <layout class="QVBoxLayout" name="verticalLayout_advanced">
       <property name="leftMargin">

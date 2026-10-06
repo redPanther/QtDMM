@@ -9,7 +9,7 @@ meter - the first start - shows nothing but a big **Add device** button.
 
 1. **How is it connected?** *Cable* (USB cable of the meter, USB-serial
    adapter, serial port), *Bluetooth*, *Network*, *sigrok* or *Simulated /
-   calculated* - the virtual meter, a signal of its own to try QtDMM without
+   calculated* - the simulated meter, a signal of its own to try QtDMM without
    hardware, or a value calculated from other windows.
 2. **Where?** For a cable, Bluetooth or the network QtDMM looks right away,
    only there, and lists every port it finds, the recognised meters first. A USB cable
@@ -45,14 +45,15 @@ sidebar (Shift+F2 for the one in use) hold the settings of the meter:
    vendor's models. *All vendors* shows the complete list; *Manual settings*
    lets you enter the serial parameters yourself.
 2. Pick the **model**. Baud rate, data bits, parity, stop bits, DTR / RTS,
-   protocol and display resolution are filled in from QtDMM's device table and
-   locked; they are folded away under **Advanced**. You can also start typing
+   protocol and display resolution come from QtDMM's device table; there is
+   nothing to set, so they are not shown. You can also start typing
    into the model box; the search covers every vendor and switches the vendor
    box for you.
 3. Choose the **port** (see below).
 
-With *Manual settings* **Advanced** is open: set the serial parameters, the
-protocol and **DTR** / **RTS** if the meter's cable needs them powered.
+With *Manual settings* the serial parameters, the protocol and **DTR** /
+**RTS** are shown: set them, DTR / RTS if the meter's cable needs them
+powered.
 
 Manual settings are for meters that are not in the table yet. If you find a
 combination that works, please report it on the project page so it can be

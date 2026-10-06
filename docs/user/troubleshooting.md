@@ -29,10 +29,9 @@ value. If the meter is on, see the next section.
   USB-HID cable QtDMM can tell the two apart and says *"The USB cable answers,
   but the meter sends nothing"* when the cable is fine and only the meter's
   output is off.
-- Some cables draw their power from the DTR or RTS line. Compare the DTR/RTS
-  boxes under *Advanced* in the settings of the device with the device table in
-  [Supported devices](supported-devices.md); with manual settings, try DTR on
-  and RTS off first.
+- Some cables draw their power from the DTR or RTS line. The device table in
+  [Supported devices](supported-devices.md) says what a known model uses;
+  with manual settings, try DTR on and RTS off first.
 - With manual settings, double-check baud rate, data bits and parity. Most
   meters in the device table use 7 data bits with odd or no parity.
 

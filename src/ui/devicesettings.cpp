@@ -60,8 +60,10 @@ DeviceSettings::DeviceSettings(QWidget *parent) : QWidget(parent)
   for (QLineEdit *e : {ui_virtualMin, ui_virtualMax, ui_virtualPeriod, ui_virtualNoise})
     connect(e, &QLineEdit::textChanged, this, &DeviceSettings::updateVirtualFormula);
   connect(ui_virtualFormula, &QLineEdit::textChanged, this, [this]{ if (ui_virtualSignal->currentIndex() == 7) updateVirtualFormula(); });
-  connect(ui_advanced, &QToolButton::toggled, this, &DeviceSettings::setAdvanced);
-  setAdvanced(false);
+  // no frames: a section title above each group, shown with it
+  for (QGroupBox *group : findChildren<QGroupBox *>())
+    sectionTitle(group);
+  showPortParameters(false);
   m_calcHintTimer.setInterval(1000);   // live values of the input instances
   connect(&m_calcHintTimer, &QTimer::timeout, this, &DeviceSettings::updateCalcHint);
 
@@ -385,20 +387,62 @@ void DeviceSettings::load(const QVariantMap &keys)
     enterManualMode();
   else
     on_ui_model_activated(ui_model->currentIndex());
-  // a known model brings its port parameters and protocol
-  setAdvanced(ui_vendor->currentIndex() == 0);
+  // a known model brings its port parameters and protocol: nothing to set
+  showPortParameters(ui_vendor->currentIndex() == 0);
 }
 
-void DeviceSettings::setAdvanced(bool open)
+void DeviceSettings::showPortParameters(bool show)
 {
-  ui_advanced->setChecked(open);
-  ui_advanced->setArrowType(open ? Qt::DownArrow : Qt::RightArrow);
-  ui_advancedBox->setVisible(open);
+  m_portParameters = show;
+  ui_advancedBox->setVisible(show);
 }
 
-bool DeviceSettings::isAdvancedOpen() const
+bool DeviceSettings::portParametersShown() const
 {
-  return ui_advanced->isChecked();
+  return m_portParameters;
+}
+
+namespace
+{
+/// Shows and hides a group's section title with the group.
+class SectionFollower : public QObject
+{
+public:
+  SectionFollower(QWidget *group, QLabel *title) : QObject(group), m_title(title) {}
+  bool eventFilter(QObject *, QEvent *event) override
+  {
+    if (event->type() == QEvent::ShowToParent)
+      m_title->show();
+    else if (event->type() == QEvent::HideToParent)
+      m_title->hide();
+    return false;
+  }
+
+private:
+  QLabel *m_title;
+};
+}
+
+void DeviceSettings::sectionTitle(QGroupBox *group)
+{
+  // the frame goes; the title becomes a bold label above, as on the pages
+  // of the settings dialog
+  const QString title = group->title();
+  group->setTitle(QString());
+  group->setFlat(true);
+  group->setStyleSheet(QStringLiteral("QGroupBox { border: none; margin: 0; padding: 0; }"));
+  auto *box = qobject_cast<QBoxLayout *>(group->parentWidget() ? group->parentWidget()->layout() : nullptr);
+  if (title.isEmpty() || !box)
+    return;
+  auto *label = new QLabel(title, group->parentWidget());
+  label->setObjectName(group->objectName() + "_title");
+  QFont f = label->font();
+  f.setBold(true);
+  label->setFont(f);
+  label->setContentsMargins(0, label->fontMetrics().height() / 2, 0, 0);
+  box->insertWidget(box->indexOf(group), label);
+  label->setVisible(!group->isHidden());
+  group->installEventFilter(new SectionFollower(group, label));
 }
 
 void DeviceSettings::factoryDefaults()
@@ -521,7 +565,7 @@ bool DeviceSettings::isCalculated() const
 
 bool DeviceSettings::isVirtual() const
 {
-  return ui_vendor->currentIndex() != 0 && m_dmmInfo.vendor == "QtDMM" && m_dmmInfo.model == "Virtual meter";
+  return ui_vendor->currentIndex() != 0 && m_dmmInfo.vendor == "QtDMM" && m_dmmInfo.model == "Simulated meter";
 }
 
 void DeviceSettings::updateVirtualFormula()
@@ -559,7 +603,6 @@ void DeviceSettings::updateCalcMode()
   ButtonGroup11->setVisible(m_portVisible && !calc && !virt && !ble && !sigrok);
   ui_serialBox->setVisible(!calc && !virt && !ble && !sigrok);
   ui_protocol->setVisible(!calc && !virt);
-  ui_advanced->setVisible(!calc && !virt);
   ui_calcGroup->setVisible(calc);
   ui_virtualGroup->setVisible(virt);
   ui_bleGroup->setVisible(ble);
@@ -673,7 +716,7 @@ void DeviceSettings::enterManualMode()
 
   message->show();
   message2->hide();
-  setAdvanced(true);   // nothing to take from a model
+  showPortParameters(true);   // nothing to take from a model
 
   m_dmmInfo.name = "custom";
   m_dmmInfo.baud = baudRate->currentText().toInt();
