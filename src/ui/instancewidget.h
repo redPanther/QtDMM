@@ -174,10 +174,8 @@ public Q_SLOTS:
   /// Graph started/stopped recording.
   void        runningSLOT(bool);
   /// Settings dialog OK/Apply: re-reads the configuration (readConfig());
-  /// \p reconnect (OK) connects the meter again.
-  void        applySLOT(bool reconnect = false);
-  /// Settings dialog Cancel.
-  void        rejectSLOT();
+  /// the connection stays as it is.
+  void        applySLOT();
 
 protected:
   void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
@@ -212,6 +210,9 @@ protected:
 
   /// Applies the settings to the MeterConnection, graph, display and meter.
   void        readConfig();
+  /// The meter's keys (and sigrok-cli) the port was set up with last:
+  /// readConfig() opens the port again only when they changed.
+  QVariantMap m_appliedMeter;
   QRect       parentRect() const;
 
 protected Q_SLOTS:

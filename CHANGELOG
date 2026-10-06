@@ -38,6 +38,12 @@
   recording the graph follows the newest reading until you scroll back
 - Texts: "recorder" is "recording" or "graph" in the tool tips, the status bar says "Recording" while it
   records; old tool tips (export as tab separated list, F2 for the recorder options) describe what QtDMM does now
+- Settings: opening the dialog no longer disconnects the meter and no longer stops a recording; OK and Apply
+  open the port again only when the meter changed (before, every OK reconnected - seconds for a Bluetooth meter -
+  and reconnected a meter you had disconnected yourself). The gap this left in the graph was drawn as a line
+- Graph: where the meter fell silent the line no longer bridges the gap. In a long recording or Live with "All",
+  a pause of minutes was now and then drawn as a straight line, so a part of the curve seemed to come and go; and
+  the newest reading was drawn twice when the window grew with it
 - Settings dialog tidied: six pages - General (now with the toolbars), Appearance, Graph (colours, line,
   Y axis, time axis and the integration curve, whose section opens when it is switched on), Recording,
   Alarms, SCPI server. Section titles without frames, one column, fields that belong to a choice show up

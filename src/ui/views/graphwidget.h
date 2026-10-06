@@ -300,6 +300,7 @@ protected:
   int              m_tailDataPts = 0;  ///< and the data points (a gap has none)
   int              m_tailIntPts = 0;
   int              m_windowSeconds = 600;   ///< the visible window, setGraphSize()
+  int              m_rebuilds = 0;          ///< rebuildSeries() calls, see onAppended()
   /// @name Time buttons (All / 1 min / 5 min / 30 min) top right in the graph
   /// @{
   QWidget         *m_timeBar = nullptr;
