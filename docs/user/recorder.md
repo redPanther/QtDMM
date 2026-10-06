@@ -53,7 +53,7 @@ vertical scale (**Y axis**: automatic, or a fixed minimum and maximum).
 
 The status bar shows how much is recorded and the recording's length, the
 time left until the length stops the recording, and whether it records:
-`0:42 / 10:00 - 9:18 left - Sampling`. While live it shows how much the
+`0:42 / 10:00 - 9:18 left - Recording`. While live it shows how much the
 live graph holds of what it keeps: `0:42 / 10:00 - Live`.
 
 The vertical axis is in the unit the meter shows - mV while it shows mV -

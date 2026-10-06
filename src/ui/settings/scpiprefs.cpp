@@ -26,7 +26,7 @@ ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
   m_enabled->setToolTip(tr("QtDMM answers SCPI queries (*IDN?, READ?, ...) on a TCP port. With the server on, "
                            "lxi-tools, LabVIEW, PyVISA or a few lines of Python can read the current value as "
                            "if the multimeter were a bench instrument with a LAN port. The server only reports; "
-                           "it never sends anything to the meter. INITiate/ABORt start and stop the recorder, "
+                           "it never sends anything to the meter. INITiate/ABORt start and stop a recording, "
                            "INPut ON/OFF connect and disconnect."));
   form->addRow(QString(), m_enabled);
   m_port = new QSpinBox(group);
@@ -41,7 +41,7 @@ ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
   m_bind->addItem(tr("This computer only (localhost)"));
   m_bind->addItem(tr("All network interfaces"));
   m_bind->setToolTip(tr("There is no authentication: anyone who can reach the port can read the "
-                        "meter and start the recorder. Open it to the network only where you trust it."));
+                        "meter and start a recording. Open it to the network only where you trust it."));
   auto *bindLabel = new QLabel(tr("&Listen on:"), group);
   bindLabel->setBuddy(m_bind);
   form->addRow(bindLabel, m_bind);

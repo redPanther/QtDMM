@@ -50,7 +50,7 @@
   </widget>
   <widget class="QToolBar" name="toolBarRecorder">
    <property name="windowTitle">
-    <string>Recorder</string>
+    <string>Graph</string>
    </property>
    <property name="toolTip">
     <string/>
@@ -128,7 +128,7 @@
     <string>Export graph</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Export recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Here you can export the recorded data as tab separated list. Each line contains the following values (separated by a tab character): date (dd.mm.yyyy) time (hh:mm:ss) value (float) unit.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Export the recording&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Writes the recording as CSV, Excel or OpenDocument: one row per sample time, or every reading at its time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+E</string>
@@ -148,7 +148,7 @@
     <string>Import graph</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Import data into recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Here you can import previously exported data files. QtDMM tries to do an educated guess if the file format is correct and rejects import of files which to not match.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Import a recording&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Loads a file exported before into the graph, to zoom, scroll and export. A file QtDMM cannot read is refused.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+I</string>
@@ -168,7 +168,7 @@
     <string>Print graph</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Print recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A dialog will open where you can define a title and a comment for your printout. The printer itself can also be configured here. To be able to print you need at least one working postscript printer configured in your system. Printing into a file is also supported.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Print the graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A dialog asks for a title and a comment and lets you choose the printer; printing into a PDF file works too.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+P</string>
@@ -185,7 +185,7 @@
     <string>&amp;Configure</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configure QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will open QtDMM's configuration dialog. Here you can configure it's visual appearance and all options regarding the multimeter hardware and the recorder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Settings&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The settings: appearance, graph, recording, alarms and the SCPI server. The meter is set up with Add device.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">F2</string>
@@ -202,7 +202,7 @@
     <string>&amp;Quit</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quit QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the recorder contains unsaved data QtDMM will give you the option to savve your data first.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quit QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;When a recording is not saved yet, QtDMM offers to export it first.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+Q</string>
@@ -251,7 +251,7 @@
     <string>show or hide the graph</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show or hide the recorder graph. Recording continues while the graph is hidden; with only the display and the meter panels visible the window can be made much smaller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show or hide the graph. Recording continues while the graph is hidden; with only the display and the meter panels visible the window can be made much smaller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
@@ -308,7 +308,7 @@
     <string>Start recording</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Start the recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If you are in manual mode this will start the recorder. Press F2 to set the recorder options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Start recording&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Asks for the length and starts a recording. A start at a clock time or at a threshold is set under Settings, Recording (Ctrl+F2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+S</string>
@@ -331,7 +331,7 @@
     <string>Stop recording</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Stop the recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The recorder will be stopped. This is independent from the start mode of the recorder. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Stop recording&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Stops the recording, however it was started.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+X</string>
@@ -391,7 +391,7 @@
     <string>Clear graph</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Clear the recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the recorder is already started it will clear the graph and continue recording.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Clear the graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Empties the recording or the live graph; a recording viewed goes back to Live.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+Del</string>
@@ -405,7 +405,7 @@
     <string>C&amp;onfigure</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configure QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will open QtDMM's configuration dialog. Here you can configure it's visual appearance and all options regarding the multimeter hardware and the recorder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Settings&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The settings: appearance, graph, recording, alarms and the SCPI server. The meter is set up with Add device.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+F2</string>
@@ -445,7 +445,7 @@
     <string>Handbook</string>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Handbook&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the QtDMM handbook: connecting a meter, the recorder, troubleshooting and the list of supported devices.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Handbook&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the QtDMM handbook: connecting a meter, recording, troubleshooting and the list of supported devices.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string notr="true">F1</string>

@@ -68,10 +68,7 @@
 	<cursorShape>ArrowCursor</cursorShape>
        </property>
        <property name="whatsThis">
-	<string>This is the plotting area for the transient recorder. It is widely configurable by clicking the &lt;b&gt;config ...&lt;/b&gt; button to the right. Data aquisition may be started by hand, at a specific time or automatically triggered by the measured value itself &lt;i&gt;(See configuration dialog)&lt;/i&gt;&lt;p&gt;
-The maximum resolution for data aquisition is 1/10th of a second, but may also be configured to sample once a week or what ever you want.
-&lt;p&gt;
-&lt;b&gt;Note:&lt;/b&gt; Connecting to the DMM as well as a change of the measuring unit automatically clears the graph.</string>
+	<string>The graph of the readings. Right after connecting it runs live; Record (Space) records, and a recording that ended or a file imported stands to zoom, save and export. More in the right-click menu.</string>
        </property>
       </widget>
      </item>

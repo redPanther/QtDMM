@@ -36,6 +36,8 @@
   longer than Max. length (1 hour by default) lost its beginning without a word. Live without a recording
   length is as wide as the visible window, the time buttons go as far as there is a recording, and while
   recording the graph follows the newest reading until you scroll back
+- Texts: "recorder" is "recording" or "graph" in the tool tips, the status bar says "Recording" while it
+  records; old tool tips (export as tab separated list, F2 for the recorder options) describe what QtDMM does now
 - Settings dialog tidied: six pages - General (now with the toolbars), Appearance, Graph (colours, line,
   Y axis, time axis and the integration curve, whose section opens when it is switched on), Recording,
   Alarms, SCPI server. Section titles without frames, one column, fields that belong to a choice show up

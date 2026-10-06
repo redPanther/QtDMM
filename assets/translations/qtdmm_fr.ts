@@ -421,8 +421,13 @@
     </message>
     <message>
         <location filename="../../src/ui/settings/alarmprefs.cpp" line="243"/>
-        <source>Mark in the recorder graph</source>
-        <translation>Marque dans le graphe de l&apos;enregistreur</translation>
+        <source>Mark in the graph</source>
+        <translation>Marquer dans le graphique</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="254"/>
+        <source>&amp;Recording:</source>
+        <translation>&amp;Enregistrement :</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/alarmprefs.cpp" line="245"/>
@@ -443,11 +448,6 @@
         <location filename="../../src/ui/settings/alarmprefs.cpp" line="252"/>
         <source>stop</source>
         <translation>arrêter</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="254"/>
-        <source>&amp;Recorder:</source>
-        <translation>&amp;Enregistreur :</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/alarmprefs.cpp" line="256"/>
@@ -509,8 +509,8 @@
     </message>
     <message>
         <location filename="../../src/ui/settings/alarmprefs.cpp" line="30"/>
-        <source>Each alarm watches the main reading. It raises when its condition has held for the given time and clears once the reading is back beyond the hysteresis. Untick an alarm to keep it without it firing. An alarm can show a banner over the display, beep, open a popup, run a program or start the recorder.</source>
-        <translation>Chaque alarme surveille la mesure principale. Elle se déclenche quand sa condition a duré le temps indiqué et cesse dès que la mesure est revenue au-delà de l&apos;hystérésis. Décochez une alarme pour la garder sans qu&apos;elle se déclenche. Une alarme peut afficher un bandeau sur l&apos;afficheur, biper, ouvrir une fenêtre, lancer un programme ou démarrer l&apos;enregistrement.</translation>
+        <source>Each alarm watches the main reading. It raises when its condition has held for the given time and clears once the reading is back beyond the hysteresis. Untick an alarm to keep it without it firing. An alarm can show a banner over the display, beep, open a popup, run a program or start a recording.</source>
+        <translation>Chaque alarme surveille la mesure principale. Elle se déclenche quand sa condition a duré le temps indiqué et cesse dès que la mesure est revenue au-delà de l&apos;hystérésis. Décochez une alarme pour la garder sans qu&apos;elle se déclenche. Une alarme peut afficher un bandeau sur l&apos;afficheur, biper, ouvrir une fenêtre, lancer un programme ou démarrer un enregistrement.</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/alarmprefs.cpp" line="36"/>
@@ -1779,11 +1779,6 @@ puis déconnectez-vous et reconnectez-vous.</translation>
         <translation>Direct</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1128"/>
-        <source>Sampling</source>
-        <translation>Échantillonnage</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/views/graphwidget.cpp" line="1131"/>
         <source>Stopped</source>
         <translation>Arrêté</translation>
@@ -1799,14 +1794,19 @@ puis déconnectez-vous et reconnectez-vous.</translation>
         <translation>Connecter</translation>
     </message>
     <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1128"/>
+        <source>Recording</source>
+        <translation>Enregistrement</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/views/graphwidget.cpp" line="1212"/>
-        <source>Stop recorder</source>
-        <translation>Arrêter l&apos;enregistreur</translation>
+        <source>Stop recording</source>
+        <translation>Arrêter l&apos;enregistrement</translation>
     </message>
     <message>
         <location filename="../../src/ui/views/graphwidget.cpp" line="1219"/>
-        <source>Start recorder</source>
-        <translation>Démarrer l&apos;enregistreur</translation>
+        <source>Start recording</source>
+        <translation>Démarrer l&apos;enregistrement</translation>
     </message>
     <message>
         <location filename="../../src/ui/views/graphwidget.cpp" line="1230"/>
@@ -2383,11 +2383,6 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <translation>&amp;Tableau des mesures</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="236"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Readings table&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Every reading the meter sent, one row each, with time, mode and range - the raw protocol of the session next to the recorder&apos;s graph. Copy rows to a spreadsheet or export them as CSV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Tableau des mesures&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Chaque mesure envoyée par le multimètre, une ligne par valeur, avec l&apos;heure, le mode et la gamme – le protocole brut de la session à côté du graphe de l&apos;enregistreur. Copiez des lignes dans un tableur ou exportez-les en CSV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/mainwindow.cpp" line="317"/>
         <source>&lt;p&gt;Drag a divider between two windows to share the space differently. Ctrl+drag a window (or drag its title bar) onto another one to swap them.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Faites glisser un séparateur entre deux fenêtres pour répartir l&apos;espace autrement. Faites glisser une fenêtre avec Ctrl (ou par sa barre de titre) sur une autre pour les échanger.&lt;/p&gt;</translation>
@@ -2462,6 +2457,11 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <location filename="../../src/ui/mainwindow.cpp" line="146"/>
         <source>&amp;Add device</source>
         <translation>A&amp;jouter un appareil</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="236"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Readings table&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Every reading the meter sent, one row each, with time, mode and range - the raw protocol of the session next to the graph. Copy rows to a spreadsheet or export them as CSV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Tableau des mesures&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Chaque mesure envoyée par l&apos;appareil, une ligne chacune, avec l&apos;heure, le mode et la gamme : le journal brut de la session à côté du graphique. Copiez des lignes dans un tableur ou exportez-les en CSV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/mainwindow.cpp" line="262"/>
@@ -2554,6 +2554,11 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <translation>Une autre instance est en cours d&apos;exécution.</translation>
     </message>
     <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="754"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copy graph image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Puts a picture of the graph on the clipboard, ready to paste into a report or a chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copier l&apos;image du graphique&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Place une image du graphique dans le presse-papiers, prête à coller dans un rapport ou une discussion.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/mainwindow.cpp" line="894"/>
         <source>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;A readout and transient recorder for digital multimeters.&lt;/p&gt;&lt;p&gt;Built with &lt;b&gt;Qt&lt;/b&gt; %2. Licensed under the &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions before 0.9.0 under GPL 2).&lt;/p&gt;&lt;p&gt;0.9.5 onwards: tuxmaster and contributors, see the AUTHORS file.&lt;br&gt;0.9.3 and before: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Source and bug reports: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbols from the &lt;b&gt;Oxygen&lt;/b&gt; and &lt;b&gt;Breeze&lt;/b&gt; icon themes of the KDE community (LGPL 3); QtDMM&apos;s own symbols are drawn in its style.&lt;/p&gt;</source>
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Affichage et enregistreur de transitoires pour multimètres numériques.&lt;/p&gt;&lt;p&gt;Construit avec &lt;b&gt;Qt&lt;/b&gt; %2. Sous licence &lt;b&gt;GNU GPL 3&lt;/b&gt; (versions antérieures à 0.9.0 sous GPL 2).&lt;/p&gt;&lt;p&gt;À partir de 0.9.5 : tuxmaster et contributeurs, voir le fichier AUTHORS.&lt;br&gt;0.9.3 et antérieures : &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Site web : &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact : &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Sources et rapports de bogues : &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Les symboles proviennent des thèmes d&apos;icônes &lt;b&gt;Oxygen&lt;/b&gt; et &lt;b&gt;Breeze&lt;/b&gt; de la communauté KDE (LGPL 3) ; les symboles propres à QtDMM sont dessinés dans son style.&lt;/p&gt;</translation>
@@ -2637,11 +2642,6 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <location filename="../../src/ui/mainwindow.cpp" line="752"/>
         <source>Cop&amp;y graph image</source>
         <translation>Copier le graphe comme &amp;image</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="754"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copy graph image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Puts a picture of the recorder graph on the clipboard, ready to paste into a report or a chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Copier le graphe comme image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Place une image du graphe de l’enregistreur dans le presse-papiers, prête à être collée dans un rapport ou un chat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/mainwindow.cpp" line="811"/>
@@ -3967,8 +3967,13 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
     </message>
     <message>
         <location filename="../../src/ui/settings/scpiprefs.cpp" line="26"/>
-        <source>QtDMM answers SCPI queries (*IDN?, READ?, ...) on a TCP port. With the server on, lxi-tools, LabVIEW, PyVISA or a few lines of Python can read the current value as if the multimeter were a bench instrument with a LAN port. The server only reports; it never sends anything to the meter. INITiate/ABORt start and stop the recorder, INPut ON/OFF connect and disconnect.</source>
-        <translation>QtDMM répond aux requêtes SCPI (*IDN?, READ?, …) sur un port TCP. Avec le serveur actif, lxi-tools, LabVIEW, PyVISA ou quelques lignes de Python peuvent lire la valeur courante comme si le multimètre était un instrument de laboratoire avec un port LAN. Le serveur ne fait que rapporter ; il n&apos;envoie jamais rien à l&apos;appareil. INITiate/ABORt démarrent et arrêtent l&apos;enregistrement, INPut ON/OFF connectent et déconnectent.</translation>
+        <source>QtDMM answers SCPI queries (*IDN?, READ?, ...) on a TCP port. With the server on, lxi-tools, LabVIEW, PyVISA or a few lines of Python can read the current value as if the multimeter were a bench instrument with a LAN port. The server only reports; it never sends anything to the meter. INITiate/ABORt start and stop a recording, INPut ON/OFF connect and disconnect.</source>
+        <translation>QtDMM répond aux requêtes SCPI (*IDN?, READ?, …) sur un port TCP. Avec le serveur actif, lxi-tools, LabVIEW, PyVISA ou quelques lignes de Python peuvent lire la valeur courante comme si le multimètre était un instrument de laboratoire avec un port LAN. Le serveur ne fait que rapporter ; il n&apos;envoie jamais rien à l&apos;appareil. INITiate/ABORt démarrent et arrêtent un enregistrement, INPut ON/OFF connectent et déconnectent.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="43"/>
+        <source>There is no authentication: anyone who can reach the port can read the meter and start a recording. Open it to the network only where you trust it.</source>
+        <translation>Il n&apos;y a pas d&apos;authentification : quiconque atteint le port peut lire l&apos;appareil et démarrer un enregistrement. Ne l&apos;ouvrez au réseau que là où vous lui faites confiance.</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/scpiprefs.cpp" line="35"/>
@@ -3989,11 +3994,6 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
         <location filename="../../src/ui/settings/scpiprefs.cpp" line="42"/>
         <source>All network interfaces</source>
         <translation>Toutes les interfaces réseau</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/scpiprefs.cpp" line="43"/>
-        <source>There is no authentication: anyone who can reach the port can read the meter and start the recorder. Open it to the network only where you trust it.</source>
-        <translation>Il n&apos;y a aucune authentification : quiconque atteint le port peut lire le multimètre et démarrer l&apos;enregistreur. Ne l&apos;ouvrez au réseau que là où vous avez confiance.</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/scpiprefs.cpp" line="45"/>
@@ -4250,11 +4250,6 @@ Votre ancienne configuration ~/.qtdmmrc a été renommée ~/.qtdmmrc.old.</trans
         <translation>Valeur &amp;principale :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uidevicesettings.ui" line="829"/>
-        <source>Which of the device&apos;s values the display, the analog meter and the recorder show.</source>
-        <translation>Quelle valeur de l&apos;appareil l&apos;affichage, le galvanomètre et l&apos;enregistreur montrent.</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/forms/uidevicesettings.ui" line="836"/>
         <source>Se&amp;cond value:</source>
         <translation>Valeur se&amp;condaire :</translation>
@@ -4430,6 +4425,11 @@ Votre ancienne configuration ~/.qtdmmrc a été renommée ~/.qtdmmrc.old.</trans
         <translation>Certains multimètres envoient plusieurs lignes contenant différentes mesures. Comme QtDMM n&apos;affiche qu&apos;une grandeur, indiquez ici le nombre de lignes à ignorer par mesure (QtDMM n&apos;utilise alors que la première ligne).</translation>
     </message>
     <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="829"/>
+        <source>Which of the device&apos;s values the display, the analog meter and the graph show.</source>
+        <translation>Quelle valeur de l&apos;appareil l&apos;afficheur, le galvanomètre et le graphique montrent.</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/forms/uidevicesettings.ui" line="1144"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These protocol settings have not been confirmed by a user yet. If you own this model and can confirm that they work, please open an issue at &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ces réglages de protocole n&apos;ont pas encore été confirmés par un utilisateur. Si vous possédez ce modèle et pouvez confirmer qu&apos;ils fonctionnent, ouvrez un ticket sur &lt;a href=&quot;https://github.com/qtdmm/QtDMM/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;github.com/qtdmm/QtDMM/issues&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
@@ -4515,14 +4515,8 @@ Votre ancienne configuration ~/.qtdmmrc a été renommée ~/.qtdmmrc.old.</trans
     <name>UIInstanceWidget</name>
     <message>
         <location filename="../../src/ui/forms/uiinstancewidget.ui" line="71"/>
-        <source>This is the plotting area for the transient recorder. It is widely configurable by clicking the &lt;b&gt;config ...&lt;/b&gt; button to the right. Data aquisition may be started by hand, at a specific time or automatically triggered by the measured value itself &lt;i&gt;(See configuration dialog)&lt;/i&gt;&lt;p&gt;
-The maximum resolution for data aquisition is 1/10th of a second, but may also be configured to sample once a week or what ever you want.
-&lt;p&gt;
-&lt;b&gt;Note:&lt;/b&gt; Connecting to the DMM as well as a change of the measuring unit automatically clears the graph.</source>
-        <translation>Zone de tracé de l&apos;enregistreur de transitoires. Elle est largement configurable via le bouton &lt;b&gt;Configurer…&lt;/b&gt;. L&apos;acquisition peut être lancée à la main, à une heure donnée ou déclenchée automatiquement par la valeur mesurée &lt;i&gt;(voir le dialogue de configuration)&lt;/i&gt;&lt;p&gt;
-La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi échantillonner une fois par semaine ou à tout autre rythme.
-&lt;p&gt;
-&lt;b&gt;Note :&lt;/b&gt; la connexion au multimètre ainsi qu&apos;un changement d&apos;unité effacent automatiquement le graphe.</translation>
+        <source>The graph of the readings. Right after connecting it runs live; Record (Space) records, and a recording that ended or a file imported stands to zoom, save and export. More in the right-click menu.</source>
+        <translation>Le graphique des mesures. Juste après la connexion il tourne en direct ; Enregistrer (Espace) enregistre, et un enregistrement terminé ou un fichier importé reste pour zoomer, sauvegarder et exporter. Plus dans le menu contextuel.</translation>
     </message>
 </context>
 <context>
@@ -4531,11 +4525,6 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
         <location filename="../../src/ui/forms/uimainwindow.ui" line="27"/>
         <source>DMM</source>
         <translation>Multimètre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="53"/>
-        <source>Recorder</source>
-        <translation>Enregistreur</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="79"/>
@@ -4560,11 +4549,6 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
         <translation>Exporter le graphe</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="131"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Export recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Here you can export the recorded data as tab separated list. Each line contains the following values (separated by a tab character): date (dd.mm.yyyy) time (hh:mm:ss) value (float) unit.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Exporter le graphe de l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Exporte les données enregistrées sous forme de liste séparée par des tabulations. Chaque ligne contient : date (jj.mm.aaaa), heure (hh:mm:ss), valeur (flottant), unité.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="145"/>
         <source>&amp;Import</source>
         <translation>&amp;Importer</translation>
@@ -4573,11 +4557,6 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
         <location filename="../../src/ui/forms/uimainwindow.ui" line="148"/>
         <source>Import graph</source>
         <translation>Importer un graphe</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="151"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Import data into recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Here you can import previously exported data files. QtDMM tries to do an educated guess if the file format is correct and rejects import of files which to not match.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Importer des données dans l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Importe des fichiers de données exportés auparavant. QtDMM vérifie le format et refuse les fichiers qui ne correspondent pas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="165"/>
@@ -4590,30 +4569,14 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
         <translation>Imprimer le graphique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="171"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Print recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A dialog will open where you can define a title and a comment for your printout. The printer itself can also be configured here. To be able to print you need at least one working postscript printer configured in your system. Printing into a file is also supported.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Imprimer le graphe de l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Un dialogue permet de définir un titre et un commentaire pour l&apos;impression et de configurer l&apos;imprimante. Il faut au moins une imprimante PostScript fonctionnelle configurée dans le système. L&apos;impression dans un fichier est aussi possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="185"/>
         <source>&amp;Configure</source>
         <translation>&amp;Configurer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="188"/>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="408"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configure QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This will open QtDMM&apos;s configuration dialog. Here you can configure it&apos;s visual appearance and all options regarding the multimeter hardware and the recorder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Configurer QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ouvre le dialogue de configuration de QtDMM : apparence, options du multimètre et de l&apos;enregistreur.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="202"/>
         <source>&amp;Quit</source>
         <translation>&amp;Quitter</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="205"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quit QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the recorder contains unsaved data QtDMM will give you the option to savve your data first.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quitter QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Si l&apos;enregistreur contient des données non enregistrées, QtDMM propose de les enregistrer d&apos;abord.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="222"/>
@@ -4641,9 +4604,40 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
         <translation>afficher ou masquer le graphe</translation>
     </message>
     <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="53"/>
+        <source>Graph</source>
+        <translation>Graphe</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="131"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Export the recording&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Writes the recording as CSV, Excel or OpenDocument: one row per sample time, or every reading at its time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Exporter l&apos;enregistrement&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Écrit l&apos;enregistrement en CSV, Excel ou OpenDocument : une ligne par période d&apos;échantillonnage, ou chaque mesure à son heure.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="151"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Import a recording&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Loads a file exported before into the graph, to zoom, scroll and export. A file QtDMM cannot read is refused.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Importer un enregistrement&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Charge dans le graphique un fichier exporté auparavant, pour zoomer, défiler et exporter. Un fichier que QtDMM ne sait pas lire est refusé.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="171"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Print the graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A dialog asks for a title and a comment and lets you choose the printer; printing into a PDF file works too.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Imprimer le graphique&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Une boîte de dialogue demande un titre et un commentaire et permet de choisir l&apos;imprimante ; l&apos;impression dans un fichier PDF fonctionne aussi.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="188"/>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="408"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Settings&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The settings: appearance, graph, recording, alarms and the SCPI server. The meter is set up with Add device.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paramètres&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Les paramètres : apparence, graphique, enregistrement, alarmes et serveur SCPI. L&apos;appareil se configure avec Ajouter un appareil.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="205"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quit QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;When a recording is not saved yet, QtDMM offers to export it first.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Quitter QtDMM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Quand un enregistrement n&apos;est pas encore sauvegardé, QtDMM propose de l&apos;exporter d&apos;abord.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="254"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show or hide the recorder graph. Recording continues while the graph is hidden; with only the display and the meter panels visible the window can be made much smaller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graphe&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Affiche ou masque le graphe de l&apos;enregistreur. L&apos;enregistrement continue quand le graphe est masqué ; avec seulement l&apos;afficheur et le galvanomètre, la fenêtre peut être bien plus petite.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Show or hide the graph. Recording continues while the graph is hidden; with only the display and the meter panels visible the window can be made much smaller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Graphique&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Afficher ou masquer le graphique. L&apos;enregistrement continue quand le graphique est masqué ; avec seulement l&apos;afficheur et le galvanomètre, la fenêtre peut être bien plus petite.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="268"/>
@@ -4683,8 +4677,23 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="311"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Start the recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If you are in manual mode this will start the recorder. Press F2 to set the recorder options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Démarrer l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;En mode manuel, démarre l&apos;enregistreur. Appuyez sur F2 pour régler ses options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Start recording&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Asks for the length and starts a recording. A start at a clock time or at a threshold is set under Settings, Recording (Ctrl+F2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Démarrer l&apos;enregistrement&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Demande la durée et démarre un enregistrement. Le démarrage à une heure ou à un seuil se règle dans Paramètres, Enregistrement (Ctrl+F2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="334"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Stop recording&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Stops the recording, however it was started.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Arrêter l&apos;enregistrement&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Arrête l&apos;enregistrement, quelle que soit la façon dont il a démarré.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="394"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Clear the graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Empties the recording or the live graph; a recording viewed goes back to Live.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Vider le graphique&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Vide l&apos;enregistrement ou le graphique en direct ; un enregistrement consulté repasse en Direct.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uimainwindow.ui" line="448"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Handbook&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the QtDMM handbook: connecting a meter, recording, troubleshooting and the list of supported devices.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Manuel&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ouvrir le manuel de QtDMM : connecter un multimètre, l&apos;enregistrement, le dépannage et la liste des appareils pris en charge.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="328"/>
@@ -4695,11 +4704,6 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
         <location filename="../../src/ui/forms/uimainwindow.ui" line="331"/>
         <source>Stop recording</source>
         <translation>Arrêter l&apos;enregistrement</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="334"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Stop the recorder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The recorder will be stopped. This is independent from the start mode of the recorder. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Arrêter l&apos;enregistreur&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Arrête l&apos;enregistreur, quel que soit son mode de démarrage. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="348"/>
@@ -4737,11 +4741,6 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
         <translation>Effacer le graphe</translation>
     </message>
     <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="394"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Clear the recorder graph&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the recorder is already started it will clear the graph and continue recording.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Effacer le graphe&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Si l&apos;enregistreur est en cours, le graphe est effacé et l&apos;enregistrement continue.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="405"/>
         <source>C&amp;onfigure</source>
         <translation>C&amp;onfigurer</translation>
@@ -4770,11 +4769,6 @@ La résolution maximale est d&apos;un dixième de seconde, mais on peut aussi é
         <location filename="../../src/ui/forms/uimainwindow.ui" line="445"/>
         <source>Handbook</source>
         <translation>Manuel</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uimainwindow.ui" line="448"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Handbook&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Open the QtDMM handbook: connecting a meter, the recorder, troubleshooting and the list of supported devices.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Manuel&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Ouvre le manuel de QtDMM : connexion d&apos;un multimètre, enregistreur, dépannage et liste des appareils pris en charge.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uimainwindow.ui" line="462"/>
