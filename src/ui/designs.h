@@ -4,6 +4,7 @@
 
 #include <QBrush>
 #include <QColor>
+#include <QIcon>
 #include <QString>
 
 /// The colour designs of the main window: the system's look, "Silver"
