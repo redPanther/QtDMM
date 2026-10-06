@@ -21,8 +21,92 @@
 //======================================================================
 
 #include "ui/settings/settingspage.h"
+#include "ui/designs.h"
 
 SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 {
 }
 
+
+QIcon SettingsPage::icon() const
+{
+  return Designs::plainIcon(m_iconName);
+}
+
+QFormLayout *SettingsPage::createForm(QWidget *parent)
+{
+  auto *form = new QFormLayout(parent ? parent : this);
+  form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
+  form->setFormAlignment(Qt::AlignLeft | Qt::AlignTop);
+  form->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+  form->setRowWrapPolicy(QFormLayout::DontWrapRows);
+  return form;
+}
+
+QLabel *SettingsPage::addSection(QFormLayout *form, const QString &title)
+{
+  auto *label = new QLabel(title, form->parentWidget());
+  addSection(form, label);
+  return label;
+}
+
+void SettingsPage::addSection(QFormLayout *form, QWidget *title)
+{
+  // the space above does what the frame did
+  if (form->rowCount() > 0)
+  {
+    auto *gap = new QWidget(form->parentWidget());
+    gap->setFixedHeight(title->fontMetrics().height() / 2);
+    form->addRow(gap);
+  }
+  QFont f = title->font();
+  f.setBold(true);
+  title->setFont(f);
+  title->setProperty("section", true);
+  form->addRow(title);
+}
+
+void SettingsPage::alignLabels(QFormLayout *form)
+{
+  QList<QWidget *> labels;
+  int width = 0;
+  for (int r = 0; r < form->rowCount(); ++r)
+    if (QLayoutItem *item = form->itemAt(r, QFormLayout::LabelRole))
+      if (QWidget *label = item->widget())
+      {
+        labels << label;
+        width = qMax(width, label->sizeHint().width());
+      }
+  for (QWidget *label : labels)
+  {
+    label->setMinimumWidth(width);
+    if (auto *l = qobject_cast<QLabel *>(label))
+      l->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+  }
+}
+
+void SettingsPage::showRow(QFormLayout *form, QWidget *field, bool show)
+{
+  field->setVisible(show);
+  if (QWidget *label = form->labelForField(field))
+    label->setVisible(show);
+}
+
+QWidget *SettingsPage::row(std::initializer_list<QWidget *> widgets, bool stretch)
+{
+  auto *box = new QWidget;
+  auto *layout = new QHBoxLayout(box);
+  layout->setContentsMargins(0, 0, 0, 0);
+  for (QWidget *w : widgets)
+  {
+    if (!w->parentWidget() || w->parentWidget() != box)
+      w->setParent(box);
+    layout->addWidget(w);
+  }
+  if (stretch)
+    layout->addStretch(1);
+  // a label's Alt key goes to the first field
+  if (widgets.size() > 0)
+    box->setFocusProxy(*widgets.begin());
+  return box;
+}

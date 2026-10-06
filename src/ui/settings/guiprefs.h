@@ -22,13 +22,17 @@
 
 #pragma once
 
-#include <QtGui>
-#include "ui_uiguiprefs.h"
+#include "ui/settings/settingspage.h"
+
+class ColorButton;
+class QCheckBox;
+class QComboBox;
+class QSpinBox;
 
 /// Settings page "Appearance": design and symbols, the LCD display (colour,
-/// bar graph, min/max), the analog meter (scale mode, style, ballistics,
-/// red zone) and the toolbars.
-class GuiPrefs : public SettingsPage, private Ui::UIGuiPrefs
+/// bar graph, min/max) and the analog meter (scale mode, style, ballistics,
+/// red zone).
+class GuiPrefs : public SettingsPage
 {
   Q_OBJECT
 public:
@@ -36,15 +40,11 @@ public:
   ~GuiPrefs();
   bool      showBar() const;
   bool      showMinMax() const;
-  bool      useTextLabel() const;
   /// The symbols: "colored", "plain" or "system" (Designs::IconSet).
   QString   iconSet() const;
   QColor    displayBgColor() const;
-  bool      showDmmToolbar() const;
-  bool      showGraphToolbar() const;
-  bool      showFileToolbar() const;
   bool      showDisplay() const;
-  void      setToolbarVisibility(bool, bool, bool, bool);
+  void      setShowDisplay(bool show);
   int       meterScaleMode() const;   ///< 0 auto, 1 unipolar, 2 bipolar
   int       meterStyle() const;   ///< 0 dark, 1 ivory
   void      setMeterStyle(int style);
@@ -55,6 +55,10 @@ public Q_SLOTS:
   virtual void defaultsSLOT();
   virtual void factoryDefaultsSLOT();
   virtual void applySLOT();
+
+private:
+  QComboBox   *ui_design, *ui_iconSet, *ui_meterScale, *ui_meterStyle;
+  QCheckBox   *ui_showDisplay, *ui_showBar, *ui_showMinMax, *ui_meterBallistics;
+  ColorButton *ui_bgColorDisplay;
+  QSpinBox    *ui_meterRedZone;
 };
-
-

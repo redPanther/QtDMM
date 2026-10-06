@@ -30,9 +30,16 @@ void RecordingStore::setSampleTime(int tenths)
     m_sampleTime = tenths;
 }
 
-void RecordingStore::setMaxDuration(int seconds)
+void RecordingStore::setLiveWidth(int seconds)
 {
-  m_maxMs = qint64(qMax(1, seconds)) * 1000;
+  m_liveWidthMs = qint64(qMax(1, seconds)) * 1000;
+  if (m_state == Live)
+    trim();
+}
+
+void RecordingStore::setMaxPoints(int points)
+{
+  m_maxPoints = qMax(2, points);
   trim();
 }
 
@@ -53,14 +60,29 @@ qint64 RecordingStore::duration() const
 
 qint64 RecordingStore::origin() const
 {
-  return qMax<qint64>(0, duration() - (m_state == Live ? liveWindow() : m_maxMs));
+  // Live runs through its window; a recording keeps all of it, unless it
+  // outgrew the most points
+  if (m_state == Live)
+    return qMax<qint64>(0, duration() - liveWindow());
+  return m_floorMs;
 }
 
 qint64 RecordingStore::liveWindow() const
 {
   // as wide as a recording will be, so the picture does not jump at the start
-  const qint64 length = m_sampleLength > 0 ? qint64(m_sampleLength) * 100 : m_maxMs;
-  return qMin(m_maxMs, qMax<qint64>(length, m_preMs));
+  // until stopped: as wide as the graph shows
+  const qint64 length = m_sampleLength > 0 ? qint64(m_sampleLength) * 100 : m_liveWidthMs;
+  return qMax<qint64>(length, m_preMs);
+}
+
+qint64 RecordingStore::lengthLimit() const
+{
+  switch (m_state)
+  {
+    case Live:   return m_sampleLength > 0 ? liveWindow() : 0;
+    case Record: return m_sampleLength > 0 ? qint64(m_sampleLength) * 100 + m_preUsed : 0;
+    default:     return duration() - origin();
+  }
 }
 
 void RecordingStore::setSampleLength(int tenths)
@@ -228,6 +250,7 @@ void RecordingStore::load(const Recording &rec)
   m_recordPort = PortKey();
   m_sampleTime = qMax(1, rec.sampleTimeTenths);
   m_series.clear();
+  m_floorMs = 0;
   m_series.reserve(int(rec.values.size()));
   m_marks.clear();
   const bool onGrid = rec.onGrid();
@@ -243,9 +266,6 @@ void RecordingStore::load(const Recording &rec)
   // before it
   m_loadedGrid = onGrid ? m_sampleTime : 0;
   m_stopT = -1;
-  // the store keeps all of it
-  if (duration() > m_maxMs)
-    m_maxMs = (duration() / 1000 + 1) * 1000;
   m_dirty = false;
   Q_EMIT marksChanged();
   Q_EMIT loaded();
@@ -495,6 +515,7 @@ void RecordingStore::live()
 void RecordingStore::clear()
 {
   m_series.clear();
+  m_floorMs = 0;
   m_recordPort = PortKey();
   m_recordBaseUnit.clear();
   if (m_unitPending)
@@ -558,16 +579,25 @@ bool RecordingStore::trim()
     return false;
   // what holds at the origin stays, everything before it goes; in steps of
   // a twentieth, so a full store does not drop something with every reading
-  const qint64 from = origin();
-  const qint64 slack = qMax<qint64>(1000, (m_state == Live ? liveWindow() : m_maxMs) / 20);
+  qint64 from = origin();
   int drop = 0;
-  if (m_series.count() > 1 && m_series.at(1).t < from - slack)
-    drop = qMax(0, m_series.holding(from));
-  if (m_series.count() - drop > kMaxPoints + kMaxPoints / 100)
-    drop = m_series.count() - kMaxPoints;
+  if (m_state == Live)
+  {
+    const qint64 slack = qMax<qint64>(1000, liveWindow() / 20);
+    if (m_series.count() > 1 && m_series.at(1).t < from - slack)
+      drop = qMax(0, m_series.holding(from));
+  }
+  if (m_series.count() - drop > m_maxPoints + m_maxPoints / 100)
+    drop = m_series.count() - m_maxPoints;
   if (drop <= 0)
     return false;
   m_series.removeFirst(drop);
+  // a recording that outgrew the most points starts at what is left
+  if (m_state != Live && !m_series.isEmpty())
+  {
+    m_floorMs = m_series.first().t;
+    from = m_floorMs;
+  }
 
   // the marks before what is kept fall off
   const qint64 first = qMax(from, m_series.isEmpty() ? from : m_series.first().t);

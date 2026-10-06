@@ -26,6 +26,7 @@
 #include <iostream>
 #include <cmath>
 
+#include "ui/dialogs/recordlengthdlg.h"
 #include "ui/instancewidget.h"
 #include "device/transports/serial.h"
 #include "core/devicelibrary.h"
@@ -109,7 +110,6 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   connect(ui_graph, &GraphWidget::windowRequested, m_configDlg, &SettingsDialog::setWindowSecondsSLOT);
   connect(m_configDlg, SIGNAL(rejected()), this, SLOT(rejectSLOT()));
   connect(ui_graph, SIGNAL(sampleTime(int)), m_configDlg, SLOT(setSampleTimeSLOT(int)));
-  connect(ui_graph, SIGNAL(graphSize(int, int)), m_configDlg, SLOT(setGraphSizeSLOT(int, int)));
   // this graph's own colours from its context menu (empty = the default
   // from the settings page, applied in readConfig())
   connect(ui_graph, &GraphWidget::colorVariantChanged, this, [this](int v)
@@ -126,7 +126,6 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
 
   connect(ui_graph, SIGNAL(zoomOut(double)), m_configDlg, SLOT(zoomOutSLOT(double)));
   connect(ui_graph, SIGNAL(zoomIn(double)), m_configDlg, SLOT(zoomInSLOT(double)));
-  connect(ui_graph, SIGNAL(zoomFit()), m_configDlg, SLOT(zoomFitSLOT()));
   connect(ui_graph, SIGNAL(thresholdChanged(GraphWidget::CursorMode, double)),
           m_configDlg, SLOT(thresholdChangedSLOT(GraphWidget::CursorMode, double)));
 
@@ -495,7 +494,7 @@ void InstanceWidget::applySLOT(bool reconnect)
 
 void InstanceWidget::zoomedSLOT()
 {
-  ui_graph->setGraphSize(m_configDlg->windowSeconds(), m_configDlg->totalSeconds());
+  ui_graph->setGraphSize(m_configDlg->windowSeconds());
 }
 
 void InstanceWidget::exportSLOT()
@@ -552,6 +551,16 @@ bool InstanceWidget::confirmRecording()
   return keepUnsavedData(tr("A new recording clears it."), tr("Record without saving"));
 }
 
+bool InstanceWidget::askRecordingLength()
+{
+  RecordLengthDlg dlg(m_configDlg->recordingLengthValue(), m_configDlg->recordingLengthUnit(), this);
+  if (dlg.exec() != QDialog::Accepted)
+    return false;
+  m_configDlg->setRecordingLength(dlg.value(), dlg.unit());
+  ui_graph->setSampleLength(m_configDlg->sampleLength());
+  return true;
+}
+
 void InstanceWidget::startSLOT()
 {
   ui_graph->startSLOT();
@@ -585,7 +594,7 @@ void InstanceWidget::readConfig()
   ui_graph->setSampleTime(m_configDlg->sampleStep());
   ui_graph->setSampleLength(m_configDlg->sampleLength());
   ui_graph->store()->setPreTrigger(m_configDlg->preTrigger());
-  ui_graph->setGraphSize(m_configDlg->windowSeconds(), m_configDlg->totalSeconds());
+  ui_graph->setGraphSize(m_configDlg->windowSeconds());
   ui_graph->setStartTime(m_configDlg->startTime());
   ui_graph->setMode(m_configDlg->sampleMode());
 

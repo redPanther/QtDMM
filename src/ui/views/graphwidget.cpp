@@ -256,8 +256,9 @@ void GraphWidget::requestAll(bool grow)
   // 99999, an odd value above would be cut and asked for again with every sample
   if (target > 60)
     target = (target + 59) / 60 * 60;
-  if (m_totalSeconds > 0)
-    target = qMin(target, m_totalSeconds);
+  const int limit = lengthLimit();
+  if (limit > 0)
+    target = qMin(target, limit);
   if (target != m_windowSeconds)
     Q_EMIT windowRequested(target);
 }
@@ -268,7 +269,8 @@ void GraphWidget::updateTimeButtons()
   {
     const int seconds = b->property("seconds").toInt();
     // a window longer than the recording is no choice
-    b->setVisible(seconds == 0 || m_totalSeconds <= 0 || seconds <= m_totalSeconds);
+    const int limit = lengthLimit();
+    b->setVisible(seconds == 0 || limit <= 0 || seconds <= limit);
     b->setChecked(seconds == 0 ? m_followAll : !m_followAll && seconds == m_windowSeconds);
   }
   placeTimeBar();
@@ -880,24 +882,46 @@ void GraphWidget::updateMarkPositions()
   }
 }
 
-void GraphWidget::setGraphSize(int size, int length)
+int GraphWidget::lengthLimit() const
+{
+  const qint64 ms = m_store->lengthLimit();
+  return ms > 0 ? int((ms + 999) / 1000) : 0;
+}
+
+void GraphWidget::updateScrollRange()
+{
+  // in tenths of a second, over what the store keeps; a recording seen at
+  // its end stays at the end
+  const bool atEnd = scrollbar->value() >= scrollbar->maximum();
+  const qint64 kept = m_store->duration() - m_store->origin();
+  scrollbar->setMaximum(int(qMax<qint64>(0, (kept - qint64(m_windowSeconds) * 1000) / 100)));
+  if (atEnd && m_store->state() == RecordingStore::Record)
+    scrollbar->setValue(scrollbar->maximum());
+}
+
+void GraphWidget::setGraphSize(int size)
 {
   m_windowSeconds = qMax(1, size);
-  m_totalSeconds = length;
 
-  // in tenths of a second, over what the store keeps
   scrollbar->setMinimum(0);
-  scrollbar->setMaximum(qMax(0, (length - m_windowSeconds) * 10));
   scrollbar->setSingleStep(qMax(1, m_windowSeconds));
   scrollbar->setPageStep(m_windowSeconds * 10);
+  updateScrollRange();
 
-  m_store->setMaxDuration(length);
+  m_store->setLiveWidth(m_windowSeconds);
 
   emitInfo();
 
   rebuildSeries();
   updateXAxisRange();
   updateThresholdLinePositions();
+  updateTimeButtons();
+}
+
+void GraphWidget::setSampleLength(int v)
+{
+  m_store->setSampleLength(v);
+  // the longest time button follows the length
   updateTimeButtons();
 }
 
@@ -930,7 +954,9 @@ void GraphWidget::onStateChanged()
     m_sourceFile.clear();
   // Live follows the newest reading: nothing to scroll
   scrollbar->setEnabled(!live);
+  updateScrollRange();
   updateXAxisRange();
+  updateTimeButtons();
   updateMarkPositions();
   updateStateLabel();
   emitInfo();
@@ -995,6 +1021,7 @@ void GraphWidget::onAppended(bool shifted)
   // "All": the window grows once the recording fills it
   if (m_followAll && m_store->duration() - m_store->origin() >= qint64(m_windowSeconds) * 1000)
     requestAll(true);
+  updateScrollRange();
   // a full store, or Live: the window moves on with what it keeps
   if (m_store->origin() > 0 || m_store->state() == RecordingStore::Live)
   {
@@ -1083,12 +1110,13 @@ void GraphWidget::onCleared()
 
 void GraphWidget::emitInfo()
 {
-  // recorded / kept at most - left until the recording length - state
+  // recorded / the recording length - left until it - state
   // Live: what the window holds of what it keeps
   const bool live = m_store->state() == RecordingStore::Live;
-  QString txt = live ? QString("%1 / %2").arg(durationText((m_store->duration() - m_store->origin()) / 1000),
-                                              durationText(m_store->liveWindow() / 1000))
-                     : QString("%1 / %2").arg(durationText(m_store->duration() / 1000), durationText(m_store->maxDuration()));
+  QString txt = durationText((m_store->duration() - (live ? m_store->origin() : 0)) / 1000);
+  const qint64 limit = live ? m_store->liveWindow() : m_store->lengthLimit();
+  if (limit > 0 && m_store->state() != RecordingStore::View)
+    txt += " / " + durationText(limit / 1000);
   if (m_store->remainingLength() > 0)
     txt += " - " + tr("%1 left").arg(durationText(m_store->remainingLength() / 10));
   switch (m_store->state())
@@ -1458,37 +1486,26 @@ bool GraphWidget::importCsvFile(const QString &fileName)
   setUnit(rec->unit);
   m_store->setSampleTime(rec->sampleTimeTenths);
   const int cnt = int(rec->values.size());
-  // setGraphSize() counts in seconds, the sample time is in tenths of one;
-  // the length covers the last row and one sample time after it
-  const int size = qMax(1, m_windowSeconds);
-  const qint64 span = cnt > 0 ? rec->timeAt(cnt - 1) + m_store->sampleTime() * 100 : 0;
-  // grown for a longer file, never shrunk: the length goes to the settings,
-  // and a short file cut the next recording (and Live) down to its length
-  const int length = qMax(qMax(1, int(std::ceil(span / 1000.0))), m_totalSeconds);
-  const bool grown = length != m_totalSeconds;
-
   if (cnt > 1)
     Q_EMIT sampleTime(m_store->sampleTime());
 
   m_scaleMin =  1e40;
   m_scaleMax = -1e40;
 
-  setGraphSize(size, length);
   m_sourceFile = QFileInfo(fileName).fileName();
   m_store->load(*rec);
   updateStateLabel();
 
   setScale(true, true, 0, 0);
-  // setGraphSize() above built the series before the values were in; the
-  // graph shows the import by itself, not only after InstanceWidget applies the
-  // new size
+  // the graph shows the import by itself
   rebuildSeries();
+  updateScrollRange();
+  scrollbar->setValue(0);
   updateXAxisRange();
+  updateTimeButtons();
 
   Q_EMIT error(fileName);
   update();
-  if (grown)
-    Q_EMIT graphSize(size, length);
   return true;
 }
 

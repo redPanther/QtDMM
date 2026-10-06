@@ -123,6 +123,17 @@ if (BUILD_TESTING)
 	target_include_directories(test_controlbar PRIVATE src)
 	target_link_libraries(test_controlbar PRIVATE Qt6::Widgets Qt::Test Qt::Core)
 	add_test(NAME control_bar COMMAND test_controlbar)
+	## the settings pages: keys through the pages, fields with their choice,
+	## the recording length asked by Record
+	add_executable(test_settingspages MACOSX_BUNDLE tests/test_settingspages.cpp
+		src/ui/settings/settingspage.cpp src/ui/settings/generalprefs.cpp src/ui/settings/guiprefs.cpp
+		src/ui/settings/graphprefs.cpp src/ui/settings/recorderprefs.cpp src/ui/dialogs/recordlengthdlg.cpp
+		src/ui/designs.cpp src/ui/colorbutton.cpp src/ui/engnumbervalidator.cpp src/core/settings.cpp
+		src/ui/views/graphwidget.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp
+		src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
+	target_include_directories(test_settingspages PRIVATE src)
+	target_link_libraries(test_settingspages PRIVATE Qt6::Widgets Qt6::Charts Qt6::PrintSupport Qt6::Svg Qt::Core)
+	add_test(NAME settings_pages COMMAND test_settingspages)
 	## the formula evaluator of calculated instances
 	set( TEST_CALC test_calc)
 	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/core/calcexpr.cpp src/core/siprefix.cpp)

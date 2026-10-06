@@ -21,19 +21,24 @@
 AlarmPrefs::AlarmPrefs(QWidget *parent) : SettingsPage(parent)
 {
   m_label = tr("Alarms");
-  m_description = tr("<b>Alarms watch the reading and tell you when it leaves the range you expect:</b> "
-                     "a banner over the display, a beep, a popup, a program, the recorder.");
+  m_description = tr("Alarms watch the reading and tell you when it leaves the range you expect.");
   m_iconName = "notifications";
 
   auto *layout = new QVBoxLayout(this);
-  auto *intro = new QLabel(tr("Each alarm watches the main reading. It raises when its condition has held for the "
-                              "given time and clears once the reading is back beyond the hysteresis. Untick an "
-                              "alarm to keep it without it firing."), this);
-  intro->setWordWrap(true);
-  layout->addWidget(intro);
-
+  layout->setContentsMargins(0, 0, 0, 0);
   m_list = new QListWidget(this);
+  m_list->setToolTip(tr("Each alarm watches the main reading. It raises when its condition has held for the "
+                        "given time and clears once the reading is back beyond the hysteresis. Untick an "
+                        "alarm to keep it without it firing. An alarm can show a banner over the display, "
+                        "beep, open a popup, run a program or start the recorder."));
   layout->addWidget(m_list, 1);
+  // the empty list says what to do
+  m_empty = new QLabel(tr("No alarms yet. Add one with Add..."), m_list->viewport());
+  m_empty->setAlignment(Qt::AlignCenter);
+  m_empty->setEnabled(false);
+  m_empty->setAttribute(Qt::WA_TransparentForMouseEvents);
+  auto *emptyLayout = new QVBoxLayout(m_list->viewport());
+  emptyLayout->addWidget(m_empty);
   connect(m_list, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *) { edit(); });
   connect(m_list, &QListWidget::itemChanged, this, [this](QListWidgetItem *item)
   {
@@ -100,6 +105,7 @@ void AlarmPrefs::refresh()
     item->setIcon(QIcon(swatch));
   }
   m_list->blockSignals(false);
+  m_empty->setVisible(m_alarms.isEmpty());
   if (current >= 0 && current < m_list->count())
     m_list->setCurrentRow(current);
 }

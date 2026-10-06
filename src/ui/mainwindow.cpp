@@ -797,6 +797,8 @@ void MainWindow::startSLOT()
   // a recording viewed and not saved yet: the new one clears it
   if (!m_wid->confirmRecording())
     return;
+  if (!m_wid->askRecordingLength())
+    return;
   if (m_stateMgr->instances().count()<=1)
   {
     QMetaObject::invokeMethod(m_wid, "startSLOT", Qt::DirectConnection);

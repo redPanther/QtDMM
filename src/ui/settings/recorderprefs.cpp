@@ -35,97 +35,166 @@
 
 RecorderPrefs::RecorderPrefs(QWidget *parent) : SettingsPage(parent)
 {
-  setupUi(this);
   m_label = tr("Recording");
-  m_description = tr("<b>Here you can configure the sampling"
-                     " frequency and start options for the"
-                     " recorder.</b>");
+  m_description = tr("How often a reading is kept and when the recording starts.");
   m_iconName = "media-record";
 
-  EngNumberValidator *validator = new EngNumberValidator(this);
+  auto *validator = new EngNumberValidator(this);
+  const QString numberHint = tr("Values take a suffix: m, u, n, p, k, M, G, T (10k = 10000, 100m = 0.1).");
+  const QStringList units = { tr("Seconds"), tr("Minutes"), tr("Hours"), tr("Days") };
 
-  ui_raisingThreshold->setValidator(validator);
-  ui_fallingThreshold->setValidator(validator);
+  m_form = createForm();
 
-  // the pre-trigger belongs to the threshold start, its time to the box
-  auto enablePre = [this]
+  addSection(m_form, tr("Sampling"));
+  sampleEvery = new QSpinBox(this);
+  sampleEvery->setObjectName("sampleEvery");
+  sampleEvery->setRange(1, 99999);
+  sampleEvery->setToolTip(tr("QtDMM records every reading of the meter with its time. This is the grid of "
+                             "the export: one row per period, the mean of the readings in it."));
+  ui_sampleUnit = new QComboBox(this);
+  ui_sampleUnit->setObjectName("ui_sampleUnit");
+  ui_sampleUnit->addItems(QStringList { tr("1/10 Seconds") } + units);
+  m_form->addRow(tr("Sample &every:"), row({ sampleEvery, ui_sampleUnit }));
+
+  addSection(m_form, tr("Start"));
+  manualBut = new QRadioButton(tr("&By hand"), this);
+  manualBut->setObjectName("manualBut");
+  manualBut->setToolTip(tr("Record (Space) starts and stops the recording."));
+  m_form->addRow(QString(), manualBut);
+
+  predefinedBut = new QRadioButton(tr("At a &clock time"), this);
+  predefinedBut->setObjectName("predefinedBut");
+  predefinedBut->setToolTip(tr("The recording starts from Live at this time of day."));
+  ui_startTime = new QTimeEdit(this);
+  ui_startTime->setObjectName("ui_startTime");
+  ui_startTime->setDisplayFormat("HH:mm:ss");
+  m_form->addRow(QString(), row({ predefinedBut, ui_startTime }));
+
+  triggerBut = new QRadioButton(tr("At a t&hreshold"), this);
+  triggerBut->setObjectName("triggerBut");
+  triggerBut->setToolTip(tr("The recording starts from Live when the reading crosses the threshold: rising "
+                            "above it or falling below it."));
+  ui_edge = new QComboBox(this);
+  ui_edge->setObjectName("ui_edge");
+  ui_edge->addItems({ tr("rising above"), tr("falling below") });
+  ui_raisingThreshold = new QLineEdit(this);
+  ui_raisingThreshold->setObjectName("ui_raisingThreshold");
+  ui_fallingThreshold = new QLineEdit(this);
+  ui_fallingThreshold->setObjectName("ui_fallingThreshold");
+  for (QLineEdit *e : { ui_raisingThreshold, ui_fallingThreshold })
   {
-    ui_preTrigger->setEnabled(triggerBut->isChecked());
-    const bool on = triggerBut->isChecked() && ui_preTrigger->isChecked();
-    ui_preTriggerTime->setEnabled(on);
-    ui_preTriggerUnit->setEnabled(on);
-  };
-  connect(triggerBut, &QRadioButton::toggled, this, enablePre);
-  connect(ui_preTrigger, &QCheckBox::toggled, this, enablePre);
-  enablePre();
+    e->setValidator(validator);
+    e->setToolTip(tr("The threshold; a line in the graph shows it and can be dragged.") + "<p>" + numberHint);
+    e->setMaximumWidth(fontMetrics().horizontalAdvance('0') * 12);
+  }
+  m_thresholdRow = row({ ui_edge, ui_raisingThreshold, ui_fallingThreshold });
+  m_form->addRow(QString(), row({ triggerBut, m_thresholdRow }));
+
+  // the options sit in rows of their own: one group keeps them exclusive
+  auto *startGroup = new QButtonGroup(this);
+  startGroup->addButton(manualBut);
+  startGroup->addButton(predefinedBut);
+  startGroup->addButton(triggerBut);
+
+  ui_preTrigger = new QCheckBox(tr("Pre-&trigger"), this);
+  ui_preTrigger->setObjectName("ui_preTrigger");
+  ui_preTrigger->setToolTip(tr("A recording started by the threshold reaches back by this time: QtDMM keeps "
+                               "the readings while it waits, and a green mark shows where the trigger came."));
+  ui_preTriggerTime = new QSpinBox(this);
+  ui_preTriggerTime->setObjectName("ui_preTriggerTime");
+  ui_preTriggerTime->setRange(1, 99999);
+  ui_preTriggerUnit = new QComboBox(this);
+  ui_preTriggerUnit->setObjectName("ui_preTriggerUnit");
+  ui_preTriggerUnit->addItems(units);
+  m_preRow = row({ ui_preTrigger, ui_preTriggerTime, ui_preTriggerUnit });
+  m_form->addRow(QString(), m_preRow);
+
+  // the threshold's fields sit in the line of the option; the pre-trigger
+  // belongs to the threshold start
+  m_preRow->setContentsMargins(QApplication::style()->pixelMetric(QStyle::PM_ExclusiveIndicatorWidth) + 6, 0, 0, 0);
+
+  alignLabels(m_form);
+  connect(predefinedBut, &QRadioButton::toggled, this, &RecorderPrefs::updateRows);
+  connect(triggerBut, &QRadioButton::toggled, this, &RecorderPrefs::updateRows);
+  connect(ui_edge, &QComboBox::currentIndexChanged, this, &RecorderPrefs::updateRows);
+  connect(ui_preTrigger, &QCheckBox::toggled, this, &RecorderPrefs::updateRows);
+  manualBut->setChecked(true);
+  updateRows();
 }
+
 RecorderPrefs::~RecorderPrefs()
 {
+}
+
+void RecorderPrefs::updateRows()
+{
+  ui_startTime->setVisible(predefinedBut->isChecked());
+  m_thresholdRow->setVisible(triggerBut->isChecked());
+  ui_raisingThreshold->setVisible(ui_edge->currentIndex() == 0);
+  ui_fallingThreshold->setVisible(ui_edge->currentIndex() == 1);
+  showRow(m_form, m_preRow, triggerBut->isChecked());
+  ui_preTriggerTime->setEnabled(ui_preTrigger->isChecked());
+  ui_preTriggerUnit->setEnabled(ui_preTrigger->isChecked());
 }
 
 void RecorderPrefs::defaultsSLOT()
 {
   sampleEvery->setValue(m_cfg->getInt("Sample/rate", 1));
   ui_sampleUnit->setCurrentIndex(m_cfg->getInt("Sample/rate-unit", 1));
-  sampleTime->setValue(m_cfg->getInt("Sample/time", 500));
-  timeUnit->setCurrentIndex(m_cfg->getInt("Sample/time-unit"));
+  m_lengthValue = m_cfg->getInt("Sample/time", 500);
+  m_lengthUnit = qBound(0, m_cfg->getInt("Sample/time-unit"), 3);
 
   GraphWidget::SampleMode mode = static_cast<GraphWidget::SampleMode>(m_cfg->getInt("Start/mode"));
-  if (mode == GraphWidget::Manual)
-    manualBut->setChecked(true);
-  else if (mode == GraphWidget::Time)
+  if (mode == GraphWidget::Time)
     predefinedBut->setChecked(true);
-  if (mode == GraphWidget::Raising)
-  {
+  else if (mode == GraphWidget::Raising || mode == GraphWidget::Falling)
     triggerBut->setChecked(true);
-    raisingBut->setChecked(true);
-  }
+  else
+    manualBut->setChecked(true);
+  // the edge of a start by hand is kept for the threshold, as before
   if (mode == GraphWidget::Falling)
-  {
-    triggerBut->setChecked(true);
-    fallingBut->setChecked(true);
-  }
+    ui_edge->setCurrentIndex(1);
+  else if (mode == GraphWidget::Raising)
+    ui_edge->setCurrentIndex(0);
 
-  hour->setValue(m_cfg->getInt("Start/hour"));
-  minute->setValue(m_cfg->getInt("Start/minute"));
-  second->setValue(m_cfg->getInt("Start/second"));
+  ui_startTime->setTime(QTime(qBound(0, m_cfg->getInt("Start/hour"), 23), qBound(0, m_cfg->getInt("Start/minute"), 59),
+                              qBound(0, m_cfg->getInt("Start/second"), 59)));
   ui_raisingThreshold->setText(m_cfg->getString("Start/raising-threshold", "0.0"));
   ui_fallingThreshold->setText(m_cfg->getString("Start/falling-threshold", "0.0"));
   ui_preTrigger->setChecked(m_cfg->getBool("Start/pre-trigger", false));
   ui_preTriggerTime->setValue(m_cfg->getInt("Start/pre-trigger-time", 10));
   ui_preTriggerUnit->setCurrentIndex(m_cfg->getInt("Start/pre-trigger-unit", 0));
+  updateRows();
 }
 
 void RecorderPrefs::factoryDefaultsSLOT()
 {
+  // the recording length is not on the page: it stays
   sampleEvery->setValue(1);
   ui_sampleUnit->setCurrentIndex(1);
-  sampleTime->setValue(500);
-  timeUnit->setCurrentIndex(0);
 
   manualBut->setChecked(true);
-
-  hour->setValue(0);
-  minute->setValue(0);
-  second->setValue(0);
+  ui_edge->setCurrentIndex(0);
+  ui_startTime->setTime(QTime(0, 0));
   ui_raisingThreshold->setText("0.0");
   ui_fallingThreshold->setText("0.0");
   ui_preTrigger->setChecked(false);
   ui_preTriggerTime->setValue(10);
   ui_preTriggerUnit->setCurrentIndex(0);
+  updateRows();
 }
 
 void RecorderPrefs::applySLOT()
 {
   m_cfg->setInt("Sample/rate", sampleEvery->value());
   m_cfg->setInt("Sample/rate-unit", ui_sampleUnit->currentIndex());
-  m_cfg->setInt("Sample/time", sampleTime->value());
-  m_cfg->setInt("Sample/time-unit", timeUnit->currentIndex());
+  m_cfg->setInt("Sample/time", m_lengthValue);
+  m_cfg->setInt("Sample/time-unit", m_lengthUnit);
 
   m_cfg->setInt("Start/mode", sampleMode());
-  m_cfg->setInt("Start/hour", hour->value());
-  m_cfg->setInt("Start/minute", minute->value());
-  m_cfg->setInt("Start/second", second->value());
+  m_cfg->setInt("Start/hour", ui_startTime->time().hour());
+  m_cfg->setInt("Start/minute", ui_startTime->time().minute());
+  m_cfg->setInt("Start/second", ui_startTime->time().second());
   m_cfg->setString("Start/raising-threshold", ui_raisingThreshold->text());
   m_cfg->setString("Start/falling-threshold", ui_fallingThreshold->text());
   m_cfg->setBool("Start/pre-trigger", ui_preTrigger->isChecked());
@@ -138,17 +207,13 @@ GraphWidget::SampleMode RecorderPrefs::sampleMode() const
   if (predefinedBut->isChecked())
     return GraphWidget::Time;
   if (triggerBut->isChecked())
-  {
-    if (raisingBut->isChecked())
-      return GraphWidget::Raising;
-    return GraphWidget::Falling;
-  }
+    return ui_edge->currentIndex() == 1 ? GraphWidget::Falling : GraphWidget::Raising;
   return GraphWidget::Manual;
 }
 
 int RecorderPrefs::sampleStep() const
 {
-  int thenthOfSec = sampleEvery->text().toInt();
+  int thenthOfSec = sampleEvery->value();
 
   switch (ui_sampleUnit->currentIndex())
   {
@@ -162,16 +227,15 @@ int RecorderPrefs::sampleStep() const
 
 int RecorderPrefs::sampleLength() const
 {
-  int thenthOfSec = sampleTime->text().toInt();
+  static const int unitSeconds[] = { 1, MINUTE_SECS, HOUR_SECS, DAY_SECS };
+  const qint64 tenths = qint64(m_lengthValue) * unitSeconds[m_lengthUnit] * 10;
+  return int(qMin<qint64>(tenths, std::numeric_limits<int>::max()));
+}
 
-  switch (timeUnit->currentIndex())
-  {
-    case 0: return thenthOfSec * 10;
-    case 1: return thenthOfSec * 10 * MINUTE_SECS;
-    case 2: return thenthOfSec * 10 * HOUR_SECS;
-    case 3: return thenthOfSec * 10 * DAY_SECS ;
-  }
-  return thenthOfSec;
+void RecorderPrefs::setLength(int value, int unit)
+{
+  m_lengthValue = qMax(0, value);
+  m_lengthUnit = qBound(0, unit, 3);
 }
 
 int RecorderPrefs::preTrigger() const
@@ -195,7 +259,7 @@ double RecorderPrefs::raisingThreshold() const
 
 void RecorderPrefs::setThreshold(double value)
 {
-  if (raisingBut->isChecked())
+  if (ui_edge->currentIndex() == 0)
     ui_raisingThreshold->setText(EngNumberValidator::engText(value));
   else
     ui_fallingThreshold->setText(EngNumberValidator::engText(value));
@@ -203,9 +267,7 @@ void RecorderPrefs::setThreshold(double value)
 
 QTime RecorderPrefs::startTime() const
 {
-  QTime time(hour->value(), minute->value(), second->value());
-
-  return time;
+  return ui_startTime->time();
 }
 
 void RecorderPrefs::setSampleTimeSLOT(int sampleTime)

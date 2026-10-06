@@ -134,8 +134,9 @@ public:
   GraphWidget(QWidget *parent, Settings *settings);
   GraphWidget(QWidget *parent = Q_NULLPTR);
   ~GraphWidget();
-  /// Visible window and total recording length, both in seconds.
-  void             setGraphSize(int size, int length);
+  /// The visible window in seconds (also how wide Live is without a
+  /// recording length).
+  void             setGraphSize(int size);
   /// The recorder behind the graph.
   RecordingStore  *store() const { return m_store; }
   /// Shows @p store instead of the graph's own one (the MeterController's
@@ -150,7 +151,7 @@ public:
   void             setSampleTime(int v);
   /// Recording duration in tenths of a second after which recording stops
   /// on its own (0 = until stopped).
-  void             setSampleLength(int v) { m_store->setSampleLength(v); }
+  void             setSampleLength(int v);
   /// Clock time for SampleMode::Time.
   void             setStartTime(const QTime &time) { m_store->setStartTime(time); }
   void             setMode(GraphWidget::SampleMode mode);
@@ -217,7 +218,6 @@ Q_SIGNALS:
   /// The store's state changed (RecordingStore::State).
   void             stateChanged(int state);
   /// Window/total size changed by zooming (seconds).
-  void             graphSize(int, int);
   /// Sample time changed by a CSV import (tenths of a second).
   void             sampleTime(int);
   /// The context menu chose this graph's colours: a ColorVariant, or -1
@@ -226,7 +226,6 @@ Q_SIGNALS:
   void             zoomIn(double);
   void             zoomOut(double);
   /// Show the whole recording (key 0).
-  void             zoomFit();
   /// A time button asks for this visible window (seconds).
   void             windowRequested(int seconds);
   /// A threshold line was dragged with the mouse.
@@ -254,7 +253,8 @@ public Q_SLOTS:
   /// @{
   void             zoomInSLOT()  { m_followAll = false; Q_EMIT zoomIn(1.25); }
   void             zoomOutSLOT() { m_followAll = false; Q_EMIT zoomOut(1.25); }
-  void             zoomFitSLOT() { m_followAll = false; Q_EMIT zoomFit(); }
+  /// The window as long as what there is.
+  void             zoomFitSLOT() { m_followAll = false; requestAll(false); }
   /// Shifts the visible window by a fraction of its width (negative = back).
   void             pan(double fraction);
   void             scrollToStart();
@@ -314,9 +314,12 @@ protected:
   /// to grow when @p grow), at least 10 s and at most the recording length.
   void             requestAll(bool grow);
   void             updateTimeButtons();
+  /// The longest window worth a time button, in seconds (0 = none).
+  int              lengthLimit() const;
+  /// The scroll bar over what the store keeps.
+  void             updateScrollRange();
   void             placeTimeBar();
   /// @}
-  int              m_totalSeconds = 0;
   double           m_scaleMin;
   double           m_scaleMax;
   bool             m_autoScale;
