@@ -62,6 +62,10 @@ GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
                             "theme of your desktop, where it has one; QtDMM's own symbols and what the theme "
                             "lacks come from the plain set."));
   form->addRow(tr("S&ymbols:"), ui_iconSet);
+  ui_textLabel = new QCheckBox(tr("Symbols &with text"), this);
+  ui_textLabel->setObjectName("ui_textLabel");
+  ui_textLabel->setToolTip(tr("The toolbar buttons with their names under the symbols."));
+  form->addRow(QString(), ui_textLabel);
 
   addSection(form, tr("Digital display (LCD)"));
   ui_showDisplay = new QCheckBox(tr("Sh&ow"), this);
@@ -132,6 +136,7 @@ void GuiPrefs::defaultsSLOT()
 {
   ui_design->setCurrentIndex(qMax(0, ui_design->findData(m_cfg->getString("Windows/design", "dark"))));
 
+  ui_textLabel->setChecked(m_cfg->getBool("Icons/text-label", false));
   ui_showDisplay->setChecked(m_cfg->getBool("Display/show", true));
   if (!m_cfg->fileConverted())
     ui_bgColorDisplay->setColor(m_cfg->getColor("Display/display-background", QColor(0xda, 0xdc, 0x77)));
@@ -162,6 +167,7 @@ void GuiPrefs::factoryDefaultsSLOT()
 {
   ui_design->setCurrentIndex(ui_design->findData(QString("dark")));
 
+  ui_textLabel->setChecked(false);
   ui_showDisplay->setChecked(true);
   ui_bgColorDisplay->setColor(QColor(0xda, 0xdc, 0x77));
 
@@ -188,6 +194,7 @@ void GuiPrefs::applySLOT()
   m_cfg->setInt("QtDMM/version", 0);   // TODO set version by cmake
   m_cfg->setInt("QtDMM/revision", 84); // TODO set revision by cmake
   m_cfg->setBool("Display/show", showDisplay());
+  m_cfg->setBool("Icons/text-label", useTextLabel());
   m_cfg->setColor("Display/display-background", ui_bgColorDisplay->color());
   m_cfg->setBool("Display/display-bar", showBar());
   m_cfg->setBool("Display/display-min-max", showMinMax());
@@ -237,6 +244,11 @@ bool GuiPrefs::showDisplay() const
 bool GuiPrefs::showBar() const
 {
   return ui_showBar->isChecked();
+}
+
+bool GuiPrefs::useTextLabel() const
+{
+  return ui_textLabel->isChecked();
 }
 
 bool GuiPrefs::showMinMax() const

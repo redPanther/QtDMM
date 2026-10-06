@@ -82,10 +82,10 @@ protected Q_SLOTS:
   void      on_action_Menu_triggered();
   /// Checks the Connect action without triggering it.
   void      setConnectSLOT(bool);
-  /// Applies toolbar visibility from the settings.
-  void      toolbarVisibilitySLOT(bool, bool, bool, bool);
-  /// A toolbar was shown/hidden by the user; stores the new state.
-  void      setToolbarVisibilitySLOT();
+  /// Shows the display as the settings say.
+  void      showDisplaySLOT(bool show);
+  /// The display was shown/hidden: the settings keep it.
+  void      storeDisplaySLOT();
   /// Toolbar button style: icons only or icons with text.
   void      setUseTextLabel(bool on);
   /// Title = app name, instance id and the configured meter.
@@ -245,6 +245,8 @@ protected:
   bool        eventFilter(QObject *watched, QEvent *event) override;
   /// Saves window state; vetoed by InstanceWidget::closeWin() on unsaved data.
   void        closeEvent(QCloseEvent *)Q_DECL_OVERRIDE;
+  /// No context menu to hide the toolbars: they are always there.
+  QMenu      *createPopupMenu() override;
   /// A size we did not ask for came from the user (or the window manager
   /// on their behalf, like snapping to a screen half): no more growing.
   void        resizeEvent(QResizeEvent *) override;

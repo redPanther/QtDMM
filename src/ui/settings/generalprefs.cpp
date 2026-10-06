@@ -13,7 +13,7 @@
 GeneralPrefs::GeneralPrefs(QWidget *parent) : SettingsPage(parent)
 {
   m_label = tr("General");
-  m_description = tr("Program exit, the toolbars and the programs QtDMM runs.");
+  m_description = tr("Program exit and the programs QtDMM runs.");
   m_iconName = "configure";
 
   QFormLayout *form = createForm();
@@ -36,16 +36,6 @@ GeneralPrefs::GeneralPrefs(QWidget *parent) : SettingsPage(parent)
   form->addRow(QString(), ui_alertUnsavedData);
   form->addRow(QString(), ui_saveWindowPos);
   form->addRow(QString(), ui_saveWindowSize);
-
-  addSection(form, tr("Toolbars"));
-  ui_textLabel = check(tr("Icons with &text label"), "ui_textLabel", tr("The name under each symbol."));
-  ui_dmmToolBar = check(tr("&DMM toolbar"), "ui_dmmToolBar", tr("Add device, Connect and the views."));
-  ui_graphToolBar = check(tr("&Graph toolbar"), "ui_graphToolBar", tr("The graph, Record, Live and Clear."));
-  ui_fileToolBar = check(tr("&File toolbar"), "ui_fileToolBar", tr("Print, Export and Import."));
-  form->addRow(QString(), ui_textLabel);
-  form->addRow(QString(), ui_dmmToolBar);
-  form->addRow(QString(), ui_graphToolBar);
-  form->addRow(QString(), ui_fileToolBar);
 
   // the programs QtDMM runs: sigrok-cli for the meters it reads through sigrok
   addSection(form, tr("Programs"));
@@ -88,33 +78,6 @@ bool GeneralPrefs::saveWindowSize() const
   return ui_saveWindowSize->isChecked();
 }
 
-bool GeneralPrefs::useTextLabel() const
-{
-  return ui_textLabel->isChecked();
-}
-
-bool GeneralPrefs::showDmmToolbar() const
-{
-  return ui_dmmToolBar->isChecked();
-}
-
-bool GeneralPrefs::showGraphToolbar() const
-{
-  return ui_graphToolBar->isChecked();
-}
-
-bool GeneralPrefs::showFileToolbar() const
-{
-  return ui_fileToolBar->isChecked();
-}
-
-void GeneralPrefs::setToolbarVisibility(bool dmm, bool graph, bool file)
-{
-  ui_dmmToolBar->setChecked(dmm);
-  ui_graphToolBar->setChecked(graph);
-  ui_fileToolBar->setChecked(file);
-}
-
 QString GeneralPrefs::sigrokExecutable() const
 {
   const QString exe = ui_sigrokExe->text().trimmed();
@@ -126,10 +89,6 @@ void GeneralPrefs::defaultsSLOT()
   ui_alertUnsavedData->setChecked(m_cfg->getBool("Alert/unsaved-file", true));
   ui_saveWindowPos->setChecked(m_cfg->getBool("Save/window-pos", true));
   ui_saveWindowSize->setChecked(m_cfg->getBool("Save/window-size", true));
-  ui_textLabel->setChecked(m_cfg->getBool("Icons/text-label", false));
-  ui_dmmToolBar->setChecked(m_cfg->getBool("Toolbar/dmm", true));
-  ui_graphToolBar->setChecked(m_cfg->getBool("Toolbar/graph", true));
-  ui_fileToolBar->setChecked(m_cfg->getBool("Toolbar/file", true));
   ui_sigrokExe->setText(m_cfg->getString("Port settings/sigrok_exe", "sigrok-cli"));
 }
 
@@ -138,10 +97,6 @@ void GeneralPrefs::factoryDefaultsSLOT()
   ui_alertUnsavedData->setChecked(true);
   ui_saveWindowPos->setChecked(true);
   ui_saveWindowSize->setChecked(true);
-  ui_textLabel->setChecked(false);
-  ui_dmmToolBar->setChecked(true);
-  ui_graphToolBar->setChecked(true);
-  ui_fileToolBar->setChecked(true);
   ui_sigrokExe->setText("sigrok-cli");
 }
 
@@ -150,9 +105,5 @@ void GeneralPrefs::applySLOT()
   m_cfg->setBool("Alert/unsaved-file", alertUnsavedData());
   m_cfg->setBool("Save/window-pos", saveWindowPosition());
   m_cfg->setBool("Save/window-size", saveWindowSize());
-  m_cfg->setBool("Icons/text-label", useTextLabel());
-  m_cfg->setBool("Toolbar/dmm", showDmmToolbar());
-  m_cfg->setBool("Toolbar/graph", showGraphToolbar());
-  m_cfg->setBool("Toolbar/file", showFileToolbar());
   m_cfg->setString("Port settings/sigrok_exe", sigrokExecutable());
 }

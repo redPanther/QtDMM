@@ -649,10 +649,7 @@ void InstanceWidget::readConfig()
   Q_EMIT useTextLabel(m_configDlg->useTextLabel());
   Q_EMIT iconSet(m_configDlg->iconSet());
   Q_EMIT remoteControl(ControlBar::supported(m_configDlg->dmmInfo()));
-  Q_EMIT toolbarVisibility(m_configDlg->showDisplay(),
-                           m_configDlg->showDmmToolbar(),
-                           m_configDlg->showGraphToolbar(),
-                           m_configDlg->showFileToolbar());
+  Q_EMIT showDisplay(m_configDlg->showDisplay());
 
   if (reopen)
     dmm->open();
@@ -699,9 +696,9 @@ QString InstanceWidget::dmmTitle() const
   return m_configDlg->device().trimmed();
 }
 
-void InstanceWidget::setToolbarVisibility(bool disp, bool dmm, bool graph, bool file)
+void InstanceWidget::setShowDisplay(bool show)
 {
-  m_configDlg->setToolbarVisibility(disp, dmm, graph, file);
+  m_configDlg->setShowDisplay(show);
 }
 
 // ---------------------------------------------------------------- alarms

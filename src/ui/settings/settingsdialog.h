@@ -143,14 +143,11 @@ public:
   bool                  alertUnsavedData() const;
   /// @}
 
-  /// @name Appearance page (toolbars, LCD display, analog meter, tips)
+  /// @name Appearance page (symbols, LCD display, analog meter, tips)
   /// @{
   bool                  useTextLabel() const;
   QString               iconSet() const;
   int                   currentTipId() const;
-  bool                  showDmmToolbar() const;
-  bool                  showGraphToolbar() const;
-  bool                  showFileToolbar() const;
   bool                  showDisplay() const;
   QColor                displayBgColor() const;
   bool                  showMinMax() const;
@@ -163,7 +160,8 @@ public:
   bool                  meterBallistics() const;
   /// Start of the red zone in percent of full scale.
   int                   meterRedZone() const;
-  void                  setToolbarVisibility(bool, bool, bool, bool);
+  /// The display shown or not (Appearance, Show), kept from the window.
+  void                  setShowDisplay(bool show);
   /// @}
 
   /// The alarms as applied (Alarms page).

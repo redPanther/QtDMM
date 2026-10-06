@@ -520,7 +520,7 @@ bool SettingsDialog::alertUnsavedData() const
 
 bool SettingsDialog::useTextLabel() const
 {
-  return m_general->useTextLabel();
+  return m_gui->useTextLabel();
 }
 
 QString SettingsDialog::iconSet() const
@@ -543,21 +543,6 @@ bool SettingsDialog::saveWindowSize() const
   return m_general->saveWindowSize();
 }
 
-
-bool SettingsDialog::showDmmToolbar() const
-{
-  return m_general->showDmmToolbar();
-}
-
-bool SettingsDialog::showGraphToolbar() const
-{
-  return m_general->showGraphToolbar();
-}
-
-bool SettingsDialog::showFileToolbar() const
-{
-  return m_general->showFileToolbar();
-}
 
 bool SettingsDialog::showDisplay() const
 {
@@ -589,10 +574,9 @@ int SettingsDialog::meterRedZone() const
   return m_gui->meterRedZone();
 }
 
-void SettingsDialog::setToolbarVisibility(bool disp, bool dmm, bool graph, bool file)
+void SettingsDialog::setShowDisplay(bool show)
 {
-  m_gui->setShowDisplay(disp);
-  m_general->setToolbarVisibility(dmm, graph, file);
+  m_gui->setShowDisplay(show);
 }
 
 /////////////////////////////////////////////////////////////////
