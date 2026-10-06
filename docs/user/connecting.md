@@ -152,7 +152,8 @@ the UT61B+/D+/E+ and UT161 also
 have Hz/%, MIN/MAX and PEAK. A click presses the key on the meter. HOLD, AUTO, REL, MIN/MAX and PEAK
 light up as the meter reports them. As on the meter, MIN/MAX and PEAK are
 left by holding the key down (about a second). Over Bluetooth the keys
-work once the link is up; before that the status bar says the key did
+work once the link is up, about five seconds after connecting (see
+[Bluetooth](bluetooth.md)); before that the status bar says the key did
 not reach the meter. Tried on the UT60BT; the UT61B+/D+/E+ and UT161 use
 the same commands. The small triangle in the display's top right corner,
 or **Hide controls** in its right-click menu, folds the row away.
