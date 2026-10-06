@@ -48,6 +48,7 @@
 #include "ui/alarmbar.h"
 #include "ui/mdiarranger.h"
 #include "service/metercontroller.h"
+#include "device/meterconnection.h"
 #include "ui/designs.h"
 #include "ui/controlbar.h"
 #include <QMdiArea>
@@ -177,11 +178,15 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   connect(m_wid->controller(), &MeterController::reading, m_controls, &ControlBar::showReading);
   connect(m_controls, &ControlBar::keyPressed, this, [this](const QString &key)
   {
-    statusBar()->showMessage(tr("The meter's %1 key: remote control is not built in yet.").arg(key.toUpper()), 4000);
+    // a Bluetooth link takes a few seconds before it takes keys
+    if (!m_wid->controller()->pressKey(key))
+      statusBar()->showMessage(tr("The key did not reach the meter: it is not connected yet."), 4000);
   });
   connect(m_wid, &InstanceWidget::remoteControl, this, [this](bool supported)
   {
     m_controlsSupported = supported;
+    // readConfig() has set the protocol: the keys this meter has
+    m_controls->setProtocol(m_wid->controller()->dmm()->format());
     updateControls();
   });
   m_displayWin = addView(displayBox, tr("Display"), MdiArranger::Instrument, "display");

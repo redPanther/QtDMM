@@ -11,6 +11,7 @@ if (BUILD_TESTING)
 	add_executable(${TEST_DECODER} MACOSX_BUNDLE tests/test_decoder.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp src/core/readingadapter.cpp ${DECODER_FILES})
 	target_link_libraries(${TEST_DECODER} PRIVATE Qt::Core Qt::Test)
 	add_test(NAME protocol_table COMMAND ${TEST_DECODER} --table)
+	add_test(NAME meter_keys COMMAND ${TEST_DECODER} --keys)
 
 	## the core's base types and ReadingAdapter (the decoder fixtures check the ports too)
 	add_executable(test_adapter tests/test_adapter.cpp src/core/readingadapter.cpp src/core/siprefix.cpp)
@@ -116,6 +117,12 @@ if (BUILD_TESTING)
 	target_include_directories(test_devicesidebar PRIVATE src ${CMAKE_BINARY_DIR})
 	target_link_libraries(test_devicesidebar PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
 	add_test(NAME device_sidebar COMMAND test_devicesidebar)
+	## the meter's keys under the display: which a meter has, what a click sends, the states
+	add_executable(test_controlbar MACOSX_BUNDLE tests/test_controlbar.cpp src/ui/controlbar.cpp
+		src/device/protocols.cpp src/device/dmmdecoder.cpp src/core/siprefix.cpp ${DECODER_FILES})
+	target_include_directories(test_controlbar PRIVATE src)
+	target_link_libraries(test_controlbar PRIVATE Qt6::Widgets Qt::Test Qt::Core)
+	add_test(NAME control_bar COMMAND test_controlbar)
 	## the formula evaluator of calculated instances
 	set( TEST_CALC test_calc)
 	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/core/calcexpr.cpp src/core/siprefix.cpp)

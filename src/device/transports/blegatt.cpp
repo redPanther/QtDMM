@@ -270,6 +270,17 @@ qint64 BleGattDevice::writeData(const char *data, qint64 len)
   return len;
 }
 
+bool BleGattDevice::sendCommand(const QByteArray &frame)
+{
+  if (!m_ready || !m_service || frame.isEmpty())
+    return false;
+  qCDebug(lcBle) << m_address << "command" << frame.toHex(' ');
+  const auto mode = (m_writeChar.properties() & QLowEnergyCharacteristic::WriteNoResponse)
+                    ? QLowEnergyService::WriteWithoutResponse : QLowEnergyService::WriteWithResponse;
+  m_service->writeCharacteristic(m_writeChar, frame, mode);
+  return true;
+}
+
 void BleGattDevice::sendPoll()
 {
   if (!m_ready || !m_service || m_lastPoll.isEmpty())

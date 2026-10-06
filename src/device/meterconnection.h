@@ -74,6 +74,10 @@ public:
   bool    open();
   /// Stops reading and closes the port; emits error("Not connected").
   void    close();
+  /// Presses the meter's key @p key once (DmmDecoder::keyRequest()). False
+  /// when the meter has no such key, or is not connected (a Bluetooth link
+  /// still being set up).
+  bool    sendKey(const QString &key);
   void    setName(const QString &name)  {  m_name = name; }
   /// The meter description; passed on to the port device and the reader.
   void    setDmmInfo(const DmmDecoder::DMMInfo info)  {  m_dmmInfo = info; }

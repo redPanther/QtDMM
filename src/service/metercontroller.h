@@ -67,6 +67,9 @@ public:
   /// not be opened.
   bool        connectMeter(bool on);
   bool        isConnected() const;
+  /// Presses the meter's key @p key (ControlBar); false when it could not be
+  /// sent (no such key, not connected).
+  bool        pressKey(const QString &key);
   /// The recorder started or stopped (SCPI reports it).
   void        setRecording(bool on);
 

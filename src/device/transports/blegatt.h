@@ -58,6 +58,10 @@ public:
   /// is sent on becoming ready.
   bool isReady() const { return m_ready; }
 
+  /// Writes @p frame once (a key of the meter), without making it the poll
+  /// that write() keeps and repeats. False while the link is not ready.
+  bool sendCommand(const QByteArray &frame);
+
   /// Shortest time between two repeated polls.
   static constexpr int kRepollMs = 300;
 

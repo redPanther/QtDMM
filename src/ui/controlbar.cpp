@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QElapsedTimer>
 #include <QToolButton>
 
 #include "core/reading.h"
@@ -45,19 +46,44 @@ ControlBar::ControlBar(QWidget *parent) :
       b->setAutoRaise(false);
       b->setToolButtonStyle(Qt::ToolButtonTextOnly);
       const QString key = k.key;
-      // a state key shows what the meter reports, not the click
-      connect(b, &QToolButton::clicked, this, [this, b, key, state = k.state]
+      // MIN/MAX and PEAK: held down, the key leaves the mode, as on the meter
+      const bool leave = key == QLatin1String("minmax") || key == QLatin1String("peak");
+      if (leave)
       {
-        if (state)
-          b->setChecked(!b->isChecked());
-        Q_EMIT keyPressed(key);
-      });
+        b->setToolTip(tr(k.tip) + "\n" + tr("Hold the key to leave it, as on the meter."));
+        auto *held = new QElapsedTimer;
+        connect(b, &QObject::destroyed, b, [held] { delete held; });
+        connect(b, &QToolButton::pressed, b, [held] { held->start(); });
+        connect(b, &QToolButton::clicked, this, [this, b, key, held]
+        {
+          // Qt has toggled the check already: on before the click is unchecked now
+          const bool wasOn = !b->isChecked();
+          const bool off = wasOn && held->isValid() && held->elapsed() >= kLongPressMs;
+          b->setChecked(!off);
+          Q_EMIT keyPressed(off ? key + "_off" : key);
+        });
+      }
+      else
+        // a state key shows what the meter reports, not the click
+        connect(b, &QToolButton::clicked, this, [this, b, key, state = k.state]
+        {
+          if (state)
+            b->setChecked(!b->isChecked());
+          Q_EMIT keyPressed(key);
+        });
       row->addWidget(b);
       m_keys << b;
+      b->setProperty("key", key);
       if (key == "hold")
         m_hold = b;
       else if (key == "auto")
         m_auto = b;
+      else if (key == "rel")
+        m_rel = b;
+      else if (key == "minmax")
+        m_minmax = b;
+      else if (key == "peak")
+        m_peak = b;
     }
     m_groups << group;
   }
@@ -76,10 +102,23 @@ void ControlBar::setConnected(bool connected)
     b->setEnabled(connected);
 }
 
+void ControlBar::setProtocol(FrameFormat::DataFormat format)
+{
+  const std::shared_ptr<DmmDecoder> decoder = DmmDecoder::getInstance(format);
+  for (QToolButton *b : std::as_const(m_keys))
+    b->setVisible(decoder && !decoder->keyRequest(b->property("key").toString()).isEmpty());
+  updateGeometry();
+}
+
 void ControlBar::showReading(const Reading &reading)
 {
+  if (reading.id != 0)
+    return;
   m_hold->setChecked(reading.hold);
   m_auto->setChecked(reading.range == "AUTO");
+  m_rel->setChecked(reading.flags & SampleFlag::Relative);
+  m_minmax->setChecked(reading.flags & (SampleFlag::Max | SampleFlag::Min));
+  m_peak->setChecked(reading.flags & SampleFlag::Peak);
 }
 
 int ControlBar::layoutGroups(int width, bool apply) const

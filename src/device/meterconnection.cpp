@@ -182,6 +182,22 @@ void MeterConnection::initDecoder( FrameFormat::DataFormat df)
 }
 
 
+bool MeterConnection::sendKey(const QString &key)
+{
+  const QByteArray frame = m_decoder ? m_decoder->keyRequest(key) : QByteArray();
+  QIODevice *port = m_portHandler->port();
+  if (frame.isEmpty() || !port || !port->isOpen())
+    return false;
+  if (m_consoleLogging)
+    std::cout << "key " << key.toStdString() << ": " << frame.toHex(' ').toStdString() << std::endl;
+#ifdef QTDMM_WITH_BLE
+  // a GATT link repeats what is written as its poll: a key goes once
+  if (auto *gatt = dynamic_cast<BleGattDevice *>(port))
+    return gatt->sendCommand(frame);
+#endif
+  return port->write(frame) == frame.size();
+}
+
 bool MeterConnection::open()
 {
   m_wanted = true;
