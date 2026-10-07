@@ -1,6 +1,8 @@
+[![](https://img.shields.io/github/v/release/qtdmm/QtDMM?sort=date)](https://github.com/qtdmm/QtDMM/releases)
+
 # QtDMM
 
-**QtDMM** is a simple, cross-platform digital multimeter (DMM) readout application
+**QtDMM** is a cross-platform digital multimeter (DMM) readout application
 with a built-in, configurable transient recorder. It's especially useful for users
 of older multimeters whose original software no longer runs on modern operating
 systems.
