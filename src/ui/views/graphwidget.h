@@ -134,9 +134,12 @@ public:
   GraphWidget(QWidget *parent, Settings *settings);
   GraphWidget(QWidget *parent = Q_NULLPTR);
   ~GraphWidget();
-  /// The visible window in seconds (also how wide Live is without a
-  /// recording length).
+  /// The window from the settings, in seconds (also how wide Live is
+  /// without a recording length). A window other than the last one ends
+  /// "All"; the same one keeps it, and the window of "All" stays.
   void             setGraphSize(int size);
+  /// The visible window in seconds: the settings' one, or that of "All".
+  int              windowSeconds() const { return m_windowSeconds; }
   /// The recorder behind the graph.
   RecordingStore  *store() const { return m_store; }
   /// Shows @p store instead of the graph's own one (the MeterController's
@@ -251,10 +254,10 @@ public Q_SLOTS:
   void             clearSLOT();
   /// @name Keyboard zoom/pan, also reachable from MainWindow's shortcuts
   /// @{
-  void             zoomInSLOT()  { m_followAll = false; Q_EMIT zoomIn(1.25); }
-  void             zoomOutSLOT() { m_followAll = false; Q_EMIT zoomOut(1.25); }
-  /// The window as long as what there is.
-  void             zoomFitSLOT() { m_followAll = false; requestAll(false); }
+  void             zoomInSLOT()  { leaveAll(); Q_EMIT zoomIn(1.25); }
+  void             zoomOutSLOT() { leaveAll(); Q_EMIT zoomOut(1.25); }
+  /// The window as long as what there is (kept in the settings, unlike "All").
+  void             zoomFitSLOT() { m_followAll = false; Q_EMIT windowRequested(allTarget(false)); }
   /// Shifts the visible window by a fraction of its width (negative = back).
   void             pan(double fraction);
   void             scrollToStart();
@@ -299,7 +302,8 @@ protected:
   int              m_tailInt = 0;   ///< the same for the integral
   int              m_tailDataPts = 0;  ///< and the data points (a gap has none)
   int              m_tailIntPts = 0;
-  int              m_windowSeconds = 600;   ///< the visible window, setGraphSize()
+  int              m_windowSeconds = 600;   ///< the visible window, applyWindow()
+  int              m_savedWindow = 0;       ///< the settings' window, setGraphSize(); 0 = none yet
   int              m_rebuilds = 0;          ///< rebuildSeries() calls, see onAppended()
   /// @name Time buttons (All / 1 min / 5 min / 30 min) top right in the graph
   /// @{
@@ -311,9 +315,17 @@ protected:
   void             hideCrosshair();
   bool             m_followAll = false;   ///< "All": the window grows with the recording
   void             timeButtonClicked(int seconds);
-  /// "All": asks for a window that holds the recording so far (plus room
-  /// to grow when @p grow), at least 10 s and at most the recording length.
+  /// "All": a window that holds the recording so far (plus room to grow
+  /// when @p grow), at least 10 s and at most the recording length.
+  int              allTarget(bool grow) const;
+  /// "All": shows allTarget() - in the graph only, the settings keep
+  /// their window (it would be saved with them).
   void             requestAll(bool grow);
+  /// Shows a window of @p seconds (setGraphSize(), requestAll()).
+  void             applyWindow(int seconds);
+  /// A zoom from "All" starts from the window shown: it goes to the
+  /// settings first.
+  void             leaveAll();
   void             updateTimeButtons();
   /// The longest window worth a time button, in seconds (0 = none).
   int              lengthLimit() const;

@@ -241,12 +241,12 @@ void GraphWidget::timeButtonClicked(int seconds)
   m_followAll = (seconds == 0);
   if (m_followAll)
     requestAll(false);
-  else if (seconds != m_windowSeconds)
-    Q_EMIT windowRequested(seconds);
+  else
+    Q_EMIT windowRequested(seconds);   // back through the settings, setGraphSize()
   updateTimeButtons();   // also when nothing changes: undo the click's own toggle
 }
 
-void GraphWidget::requestAll(bool grow)
+int GraphWidget::allTarget(bool grow) const
 {
   const double recorded = (m_store->duration() - m_store->origin()) / 1000.0;
   // growing by a quarter at a time: the window does not change with every sample
@@ -259,8 +259,23 @@ void GraphWidget::requestAll(bool grow)
   const int limit = lengthLimit();
   if (limit > 0)
     target = qMin(target, limit);
+  return target;
+}
+
+void GraphWidget::requestAll(bool grow)
+{
+  const int target = allTarget(grow);
   if (target != m_windowSeconds)
-    Q_EMIT windowRequested(target);
+    applyWindow(target);
+}
+
+void GraphWidget::leaveAll()
+{
+  if (!m_followAll)
+    return;
+  m_followAll = false;
+  if (m_windowSeconds != m_savedWindow)
+    Q_EMIT windowRequested(m_windowSeconds);
 }
 
 void GraphWidget::updateTimeButtons()
@@ -919,7 +934,18 @@ void GraphWidget::updateScrollRange()
 
 void GraphWidget::setGraphSize(int size)
 {
-  m_windowSeconds = qMax(1, size);
+  size = qMax(1, size);
+  // another window (the settings page, a zoom, a time button) ends "All";
+  // the same one again (OK in the dialog) keeps it with its window
+  if (m_savedWindow > 0 && size != m_savedWindow)
+    m_followAll = false;
+  m_savedWindow = size;
+  applyWindow(m_followAll ? m_windowSeconds : size);
+}
+
+void GraphWidget::applyWindow(int seconds)
+{
+  m_windowSeconds = qMax(1, seconds);
 
   scrollbar->setMinimum(0);
   scrollbar->setSingleStep(qMax(1, m_windowSeconds));
@@ -1044,8 +1070,8 @@ void GraphWidget::onAppended(bool shifted)
   const RawPoint &p = m_store->series().last();
 
   // "All": the window grows once the recording fills it. The new window
-  // comes back at once (InstanceWidget, through the settings) and rebuilds
-  // the series with this reading in it: then it must not be appended again
+  // rebuilds the series with this reading in it: then it must not be
+  // appended again
   // A window much longer than what there is (Live starts with All, the
   // window from the settings) comes down to it.
   const int rebuilds = m_rebuilds;
@@ -1439,7 +1465,7 @@ void GraphWidget::handleChartMouseRelease(QMouseEvent *)
 
 void GraphWidget::handleChartWheel(QWheelEvent *ev)
 {
-  m_followAll = false;
+  leaveAll();
   if (ev->angleDelta().x() < 0 || ev->angleDelta().y() < 0)
     Q_EMIT zoomOut(1.1);
   else

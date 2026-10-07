@@ -557,6 +557,14 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     // device) was the same state again, and no instance started
     if (state.startsWith("RECORD_"))
     {
+      // another instance's start: nobody here to ask (review R9-01) - a
+      // recording running goes on, one not saved stays
+      QString why;
+      if (state != m_ownRecord && !m_wid->controller()->mayStartRecording(&why))
+      {
+        m_info->setText(tr("Another instance: %1").arg(why));
+        return;
+      }
       QMetaObject::invokeMethod(m_wid, "startSLOT", Qt::DirectConnection);
       m_localRecord = false;
     }
@@ -850,7 +858,8 @@ void MainWindow::startSLOT()
         m_localRecord = true;
         return;
       case QMessageBox::No:
-        m_stateMgr->writeState("RECORD_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
+        m_ownRecord = "RECORD_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+        m_stateMgr->writeState(m_ownRecord);
         m_localRecord = false;
         return;
     }

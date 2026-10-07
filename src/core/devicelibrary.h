@@ -103,10 +103,16 @@ private:
   /// Windows a virus scanner or indexer may hold the file a moment, the
   /// replacement then cannot take its place) is tried again a few times.
   /// QSettings may report an error on Windows although the change is in
-  /// the file: @p landed, read from the file, says whether it is.
-  /// False when it never succeeded.
+  /// the file: @p landed gets the entries on disk (onDisk()) and says
+  /// whether it is. False when it never succeeded.
   bool        write(const std::function<void(QSettings &)> &edit,
-                    const std::function<bool()> &landed = {}) const;
+                    const std::function<bool(const QList<MyDevice> &)> &landed = {}) const;
+  /// The entries of @p s, in their order.
+  static QList<MyDevice> entries(QSettings &s);
+  /// The entries as the file holds them, read from a copy: QSettings keeps
+  /// one cache per file in a process, and after a failed write it still
+  /// holds what was not written. Nothing when the file cannot be read.
+  std::optional<QList<MyDevice>> onDisk() const;
   /// entryKeys() for every entry: snapshots of all meter keys from before
   /// are cut down (name, order and id stay).
   void        tidy();

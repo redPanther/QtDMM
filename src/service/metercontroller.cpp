@@ -50,7 +50,17 @@ MeterController::MeterController(QObject *parent)
     updateBanner();
   });
 
-  connect(m_scpi, &ScpiServer::startRecording, this, [this] { Q_EMIT recordingRequested(true); });
+  connect(m_scpi, &ScpiServer::startRecording, this, [this]
+  {
+    QString why;
+    if (mayStartRecording(&why))
+      Q_EMIT recordingRequested(true);
+    else
+    {
+      m_scpi->pushError(-213, "Init ignored");
+      Q_EMIT info(tr("SCPI: %1").arg(why));
+    }
+  });
   connect(m_scpi, &ScpiServer::stopRecording, this, [this] { Q_EMIT recordingRequested(false); });
   connect(m_scpi, &ScpiServer::connectRequested, this, [this](bool on)
   {
@@ -222,6 +232,18 @@ void MeterController::publish(const Reading &rd)
   m_scpi->setReading(id, r);
 }
 
+bool MeterController::mayStartRecording(QString *why) const
+{
+  QString reason;
+  if (m_recorder->state() == RecordingStore::Record)
+    reason = tr("already recording, the recording goes on");
+  else if (m_recorder->state() == RecordingStore::View && m_recorder->dirty())
+    reason = tr("start ignored, the recording shown is not saved yet");
+  if (why)
+    *why = reason;
+  return reason.isEmpty();
+}
+
 void MeterController::resetMinMax()
 {
   m_minMax.clear();
@@ -236,8 +258,11 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
   const QString text = alarm.message.isEmpty() ? alarm.describe(m_baseUnit) : alarm.message;
   Q_EMIT error(tr("%1: %2 (%3)").arg(Alarm::title(alarm.name), text, shown));
 
-  if (alarm.recorder == Alarm::RecorderStart)
+  QString why;
+  if (alarm.recorder == Alarm::RecorderStart && mayStartRecording(&why))
     Q_EMIT recordingRequested(true);
+  else if (alarm.recorder == Alarm::RecorderStart)
+    Q_EMIT info(tr("%1: %2").arg(Alarm::title(alarm.name), why));
   else if (alarm.recorder == Alarm::RecorderStop)
     Q_EMIT recordingRequested(false);
   if (alarm.markGraph || alarm.markTable)

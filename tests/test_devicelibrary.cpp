@@ -275,6 +275,28 @@ int main(int argc, char **argv)
   }
 #endif
 
+#if !defined(Q_OS_WIN)
+  // 10. a write that fails is reported (review R9-04): the check after an
+  //     error reads the file, not the cache QSettings keeps in the process
+  {
+    QTemporaryDir ro;
+    DeviceLibrary lib(ro.path());
+    const QVariantMap sim { {"DMM/model", "QtDMM Simulated meter"}, {"Port settings/device", "calc V/DC t"} };
+    check(!lib.add("First", sim).isEmpty(), "read-only: the first entry");
+    // QSaveFile needs a file next to devices.conf: the directory read-only
+    QFile::setPermissions(ro.path(), QFile::ReadOwner | QFile::ExeOwner);
+    if (QFileInfo(ro.path()).isWritable())
+      qInfo() << "read-only check skipped: the directory stays writable (root?)";
+    else
+    {
+      check(lib.add("Second", sim).isEmpty(), "read-only: add() says it failed");
+      const std::optional<MyDevice> first = lib.list().isEmpty() ? std::nullopt : std::optional(lib.list().first());
+      check(first && !lib.rename(first->id, "Renamed"), "read-only: rename() says it failed");
+    }
+    QFile::setPermissions(ro.path(), QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
+  }
+#endif
+
   // 9. instance names for "In a new window": identifiers, unique, not "default"
   check(DeviceLibrary::instanceId("Uni-Trend UT61E", {}) == "Uni_Trend_UT61E", "instanceId: " + DeviceLibrary::instanceId("Uni-Trend UT61E", {}));
   check(DeviceLibrary::instanceId("Uni-Trend UT61E", { "default", "uni_trend_ut61e" }) == "Uni_Trend_UT61E_2", "instanceId: taken in another case");

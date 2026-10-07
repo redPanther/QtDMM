@@ -56,7 +56,10 @@
 - Device settings and the assistant: no frames; the fixed port parameters and protocol of a known model are no
   longer shown (they were greyed under "Advanced"), manual settings show them at once - also when a model is
   chosen after manual settings
-- "QtDMM Virtual meter" is "Simulated meter" (a new entry: "Simulated meter"); old configurations keep working
+- "QtDMM Virtual meter" is "Simulated meter" (a new entry: "Simulated meter"); old configurations keep
+  working. SCPI *IDN? says "QtDMM Simulated meter"
+- A recording started by an alarm, SCPI INITiate or another instance (All instances) no longer clears one
+  that is not saved yet, and no longer starts one running afresh: the status bar says why, SCPI gets -213
 - Record asks in a larger window, with "Until Stop" as a choice of its own and a word on a start at a clock time
   or threshold
 - Sidebar: "+ Add device..." at the end of My devices
