@@ -268,7 +268,7 @@ void SettingsDialog::setWindowSecondsSLOT(int seconds)
 
 void SettingsDialog::setRecordingLength(int value, int unit)
 {
-  // kept at once, without applying the pages: OK on them reconnects the meter
+  // kept at once, without applying the other pages
   m_recorder->setLength(value, unit);
   m_settings->setInt("Sample/time", m_recorder->lengthValue());
   m_settings->setInt("Sample/time-unit", m_recorder->lengthUnit());

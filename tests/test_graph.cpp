@@ -203,11 +203,14 @@ int main(int argc, char **argv)
       graph.startSLOT();
       for (int i = 0; i < 150; ++i)   // 15 s
         feed.value(1.0);
-      bool grew = !spy.isEmpty();
-      for (const QList<QVariant> &args : spy)
-        grew = grew && args.at(0).toInt() > 10 && args.at(0).toInt() <= 600;
-      check(grew, QString("time buttons: All grows the window with the recording (%1 requests)").arg(spy.size()));
+      check(graph.windowSeconds() > 10 && graph.windowSeconds() <= 600,
+            QString("time buttons: All grows the window with the recording (%1 s)").arg(graph.windowSeconds()));
+      check(spy.isEmpty(), QString("time buttons: All keeps its window out of the settings (%1 requests)").arg(spy.size()));
+      // a zoom starts from the window shown: it goes to the settings first
+      const int shown = graph.windowSeconds();
       graph.zoomInSLOT();
+      check(spy.size() == 1 && spy.last().at(0).toInt() == shown,
+            QString("time buttons: a zoom from All hands its window to the settings (%1)").arg(spy.size()));
       graph.setGraphSize(8);
       check(!all->isChecked(), "time buttons: zooming ends All");
     }
@@ -228,17 +231,15 @@ int main(int argc, char **argv)
     if (all)
     {
       all->click();
-      QList<int> requests;
-      // InstanceWidget applies each request through the settings
-      QObject::connect(&graph, &GraphWidget::windowRequested, &graph, [&](int seconds)
-      {
-        requests << seconds;
-        graph.setGraphSize(seconds);
-      });
+      QList<int> requests;   // the windows All went through
       Feed feed(graph);
       graph.startSLOT();
       for (int i = 0; i < 3000; ++i)   // 300 s
+      {
         feed.value(1.0);
+        if (requests.isEmpty() || requests.last() != graph.windowSeconds())
+          requests << graph.windowSeconds();
+      }
       bool minutes = !requests.isEmpty();
       for (int seconds : requests)
         minutes = minutes && (seconds <= 60 || seconds % 60 == 0);
@@ -725,7 +726,17 @@ int main(int argc, char **argv)
     for (QToolButton *b : graph.findChildren<QToolButton *>())
       if (b->text() == "All")
         all = b;
-    check(all && all->isChecked() && asked == 10, QString("live: starts with All, window asked %1 s").arg(asked));
+    check(all && all->isChecked() && graph.windowSeconds() == 10,
+          QString("live: starts with All, window %1 s").arg(graph.windowSeconds()));
+    // review R9-03: the window of All is not the settings' one - it was
+    // saved with them, 600 s became 10 s by starting and closing QtDMM
+    check(asked == -1, QString("live: All asks the settings for nothing (%1)").arg(asked));
+    graph.setGraphSize(600);   // OK in the settings dialog, the window unchanged
+    check(all->isChecked() && graph.windowSeconds() == 10,
+          QString("live: OK with the same window keeps All (%1 s)").arg(graph.windowSeconds()));
+    graph.setGraphSize(300);   // another window on the Graph page
+    check(!all->isChecked() && graph.windowSeconds() == 300,
+          QString("live: another window from the settings ends All (%1 s)").arg(graph.windowSeconds()));
   }
 
   // --- 5n. a meter silent for minutes (every 2 s, then 5.5 min nothing),
@@ -1208,7 +1219,9 @@ int main(int argc, char **argv)
       feed.value(i);
     auto *x = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Horizontal).first());
     const double newest = graph.store()->series().last().t / 1000.0;
-    check(qAbs(x->max() - newest) < 0.01 && qAbs(x->max() - x->min() - 9) < 0.01,
+    // Live is "All": the window grows to the 30 s kept, then moves on
+    check(graph.windowSeconds() == 30, QString("live: All up to the length, %1 s").arg(graph.windowSeconds()));
+    check(qAbs(x->max() - newest) < 0.01 && qAbs(x->max() - x->min() - 29) < 0.01,
           QString("live: the window %1..%2 s follows the newest at %3 s").arg(x->min()).arg(x->max()).arg(newest));
     check(graph.store()->origin() == graph.store()->duration() - 30000, "live: keeps the recording length");
     check(!graph.findChild<QScrollBar *>()->isEnabled(), "live: the scroll bar rests");
