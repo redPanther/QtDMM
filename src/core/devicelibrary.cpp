@@ -3,8 +3,10 @@
 #include "core/devicelibrary.h"
 
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
 #include <QSettings>
+#include <QTemporaryDir>
 #include <QThread>
 #include <QUuid>
 #include <algorithm>
@@ -198,10 +200,18 @@ void DeviceLibrary::watch()
 namespace
 {
 constexpr int kAttempts = 6;   ///< reading/writing devices.conf, 20 ... 320 ms apart
+
+std::optional<MyDevice> findIn(const QList<MyDevice> &entries, const QString &id)
+{
+  for (const MyDevice &d : entries)
+    if (d.id == id)
+      return d;
+  return std::nullopt;
+}
 }
 
 bool DeviceLibrary::write(const std::function<void(QSettings &)> &edit,
-                          const std::function<bool()> &landed) const
+                          const std::function<bool(const QList<MyDevice> &)> &landed) const
 {
   for (int attempt = 0; attempt < kAttempts; ++attempt)
   {
@@ -215,9 +225,14 @@ bool DeviceLibrary::write(const std::function<void(QSettings &)> &edit,
         return true;
     }
     // an error, and still in the file (Windows CI: the entry of a second
-    // instance was there, add() said it failed)
-    if (landed && landed())
-      return true;
+    // instance was there, add() said it failed) - the file itself, not
+    // the cache of this process (review R9-04)
+    if (landed)
+    {
+      const std::optional<QList<MyDevice>> disk = onDisk();
+      if (disk && landed(*disk))
+        return true;
+    }
   }
   return false;
 }
@@ -234,6 +249,29 @@ QList<MyDevice> DeviceLibrary::list() const
     QThread::msleep(20u << (attempt - 1));
   }
   QSettings s(m_file, QSettings::IniFormat);
+  return entries(s);
+}
+
+std::optional<QList<MyDevice>> DeviceLibrary::onDisk() const
+{
+  QFile file(m_file);
+  QTemporaryDir dir;
+  if (!dir.isValid() || !file.open(QIODevice::ReadOnly))
+    return std::nullopt;
+  const QByteArray bytes = file.readAll();
+  // a path of its own: a cache of its own
+  QFile copy(dir.filePath(QStringLiteral("devices.conf")));
+  if (!copy.open(QIODevice::WriteOnly) || copy.write(bytes) != bytes.size())
+    return std::nullopt;
+  copy.close();
+  QSettings s(copy.fileName(), QSettings::IniFormat);
+  if (s.status() != QSettings::NoError)
+    return std::nullopt;
+  return entries(s);
+}
+
+QList<MyDevice> DeviceLibrary::entries(QSettings &s)
+{
   QList<MyDevice> out;
   for (const QString &group : s.childGroups())
   {
@@ -321,7 +359,7 @@ QString DeviceLibrary::add(const QString &name, const QVariantMap &keys)
     for (auto it = own.cbegin(); it != own.cend(); ++it)
       s.setValue(it.key(), it.value());
     s.endGroup();
-  }, [&] { const std::optional<MyDevice> d = find(id); return d && d->name == name; });
+  }, [&](const QList<MyDevice> &disk) { const std::optional<MyDevice> d = findIn(disk, id); return d && d->name == name; });
   watch();
   Q_EMIT changed();
   return ok ? id : QString();
@@ -341,9 +379,9 @@ bool DeviceLibrary::update(const QString &id, const QVariantMap &keys)
     for (auto it = own.cbegin(); it != own.cend(); ++it)
       s.setValue(it.key(), it.value());
     s.endGroup();
-  }, [&]
+  }, [&](const QList<MyDevice> &disk)
   {
-    const std::optional<MyDevice> d = find(id);
+    const std::optional<MyDevice> d = findIn(disk, id);
     if (!d || d->keys.size() != own.size())
       return false;
     for (auto it = own.cbegin(); it != own.cend(); ++it)
@@ -360,7 +398,7 @@ bool DeviceLibrary::rename(const QString &id, const QString &name)
   if (!find(id) || name.trimmed().isEmpty())
     return false;
   const bool ok = write([&](QSettings &s) { s.setValue(kPrefix + id + "/name", name.trimmed()); },
-                        [&] { const std::optional<MyDevice> d = find(id); return d && d->name == name.trimmed(); });
+                        [&](const QList<MyDevice> &disk) { const std::optional<MyDevice> d = findIn(disk, id); return d && d->name == name.trimmed(); });
   Q_EMIT changed();
   return ok;
 }
@@ -369,7 +407,8 @@ bool DeviceLibrary::remove(const QString &id)
 {
   if (!find(id))
     return false;
-  const bool ok = write([&](QSettings &s) { s.remove(kPrefix + id); }, [&] { return !find(id); });
+  const bool ok = write([&](QSettings &s) { s.remove(kPrefix + id); },
+                        [&](const QList<MyDevice> &disk) { return !findIn(disk, id); });
   Q_EMIT changed();
   return ok;
 }
@@ -380,10 +419,10 @@ void DeviceLibrary::writeOrder(const QStringList &ids)
   {
     for (int i = 0; i < ids.size(); ++i)
       s.setValue(kPrefix + ids[i] + "/order", i + 1);
-  }, [&]
+  }, [&](const QList<MyDevice> &disk)
   {
     QStringList now;
-    for (const MyDevice &d : list())
+    for (const MyDevice &d : disk)
       now << d.id;
     return now == ids;
   });
