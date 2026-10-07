@@ -51,6 +51,11 @@ public:
   /// The recorder: the readings feed it from here on, views (the graph)
   /// show it. SCPI learns when it starts or stops.
   RecordingStore *recorder() const { return m_recorder; }
+  /// Whether a start nobody clicked (an alarm, SCPI, another instance's
+  /// RECORD_) may begin a recording: not while one runs - it goes on
+  /// instead of starting afresh - and not over one viewed and not saved
+  /// yet, which nobody could be asked about. False says why in @p why.
+  bool        mayStartRecording(QString *why = nullptr) const;
   /// The meter's display count (DMMInfo::display), for the range and the
   /// bar graph of the readings.
   void        setDisplayCounts(int counts) { m_adapter.setCounts(counts); }

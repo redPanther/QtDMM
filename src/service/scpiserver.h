@@ -83,6 +83,10 @@ public:
   /// Number of readings considered current: older ones answer as stale.
   static constexpr qint64 kStaleMs = 5000;
 
+  /// Puts an error into the queue (SYST:ERR?); also for what the receiver
+  /// of a command refuses (INIT ignored).
+  void pushError(int code, const QString &text);
+
 Q_SIGNALS:
   void clientsChanged(int count);
   /// INITiate / ABORt: the client wants the recorder started or stopped.
@@ -104,7 +108,6 @@ private:
   void onReadyRead(QTcpSocket *socket);
   QByteArray handle(const Command &cmd, bool &isQuery);
   QString handleText(const Command &cmd, bool &isQuery);
-  void pushError(int code, const QString &text);
   static bool matches(const QString &mnemonic, const char *longForm);
   static QString number(double v);
   QString function(const Reading &r) const;

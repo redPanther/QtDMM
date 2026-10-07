@@ -209,6 +209,7 @@ protected:
   QString     m_config_id;
   bool        m_localRecord;
   bool        m_remoteStop = false;   ///< stopping on another instance's STOP
+  QString     m_ownRecord;   ///< the RECORD_ this window sent ("All instances"): asked about already
 
   void        setupIcons();
   void        createActions();
