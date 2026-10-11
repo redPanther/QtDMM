@@ -47,7 +47,7 @@ int main(int argc, char **argv)
   MeterController ctl;
   ScpiConfig config;
   config.enabled = true;
-  config.port = 55125;
+  config.port = 0;   // the system picks one: a fixed port may be in use
   ctl.applyScpi(config);
   quint16 port = 0;
   for (const ServiceState &s : ctl.services())
