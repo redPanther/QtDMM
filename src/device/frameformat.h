@@ -71,6 +71,8 @@ public:
     KeysightU12xx,
     UniTUT32x,
     MastechMS6514,
+    AppaDmm,
+    Appa500,
     EndOfList              // new stuff always before!
   };
 

@@ -42,8 +42,18 @@ meter working, please report it on the
 | Agilent | U1271A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | Agilent | U1272A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | Agilent | U1273A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| APPA | 208 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 208B ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 501 ¹ | - | `AppaDmm` | 9600 8N1 | - | 40000 |
+| APPA | 502 ¹ | - | `AppaDmm` | 9600 8N1 | - | 40000 |
+| APPA | 503 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
+| APPA | 505 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
+| APPA | 506 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 506B ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 507 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | APPA | 71 ¹ | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
 | APPA | 73 ¹ | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
+| BENNING | MM 12 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | Brymen | BM250 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
 | Brymen | BM251 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
 | Brymen | BM252 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
@@ -57,6 +67,7 @@ meter working, please report it on the
 | Brymen | BM829s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
 | Brymen | BM867s ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
 | Brymen | BM869s | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
+| CMT | 3503 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
 | CO2Meter | CM-INK-1 ¹ | Holtek | `TfaAirControl` | USB-HID (Holtek) | - | 5000 |
 | Digitech | QM1350 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | Digitech | QM1462 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
@@ -91,6 +102,8 @@ meter working, please report it on the
 | GW Instek | GDM-397 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
 | HoldPeak | HP-90EPC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | HP | 34401A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
+| Iso-Tech | IDM 503 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
+| Iso-Tech | IDM 505 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
 | Iso-Tech | IDM 73 | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
 | Keysight | 34465A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
 | Keysight | U1241C ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
@@ -98,6 +111,7 @@ meter working, please report it on the
 | Keysight | U1273AX ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | Keysight | U1281A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
 | Keysight | U1282A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
+| KPS | DMM9000BT ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | MASTECH | M9803R | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
 | MASTECH | MAS-343 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | MASTECH | MAS-345 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
@@ -138,6 +152,8 @@ meter working, please report it on the
 | Radioshack | 22-812 | - | `RS22812Continuous` | 4800 8N1 | DTR | 4000 |
 | Radioshack | RS22-168A | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
 | Sanwa | PC7000 ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
+| Sefram | 7351 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| Sefram | 7352B ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | Siglent | SDM3055 (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 200000 |
 | sigrok | SCPI DMM (any scpi-dmm model) ¹ | - | `Sigrok` | sigrok-cli | - | 100000 |
 | Sinometer | MAS-343 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
@@ -222,7 +238,9 @@ meter working, please report it on the
 | Voltcraft | VC 850 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
 | Voltcraft | VC 870 | - | `VC870Continuous` | 9600 8N1 | DTR | 40000 |
 | Voltcraft | VC 920 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| Voltcraft | VC 930 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
 | Voltcraft | VC 940 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| Voltcraft | VC 950 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
 | Voltcraft | VC 960 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
 | Wintex | TD2200 | ES51922 | `CyrustekES51922` | 19200 7N1 | DTR | 22000 |
 
@@ -233,4 +251,4 @@ meter working, please report it on the
 - **Generic DTM0660 4000 count, DTM0660 6000 count, DTM0660 8000 count**: the DTM0660 chip has a UART, but meters built on it (Victor VC921 and similar) ship without an interface: an IR LED with a 100 Ω resistor goes on the chip's TX pin and the RS232 bit in the 24C02 EEPROM has to be set - [eevblog: hacking the Victor VC-921](https://www.eevblog.com/forum/testgear/hacking-the-victor-vc-921/). PeakTech 3415 and Velleman DVM4100 use the same chip but come with a cable and need no change.
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
-202 devices across 43 vendors.
+220 devices across 47 vendors.

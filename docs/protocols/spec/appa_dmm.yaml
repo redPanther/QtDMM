@@ -1,0 +1,61 @@
+protocol: AppaDmm
+decoder: src/device/decoders/appa_dmm.cpp
+devices: [APPA 506, BENNING MM 12]
+frames_per_reading: 1
+sources:
+  - docs/protocols/spec/appa_dmm.yaml   # synthetic, see note below
+
+# SYNTHETIC frames built from libsigrok appa-dmm (Martin Eitzenberger,
+# GPL-3.0-or-later, github.com/Cymaphore/libsigrok branch appadmm-stage):
+# 55 55 01 0C, function, range/auto, main and sub display (24-bit LE count,
+# dot|unit<<3, content|overload<<7), checksum = sum of all bytes before it.
+# A count of 0x700000 (a word) on the sub display leaves it empty. No
+# capture from a real meter exists yet.
+vectors:
+  - source_line: "DC V 1.2345 V, sub off"
+    bytes: 55 55 01 0C 02 81 39 30 00 0C 00 00 00 70 00 00 1F
+    reading: {value: "1.2345", unit: "V", coupling: "DC", range_mode: "auto"}
+    expect: {special: "DC", val: "1.2345", val2: ""}
+  - source_line: "AC V 230.12 V, sub 50.00 Hz"
+    bytes: 55 55 01 0C 01 82 E4 59 00 0A 00 88 13 00 8A 01 A7
+    reading: {value: "230.12", unit: "V", coupling: "AC", range_mode: "auto"}
+    expect: {special: "AC", dval2: 50.0, val2: "50.00", unit2: "Hz", id2: 1}
+  - source_line: "DC mV -12.345 mV manual"
+    bytes: 55 55 01 0C 04 00 C7 CF FF 13 00 00 00 70 00 00 D3
+    reading: {value: "-12.345", unit: "mV", coupling: "DC", range_mode: "manual"}
+    expect: {special: "DC"}
+  - source_line: "resistance 4.7000 kOhm"
+    bytes: 55 55 01 0C 05 82 98 B7 00 64 00 00 00 70 00 00 61
+    reading: {value: "4.7000", unit: "kOhm", range_mode: "auto"}
+    expect: {special: "OH"}
+  - source_line: "resistance overload"
+    bytes: 55 55 01 0C 05 85 00 00 00 5A 80 00 00 70 00 00 8B
+    reading: {value: "OL", unit: "MOhm", range_mode: "auto"}
+    expect: {special: "OH", val: "OL"}
+  - source_line: "continuity 12.3 Ohm"
+    bytes: 55 55 01 0C 06 80 7B 00 00 69 00 00 00 70 00 00 91
+    reading: {value: "12.3", unit: "Ohm", range_mode: "auto"}
+    expect: {special: "BUZ"}
+  - source_line: "diode 0.5123 V"
+    bytes: 55 55 01 0C 07 80 03 14 00 0C 00 00 00 70 00 00 D1
+    reading: {value: "0.5123", unit: "V", range_mode: "auto"}
+    expect: {special: "DI"}
+  - source_line: "capacitance 470.0 nF"
+    bytes: 55 55 01 0C 08 81 5C 12 00 49 00 00 00 70 00 00 67
+    reading: {value: "470.0", unit: "nF", range_mode: "auto"}
+    expect: {special: "CA"}
+  - source_line: "temperature 23.5 C"
+    bytes: 55 55 01 0C 0D 80 EB 00 00 91 00 00 00 70 00 00 30
+    reading: {value: "23.5", unit: "C", range_mode: "auto"}
+    expect: {special: "TE"}
+  - source_line: "AC+DC mA 12.345 mA"
+    bytes: 55 55 01 0C 18 81 39 30 00 23 00 00 00 70 00 00 4C
+    reading: {value: "12.345", unit: "mA", coupling: "ACDC", range_mode: "auto"}
+    expect: {special: "ACDC"}
+  - source_line: "DC A HOLD 1.234 A"
+    bytes: 55 55 01 0C 0A 00 D2 04 00 1B 1A 00 00 70 00 00 3C
+    reading: {value: "1.234", unit: "A", coupling: "DC", range_mode: "manual", flags: [HOLD]}
+  - source_line: "frequency 1.2345 kHz"
+    bytes: 55 55 01 0C 0F 82 39 30 00 84 00 00 00 70 00 00 A5
+    reading: {value: "1.2345", unit: "kHz", range_mode: "auto"}
+    expect: {special: "FR"}
