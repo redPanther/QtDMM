@@ -4,6 +4,7 @@
 
 #include <QLoggingCategory>
 #include <QTcpSocket>
+#include <QTimer>
 #include <QtEndian>
 
 Q_LOGGING_CATEGORY(lcHislip, "qtdmm.scpi.hislip", QtWarningMsg)
@@ -41,6 +42,8 @@ enum : quint8
 constexpr quint16 kServerVersion = 0x0100;  // HiSLIP 1.0
 // connections that have not said which channel they are, on top of two per session
 constexpr int kMaxPendingConnections = 4;
+// after a FatalError: how long what the client still sends is dropped before closing
+constexpr int kFatalLingerMs = 500;
 constexpr qsizetype kHeaderSize = 16;
 } // namespace
 
@@ -147,12 +150,17 @@ void HislipServer::onReadyRead(QTcpSocket *s)
   auto it = m_conns.find(s);
   if (it == m_conns.end())
     return;
+  if (it->closing)
+  {
+    s->readAll();
+    return;
+  }
   it->in += s->readAll();
 
   for (;;)
   {
     it = m_conns.find(s); // the entry may be gone after dispatch()
-    if (it == m_conns.end())
+    if (it == m_conns.end() || it->closing)
       return;
     QByteArray &in = it->in;
     if (in.size() < kHeaderSize)
@@ -216,7 +224,23 @@ void HislipServer::sendFatal(QTcpSocket *s, quint8 code, const QString &text)
 {
   qCWarning(lcHislip) << "FatalError:" << text;
   send(s, kFatalError, code, 0, text.toUtf8());
-  s->disconnectFromHost();
+  // Not closed at once: a client still sending (a message too large) would
+  // leave unread bytes here, and closing over them resets the connection -
+  // on Windows the FatalError is then lost on the way. Drop what comes for
+  // a moment, then close.
+  auto it = m_conns.find(s);
+  if (it == m_conns.end())
+  {
+    s->disconnectFromHost();
+    return;
+  }
+  it->closing = true;
+  it->in.clear();
+  QTimer::singleShot(kFatalLingerMs, s, [s]()
+  {
+    s->readAll();
+    s->disconnectFromHost();
+  });
 }
 
 void HislipServer::sendError(QTcpSocket *s, quint8 code, const QString &text)

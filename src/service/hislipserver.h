@@ -56,6 +56,7 @@ private:
     QByteArray in;
     Kind kind = Kind::Unknown;
     quint16 session = 0;
+    bool closing = false;   ///< FatalError sent: what still comes is read and dropped
   };
   struct Session // one per HiSLIP session (two connections)
   {
