@@ -69,6 +69,8 @@ public:
     UniTUT61Plus,
     TfaAirControl,
     KeysightU12xx,
+    UniTUT32x,
+    MastechMS6514,
     EndOfList              // new stuff always before!
   };
 

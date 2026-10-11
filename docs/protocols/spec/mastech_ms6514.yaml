@@ -1,0 +1,39 @@
+protocol: MastechMS6514
+decoder: src/device/decoders/mastech_ms6514.cpp
+devices: [MASTECH MS6514]
+frames_per_reading: 1
+sources:
+  - docs/protocols/spec/mastech_ms6514.yaml   # synthetic, see note below
+
+# SYNTHETIC vectors built from the frame layout of libsigrok's
+# mastech-ms6514 (protocol.c): 0x65 0x14, @5..@8 main and auxiliary counts
+# big-endian, @10 unit (bits 0-1) and HOLD (bit 6), @11/@12 per display
+# minus (bit 7), one decimal (bit 3), open (bit 6), what it shows (bits 0-1),
+# CR LF at @16. No capture from a real meter exists yet.
+vectors:
+  - source_line: "T1 23.5 C, T2 22.1 C"
+    bytes: 65 14 00 00 00 00 EB 00 DD 00 01 08 08 00 00 00 0D 0A
+    reading: {value: "23.5", unit: "C"}
+    expect: {special: "TE", val: "23.5", dval2: 22.1, val2: "22.1", unit2: "C", id2: 1}
+  - source_line: "T1 74.5 F, T2 72.0 F"
+    bytes: 65 14 00 00 00 02 E9 02 D0 00 02 08 08 00 00 00 0D 0A
+    reading: {value: "74.5", unit: "dF"}
+    expect: {dval2: 72.0, unit2: "dF"}
+  - source_line: "T1 -5.2 C, T2 without decimal 21 C"
+    bytes: 65 14 00 00 00 00 34 00 15 00 01 88 00 00 00 00 0D 0A
+    reading: {value: "-5.2", unit: "C"}
+    expect: {val2: "21", dval2: 21.0}
+  - source_line: "T1 open (no thermocouple), T2 20.0 C"
+    bytes: 65 14 00 00 00 00 00 00 C8 00 01 48 08 00 00 00 0D 0A
+    reading: {value: "OPEN", unit: "C"}
+    expect: {val: "OPEN", dval2: 20.0}
+  - source_line: "HOLD, T1 23.5 C"
+    bytes: 65 14 00 00 00 00 EB 00 DD 00 41 08 08 00 00 00 0D 0A
+    reading: {value: "23.5", unit: "C", flags: [HOLD]}
+  - source_line: "main T1-T2 1.3 C, aux T1"
+    bytes: 65 14 00 00 00 00 0D 00 EB 00 01 0A 08 00 00 00 0D 0A
+    reading: {value: "1.3", unit: "C"}
+  - source_line: "kelvin 296.6 K"
+    bytes: 65 14 00 00 00 0B 96 0B 88 00 03 08 08 00 00 00 0D 0A
+    reading: {value: "296.6", unit: "K"}
+    expect: {special: "TE", port: "temperature"}

@@ -168,6 +168,7 @@ meter working, please report it on the
 | MASTECH | M9803R | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
 | MASTECH | MAS-343 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | MASTECH | MAS-345 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| MASTECH | MS6514 ¹ | - | `MastechMS6514` | 9600 8N1 | - | 9999 |
 | MASTECH | MS8250B ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | McVoice | M-345pro | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | McVoice | M-980T | - | `M9803RContinuous` | 9600 7N1 | DTR | 4000 |
@@ -212,6 +213,8 @@ meter working, please report it on the
 | TekPower | TP4000ZC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Tenma | 72-1016 | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
 | Tenma | 72-6870 ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Tenma | 72-7712 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Tenma | 72-7715 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Tenma | 72-7730 ¹ | - | `VC940Continuous` | 2400 7O1 | DTR | 20000 |
 | Tenma | 72-7732 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
 | Tenma | 72-7745 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
@@ -223,6 +226,9 @@ meter working, please report it on the
 | Uni-Trend | UT161E ¹ | - | `UniTUT61Plus` | Bluetooth LE | - | 22000 |
 | Uni-Trend | UT30A ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Uni-Trend | UT30E ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Uni-Trend | UT321 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Uni-Trend | UT322 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Uni-Trend | UT325 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Uni-Trend | UT60A | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Uni-Trend | UT60BT | - | `UniTiDMM` | Bluetooth LE | - | 10000 |
 | Uni-Trend | UT60D ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
@@ -294,7 +300,7 @@ meter working, please report it on the
 - **Generic DTM0660 4000 count, DTM0660 6000 count, DTM0660 8000 count**: the DTM0660 chip has a UART, but meters built on it (Victor VC921 and similar) ship without an interface: an IR LED with a 100 Ω resistor goes on the chip's TX pin and the RS232 bit in the 24C02 EEPROM has to be set - [eevblog: hacking the Victor VC-921](https://www.eevblog.com/forum/testgear/hacking-the-victor-vc-921/). PeakTech 3415 and Velleman DVM4100 use the same chip but come with a cable and need no change.
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
-196 devices across 43 vendors.
+202 devices across 43 vendors.
 
 ## Command line
 

@@ -99,7 +99,8 @@ int main(int argc, char **argv)
     const QByteArray w9329 = HIDSerialDevice::packWrite(Chip::CH9329, QByteArray("D\n"));
     check(w9329.size() == 65 && w9329.left(4).toHex(' ') == "00 02 44 0a", "CH9329 write: placeholder, count, data, padded to 64");
     check(HIDSerialDevice::packWrite(Chip::CP2110, QByteArray("D\n")).toHex(' ') == "02 44 0a", "CP2110 write: count as report id");
-    check(HIDSerialDevice::packWrite(Chip::CH9325, QByteArray("D\n")).isEmpty(), "CH9325 cannot write");
+    check(HIDSerialDevice::packWrite(Chip::CH9325, QByteArray("D\n")).toHex(' ') == "00 02 44 0a 00 00 00 00 00",
+          "CH9325 write: id placeholder, count, data, 8-byte report");
   }
 
   // --- 3d. the shared vectors: tests/data/hid_cables.json is what the bridge

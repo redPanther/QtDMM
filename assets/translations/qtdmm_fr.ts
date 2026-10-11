@@ -3283,6 +3283,16 @@ Le multimètre est-il branché et allumé ?</translation>
         <source>variable bytes ASCII, polled with CONF?/FETC? (Agilent/Keysight U12xx)</source>
         <translation>octets variables ASCII, interrogé par CONF?/FETC? (Agilent/Keysight U12xx)</translation>
     </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="51"/>
+        <source>19 bytes ASCII, continuous after a start byte (UNI-T UT32x thermometers)</source>
+        <translation>19 octets ASCII, continu après un octet de départ (thermomètres UNI-T UT32x)</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="52"/>
+        <source>18 bytes binary, continuous, two values (MASTECH MS6514 thermometer)</source>
+        <translation>18 octets binaires, continu, deux valeurs (thermomètre MASTECH MS6514)</translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>

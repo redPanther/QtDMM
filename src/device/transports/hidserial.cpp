@@ -91,7 +91,15 @@ QByteArray HIDSerialDevice::packWrite(Chip chip, const QByteArray &data)
       r.append(data.left(63));
       break;
     case Chip::CH9325:
-      break;   // receive only
+      // (@-1 report id placeholder) @0 count - without the 0xF0 of the
+      // input reports - @1.. up to seven bytes, an 8-byte report (libsigrok
+      // serial_hid_ch9325.c). Most of these cables only receive; the UT325
+      // needs its start byte.
+      r.append('\0');
+      r.append(static_cast<char>(qMin(7, data.size())));
+      r.append(data.left(7));
+      r.append(QByteArray(9 - r.size(), '\0'));
+      break;
   }
   return r;
 }
@@ -381,19 +389,24 @@ qint64 HIDSerialDevice::readData(char *data, qint64 maxSize)
 
 qint64 HIDSerialDevice::writeData(const char *data, qint64 len)
 {
-  // poll requests (DmmDecoder::pollRequest()); the CH9325 cables cannot
-  // send and their meters stream anyway
+  // poll requests (DmmDecoder::pollRequest()); on a CH9325 cable without
+  // a transmitter they go nowhere, the meters stream anyway
   if (!m_isOpen || !m_handle)
     return -1;
-  const QByteArray report = packWrite(m_chip, QByteArray(data, static_cast<int>(len)));
-  if (report.isEmpty())
-    return len;   // nothing to send on this cable, but not an error
-  const int res = hid_write(m_handle, reinterpret_cast<const unsigned char *>(report.constData()), report.size());
-  qCDebug(lcHid) << "write" << report.toHex(' ') << "->" << res;
-  if (res < 0)
+  // one report carries seven bytes on a CH9325, 63 on the others
+  const qint64 step = m_chip == Chip::CH9325 ? 7 : 63;
+  for (qint64 pos = 0; pos < len; pos += step)
   {
-    qWarning() << "HID: write failed:" << QString::fromWCharArray(hid_error(m_handle));
-    return -1;
+    const QByteArray report = packWrite(m_chip, QByteArray(data + pos, static_cast<int>(qMin(step, len - pos))));
+    if (report.isEmpty())
+      return len;   // nothing to send on this cable, but not an error
+    const int res = hid_write(m_handle, reinterpret_cast<const unsigned char *>(report.constData()), report.size());
+    qCDebug(lcHid) << "write" << report.toHex(' ') << "->" << res;
+    if (res < 0)
+    {
+      qWarning() << "HID: write failed:" << QString::fromWCharArray(hid_error(m_handle));
+      return -1;
+    }
   }
   return len;
 };

@@ -26,7 +26,9 @@
     {"chip": "BU86X",  "data": "00 86 66", "expect": "00 00 86 66", "why": "report id placeholder + data"},
     {"chip": "CH9329", "data": "44 0a", "expect_prefix": "00 02 44 0a", "expect_length": 65, "why": "placeholder, count, data, padded to 64"},
     {"chip": "CP2110", "data": "44 0a", "expect": "02 44 0a", "why": "count as report id"},
-    {"chip": "CH9325", "data": "44 0a", "expect": "", "why": "receive-only cable"}
+    {"chip": "CH9325", "data": "44 0a", "expect": "00 02 44 0a 00 00 00 00 00", "why": "count without 0xF0, padded to 8 bytes"},
+    {"chip": "CH9325", "data": "01", "expect": "00 01 01 00 00 00 00 00 00", "why": "UT325 start byte"},
+    {"chip": "CH9325", "data": "01 02 03 04 05 06 07 08 09", "expect": "00 07 01 02 03 04 05 06 07", "why": "at most seven bytes"}
   ],
   "config": [
     {"chip": "CP2110", "baud": 19200, "bits": 7, "parity": "O", "stopbits": 1, "expect": "50 00 00 4b 00 02 00 02 00"},

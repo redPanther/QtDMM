@@ -3284,6 +3284,16 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
         <source>variable bytes ASCII, polled with CONF?/FETC? (Agilent/Keysight U12xx)</source>
         <translation>variable Länge ASCII, abgefragt mit CONF?/FETC? (Agilent/Keysight U12xx)</translation>
     </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="51"/>
+        <source>19 bytes ASCII, continuous after a start byte (UNI-T UT32x thermometers)</source>
+        <translation>19 Bytes ASCII, kontinuierlich nach einem Startbyte (UNI-T-UT32x-Thermometer)</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="52"/>
+        <source>18 bytes binary, continuous, two values (MASTECH MS6514 thermometer)</source>
+        <translation>18 Bytes binär, kontinuierlich, zwei Werte (MASTECH-MS6514-Thermometer)</translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>

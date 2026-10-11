@@ -330,7 +330,12 @@ def pack_hid_write(chip: str, data: bytes) -> bytes:
         return r + b"\x00" * (65 - len(r))
     if chip == "CP2110":
         return bytes([len(data)]) + data
-    return b""  # CH9325 cables are receive-only
+    # CH9325: count without the 0xF0 of the input reports, up to seven
+    # bytes, an 8-byte report (libsigrok serial_hid_ch9325.c); the UT325
+    # needs its start byte, most of these cables only receive
+    data = data[:7]
+    r = b"\x00" + bytes([len(data)]) + data
+    return r + b"\x00" * (9 - len(r))
 
 
 def cp2110_config_report(s: LineSettings) -> bytes:
@@ -450,8 +455,9 @@ class HidBackend(Backend):
         raw = self._raw
         if raw is None:
             return
-        for i in range(0, len(data), 63):
-            report = pack_hid_write(self.chip, data[i:i + 63])
+        step = 7 if self.chip == "CH9325" else 63   # bytes one report carries
+        for i in range(0, len(data), step):
+            report = pack_hid_write(self.chip, data[i:i + step])
             if not report:
                 return
             try:
