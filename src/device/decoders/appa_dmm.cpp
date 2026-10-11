@@ -35,6 +35,14 @@ static const bool registered = []() {
 namespace
 {
 constexpr qint32 kTextCodes = 0x700000;   // a word on the display instead of digits
+// libsigrok's appadmm_wordcode_e: the words that mean an overload. Every
+// other word ("----", blank, "Er", "FUSE", "APO", ...) gives no reading.
+constexpr qint32 kWordSpace = 0x700000;
+constexpr qint32 kWordEr = 0x700010;
+constexpr qint32 kWordOL = 0x70002a;
+constexpr qint32 kWordOLA = 0x700033;
+constexpr qint32 kWordOLV = 0x700034;
+constexpr qint32 kWordOLVA = 0x700035;
 
 // AppaDmm function codes (libsigrok appadmm_functioncode_e) of the legacy
 // 500 codes: the high byte the switch position, the low byte the function
@@ -146,7 +154,30 @@ bool DecoderAppa::reading(const Display &d, double *dval, QString *val, QString 
     { "C", 1 },       { "dF", 1 },      { "s", 1 },      { "ms", 1e-3 },   { "µs", 1e-6 },  { "ns", 1e-9 },
     { "µA", 1e-6 },   { "min", 1 },     { "kW", 1e3 },   { "cosphi", 1 },
   };
-  if (d.count >= kTextCodes || d.unit <= 0 || d.unit >= int(std::size(units)))
+  const bool knownUnit = d.unit > 0 && d.unit < int(std::size(units));
+  if (d.count >= kTextCodes)
+  {
+    // an overload spelled out: "OL", or "OLA"/"OLV"/"OLVA", which name the unit
+    const char *word = nullptr;
+    switch (d.count)
+    {
+      case kWordOL: word = ""; break;
+      case kWordOLA: word = "A"; break;
+      case kWordOLV: word = "V"; break;
+      case kWordOLVA: word = "VA"; break;
+      default: return false;
+    }
+    if (knownUnit)
+      *unit = QString::fromUtf8(units[d.unit].text);
+    else if (*word)
+      *unit = QString::fromUtf8(word);
+    else
+      return false;   // "OL" without a unit: of what is unknown
+    *val = "OL";
+    *dval = 0;
+    return true;
+  }
+  if (!knownUnit)
     return false;
   *unit = QString::fromUtf8(units[d.unit].text);
   const int dot = qBound(0, d.dot, 4);
@@ -207,8 +238,12 @@ std::optional<DmmDecoder::DmmResponse> DecoderAppa::decode(const QByteArray &fra
       const int content = q[4] & 0x1f;
       d.content = content < 2 ? 0 : content - 1;
       d.overload = q[4] & 0x20;
-      if (q[4] & 0xc0)
-        d.count = kTextCodes;   // a word, or nothing, on this display
+      // bit 7: nothing on this display; bit 6: a word, its number in the
+      // count (0 is "Er"), as libsigrok's appadmm_500_dec_read_display
+      if (q[4] & 0x80)
+        d.count = kWordSpace;
+      else if (q[4] & 0x40)
+        d.count = d.count == 0 ? kWordEr : kWordSpace + d.count;
       return d;
     };
     main = display(p + 37);
@@ -220,7 +255,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderAppa::decode(const QByteArray &fra
   m_result.showBar = true;
   m_result.range = autoRange ? "AUTO" : "MANU";
   if (!reading(main, &m_result.dval, &m_result.val, &m_result.unit))
-    return std::nullopt;   // "----", "Er", "FUSE" ...: no reading now
+    return std::nullopt;   // "----", "Er", "FUSE" ...: no reading now (OL words are one)
   // the coupling of the function, where the unit has one
   const QString base = m_result.unit.right(1);
   const QString code = special(function);

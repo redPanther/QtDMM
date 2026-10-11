@@ -51,7 +51,8 @@ public:
     int    content = 0;   ///< what it shows (AppaDmm numbering)
     bool   overload = false;
   };
-  /// Value, display text and unit of @p d; false when it shows a text.
+  /// Value, display text and unit of @p d; an overload word ("OL", "OLA",
+  /// "OLV", "OLVA") is an overload, false for any other word.
   static bool reading(const Display &d, double *dval, QString *val, QString *unit);
   /// Coupling or function code ("DC", "AC", "ACDC", "OH", "DI", ...) of
   /// an AppaDmm function code.

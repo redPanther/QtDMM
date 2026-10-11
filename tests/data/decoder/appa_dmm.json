@@ -150,6 +150,53 @@
         "port": "frequency",
         "special": "FR"
       }
+    },
+    {
+      "comment": "[appa_dmm.yaml] 'DC V, the word OLV on the main display (no unit code)'",
+      "hex": "55 55 01 0C 02 81 34 00 70 00 00 00 00 70 00 00 4E",
+      "expected": {
+        "unit": "V",
+        "range": "AUTO",
+        "hold": false,
+        "port": "voltage.dc",
+        "val": "OL",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "[appa_dmm.yaml] 'DC mA, the word OL with unit mA'",
+      "hex": "55 55 01 0C 0C 81 2A 00 70 20 00 00 00 70 00 00 6E",
+      "expected": {
+        "unit": "mA",
+        "range": "AUTO",
+        "hold": false,
+        "port": "current.dc",
+        "val": "OL",
+        "special": "DC"
+      }
+    },
+    {
+      "comment": "[appa_dmm.yaml] 'DC A, the word OLA (no unit code)'",
+      "hex": "55 55 01 0C 0A 81 33 00 70 00 00 00 00 70 00 00 55",
+      "expected": {
+        "unit": "A",
+        "range": "AUTO",
+        "hold": false,
+        "port": "current.dc",
+        "val": "OL"
+      }
+    },
+    {
+      "comment": "[appa_dmm.yaml] 'DC V negative overload (overload bit, count below 0)'",
+      "hex": "55 55 01 0C 02 81 FF FF FF 0C 80 00 00 70 00 00 33",
+      "expected": {
+        "unit": "V",
+        "range": "AUTO",
+        "hold": false,
+        "port": "voltage.dc",
+        "val": "-OL",
+        "special": "DC"
+      }
     }
   ]
 }
