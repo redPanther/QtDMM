@@ -354,6 +354,34 @@ int main(int argc, char **argv)
     scpi.stop();
   }
 
+  // --- 5c. silent connections and half sessions are closed after a while ---
+  {
+    std::vector<Channel *> silent;
+    // every place taken (two per session and four on their way in), the
+    // last by a session without its asynchronous channel
+    for (int i = 0; i < 2 * HislipServer::kMaxSessions + 4 - 1; ++i)
+    {
+      silent.push_back(new Channel);
+      silent.back()->open(port);
+    }
+    Channel half;
+    check(half.open(port), "a synchronous channel alone");
+    half.send(Initialize, 0, 0x01000000, "hislip0");
+    check(half.receive().type == InitializeResponse, "the half session initialized");
+    Session full;
+    check(!full.open(port), "no session while the silent connections block the server");
+    check(half.closed(HislipServer::kSetupTimeoutMs + 2000), "the half session closed after the timeout");
+    bool allClosed = true;
+    for (Channel *c : silent)
+      allClosed = allClosed && c->closed(100);
+    check(allClosed, "the silent connections closed after the timeout");
+    qDeleteAll(silent);
+    check(waitFor([&] { return server.sessionCount() == 0; }), "no session left");
+    Session again;
+    check(again.open(port), "a session after the timeout");
+    check(again.query("*IDN?\n").size() == 1, "... and it answers");
+  }
+
   // --- 6. stop ends the sessions ---
   {
     Session s;

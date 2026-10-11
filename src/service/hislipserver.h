@@ -29,6 +29,9 @@ public:
   static constexpr int kMaxSessions = 16;
   // Largest message accepted from a client (also announced); SCPI lines are short.
   static constexpr quint64 kMaxMessage = 1u << 20;
+  // A connection that is no complete session by then (Initialize, then the
+  // asynchronous channel) is closed: silent ones would block the server.
+  static constexpr int kSetupTimeoutMs = 5000;
 
   // Like ScpiServer::start(): tries 'tries' consecutive ports beginning at 'port'.
   bool start(const QHostAddress &address, quint16 port = kDefaultPort, int tries = 1);

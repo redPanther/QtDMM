@@ -99,7 +99,8 @@ print(float(dmm.query("READ?")))
 
 HiSLIP needs no extra rights and no other service. QtDMM speaks HiSLIP 1.0
 in synchronized mode; it grants no locks (`viLock` fails), and a message
-may be 1 MB at most. The raw socket is a VISA resource too, with `\n` as
+may be 1 MB at most. It serves 16 sessions at a time; a connection that has
+not opened both channels of its session within 5 seconds is closed. The raw socket is a VISA resource too, with `\n` as
 read termination:
 
 ```

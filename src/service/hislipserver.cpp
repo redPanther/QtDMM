@@ -107,7 +107,26 @@ void HislipServer::onNewConnection()
       continue;
     }
     s->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+    // a client gone without a word (network down, computer off) frees its place
+    s->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
     m_conns.insert(s, Conn{});
+    QTimer::singleShot(kSetupTimeoutMs, s, [this, s]()
+    {
+      const auto it = m_conns.constFind(s);
+      if (it == m_conns.constEnd() || it->closing)
+        return;
+      bool complete = it->kind == Kind::Async;
+      if (it->kind == Kind::Sync)
+      {
+        const auto sit = m_sessions.constFind(it->session);
+        complete = sit != m_sessions.constEnd() && sit->async;
+      }
+      if (!complete)
+      {
+        qCDebug(lcHislip) << "no complete session after" << kSetupTimeoutMs << "ms, closing";
+        s->disconnectFromHost();
+      }
+    });
     connect(s, &QTcpSocket::readyRead, this, [this, s]() { onReadyRead(s); });
     connect(s, &QTcpSocket::disconnected, this, [this, s]() { onDisconnected(s); });
   }
