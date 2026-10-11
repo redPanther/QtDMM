@@ -167,6 +167,20 @@ if (BUILD_TESTING)
 	target_link_libraries(${TEST_DMM} PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Network Qt::Core ${HIDAPI_TARGET})
 	add_test(NAME dmm_link_state COMMAND ${TEST_DMM})
 
+	## MeterController behind its SCPI server: what a command asks of the UI
+	## runs after it, once (review R10-05); needs the whole port stack too
+	set( TEST_CONTROLLER test_metercontroller)
+	add_executable(${TEST_CONTROLLER} MACOSX_BUNDLE tests/test_metercontroller.cpp src/service/metercontroller.cpp
+		src/service/scpiserver.cpp src/service/hislipserver.cpp src/service/mdnsresponder.cpp src/service/mdnsbrowser.cpp
+		src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c
+		src/core/alarm.cpp src/core/readingadapter.cpp src/ui/engnumbervalidator.cpp
+		src/device/meterconnection.cpp src/device/framereader.cpp src/device/transport.cpp
+		src/device/transports/serial.cpp src/device/transports/hidserial.cpp src/device/transports/hidreader.cpp src/device/transports/hidholtek.cpp src/device/transports/rfc2217serial.cpp src/device/transports/sigrok.cpp
+		src/device/transports/calc.cpp src/core/calcexpr.cpp src/service/sharedstatemanager.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
+	target_include_directories(${TEST_CONTROLLER} PRIVATE src)
+	target_link_libraries(${TEST_CONTROLLER} PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Network Qt::Core ${HIDAPI_TARGET})
+	add_test(NAME meter_controller COMMAND ${TEST_CONTROLLER})
+
 	## RFC 2217 client against a fake server: negotiation, telnet filtering, IAC escaping
 	set( TEST_RFC2217 test_rfc2217)
 	add_executable(${TEST_RFC2217} MACOSX_BUNDLE tests/test_rfc2217.cpp src/device/transports/rfc2217serial.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
@@ -204,7 +218,7 @@ if (BUILD_TESTING)
 
 	## SCPI server: command interpreter, TCP round trip, mDNS announcement
 	set( TEST_SCPI test_scpi)
-	add_executable(${TEST_SCPI} MACOSX_BUNDLE tests/test_scpi.cpp src/service/scpiserver.cpp src/service/mdnsresponder.cpp src/service/mdnsbrowser.cpp)
+	add_executable(${TEST_SCPI} MACOSX_BUNDLE tests/test_scpi.cpp src/service/scpiserver.cpp src/service/mdnsresponder.cpp src/service/mdnsbrowser.cpp src/service/mdnsbrowser.cpp)
 	target_include_directories(${TEST_SCPI} PRIVATE src)
 	target_link_libraries(${TEST_SCPI} PRIVATE Qt::Core Qt6::Network Qt::Test)
 	add_test(NAME scpi_server COMMAND ${TEST_SCPI})
