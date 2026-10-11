@@ -175,6 +175,8 @@ public:
   int                   scpiPort() const;
   bool                  scpiAllInterfaces() const;
   bool                  scpiMdns() const;
+  bool                  scpiHislip() const;
+  int                   scpiHislipPort() const;
   void                  setScpiStatus(const QString &text);
   /// @}
 

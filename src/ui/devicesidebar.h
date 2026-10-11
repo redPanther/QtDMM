@@ -17,6 +17,11 @@ class DeviceLibrary;
 /// setInstances()) with their reading and, below each, its device; this
 /// window's own is bold. A click brings a running one to the front or starts
 /// a stopped one; a stopped one can be renamed and deleted.
+///
+/// The node "Services" shows what this window offers to other programs
+/// (setServices()): the SCPI server and HiSLIP, with their port or "off";
+/// a double click or the context menu opens their settings, the menu also
+/// copies the address.
 class DeviceSidebar : public QTreeWidget
 {
   Q_OBJECT
@@ -29,6 +34,18 @@ public:
     QString value;          ///< its reading, "OL", or "stopped"
     bool    running = false;
     bool    active = false; ///< readings come in
+  };
+
+  /// One row of the node "Services".
+  struct Service
+  {
+    QString id;             ///< "scpi", "hislip"
+    QString name;           ///< "SCPI", "HiSLIP"
+    QString value;          ///< at the right: the port, or "off"
+    QString address;        ///< copied by the menu ("localhost:5025", a VISA address)
+    QString tooltip;
+    bool    running = false;
+    bool    active = false; ///< a client is connected
   };
 
   explicit DeviceSidebar(DeviceLibrary *library, QWidget *parent = nullptr);
@@ -50,6 +67,11 @@ public:
   /// The item of the instance @p id, nullptr when there is none.
   QTreeWidgetItem *instanceItem(const QString &id) const;
 
+  /// The services of this window, in this order.
+  void        setServices(const QList<Service> &services);
+  /// The node "Services".
+  QTreeWidgetItem *servicesNode() const { return m_services; }
+
   /// Shown at the start: as the user left it (@p stored, invalid when never
   /// set), else with two devices or more; a window without a meter shows it
   /// whenever there are devices to choose from.
@@ -67,6 +89,8 @@ Q_SIGNALS:
   void        deleteInstanceRequested(const QString &id);
   /// The row "+ Add device..." at the end of My devices.
   void        addDeviceRequested();
+  /// The settings of the services (Settings, SCPI server).
+  void        serviceSettingsRequested();
 
 public Q_SLOTS:
   /// The entries anew from the library.
@@ -87,10 +111,12 @@ private:
   /// Whether the instance of @p item (its row or its device row) runs.
   bool        instanceRunning(const QTreeWidgetItem *item) const;
   void        instanceMenu(QTreeWidgetItem *item, const QPoint &pos);
+  void        serviceMenu(QTreeWidgetItem *item, const QPoint &pos);
 
   DeviceLibrary   *m_library = nullptr;
   QTreeWidgetItem *m_devices = nullptr;
   QTreeWidgetItem *m_instances = nullptr;
+  QTreeWidgetItem *m_services = nullptr;
   QString          m_ownInstance;
   QString          m_selectInstance;   ///< renamed: selected again under this name
   QString          m_current;

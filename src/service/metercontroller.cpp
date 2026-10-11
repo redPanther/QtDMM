@@ -10,6 +10,7 @@
 
 #include "device/meterconnection.h"
 #include "ui/engnumbervalidator.h"
+#include "service/hislipserver.h"
 #include "service/mdnsresponder.h"
 #include "recording/recordingstore.h"
 #include "service/scpiserver.h"
@@ -24,6 +25,8 @@ MeterController::MeterController(QObject *parent)
   , m_recorder(new RecordingStore(this))
   , m_scpi(new ScpiServer(this))
   , m_mdns(new MdnsResponder(this))
+  , m_hislip(new HislipServer(m_scpi->endpoint(), this))
+  , m_mdnsHislip(new MdnsResponder(this))
   , m_external(new QProcess(this))
 {
   qRegisterMetaType<Reading>();
@@ -75,6 +78,7 @@ MeterController::MeterController(QObject *parent)
       Q_EMIT connectRequested(on);
   });
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
+  connect(m_hislip, &HislipServer::sessionsChanged, this, [this](int) { updateScpiStatus(); });
 
   // an alarm's program that had the port to itself has ended: the meter again
   connect(m_external, &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus)
@@ -373,19 +377,39 @@ void MeterController::applyScpi(const ScpiConfig &config)
     if (!m_scpi->start(address, config.port))
       Q_EMIT error(tr("SCPI server: %1").arg(m_scpi->errorString()));
   }
-  if (m_scpi->isListening() && config.mdns && !m_mdns->isActive())
+
+  // HiSLIP: the same interpreter for VISA, next to the raw socket; another
+  // instance takes the next port, as for the raw socket
+  const bool hislip = config.enabled && config.hislip && m_scpi->isListening();
+  const bool sameHislip = m_hislip->isListening() && m_hislip->address() == address
+                          && m_hislip->port() >= config.hislipPort && m_hislip->port() < config.hislipPort + 10;
+  if (!hislip)
   {
-    QMap<QString, QString> txt;
-    txt["txtvers"] = "1";
-    txt["model"] = m_model;
-    txt["version"] = APP_VERSION;
-    txt["instance"] = m_instanceId;
-    const QString instance = QString("QtDMM %1").arg(m_instanceId == "default"
-                                                     ? QHostInfo::localHostName() : m_instanceId);
-    m_mdns->start("_scpi-raw._tcp", instance, m_scpi->port(), txt);
+    m_mdnsHislip->stop();
+    m_hislip->stop();
   }
+  else if (!sameHislip)
+  {
+    m_mdnsHislip->stop();
+    if (!m_hislip->start(address, config.hislipPort, 10))
+      Q_EMIT error(tr("HiSLIP server: %1").arg(m_hislip->error()));
+  }
+
+  QMap<QString, QString> txt;
+  txt["txtvers"] = "1";
+  txt["model"] = m_model;
+  txt["version"] = APP_VERSION;
+  txt["instance"] = m_instanceId;
+  const QString instance = QString("QtDMM %1").arg(m_instanceId == "default"
+                                                   ? QHostInfo::localHostName() : m_instanceId);
+  if (m_scpi->isListening() && config.mdns && !m_mdns->isActive())
+    m_mdns->start("_scpi-raw._tcp", instance, m_scpi->port(), txt);
   else if (!config.mdns)
     m_mdns->stop();
+  if (m_hislip->isListening() && config.mdns && !m_mdnsHislip->isActive())
+    m_mdnsHislip->start("_hislip._tcp", instance, m_hislip->port(), txt);
+  else if (!config.mdns)
+    m_mdnsHislip->stop();
   updateScpiStatus();
 }
 
@@ -393,15 +417,54 @@ void MeterController::updateScpiStatus()
 {
   if (!m_scpi->isListening())
   {
-    Q_EMIT scpiStatusChanged(QString(), tr("The server is not running."));
+    Q_EMIT scpiStatusChanged(tr("The server is not running."));
     return;
   }
   const QString where = m_scpi->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
-  const int n = m_scpi->clientCount();
+  const int n = m_scpi->clientCount() + m_hislip->sessionCount();
   const QString clients = n == 1 ? tr("1 client") : tr("%1 clients").arg(n);
   QString text = tr("Listening on %1, port %2, %3 connected.").arg(where).arg(m_scpi->port()).arg(clients);
+  if (m_hislip->isListening())
+    text += ' ' + tr("HiSLIP on port %1: %2.").arg(m_hislip->port()).arg(hislipResource());
   if (m_mdns->isActive())
     text += ' ' + tr("Announced as \"%1\".").arg(m_mdns->instanceName());
-  Q_EMIT scpiStatusChanged(tr("SCPI %1:%2 (%3)").arg(where).arg(m_scpi->port()).arg(clients), text);
+  Q_EMIT scpiStatusChanged(text);
+}
+
+QList<ServiceState> MeterController::services() const
+{
+  ServiceState scpi;
+  scpi.id = "scpi";
+  scpi.name = "SCPI";
+  scpi.running = m_scpi->isListening();
+  if (scpi.running)
+  {
+    const QString where = m_scpi->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
+    scpi.port = m_scpi->port();
+    scpi.address = QString("%1:%2").arg(where).arg(scpi.port);
+    scpi.clients = m_scpi->clientCount();
+  }
+  ServiceState hislip;
+  hislip.id = "hislip";
+  hislip.name = "HiSLIP";
+  hislip.running = m_hislip->isListening();
+  if (hislip.running)
+  {
+    hislip.port = m_hislip->port();
+    hislip.address = hislipResource();
+    hislip.clients = m_hislip->sessionCount();
+  }
+  return { scpi, hislip };
+}
+
+QString MeterController::hislipResource() const
+{
+  if (!m_hislip->isListening())
+    return QString();
+  const QString host = m_hislip->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
+  // the port only when it is not the standard one
+  if (m_hislip->port() == HislipServer::kDefaultPort)
+    return QString("TCPIP::%1::hislip0::INSTR").arg(host);
+  return QString("TCPIP::%1::hislip0,%2::INSTR").arg(host).arg(m_hislip->port());
 }
 

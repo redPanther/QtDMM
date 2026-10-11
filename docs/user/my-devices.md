@@ -32,6 +32,11 @@ it, and the window remembers whether you leave it open. A window without a
 meter shows it whenever there are devices to choose from - pick one, or add
 a new one with the big **Add device** button.
 
+Below My devices the node **Instances** lists the QtDMM windows (see
+[Command line](command-line.md)), and **Services** what this window offers
+to other programs: the [SCPI server and HiSLIP](scpi-server.md) with their
+port, or *off*.
+
 The context menu of a device:
 
 - **Settings...** - the meter's settings as in the assistant; the device in

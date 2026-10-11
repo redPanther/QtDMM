@@ -11,8 +11,8 @@ class QSpinBox;
 
 /// Settings page "SCPI server": lets other programs read the meter over
 /// TCP in SCPI (port 5025, lxi-tools style), with optional mDNS
-/// announcement. Keys Scpi/enabled, Scpi/port, Scpi/all-interfaces,
-/// Scpi/mdns.
+/// announcement and HiSLIP for VISA next to it. Keys Scpi/enabled,
+/// Scpi/port, Scpi/all-interfaces, Scpi/mdns, Scpi/hislip, Scpi/hislip-port.
 class ScpiPrefs : public SettingsPage
 {
   Q_OBJECT
@@ -23,6 +23,8 @@ public:
   int port() const;
   bool allInterfaces() const;
   bool mdns() const;
+  bool hislip() const;
+  int hislipPort() const;
 
   /// Live status from the running server, shown below the settings.
   void setStatus(const QString &text);
@@ -35,8 +37,8 @@ public Q_SLOTS:
 private:
   void updateHint();
 
-  QCheckBox *m_enabled, *m_mdns;
-  QSpinBox *m_port;
+  QCheckBox *m_enabled, *m_mdns, *m_hislip;
+  QSpinBox *m_port, *m_hislipPort;
   QComboBox *m_bind;
   QLabel *m_hint, *m_status;
 };

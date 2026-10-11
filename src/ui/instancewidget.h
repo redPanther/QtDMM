@@ -147,8 +147,9 @@ Q_SIGNALS:
   void        configChanged();
   /// A state string for the other instances (SharedStateManager).
   void        sendState(const QString&);
-  /// The SCPI server's state for the status bar ("SCPI 5025", empty = off).
-  void        scpiStatus(const QString&);
+  /// The SCPI server or HiSLIP started, stopped or got a client
+  /// (controller()->services()).
+  void        servicesChanged();
 
 public Q_SLOTS:
   /// Clears min/max memory and the meter's peak/auto-bipolar latch.
@@ -168,6 +169,8 @@ public Q_SLOTS:
   void        configSLOT();
   /// Opens the settings dialog on the recording page.
   void        configRecorderSLOT();
+  /// Opens the settings dialog on the SCPI server page.
+  void        configScpiSLOT();
   void        printSLOT();
   void        exportSLOT();
   void        importSLOT();

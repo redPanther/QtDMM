@@ -309,6 +309,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   connect(m_sidebar, &DeviceSidebar::renameInstanceRequested, this, &MainWindow::renameInstance);
   connect(m_sidebar, &DeviceSidebar::deleteInstanceRequested, this, &MainWindow::deleteInstance);
   connect(m_sidebar, &DeviceSidebar::addDeviceRequested, this, &MainWindow::addDevice);
+  connect(m_sidebar, &DeviceSidebar::serviceSettingsRequested, m_wid, &InstanceWidget::configScpiSLOT);
   // the readings of the others change all the time
   m_instancesTimer = new QTimer(this);
   m_instancesTimer->setInterval(1000);
@@ -479,17 +480,8 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   statusBar()->addWidget(m_info, 10);
   m_info->setLineWidth(1);
 
-  m_scpi = new QLabel(statusBar());
-  m_scpi->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-  m_scpi->setLineWidth(1);
-  m_scpi->setToolTip(tr("The SCPI server: other programs can read the meter here (Settings, SCPI server)."));
-  statusBar()->addPermanentWidget(m_scpi);
-  m_scpi->hide();
-  connect(m_wid, &InstanceWidget::scpiStatus, this, [this](const QString &text)
-  {
-    m_scpi->setText(text);
-    m_scpi->setVisible(!text.isEmpty());
-  });
+  // the SCPI server and HiSLIP are in the sidebar (Services), not here
+  connect(m_wid, &InstanceWidget::servicesChanged, this, &MainWindow::updateServices);
 
   // messages such as the permission hint span several lines; the status bar
   // shows the first one and keeps the rest in the tooltip
@@ -602,6 +594,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   showSidebar(DeviceSidebar::shownAtStart(sidebarSet ? QVariant(m_wid->settings()->getBool("Windows/sidebar"))
                                                      : QVariant(),
                                           int(m_wid->devices()->list().size()), m_wid->dmmConfigured()));
+  updateServices();   // the servers may have started before this window listened
 }
 
 void MainWindow::updateEmptyStart()
@@ -1146,6 +1139,30 @@ void MainWindow::showSidebar(bool show)
   m_sidebarDock->setVisible(show);
   m_sidebarAction->setChecked(show);
   updateInstances();
+}
+
+void MainWindow::updateServices()
+{
+  QList<DeviceSidebar::Service> rows;
+  for (const ServiceState &state : m_wid->controller()->services())
+  {
+    DeviceSidebar::Service row;
+    row.id = state.id;
+    row.name = state.name;
+    row.running = state.running;
+    row.active = state.clients > 0;
+    row.address = state.address;
+    row.value = state.running ? QString::number(state.port) : tr("off");
+    const QString clients = state.clients == 1 ? tr("1 client") : tr("%1 clients").arg(state.clients);
+    if (!state.running)
+      row.tooltip = tr("%1 is off. Double-click for its settings.").arg(state.name);
+    else if (state.id == QLatin1String("hislip"))
+      row.tooltip = tr("HiSLIP for VISA (NI-VISA, LabVIEW, PyVISA): %1, %2 connected.").arg(state.address, clients);
+    else
+      row.tooltip = tr("SCPI server (raw socket) on %1, %2 connected.").arg(state.address, clients);
+    rows << row;
+  }
+  m_sidebar->setServices(rows);
 }
 
 void MainWindow::updateInstances()

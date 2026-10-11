@@ -17,6 +17,7 @@
 class MeterConnection;
 class QProcess;
 class ScpiServer;
+class HislipServer;
 class MdnsResponder;
 class SharedStateManager;
 class RecordingStore;
@@ -27,7 +28,21 @@ struct ScpiConfig
   bool    enabled = false;
   bool    allInterfaces = false;   ///< else localhost only
   quint16 port = 5025;
-  bool    mdns = false;            ///< announce as _scpi-raw._tcp
+  bool    mdns = false;            ///< announce as _scpi-raw._tcp (and _hislip._tcp)
+  bool    hislip = false;          ///< also HiSLIP for VISA (NI-VISA, LabVIEW, PyVISA)
+  quint16 hislipPort = 4880;
+};
+
+/// One network service of the session (the SCPI server, HiSLIP), as the
+/// sidebar shows it.
+struct ServiceState
+{
+  QString id;               ///< "scpi", "hislip"
+  QString name;             ///< "SCPI", "HiSLIP"
+  bool    running = false;
+  quint16 port = 0;
+  QString address;          ///< "localhost:5025", "TCPIP::localhost::hislip0::INSTR"
+  int     clients = 0;
 };
 
 /// The meter session without any user interface: the connection (MeterConnection), the
@@ -81,6 +96,11 @@ public:
   /// Starts, restarts or stops the SCPI server; keeps a running server when
   /// nothing about it changed, so its clients stay connected.
   void        applyScpi(const ScpiConfig &config);
+  /// The VISA address of the HiSLIP server ("TCPIP::localhost::hislip0::INSTR"),
+  /// empty while it does not run.
+  QString     hislipResource() const;
+  /// The SCPI server and HiSLIP, running or not.
+  QList<ServiceState> services() const;
   /// Source of the SCPI screen dump (HCOPy:SDUMp:DATA?): format -> image bytes.
   void        setScreenshotSource(std::function<QByteArray(const QByteArray &)> source);
 
@@ -137,9 +157,9 @@ Q_SIGNALS:
   /// has ended and gives it back (false). A recording goes on; the time
   /// without readings is a gap in it.
   void        portReleased(bool released);
-  /// SCPI server state: a short text for the status bar (empty = off) and
-  /// a sentence for the settings page.
-  void        scpiStatusChanged(const QString &status, const QString &detail);
+  /// SCPI server state as a sentence for the settings page; services()
+  /// changed with it.
+  void        scpiStatusChanged(const QString &detail);
 
 private:
   void        responseSLOT(const DmmDecoder::DmmResponse &response);
@@ -156,6 +176,8 @@ private:
   ReadingAdapter      m_adapter;
   ScpiServer         *m_scpi;
   MdnsResponder      *m_mdns;
+  HislipServer       *m_hislip;       ///< the same interpreter over HiSLIP
+  MdnsResponder      *m_mdnsHislip;
   QProcess           *m_external;     ///< an alarm's program that wanted the port: one at a time
   bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends
   bool                m_externalPending = false;   ///< planned, not started yet

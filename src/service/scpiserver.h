@@ -11,6 +11,7 @@
 #include <functional>
 
 #include "core/sampletypes.h"
+#include "service/scpiendpoint.h"
 
 class QTcpServer;
 class QTcpSocket;
@@ -81,6 +82,11 @@ public:
   /// or nothing when no command was a query. Errors go to the error
   /// queue (SYST:ERR?).
   QByteArray process(const QByteArray &message);
+  /// The interpreter for the other transports (HiSLIP): process() and the
+  /// status byte; valid as long as this object lives.
+  ScpiEndpoint endpoint();
+  /// IEEE 488.2 status byte: bit 2 (4) while the error queue holds errors.
+  quint8 statusByte() const { return m_errors.isEmpty() ? 0 : 4; }
 
   /// Number of readings considered current: older ones answer as stale.
   static constexpr qint64 kStaleMs = 5000;

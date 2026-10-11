@@ -45,7 +45,20 @@ ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
   auto *bindLabel = new QLabel(tr("&Listen on:"), group);
   bindLabel->setBuddy(m_bind);
   form->addRow(bindLabel, m_bind);
-  m_mdns = new QCheckBox(tr("&Announce by mDNS (_scpi-raw._tcp), so lxi discover finds it"), group);
+  m_hislip = new QCheckBox(tr("Also &HiSLIP, for VISA (NI-VISA, LabVIEW, PyVISA)"), group);
+  m_hislip->setToolTip(tr("HiSLIP is the LAN protocol VISA libraries prefer: the same SCPI commands, "
+                          "addressed as TCPIP::host::hislip0::INSTR. It needs no extra rights."));
+  form->addRow(QString(), m_hislip);
+  m_hislipPort = new QSpinBox(group);
+  m_hislipPort->setRange(1, 65535);
+  m_hislipPort->setValue(4880);
+  m_hislipPort->setToolTip(tr("4880 is the HiSLIP port VISA tries by default. When it is taken (another QtDMM "
+                              "instance), the next free one is used; the address then names it: "
+                              "TCPIP::host::hislip0,4881::INSTR."));
+  auto *hislipLabel = new QLabel(tr("HiSLIP p&ort:"), group);
+  hislipLabel->setBuddy(m_hislipPort);
+  form->addRow(hislipLabel, m_hislipPort);
+  m_mdns = new QCheckBox(tr("&Announce by mDNS (_scpi-raw._tcp, _hislip._tcp), so lxi discover finds it"), group);
   form->addRow(QString(), m_mdns);
 
   m_hint = new QLabel(this);
@@ -60,10 +73,15 @@ ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
   connect(m_enabled, &QCheckBox::toggled, this, &ScpiPrefs::updateHint);
   connect(m_bind, &QComboBox::currentIndexChanged, this, &ScpiPrefs::updateHint);
   connect(m_port, &QSpinBox::valueChanged, this, &ScpiPrefs::updateHint);
+  connect(m_hislip, &QCheckBox::toggled, this, &ScpiPrefs::updateHint);
+  connect(m_hislipPort, &QSpinBox::valueChanged, this, &ScpiPrefs::updateHint);
+  connect(m_hislip, &QCheckBox::toggled, this, [this](bool on) { m_hislipPort->setEnabled(on && m_enabled->isChecked()); });
   connect(m_enabled, &QCheckBox::toggled, this, [this](bool on)
   {
     m_port->setEnabled(on);
     m_bind->setEnabled(on);
+    m_hislip->setEnabled(on);
+    m_hislipPort->setEnabled(on && m_hislip->isChecked());
     m_mdns->setEnabled(on && m_bind->currentIndex() == 1);
   });
   connect(m_bind, &QComboBox::currentIndexChanged, this, [this](int idx)
@@ -77,6 +95,8 @@ bool ScpiPrefs::enabled() const { return m_enabled->isChecked(); }
 int ScpiPrefs::port() const { return m_port->value(); }
 bool ScpiPrefs::allInterfaces() const { return m_bind->currentIndex() == 1; }
 bool ScpiPrefs::mdns() const { return m_mdns->isChecked() && allInterfaces(); }
+bool ScpiPrefs::hislip() const { return m_hislip->isChecked(); }
+int ScpiPrefs::hislipPort() const { return m_hislipPort->value(); }
 
 void ScpiPrefs::setStatus(const QString &text)
 {
@@ -91,8 +111,14 @@ void ScpiPrefs::updateHint()
     return;
   }
   const QString host = m_bind->currentIndex() == 1 ? QHostInfo::localHostName() : QString("localhost");
-  m_hint->setText(tr("Try it: <code>lxi scpi -a %1 -p %2 \"*IDN?\"</code> or "
-                     "<code>printf 'READ?\\n' | nc %1 %2</code>").arg(host).arg(m_port->value()));
+  QString text = tr("Try it: <code>lxi scpi -a %1 -p %2 \"*IDN?\"</code> or "
+                    "<code>printf 'READ?\\n' | nc %1 %2</code>").arg(host).arg(m_port->value());
+  if (m_hislip->isChecked())
+  {
+    const QString port = m_hislipPort->value() == 4880 ? QString() : QString(",%1").arg(m_hislipPort->value());
+    text += "<br>" + tr("VISA address: <code>%1</code>").arg(QString("TCPIP::%1::hislip0%2::INSTR").arg(host, port));
+  }
+  m_hint->setText(text);
 }
 
 void ScpiPrefs::defaultsSLOT()
@@ -101,6 +127,8 @@ void ScpiPrefs::defaultsSLOT()
   m_port->setValue(m_cfg->getInt("Scpi/port", 5025));
   m_bind->setCurrentIndex(m_cfg->getBool("Scpi/all-interfaces", false) ? 1 : 0);
   m_mdns->setChecked(m_cfg->getBool("Scpi/mdns", true));
+  m_hislip->setChecked(m_cfg->getBool("Scpi/hislip", false));
+  m_hislipPort->setValue(m_cfg->getInt("Scpi/hislip-port", 4880));
   m_enabled->toggled(m_enabled->isChecked());
   updateHint();
 }
@@ -111,6 +139,8 @@ void ScpiPrefs::factoryDefaultsSLOT()
   m_port->setValue(5025);
   m_bind->setCurrentIndex(0);
   m_mdns->setChecked(true);
+  m_hislip->setChecked(false);
+  m_hislipPort->setValue(4880);
   updateHint();
 }
 
@@ -120,4 +150,6 @@ void ScpiPrefs::applySLOT()
   m_cfg->setInt("Scpi/port", m_port->value());
   m_cfg->setBool("Scpi/all-interfaces", m_bind->currentIndex() == 1);
   m_cfg->setBool("Scpi/mdns", m_mdns->isChecked());
+  m_cfg->setBool("Scpi/hislip", m_hislip->isChecked());
+  m_cfg->setInt("Scpi/hislip-port", m_hislipPort->value());
 }
