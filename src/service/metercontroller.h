@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QString>
 #include <functional>
+#include <optional>
 
 #include "core/minmaxmemory.h"
 #include "core/alarm.h"
@@ -181,6 +182,10 @@ private:
   MdnsResponder      *m_mdnsHislip;
   QString             m_scpiError;    ///< why the switched-on server is not running
   QString             m_hislipError;
+  // a SCPI start or (dis)connect checked but not run yet (it runs after the
+  // command): the next command's check counts it, so "INIT;INIT" starts once
+  bool                m_startPending = false;
+  std::optional<bool> m_connectPending;
   QProcess           *m_external;     ///< an alarm's program that wanted the port: one at a time
   bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends
   bool                m_externalPending = false;   ///< planned, not started yet

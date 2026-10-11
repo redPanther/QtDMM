@@ -62,12 +62,26 @@ MeterController::MeterController(QObject *parent)
   // What a SCPI command starts in the UI runs after the command: a dialog it
   // opens (the length of a recording, a port without access) must not spin an
   // event loop inside the server, where the client may go away meanwhile. The
-  // checks stay at once, so the error queue answers the next command.
+  // checks stay at once, so the error queue answers the next command; they
+  // count what is checked but not run yet, and the run checks once more.
   connect(m_scpi, &ScpiServer::startRecording, this, [this]
   {
     QString why;
-    if (mayStartRecording(&why))
-      QMetaObject::invokeMethod(this, [this] { Q_EMIT recordingRequested(true); }, Qt::QueuedConnection);
+    if (m_startPending)
+      why = tr("already starting, the recording goes on");
+    if (!m_startPending && mayStartRecording(&why))
+    {
+      m_startPending = true;
+      QMetaObject::invokeMethod(this, [this]
+      {
+        QString why;
+        if (mayStartRecording(&why))
+          Q_EMIT recordingRequested(true);   // may ask the length: pending until it returns
+        else
+          Q_EMIT info(tr("SCPI: %1").arg(why));
+        m_startPending = false;
+      }, Qt::QueuedConnection);
+    }
     else
     {
       m_scpi->pushError(-213, "Init ignored");
@@ -81,8 +95,16 @@ MeterController::MeterController(QObject *parent)
   connect(m_scpi, &ScpiServer::connectRequested, this, [this](bool on)
   {
     // INPut OFF also ends a connection that is lost and being reopened
-    if (on != m_dmm->isWanted())
-      QMetaObject::invokeMethod(this, [this, on] { Q_EMIT connectRequested(on); }, Qt::QueuedConnection);
+    if (on == m_connectPending.value_or(m_dmm->isWanted()))
+      return;
+    m_connectPending = on;
+    QMetaObject::invokeMethod(this, [this, on]
+    {
+      if (on != m_dmm->isWanted())
+        Q_EMIT connectRequested(on);   // may show a dialog: pending until it returns
+      if (m_connectPending == on)
+        m_connectPending.reset();
+    }, Qt::QueuedConnection);
   });
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
   connect(m_hislip, &HislipServer::sessionsChanged, this, [this](int) { updateScpiStatus(); });
