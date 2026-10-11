@@ -43,6 +43,7 @@ struct ServiceState
   quint16 port = 0;
   QString address;          ///< "localhost:5025", "TCPIP::localhost::hislip0::INSTR"
   int     clients = 0;
+  QString error;            ///< switched on but not running: why (port taken, ...)
 };
 
 /// The meter session without any user interface: the connection (MeterConnection), the
@@ -178,6 +179,8 @@ private:
   MdnsResponder      *m_mdns;
   HislipServer       *m_hislip;       ///< the same interpreter over HiSLIP
   MdnsResponder      *m_mdnsHislip;
+  QString             m_scpiError;    ///< why the switched-on server is not running
+  QString             m_hislipError;
   QProcess           *m_external;     ///< an alarm's program that wanted the port: one at a time
   bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends
   bool                m_externalPending = false;   ///< planned, not started yet

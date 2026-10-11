@@ -26,8 +26,11 @@ keeps deciding what it measures.
 
 The sidebar (F9) lists both under **Services**: *SCPI* and *HiSLIP* with
 their port, or *off*. The dot turns green while a client is connected, the
-tooltip has the address and the number of clients. A double click opens
-these settings; the context menu also copies the address
+tooltip has the address and the number of clients. *failed* with a red dot
+means switched on but not running, usually because all ten ports from the
+one set here are taken; the tooltip and the status line of these settings
+say why. A double click opens these settings; the context menu also copies
+the address
 (`localhost:5025`, `TCPIP::localhost::hislip0::INSTR`).
 There is **no authentication**: whoever can reach the port can read the
 meter, start the recorder, connect or disconnect - and fetch a picture of
