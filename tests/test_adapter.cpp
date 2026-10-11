@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     // "unknown" (CarbonDioxide of the TFA AirControl did)
     for (int q = int(Quantity::Voltage); q <= int(Quantity::HarmonicRatio); ++q)
       check(Quantities::id(Quantity(q)) != QLatin1String("unknown"), QString("table row for sr_mq %1").arg(q));
-    for (int q = int(Quantity::Energy); q <= int(Quantity::CarbonDioxide); ++q)
+    for (int q = int(Quantity::Energy); q <= int(Quantity::Illuminance); ++q)
       check(Quantities::id(Quantity(q)) != QLatin1String("unknown"), QString("table row for own quantity %1").arg(q));
     check(Quantities::id(Quantity::CarbonDioxide) == QLatin1String("carbon_dioxide"), "carbon_dioxide");
     check(int(Quantity::Voltage) == 10000 && int(Quantity::HarmonicRatio) == 10032, "sr_mq numbering");

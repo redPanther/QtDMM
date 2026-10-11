@@ -120,6 +120,7 @@ meter working, please report it on the
 | APPA | 507 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | APPA | 71 ¹ | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
 | APPA | 73 ¹ | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
+| Benetech | GM1020 ¹ | - | `BenetechGM1020` | 19200 8N1 | - | 4000 |
 | BENNING | MM 12 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | Brymen | BM250 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
 | Brymen | BM251 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
@@ -245,6 +246,7 @@ meter working, please report it on the
 | Uni-Trend | UT321 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Uni-Trend | UT322 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Uni-Trend | UT325 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Uni-Trend | UT382 ¹ | - | `UniTUT382` | 19200 8N1 | - | 2000 |
 | Uni-Trend | UT60A | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Uni-Trend | UT60BT | - | `UniTiDMM` | Bluetooth LE | - | 10000 |
 | Uni-Trend | UT60D ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
@@ -318,7 +320,7 @@ meter working, please report it on the
 - **Generic DTM0660 4000 count, DTM0660 6000 count, DTM0660 8000 count**: the DTM0660 chip has a UART, but meters built on it (Victor VC921 and similar) ship without an interface: an IR LED with a 100 Ω resistor goes on the chip's TX pin and the RS232 bit in the 24C02 EEPROM has to be set - [eevblog: hacking the Victor VC-921](https://www.eevblog.com/forum/testgear/hacking-the-victor-vc-921/). PeakTech 3415 and Velleman DVM4100 use the same chip but come with a cable and need no change.
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
-220 devices across 47 vendors.
+222 devices across 48 vendors.
 
 ## Command line
 

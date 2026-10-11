@@ -31,7 +31,7 @@ PREFIX_FACTOR = {
     "p": 1e-12, "n": 1e-9, "µ": 1e-6, "u": 1e-6, "m": 1e-3,
     "k": 1e3, "M": 1e6, "G": 1e9, "T": 1e12,
 }
-BASE_UNITS = {"V", "A", "Ohm", "F", "Hz", "%", "°C", "°F", "C", "dF", "RPM", "D", "S", "s", "W", "VA"}
+BASE_UNITS = {"V", "A", "Ohm", "F", "Hz", "%", "°C", "°F", "C", "dF", "RPM", "D", "S", "s", "W", "VA", "lx", "fc"}
 # A displayed value is digits, sign, point and spaces; any letter marks an
 # overload/underload display (0L. .0L 0.L UL . L0. OL UL ...) with no number.
 OVERLOAD = re.compile(r"[A-Za-z]")
@@ -69,7 +69,7 @@ PORT_BY_UNIT = {
     "Hz": "frequency", "RPM": "frequency", "%": "duty_cycle", "S": "conductance", "W": "power",
     "VA": "apparent_power", "dBm": "power", "dBV": "voltage", "dB": "gain", "s": "time",
     "C": "temperature", "°C": "temperature", "dF": "temperature", "°F": "temperature",
-    "Ah": "electric_charge", "Wh": "energy",
+    "Ah": "electric_charge", "Wh": "energy", "lx": "illuminance", "fc": "illuminance",
 }
 PORT_BY_FUNCTION = {
     "resistance": "resistance", "continuity": "continuity", "diode": "voltage",
