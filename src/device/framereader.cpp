@@ -141,8 +141,11 @@ void FrameReader::socketNotifierSLOT()
 
 void FrameReader::sendReadRequest()
 {
-  const QByteArray request = m_decoder ? m_decoder->pollRequest() : QByteArray();
-  if (request.isEmpty() || !m_sendRequest)
+  // asked only when it is sent: a decoder may count its requests
+  if (m_decoder == Q_NULLPTR || !m_sendRequest)
+    return;
+  const QByteArray request = m_decoder->pollRequest();
+  if (request.isEmpty())
     return;
   m_port->write(request);
   m_sendRequest = false;

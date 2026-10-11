@@ -25,7 +25,7 @@
 /// A frame is the line with the value (getPacketLength() 0, as Fluke45):
 /// the `CONF?` answer before it stays in the reader's buffer, so decode()
 /// gets both and reads them in order. pollRequest() asks `CONF?` first,
-/// after a switch and every tenth time, otherwise `FETC?`.
+/// once after a switch and every tenth time, otherwise `FETC?`.
 ///
 /// Not read: STAT? (hold, min/max, the U123x temperature and continuity
 /// modes, which `CONF?` reports as MV and RES), the second display and
@@ -55,5 +55,5 @@ private:
   Function m_function;
   // the reader thread asks pollRequest(), the decoder runs in the connection's
   mutable std::atomic<int> m_polls{ 0 };
-  std::atomic<bool>        m_needConf{ true };
+  mutable std::atomic<bool> m_needConf{ true };
 };
