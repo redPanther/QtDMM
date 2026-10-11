@@ -9,7 +9,9 @@ sources:
 # GPL-3.0-or-later, github.com/Cymaphore/libsigrok branch appadmm-stage):
 # 55 55 01 0C, function, range/auto, main and sub display (24-bit LE count,
 # dot|unit<<3, content|overload<<7), checksum = sum of all bytes before it.
-# A count of 0x700000 (a word) on the sub display leaves it empty. No
+# A count of 0x700000 (a word) on the sub display leaves it empty. The words
+# OL (0x70002a), OLA, OLV, OLVA (0x700033..35) are an overload; the unit is
+# the unit code, else the one the word names. No
 # capture from a real meter exists yet.
 vectors:
   - source_line: "DC V 1.2345 V, sub off"
@@ -59,3 +61,29 @@ vectors:
     bytes: 55 55 01 0C 0F 82 39 30 00 84 00 00 00 70 00 00 A5
     reading: {value: "1.2345", unit: "kHz", range_mode: "auto"}
     expect: {special: "FR"}
+  - source_line: "DC V, the word OLV on the main display (no unit code)"
+    bytes: 55 55 01 0C 02 81 34 00 70 00 00 00 00 70 00 00 4E
+    reading: {value: "OL", unit: "V", coupling: "DC", range_mode: "auto"}
+    expect: {val: "OL", special: "DC"}
+  - source_line: "DC mA, the word OL with unit mA"
+    bytes: 55 55 01 0C 0C 81 2A 00 70 20 00 00 00 70 00 00 6E
+    reading: {value: "OL", unit: "mA", coupling: "DC", range_mode: "auto"}
+    expect: {val: "OL", special: "DC"}
+  - source_line: "DC A, the word OLA (no unit code)"
+    bytes: 55 55 01 0C 0A 81 33 00 70 00 00 00 00 70 00 00 55
+    reading: {value: "OL", unit: "A", coupling: "DC", range_mode: "auto"}
+    expect: {val: "OL"}
+  - source_line: "DC V negative overload (overload bit, count below 0)"
+    bytes: 55 55 01 0C 02 81 FF FF FF 0C 80 00 00 70 00 00 33
+    reading: {value: "-OL", unit: "V", coupling: "DC", range_mode: "auto"}
+    expect: {val: "-OL", special: "DC"}
+
+skipped:
+  - source_line: "DC V, the word ----- (0x700014) on the main display"
+    bytes: 55 55 01 0C 02 81 14 00 70 08 00 00 00 70 00 00 36
+    reason: >-
+      A dash is "no reading now", not an overload: no reading.
+  - source_line: "DC V, the word OL without a unit code"
+    bytes: 55 55 01 0C 02 81 2A 00 70 00 00 00 00 70 00 00 44
+    reason: >-
+      "OL" alone does not say of what (the function code would, not mapped): no reading.

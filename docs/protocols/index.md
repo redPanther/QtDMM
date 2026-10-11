@@ -64,8 +64,12 @@ it. After a switch no value is shown until `CONF?` has been answered again;
 display; `55 55 00 00 AA`, read all data of the older 500 series) and answer
 with a fixed-length frame `55 55 <command> <length> <data> <sum>`; the
 checksum is the sum of all bytes before it, so `checkFormat()` checks it. A
-display count from `0x700000` on is a word on the display (`----`, `Er`,
-`FUSE`) and gives no reading. APPA's S series and the other Bluetooth-only
+display count from `0x700000` on is a word on the display (libsigrok's
+`appadmm_wordcode_e`). The overload words `OL`, `OLA`, `OLV` and `OLVA` are an
+overload reading (`OL`; the unit from the unit code, else the one the word
+names); every other word (`----`, blank, `Er`, `FUSE`, `APO`, ...) gives no
+reading. The 500 protocol marks a word with bit 6 (its number is the count,
+0 is `Er`) and a blank display with bit 7. APPA's S series and the other Bluetooth-only
 models are not read (no serial port).
 `UniTUT382` sends only after "USB.1" is set in the meter's menu (long press
 MENU); after each power-on it is back at USB.0. A frame is 30 bytes `0x3?`

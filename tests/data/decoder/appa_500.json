@@ -76,6 +76,17 @@
         "port": "voltage.dc",
         "special": "DC"
       }
+    },
+    {
+      "comment": "[appa_500.yaml] 'DC mA, the word OL (bit 6, word 0x2a) on the main display'",
+      "hex": "55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 04 01 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 2A 20 40 00 00 00 00 80 00 00 00 00 00 00 00 F0",
+      "expected": {
+        "unit": "mA",
+        "range": "AUTO",
+        "hold": false,
+        "port": "current.dc",
+        "val": "OL"
+      }
     }
   ]
 }
