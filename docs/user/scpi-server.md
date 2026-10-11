@@ -56,7 +56,7 @@ long or the short form (`MEASure?`, `MEAS?`), case does not matter.
 | `READ2?` `FETCh2?` `VALue2?` | the meter's second value (Victron, Fluke 45), same rules |
 | `UNIT?` `UNIT2?` | the base unit, `"V"` |
 | `CONFigure?` `CONFigure2?` | function and range, `"VOLT:DC AUTO"` - functions `VOLT:DC`, `VOLT:AC`, `CURR:DC`, `CURR:AC`, `RES`, `CONT`, `CAP`, `FREQ`, `TEMP`, `DIOD`, `PER`, `POW` |
-| `STATus:QUEStionable?` | bit 0 overload, bit 1 hold, bit 2 meter not connected, bit 3 no current reading |
+| `STATus:QUEStionable?` | bit 0 overload, bit 1 hold, bit 2 meter not connected (also while QtDMM reconnects it), bit 3 no current reading |
 | `STATus:OPERation?` | 16 while the recorder runs |
 | `INITiate` / `ABORt` | starts / stops the recorder; while it records, or over a recording shown and not saved yet, `INITiate` is ignored with error -213 *Init ignored* |
 | `INPut ON|OFF`, `INPut?` | connects / disconnects the meter, asks whether it is |

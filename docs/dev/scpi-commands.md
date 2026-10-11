@@ -72,9 +72,9 @@ The range is `AUTO`, `MANUAL` or the meter's own range text.
 
 | Command | Answer | Notes |
 |---|---|---|
-| `STATus:QUEStionable?`, `STATus:QUEStionable:CONDition?`, `…:EVENt?` | integer | bit 0 (1) overload · bit 1 (2) hold · bit 2 (4) meter not connected · bit 3 (8) no current reading (nothing for 5 s) |
+| `STATus:QUEStionable?`, `STATus:QUEStionable:CONDition?`, `…:EVENt?` | integer | bit 0 (1) overload · bit 1 (2) hold · bit 2 (4) meter not connected (connecting, silent, or lost and reconnecting) · bit 3 (8) no current reading (nothing for 5 s; bits 0 and 1 are then 0) |
 | `STATus:OPERation?`, `…:CONDition?`, `…:EVENt?` | integer | bit 4 (16) *measuring*: the recorder is running |
-| `INPut?`, `INPut:STATe?` | `1` / `0` | meter connected? |
+| `INPut?`, `INPut:STATe?` | `1` / `0` | meter connected and sending? `0` also while QtDMM reconnects a lost meter |
 | `SYSTem:VERSion?` | `1999.0` | SCPI version |
 
 ## Control
@@ -84,7 +84,7 @@ The range is `AUTO`, `MANUAL` or the meter's own range text.
 | `INITiate`, `INITiate:IMMediate` | starts the recorder (like the Start button) |
 | `ABORt` | stops the recorder |
 | `INPut ON`, `INPut 1`, `INPut:STATe ON` | connects the meter (like the Connect button) |
-| `INPut OFF`, `INPut 0` | disconnects the meter |
+| `INPut OFF`, `INPut 0` | disconnects the meter, also one that is lost and being reconnected |
 
 ## Screen dump
 

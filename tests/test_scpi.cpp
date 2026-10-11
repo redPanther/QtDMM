@@ -92,6 +92,13 @@ int main(int argc, char **argv)
   old.msecs -= ScpiServer::kStaleMs + 1;
   s.setReading(0, old);
   check(ask(s, "READ?") == "9.91E+37" && ask(s, "STAT:QUES:COND?") == "8", "a stale reading is NaN, bit 3");
+  old.overload = true;
+  old.hold = true;
+  s.setReading(0, old);
+  check(ask(s, "STAT:QUES?") == "8", "a stale reading's overload and hold are gone " + ask(s, "STAT:QUES?"));
+  s.setConnected(false);   // the link lost, QtDMM reconnects
+  check(ask(s, "STAT:QUES?") == "12" && ask(s, "INP?") == "0", "lost: bit 2, INP? 0 " + ask(s, "STAT:QUES?"));
+  s.setConnected(true);
   s.process("*CLS");
   s.setReading(0, reading(-2.5e-3, "V"));
   check(ask(s, "READ?") == "-2.500000E-03", "negative, small");

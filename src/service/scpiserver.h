@@ -62,6 +62,8 @@ public:
   void setModel(const QString &model) { m_model = model; }
   /// Reading of value @p id (0 = main, 1 = second) as it arrives.
   void setReading(int id, const Reading &reading);
+  /// The meter sends readings: false while connecting, after a timeout and
+  /// while a lost connection is reopened (STAT:QUES? bit 2, INPut?).
   void setConnected(bool on) { m_connected = on; }
   void setRecording(bool on) { m_recording = on; }
   bool connected() const { return m_connected; }

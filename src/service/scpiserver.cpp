@@ -502,14 +502,15 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
     if (matches(cmd.path[1], "QUEStionable"))
     {
       // bit 0 overload, bit 1 hold, bit 2 meter not connected, bit 3 no
-      // current reading
+      // current reading; an old reading's overload or hold is gone
       int bits = 0;
       const Reading &r = m_readings[0];
       const qint64 now = QDateTime::currentMSecsSinceEpoch();
-      if (r.overload) bits |= 1;
-      if (r.hold) bits |= 2;
+      const bool current = r.valid && now - r.msecs <= kStaleMs;
+      if (current && r.overload) bits |= 1;
+      if (current && r.hold) bits |= 2;
       if (!m_connected) bits |= 4;
-      if (!r.valid || now - r.msecs > kStaleMs) bits |= 8;
+      if (!current) bits |= 8;
       return QString::number(bits);
     }
     if (matches(cmd.path[1], "OPERation"))

@@ -81,7 +81,10 @@ void initTranslation(QApplication *app,QTranslator *QtTranslation, QTranslator *
   const QLocale locale = QLocale::system();
   const bool english = locale.language() == QLocale::English || locale.language() == QLocale::C;
 
-  if (QtTranslation->load(QString("qt_%1").arg(locale.name()), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+  // qt_<locale> only points to the module catalogues; deploy tools such as
+  // linuxdeploy (AppImage) ship just these, qtbase_<locale> among them
+  const QString qtDir = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+  if (QtTranslation->load(locale, "qt", "_", qtDir) || QtTranslation->load(locale, "qtbase", "_", qtDir))
     app->installTranslator(QtTranslation);
   else if (!english)
     qWarning() << "Could not load Qt translation for" << locale.name();

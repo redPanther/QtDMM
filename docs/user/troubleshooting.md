@@ -63,6 +63,18 @@ address instead of a device file, and your user needs access to the `ugen`
 node — a `devfs.rules` entry (`add path 'ugen*' mode 0660 group dialer`, same
 for `usb/*`) does that; `usbconfig` lists the attached devices.
 
+## The AppImage does not start
+
+The AppImage brings its own Qt, but takes the C library from the system and
+needs **glibc 2.38 or newer**: Ubuntu 24.04, Debian 13, Fedora 39 and later.
+On older systems (Ubuntu 22.04, Debian 12, RHEL 9) it stops at once with
+`version 'GLIBC_2.38' not found`; build QtDMM from the sources there.
+
+It contains only the X11 platform plugin. Under Wayland it runs through
+XWayland, unless `QT_QPA_PLATFORM=wayland` is set: then it ends with "no Qt
+platform plugin could be initialized". Start it with
+`QT_QPA_PLATFORM=xcb ./QtDMM-*.AppImage`.
+
 ## Windows
 
 Serial ports appear as `COM3`, `COM4` … and need no permissions. USB-serial
