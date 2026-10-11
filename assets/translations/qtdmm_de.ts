@@ -546,24 +546,24 @@
 <context>
     <name>AnalogMeter</name>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="556"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="557"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="557"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="558"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="563"/>
         <location filename="../../src/ui/views/analogmeter.cpp" line="564"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="572"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="565"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="573"/>
         <source>OL</source>
         <translation>OL</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="652"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="653"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
@@ -3304,6 +3304,16 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
         <source>59 bytes binary, polled (APPA 503/505, Voltcraft VC-930/950)</source>
         <translation>59 Bytes binär, abgefragt (APPA 503/505, Voltcraft VC-930/950)</translation>
     </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="55"/>
+        <source>33 bytes, continuous, lx or fc (UNI-T UT382 luxmeter)</source>
+        <translation>33 Bytes, kontinuierlich, lx oder fc (UNI-T-UT382-Luxmeter)</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="56"/>
+        <source>8 bytes binary, continuous after a start command, lx and °C (Benetech GM1020)</source>
+        <translation>8 Bytes binär, kontinuierlich nach einem Startbefehl, lx und °C (Benetech GM1020)</translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>
@@ -3371,199 +3381,204 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
 <context>
     <name>Quantity</name>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="129"/>
+        <location filename="../../src/core/sampletypes.h" line="130"/>
         <source>Unknown</source>
         <translation>Unbekannt</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="130"/>
+        <location filename="../../src/core/sampletypes.h" line="131"/>
         <source>Voltage</source>
         <translation>Spannung</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="131"/>
+        <location filename="../../src/core/sampletypes.h" line="132"/>
         <source>Current</source>
         <translation>Strom</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="132"/>
+        <location filename="../../src/core/sampletypes.h" line="133"/>
         <source>Resistance</source>
         <translation>Widerstand</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="133"/>
+        <location filename="../../src/core/sampletypes.h" line="134"/>
         <source>Capacitance</source>
         <translation>Kapazität</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="134"/>
+        <location filename="../../src/core/sampletypes.h" line="135"/>
         <source>Temperature</source>
         <translation>Temperatur</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="135"/>
+        <location filename="../../src/core/sampletypes.h" line="136"/>
         <source>Frequency</source>
         <translation>Frequenz</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="136"/>
+        <location filename="../../src/core/sampletypes.h" line="137"/>
         <source>Duty cycle</source>
         <translation>Tastgrad</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="137"/>
+        <location filename="../../src/core/sampletypes.h" line="138"/>
         <source>Continuity</source>
         <translation>Durchgang</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="138"/>
+        <location filename="../../src/core/sampletypes.h" line="139"/>
         <source>Pulse width</source>
         <translation>Pulsbreite</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="139"/>
+        <location filename="../../src/core/sampletypes.h" line="140"/>
         <source>Conductance</source>
         <translation>Leitwert</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="140"/>
+        <location filename="../../src/core/sampletypes.h" line="141"/>
         <source>Power</source>
         <translation>Leistung</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="141"/>
+        <location filename="../../src/core/sampletypes.h" line="142"/>
         <source>Gain</source>
         <translation>Verstärkung</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="142"/>
+        <location filename="../../src/core/sampletypes.h" line="143"/>
         <source>Sound pressure level</source>
         <translation>Schalldruckpegel</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="143"/>
+        <location filename="../../src/core/sampletypes.h" line="144"/>
         <source>Carbon monoxide</source>
         <translation>Kohlenmonoxid</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="144"/>
+        <location filename="../../src/core/sampletypes.h" line="145"/>
         <source>Relative humidity</source>
         <translation>Relative Luftfeuchte</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="145"/>
+        <location filename="../../src/core/sampletypes.h" line="146"/>
         <source>Time</source>
         <translation>Zeit</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="146"/>
+        <location filename="../../src/core/sampletypes.h" line="147"/>
         <source>Wind speed</source>
         <translation>Windgeschwindigkeit</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="147"/>
+        <location filename="../../src/core/sampletypes.h" line="148"/>
         <source>Pressure</source>
         <translation>Druck</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="148"/>
+        <location filename="../../src/core/sampletypes.h" line="149"/>
         <source>Parallel inductance</source>
         <translation>Induktivität parallel</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="149"/>
+        <location filename="../../src/core/sampletypes.h" line="150"/>
         <source>Parallel capacitance</source>
         <translation>Kapazität parallel</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="150"/>
+        <location filename="../../src/core/sampletypes.h" line="151"/>
         <source>Parallel resistance</source>
         <translation>Widerstand parallel</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="151"/>
+        <location filename="../../src/core/sampletypes.h" line="152"/>
         <source>Series inductance</source>
         <translation>Induktivität seriell</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="152"/>
+        <location filename="../../src/core/sampletypes.h" line="153"/>
         <source>Series capacitance</source>
         <translation>Kapazität seriell</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="153"/>
+        <location filename="../../src/core/sampletypes.h" line="154"/>
         <source>Series resistance</source>
         <translation>Widerstand seriell</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="154"/>
+        <location filename="../../src/core/sampletypes.h" line="155"/>
         <source>Dissipation factor</source>
         <translation>Verlustfaktor</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="155"/>
+        <location filename="../../src/core/sampletypes.h" line="156"/>
         <source>Quality factor</source>
         <translation>Güte</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="156"/>
+        <location filename="../../src/core/sampletypes.h" line="157"/>
         <source>Phase angle</source>
         <translation>Phasenwinkel</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="157"/>
+        <location filename="../../src/core/sampletypes.h" line="158"/>
         <source>Difference</source>
         <translation>Differenz</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="158"/>
+        <location filename="../../src/core/sampletypes.h" line="159"/>
         <source>Count</source>
         <translation>Zählwert</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="159"/>
+        <location filename="../../src/core/sampletypes.h" line="160"/>
         <source>Power factor</source>
         <translation>Leistungsfaktor</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="160"/>
+        <location filename="../../src/core/sampletypes.h" line="161"/>
         <source>Apparent power</source>
         <translation>Scheinleistung</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="161"/>
+        <location filename="../../src/core/sampletypes.h" line="162"/>
         <source>Mass</source>
         <translation>Masse</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="162"/>
+        <location filename="../../src/core/sampletypes.h" line="163"/>
         <source>Harmonic ratio</source>
         <translation>Oberschwingungsanteil</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="163"/>
+        <location filename="../../src/core/sampletypes.h" line="164"/>
         <source>Energy</source>
         <translation>Energie</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="164"/>
+        <location filename="../../src/core/sampletypes.h" line="165"/>
         <source>Electric charge</source>
         <translation>Ladung</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="165"/>
+        <location filename="../../src/core/sampletypes.h" line="166"/>
         <source>State of charge</source>
         <translation>Ladezustand</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="166"/>
+        <location filename="../../src/core/sampletypes.h" line="167"/>
         <source>Time to go</source>
         <translation>Restlaufzeit</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="167"/>
+        <location filename="../../src/core/sampletypes.h" line="168"/>
         <source>Carbon dioxide</source>
         <translation>Kohlendioxid</translation>
+    </message>
+    <message>
+        <location filename="../../src/core/sampletypes.h" line="169"/>
+        <source>Illuminance</source>
+        <translation>Beleuchtungsstärke</translation>
     </message>
 </context>
 <context>

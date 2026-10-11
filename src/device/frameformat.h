@@ -73,6 +73,8 @@ public:
     MastechMS6514,
     AppaDmm,
     Appa500,
+    UniTUT382,
+    BenetechGM1020,
     EndOfList              // new stuff always before!
   };
 

@@ -84,6 +84,8 @@ Meaning meaning(const QString &base, const QString &mode, FrameFormat::DataForma
     { "cosphi", Quantity::PowerFactor,       "" },
     { "D",      Quantity::DissipationFactor, "" },
     { "ppm",    Quantity::Unknown,           "ppm" },   // a concentration; of what, the meter says
+    { "lx",     Quantity::Illuminance,       "lx" },
+    { "fc",     Quantity::Illuminance,       "fc" },    // foot-candle, 1 fc = 10.764 lx
   };
   for (const Row &r : kRows)
     if (base == QString::fromUtf8(r.base))

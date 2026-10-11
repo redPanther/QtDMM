@@ -52,6 +52,8 @@ const std::vector<ProtocolInfo> &protocols()
     { FrameFormat::MastechMS6514,         "MastechMS6514",         QT_TRANSLATE_NOOP("Protocols", "18 bytes binary, continuous, two values (MASTECH MS6514 thermometer)"), "",                "",                         make<DecoderMastechMS6514> },
     { FrameFormat::AppaDmm,               "AppaDmm",               QT_TRANSLATE_NOOP("Protocols", "17 bytes binary, polled (APPA 506/208, BENNING MM 12)"),       "",                      "",                         make<DecoderAppa> },
     { FrameFormat::Appa500,               "Appa500",               QT_TRANSLATE_NOOP("Protocols", "59 bytes binary, polled (APPA 503/505, Voltcraft VC-930/950)"), "",                     "",                         make<DecoderAppa> },
+    { FrameFormat::UniTUT382,             "UniTUT382",             QT_TRANSLATE_NOOP("Protocols", "33 bytes, continuous, lx or fc (UNI-T UT382 luxmeter)"), "",                          "",                         make<DecoderUniTUT382> },
+    { FrameFormat::BenetechGM1020,        "BenetechGM1020",        QT_TRANSLATE_NOOP("Protocols", "8 bytes binary, continuous after a start command, lx and °C (Benetech GM1020)"), "",  "",                         make<DecoderBenetechGM1020> },
   };
   return table;
 }

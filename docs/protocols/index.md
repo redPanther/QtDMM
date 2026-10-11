@@ -33,10 +33,12 @@ regression tests.
 | `keysight_u12xx.cpp` | `KeysightU12xx` | Agilent/Keysight U1231A–U1282A over the IR-USB cable (U1173A/B, 9600 8N1; unconfirmed) | — (answer formats from libsigrok's `agilent-dmm`, GPL) | synthetic |
 | `gdm703.cpp` | `GDM703Continuous` | Voltcraft GDM 703/704/705 (unconfirmed; chip WENS98A per the [sigrok IC list](https://sigrok.org/wiki/Multimeter_ICs)) | — (layout from Toussaint's CDMM, `ablage/CDMM`) | synthetic |
 | `dtm0660.cpp` | `DTM0660` | Generic DTM0660 (4000/6000/8000 count) | — (`dtm0660-brochure.pdf` has no serial frame; layout from the decoder, after libsigrok) | synthetic |
+| `benetech_gm1020.cpp` | `BenetechGM1020` | Benetech GM1020 luxmeter, 19200 8N1 (unconfirmed) | — (frame layout from `gm1020.py` of [parametrek/gm1020](https://github.com/parametrek/gm1020), GPL) | synthetic |
 | `mastech_ms6514.cpp` | `MastechMS6514` | MASTECH MS6514 two-channel thermometer, 9600 8N1 (unconfirmed) | — (frame layout from libsigrok's `mastech-ms6514`, GPL) | synthetic |
 | `m9803r.cpp` | `M9803RContinuous` | ELV M9803R, MASTECH M9803R, McVoice M-980T | — (byte table in the decoder's header, reverse engineered by Toussaint) | synthetic from the byte table, plus frames of a real meter published on the web (one, 4.700 kOhm, corrected for an apparent typo) |
 | `qm1537.cpp` | `QM1537Continuous` | Digitek DT4000ZC, Digitech QM1537, PeakTech 3430, TekPower TP4000ZC, Uni-Trend UT61B/C/D, Vichy VC99 | `UT61BCD.log` | yes |
 | `rs22812.cpp` | `RS22812Continuous` | Radioshack 22-812 | — (layout from [rs22812](https://github.com/syn-net/rs22812) and the sigrok wiki) | synthetic |
+| `uni_t_ut382.cpp` | `UniTUT382` | Uni-Trend UT382 luxmeter over its USB cable, 19200 8N1 (unconfirmed) | — (frame layout from `ut382.py` of [parametrek/gm1020](https://github.com/parametrek/gm1020), GPL) | synthetic |
 | `uni_t_ut32x.cpp` | `UniTUT32x` | Uni-Trend UT325 (UT322, Tenma 72-7712/72-7715 unconfirmed) thermometers over the HE2325U cable, 2400 8N1 | `UT325.log` | yes |
 | `vc820.cpp` | `VC820Continuous` | Digitek DT-9062/INO2513, Digitech QM1462/QM1538, HoldPeak HP-90EPC, PeakTech 3330, Tenma 72-7745, Uni-Trend UT60A/UT60E, Voltcraft VC 820/840 | `UT60AE.log` | yes |
 | `vc870.cpp` | `VC870Continuous` | Voltcraft VC 870 | `vc870_protocol.pdf` (frame description); one frame validated on a real VC870 | yes, one real frame (DCV), the rest synthetic from the document's tables; resistance above 400 Ohm and the AC ranges left out, see below |
@@ -65,6 +67,12 @@ checksum is the sum of all bytes before it, so `checkFormat()` checks it. A
 display count from `0x700000` on is a word on the display (`----`, `Er`,
 `FUSE`) and gives no reading. APPA's S series and the other Bluetooth-only
 models are not read (no serial port).
+`UniTUT382` sends only after "USB.1" is set in the meter's menu (long press
+MENU); after each power-on it is back at USB.0. A frame is 30 bytes `0x3?`
+whose low nibbles give 15 data bytes, CR LF and one more byte (perhaps a
+checksum, not checked). `BenetechGM1020` streams after its "live start"
+command `3C 01 00 00 00 00 00 3D`, which is sent as the poll request; the live
+value is always in lx, the meter's fc setting changes only its display.
 
 `VictronBLE` is not a serial protocol at all: `BleAdvertisementDevice`
 decrypts each Bluetooth advertisement (`src/device/victronble.cpp`, AES-128-CTR
