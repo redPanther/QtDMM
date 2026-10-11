@@ -19,6 +19,12 @@ static const bool registered = []() {
   DmmDecoder::addConfig({"Uni-Trend", "UT61C", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
   DmmDecoder::addConfig({"Uni-Trend", "UT61D", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
   DmmDecoder::addConfig({"Vichy", "VC99", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 6000, 0, 0, 1});
+  // FS9922 at 2400 8N1 in HKJ's TestController device list ("SimpleDMM");
+  // display counts not known, 4000 as the FS9922-DMM4
+  DmmDecoder::addConfig({"Victor", "70C *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Victor", "86C *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 850 *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"EZA", "EZ-735 *", "", 2400, FrameFormat::QM1537Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   return true;
 }();
 

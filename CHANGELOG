@@ -17,6 +17,9 @@
 - Sidebar: node Services with the SCPI server and HiSLIP (port or off, green dot with a client, double click
   for the settings, Copy address); the SCPI field in the status bar is gone. *STB? reports bit 2 (EAV) while
   errors are queued
+- 19 more meters (all "*", not tried on hardware): Victor 70C/86C, Voltcraft VC 850, EZA EZ-735 (FS9922); Brymen
+  BM255, Greenlee DM-210A (BM25x); Elma BM869s, Greenlee DM-860A, Sanwa PC7000 (BM86x); Brymen BM521s, Elma BM525s
+  (BM52x); Brymen BM821s/822s/827s, Elma BM821s/829s, Greenlee DM-810A/820A/830A (BM82x)
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
 - Digital display: HOLD is an H in a square at the right of the annunciators, MANU is gone (AUTO off is a
