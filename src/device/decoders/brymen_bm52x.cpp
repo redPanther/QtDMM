@@ -5,6 +5,18 @@
 static const bool registered = []() {
   DmmDecoder::addConfig({"Brymen", "BM525s *", "", 0, FrameFormat::BrymenBM52x, 8, 1, 2, 0, 6000, 0, 0, 0});
   DmmDecoder::addConfig({"Brymen", "BM829s *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  // the same meters under other names, and their smaller siblings
+  // (HKJ's TestController device list, "BrymenDMM": protocol 525 or 829)
+  DmmDecoder::addConfig({"Brymen", "BM521s *", "", 0, FrameFormat::BrymenBM52x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Elma", "BM525s *", "", 0, FrameFormat::BrymenBM52x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM821s *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM822s *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM827s *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Elma", "BM821s *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Elma", "BM829s *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Greenlee", "DM-810A *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Greenlee", "DM-820A *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
+  DmmDecoder::addConfig({"Greenlee", "DM-830A *", "", 0, FrameFormat::BrymenBM82x, 8, 1, 2, 0, 6000, 0, 0, 0});
   return true;
 }();
 

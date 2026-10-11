@@ -46,12 +46,11 @@ static const bool registered = []() {
   DmmDecoder::addConfig({"Tecpel", "DMM-8061 *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   DmmDecoder::addConfig({"V&A", "VA18B *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   DmmDecoder::addConfig({"V&A", "VA40B *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  // from Matthias Toussaint's CDMM device table (ablage/CDMM); the Protek
-  // 50x speak the FS9721 frame at 1200 7N2 with RTS driven ("PT506" there)
+  // from Matthias Toussaint's CDMM device table (ablage/CDMM). Its Protek
+  // 504/505/506 are left out: CDMM calls their protocol ASCII but decodes an
+  // FS9721 frame, and HKJ's TestController reads them as an ASCII line - no
+  // capture to settle it
   DmmDecoder::addConfig({"Metrel", "MD9015 *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Protek", "504 *", "", 1200, FrameFormat::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
-  DmmDecoder::addConfig({"Protek", "505 *", "", 1200, FrameFormat::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
-  DmmDecoder::addConfig({"Protek", "506 *", "", 1200, FrameFormat::VC820Continuous, 7, 2, 1, 0, 4000, 0, 1, 1});
   DmmDecoder::addConfig({"Uni-Trend", "UT30A *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   DmmDecoder::addConfig({"Uni-Trend", "UT30E *", "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   DmmDecoder::addConfig({"Digitek", "INO2513"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});

@@ -6,6 +6,10 @@
 static const bool registered = []() {
   DmmDecoder::addConfig({"Brymen", "BM867s *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
   DmmDecoder::addConfig({"Brymen", "BM869s", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
+  // the BM869s under other names (HKJ's TestController device list, "BrymenDMM")
+  DmmDecoder::addConfig({"Elma", "BM869s *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Greenlee", "DM-860A *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Sanwa", "PC7000 *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
   return true;
 }();
 

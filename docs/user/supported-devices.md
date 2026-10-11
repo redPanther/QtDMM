@@ -31,8 +31,13 @@ meter working, please report it on the
 | Brymen | BM250 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
 | Brymen | BM251 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
 | Brymen | BM252 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Brymen | BM255 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
 | Brymen | BM257 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Brymen | BM521s ¹ | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
 | Brymen | BM525s ¹ | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM821s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM822s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM827s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
 | Brymen | BM829s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
 | Brymen | BM867s ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
 | Brymen | BM869s | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
@@ -46,7 +51,12 @@ meter working, please report it on the
 | Digitek | DT4000ZC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Digitek | INO2513 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Duratool | DO3122 | - | `DO3122Continuous` | 9600 8N1 | - | 4000 |
+| Elma | BM525s ¹ | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
+| Elma | BM821s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Elma | BM829s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Elma | BM869s ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
 | ELV | M9803R | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
+| EZA | EZ-735 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
 | Fluke | 187 ¹ | - | `FlukeQM` | 9600 8N1 | - | 50000 |
 | Fluke | 189 ¹ | - | `FlukeQM` | 9600 8N1 | - | 50000 |
 | Fluke | 287 ¹ | - | `FlukeQM` | 115200 8N1 | - | 50000 |
@@ -57,6 +67,11 @@ meter working, please report it on the
 | Generic | DTM0660 4000 count ² | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 4000 |
 | Generic | DTM0660 6000 count ² | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 6000 |
 | Generic | DTM0660 8000 count ² | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 8000 |
+| Greenlee | DM-210A ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Greenlee | DM-810A ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Greenlee | DM-820A ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Greenlee | DM-830A ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Greenlee | DM-860A ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
 | GW Instek | GDM-397 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
 | HoldPeak | HP-90EPC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | HP | 34401A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
@@ -97,12 +112,10 @@ meter working, please report it on the
 | PeakTech | 4390 | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 4000 |
 | PeakTech | 451 | - | `PeakTech10` | 600 7N2 | DTR | 4000 |
 | Pro'sKit | MT-1820 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Protek | 504 ¹ | FS9721 LP3 | `VC820Continuous` | 1200 7N2 | DTR RTS | 4000 |
-| Protek | 505 ¹ | FS9721 LP3 | `VC820Continuous` | 1200 7N2 | DTR RTS | 4000 |
-| Protek | 506 ¹ | FS9721 LP3 | `VC820Continuous` | 1200 7N2 | DTR RTS | 4000 |
 | Radioshack | 22-805 DMM | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | Radioshack | 22-812 | - | `RS22812Continuous` | 4800 8N1 | DTR | 4000 |
 | Radioshack | RS22-168A | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Sanwa | PC7000 ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
 | Siglent | SDM3055 (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 200000 |
 | sigrok | SCPI DMM (any scpi-dmm model) ¹ | - | `Sigrok` | sigrok-cli | - | 100000 |
 | Sinometer | MAS-343 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
@@ -147,6 +160,8 @@ meter working, please report it on the
 | V&A | VA40B ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Velleman | DVM4100 ¹ | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 6000 |
 | Vichy | VC99 ² | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Victor | 70C ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| Victor | 86C ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
 | Victron | BlueSolar MPPT ¹ | - | `VictronBLE` | Bluetooth LE | - | 1000 |
 | Victron | BMV-712 Smart ¹ | - | `VictronBLE` | Bluetooth LE | - | 6000 |
 | Victron | Phoenix Inverter Smart | - | `VictronBLE` | Bluetooth LE | - | 6000 |
@@ -177,6 +192,7 @@ meter working, please report it on the
 | Voltcraft | VC 820 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Voltcraft | VC 830 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
 | Voltcraft | VC 840 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Voltcraft | VC 850 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
 | Voltcraft | VC 870 | - | `VC870Continuous` | 9600 8N1 | DTR | 40000 |
 | Voltcraft | VC 920 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
 | Voltcraft | VC 940 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
@@ -190,4 +206,4 @@ meter working, please report it on the
 - **Generic DTM0660 4000 count, DTM0660 6000 count, DTM0660 8000 count**: the DTM0660 chip has a UART, but meters built on it (Victor VC921 and similar) ship without an interface: an IR LED with a 100 Ω resistor goes on the chip's TX pin and the RS232 bit in the 24C02 EEPROM has to be set - [eevblog: hacking the Victor VC-921](https://www.eevblog.com/forum/testgear/hacking-the-victor-vc-921/). PeakTech 3415 and Velleman DVM4100 use the same chip but come with a cable and need no change.
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
-159 devices across 39 vendors.
+175 devices across 43 vendors.
