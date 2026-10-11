@@ -1,0 +1,57 @@
+protocol: UniTUT32x
+decoder: src/device/decoders/uni_t_ut32x.cpp
+devices: [Uni-Trend UT325, Uni-Trend UT321]
+frames_per_reading: 1
+sources:
+  - docs/protocols/sources/UT325.log
+  - docs/protocols/sources/UT321.log
+
+# Frames of a real UT325 and UT321 from heha's notes (UT325.log, UT321.log
+# with the byte table): 19 bytes ending CR LF, @0 the decimal point ('2' one
+# decimal, '0' none), the digits as ASCII (':' blank, ';' minus), @5 the unit
+# ('1' C, '2' F, '3' K), @13 the sensor in the large display ('2'/'3' T1-T2).
+# The meter streams after the start byte 0x01 (libsigrok uni-t-ut32x).
+# Stored values (unit byte '0', "Speicherwert") give no reading.
+vectors:
+  - source_line: "Sensor an T1"
+    bytes: 32 3A 31 35 39 31 30 30 30 30 31 32 34 30 74 42 31 0D 0A
+    reading: {value: "15.9", unit: "C"}
+    expect: {special: "TE", val: "15.9"}
+  - source_line: "T1(15)+T2(14)"
+    bytes: 32 3A 31 35 35 31 30 30 30 30 31 32 35 30 B7 3E 31 0D 0A
+    reading: {value: "15.5", unit: "C"}
+    expect: {special: "TE"}
+  - source_line: "T2+T1, C (T2 in the large display)"
+    bytes: 32 3A 31 35 31 31 30 30 30 32 32 32 37 31 BE 3E 31 0D 0A
+    reading: {value: "15.1", unit: "C"}
+  - source_line: "F"
+    bytes: 32 3A 35 39 31 32 30 30 30 35 39 32 35 30 B9 3E 31 0D 0A
+    reading: {value: "59.1", unit: "dF"}
+  - source_line: "K"
+    bytes: 32 32 38 38 32 33 30 30 30 32 33 32 36 30 B9 3E 31 0D 0A
+    reading: {value: "288.2", unit: "K"}
+    expect: {special: "TE", port: "temperature"}
+  - source_line: "T1-T2,T1"
+    bytes: 32 3A 3A 30 31 31 30 30 30 34 35 32 37 32 BC 3E 31 0D 0A
+    reading: {value: "0.1", unit: "C"}
+  - source_line: "T1+T2,Hold (hold is not in the frame)"
+    bytes: 32 3A 31 35 30 31 30 30 30 34 33 32 38 30 38 30 31 0D 0A
+    reading: {value: "15.0", unit: "C"}
+  - source_line: "Kein Sensor, C"
+    bytes: 30 3B 3B 3B 3B 31 30 30 30 32 30 32 33 30 74 42 31 0D 0A
+    reading: {value: "OPEN", unit: "C"}
+    expect: {val: "OPEN"}
+  - source_line: "UT321: 296,0 K"
+    source: docs/protocols/sources/UT321.log
+    bytes: 32 32 39 36 30 33 30 31 30 32 38 30 31 30 00 00 31 0D 0A
+    reading: {value: "296.0", unit: "K"}
+  - source_line: "UT321: 22,7 C"
+    source: docs/protocols/sources/UT321.log
+    bytes: 32 3A 32 32 37 31 30 31 30 34 37 30 31 30 7F 99 31 0D 0A
+    reading: {value: "22.7", unit: "C"}
+  - source_line: "synthetic: no decimal (@0 '0'), 1250 C, thermocouple type J (@8 '1')"
+    bytes: 30 31 32 35 30 31 30 30 31 30 30 30 30 30 00 00 31 0D 0A
+    reading: {value: "1250", unit: "C"}
+  - source_line: "synthetic: -12.5 C"
+    bytes: 32 3B 31 32 35 31 30 30 30 30 30 30 30 30 00 00 31 0D 0A
+    reading: {value: "-12.5", unit: "C"}

@@ -24,6 +24,9 @@
   an ASCII line)
 - Agilent/Keysight U1231A to U1282A handheld meters (21 models, "*") over the IR-USB cable U1173A/B: new
   protocol KeysightU12xx, polled with CONF? and FETC? as libsigrok's agilent-dmm does
+- Thermometers: UNI-T UT325 (UT322, Tenma 72-7712/72-7715 "*") over the HE2325U USB cable, which now also sends
+  (the UT325 needs a start byte), and MASTECH MS6514 "*" with its second display. Temperatures in kelvin as
+  the meters show them. Until QtDMM reads several channels only the large display / main and auxiliary display
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
 - Digital display: HOLD is an H in a square at the right of the annunciators, MANU is gone (AUTO off is a

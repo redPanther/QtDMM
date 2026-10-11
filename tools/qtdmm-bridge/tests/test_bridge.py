@@ -465,7 +465,7 @@ class HidReportTest(unittest.TestCase):
         self.assertEqual(len(r), 65)
         self.assertEqual(r[:4], b"\x00\x02D\n")
         self.assertEqual(qb.pack_hid_write("CP2110", b"D\n"), b"\x02D\n")
-        self.assertEqual(qb.pack_hid_write("CH9325", b"D\n"), b"")
+        self.assertEqual(qb.pack_hid_write("CH9325", b"D\n"), b"\x00\x02D\n\x00\x00\x00\x00\x00")
 
     def test_config_reports(self):
         s = qb.LineSettings(baudrate=19200, bytesize=7, parity="O", stopbits=1)
@@ -526,8 +526,10 @@ class HidBackendTest(unittest.TestCase):
             # a new baud rate from the client -> another feature report
             b.apply(qb.LineSettings(baudrate=2400, bytesize=8))
             self.assertEqual(raw.features[-1], bytes([0, 0x60, 0x09, 0, 0, 3]))
-            b.write(b"D\n")                                   # receive-only cable: nothing goes out
-            self.assertEqual(raw.writes, [])
+            b.write(b"D\n")                                   # count, data, an 8-byte report
+            self.assertEqual(raw.writes, [b"\x00\x02D\n\x00\x00\x00\x00\x00"])
+            b.write(b"0123456789")                            # in reports of seven bytes
+            self.assertEqual(raw.writes[1:], [b"\x00\x070123456", b"\x00\x03789\x00\x00\x00\x00"])
         finally:
             b.close()
         self.assertTrue(raw.closed)

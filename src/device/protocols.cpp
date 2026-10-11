@@ -48,6 +48,8 @@ const std::vector<ProtocolInfo> &protocols()
     { FrameFormat::UniTUT61Plus,          "UniTUT61Plus",          QT_TRANSLATE_NOOP("Protocols", "19 bytes binary, polled (UNI-T UT61B+/D+/E+, USB or Bluetooth adapter)"), "", "Bluetooth LE", make<DecoderUniTiDMM> },
     { FrameFormat::TfaAirControl,         "TfaAirControl",         QT_TRANSLATE_NOOP("Protocols", "text lines from HID records, CO2/temperature/humidity (TFA AIRCO2NTROL)"), "Holtek",  "USB-HID (Holtek)",         make<DecoderTfaAirControl> },
     { FrameFormat::KeysightU12xx,         "KeysightU12xx",         QT_TRANSLATE_NOOP("Protocols", "variable bytes ASCII, polled with CONF?/FETC? (Agilent/Keysight U12xx)"), "",                      "",                         make<DecoderKeysightU12xx> },
+    { FrameFormat::UniTUT32x,             "UniTUT32x",             QT_TRANSLATE_NOOP("Protocols", "19 bytes ASCII, continuous after a start byte (UNI-T UT32x thermometers)"), "",            "",                         make<DecoderUniTUT32x> },
+    { FrameFormat::MastechMS6514,         "MastechMS6514",         QT_TRANSLATE_NOOP("Protocols", "18 bytes binary, continuous, two values (MASTECH MS6514 thermometer)"), "",                "",                         make<DecoderMastechMS6514> },
   };
   return table;
 }

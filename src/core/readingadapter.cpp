@@ -52,6 +52,8 @@ Meaning meaning(const QString &base, const QString &mode, FrameFormat::DataForma
     return { Quantity::Temperature, QStringLiteral("°C") };
   if (base == QLatin1String("dF") || base == QStringLiteral("°F") || (mode == QLatin1String("TE") && base == QLatin1String("F")))
     return { Quantity::Temperature, QStringLiteral("°F") };
+  if (mode == QLatin1String("TE") && base == QLatin1String("K"))
+    return { Quantity::Temperature, QStringLiteral("K") };   // thermometers that show kelvin
   if (mode == QLatin1String("HFE") || base.compare(QLatin1String("hFE"), Qt::CaseInsensitive) == 0)
     return { Quantity::Gain, QString() };
   // a time in the frequency position is the pulse width (Fluke "ms")

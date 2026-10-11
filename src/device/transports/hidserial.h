@@ -56,7 +56,7 @@ public:
   /// bytes); returns the count, -1 for a malformed report. Pure, for tests.
   static int unpackReport(Chip chip, const unsigned char *report, int reportLen, unsigned char *out);
   /// The output report(s) that carry @p data to the cable, report id
-  /// placeholder included; empty when the chip cannot send (CH9325).
+  /// placeholder included; empty when there is nothing to send.
   static QByteArray packWrite(Chip chip, const QByteArray &data);
   /// The CP2110 UART_CONFIG feature report (9 bytes incl. report id 0x50)
   /// for the given line settings; parity 0 none / 1 even / 2 odd. Pure.

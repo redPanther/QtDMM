@@ -41,8 +41,8 @@ The bridge serves them like serial ports: it reads the HID reports directly
 from `/dev/hidrawN` (no extra library), unpacks the UART bytes and, where the
 chip takes one, turns the line settings QtDMM sends into the cable's feature
 report. In QtDMM the port is again an RFC2217 entry; the meter model is chosen
-as usual. Chips: CH9325/HE2325U (receive only, baud rate set by feature
-report), CP2110 (full UART), CH9329 (fixed 9600 8N1), BU-86X (fixed).
+as usual. Chips: CH9325/HE2325U (baud rate set by feature report, sends up
+to seven bytes per report), CP2110 (full UART), CH9329 (fixed 9600 8N1), BU-86X (fixed).
 
 Address a cable by `hid:VID:PID` (the first one attached) or by its node
 `hid:/dev/hidraw2`; `--list` prints both. Linux only.
