@@ -1,0 +1,78 @@
+protocol: KeysightU12xx
+decoder: src/device/decoders/keysight_u12xx.cpp
+devices: [Agilent/Keysight U1231A..U1282A]
+frames_per_reading: 1
+sources:
+  - docs/protocols/spec/keysight_u12xx.yaml   # synthetic, see note below
+
+# SYNTHETIC vectors built from the answer formats libsigrok's agilent-dmm
+# recognises (protocol.c: the CONF? regexes of agdmm_recvs_u123x .. u128x,
+# FETC? as [-+]d.dddddddddE[-+]dd, +-9.9E+37 overload, "*<n>" when the rotary
+# switch turns). No capture from a real meter exists yet - replace when one
+# arrives. QtDMM polls CONF? and FETC? in turn; the CONF? answer stays in the
+# reader's buffer until the value line, so a vector is both lines, as the
+# decoder gets them.
+vectors:
+  - source_line: 'U123x "V,0,DC" then 1.2345 V'
+    bytes: 22 56 2C 30 2C 44 43 22 0D 0A 2B 31 2E 32 33 34 35 30 30 30 30 45 2B 30 30 0D 0A
+    reading: {value: "1.2345", unit: "V", coupling: "DC"}
+    expect: {special: "DC"}
+  - source_line: 'U123x "MV,1,AC": FETC? counts in mV'
+    bytes: 22 4D 56 2C 31 2C 41 43 22 0D 0A 2B 31 2E 32 33 34 35 30 30 30 30 45 2B 30 32 0D 0A
+    reading: {value: "123.45", unit: "mV", coupling: "AC"}
+    expect: {special: "AC"}
+  - source_line: 'U127x "MA,0,ACDC"'
+    bytes: 22 4D 41 2C 30 2C 41 43 44 43 22 0D 0A 2B 35 2E 30 30 30 30 30 30 30 30 45 2B 30 31 0D 0A
+    reading: {value: "50", unit: "mA", coupling: "ACDC"}
+    expect: {special: "ACDC"}
+  - source_line: 'U123x "RES,2"'
+    bytes: 22 52 45 53 2C 32 22 0D 0A 2B 34 2E 37 30 30 30 30 30 30 30 45 2B 30 33 0D 0A
+    reading: {value: "4.7", unit: "kOhm"}
+    expect: {special: "OH"}
+  - source_line: 'U123x "DIOD"'
+    bytes: 22 44 49 4F 44 22 0D 0A 2B 36 2E 35 32 30 30 30 30 30 30 45 2D 30 31 0D 0A
+    reading: {value: "0.652", unit: "V"}
+    expect: {special: "DI"}
+  - source_line: 'U125x "VOLT:AC" 230.12 V'
+    bytes: 22 56 4F 4C 54 3A 41 43 20 2B 36 2E 30 30 30 30 30 30 45 2B 30 32 2C 2B 31 2E 30 30 30 30 30 30 45 2D 30 31 22 0D 0A 2B 32 2E 33 30 31 32 30 30 30 30 45 2B 30 32 0D 0A
+    reading: {value: "230.12", unit: "V", coupling: "AC"}
+    expect: {special: "AC"}
+  - source_line: 'U124x "CURR:DC" -12.34 mA'
+    bytes: 22 43 55 52 52 3A 44 43 20 2B 31 2E 30 30 30 30 30 30 45 2D 30 31 2C 2B 31 2E 30 30 30 30 30 30 45 2D 30 35 22 0D 0A 2D 31 2E 32 33 34 30 30 30 30 30 45 2D 30 32 0D 0A
+    reading: {value: "-12.34", unit: "mA", coupling: "DC"}
+    expect: {special: "DC"}
+  - source_line: 'U125x "VOLT" without coupling is DC'
+    bytes: 22 56 4F 4C 54 20 2B 36 2E 30 30 30 30 30 30 45 2B 30 30 2C 2B 31 2E 30 30 30 30 30 30 45 2D 30 34 22 0D 0A 2B 35 2E 30 30 30 30 30 30 30 30 45 2B 30 30 0D 0A
+    reading: {value: "5", unit: "V", coupling: "DC"}
+    expect: {special: "DC"}
+  - source_line: 'U128x "TEMP:K CEL" 23.5 C'
+    bytes: 22 54 45 4D 50 3A 4B 20 43 45 4C 22 0D 0A 2B 32 2E 33 35 30 30 30 30 30 30 45 2B 30 31 0D 0A
+    reading: {value: "23.50", unit: "C"}
+    expect: {special: "TE"}
+  - source_line: 'U125x "T1:K FAR" 74.3 F'
+    bytes: 22 54 31 3A 4B 20 46 41 52 22 0D 0A 2B 37 2E 34 33 30 30 30 30 30 30 45 2B 30 31 0D 0A
+    reading: {value: "74.30", unit: "dF"}
+    expect: {special: "TE"}
+  - source_line: 'U125x "CAP" 470 nF'
+    bytes: 22 43 41 50 20 2B 31 2E 30 30 30 30 30 30 45 2D 30 36 2C 2B 31 2E 30 30 30 30 30 30 45 2D 30 39 22 0D 0A 2B 34 2E 37 30 30 30 30 30 30 30 45 2D 30 37 0D 0A
+    reading: {value: "470", unit: "nF"}
+    expect: {special: "CA"}
+  - source_line: 'U125x "FREQ" 50 Hz'
+    bytes: 22 46 52 45 51 20 2B 31 2E 30 30 30 30 30 30 45 2B 30 33 2C 2B 31 2E 30 30 30 30 30 30 45 2D 30 31 22 0D 0A 2B 35 2E 30 30 30 30 30 30 30 30 45 2B 30 31 0D 0A
+    reading: {value: "50", unit: "Hz"}
+    expect: {special: "FR"}
+  - source_line: 'U128x "CONT" 12 Ohm'
+    bytes: 22 43 4F 4E 54 20 2B 36 2E 30 30 30 30 30 30 45 2B 30 32 2C 2B 31 2E 30 30 30 30 30 30 45 2D 30 31 22 0D 0A 2B 31 2E 32 30 30 30 30 30 30 30 45 2B 30 31 0D 0A
+    reading: {value: "12", unit: "Ohm"}
+    expect: {special: "BUZ"}
+  - source_line: 'U125x "PULS:PDUT" 25 %'
+    bytes: 22 50 55 4C 53 3A 50 44 55 54 22 0D 0A 2B 32 2E 35 30 30 30 30 30 30 30 45 2B 30 31 0D 0A
+    reading: {value: "25.00", unit: "%"}
+  - source_line: 'U125x "RES" overload'
+    bytes: 22 52 45 53 20 2B 36 2E 30 30 30 30 30 30 45 2B 30 37 2C 2B 31 2E 30 30 30 30 30 30 45 2B 30 34 22 0D 0A 2B 39 2E 39 30 30 30 30 30 30 30 45 2B 33 37 0D 0A
+    reading: {value: "OL", unit: "Ohm"}
+    expect: {special: "OH", val: "OL"}
+  - source_line: "switch message, then CONF? and the value"
+    bytes: 2A 32 0D 0A 22 56 4F 4C 54 3A 44 43 20 2B 36 2E 30 30 30 30 30 30 45 2B 30 31 2C 2B 31 2E 30 30 30 30 30 30 45 2D 30 33 22 0D 0A 2B 31 2E 32 30 30 30 30 30 30 30 45 2B 30 31 0D 0A
+    reading: {value: "12", unit: "V", coupling: "DC"}
+    expect: {special: "DC"}

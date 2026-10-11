@@ -63,6 +63,36 @@ int main(int argc, char **argv)
     expect(ut61plus, "peak_off", "abcd034e01c9");
     expect(FrameFormat::Metex14, "hold", "");   // no remote control
 
+    // what is asked: the Keysight U12xx answer CONF? (the function) first,
+    // then FETC? (the value); a turn of the rotary switch ("*3") makes the
+    // function unknown - no value until CONF? again
+    {
+      auto keysight = DmmDecoder::getInstance(FrameFormat::KeysightU12xx);
+      const QByteArray conf("CONF?\n\r\n"), fetc("FETC?\n\r\n");
+      auto step = [&](const QByteArray &want, const char *what)
+      {
+        const QByteArray got = keysight->pollRequest();
+        if (got != want)
+        {
+          qWarning() << "KeysightU12xx:" << what << "asks" << got << "expected" << want;
+          ++problems;
+        }
+      };
+      step(conf, "first poll");
+      step(conf, "before a CONF? answer");
+      bool ok = !keysight->decode("\"VOLT:DC +6.000000E+00,+1.000000E-04\"\r\n+1.20000000E+00\r\n", 0)->val.isEmpty();
+      step(fetc, "after the function");
+      ok = ok && !keysight->decode("*3\r\n+1.20000000E+00\r\n", 0);
+      step(conf, "after the switch");
+      ok = ok && !keysight->decode("+1.20000000E+00\r\n", 0);   // still unknown
+      ok = ok && keysight->decode("\"RES +6.000000E+02,+1.000000E-01\"\r\n+1.00000000E+02\r\n", 0)->unit == "Ohm";
+      if (!ok)
+      {
+        qWarning() << "KeysightU12xx: a switch must hide values until the next CONF?";
+        ++problems;
+      }
+    }
+
     // the states the keys switch come back in the frame: flags A MAX, MIN,
     // HOLD, REL; flags C peak - into the reading's flags
     auto frame = [](unsigned char a, unsigned char c)

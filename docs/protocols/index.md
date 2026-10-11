@@ -28,6 +28,7 @@ regression tests.
 | `do3122.cpp` | `DO3122Continuous` | Duratool DO3122 | — (`duratool.pdf` is the meter's datasheet, no frame description; layout from the decoder) | synthetic |
 | `fluke_qm.cpp` | `FlukeQM` | Fluke 87-IV/89-IV/187/189 (9600 Bd) and 287/289 (115200 Bd) over the IR serial adapter (unconfirmed) | `fluke_18x_remote.pdf`, `fluke_28x_remote.pdf` (Fluke's Remote Interface Specifications; no capture) | yes, from the specifications' examples |
 | `fluke45.cpp` | `Fluke45` | Fluke 45 bench meter, RS-232 (unconfirmed) | `fluke_45_users_manual.pdf` (chapter 5; no capture) | yes, built from the manual's tables |
+| `keysight_u12xx.cpp` | `KeysightU12xx` | Agilent/Keysight U1231A–U1282A over the IR-USB cable (U1173A/B, 9600 8N1; unconfirmed) | — (answer formats from libsigrok's `agilent-dmm`, GPL) | synthetic |
 | `gdm703.cpp` | `GDM703Continuous` | Voltcraft GDM 703/704/705 (unconfirmed; chip WENS98A per the [sigrok IC list](https://sigrok.org/wiki/Multimeter_ICs)) | — (layout from Toussaint's CDMM, `ablage/CDMM`) | synthetic |
 | `dtm0660.cpp` | `DTM0660` | Generic DTM0660 (4000/6000/8000 count) | — (`dtm0660-brochure.pdf` has no serial frame; layout from the decoder, after libsigrok) | synthetic |
 | `m9803r.cpp` | `M9803RContinuous` | ELV M9803R, MASTECH M9803R, McVoice M-980T | — (byte table in the decoder's header, reverse engineered by Toussaint) | synthetic from the byte table, plus frames of a real meter published on the web (one, 4.700 kOhm, corrected for an apparent typo) |
@@ -46,6 +47,13 @@ for the 45), the meter answers with status lines (CMD_ACK `0\r`, the 45's
 `=>` prompt or a command echo) and one reading line. The reader hands
 everything since the previous frame to the decoder (`getPacketLength()` 0),
 which takes the last line.
+
+`KeysightU12xx` is polled as well, with two questions in turn: `CONF?` (what
+the meter measures) and `FETC?` (the value), terminated `\n\r\n` as libsigrok
+does. Only the value line ends a frame; the `CONF?` answer before it, and the
+`*<n>` the meter sends when its rotary switch turns, reach the decoder with
+it. After a switch no value is shown until `CONF?` has been answered again;
+`CONF?` is also asked every tenth time.
 
 `VictronBLE` is not a serial protocol at all: `BleAdvertisementDevice`
 decrypts each Bluetooth advertisement (`src/device/victronble.cpp`, AES-128-CTR
