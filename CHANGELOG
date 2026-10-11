@@ -185,6 +185,11 @@
 - Settings, Multimeter: the port parameters and the protocol are under Advanced, closed for a known model
 - Quitting and Apply in the settings no longer connect the meter (quitting connected a Bluetooth meter twice)
 - A Bluetooth meter that stays half connected (a UT60BT now and then) is tried again after 10 s, not 20 s
+- SCPI: STAT:QUES? bit 2 and INPut? follow the connection: a meter lost and reconnecting (a Bluetooth meter
+  switched off) is not connected; INPut OFF also ends the reconnecting. An old reading no longer sets the
+  overload and hold bits
+- Linux AppImage: Qt's own texts (OK / Cancel, Ctrl, file dialogs) are translated too. The AppImage needs
+  glibc 2.38 or newer (Ubuntu 24.04, Debian 13), see Troubleshooting
 
 
 * 04/10/2026 26.1 (the first release since 0.9.8; this section has the changes after rc2, the two release

@@ -84,6 +84,9 @@ public:
   /// The last message emitted through error().
   QString errorString() const  { return m_error; }
   LinkState linkState() const { return m_state; }
+  /// open() called and not close()d: the connection is wanted, even while
+  /// it is lost and being reopened.
+  bool    isWanted() const { return m_wanted; }
   /// Silence longer than this (ms) is a Timeout; default 3000.
   void    setTimeout(int ms) { m_timeoutMs = ms; }
   int     timeout() const { return m_timeoutMs; }

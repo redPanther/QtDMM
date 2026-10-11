@@ -29,6 +29,12 @@ MeterController::MeterController(QObject *parent)
   qRegisterMetaType<Reading>();
   connect(m_dmm, &MeterConnection::response, this, &MeterController::responseSLOT);
   connect(m_dmm, &MeterConnection::error, this, &MeterController::error);
+  // SCPI's "connected" (INPut?, STAT:QUES? bit 2) is the link itself: lost
+  // and reconnecting (a Bluetooth meter switched off) is not connected
+  connect(m_dmm, &MeterConnection::linkStateChanged, this, [this](MeterConnection::LinkState state)
+  {
+    m_scpi->setConnected(state == MeterConnection::LinkState::Connected);
+  });
 
   // the recorder keeps every reading of the main value, and a gap where it
   // went stale
@@ -64,7 +70,8 @@ MeterController::MeterController(QObject *parent)
   connect(m_scpi, &ScpiServer::stopRecording, this, [this] { Q_EMIT recordingRequested(false); });
   connect(m_scpi, &ScpiServer::connectRequested, this, [this](bool on)
   {
-    if (on != m_dmm->isOpen())
+    // INPut OFF also ends a connection that is lost and being reopened
+    if (on != m_dmm->isWanted())
       Q_EMIT connectRequested(on);
   });
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
@@ -113,7 +120,6 @@ bool MeterController::connectMeter(bool on)
     ok = m_dmm->open();
   else
     m_dmm->close();
-  m_scpi->setConnected(m_dmm->isOpen());
   // a "no readings" alarm watches a connected meter, so its clock starts here
   m_alarms->setConnected(m_dmm->isOpen(), QDateTime::currentMSecsSinceEpoch());
   return ok;
