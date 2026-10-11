@@ -155,6 +155,30 @@ int main(int argc, char **argv)
     check(!sidebar.instanceItem("p") && sidebar.instancesNode()->childCount() == 2, "deleted one gone");
   }
 
+  // 8. the services: port or off, the address to copy, settings by a double click
+  {
+    DeviceSidebar::Service scpi { "scpi", "SCPI", "5025", "localhost:5025", "tip", true, true };
+    DeviceSidebar::Service hislip { "hislip", "HiSLIP", "off", "", "off tip", false, false };
+    sidebar.setServices({ scpi, hislip });
+    QTreeWidgetItem *node = sidebar.servicesNode();
+    check(node->childCount() == 2, "two services");
+    QTreeWidgetItem *s = node->child(0);
+    check(s->text(0) == "SCPI" && s->text(1) == "5025" && s->data(1, Qt::UserRole).toString() == "localhost:5025",
+          "SCPI row: " + s->text(1));
+    check(node->child(1)->text(1) == "off", "HiSLIP off");
+    check(!(s->flags() & Qt::ItemIsEditable) && !(node->flags() & Qt::ItemIsDropEnabled), "not renamed, no drops");
+    int settings = 0;
+    QObject::connect(&sidebar, &DeviceSidebar::serviceSettingsRequested, [&] { ++settings; });
+    Q_EMIT sidebar.itemDoubleClicked(node->child(1), 0);
+    check(settings == 1, "double click: settings");
+    hislip.running = true;
+    hislip.value = "4880";
+    sidebar.setServices({ scpi, hislip });
+    check(node->child(0) == s && node->child(1)->text(1) == "4880", "updated in place");
+    sidebar.setServices({ scpi });
+    check(node->childCount() == 1, "one less");
+  }
+
   if (failed)
     qWarning() << failed << "check(s) failed";
   else

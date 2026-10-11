@@ -209,6 +209,13 @@ if (BUILD_TESTING)
 	target_link_libraries(${TEST_SCPI} PRIVATE Qt::Core Qt6::Network Qt::Test)
 	add_test(NAME scpi_server COMMAND ${TEST_SCPI})
 
+	## HiSLIP (VISA over LAN) in front of the SCPI interpreter, over TCP on localhost
+	set( TEST_HISLIP test_hislip)
+	add_executable(${TEST_HISLIP} MACOSX_BUNDLE tests/test_hislip.cpp src/service/hislipserver.cpp src/service/scpiserver.cpp)
+	target_include_directories(${TEST_HISLIP} PRIVATE src)
+	target_link_libraries(${TEST_HISLIP} PRIVATE Qt::Core Qt6::Network)
+	add_test(NAME scpi_hislip COMMAND ${TEST_HISLIP})
+
 	## alarms: conditions, duration, hysteresis, acknowledge, JSON
 	set( TEST_ALARM test_alarm)
 	add_executable(${TEST_ALARM} MACOSX_BUNDLE tests/test_alarm.cpp src/core/alarm.cpp src/ui/engnumbervalidator.cpp src/core/siprefix.cpp)

@@ -12,6 +12,11 @@
 - Symbols: coloured (KDE's Oxygen, the default), plain (KDE's Breeze, light and dark) or, on Linux and BSD,
   the desktop's icon theme - Settings, Appearance, Symbols. They replace the XPM icons
 - The tip-of-the-day dialog is gone
+- SCPI server: also over HiSLIP (VISA: NI-VISA, LabVIEW, PyVISA-py), TCPIP::host::hislip0::INSTR on port 4880,
+  switched on in Settings, SCPI server. No extra rights needed
+- Sidebar: node Services with the SCPI server and HiSLIP (port or off, green dot with a client, double click
+  for the settings, Copy address); the SCPI field in the status bar is gone. *STB? reports bit 2 (EAV) while
+  errors are queued
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
 - Digital display: HOLD is an H in a square at the right of the annunciators, MANU is gone (AUTO off is a

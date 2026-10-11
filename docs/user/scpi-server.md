@@ -6,7 +6,9 @@ same for the meter it reads: switch on the **SCPI server** under
 **Settings → SCPI server** and a consumer multimeter on a USB cable, a
 Victron device over Bluetooth or the simulated meter becomes an instrument
 that [lxi-tools](https://github.com/lxi-tools/lxi-tools), LabVIEW,
-a Python script or a second QtDMM can query.
+a Python script or a second QtDMM can query - over a plain TCP socket, or
+over **HiSLIP**, the LAN protocol of VISA (NI-VISA, LabVIEW, Keysight IO
+Libraries, PyVISA).
 
 The server only reports. It never sends anything to the meter; the meter
 keeps deciding what it measures.
@@ -16,11 +18,17 @@ keeps deciding what it measures.
 | Setting | Meaning |
 |---|---|
 | Enable the SCPI server | off by default |
-| Port | 5025 is the usual raw-socket SCPI port. When it is taken - a second QtDMM instance, say - the next free one is used; the status bar shows the actual port |
+| Port | 5025 is the usual raw-socket SCPI port. When it is taken - a second QtDMM instance, say - the next free one is used; the sidebar shows the actual port |
 | Listen on | *This computer only* binds to `localhost`; *All network interfaces* opens the port to the network |
-| Announce by mDNS | with the port open to the network, QtDMM registers as `_scpi-raw._tcp` so that `lxi discover -m` and every DNS-SD browser list it as "QtDMM *host*" (or "QtDMM *instance*" with `--config-id`) |
+| Also HiSLIP | the same commands for VISA on a second port, off by default; see *VISA (HiSLIP)* below |
+| HiSLIP port | 4880 is the port VISA tries when the address names none; taken, the next free one is used |
+| Announce by mDNS | with the port open to the network, QtDMM registers as `_scpi-raw._tcp` (and `_hislip._tcp`) so that `lxi discover -m` and every DNS-SD browser list it as "QtDMM *host*" (or "QtDMM *instance*" with `--config-id`) |
 
-The status bar shows *SCPI host:port (n clients)* while the server runs.
+The sidebar (F9) lists both under **Services**: *SCPI* and *HiSLIP* with
+their port, or *off*. The dot turns green while a client is connected, the
+tooltip has the address and the number of clients. A double click opens
+these settings; the context menu also copies the address
+(`localhost:5025`, `TCPIP::localhost::hislip0::INSTR`).
 There is **no authentication**: whoever can reach the port can read the
 meter, start the recorder, connect or disconnect - and fetch a picture of
 the QtDMM window (`HCOPy:SDUMp:DATA?`), which shows the readings, the
@@ -64,6 +72,37 @@ long or the short form (`MEASure?`, `MEAS?`), case does not matter.
 | `SYSTem:ERRor?` `SYSTem:ERRor:COUNt?` | the error queue: `0,"No error"`, `-113,"Undefined header"`, `-230,"Data corrupt or stale"`, ... |
 | `*RST` `*CLS` `*OPC?` `*TST?` `*ESR?` `*STB?` `SYSTem:VERSion?` | the usual IEEE 488.2 replies |
 
+## VISA (HiSLIP)
+
+VISA libraries address a LAN instrument by a resource string. With
+**Also HiSLIP** switched on, QtDMM is
+
+```
+TCPIP::bench.local::hislip0::INSTR          (port 4880)
+TCPIP::bench.local::hislip0,4881::INSTR     (another port: a second instance)
+```
+
+The settings page shows the address for this computer. It works with
+NI-VISA (LabVIEW, NI MAX: *Add network device*, *Manual entry*, HiSLIP),
+the Keysight IO Libraries and [PyVISA-py](https://pyvisa.readthedocs.io/projects/pyvisa-py/) 0.6
+or newer:
+
+```python
+import pyvisa
+dmm = pyvisa.ResourceManager("@py").open_resource("TCPIP::bench.local::hislip0::INSTR")
+print(dmm.query("*IDN?"))
+print(float(dmm.query("READ?")))
+```
+
+HiSLIP needs no extra rights and no other service. QtDMM speaks HiSLIP 1.0
+in synchronized mode; it grants no locks (`viLock` fails), and a message
+may be 1 MB at most. The raw socket is a VISA resource too, with `\n` as
+read termination:
+
+```
+TCPIP::bench.local::5025::SOCKET
+```
+
 Unknown headers answer nothing and leave `-113,"Undefined header"` in the
 queue; a query that could not be answered is skipped in the `;` list. The
 complete list of accepted forms, answers and error codes is the
@@ -77,7 +116,8 @@ complete list of accepted forms, answers and error codes is the
   measurement. Meters deliver two to four readings a second, so polling
   faster than that repeats values.
 - Every instance of QtDMM (`--config-id`) has its own server; with the
-  same port configured they line up on 5025, 5026, ...
+  same port configured they line up on 5025, 5026, ... and for HiSLIP on
+  4880, 4881, ...
 - sigrok's `scpi-dmm` driver identifies instruments by `*IDN?` and does not
   know QtDMM, so it will not talk to this server. lxi-tools, PyVISA and
   plain sockets work; the PyVISA resource string is

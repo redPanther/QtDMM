@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "ui/devicesidebar.h"
 
+#include <QApplication>
+#include <QClipboard>
 #include <QContextMenuEvent>
 #include <QDropEvent>
 #include <QHeaderView>
@@ -66,6 +68,12 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   m_instances->setFont(0, bold);
   m_instances->setFirstColumnSpanned(true);
   m_instances->setExpanded(true);
+  m_services = new QTreeWidgetItem(this, { tr("Services") });
+  m_services->setFlags(Qt::ItemIsEnabled);
+  m_services->setFont(0, bold);
+  m_services->setFirstColumnSpanned(true);
+  m_services->setToolTip(0, tr("What this window offers to other programs over the network."));
+  m_services->setExpanded(true);
 
   connect(this, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item)
   {
@@ -85,6 +93,11 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   });
   connect(this, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item)
   {
+    if (item && item->parent() == m_services)
+    {
+      Q_EMIT serviceSettingsRequested();
+      return;
+    }
     const QString instance = instanceOf(item);
     if (!instance.isEmpty() && instance != m_ownInstance && !instanceRunning(item))
       Q_EMIT instanceRequested(instance);
@@ -207,6 +220,50 @@ void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString
     item->setExpanded(true);
   }
   m_filling = false;
+}
+
+void DeviceSidebar::setServices(const QList<Service> &services)
+{
+  m_filling = true;
+  while (m_services->childCount() > services.size())
+    delete m_services->takeChild(m_services->childCount() - 1);
+  const QColor grey = palette().color(QPalette::Disabled, QPalette::WindowText);
+  for (int i = 0; i < services.size(); ++i)
+  {
+    const Service &service = services[i];
+    QTreeWidgetItem *item = m_services->child(i);
+    if (!item)
+    {
+      item = new QTreeWidgetItem(m_services);
+      item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+      item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+    }
+    item->setData(0, Qt::UserRole, service.id);
+    item->setData(1, Qt::UserRole, service.address);
+    item->setText(0, service.name);
+    item->setText(1, service.value);
+    item->setToolTip(0, service.tooltip);
+    item->setToolTip(1, service.tooltip);
+    item->setForeground(0, service.running ? palette().color(QPalette::Text) : grey);
+    item->setForeground(1, service.running ? palette().color(QPalette::Text) : grey);
+    // as an instance: green while a client is connected
+    item->setIcon(0, dot(service.active ? QColor(0x22, 0xaa, 0x22) : service.running ? grey : QColor()));
+  }
+  m_filling = false;
+}
+
+void DeviceSidebar::serviceMenu(QTreeWidgetItem *item, const QPoint &pos)
+{
+  const QString address = item->data(1, Qt::UserRole).toString();
+  QMenu menu(this);
+  QAction *settings = menu.addAction(QIcon::fromTheme("configure"), tr("&Settings..."));
+  QAction *copy = menu.addAction(QIcon::fromTheme("edit-copy"), tr("&Copy address"));
+  copy->setEnabled(!address.isEmpty());
+  QAction *chosen = menu.exec(pos);
+  if (chosen == settings)
+    Q_EMIT serviceSettingsRequested();
+  else if (chosen == copy)
+    QApplication::clipboard()->setText(address);
 }
 
 void DeviceSidebar::fill()
@@ -348,6 +405,12 @@ void DeviceSidebar::instanceMenu(QTreeWidgetItem *item, const QPoint &pos)
 void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
 {
   QTreeWidgetItem *item = itemAt(event->pos());
+  if (item && (item == m_services || item->parent() == m_services))
+  {
+    if (item->parent() == m_services)
+      serviceMenu(item, event->globalPos());
+    return;
+  }
   if (!instanceOf(item).isEmpty())
   {
     instanceMenu(item, event->globalPos());

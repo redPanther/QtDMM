@@ -8,7 +8,10 @@ command changes what the meter measures.
 ## Message format
 
 - Transport: raw TCP, one **program message per line** (`\n`, `\r\n` also
-  accepted), no VXI-11, no HiSLIP.
+  accepted); or HiSLIP 1.0 (`src/service/hislipserver.cpp`, synchronized
+  mode, no locks, messages up to 1 MB, `tests/test_hislip.cpp`), where a
+  message may also hold several lines and each query line answers with a
+  message of its own. No VXI-11.
 - Several commands per message separated by `;`. Their query answers come
   back in one line, separated by `;`, terminated by `\n`. A message without
   a query gets no answer at all.
@@ -35,7 +38,8 @@ command changes what the meter measures.
 | `*OPC?` | `1` | always complete |
 | `*OPC`, `*WAI` | – | accepted, no effect |
 | `*TST?` | `0` | self-test passed |
-| `*ESR?`, `*STB?`, `*ESE?`, `*SRE?` | `0` | no status registers; `*ESE n` / `*SRE n` are accepted and ignored |
+| `*STB?` | `0` or `4` | status byte: bit 2 (4, EAV) while the error queue holds errors |
+| `*ESR?`, `*ESE?`, `*SRE?` | `0` | no event registers; `*ESE n` / `*SRE n` are accepted and ignored |
 
 ## Readings
 

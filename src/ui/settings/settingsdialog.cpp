@@ -756,6 +756,8 @@ bool SettingsDialog::scpiEnabled() const { return m_scpi->enabled(); }
 int SettingsDialog::scpiPort() const { return m_scpi->port(); }
 bool SettingsDialog::scpiAllInterfaces() const { return m_scpi->allInterfaces(); }
 bool SettingsDialog::scpiMdns() const { return m_scpi->mdns(); }
+bool SettingsDialog::scpiHislip() const { return m_scpi->hislip(); }
+int SettingsDialog::scpiHislipPort() const { return m_scpi->hislipPort(); }
 
 void SettingsDialog::setScpiStatus(const QString &text)
 {

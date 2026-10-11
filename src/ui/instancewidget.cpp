@@ -162,10 +162,10 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
     Q_EMIT connectDMM(!released);
     connectPort(!released);
   });
-  connect(m_ctl, &MeterController::scpiStatusChanged, this, [this](const QString &status, const QString &detail)
+  connect(m_ctl, &MeterController::scpiStatusChanged, this, [this](const QString &detail)
   {
-    Q_EMIT scpiStatus(status);
     m_configDlg->setScpiStatus(detail);
+    Q_EMIT servicesChanged();
   });
   // HCOPy:SDUMp:DATA? - the main window as the "instrument screen"
   m_ctl->setScreenshotSource([this](const QByteArray &format) -> QByteArray
@@ -464,6 +464,11 @@ void InstanceWidget::configRecorderSLOT()
   openConfig(SettingsDialog::Recorder);
 }
 
+void InstanceWidget::configScpiSLOT()
+{
+  openConfig(SettingsDialog::Scpi);
+}
+
 void InstanceWidget::applySLOT()
 {
   readConfig();
@@ -475,6 +480,8 @@ void InstanceWidget::applySLOT()
   scpi.allInterfaces = m_configDlg->scpiAllInterfaces();
   scpi.port = quint16(m_configDlg->scpiPort());
   scpi.mdns = m_configDlg->scpiMdns();
+  scpi.hislip = m_configDlg->scpiHislip();
+  scpi.hislipPort = quint16(m_configDlg->scpiHislipPort());
   m_ctl->applyScpi(scpi);
   syncDevice();
   Q_EMIT configChanged();

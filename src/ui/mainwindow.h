@@ -138,6 +138,8 @@ protected:
   /// The node "Instances" anew: the configured and running instances with
   /// their devices and readings (each second while the sidebar is shown).
   void        updateInstances();
+  /// The node "Services": the SCPI server and HiSLIP of this window.
+  void        updateServices();
   /// A click on an instance: a running one comes to the front, a stopped one starts.
   void        openInstance(const QString &id);
   void        renameInstance(const QString &from, const QString &to);
@@ -202,7 +204,6 @@ protected:
   bool        m_running;
   QLabel     *m_error;
   QLabel     *m_info;
-  QLabel     *m_scpi;      ///< SCPI server state, hidden while it is off
   QMenu      *m_menu;
   HelpDlg    *m_helpDlg;
   SharedStateManager* m_stateMgr;

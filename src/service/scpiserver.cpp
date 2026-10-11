@@ -197,6 +197,14 @@ QByteArray ScpiServer::block(const QByteArray &data)
   return '#' + QByteArray::number(len.size()) + len + data;
 }
 
+ScpiEndpoint ScpiServer::endpoint()
+{
+  ScpiEndpoint ep;
+  ep.process = [this](const QByteArray &line) { return process(line); };
+  ep.statusByte = [this]() { return statusByte(); };
+  return ep;
+}
+
 QByteArray ScpiServer::process(const QByteArray &message)
 {
   QList<QByteArray> answers;
@@ -378,7 +386,9 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
       return noQuery() ? QString() : QString();
     if (head == "*TST")
       return queryOnly() ? QString("0") : QString();
-    if (head == "*ESR" || head == "*STB" || head == "*ESE" || head == "*SRE")
+    if (head == "*STB")
+      return queryOnly() ? QString::number(statusByte()) : QString();
+    if (head == "*ESR" || head == "*ESE" || head == "*SRE")
     {
       if (!cmd.query && (head == "*ESE" || head == "*SRE"))
         return {};
