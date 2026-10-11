@@ -1,0 +1,37 @@
+protocol: Appa500
+decoder: src/device/decoders/appa_dmm.cpp
+devices: [APPA 503/505, Voltcraft VC-930/VC-950]
+frames_per_reading: 1
+sources:
+  - docs/protocols/spec/appa_500.yaml   # synthetic, see note below
+
+# SYNTHETIC frames built from libsigrok appa-dmm's legacy 500 protocol
+# (appadmm_500_dec_read_display): 55 55 00 36, function @20..@21 big-endian,
+# range @23, manual range bit 0 and low-pass bit 4 @24, main @37 and sub @42
+# display (24-bit BE count, dot|unit<<3, content+1 | overload<<5 | text
+# bits 6/7), checksum. No capture from a real meter exists yet.
+vectors:
+  - source_line: "VC-930: DC V 5.0000 V"
+    bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 C3 50 0C 00 00 00 00 00 80 00 00 00 00 00 00 00 82
+    reading: {value: "5.0000", unit: "V", coupling: "DC", range_mode: "auto"}
+    expect: {special: "DC", val2: ""}
+  - source_line: "AC V 230.0 V, sub 50.00 Hz"
+    bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 08 FC 09 00 00 13 88 8A 02 00 00 00 00 00 00 00 17
+    reading: {value: "230.0", unit: "V", coupling: "AC", range_mode: "auto"}
+    expect: {special: "AC", val2: "50.00", unit2: "Hz", dval2: 50.0}
+  - source_line: "AC V with low-pass filter, manual"
+    bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 02 11 00 00 00 00 00 00 00 00 00 00 00 00 00 03 E8 09 00 00 00 00 00 80 00 00 00 00 00 00 00 68
+    reading: {value: "100.0", unit: "V", coupling: "AC", range_mode: "manual"}
+    expect: {special: "AC"}
+  - source_line: "resistance 1.000 kOhm"
+    bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 03 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 03 E8 63 00 00 00 00 00 80 00 00 00 00 00 00 00 B2
+    reading: {value: "1.000", unit: "kOhm", range_mode: "auto"}
+    expect: {special: "OH"}
+  - source_line: "DC mA overload"
+    bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 04 01 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 22 20 00 00 00 00 80 00 00 00 00 00 00 00 A8
+    reading: {value: "OL", unit: "mA", coupling: "DC", range_mode: "auto"}
+    expect: {val: "OL"}
+  - source_line: "DC V -1.2345 V, MAX"
+    bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 FF CF C7 0C 0E 00 00 00 00 80 00 00 00 00 00 00 00 12
+    reading: {value: "-1.2345", unit: "V", coupling: "DC", range_mode: "auto"}
+    expect: {special: "DC"}

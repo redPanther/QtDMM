@@ -3293,6 +3293,16 @@ Le multimètre est-il branché et allumé ?</translation>
         <source>18 bytes binary, continuous, two values (MASTECH MS6514 thermometer)</source>
         <translation>18 octets binaires, continu, deux valeurs (thermomètre MASTECH MS6514)</translation>
     </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="53"/>
+        <source>17 bytes binary, polled (APPA 506/208, BENNING MM 12)</source>
+        <translation>17 octets binaires, interrogé (APPA 506/208, BENNING MM 12)</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="54"/>
+        <source>59 bytes binary, polled (APPA 503/505, Voltcraft VC-930/950)</source>
+        <translation>59 octets binaires, interrogé (APPA 503/505, Voltcraft VC-930/950)</translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>

@@ -22,6 +22,8 @@ regression tests.
 | `brymen_bm52x.cpp` | `BrymenBM52x`, `BrymenBM82x` | Brymen BM525s, BM829s over the BU-86X adapter (unconfirmed) | — (layout from libsigrok's `bm52x.c`, live readings only) | synthetic |
 | `brymen_bm86x.cpp` | `BrymenBM86x` | Brymen BM867s, BM869s over the BU-86X adapter (unconfirmed) | — (layout from libsigrok's `bm86x.c`) | synthetic |
 | `brymen_bm25x.cpp` | `BrymenBM25x` | Brymen BM250/251/252/257 (unconfirmed) | — (layout from libsigrok's `bm25x.c`) | synthetic |
+| `appa_dmm.cpp` | `AppaDmm` | APPA 501/502/506/506B/507/208/208B, BENNING MM 12, Sefram 7351/7352B, KPS DMM9000BT over the optical cable, 9600 8N1 (unconfirmed) | — (frame layout from libsigrok's `appa-dmm` by Martin Eitzenberger, GPL, branch `appadmm-stage` of github.com/Cymaphore/libsigrok) | synthetic |
+| `appa_dmm.cpp` | `Appa500` | APPA 503/505, Voltcraft VC-930/VC-950, ISO-TECH IDM503/505, CMT 3503 (the older 500 protocol; unconfirmed) | — (same source, its legacy 500 part) | synthetic |
 | `cyrustek_es51922.cpp` | `CyrustekES51922` | Uni-Trend UT61E, Wintex TD2200 | `UT61E.log` | yes |
 | `cyrustek_es51962.cpp` | `CyrustekES51962` | PeakTech 3315, Uni-Trend UT70B | `UT70B.log` | yes |
 | `cyrustek_es51986.cpp` | `CyrustekES51986` | Iso-Tech IDM 73, Tenma 72-1016, Uni-Trend UT803 | `UT803.log` | yes |
@@ -56,6 +58,13 @@ does. Only the value line ends a frame; the `CONF?` answer before it, and the
 `*<n>` the meter sends when its rotary switch turns, reach the decoder with
 it. After a switch no value is shown until `CONF?` has been answered again;
 `CONF?` is also asked every tenth time.
+`AppaDmm` and `Appa500` are polled with a fixed frame (`55 55 01 00 AB`, read
+display; `55 55 00 00 AA`, read all data of the older 500 series) and answer
+with a fixed-length frame `55 55 <command> <length> <data> <sum>`; the
+checksum is the sum of all bytes before it, so `checkFormat()` checks it. A
+display count from `0x700000` on is a word on the display (`----`, `Er`,
+`FUSE`) and gives no reading. APPA's S series and the other Bluetooth-only
+models are not read (no serial port).
 
 `VictronBLE` is not a serial protocol at all: `BleAdvertisementDevice`
 decrypts each Bluetooth advertisement (`src/device/victronble.cpp`, AES-128-CTR

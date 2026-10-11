@@ -50,6 +50,8 @@ const std::vector<ProtocolInfo> &protocols()
     { FrameFormat::KeysightU12xx,         "KeysightU12xx",         QT_TRANSLATE_NOOP("Protocols", "variable bytes ASCII, polled with CONF?/FETC? (Agilent/Keysight U12xx)"), "",                      "",                         make<DecoderKeysightU12xx> },
     { FrameFormat::UniTUT32x,             "UniTUT32x",             QT_TRANSLATE_NOOP("Protocols", "19 bytes ASCII, continuous after a start byte (UNI-T UT32x thermometers)"), "",            "",                         make<DecoderUniTUT32x> },
     { FrameFormat::MastechMS6514,         "MastechMS6514",         QT_TRANSLATE_NOOP("Protocols", "18 bytes binary, continuous, two values (MASTECH MS6514 thermometer)"), "",                "",                         make<DecoderMastechMS6514> },
+    { FrameFormat::AppaDmm,               "AppaDmm",               QT_TRANSLATE_NOOP("Protocols", "17 bytes binary, polled (APPA 506/208, BENNING MM 12)"),       "",                      "",                         make<DecoderAppa> },
+    { FrameFormat::Appa500,               "Appa500",               QT_TRANSLATE_NOOP("Protocols", "59 bytes binary, polled (APPA 503/505, Voltcraft VC-930/950)"), "",                     "",                         make<DecoderAppa> },
   };
   return table;
 }

@@ -12,6 +12,9 @@
 - Symbols: coloured (KDE's Oxygen, the default), plain (KDE's Breeze, light and dark) or, on Linux and BSD,
   the desktop's icon theme - Settings, Appearance, Symbols. They replace the XPM icons
 - The tip-of-the-day dialog is gone
+- APPA 501/502/503/505/506/506B/507/208/208B and their relatives (BENNING MM 12, Sefram 7351/7352B, KPS DMM9000BT,
+  Voltcraft VC-930/VC-950, ISO-TECH IDM503/505, CMT 3503), all "*", over the optical cable: new protocols AppaDmm and
+  Appa500 after libsigrok's appa-dmm, main and sub display
 - SCPI server: also over HiSLIP (VISA: NI-VISA, LabVIEW, PyVISA-py), TCPIP::host::hislip0::INSTR on port 4880,
   switched on in Settings, SCPI server. No extra rights needed
 - Sidebar: node Services with the SCPI server and HiSLIP (port or off, green dot with a client, double click
