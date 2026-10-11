@@ -59,23 +59,30 @@ MeterController::MeterController(QObject *parent)
     updateBanner();
   });
 
+  // What a SCPI command starts in the UI runs after the command: a dialog it
+  // opens (the length of a recording, a port without access) must not spin an
+  // event loop inside the server, where the client may go away meanwhile. The
+  // checks stay at once, so the error queue answers the next command.
   connect(m_scpi, &ScpiServer::startRecording, this, [this]
   {
     QString why;
     if (mayStartRecording(&why))
-      Q_EMIT recordingRequested(true);
+      QMetaObject::invokeMethod(this, [this] { Q_EMIT recordingRequested(true); }, Qt::QueuedConnection);
     else
     {
       m_scpi->pushError(-213, "Init ignored");
       Q_EMIT info(tr("SCPI: %1").arg(why));
     }
   });
-  connect(m_scpi, &ScpiServer::stopRecording, this, [this] { Q_EMIT recordingRequested(false); });
+  connect(m_scpi, &ScpiServer::stopRecording, this, [this]
+  {
+    QMetaObject::invokeMethod(this, [this] { Q_EMIT recordingRequested(false); }, Qt::QueuedConnection);
+  });
   connect(m_scpi, &ScpiServer::connectRequested, this, [this](bool on)
   {
     // INPut OFF also ends a connection that is lost and being reopened
     if (on != m_dmm->isWanted())
-      Q_EMIT connectRequested(on);
+      QMetaObject::invokeMethod(this, [this, on] { Q_EMIT connectRequested(on); }, Qt::QueuedConnection);
   });
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
   connect(m_hislip, &HislipServer::sessionsChanged, this, [this](int) { updateScpiStatus(); });

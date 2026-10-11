@@ -87,7 +87,7 @@ void HislipServer::stop()
   {
     s->disconnect(this);
     s->abort();
-    s->deleteLater();
+    release(s);
   }
   if (had)
     Q_EMIT sessionsChanged(0);
@@ -130,7 +130,15 @@ void HislipServer::onDisconnected(QTcpSocket *s)
       Q_EMIT sessionsChanged(int(m_sessions.size()));
     }
   }
-  s->deleteLater();
+  release(s);
+}
+
+void HislipServer::release(QTcpSocket *s)
+{
+  if (m_running > 0)
+    m_released << s;
+  else
+    s->deleteLater();
 }
 
 quint16 HislipServer::newSessionId()
@@ -346,9 +354,24 @@ void HislipServer::handleSync(QTcpSocket *s, Session &sess, quint8 type, quint8 
       const QByteArray msg = sess.msgBuf;
       sess.msgBuf.clear();
       // HiSLIP streams: every response goes out at once, tagged with the message id of the request
+      ++m_running;
       const QList<QByteArray> responses = m_ep.run(msg);
+      if (--m_running == 0)
+      {
+        for (QTcpSocket *gone : std::as_const(m_released))
+          gone->deleteLater();
+        m_released.clear();
+      }
+      // running it may have spun an event loop: the client gone, sess moved
+      // by a rehash of m_sessions - find both again
+      const auto cit = m_conns.constFind(s);
+      if (cit == m_conns.constEnd() || cit->closing)
+        return;
+      const auto sit = m_sessions.constFind(cit->session);
+      if (sit == m_sessions.constEnd())
+        return;
       for (const QByteArray &response : responses)
-        sendData(s, sess, response, param);
+        sendData(s, *sit, response, param);
       break;
     }
 

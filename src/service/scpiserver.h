@@ -114,6 +114,8 @@ private:
 
   void onNewConnection();
   void onReadyRead(QTcpSocket *socket);
+  /// deleteLater(), or after the command when one is running (see m_running)
+  void release(QTcpSocket *socket);
   QByteArray handle(const Command &cmd, bool &isQuery);
   QString handleText(const Command &cmd, bool &isQuery);
   static bool matches(const QString &mnemonic, const char *longForm);
@@ -123,6 +125,11 @@ private:
 
   QTcpServer *m_server;
   QList<QTcpSocket *> m_clients;
+  /// A command may spin an event loop (a dialog); a client that goes
+  /// meanwhile waits in m_released, deleting its socket there would pull it
+  /// from under its own readyRead.
+  int m_running = 0;
+  QList<QTcpSocket *> m_released;
   QString m_error;
   QString m_model;
   Reading m_readings[2];

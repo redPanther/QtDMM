@@ -79,6 +79,8 @@ private:
   void sendFatal(QTcpSocket *s, quint8 code, const QString &text);
   void sendError(QTcpSocket *s, quint8 code, const QString &text);
   quint16 newSessionId();
+  /// deleteLater(), or after the command when one is running (see m_running)
+  void release(QTcpSocket *s);
 
   ScpiEndpoint m_ep;
   QTcpServer m_server;
@@ -86,4 +88,9 @@ private:
   QHash<quint16, Session> m_sessions;
   quint16 m_nextSession = 1;
   QString m_error;
+  /// A command may spin an event loop (a dialog); a socket that goes meanwhile
+  /// waits in m_released, deleting it there would pull it from under its own
+  /// readyRead.
+  int m_running = 0;
+  QList<QTcpSocket *> m_released;
 };
