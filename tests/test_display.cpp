@@ -63,6 +63,12 @@ int main(int argc, char **argv)
   check(SiPrefix::displayText("cosphi") == QStringLiteral("cosφ"), "cosphi -> cosφ");
   check(SiPrefix::displayText("mV") == "mV" && SiPrefix::displayText("Hz") == "Hz", "other units unchanged");
 
+  // units of their own stay whole, prefixed ones are split
+  for (const char *whole : { "ppm", "fc", "min", "mol", "cosphi" })
+    check(SiPrefix::split(whole).prefix.isEmpty() && SiPrefix::split(whole).baseUnit == whole,
+          QString("%1 stays whole").arg(whole));
+  check(SiPrefix::split("mV").prefix == "m" && SiPrefix::split("kOhm").baseUnit == "Ohm", "mV, kOhm split");
+
   // --- 1c. leading zeros go, as on the meter (table, analog meter) ---
   check(SiPrefix::withoutLeadingZeros("000.00") == "0.00", "000.00 -> 0.00");
   check(SiPrefix::withoutLeadingZeros("-029.30") == "-29.30", "-029.30 -> -29.30");

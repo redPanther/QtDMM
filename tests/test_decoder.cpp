@@ -63,32 +63,59 @@ int main(int argc, char **argv)
     expect(ut61plus, "peak_off", "abcd034e01c9");
     expect(FrameFormat::Metex14, "hold", "");   // no remote control
 
-    // what is asked: the Keysight U12xx answer CONF? (the function) first,
-    // then FETC? (the value); a turn of the rotary switch ("*3") makes the
-    // function unknown - no value until CONF? again
+    // the Keysight U12xx polling loop as it runs: a request each tick, the
+    // meter's answer through the ring buffer the way FrameReader reads a
+    // variable-length frame, the frame into decode(). The CONF? answer is no
+    // frame of its own, so CONF? must be followed by FETC?; a turn of the
+    // rotary switch ("*3") hides values until CONF? says the new function.
     {
       auto keysight = DmmDecoder::getInstance(FrameFormat::KeysightU12xx);
-      const QByteArray conf("CONF?\n\r\n"), fetc("FETC?\n\r\n");
-      auto step = [&](const QByteArray &want, const char *what)
+      const QByteArray confV("\"VOLT:DC +6.000000E+00,+1.000000E-04\"\r\n");
+      const QByteArray confR("\"RES +6.000000E+02,+1.000000E-01\"\r\n");
+      QByteArray conf = confV;
+      QByteArray value("+1.20000000E+00\r\n");
+      char fifo[FIFO_LENGTH];
+      size_t length = 0;
+      int volts = 0, ohms = 0, wrong = 0;
+      for (int tick = 0; tick < 24; ++tick)
       {
-        const QByteArray got = keysight->pollRequest();
-        if (got != want)
+        QByteArray answer;
+        if (tick == 12)
         {
-          qWarning() << "KeysightU12xx:" << what << "asks" << got << "expected" << want;
-          ++problems;
+          answer = "*3\r\n";   // unasked, before the answer to this tick's request
+          conf = confR;
+          value = "+1.00000000E+02\r\n";
         }
-      };
-      step(conf, "first poll");
-      step(conf, "before a CONF? answer");
-      bool ok = !keysight->decode("\"VOLT:DC +6.000000E+00,+1.000000E-04\"\r\n+1.20000000E+00\r\n", 0)->val.isEmpty();
-      step(fetc, "after the function");
-      ok = ok && !keysight->decode("*3\r\n+1.20000000E+00\r\n", 0);
-      step(conf, "after the switch");
-      ok = ok && !keysight->decode("+1.20000000E+00\r\n", 0);   // still unknown
-      ok = ok && keysight->decode("\"RES +6.000000E+02,+1.000000E-01\"\r\n+1.00000000E+02\r\n", 0)->unit == "Ohm";
-      if (!ok)
+        const QByteArray request = keysight->pollRequest();
+        if (request == "CONF?\n\r\n")
+          answer += conf;
+        else if (request == "FETC?\n\r\n")
+          answer += value;
+        else
+          ++wrong;
+        for (char c : answer)
+        {
+          fifo[length] = c;
+          if (keysight->checkFormat(fifo, length))
+          {
+            const auto r = keysight->decode(QByteArray(fifo, int(length) + 1), 0);
+            if (r && r->unit == "V" && tick < 12)
+              ++volts;
+            else if (r && r->unit == "Ohm" && tick > 12)
+              ++ohms;
+            else if (r)
+              ++wrong;
+            length = 0;
+          }
+          else
+            length = (length + 1) % FIFO_LENGTH;
+        }
+      }
+      // 12 ticks each: one CONF? (two before the switch: the first poll and
+      // the tenth), the rest values; the tick of the switch shows nothing
+      if (volts != 10 || ohms < 9 || wrong != 0)
       {
-        qWarning() << "KeysightU12xx: a switch must hide values until the next CONF?";
+        qWarning() << "KeysightU12xx: polling loop gave" << volts << "V," << ohms << "Ohm," << wrong << "wrong";
         ++problems;
       }
     }

@@ -56,7 +56,7 @@ void ScpiServer::stop()
   {
     s->disconnect(this);
     s->close();
-    s->deleteLater();
+    release(s);
   }
   const bool had = !m_clients.isEmpty();
   m_clients.clear();
@@ -94,7 +94,7 @@ void ScpiServer::onNewConnection()
     connect(s, &QTcpSocket::disconnected, this, [this, s]()
     {
       m_clients.removeAll(s);
-      s->deleteLater();
+      release(s);
       Q_EMIT clientsChanged(m_clients.size());
     });
     qCDebug(lcScpi) << "client" << s->peerAddress().toString();
@@ -116,10 +116,28 @@ void ScpiServer::onReadyRead(QTcpSocket *socket)
     QByteArray line = socket->readLine();
     while (line.endsWith('\n') || line.endsWith('\r'))
       line.chop(1);
+    ++m_running;
     const QByteArray response = process(line);
+    if (--m_running == 0)
+    {
+      for (QTcpSocket *gone : std::as_const(m_released))
+        gone->deleteLater();
+      m_released.clear();
+    }
+    // the client may have gone while the command ran
+    if (!m_clients.contains(socket))
+      return;
     if (!response.isEmpty())
       socket->write(response);
   }
+}
+
+void ScpiServer::release(QTcpSocket *socket)
+{
+  if (m_running > 0)
+    m_released << socket;
+  else
+    socket->deleteLater();
 }
 
 // ---------------------------------------------------------------------------

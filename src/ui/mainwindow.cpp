@@ -1152,9 +1152,12 @@ void MainWindow::updateServices()
     row.running = state.running;
     row.active = state.clients > 0;
     row.address = state.address;
-    row.value = state.running ? QString::number(state.port) : tr("off");
+    row.failed = !state.running && !state.error.isEmpty();
+    row.value = state.running ? QString::number(state.port) : row.failed ? tr("failed") : tr("off");
     const QString clients = state.clients == 1 ? tr("1 client") : tr("%1 clients").arg(state.clients);
-    if (!state.running)
+    if (row.failed)
+      row.tooltip = tr("%1 could not start: %2. Double-click for its settings.").arg(state.name, state.error);
+    else if (!state.running)
       row.tooltip = tr("%1 is off. Double-click for its settings.").arg(state.name);
     else if (state.id == QLatin1String("hislip"))
       row.tooltip = tr("HiSLIP for VISA (NI-VISA, LabVIEW, PyVISA): %1, %2 connected.").arg(state.address, clients);

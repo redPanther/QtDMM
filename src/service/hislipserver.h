@@ -29,6 +29,9 @@ public:
   static constexpr int kMaxSessions = 16;
   // Largest message accepted from a client (also announced); SCPI lines are short.
   static constexpr quint64 kMaxMessage = 1u << 20;
+  // A connection that is no complete session by then (Initialize, then the
+  // asynchronous channel) is closed: silent ones would block the server.
+  static constexpr int kSetupTimeoutMs = 5000;
 
   // Like ScpiServer::start(): tries 'tries' consecutive ports beginning at 'port'.
   bool start(const QHostAddress &address, quint16 port = kDefaultPort, int tries = 1);
@@ -79,6 +82,8 @@ private:
   void sendFatal(QTcpSocket *s, quint8 code, const QString &text);
   void sendError(QTcpSocket *s, quint8 code, const QString &text);
   quint16 newSessionId();
+  /// deleteLater(), or after the command when one is running (see m_running)
+  void release(QTcpSocket *s);
 
   ScpiEndpoint m_ep;
   QTcpServer m_server;
@@ -86,4 +91,9 @@ private:
   QHash<quint16, Session> m_sessions;
   quint16 m_nextSession = 1;
   QString m_error;
+  /// A command may spin an event loop (a dialog); a socket that goes meanwhile
+  /// waits in m_released, deleting it there would pull it from under its own
+  /// readyRead.
+  int m_running = 0;
+  QList<QTcpSocket *> m_released;
 };

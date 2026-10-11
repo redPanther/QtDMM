@@ -1007,14 +1007,14 @@
         <translation>Moje urządzenia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="259"/>
-        <location filename="../../src/ui/devicesidebar.cpp" line="424"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="263"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="428"/>
         <source>&amp;Settings...</source>
         <translation>&amp;Ustawienia...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="384"/>
-        <location filename="../../src/ui/devicesidebar.cpp" line="425"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="388"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="429"/>
         <source>&amp;Rename</source>
         <translation>Zmień &amp;nazwę</translation>
     </message>
@@ -1034,67 +1034,67 @@
         <translation>Co to okno udostępnia innym programom przez sieć.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="260"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="264"/>
         <source>&amp;Copy address</source>
         <translation>&amp;Kopiuj adres</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="292"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="296"/>
         <source>+ Add device...</source>
         <translation>＋ Dodaj urządzenie…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="296"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="300"/>
         <source>Set up another meter (the assistant).</source>
         <translation>Skonfiguruj kolejny miernik (asystent).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="381"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="385"/>
         <source>Bring to &amp;front</source>
         <translation>Przenieś na &amp;wierzch</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="381"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="385"/>
         <source>&amp;Start</source>
         <translation>&amp;Uruchom</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="385"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="389"/>
         <source>&amp;Delete</source>
         <translation>&amp;Usuń</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="391"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="395"/>
         <source>Only for a stopped instance</source>
         <translation>Tylko dla zatrzymanej instancji</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="399"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="403"/>
         <source>Delete instance</source>
         <translation>Usuń instancję</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="400"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="404"/>
         <source>Delete the instance &quot;%1&quot; with its settings?</source>
         <translation>Usunąć instancję „%1” wraz z jej ustawieniami?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="426"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="430"/>
         <source>Open in a &amp;new window</source>
         <translation>Otwórz w n&amp;owym oknie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="428"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="432"/>
         <source>Re&amp;move from My devices</source>
         <translation>U&amp;suń z Moich urządzeń</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="437"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="441"/>
         <source>Remove device</source>
         <translation>Usuń urządzenie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="437"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="441"/>
         <source>Remove &quot;%1&quot; from My devices?</source>
         <translation>Usunąć „%1” z Moich urządzeń?</translation>
     </message>
@@ -2550,22 +2550,22 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Odczyt i rejestrator przebiegów dla multimetrów cyfrowych.&lt;/p&gt;&lt;p&gt;Zbudowany z użyciem &lt;b&gt;Qt&lt;/b&gt; %2. Licencja &lt;b&gt;GNU GPL 3&lt;/b&gt; (wersje przed 0.9.0 na GPL 2).&lt;/p&gt;&lt;p&gt;Od 0.9.5: tuxmaster i współtwórcy, zob. plik AUTHORS.&lt;br&gt;0.9.3 i wcześniejsze: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Strona: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Kontakt: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Kod źródłowy i zgłoszenia błędów: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbole pochodzą z motywów ikon &lt;b&gt;Oxygen&lt;/b&gt; i &lt;b&gt;Breeze&lt;/b&gt; społeczności KDE (LGPL 3); własne symbole QtDMM są narysowane w jego stylu.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1253"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1256"/>
         <source>The formulas now use &quot;%1&quot;. The running instances %2 use it after a restart.</source>
         <translation>Formuły używają teraz „%1”. Uruchomione instancje %2 zastosują to po ponownym uruchomieniu.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1300"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1303"/>
         <source>%1 is in use in this window</source>
         <translation>%1 jest używane w tym oknie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1306"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1309"/>
         <source>%1 is in use by the instance %2</source>
         <translation>%1 jest używane przez instancję %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1311"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1314"/>
         <source>%1 opens in the new window %2</source>
         <translation>%1 otwiera się w nowym oknie %2</translation>
     </message>
@@ -2747,104 +2747,114 @@ Wybierz, która instancja ma rejestrować.</translation>
         <translation>&amp;Klasyczna kość słoniowa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1155"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1156"/>
         <source>off</source>
         <translation>wył.</translation>
     </message>
     <message>
         <location filename="../../src/ui/mainwindow.cpp" line="1156"/>
+        <source>failed</source>
+        <translation>błąd</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="1157"/>
         <source>1 client</source>
         <translation>1 klient</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1156"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1157"/>
         <source>%1 clients</source>
         <translation>Klienci: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1158"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1159"/>
+        <source>%1 could not start: %2. Double-click for its settings.</source>
+        <translation>%1 nie mógł wystartować: %2. Dwuklik otwiera ustawienia.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="1161"/>
         <source>%1 is off. Double-click for its settings.</source>
         <translation>%1 jest wyłączony. Dwuklik otwiera ustawienia.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1160"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1163"/>
         <source>HiSLIP for VISA (NI-VISA, LabVIEW, PyVISA): %1, %2 connected.</source>
         <translation>HiSLIP dla VISA (NI-VISA, LabVIEW, PyVISA): %1, połączono: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1162"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1165"/>
         <source>SCPI server (raw socket) on %1, %2 connected.</source>
         <translation>Serwer SCPI (surowe gniazdo) na %1, połączono: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1213"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1216"/>
         <source>stopped</source>
         <translation>zatrzymana</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1232"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1235"/>
         <source>The instance %1 starts</source>
         <translation>Instancja %1 uruchamia się</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1241"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1252"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1244"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1255"/>
         <source>Rename instance</source>
         <translation>Zmień nazwę instancji</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1331"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1334"/>
         <source>%1: readings are coming in</source>
         <translation>%1: napływają odczyty</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1332"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1335"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: brak odczytu od 3 s</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1445"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1448"/>
         <source>Save workspace</source>
         <translation>Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1446"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1472"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1449"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1475"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Obszar roboczy QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1459"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1462"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1459"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1462"/>
         <source>Could not write %1.</source>
         <translation>Nie można zapisać %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1463"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1466"/>
         <source>Workspace saved to %1</source>
         <translation>Obszar roboczy zapisany w %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1471"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1474"/>
         <source>Load workspace</source>
         <translation>Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1478"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1481"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1479"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1482"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 nie jest obszarem roboczym QtDMM.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1503"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1506"/>
         <source>Workspace loaded from %1</source>
         <translation>Obszar roboczy wczytany z %1</translation>
     </message>
@@ -2967,83 +2977,98 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>%1 zgasł</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="70"/>
+        <location filename="../../src/service/metercontroller.cpp" line="74"/>
         <source>SCPI: %1</source>
         <translation>SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="86"/>
+        <location filename="../../src/service/metercontroller.cpp" line="93"/>
         <source>%1 ended with exit code %2</source>
         <translation>%1 zakończył się z kodem wyjścia %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="249"/>
+        <location filename="../../src/service/metercontroller.cpp" line="256"/>
         <source>already recording, the recording goes on</source>
         <translation>nagrywanie już trwa i jest kontynuowane</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="251"/>
+        <location filename="../../src/service/metercontroller.cpp" line="258"/>
         <source>start ignored, the recording shown is not saved yet</source>
         <translation>start zignorowany, wyświetlane nagranie nie jest jeszcze zapisane</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="269"/>
+        <location filename="../../src/service/metercontroller.cpp" line="276"/>
         <source>%1: %2 (%3)</source>
         <translation>%1: %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="275"/>
+        <location filename="../../src/service/metercontroller.cpp" line="282"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="291"/>
-        <location filename="../../src/service/metercontroller.cpp" line="316"/>
+        <location filename="../../src/service/metercontroller.cpp" line="298"/>
+        <location filename="../../src/service/metercontroller.cpp" line="323"/>
         <source>%1: could not run %2</source>
         <translation>%1: nie można uruchomić %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="294"/>
+        <location filename="../../src/service/metercontroller.cpp" line="301"/>
         <source>%1: %2 is still running</source>
         <translation>%1: %2 nadal działa</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="378"/>
+        <location filename="../../src/service/metercontroller.cpp" line="389"/>
         <source>SCPI server: %1</source>
         <translation>Serwer SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="395"/>
+        <location filename="../../src/service/metercontroller.cpp" line="402"/>
+        <source>the SCPI server is not running</source>
+        <translation>serwer SCPI nie jest uruchomiony</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="411"/>
         <source>HiSLIP server: %1</source>
         <translation>Serwer HiSLIP: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="420"/>
+        <location filename="../../src/service/metercontroller.cpp" line="437"/>
         <source>The server is not running.</source>
         <translation>Serwer nie jest uruchomiony.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="425"/>
+        <location filename="../../src/service/metercontroller.cpp" line="438"/>
+        <source>The server could not start: %1.</source>
+        <translation>Serwer nie mógł wystartować: %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="443"/>
         <source>1 client</source>
         <translation>1 klient</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="425"/>
+        <location filename="../../src/service/metercontroller.cpp" line="443"/>
         <source>%1 clients</source>
         <translation>Klienci: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="426"/>
+        <location filename="../../src/service/metercontroller.cpp" line="444"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>Nasłuchiwanie na %1, port %2, podłączono: %3.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="428"/>
+        <location filename="../../src/service/metercontroller.cpp" line="446"/>
         <source>HiSLIP on port %1: %2.</source>
         <translation>HiSLIP na porcie %1: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="430"/>
+        <location filename="../../src/service/metercontroller.cpp" line="448"/>
+        <source>HiSLIP could not start: %1.</source>
+        <translation>HiSLIP nie mógł wystartować: %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="450"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Ogłaszany jako „%1”.</translation>
     </message>

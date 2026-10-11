@@ -46,6 +46,7 @@ public:
     QString tooltip;
     bool    running = false;
     bool    active = false; ///< a client is connected
+    bool    failed = false; ///< switched on but could not start
   };
 
   explicit DeviceSidebar(DeviceLibrary *library, QWidget *parent = nullptr);

@@ -59,23 +59,30 @@ MeterController::MeterController(QObject *parent)
     updateBanner();
   });
 
+  // What a SCPI command starts in the UI runs after the command: a dialog it
+  // opens (the length of a recording, a port without access) must not spin an
+  // event loop inside the server, where the client may go away meanwhile. The
+  // checks stay at once, so the error queue answers the next command.
   connect(m_scpi, &ScpiServer::startRecording, this, [this]
   {
     QString why;
     if (mayStartRecording(&why))
-      Q_EMIT recordingRequested(true);
+      QMetaObject::invokeMethod(this, [this] { Q_EMIT recordingRequested(true); }, Qt::QueuedConnection);
     else
     {
       m_scpi->pushError(-213, "Init ignored");
       Q_EMIT info(tr("SCPI: %1").arg(why));
     }
   });
-  connect(m_scpi, &ScpiServer::stopRecording, this, [this] { Q_EMIT recordingRequested(false); });
+  connect(m_scpi, &ScpiServer::stopRecording, this, [this]
+  {
+    QMetaObject::invokeMethod(this, [this] { Q_EMIT recordingRequested(false); }, Qt::QueuedConnection);
+  });
   connect(m_scpi, &ScpiServer::connectRequested, this, [this](bool on)
   {
     // INPut OFF also ends a connection that is lost and being reopened
     if (on != m_dmm->isWanted())
-      Q_EMIT connectRequested(on);
+      QMetaObject::invokeMethod(this, [this, on] { Q_EMIT connectRequested(on); }, Qt::QueuedConnection);
   });
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
   connect(m_hislip, &HislipServer::sessionsChanged, this, [this](int) { updateScpiStatus(); });
@@ -370,12 +377,17 @@ void MeterController::applyScpi(const ScpiConfig &config)
   {
     m_mdns->stop();
     m_scpi->stop();
+    m_scpiError.clear();
   }
   else if (!same)
   {
     m_mdns->stop();
+    m_scpiError.clear();
     if (!m_scpi->start(address, config.port))
-      Q_EMIT error(tr("SCPI server: %1").arg(m_scpi->errorString()));
+    {
+      m_scpiError = m_scpi->errorString();
+      Q_EMIT error(tr("SCPI server: %1").arg(m_scpiError));
+    }
   }
 
   // HiSLIP: the same interpreter for VISA, next to the raw socket; another
@@ -387,12 +399,17 @@ void MeterController::applyScpi(const ScpiConfig &config)
   {
     m_mdnsHislip->stop();
     m_hislip->stop();
+    m_hislipError = config.enabled && config.hislip ? tr("the SCPI server is not running") : QString();
   }
   else if (!sameHislip)
   {
     m_mdnsHislip->stop();
+    m_hislipError.clear();
     if (!m_hislip->start(address, config.hislipPort, 10))
-      Q_EMIT error(tr("HiSLIP server: %1").arg(m_hislip->error()));
+    {
+      m_hislipError = m_hislip->error();
+      Q_EMIT error(tr("HiSLIP server: %1").arg(m_hislipError));
+    }
   }
 
   QMap<QString, QString> txt;
@@ -417,7 +434,8 @@ void MeterController::updateScpiStatus()
 {
   if (!m_scpi->isListening())
   {
-    Q_EMIT scpiStatusChanged(tr("The server is not running."));
+    Q_EMIT scpiStatusChanged(m_scpiError.isEmpty() ? tr("The server is not running.")
+                                                   : tr("The server could not start: %1.").arg(m_scpiError));
     return;
   }
   const QString where = m_scpi->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
@@ -426,6 +444,8 @@ void MeterController::updateScpiStatus()
   QString text = tr("Listening on %1, port %2, %3 connected.").arg(where).arg(m_scpi->port()).arg(clients);
   if (m_hislip->isListening())
     text += ' ' + tr("HiSLIP on port %1: %2.").arg(m_hislip->port()).arg(hislipResource());
+  else if (!m_hislipError.isEmpty())
+    text += ' ' + tr("HiSLIP could not start: %1.").arg(m_hislipError);
   if (m_mdns->isActive())
     text += ' ' + tr("Announced as \"%1\".").arg(m_mdns->instanceName());
   Q_EMIT scpiStatusChanged(text);
@@ -444,6 +464,8 @@ QList<ServiceState> MeterController::services() const
     scpi.address = QString("%1:%2").arg(where).arg(scpi.port);
     scpi.clients = m_scpi->clientCount();
   }
+  else
+    scpi.error = m_scpiError;
   ServiceState hislip;
   hislip.id = "hislip";
   hislip.name = "HiSLIP";
@@ -454,6 +476,8 @@ QList<ServiceState> MeterController::services() const
     hislip.address = hislipResource();
     hislip.clients = m_hislip->sessionCount();
   }
+  else
+    hislip.error = m_hislipError;
   return { scpi, hislip };
 }
 

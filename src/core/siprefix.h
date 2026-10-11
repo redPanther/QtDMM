@@ -22,7 +22,8 @@ namespace SiPrefix
   double factor(const QString &prefix);
 
   /// "kOhm" -> {"k", "Ohm"}, "Ohm" -> {"", "Ohm"}. A leading prefix letter only
-  /// counts when something follows it, so a bare "m" stays a unit.
+  /// counts when something follows it, so a bare "m" stays a unit; units of
+  /// their own such as "ppm", "min" and "mol" stay whole.
   Split split(const QString &unit);
 
   /// Scales value into [1, 1000) and reports the prefix that goes with it:

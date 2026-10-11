@@ -297,6 +297,91 @@ int main(int argc, char **argv)
     check(again.query("*IDN?\n").size() == 1, "... and it answers");
   }
 
+  // --- 5b. a command that spins an event loop (a dialog) while the client goes ---
+  // INPut ON may show a modal message box in the UI; the server must not
+  // write to the socket or session afterwards (review R10-02).
+  {
+    auto *s = new Session;
+    check(s->open(port), "session before the dialog");
+    std::vector<Session *> others;
+    auto conn = QObject::connect(&scpi, &ScpiServer::connectRequested, [&](bool)
+    {
+      s->sync.sock.abort();
+      s->async.sock.abort();
+      // more sessions meanwhile: m_sessions may grow and move its entries
+      for (int i = 0; i < 8; ++i)
+      {
+        others.push_back(new Session);
+        others.back()->open(port);
+      }
+      QEventLoop loop;
+      QTimer::singleShot(300, &loop, &QEventLoop::quit);
+      loop.exec();
+    });
+    s->sync.send(DataEnd, 0, s->msgId, "INP ON\n*IDN?\n");
+    check(waitFor([&] { return !others.empty(); }), "the command ran");
+    QObject::disconnect(conn);
+    delete s;
+    check(waitFor([&] { return server.sessionCount() == int(others.size()); }), "the gone client's session removed");
+    check(others.back()->query("*IDN?\n").size() == 1, "the others still answer");
+    qDeleteAll(others);
+    check(waitFor([&] { return server.sessionCount() == 0; }), "all closed after the dialog");
+
+    // the same over SCPI raw
+    check(scpi.start(QHostAddress::LocalHost, 0), "raw: " + scpi.errorString());
+    auto *raw = new QTcpSocket;
+    raw->connectToHost(QHostAddress::LocalHost, scpi.port());
+    check(waitFor([&] { return raw->state() == QAbstractSocket::ConnectedState; }), "raw connected");
+    bool ran = false;
+    conn = QObject::connect(&scpi, &ScpiServer::connectRequested, [&](bool)
+    {
+      raw->abort();
+      QEventLoop loop;
+      QTimer::singleShot(300, &loop, &QEventLoop::quit);
+      loop.exec();
+      ran = true;
+    });
+    raw->write("INP ON\n*IDN?\n");
+    raw->flush();
+    check(waitFor([&] { return ran; }), "raw: the command ran");
+    QObject::disconnect(conn);
+    delete raw;
+    QTcpSocket next;
+    next.connectToHost(QHostAddress::LocalHost, scpi.port());
+    check(waitFor([&] { return next.state() == QAbstractSocket::ConnectedState; }), "raw: next client");
+    next.write("*IDN?\n");
+    check(waitFor([&] { return next.canReadLine(); }), "raw: still answers");
+    scpi.stop();
+  }
+
+  // --- 5c. silent connections and half sessions are closed after a while ---
+  {
+    std::vector<Channel *> silent;
+    // every place taken (two per session and four on their way in), the
+    // last by a session without its asynchronous channel
+    for (int i = 0; i < 2 * HislipServer::kMaxSessions + 4 - 1; ++i)
+    {
+      silent.push_back(new Channel);
+      silent.back()->open(port);
+    }
+    Channel half;
+    check(half.open(port), "a synchronous channel alone");
+    half.send(Initialize, 0, 0x01000000, "hislip0");
+    check(half.receive().type == InitializeResponse, "the half session initialized");
+    Session full;
+    check(!full.open(port), "no session while the silent connections block the server");
+    check(half.closed(HislipServer::kSetupTimeoutMs + 2000), "the half session closed after the timeout");
+    bool allClosed = true;
+    for (Channel *c : silent)
+      allClosed = allClosed && c->closed(100);
+    check(allClosed, "the silent connections closed after the timeout");
+    qDeleteAll(silent);
+    check(waitFor([&] { return server.sessionCount() == 0; }), "no session left");
+    Session again;
+    check(again.open(port), "a session after the timeout");
+    check(again.query("*IDN?\n").size() == 1, "... and it answers");
+  }
+
   // --- 6. stop ends the sessions ---
   {
     Session s;

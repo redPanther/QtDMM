@@ -26,8 +26,11 @@ keeps deciding what it measures.
 
 The sidebar (F9) lists both under **Services**: *SCPI* and *HiSLIP* with
 their port, or *off*. The dot turns green while a client is connected, the
-tooltip has the address and the number of clients. A double click opens
-these settings; the context menu also copies the address
+tooltip has the address and the number of clients. *failed* with a red dot
+means switched on but not running, usually because all ten ports from the
+one set here are taken; the tooltip and the status line of these settings
+say why. A double click opens these settings; the context menu also copies
+the address
 (`localhost:5025`, `TCPIP::localhost::hislip0::INSTR`).
 There is **no authentication**: whoever can reach the port can read the
 meter, start the recorder, connect or disconnect - and fetch a picture of
@@ -96,16 +99,19 @@ print(float(dmm.query("READ?")))
 
 HiSLIP needs no extra rights and no other service. QtDMM speaks HiSLIP 1.0
 in synchronized mode; it grants no locks (`viLock` fails), and a message
-may be 1 MB at most. The raw socket is a VISA resource too, with `\n` as
+may be 1 MB at most. It serves 16 sessions at a time; a connection that has
+not opened both channels of its session within 5 seconds is closed. The raw socket is a VISA resource too, with `\n` as
 read termination:
 
 ```
 TCPIP::bench.local::5025::SOCKET
 ```
 
-Unknown headers answer nothing and leave `-113,"Undefined header"` in the
-queue; a query that could not be answered is skipped in the `;` list. The
-complete list of accepted forms, answers and error codes is the
+The raw socket and HiSLIP share one instrument state: the error queue and
+`*STB?` are the same for all clients, so one client may read another's
+error. Unknown headers answer nothing and leave `-113,"Undefined header"`
+in the queue; a query that could not be answered is skipped in the `;`
+list. The complete list of accepted forms, answers and error codes is the
 [SCPI command reference](../dev/scpi-commands.md).
 
 ## Notes
