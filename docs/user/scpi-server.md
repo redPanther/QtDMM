@@ -107,9 +107,11 @@ read termination:
 TCPIP::bench.local::5025::SOCKET
 ```
 
-Unknown headers answer nothing and leave `-113,"Undefined header"` in the
-queue; a query that could not be answered is skipped in the `;` list. The
-complete list of accepted forms, answers and error codes is the
+The raw socket and HiSLIP share one instrument state: the error queue and
+`*STB?` are the same for all clients, so one client may read another's
+error. Unknown headers answer nothing and leave `-113,"Undefined header"`
+in the queue; a query that could not be answered is skipped in the `;`
+list. The complete list of accepted forms, answers and error codes is the
 [SCPI command reference](../dev/scpi-commands.md).
 
 ## Notes

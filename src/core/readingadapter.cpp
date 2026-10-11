@@ -11,14 +11,6 @@
 
 namespace
 {
-// Units that start with a prefix letter but are not prefixed ("min" is not
-// milli-"in"); SiPrefix::split() would take them apart.
-bool isWholeUnit(const QString &unit)
-{
-  static const QStringList kWhole = { "min", "mol", "dB", "dBm", "dBV", "cosphi", "hFE", "HFE" };
-  return kWhole.contains(unit);
-}
-
 // The decoders' mode codes, as one word: "AC", "DC", "ACDC", "DI", "BUZ",
 // "TE", ... The Metex frames carry it with padding, some decoders write
 // "Diode".
@@ -157,7 +149,7 @@ PortSample ReadingAdapter::adaptValue(double dval, const QString &text, const QS
   ps.decoderUnit = unit;
   ps.rangeText = range;
 
-  SiPrefix::Split split = isWholeUnit(unit) ? SiPrefix::Split{ QString(), unit } : SiPrefix::split(unit);
+  SiPrefix::Split split = SiPrefix::split(unit);
   if (split.prefix == QLatin1String("u"))
     split.prefix = QStringLiteral("µ");
   ps.decoderBaseUnit = split.baseUnit;

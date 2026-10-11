@@ -50,9 +50,11 @@ double factor(const QString &prefix)
 
 Split split(const QString &unit)
 {
-  // "ppm" (CO2 sensors) and "fc" (foot-candle, luxmeters) are units of their
-  // own, not pico-"pm" and femto-"c"
-  if (unit == QLatin1String("ppm") || unit == QLatin1String("fc"))
+  // units of their own that start with a prefix letter: "ppm" (CO2 sensors)
+  // is not pico-"pm", "min" (APPA) not milli-"in", "fc" (foot-candle,
+  // luxmeters) not femto-"c"
+  static const QStringList kWhole = { "ppm", "fc", "min", "mol", "dB", "dBm", "dBV", "cosphi", "hFE", "HFE" };
+  if (kWhole.contains(unit))
     return {QString(), unit};
   if (unit.size() > 1 && isPrefix(unit.left(1)))
     return {unit.left(1), unit.mid(1)};

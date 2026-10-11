@@ -19,8 +19,8 @@
   the GM1020 also gives its temperature as second value. Protocols after github.com/parametrek/gm1020
 - SCPI server: also over HiSLIP (VISA: NI-VISA, LabVIEW, PyVISA-py), TCPIP::host::hislip0::INSTR on port 4880,
   switched on in Settings, SCPI server. No extra rights needed
-- Sidebar: node Services with the SCPI server and HiSLIP (port or off, green dot with a client, double click
-  for the settings, Copy address); the SCPI field in the status bar is gone. *STB? reports bit 2 (EAV) while
+- Sidebar: node Services with the SCPI server and HiSLIP (port, off or failed, green dot with a client, double
+  click for the settings, Copy address); the SCPI field in the status bar is gone. *STB? reports bit 2 (EAV) while
   errors are queued
 - 19 more meters (all "*", not tried on hardware): Victor 70C/86C, Voltcraft VC 850, EZA EZ-735 (FS9922); Brymen
   BM255, Greenlee DM-210A (BM25x); Elma BM869s, Greenlee DM-860A, Sanwa PC7000 (BM86x); Brymen BM521s, Elma BM525s
@@ -29,8 +29,8 @@
   an ASCII line)
 - Agilent/Keysight U1231A to U1282A handheld meters (21 models, "*") over the IR-USB cable U1173A/B: new
   protocol KeysightU12xx, polled with CONF? and FETC? as libsigrok's agilent-dmm does
-- Thermometers: UNI-T UT325 (UT322, Tenma 72-7712/72-7715 "*") over the HE2325U USB cable, which now also sends
-  (the UT325 needs a start byte), and MASTECH MS6514 "*" with its second display. Temperatures in kelvin as
+- Thermometers: UNI-T UT325 (UT321, UT322, Tenma 72-7712/72-7715 "*") over the HE2325U USB cable, which now also
+  sends (the UT325 needs a start byte), and MASTECH MS6514 "*" with its second display. Temperatures in kelvin as
   the meters show them. Until QtDMM reads several channels only the large display / main and auxiliary display
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
