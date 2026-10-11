@@ -26,6 +26,22 @@ meter working, please report it on the
 | Agilent | 34405A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 100000 |
 | Agilent | 34410A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
 | Agilent | 34460A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
+| Agilent | U1231A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
+| Agilent | U1232A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
+| Agilent | U1233A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
+| Agilent | U1241A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Agilent | U1241B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Agilent | U1242A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Agilent | U1242B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Agilent | U1251A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1251B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1252A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1252B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1253A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1253B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1271A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| Agilent | U1272A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| Agilent | U1273A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | APPA | 71 ¹ | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
 | APPA | 73 ¹ | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
 | Brymen | BM250 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
@@ -77,6 +93,11 @@ meter working, please report it on the
 | HP | 34401A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
 | Iso-Tech | IDM 73 | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
 | Keysight | 34465A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
+| Keysight | U1241C ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Keysight | U1242C ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Keysight | U1273AX ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| Keysight | U1281A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
+| Keysight | U1282A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
 | MASTECH | M9803R | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
 | MASTECH | MAS-343 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | MASTECH | MAS-345 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
@@ -206,4 +227,4 @@ meter working, please report it on the
 - **Generic DTM0660 4000 count, DTM0660 6000 count, DTM0660 8000 count**: the DTM0660 chip has a UART, but meters built on it (Victor VC921 and similar) ship without an interface: an IR LED with a 100 Ω resistor goes on the chip's TX pin and the RS232 bit in the 24C02 EEPROM has to be set - [eevblog: hacking the Victor VC-921](https://www.eevblog.com/forum/testgear/hacking-the-victor-vc-921/). PeakTech 3415 and Velleman DVM4100 use the same chip but come with a cable and need no change.
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
-175 devices across 43 vendors.
+196 devices across 43 vendors.

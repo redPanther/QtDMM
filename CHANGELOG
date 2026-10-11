@@ -22,6 +22,8 @@
   (BM52x); Brymen BM821s/822s/827s, Elma BM821s/829s, Greenlee DM-810A/820A/830A (BM82x)
 - Protek 504/505/506 are gone from the model list: they were listed with the wrong protocol (FS9721 instead of
   an ASCII line)
+- Agilent/Keysight U1231A to U1282A handheld meters (21 models, "*") over the IR-USB cable U1173A/B: new
+  protocol KeysightU12xx, polled with CONF? and FETC? as libsigrok's agilent-dmm does
 - Graph: time buttons All / 1 min / 5 min / 30 min at the top right
 - Readings table: columns fit their content, the time without the date
 - Digital display: HOLD is an H in a square at the right of the annunciators, MANU is gone (AUTO off is a

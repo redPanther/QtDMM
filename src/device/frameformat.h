@@ -68,6 +68,7 @@ public:
     UniTiDMM,
     UniTUT61Plus,
     TfaAirControl,
+    KeysightU12xx,
     EndOfList              // new stuff always before!
   };
 

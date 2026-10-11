@@ -47,6 +47,7 @@ const std::vector<ProtocolInfo> &protocols()
     { FrameFormat::UniTiDMM,              "UniTiDMM",              QT_TRANSLATE_NOOP("Protocols", "19 bytes binary, polled over Bluetooth LE (UNI-T UT60BT)"),   "",                      "Bluetooth LE",             make<DecoderUniTiDMM> },
     { FrameFormat::UniTUT61Plus,          "UniTUT61Plus",          QT_TRANSLATE_NOOP("Protocols", "19 bytes binary, polled (UNI-T UT61B+/D+/E+, USB or Bluetooth adapter)"), "", "Bluetooth LE", make<DecoderUniTiDMM> },
     { FrameFormat::TfaAirControl,         "TfaAirControl",         QT_TRANSLATE_NOOP("Protocols", "text lines from HID records, CO2/temperature/humidity (TFA AIRCO2NTROL)"), "Holtek",  "USB-HID (Holtek)",         make<DecoderTfaAirControl> },
+    { FrameFormat::KeysightU12xx,         "KeysightU12xx",         QT_TRANSLATE_NOOP("Protocols", "variable bytes ASCII, polled with CONF?/FETC? (Agilent/Keysight U12xx)"), "",                      "",                         make<DecoderKeysightU12xx> },
   };
   return table;
 }
