@@ -75,7 +75,7 @@ long or the short form (`MEASure?`, `MEAS?`), case does not matter.
 | `STATus:OPERation?` | 16 while the recorder runs, plus 512 while an alarm is raised (acknowledged or not) |
 | `INITiate` / `ABORt` | starts / stops the recorder; while it records, or over a recording shown and not saved yet, `INITiate` is ignored with error -213 *Init ignored* |
 | `INPut ON|OFF`, `INPut?` | connects / disconnects the meter, asks whether it is; the connection starts after the command, so `INPut ON;INPut?` still answers 0 |
-| `HCOPy:SDUMp:DATA?` | a screenshot of the QtDMM window as PNG (IEEE 488.2 block), like a bench instrument's screen dump |
+| `HCOPy:SDUMp:DATA?` | a screenshot of the QtDMM window as PNG (IEEE 488.2 block), like a bench instrument's screen dump; `HCOPy:SDUMp:DATA:FORMat PNG\|BMP\|JPG` chooses the format |
 | `SYSTem:ERRor?` `SYSTem:ERRor:COUNt?` | the error queue: `0,"No error"`, `-113,"Undefined header"`, `-230,"Data corrupt or stale"`, ... |
 | `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` `…:COUNt?` | the min/max memory of the main value as the displays show it: minimum, maximum, mean and number of readings since the last reset (overloads not counted); `9.91E+37` while it is empty |
 | `CALCulate:AVERage:CLEar` | resets min/max, like F4 |
@@ -171,6 +171,17 @@ Searching for LXI devices - please wait...
 $ lxi scpi -a bench.local "READ?"
 +1.234500E+00
 ```
+
+`lxi screenshot` (and the screenshot page of lxi-gui) fetches a picture of
+the QtDMM window over VXI-11. lxi picks its plugin by the `*IDN?` answer
+and knows no QtDMM, so name the plugin: QtDMM answers the commands of
+Keysight's Truevolt multimeters.
+
+```
+$ lxi screenshot -a bench.local -p keysight-dmm
+```
+
+In lxi-gui choose the plugin *keysight-dmm* instead of *auto*.
 
 **Prefer HiSLIP** where the client has it: VXI-11 needs a portmapper on
 port 111, which clients ask for the VXI-11 ports. A computer has one
