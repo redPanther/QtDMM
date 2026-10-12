@@ -29,6 +29,10 @@
   an ASCII line)
 - Agilent/Keysight U1231A to U1282A handheld meters (21 models, "*") over the IR-USB cable U1173A/B: new
   protocol KeysightU12xx, polled with CONF? and FETC? as libsigrok's agilent-dmm does
+- USB-HID cables: when the path changed (another /dev/hidraw number after plugging in again or a restart; on
+  Windows and macOS another path) QtDMM finds the cable again by its USB ids if it is the only one of its kind.
+  The udev rule also makes a stable link per cable and USB port, /dev/qtdmm/<cable>-<port>, which the port list
+  shows instead of /dev/hidrawN
 - Thermometers: UNI-T UT325 (UT321, UT322, Tenma 72-7712/72-7715 "*") over the HE2325U USB cable, which now also
   sends (the UT325 needs a start byte), and MASTECH MS6514 "*" with its second display. Temperatures in kelvin as
   the meters show them. Until QtDMM reads several channels only the large display / main and auxiliary display

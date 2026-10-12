@@ -129,15 +129,26 @@ QString Families::adapter(quint16 vid, quint16 pid)
 
 QString udevRules()
 {
-  QString rules = "# QtDMM: the logged-in user may open the USB-HID cables and sensors of meters\n";
-  for (const auto &[vid, pid, what] : { std::tuple { "1a86", "e008", "WCH CH9325 (UNI-T UT-D04)" },
-                                         std::tuple { "04fa", "2490", "Hoitek HE2325U (UNI-T UT-D04)" },
-                                         std::tuple { "10c4", "ea80", "SiLabs CP2110 (UNI-T UT-D09)" },
-                                         std::tuple { "1a86", "e429", "WCH CH9329 (UNI-T UT-D09)" },
-                                         std::tuple { "0820", "0001", "Brymen BU-86X" },
-                                         std::tuple { "04d9", "a052", "Holtek (TFA AIRCO2NTROL)" } })
-    rules += QString("# %3\nKERNEL==\"hidraw*\", ATTRS{idVendor}==\"%1\", ATTRS{idProduct}==\"%2\", TAG+=\"uaccess\"\n")
-               .arg(vid, pid, what);
+  QString rules = "# QtDMM: the logged-in user may open the USB-HID cables and sensors of meters,\n"
+                  "# and each gets a link that stays the same across plugging in again and\n"
+                  "# restarts as long as it is in the same USB port:\n"
+                  "# /dev/qtdmm/<cable>-<USB port>, e.g. /dev/qtdmm/ut-d04-ch9325-pci-0000_00_14_0-usb-0_2_1_0\n";
+  for (const auto &[vid, pid, what, name] :
+       { std::tuple { "1a86", "e008", "WCH CH9325 (UNI-T UT-D04)", "ut-d04-ch9325" },
+         std::tuple { "04fa", "2490", "Hoitek HE2325U (UNI-T UT-D04)", "ut-d04-he2325u" },
+         std::tuple { "10c4", "ea80", "SiLabs CP2110 (UNI-T UT-D09)", "ut-d09-cp2110" },
+         std::tuple { "1a86", "e429", "WCH CH9329 (UNI-T UT-D09)", "ut-d09-ch9329" },
+         std::tuple { "0820", "0001", "Brymen BU-86X", "brymen-bu86x" },
+         std::tuple { "04d9", "a052", "Holtek (TFA AIRCO2NTROL)", "holtek-co2" } })
+    rules += QString("# %3\nKERNEL==\"hidraw*\", ATTRS{idVendor}==\"%1\", ATTRS{idProduct}==\"%2\", TAG+=\"uaccess\", "
+                     "ENV{QTDMM_CABLE}=\"%4\"\n")
+               .arg(vid, pid, what, name);
+  // the stable link (HidPath finds the cable without it, too, when it is
+  // the only one of its kind)
+  rules += "\n# the stable link: the cable's name and its USB port\n"
+           "KERNEL==\"hidraw*\", ENV{QTDMM_CABLE}==\"?*\", IMPORT{builtin}=\"path_id\"\n"
+           "KERNEL==\"hidraw*\", ENV{QTDMM_CABLE}==\"?*\", ENV{ID_PATH_TAG}==\"?*\", "
+           "SYMLINK+=\"qtdmm/$env{QTDMM_CABLE}-$env{ID_PATH_TAG}\"\n";
   return rules;
 }
 

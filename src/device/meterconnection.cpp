@@ -161,7 +161,10 @@ void MeterConnection::setDevice(const QString &device)
   // "calc <unit> <formula>": the formula may contain spaces, so keep
   // everything after the type token; the other types take the last token
   // "ble <address> <key>" likewise
-  if (m_portType == Transport::PortType::Calc || m_portType == Transport::PortType::Ble)
+  // "hid 0xvvvv:0xpppp <path>": the USB ids find the cable again when the
+  // path has changed (HidPath)
+  if (m_portType == Transport::PortType::Calc || m_portType == Transport::PortType::Ble
+      || m_portType == Transport::PortType::Hid || m_portType == Transport::PortType::HidHoltek)
     m_device = device.section(' ', 1).trimmed();
   else
     m_device = deviceList.last();
@@ -221,7 +224,8 @@ bool MeterConnection::openPort()
   if (m_portHandler->port() && !m_portHandler->port()->open(QIODevice::ReadWrite))
   {
     if (m_portType == Transport::PortType::Calc || m_portType == Transport::PortType::RFC2217
-        || m_portType == Transport::PortType::HidHoltek || m_portType == Transport::PortType::Ble || m_portType == Transport::PortType::BleGatt)
+        || m_portType == Transport::PortType::HidHoltek || m_portType == Transport::PortType::Ble || m_portType == Transport::PortType::BleGatt
+        || m_portType == Transport::PortType::Hid)
     {
       // the formula did not parse / the address or key is malformed; the device says where
       m_error = m_portHandler->port()->errorString();
@@ -355,6 +359,8 @@ QString MeterConnection::deviceName() const
 {
   if (m_portType == Transport::PortType::Ble)
     return m_device.section(' ', 0, 0);
+  if (m_portType == Transport::PortType::Hid || m_portType == Transport::PortType::HidHoltek)
+    return m_device.section(' ', -1);   // the path, without the USB ids
   return m_device;
 }
 

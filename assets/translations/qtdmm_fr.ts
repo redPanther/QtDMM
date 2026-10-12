@@ -1147,12 +1147,12 @@
         <translation>Moniteur de CO2 TFA AIRCO2NTROL</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="151"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="162"/>
         <source>No access: %1 belongs to %2:%3</source>
         <translation>Pas d&apos;accès : %1 appartient à %2:%3</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="156"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="167"/>
         <source>A udev rule lets you open the cable. The packages of QtDMM install one; for the AppImage or Flatpak, put this line into /etc/udev/rules.d/70-qtdmm.rules:
 
 %1
@@ -1169,7 +1169,7 @@ puis chargez-la et rebranchez le câble :
 sudo udevadm control --reload-rules &amp;&amp; sudo udevadm trigger</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="164"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="175"/>
         <source>Serial ports belong to the group %1. Add yourself to it:
 
 sudo usermod -aG %1 $USER
@@ -1182,63 +1182,63 @@ sudo usermod -aG %1 $USER
 puis déconnectez-vous et reconnectez-vous.</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="193"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="204"/>
         <source>%1 cable · %2</source>
         <translation>Câble %1 · %2</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="231"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="242"/>
         <source>Serial port</source>
         <translation>Port série</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="231"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="242"/>
         <source>USB-serial adapter (%1)</source>
         <translation>Adaptateur USB-série (%1)</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="233"/>
-        <location filename="../../src/device/discovery/discovery.cpp" line="261"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="244"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="272"/>
         <source>Which meter is on it, QtDMM cannot tell yet: choose the model.</source>
         <translation>QtDMM ne sait pas encore quel multimètre y est branché : choisissez le modèle.</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="259"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="270"/>
         <source>qtdmm-bridge on %1</source>
         <translation>qtdmm-bridge sur %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="300"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="311"/>
         <source>No Bluetooth adapter found.</source>
         <translation>Aucun adaptateur Bluetooth trouvé.</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="303"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="314"/>
         <source>This build of QtDMM has no Bluetooth.</source>
         <translation>Cette version de QtDMM n&apos;a pas de Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="323"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="334"/>
         <source>Victron device</source>
         <translation>Appareil Victron</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="323"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="334"/>
         <source>Victron %1</source>
         <translation>Victron %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="324"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="335"/>
         <source>The device key is in the VictronConnect app: Product info, Instant readout.</source>
         <translation>La clé de l&apos;appareil est dans l&apos;app VictronConnect : Infos produit, Instant readout.</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="343"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="354"/>
         <source>Bluetooth meter</source>
         <translation>Multimètre Bluetooth</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="344"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="355"/>
         <source>Switch Bluetooth on at the meter.</source>
         <translation>Activez le Bluetooth sur le multimètre.</translation>
     </message>
@@ -2148,6 +2148,36 @@ puis déconnectez-vous et reconnectez-vous.</translation>
     </message>
 </context>
 <context>
+    <name>HIDSerialDevice</name>
+    <message>
+        <location filename="../../src/device/transports/hidserial.cpp" line="174"/>
+        <source>%1 is gone, and several cables with its USB ids are plugged in: choose the port in the device settings.</source>
+        <translation>%1 n&apos;existe plus et plusieurs câbles avec les mêmes ID USB sont branchés : choisissez le port dans les réglages de l&apos;appareil.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/hidserial.cpp" line="195"/>
+        <source>Cannot open %1: %2</source>
+        <translation>Impossible d’ouvrir %1 : %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/hidserial.cpp" line="197"/>
+        <source>
+Cable plugged in? No permission? The cable needs the udev rule of QtDMM.</source>
+        <translation>
+Câble branché ? Pas d&apos;autorisation ? Le câble a besoin de la règle udev de QtDMM.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/hidserial.cpp" line="207"/>
+        <source>Cannot set up the cable at %1.</source>
+        <translation>Impossible de configurer le câble sur %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/hidserial.cpp" line="276"/>
+        <source>Cannot open the cable.</source>
+        <translation>Impossible d&apos;ouvrir le câble.</translation>
+    </message>
+</context>
+<context>
     <name>HelpDlg</name>
     <message>
         <location filename="../../src/ui/dialogs/helpdlg.cpp" line="90"/>
@@ -2158,19 +2188,24 @@ puis déconnectez-vous et reconnectez-vous.</translation>
 <context>
     <name>HidHoltekDevice</name>
     <message>
-        <location filename="../../src/device/transports/hidholtek.cpp" line="15"/>
+        <location filename="../../src/device/transports/hidholtek.cpp" line="16"/>
+        <source>%1 is gone, and several sensors with its USB ids are plugged in: choose the port in the device settings.</source>
+        <translation>%1 n&apos;existe plus et plusieurs capteurs avec les mêmes ID USB sont branchés : choisissez le port dans les réglages de l&apos;appareil.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/hidholtek.cpp" line="27"/>
         <source>Cannot open %1: %2</source>
         <translation>Impossible d’ouvrir %1 : %2</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/hidholtek.cpp" line="17"/>
+        <location filename="../../src/device/transports/hidholtek.cpp" line="29"/>
         <source>
 No permission? The sensor needs a udev rule for USB ID %1:%2.</source>
         <translation>
 Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%2.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/hidholtek.cpp" line="30"/>
+        <location filename="../../src/device/transports/hidholtek.cpp" line="42"/>
         <source>Cannot initialise the sensor: %1</source>
         <translation>Impossible d’initialiser le capteur : %1</translation>
     </message>
@@ -2872,97 +2907,97 @@ Choisissez quelle instance doit enregistrer.</translation>
 <context>
     <name>MeterConnection</name>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="216"/>
+        <location filename="../../src/device/meterconnection.cpp" line="219"/>
         <source>Error creating port %1.</source>
         <translation>Erreur à la création du port %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="236"/>
+        <location filename="../../src/device/meterconnection.cpp" line="240"/>
         <source>Missing Permission</source>
         <translation>Permission manquante</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="239"/>
+        <location filename="../../src/device/meterconnection.cpp" line="243"/>
         <source>No such device %1.</source>
         <translation>Périphérique %1 introuvable.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="242"/>
+        <location filename="../../src/device/meterconnection.cpp" line="246"/>
         <source>Error opening %1.
 DMM connected and switched on?</source>
         <translation>Erreur à l&apos;ouverture de %1.
 Le multimètre est-il branché et allumé ?</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="254"/>
+        <location filename="../../src/device/meterconnection.cpp" line="258"/>
         <source>Error configuring serial port %1.</source>
         <translation>Erreur de configuration du port série %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="298"/>
+        <location filename="../../src/device/meterconnection.cpp" line="302"/>
         <source>Connecting ...</source>
         <translation>Connexion…</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="344"/>
+        <location filename="../../src/device/meterconnection.cpp" line="348"/>
         <source>Lost connection to %1.</source>
         <translation>Connexion à %1 perdue.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="348"/>
-        <location filename="../../src/device/meterconnection.cpp" line="403"/>
+        <location filename="../../src/device/meterconnection.cpp" line="352"/>
+        <location filename="../../src/device/meterconnection.cpp" line="409"/>
         <source>Retrying every %1 s.</source>
         <translation>Nouvel essai toutes les %1 s.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="376"/>
+        <location filename="../../src/device/meterconnection.cpp" line="382"/>
         <source>Access denied for %1.</source>
         <translation>Accès refusé pour %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="388"/>
+        <location filename="../../src/device/meterconnection.cpp" line="394"/>
         <source>Not connected</source>
         <translation>Non connecté</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="366"/>
+        <location filename="../../src/device/meterconnection.cpp" line="372"/>
         <source>Connected %1</source>
         <translation>Connecté à %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="215"/>
+        <location filename="../../src/device/meterconnection.cpp" line="218"/>
         <source>This QtDMM was built without Bluetooth support.</source>
         <translation>Ce QtDMM a été compilé sans prise en charge du Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="365"/>
+        <location filename="../../src/device/meterconnection.cpp" line="371"/>
         <source>Simulated</source>
         <translation>Simulé</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="365"/>
+        <location filename="../../src/device/meterconnection.cpp" line="371"/>
         <source>Calculated</source>
         <translation>Calculé</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="416"/>
+        <location filename="../../src/device/meterconnection.cpp" line="422"/>
         <source>Connecting to %1 over Bluetooth ...</source>
         <translation>Connexion à %1 par Bluetooth ...</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="453"/>
+        <location filename="../../src/device/meterconnection.cpp" line="459"/>
         <source>Error %1</source>
         <translation>Erreur %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="324"/>
+        <location filename="../../src/device/meterconnection.cpp" line="328"/>
         <source>The USB cable answers, but the meter sends nothing.
 Switch on the meter&apos;s serial output (on UNI-T meters: hold the RS232/USB button).</source>
         <translation>Le câble USB répond, mais le multimètre n&apos;envoie rien.
 Activez la sortie série du multimètre (sur les UNI-T : maintenez la touche RS232/USB).</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="326"/>
+        <location filename="../../src/device/meterconnection.cpp" line="330"/>
         <source>Timeout on device %1.
 DMM connected and switched on?</source>
         <translation>Délai dépassé sur %1.

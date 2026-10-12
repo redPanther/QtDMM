@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include "device/transports/hidserial.h"
+#include "device/transports/hidpath.h"
 #include "device/transports/hidholtek.h"
 
 static int failed = 0;
@@ -182,7 +183,9 @@ int main(int argc, char **argv)
     check(HidHoltekDevice::pathForEntry("HIDHOLTEK 0x04d9:0xa052 /dev/hidraw3") == "/dev/hidraw3", "Holtek: path split off");
     check(HidHoltekDevice::pathForEntry("/dev/hidraw3") == "/dev/hidraw3", "Holtek: bare path kept");
     DmmDecoder::DMMInfo info;
-    HidHoltekDevice dev(info, "HIDHOLTEK 0x04d9:0xa052 /nonexistent/hidraw99");
+    // a bare path: with the ids the sensor would be looked for, and a real
+    // one plugged into this computer would be opened
+    HidHoltekDevice dev(info, "/nonexistent/hidraw99");
     check(!dev.open(QIODevice::ReadWrite), "Holtek: open() fails without a device");
     check(!dev.errorString().isEmpty(), "Holtek: a failed open() says why");
   }
@@ -192,9 +195,47 @@ int main(int argc, char **argv)
     DmmDecoder::DMMInfo info;
     info.baud = 9600;
     info.bits = 8;
-    HIDSerialDevice dev(info, "HID 0x1a86:0xe429 /nonexistent/hidraw99");
-    check(dev.chip() == Chip::CH9329, "chip taken from the entry");
+    check(HIDSerialDevice::chipForEntry("HID 0x1a86:0xe429 /nonexistent/hidraw99") == Chip::CH9329,
+          "chip taken from the entry");
+    // a bare path: with ids a real cable plugged into this computer would be opened
+    HIDSerialDevice dev(info, "/nonexistent/hidraw99");
     check(!dev.open(QIODevice::ReadWrite), "open() fails without a device");
+  }
+
+  // the path changed (replugged, restarted): the cable again by its USB ids
+  {
+    using namespace HidPath;
+    // a udev link /dev/qtdmm/ch9325-usb-1 points to /dev/hidraw5
+    static auto canonical = [](const QString &path) -> QString
+    {
+      return path == "/dev/qtdmm/ch9325-usb-1" ? QString("/dev/hidraw5") : path;
+    };
+    const Candidate ch9325a{ 0x1a86, 0xe008, "/dev/hidraw5" };
+    const Candidate ch9325b{ 0x1a86, 0xe008, "/dev/hidraw7" };
+
+    const Entry e = parse("HID 0x1a86:0xe008 /dev/hidraw3");
+    check(e.hasIds && e.vendorId == 0x1a86 && e.productId == 0xe008 && e.path == "/dev/hidraw3", "entry parsed");
+    check(!parse("/dev/hidraw3").hasIds && parse("/dev/hidraw3").path == "/dev/hidraw3", "a bare path has no ids");
+    check(parse("0x04fa:0x2490 /dev/hidraw1").hasIds, "ids without the type token (MeterConnection)");
+
+    Choice c = choose(parse("0x1a86:0xe008 /dev/hidraw5"), { ch9325a }, canonical);
+    check(c.path == "/dev/hidraw5" && c.moved.isEmpty() && !c.ambiguous, "path still there: kept");
+    c = choose(e, { ch9325a }, canonical);
+    check(c.path == "/dev/hidraw5" && c.moved == "/dev/hidraw5", "path gone, one cable: that one");
+    c = choose(e, {}, canonical);
+    check(c.path == "/dev/hidraw3" && c.moved.isEmpty() && !c.ambiguous, "no cable: the old path (open fails)");
+    c = choose(e, { ch9325a, ch9325b }, canonical);
+    check(c.ambiguous, "path gone, two cables: no guess");
+    c = choose(parse("0x1a86:0xe008 /dev/hidraw7"), { ch9325a, ch9325b }, canonical);
+    check(c.path == "/dev/hidraw7" && !c.ambiguous, "two cables, the path still there: kept");
+    c = choose(parse("0x1a86:0xe008 /dev/qtdmm/ch9325-usb-1"), { ch9325a, ch9325b }, canonical);
+    check(c.path == "/dev/qtdmm/ch9325-usb-1" && c.moved.isEmpty() && !c.ambiguous, "a udev link: opened as it is");
+    // the old path now belongs to another device: hidapi lists it with other ids
+    const Candidate other{ 0x046d, 0xc52b, "/dev/hidraw3" };
+    c = choose(e, { other, ch9325a }, canonical);
+    check(c.path == "/dev/hidraw5", "the old path is another device now: the cable, not that one");
+    c = choose(parse("/dev/hidraw3"), { ch9325a }, canonical);
+    check(c.path == "/dev/hidraw3" && c.moved.isEmpty(), "a bare path: opened as it is");
   }
 
   if (failed == 0)

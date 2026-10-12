@@ -38,7 +38,14 @@ value. If the meter is on, see the next section.
 ## USB-HID cables
 
 Meters with a USB-HID cable (many Uni-Trend models) appear in the port list as
-`HID 0x1a86:0xe008 /dev/hidrawN`. If the entry is missing or cannot be opened,
+`HID 0x1a86:0xe008 /dev/hidrawN`. The number (and on Windows and macOS the
+whole path) can change when the cable is plugged in again or the computer
+restarts. QtDMM then looks for the cable by its USB ids (`1a86:e008`) and
+takes it if it is the only one of its kind; with several equal cables it asks
+you to choose the port. On Linux the udev rule below also gives each cable a
+link that stays the same as long as it is in the same USB port,
+`/dev/qtdmm/ut-d04-ch9325-pci-…-usb-0_2_1_0`; the port list shows that link
+instead of `/dev/hidrawN`. If the entry is missing or cannot be opened,
 the `/dev/hidraw*` device is usually only readable by root. A udev rule grants
 access to your user. The DEB and RPM packages install one,
 `/usr/lib/udev/rules.d/70-qtdmm.rules`, for every cable and sensor QtDMM
