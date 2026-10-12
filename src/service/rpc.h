@@ -7,11 +7,14 @@
 #include "service/xdr.h"
 
 #include <QHash>
+#include <QHostAddress>
 #include <QList>
 #include <QObject>
 #include <QString>
 #include <QTcpServer>
 #include <QUdpSocket>
+
+class QTcpSocket;
 
 enum class RpcStatus
 {
@@ -29,8 +32,11 @@ public:
   virtual quint32 program() const = 0;
   virtual quint32 version() const = 0;
   // Read the arguments from 'args', write the result to 'result'. The NULL procedure (0) is
-  // answered by the dispatcher.
-  virtual RpcStatus call(quint32 proc, XdrReader &args, XdrWriter &result) = 0;
+  // answered by the dispatcher. 'conn' names the TCP connection the call came on (0: UDP), so
+  // state can be tied to it.
+  virtual RpcStatus call(quint32 proc, XdrReader &args, XdrWriter &result, quint64 conn) = 0;
+  // The TCP connection 'conn' is gone: what belonged to it goes too.
+  virtual void connectionClosed(quint64 conn) { Q_UNUSED(conn) }
 };
 
 // Processes one complete RPC call message and returns the reply message (empty: no reply).
@@ -38,40 +44,54 @@ class RpcDispatcher
 {
 public:
   void addService(RpcService *service) { m_services.append(service); }
-  QByteArray handle(const QByteArray &callMsg) const;
+  QByteArray handle(const QByteArray &callMsg, quint64 conn = 0) const;
+  void connectionClosed(quint64 conn) const;
 
 private:
   QList<RpcService *> m_services;
 };
 
-// Portmapper v2 (program 100000): GETPORT and CALLIT (NULL procedure only, for broadcast discovery).
+// Portmapper v2 (program 100000): GETPORT, DUMP and CALLIT (NULL procedure only, for broadcast
+// discovery). SET and UNSET are refused: only this process registers, directly.
 class Portmapper : public RpcService
 {
 public:
   quint32 program() const override { return 100000; }
   quint32 version() const override { return 2; }
-  void registerProgram(quint32 prog, quint16 tcpPort) { m_ports[prog] = tcpPort; }
-  void clear() { m_ports.clear(); }
-  RpcStatus call(quint32 proc, XdrReader &args, XdrWriter &result) override;
+  void registerProgram(quint32 prog, quint32 vers, quint16 tcpPort);
+  void clear() { m_entries.clear(); }
+  RpcStatus call(quint32 proc, XdrReader &args, XdrWriter &result, quint64 conn) override;
 
 private:
-  QHash<quint32, quint16> m_ports;
+  struct Entry
+  {
+    quint32 prog;
+    quint32 vers;
+    quint16 port;
+  };
+  QList<Entry> m_entries;
 };
 
 class TcpRpcServer : public QObject
 {
   Q_OBJECT
 public:
+  // Largest record (all fragments of one call) accepted; VXI-11 blocks are at most 64 KiB.
+  static constexpr qsizetype kMaxRecord = 1024 * 1024;
+
   explicit TcpRpcServer(const RpcDispatcher *dispatcher, QObject *parent = nullptr);
-  bool listen(quint16 port);
+  bool listen(const QHostAddress &address, quint16 port);
   void close(); // stops listening and drops all connections
+  bool isListening() const { return m_server.isListening(); }
   quint16 port() const { return m_server.serverPort(); }
   QString errorString() const { return m_server.errorString(); }
+  QAbstractSocket::SocketError serverError() const { return m_server.serverError(); }
 
 private:
   void onNewConnection();
   const RpcDispatcher *m_dispatcher;
   QTcpServer m_server;
+  quint64 m_nextConn = 1;
 };
 
 class UdpRpcServer : public QObject
@@ -79,8 +99,9 @@ class UdpRpcServer : public QObject
   Q_OBJECT
 public:
   explicit UdpRpcServer(const RpcDispatcher *dispatcher, QObject *parent = nullptr);
-  bool bind(quint16 port);
+  bool bind(const QHostAddress &address, quint16 port);
   void close();
+  QString errorString() const { return m_socket.errorString(); }
 
 private:
   const RpcDispatcher *m_dispatcher;

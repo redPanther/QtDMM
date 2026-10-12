@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "service/vxi11core.h"
 
-Q_LOGGING_CATEGORY(lcVxi11, "qtdmm.vxi11", QtWarningMsg)
+Q_LOGGING_CATEGORY(lcVxi11, "qtdmm.scpi.vxi11", QtWarningMsg)
 
 namespace
 {
@@ -10,9 +10,11 @@ namespace
 constexpr qint32 kErrNone = 0;
 constexpr qint32 kErrInvalidLink = 4;
 constexpr qint32 kErrNotSupported = 8;
+constexpr qint32 kErrOutOfResources = 9;
 constexpr qint32 kErrLocked = 11;
 constexpr qint32 kErrNoLock = 12;
 constexpr qint32 kErrTimeout = 15;
+constexpr qint32 kErrIo = 17;
 
 constexpr quint32 kFlagEnd = 0x08;      // device_write: last block of the message
 constexpr quint32 kReasonReqCnt = 1;    // device_read: requested size reached
@@ -41,11 +43,34 @@ qint32 Vxi11Core::abortLink(qint32 lid)
 
 void Vxi11Core::reset()
 {
+  const bool had = !m_links.isEmpty();
   m_links.clear();
   m_lockOwner = -1;
+  if (had && m_linksChanged)
+    m_linksChanged();
 }
 
-RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r)
+void Vxi11Core::connectionClosed(quint64 conn)
+{
+  bool removed = false;
+  for (auto it = m_links.begin(); it != m_links.end();)
+  {
+    if (it->conn != conn)
+    {
+      ++it;
+      continue;
+    }
+    qCDebug(lcVxi11) << "connection closed, dropping link" << it.key();
+    if (m_lockOwner == it.key())
+      m_lockOwner = -1;
+    it = m_links.erase(it);
+    removed = true;
+  }
+  if (removed && m_linksChanged)
+    m_linksChanged();
+}
+
+RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn)
 {
   qint32 lid = 0;
   // Device_GenericParms: lid, flags, lock_timeout, io_timeout
@@ -77,10 +102,22 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r)
         r.u32(0);
         return RpcStatus::Success;
       }
+      if (m_links.size() >= kMaxLinks)
+      {
+        r.i32(kErrOutOfResources);
+        r.i32(0);
+        r.u32(0);
+        r.u32(0);
+        return RpcStatus::Success;
+      }
       lid = m_nextLid++;
-      m_links.insert(lid, Link{});
+      Link link;
+      link.conn = conn;
+      m_links.insert(lid, link);
       if (lock)
         m_lockOwner = lid;
+      if (m_linksChanged)
+        m_linksChanged();
       r.i32(kErrNone);
       r.i32(lid);
       r.u32(m_abortPort);
@@ -105,6 +142,13 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r)
         return RpcStatus::Success;
       }
       Link &l = m_links[lid];
+      if (l.in.size() + data.size() > kMaxMessage)
+      {
+        l.in.clear();
+        r.i32(kErrIo);
+        r.u32(0);
+        return RpcStatus::Success;
+      }
       l.in += data;
       if (flags & kFlagEnd)
       {
@@ -251,6 +295,8 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r)
       const qint32 err = m_links.remove(lid) ? kErrNone : kErrInvalidLink;
       if (m_lockOwner == lid)
         m_lockOwner = -1;
+      if (!err && m_linksChanged)
+        m_linksChanged();
       qCDebug(lcVxi11) << "destroy_link" << lid;
       r.i32(err);
       return RpcStatus::Success;
@@ -261,7 +307,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r)
   }
 }
 
-RpcStatus Vxi11Abort::call(quint32 proc, XdrReader &a, XdrWriter &r)
+RpcStatus Vxi11Abort::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64)
 {
   if (proc != 1) // device_abort
     return RpcStatus::ProcUnavail;
