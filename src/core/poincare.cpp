@@ -115,25 +115,30 @@ PoincareSeries::Stats PoincareSeries::stats() const
     s.meanX = s.meanY = s.sd1 = s.sd2 = qQNaN();
     return s;
   }
-  // in the coordinates turned by 45°: across (y - x) and along (y + x)
+  // in the coordinates turned by 45°: across (y - x) and along (y + x).
+  // Counted from the first value, so that equal readings give exactly 0
+  // and not the rounding of 12.83 summed up (7e-15)
+  const double ref = p.first().x;
   double sumX = 0, sumY = 0;
   for (const Pair &q : p)
   {
-    sumX += q.x;
-    sumY += q.y;
+    sumX += q.x - ref;
+    sumY += q.y - ref;
   }
-  s.meanX = sumX / s.count;
-  s.meanY = sumY / s.count;
+  const double dX = sumX / s.count, dY = sumY / s.count;
+  s.meanX = ref + dX;
+  s.meanY = ref + dY;
   if (s.count < 2)
   {
     s.sd1 = s.sd2 = qQNaN();
     return s;
   }
-  const double meanD = (s.meanY - s.meanX) / kSqrt2, meanS = (s.meanY + s.meanX) / kSqrt2;
+  const double meanD = (dY - dX) / kSqrt2, meanS = (dY + dX) / kSqrt2;
   double varD = 0, varS = 0;
   for (const Pair &q : p)
   {
-    const double d = (q.y - q.x) / kSqrt2 - meanD, a = (q.y + q.x) / kSqrt2 - meanS;
+    const double x = q.x - ref, y = q.y - ref;
+    const double d = (y - x) / kSqrt2 - meanD, a = (y + x) / kSqrt2 - meanS;
     varD += d * d;
     varS += a * a;
   }
@@ -148,7 +153,13 @@ PoincareSeries::Axis PoincareSeries::axis(double lo, double hi, double resolutio
   // all alike: not a span of 1e-12 (pV at a meter showing 0.000 V) but
   // the digits the meter shows
   if (!(span > 0))
+  {
     span = resolution > 0 ? 10 * resolution : hi != 0 ? std::abs(hi) * 1e-3 : 1;
+    // the value in the middle: at the edge of the span the axis could
+    // end up one grid step wide, the grid lines on the frame
+    lo -= span / 2;
+    hi += span / 2;
+  }
   Axis a;
   a.step = niceStep(span * 1.16 / 5);
   a.lo = std::floor((lo - span * 0.08) / a.step) * a.step;

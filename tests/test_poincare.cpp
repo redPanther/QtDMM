@@ -150,6 +150,21 @@ int main(int argc, char **argv)
     check(b.lo < 1.234 && b.hi > 1.234 && b.hi - b.lo <= 0.1, QString("axis at 1.234: %1 .. %2").arg(b.lo).arg(b.hi));
     const PoincareSeries::Axis c = PoincareSeries::axis(0, 0, 0);
     check(c.lo < 0 && c.hi > 0 && c.step > 1e-3, "axis at 0 without a resolution");
+    // all alike: a grid inside the frame, not one step from edge to edge
+    for (const double v : { 12.83, 1.234, 0.0, -5.0 })
+    {
+      const PoincareSeries::Axis g = PoincareSeries::axis(v, v, 0.01);
+      check(g.lo < v && g.hi > v && (g.hi - g.lo) / g.step >= 2.99,
+            QString("axis at %1: %2 .. %3 step %4").arg(v).arg(g.lo).arg(g.hi).arg(g.step));
+    }
+    {
+      PoincareSeries e;
+      for (int i = 0; i < 22; ++i)
+        e.feed(reading(12.83, "12.83", "V"));
+      const PoincareSeries::Stats st = e.stats();
+      check(st.sd1 == 0 && st.sd2 == 0 && st.meanX == 12.83,
+            QString("equal readings: SD1 %1, SD2 %2 exactly 0").arg(st.sd1).arg(st.sd2));
+    }
     const PoincareSeries::Axis d = PoincareSeries::axis(1, 3, 1e-3);
     check(d.lo <= 1 && d.hi >= 3 && near(d.step, 0.5), QString("axis 1..3: step %1").arg(d.step));
     z.clear();
