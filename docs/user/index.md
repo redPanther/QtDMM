@@ -38,7 +38,7 @@ side, one window each, and can be combined into calculated values.
   `READ?` over TCP for lxi-tools, Python or LabVIEW, announced by mDNS.
 - [Command line](command-line.md) — options, multiple instances, debug output.
 - [Keyboard and mouse](keyboard.md) — shortcuts in the main window and the
-  graph.
+  graph, and how to give a command a key of your own.
 - [Troubleshooting](troubleshooting.md) — permission errors, "another instance
   is running", HID devices.
 

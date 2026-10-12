@@ -41,6 +41,8 @@ class GuiPrefs;
 class GraphPrefs;
 class AlarmPrefs;
 class ScpiPrefs;
+class KeyboardPrefs;
+class ShortcutRegistry;
 #include "core/alarm.h"
 class SettingsPage;
 
@@ -66,10 +68,14 @@ public:
     Recorder,
     Alarms,
     Scpi,
+    Keyboard,   ///< the keys of the main window, for all instances
     NumItems,
   };
 
   SettingsDialog(Settings* settings, QWidget *parent = Q_NULLPTR);
+
+  /// The main window's actions for the page Keyboard.
+  void                  setShortcuts(ShortcutRegistry *registry);
 
   /// @name The meter of this instance
   /// From its settings keys (DMM/, Port settings/); it has no page here:
@@ -226,6 +232,7 @@ protected:
   GraphPrefs           *m_graph;
   AlarmPrefs           *m_alarms;
   ScpiPrefs            *m_scpi;
+  KeyboardPrefs        *m_keyboard;
   bool                  m_buttonBox_OK;
 
   void                  reloadSettings();

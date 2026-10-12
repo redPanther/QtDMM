@@ -52,6 +52,7 @@
 #include "device/meterconnection.h"
 #include "ui/designs.h"
 #include "ui/controlbar.h"
+#include "ui/shortcuts.h"
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QLoggingCategory>
@@ -271,6 +272,10 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
        "drift stretches it along it. SD1 and SD2 put both in numbers.</p></body></html>"));
   // the graph keeps its action from the .ui (toolbar button with Ctrl+3)
   bindWindowAction(action_Graph, m_graphWin);
+  m_displayAction->setObjectName("action_WindowDisplay");
+  m_meterAction->setObjectName("action_WindowMeter");
+  m_readingsAction->setObjectName("action_WindowReadings");
+  m_poincareAction->setObjectName("action_WindowPoincare");
 
   // the sidebar "Devices" at the left: My devices, a click switches
   m_sidebar = new DeviceSidebar(m_wid->devices(), this);
@@ -318,6 +323,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_instancesTimer->start();
   toolBarDMM->insertAction(toolBarDMM->actions().value(0), sidebar);
   m_addDeviceAction = new QAction(QIcon(new PlusIconEngine("qtdmm-dmm")), tr("&Add device..."), this);
+  m_addDeviceAction->setObjectName("action_AddDevice");
   m_addDeviceAction->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
   m_addDeviceAction->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Add device</span></p>"
                                      "<p>Step by step: how the meter is connected, which one it is, and whether it "
@@ -369,6 +375,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
                                    "also one without title bar.</p></body></html>"));
 
   m_titleBars = new QAction(tr("&Hide title bars"), this);
+  m_titleBars->setObjectName("action_TitleBars");
   m_titleBars->setCheckable(true);
   m_titleBars->setShortcut(QKeySequence("F10"));
   m_titleBars->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Hide title bars</span></p>"
@@ -388,12 +395,14 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_arrangeMenu->addAction(m_titleBars);
   m_arrangeMenu->addSeparator();
   QAction *loadWs = m_arrangeMenu->addAction(QIcon::fromTheme("document-open"), tr("L&oad workspace..."));
+  loadWs->setObjectName("action_LoadWorkspace");
   loadWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Load workspace</span></p>"
                           "<p>Takes a window layout saved with <i>Save workspace</i>: which windows are shown, "
                           "the arrangement, title bars, design and the size of the main window.</p>"
                           "</body></html>"));
   connect(loadWs, &QAction::triggered, this, &MainWindow::loadWorkspace);
   QAction *saveWs = m_arrangeMenu->addAction(QIcon::fromTheme("document-save-as"), tr("&Save workspace..."));
+  saveWs->setObjectName("action_SaveWorkspace");
   saveWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Save workspace</span></p>"
                           "<p>Writes the window layout to a file: which windows are shown, the arrangement, "
                           "title bars, design and the size of the main window.</p></body></html>"));
@@ -440,7 +449,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   });
 
   createExtraActions();
-  addShortcutsToToolTips();
+  createShortcuts({ loadWs, saveWs });
 
   connect(m_wid, SIGNAL(running(bool)), this, SLOT(runningSLOT(bool)));
   connect(m_wid, &InstanceWidget::recorderState, this, &MainWindow::updateRecorderActions);
@@ -757,23 +766,28 @@ void MainWindow::createActions()
 void MainWindow::createExtraActions()
 {
   m_fullScreen = new QAction(tr("&Full screen"), this);
+  m_fullScreen->setObjectName("action_FullScreen");
   m_fullScreen->setCheckable(true);
   m_fullScreen->setShortcut(QKeySequence("F11"));
   m_fullScreen->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Full screen</span></p>"
-                                "<p>Use the whole screen for the instruments, e.g. on a lab monitor. F11 again "
-                                "returns to the normal window.</p></body></html>"));
+                                "<p>Use the whole screen for the instruments, e.g. on a lab monitor. The same key "
+                                "again returns to the normal window.</p></body></html>"));
   connect(m_fullScreen, &QAction::toggled, this, &MainWindow::setFullScreen);
 
   m_zoomIn = new QAction(tr("Zoom &in"), this);
+  m_zoomIn->setObjectName("action_ZoomIn");
   m_zoomIn->setShortcuts({QKeySequence::ZoomIn, QKeySequence("Ctrl+=")});
   connect(m_zoomIn, &QAction::triggered, m_wid->graph(), &GraphWidget::zoomInSLOT);
   m_zoomOut = new QAction(tr("Zoom &out"), this);
+  m_zoomOut->setObjectName("action_ZoomOut");
   m_zoomOut->setShortcut(QKeySequence::ZoomOut);
   connect(m_zoomOut, &QAction::triggered, m_wid->graph(), &GraphWidget::zoomOutSLOT);
   m_zoomFit = new QAction(tr("Show &whole recording"), this);
+  m_zoomFit->setObjectName("action_ZoomFit");
   m_zoomFit->setShortcut(QKeySequence("Ctrl+0"));
   connect(m_zoomFit, &QAction::triggered, m_wid->graph(), &GraphWidget::zoomFitSLOT);
   m_copyImage = new QAction(tr("Cop&y graph image"), this);
+  m_copyImage->setObjectName("action_CopyImage");
   m_copyImage->setShortcut(QKeySequence("Ctrl+Shift+C"));
   m_copyImage->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Copy graph image</span></p>"
                                "<p>Puts a picture of the graph on the clipboard, ready to paste into a "
@@ -787,17 +801,33 @@ void MainWindow::createExtraActions()
               m_fullScreen, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage});
 }
 
-void MainWindow::addShortcutsToToolTips()
+// Every command that may have a key, in the groups of the page Keyboard;
+// the keys the user set (shortcuts.conf, all instances) replace the ones
+// given above, and the tooltips name them
+void MainWindow::createShortcuts(std::initializer_list<QAction *> workspace)
 {
-  for (QAction *a : findChildren<QAction *>())
-  {
-    if (a->shortcut().isEmpty() || a->isSeparator())
-      continue;
-    QString tip = a->toolTip();
-    if (tip.isEmpty())
-      tip = a->text().remove('&');
-    a->setToolTip(QString("%1 (%2)").arg(tip, a->shortcut().toString(QKeySequence::NativeText)));
-  }
+  m_shortcuts = new ShortcutRegistry(this, QDir(m_wid->settings()->configDir()).filePath("shortcuts.conf"), this);
+  const QString meter = tr("Meter"), recording = tr("Recording and graph"), windows = tr("Windows"),
+                help = tr("Settings and help");
+  for (QAction *a : { action_Connect, action_Reset, action_ConfigureDMM, m_addDeviceAction })
+    m_shortcuts->add(a, meter);
+  m_shortcuts->add(action_Record, recording, tr("Record / Stop"));
+  for (QAction *a : { action_Live, action_Clear, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage, action_Export,
+                      action_Import, action_Print })
+    m_shortcuts->add(a, recording);
+  for (QAction *a : { m_sidebarAction, m_displayAction, m_meterAction, action_Graph, m_readingsAction,
+                      m_poincareAction, m_titleBars, m_fullScreen })
+    m_shortcuts->add(a, windows);
+  for (QAction *a : workspace)
+    m_shortcuts->add(a, windows);
+  m_shortcuts->add(action_Configure, help, tr("Settings"));
+  m_shortcuts->add(actionConfigureRecorder, help, tr("Recording settings"));
+  for (QAction *a : { action_Help, action_Direct_help, action_About, action_Menu, action_Quit })
+    m_shortcuts->add(a, help);
+  m_shortcuts->load();
+  // Record names its key in a tooltip of its own
+  connect(m_shortcuts, &ShortcutRegistry::changed, this, &MainWindow::updateRecorderActions);
+  m_wid->setShortcuts(m_shortcuts);
 }
 
 void MainWindow::toggleRecordingSLOT()

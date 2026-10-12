@@ -60,7 +60,7 @@ RecorderPrefs::RecorderPrefs(QWidget *parent) : SettingsPage(parent)
   addSection(m_form, tr("Start"));
   manualBut = new QRadioButton(tr("&By hand"), this);
   manualBut->setObjectName("manualBut");
-  manualBut->setToolTip(tr("Record (Space) starts and stops the recording."));
+  manualBut->setToolTip(tr("The Record button starts and stops the recording."));
   m_form->addRow(QString(), manualBut);
 
   predefinedBut = new QRadioButton(tr("At a &clock time"), this);

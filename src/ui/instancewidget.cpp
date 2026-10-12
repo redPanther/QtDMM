@@ -719,6 +719,11 @@ QString InstanceWidget::dmmTitle() const
   return m_configDlg->device().trimmed();
 }
 
+void InstanceWidget::setShortcuts(ShortcutRegistry *registry)
+{
+  m_configDlg->setShortcuts(registry);
+}
+
 void InstanceWidget::setShowDisplay(bool show)
 {
   m_configDlg->setShowDisplay(show);

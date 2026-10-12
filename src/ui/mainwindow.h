@@ -40,6 +40,7 @@ class AnalogMeter;
 class ReadingsWidget;
 class PoincarePlot;
 class AlarmBar;
+class ShortcutRegistry;
 class ControlBar;
 class FoldButton;
 class MdiArranger;
@@ -202,6 +203,7 @@ protected:
   QAction    *m_zoomOut;
   QAction    *m_zoomFit;
   QAction    *m_copyImage;
+  ShortcutRegistry *m_shortcuts = nullptr;
   bool        m_running;
   QLabel     *m_error;
   QLabel     *m_info;
@@ -217,8 +219,10 @@ protected:
   void        createActions();
   /// Menu-only actions and their shortcuts (the window has no menu bar).
   void        createExtraActions();
-  /// Appends the shortcut to every action's tooltip: "Record (Space)".
-  void        addShortcutsToToolTips();
+  /// The commands with a key for the page Keyboard (ShortcutRegistry);
+  /// the user's keys applied, the tooltips name them: "Record (Space)".
+  /// @p workspace: the menu's Load/Save workspace.
+  void        createShortcuts(std::initializer_list<QAction *> workspace);
   /// Adds @p view as an MDI window with @p title (@p role: MdiArranger::Role;
   /// @p name identifies it in the settings).
   QMdiSubWindow *addView(QWidget *view, const QString &title, int role, const QString &name);

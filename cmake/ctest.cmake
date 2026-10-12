@@ -134,6 +134,12 @@ if (BUILD_TESTING)
 	target_include_directories(test_settingspages PRIVATE src)
 	target_link_libraries(test_settingspages PRIVATE Qt6::Widgets Qt6::Charts Qt6::PrintSupport Qt6::Svg Qt::Core)
 	add_test(NAME settings_pages COMMAND test_settingspages)
+	## the keys of the main window's commands and the page Keyboard
+	add_executable(test_shortcuts MACOSX_BUNDLE tests/test_shortcuts.cpp src/ui/shortcuts.cpp
+		src/ui/settings/keyboardprefs.cpp src/ui/settings/settingspage.cpp src/ui/designs.cpp)
+	target_include_directories(test_shortcuts PRIVATE src)
+	target_link_libraries(test_shortcuts PRIVATE Qt6::Widgets Qt::Core)
+	add_test(NAME shortcuts COMMAND test_shortcuts)
 	## the formula evaluator of calculated instances
 	set( TEST_CALC test_calc)
 	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/core/calcexpr.cpp src/core/siprefix.cpp)

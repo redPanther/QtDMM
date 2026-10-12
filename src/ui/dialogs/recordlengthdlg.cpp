@@ -40,7 +40,7 @@ RecordLengthDlg::RecordLengthDlg(int value, int unit, const QString &startHint, 
   m_unit->setCurrentIndex(qBound(0, unit, 3));
   m_untilStop = new QRadioButton(tr("&Until Stop"), this);
   m_untilStop->setObjectName("ui_untilStop");
-  m_untilStop->setToolTip(tr("Records until you press Stop (Space)."));
+  m_untilStop->setToolTip(tr("Records until you press Stop."));
   grid->addWidget(m_forLength, 0, 0);
   grid->addWidget(m_value, 0, 1);
   grid->addWidget(m_unit, 0, 2);

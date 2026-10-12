@@ -7,6 +7,24 @@ has the focus. Ctrl+drag moves a window, also one without title bar: in
 to swap the two. There, the gaps between the windows can be dragged to
 share the space differently.
 
+## Your own keys
+
+Settings, **Keyboard** lists the commands of the main window with their
+key and the default. Select a command, click into **Key** and press the new
+key; **None** takes the key away, **Default** gives the command its own key
+back, **All to default** does so for all. The search field finds a command
+by its name or its key. Changed keys are shown in bold.
+
+A key another command already has is taken from it after a question. Esc,
+Tab, Return and Alt with a letter or a digit stay with the window: they
+move through buttons, menus and dialogs. The keys are the same in all
+instances (the file `shortcuts.conf` next to the instances' settings); an
+instance that runs takes over a change at once. The tables below show the
+defaults.
+
+The keys of the graph, the readings table, the settings dialog and the
+handbook window are fixed.
+
 ## Main window
 
 | Key | Action |
