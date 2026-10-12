@@ -1674,7 +1674,10 @@ void MainWindow::setDesign(int design)
   updateLed();
   const Designs::GraphColors g = Designs::graphColors(d);
   m_wid->graph()->setThemeColors(g.background, g.grid, g.labels, g.data);
-  m_poincare->setThemeColors(g.background, g.grid, g.labels, g.data);
+  // the Poincaré plot on the background around the instruments, not on the
+  // graph's: it stands next to the display and the meter
+  m_poincare->setThemeColors(frame.style() != Qt::NoBrush ? frame : QApplication::palette().window(), g.grid,
+                             g.labels, g.data);
   for (QAction *a : m_designMenu->actions())
     a->setChecked(a->data().toInt() == design);
   // at once, so the settings dialog shows the design of the menu

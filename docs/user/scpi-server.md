@@ -25,13 +25,13 @@ keeps deciding what it measures.
 | Announce by mDNS | with the port open to the network, QtDMM registers as `_scpi-raw._tcp` (and `_hislip._tcp`) so that `lxi discover -m` and every DNS-SD browser list it as "QtDMM *host*" (or "QtDMM *instance*" with `--config-id`) |
 
 The sidebar (F9) lists both under **Services**: *SCPI* and *HiSLIP* with
-their port, or *off*. The dot turns green while a client is connected, the
-tooltip has the address and the number of clients. *failed* with a red dot
-means switched on but not running, usually because all ten ports from the
-one set here are taken; the tooltip and the status line of these settings
-say why. A double click opens these settings; the context menu also copies
-the address
-(`localhost:5025`, `TCPIP::localhost::hislip0::INSTR`).
+their port, or *off*. The dot is dark green while the service waits for a
+client and turns bright green while one is connected, the tooltip has the
+address and the number of clients. *failed* with a red dot means switched
+on but not running, usually because all ten ports from the one set here
+are taken; the tooltip and the status line of these settings say why. A
+double click opens these settings; the context menu also copies the
+address (`localhost:5025`, `TCPIP::localhost::hislip0::INSTR`).
 There is **no authentication**: whoever can reach the port can read the
 meter, start the recorder, connect or disconnect - and fetch a picture of
 the QtDMM window (`HCOPy:SDUMp:DATA?`), which shows the readings, the
@@ -88,7 +88,13 @@ TCPIP::bench.local::hislip0,4881::INSTR     (another port: a second instance)
 The settings page shows the address for this computer. It works with
 NI-VISA (LabVIEW, NI MAX: *Add network device*, *Manual entry*, HiSLIP),
 the Keysight IO Libraries and [PyVISA-py](https://pyvisa.readthedocs.io/projects/pyvisa-py/) 0.6
-or newer:
+or newer. Older PyVISA-py, as some distributions still package it (Ubuntu
+24.04: 0.5.1), knows no HiSLIP and tries VXI-11 on port 111 instead:
+"Connection refused". Install a current one with
+`python3 -m venv ~/visa && ~/visa/bin/pip install pyvisa pyvisa-py`.
+lxi-tools speaks VXI-11 and raw sockets only, not HiSLIP; `lxi discover`
+finds QtDMM only with `-m` (mDNS), without it lxi looks for VXI-11
+instruments.
 
 ```python
 import pyvisa
