@@ -70,3 +70,18 @@ a second. It is off by default.
 Alarms judge the main reading only. For a condition on several meters -
 power over a limit, say - set up a [calculated value](calculated-values.md)
 and put the alarm on that instance.
+
+## Example: setting a voltage
+
+An alarm can also say "on target" instead of "wrong". Setting the reference
+voltage of a stepper motor driver with its trimmer, say to 2.00 V:
+
+- Condition **inside**, from 1.95 V to 2.05 V; duration 0, no hysteresis.
+- Colour **green**, **Display and analog meter in the alarm's colour** on.
+- **Banner**, **Beep** and the two **Mark** boxes off: the beep would sound
+  every time the reading enters the range, and every entry would be a mark.
+
+Now turn the trimmer and watch the screen from the corner of your eye:
+the display turns green while the voltage is in the range and goes back
+to its own colour as soon as it leaves it. With a narrower range the
+target is hit more exactly.
