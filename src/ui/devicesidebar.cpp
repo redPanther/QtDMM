@@ -246,11 +246,11 @@ void DeviceSidebar::setServices(const QList<Service> &services)
     item->setToolTip(1, service.tooltip);
     item->setForeground(0, service.running ? palette().color(QPalette::Text) : grey);
     item->setForeground(1, service.running ? palette().color(QPalette::Text) : grey);
-    // as an instance: green while a client is connected
-    // red: switched on but not running (port taken)
+    // green while a client is connected, dark green while it runs and waits
+    // for one; red: switched on but not running (port taken)
     item->setIcon(0, dot(service.active    ? QColor(0x22, 0xaa, 0x22)
                          : service.failed  ? QColor(0xcc, 0x22, 0x22)
-                         : service.running ? grey
+                         : service.running ? QColor(0x1a, 0x5c, 0x1a)
                                            : QColor()));
   }
   m_filling = false;
