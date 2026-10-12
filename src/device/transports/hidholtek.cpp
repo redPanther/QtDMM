@@ -1,6 +1,7 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "device/transports/hidholtek.h"
+#include "device/transports/hidpath.h"
 
 HidHoltekDevice::HidHoltekDevice(const DmmDecoder::DMMInfo & /*info*/, const QString &device, QObject *p)
   : QIODevice(p)
@@ -8,7 +9,18 @@ HidHoltekDevice::HidHoltekDevice(const DmmDecoder::DMMInfo & /*info*/, const QSt
   if (device.isNull())
     return;
 
-  const QString path = pathForEntry(device);
+  // the path may have changed since the entry was saved: the sensor again by its ids
+  const HidPath::Choice where = HidPath::resolve(device);
+  if (where.ambiguous)
+  {
+    m_openError = tr("%1 is gone, and several sensors with its USB ids are plugged in: choose the port in the "
+                     "device settings.").arg(pathForEntry(device));
+    qWarning() << "HID:" << m_openError;
+    return;
+  }
+  const QString path = where.path;
+  if (!where.moved.isEmpty())
+    qCInfo(lcHid) << "the sensor of" << pathForEntry(device) << "is now" << path;
   m_handle = hid_open_path(path.toUtf8().constData());
   if (!m_handle)
   {
@@ -60,10 +72,15 @@ bool HidHoltekDevice::availablePorts(QStringList &portlist)
   const qsizetype before = portlist.size();
   struct hid_device_info *devs = hid_enumerate(VendorId, ProductId);
   for (struct hid_device_info *d = devs; d; d = d->next)
+  {
+    // a udev link (/dev/qtdmm/...) stays the same across plugs and restarts
+    const QString path = QString::fromLatin1(d->path);
+    const QString link = HidPath::linkFor(path);
     portlist << QString("HIDHOLTEK 0x%1:0x%2 %3")
                    .arg(d->vendor_id, 4, 16, QLatin1Char('0'))
                    .arg(d->product_id, 4, 16, QLatin1Char('0'))
-                   .arg(QString::fromLatin1(d->path));
+                   .arg(link.isEmpty() ? path : link);
+  }
   hid_free_enumeration(devs);
   return portlist.size() > before;
 }

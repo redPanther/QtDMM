@@ -1,13 +1,20 @@
-# QtDMM: the logged-in user may open the USB-HID cables and sensors of meters
+# QtDMM: the logged-in user may open the USB-HID cables and sensors of meters,
+# and each gets a link that stays the same across plugging in again and
+# restarts as long as it is in the same USB port:
+# /dev/qtdmm/<cable>-<USB port>, e.g. /dev/qtdmm/ut-d04-ch9325-pci-0000_00_14_0-usb-0_2_1_0
 # WCH CH9325 (UNI-T UT-D04)
-KERNEL=="hidraw*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e008", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e008", TAG+="uaccess", ENV{QTDMM_CABLE}="ut-d04-ch9325"
 # Hoitek HE2325U (UNI-T UT-D04)
-KERNEL=="hidraw*", ATTRS{idVendor}=="04fa", ATTRS{idProduct}=="2490", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="04fa", ATTRS{idProduct}=="2490", TAG+="uaccess", ENV{QTDMM_CABLE}="ut-d04-he2325u"
 # SiLabs CP2110 (UNI-T UT-D09)
-KERNEL=="hidraw*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea80", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea80", TAG+="uaccess", ENV{QTDMM_CABLE}="ut-d09-cp2110"
 # WCH CH9329 (UNI-T UT-D09)
-KERNEL=="hidraw*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e429", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e429", TAG+="uaccess", ENV{QTDMM_CABLE}="ut-d09-ch9329"
 # Brymen BU-86X
-KERNEL=="hidraw*", ATTRS{idVendor}=="0820", ATTRS{idProduct}=="0001", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="0820", ATTRS{idProduct}=="0001", TAG+="uaccess", ENV{QTDMM_CABLE}="brymen-bu86x"
 # Holtek (TFA AIRCO2NTROL)
-KERNEL=="hidraw*", ATTRS{idVendor}=="04d9", ATTRS{idProduct}=="a052", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="04d9", ATTRS{idProduct}=="a052", TAG+="uaccess", ENV{QTDMM_CABLE}="holtek-co2"
+
+# the stable link: the cable's name and its USB port
+KERNEL=="hidraw*", ENV{QTDMM_CABLE}=="?*", IMPORT{builtin}="path_id"
+KERNEL=="hidraw*", ENV{QTDMM_CABLE}=="?*", ENV{ID_PATH_TAG}=="?*", SYMLINK+="qtdmm/$env{QTDMM_CABLE}-$env{ID_PATH_TAG}"

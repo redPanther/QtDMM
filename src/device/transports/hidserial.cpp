@@ -1,4 +1,5 @@
 #include "device/transports/hidserial.h"
+#include "device/transports/hidpath.h"
 
 // The chips this driver knows, by USB id. The Hoitek HE2325U is the CH9325's
 // predecessor with the same protocol.
@@ -166,7 +167,18 @@ HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo info, QString device,
 {
   if (device.isNull())
     return;
-  const QString path = pathForEntry(device);
+  // the path may have changed since the entry was saved: the cable again by its ids
+  const HidPath::Choice where = HidPath::resolve(device);
+  if (where.ambiguous)
+  {
+    m_openError = tr("%1 is gone, and several cables with its USB ids are plugged in: choose the port in the "
+                     "device settings.").arg(pathForEntry(device));
+    qWarning() << "HID:" << m_openError;
+    return;
+  }
+  const QString path = where.path;
+  if (!where.moved.isEmpty())
+    qCInfo(lcHid) << "the cable of" << pathForEntry(device) << "is now" << path;
   m_chip = chipForEntry(device);
   if (!device.contains(':'))
   {
@@ -180,7 +192,11 @@ HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo info, QString device,
   m_handle = hid_open_path(path.toUtf8().data());
   if (!m_handle)
   {
-    qWarning() << "HID: cannot open" << path << QString::fromWCharArray(hid_error(nullptr));
+    m_openError = tr("Cannot open %1: %2").arg(path, QString::fromWCharArray(hid_error(nullptr)));
+#ifdef Q_OS_LINUX
+    m_openError += tr("\nCable plugged in? No permission? The cable needs the udev rule of QtDMM.");
+#endif
+    qWarning() << "HID:" << m_openError;
     return;
   }
   qCDebug(lcHid) << "opened" << path
@@ -188,6 +204,7 @@ HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo info, QString device,
                      : m_chip == Chip::BU86X ? "(BU-86X)" : "(CH9325)");
   if (!configureCable())
   {
+    m_openError = tr("Cannot set up the cable at %1.").arg(path);
     hid_close(m_handle);
     m_handle = Q_NULLPTR;
     return;
@@ -239,10 +256,13 @@ bool HIDSerialDevice::availablePorts(QStringList &portlist,unsigned short vendor
   }
 
   for (cur_dev = devs; cur_dev != Q_NULLPTR; cur_dev = cur_dev->next) {
+    // a udev link (/dev/qtdmm/...) stays the same across plugs and restarts
+    const QString path = QString::fromLatin1(cur_dev->path);
+    const QString link = HidPath::linkFor(path);
     portlist << QString("HID 0x%1:0x%2 %3")
     .arg(vendor_id, 4, 16, QLatin1Char('0'))
     .arg(product_id, 4, 16, QLatin1Char('0'))
-    .arg(QString::fromLatin1(cur_dev->path));
+    .arg(link.isEmpty() ? path : link);
   }
   hid_free_enumeration(devs);
 
@@ -252,7 +272,10 @@ bool HIDSerialDevice::availablePorts(QStringList &portlist,unsigned short vendor
 bool HIDSerialDevice::open(OpenMode mode)
 {
   if (!m_isOpen)
+  {
+    setErrorString(m_openError.isEmpty() ? tr("Cannot open the cable.") : m_openError);
     return false;
+  }
   return QIODevice::open(mode);
 }
 
