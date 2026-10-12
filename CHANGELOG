@@ -1,4 +1,4 @@
-* in development: 26.2 (not released yet)
+* 12/10/2026 26.2-rc1 (first release candidate for 26.2)
 - New main window: display, analog meter, graph and readings table are windows in one area, arranged
   automatically ("Displays on top", "Displays on the left"), fixed or freely. In the arranged modes the gaps
   between the windows can be dragged, and Ctrl+drag (or the title bar) swaps two windows; the layout is
