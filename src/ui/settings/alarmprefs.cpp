@@ -5,14 +5,18 @@
 #include <QColorDialog>
 #include <QComboBox>
 #include <QDialogButtonBox>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QProcess>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QToolButton>
 #include <QVBoxLayout>
 
 #include "ui/engnumbervalidator.h"
@@ -255,7 +259,31 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   m_command = new QLineEdit(alarm.command, act);
   m_command->setPlaceholderText(tr("none"));
   m_command->setToolTip(tr("Program to run when the alarm raises. %v is the value, %u its unit, %n the alarm's name."));
-  af->addRow(tr("Run &program:"), m_command);
+  auto *browse = new QToolButton(act);
+  browse->setObjectName("ui_alarmCommandButton");
+  browse->setIcon(QIcon::fromTheme("document-open"));
+  browse->setToolTip(tr("Choose the program"));
+  connect(browse, &QToolButton::clicked, this, [this]
+  {
+    // the file replaces the program, its arguments (%v, %u, %n) stay
+    QStringList args = QProcess::splitCommand(m_command->text());
+    const QString current = args.isEmpty() ? QString() : args.takeFirst();
+    const QString dir = QFileInfo(current).isAbsolute() ? QFileInfo(current).absolutePath() : QString();
+    const QString file = QFileDialog::getOpenFileName(this, tr("Program to run"), dir);
+    if (file.isEmpty())
+      return;
+    QStringList parts{ file.contains(' ') ? '"' + file + '"' : file };
+    for (const QString &a : std::as_const(args))
+      parts << (a.contains(' ') ? '"' + a + '"' : a);
+    m_command->setText(parts.join(' '));
+  });
+  auto *commandRow = new QHBoxLayout;
+  commandRow->setContentsMargins(0, 0, 0, 0);
+  commandRow->addWidget(m_command);
+  commandRow->addWidget(browse);
+  auto *commandLabel = new QLabel(tr("Run &program:"), act);
+  commandLabel->setBuddy(m_command);   // Alt+P into the field, not the row
+  af->addRow(commandLabel, commandRow);
   m_disconnect = new QCheckBox(tr("&Disconnect first"), act);
   m_disconnect->setChecked(alarm.disconnect);
   m_disconnect->setToolTip(tr("Close the port while the program runs and open it again when it has ended - "

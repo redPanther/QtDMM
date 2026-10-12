@@ -47,7 +47,8 @@ What happens when an alarm raises; tick any of them:
   a relay. The command is the program followed by its arguments, as in a
   terminal but without a shell: put arguments containing spaces in double
   quotes; for pipes or redirections call the shell yourself
-  (`sh -c "echo done > /tmp/qtdmm.log"`).
+  (`sh -c "echo done > /tmp/qtdmm.log"`). The button next to the field
+  chooses the program file; the arguments already typed stay.
 - **Disconnect first** (with a program) - QtDMM closes the port before the
   program starts and opens it again when the program has ended, so the
   program can talk to the meter itself. One such program runs at a time.
