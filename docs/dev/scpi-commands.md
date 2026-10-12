@@ -11,7 +11,12 @@ command changes what the meter measures.
   accepted); or HiSLIP 1.0 (`src/service/hislipserver.cpp`, synchronized
   mode, no locks, messages up to 1 MB, `tests/test_hislip.cpp`), where a
   message may also hold several lines and each query line answers with a
-  message of its own. No VXI-11.
+  message of its own; or VXI-11 (`src/service/vxi11core.cpp`,
+  `vxi11server.cpp`, `rpc.cpp`; core and abort channel, no interrupt
+  channel, 16 links, messages up to 1 MB, a lock ends with its connection,
+  `tests/test_vxi11.cpp`), the same way: a `device_write` with END runs
+  the lines, each query answer is read with `device_read` of its own.
+  `device_clear` (and HiSLIP's device clear) empties the error queue.
 - Several commands per message separated by `;`. Their query answers come
   back in one line, separated by `;`, terminated by `\n`. A message without
   a query gets no answer at all.

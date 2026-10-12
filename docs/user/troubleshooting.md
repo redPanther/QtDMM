@@ -104,6 +104,23 @@ with "QtDMM cannot be opened" or "Apple could not verify QtDMM". Allow it once:
 After that it starts normally. Serial ports appear as `/dev/cu.usbserial-…`
 (use the `cu.` ports, not `tty.`). Bluetooth LE is not available on macOS yet.
 
+## VXI-11 shows "failed"
+
+The status line of Settings, SCPI server and the tooltip in the sidebar
+say why:
+
+- *port 111 is not allowed for this program*: no rpcbind runs, and an own
+  portmapper on the privileged port 111 needs rights QtDMM does not take.
+  Start the system rpcbind (`sudo systemctl enable --now rpcbind.socket`)
+  or see [SCPI server, VXI-11](scpi-server.md#vxi-11) for the other ways.
+- *another program or QtDMM instance offers VXI-11 already*: one per
+  computer. Use HiSLIP in this instance, or switch VXI-11 off in the other.
+- *rpcbind refused the registration over TCP*: rpcbind runs, but its Unix
+  socket `/run/rpcbind.sock` is missing (an old setup, or a container or
+  Flatpak without access to it).
+- *no rpcbind is running*: the Portmapper setting is *System rpcbind*;
+  choose *Automatic*, or start rpcbind.
+
 ## "Another instance is running"
 
 QtDMM instances coordinate through shared memory so that several meters can be

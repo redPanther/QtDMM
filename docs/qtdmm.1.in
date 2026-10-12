@@ -10,6 +10,8 @@ qtdmm \- read out and record digital multimeters
 .IR id ]
 .RB [ \-\-config\-dir
 .IR dir ]
+.RB [ \-\-vxi11\-rpc
+.IR mode ]
 .RB [ \-\-debug ]
 .br
 .B qtdmm
@@ -58,6 +60,19 @@ used in the formula of a calculated value.
 Keep the configuration files in
 .I dir
 instead of the platform's user configuration directory.
+.TP
+.BI \-\-vxi11\-rpc " mode"
+Where the VXI\-11 server of the SCPI server gets its portmapper from, for this
+run only:
+.B auto
+(the system's
+.BR rpcbind (8)
+when it runs, otherwise an own one),
+.B system
+or
+.B own
+(port 111 itself, which needs the right to bind a privileged port).
+Replaces the setting without changing it.
 .TP
 .B \-\-debug
 Print every frame received from the meter as a line of hex bytes on
