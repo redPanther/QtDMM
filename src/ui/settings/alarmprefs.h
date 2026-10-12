@@ -17,6 +17,8 @@ public:
   explicit AlarmPrefs(QWidget *parent = nullptr);
 
   QList<Alarm> alarms() const { return m_alarms; }
+  /// The display and the analog meter blink while they show an alarm's colour (Alarms/blink).
+  bool blink() const;
   /// Base unit of the current reading, shown next to the thresholds.
   void setUnit(const QString &unit);
 
@@ -37,6 +39,7 @@ private:
   QListWidget *m_list;
   QLabel *m_empty;   ///< the hint in the empty list
   QPushButton *m_edit, *m_remove;
+  class QCheckBox *m_blink;
 };
 
 /// Editor for one alarm: name, condition, duration, hysteresis, actions.
@@ -53,7 +56,7 @@ private:
   QString m_unit;
   class QLineEdit *m_name, *m_a, *m_b, *m_seconds, *m_hysteresis, *m_message, *m_command;
   class QComboBox *m_condition, *m_recorder;
-  class QCheckBox *m_enabled, *m_banner, *m_beep, *m_popup, *m_raise, *m_markGraph, *m_markTable, *m_disconnect;
+  class QCheckBox *m_enabled, *m_banner, *m_tint, *m_beep, *m_popup, *m_raise, *m_markGraph, *m_markTable, *m_disconnect;
   class QPushButton *m_color;
   class QLabel *m_aLabel, *m_bLabel, *m_secondsLabel, *m_hystLabel;
   QColor m_colorValue;

@@ -194,6 +194,13 @@ protected:
   QPrinter    m_printer;
   LcdWidget *m_display;
   QColor      m_lcdTint;   ///< the Appearance page's tint last applied
+  QColor      m_alertColor;   ///< the raised alarm's colour for display and meter, invalid when none
+  bool        m_alertBlink = false;   ///< Alarms/blink
+  bool        m_alertPhase = true;    ///< blinking: the colour shown now
+  QTimer     *m_alertTimer = nullptr;
+  /// Display and meter in the alarm's colour (or their own in the dark
+  /// phase of the blinking).
+  void        showAlertColor();
   AnalogMeter   *m_meter;
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);

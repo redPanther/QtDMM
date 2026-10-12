@@ -55,6 +55,7 @@ QJsonObject Alarm::toJson() const
   o["message"] = message;
   o["color"] = color.name();
   o["banner"] = banner;
+  o["tint-display"] = tintDisplay;
   o["beep"] = beep;
   o["popup"] = popup;
   o["raise-window"] = raiseWindow;
@@ -79,6 +80,7 @@ Alarm Alarm::fromJson(const QJsonObject &o)
   al.message = o["message"].toString();
   al.color = QColor(o["color"].toString(al.color.name()));
   al.banner = o["banner"].toBool(true);
+  al.tintDisplay = o["tint-display"].toBool(true);
   al.beep = o["beep"].toBool(true);
   al.popup = o["popup"].toBool(false);
   al.raiseWindow = o["raise-window"].toBool(false);
@@ -171,6 +173,12 @@ bool Alarm::released(double value, bool overload) const
 
 AlarmManager::AlarmManager(QObject *parent) : QObject(parent)
 {
+  // connected first: the order is known to the slots of raised()
+  connect(this, &AlarmManager::raised, this, [this](int, const Alarm &alarm, double)
+  {
+    m_raiseOrder.removeAll(alarm.name);
+    m_raiseOrder << alarm.name;
+  });
 }
 
 void AlarmManager::setAlarms(const QList<Alarm> &alarms)
@@ -202,6 +210,16 @@ bool AlarmManager::anyRaised() const
     if (s == Raised)
       return true;
   return false;
+}
+
+QColor AlarmManager::displayColor() const
+{
+  for (int k = m_raiseOrder.size() - 1; k >= 0; --k)
+    for (int i = 0; i < m_alarms.size(); ++i)
+      if (m_alarms[i].name == m_raiseOrder[k] && m_alarms[i].tintDisplay
+          && (m_state[i] == Raised || m_state[i] == Acknowledged))
+        return m_alarms[i].color;
+  return QColor();
 }
 
 void AlarmManager::feed(double value, bool overload, qint64 nowMs)

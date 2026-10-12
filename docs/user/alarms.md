@@ -34,6 +34,13 @@ What happens when an alarm raises; tick any of them:
 - **Banner** over the graph in the alarm's colour with its message (or the
   condition in words). **Acknowledge** hides it; the alarm stays raised
   until the reading is back and raises again only after that.
+- **Display and analog meter in the alarm's colour** (on by default): the
+  LCD's face takes the colour, its digits turn light or dark, whichever
+  reads better; the analog meter's dial takes a third of it, so scale and
+  pointer stay readable. The colour stays after Acknowledge until the
+  reading is back. With several alarms raised, the one raised last gives
+  the colour. The colour is never the only sign: banner, beep and the
+  status line tell the same.
 - **Beep**.
 - **Popup window** with message, value and time.
 - **Bring the QtDMM window to the front**.
@@ -55,6 +62,10 @@ What happens when an alarm raises; tick any of them:
   A running recording goes on; the time without readings is a gap in it.
 
 The status line reports every raise and clear too.
+
+**Coloured displays blink**, below the list of alarms, makes the display
+and the analog meter switch between the alarm's colour and their own once
+a second. It is off by default.
 
 Alarms judge the main reading only. For a condition on several meters -
 power over a limit, say - set up a [calculated value](calculated-values.md)

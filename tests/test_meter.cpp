@@ -383,6 +383,18 @@ int main(int argc, char **argv)
     }
   }
 
+  // --- an alarm's colour mixed into the dial, and back ---
+  {
+    AnalogMeter w;
+    w.setStyle(AnalogMeterStyle::dark());
+    const QColor dial = w.dialColor();
+    w.setAlertColor(QColor("#d82222"));
+    const QColor mixed = w.dialColor();
+    check(mixed.red() > dial.red() + 40 && mixed.red() < 0xd8, QString("alarm: dial reddened, not red (%1)").arg(mixed.name()));
+    w.setAlertColor(QColor());
+    check(w.dialColor() == dial, "no alarm: the style's dial again");
+  }
+
   if (failed == 0)
     qInfo() << "All analog meter tests passed.";
   else

@@ -135,6 +135,21 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   // alarms: the controller judges every reading and runs the program; beep,
   // popup and raising the window are UI (the banner is MainWindow's)
   connect(m_ctl, &MeterController::alarmRaised, this, &InstanceWidget::alarmRaised);
+  // the display and the meter in the alarm's colour, blinking if wanted;
+  // the banner and the beep stay, the colour is never the only sign
+  m_alertTimer = new QTimer(this);
+  m_alertTimer->setInterval(500);
+  connect(m_alertTimer, &QTimer::timeout, this, [this]
+  {
+    m_alertPhase = !m_alertPhase;
+    showAlertColor();
+  });
+  connect(m_ctl, &MeterController::alertColorChanged, this, [this](const QColor &color)
+  {
+    m_alertColor = color;
+    m_alertPhase = true;
+    showAlertColor();
+  });
   connect(m_ctl, &MeterController::recordingRequested, this, [this](bool start)
   {
     if (start)
@@ -474,6 +489,8 @@ void InstanceWidget::applySLOT()
 {
   readConfig();
   m_ctl->setAlarms(m_configDlg->alarms());
+  m_alertBlink = m_configDlg->alarmBlink();
+  showAlertColor();
   ui_graph->setAlertUnsaved(m_configDlg->alertUnsavedData());
   m_ctl->setModel(m_configDlg->dmmName());
   ScpiConfig scpi;
@@ -752,6 +769,23 @@ void InstanceWidget::alarmRaised(const Alarm &alarm, const QString &shown, const
     box->setModal(false);
     box->show();
   }
+}
+
+void InstanceWidget::showAlertColor()
+{
+  const bool blinking = m_alertColor.isValid() && m_alertBlink;
+  if (blinking && !m_alertTimer->isActive())
+    m_alertTimer->start();
+  else if (!blinking)
+  {
+    m_alertTimer->stop();
+    m_alertPhase = true;
+  }
+  const QColor shown = m_alertPhase ? m_alertColor : QColor();
+  if (m_display)
+    m_display->setAlertColor(shown);
+  if (m_meter)
+    m_meter->setAlertColor(shown);
 }
 
 void InstanceWidget::setMeterStyle(int style)

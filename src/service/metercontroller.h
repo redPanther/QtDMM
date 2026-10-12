@@ -148,6 +148,10 @@ Q_SIGNALS:
   /// The alarm banner: one line per raised, unacknowledged alarm, in the
   /// colour of the first; empty when nothing is raised.
   void        alarmBannerChanged(const QString &lines, const QColor &color);
+  /// The colour the display and the analog meter take: that of the alarm
+  /// raised last among those raised (acknowledged or not) with
+  /// Alarm::tintDisplay; invalid when there is none.
+  void        alertColorChanged(const QColor &color);
   /// An alarm wants the recorder started (true) or stopped.
   void        recordingRequested(bool start);
   /// An alarm wants a mark in the graph and/or the readings table.
@@ -197,6 +201,7 @@ private:
   QString     m_lastUnit;
   QString     m_baseUnit;
   bool        m_overload = false;
+  QColor      m_alertColor;   ///< the colour last sent with alertColorChanged()
   QElapsedTimer m_clock;   ///< the stale check's time base, monotonic
   StaleRule   m_stale;     ///< when the main value is too old to stand for the present
   bool        m_staleShown = false;   ///< what staleChanged() said last

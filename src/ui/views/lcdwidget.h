@@ -86,6 +86,14 @@ public:
   /// The tint for Custom (Appearance page); the others bring their own.
   void setFaceColor(const QColor &);
   void setLcdVariant(LcdVariant variant);
+  /// An alarm's colour for the face while it is raised (invalid: the
+  /// variant's own); the segments turn light or dark, whichever reads
+  /// better on it. The variant stays.
+  void setAlertColor(const QColor &color);
+  QColor alertColor() const { return m_alert; }
+  /// The face as painted now (the alarm's colour or the variant's).
+  QColor faceColor() const { return m_face; }
+  QColor segmentColor() const { return m_segment; }
   LcdVariant lcdVariant() const { return m_variant; }
   /// The value is too old to stand for the present (StaleRule): the
   /// segments fade, the panel stays.
@@ -160,6 +168,7 @@ private:
   void drawAnnunciator(QPainter &p, const QRectF &r, const QString &text, bool on, double fontPx) const;
 
   QColor m_face;
+  QColor m_alert;   ///< an alarm's colour over the variant, invalid when none
   QColor m_segment;
   QColor m_customFace;             ///< setFaceColor()
   LcdVariant m_variant = Classic;
