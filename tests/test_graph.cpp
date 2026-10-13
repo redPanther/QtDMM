@@ -36,6 +36,24 @@ static void check(bool cond, const QString &what)
     fail(what);
 }
 
+// The lines of a path at least @p length long, horizontal (their y) or
+// vertical (their x): phosphor's lines, not its ticks
+static QList<double> pathLines(const QPainterPath &path, bool horizontal, double length)
+{
+  QList<double> out;
+  for (int i = 1; i < path.elementCount(); ++i)
+  {
+    const QPainterPath::Element a = path.elementAt(i - 1), b = path.elementAt(i);
+    if (!a.isMoveTo() || !b.isLineTo())
+      continue;
+    if (horizontal && std::abs(a.y - b.y) < 0.01 && std::abs(b.x - a.x) >= length)
+      out << a.y;
+    else if (!horizontal && std::abs(a.x - b.x) < 0.01 && std::abs(b.y - a.y) >= length)
+      out << a.x;
+  }
+  return out;
+}
+
 // Reads a whole file as text (used to compare export output byte-for-byte).
 // Text mode mirrors the exporter, which writes "\r\n" on Windows.
 static QString readFile(const QString &fileName)
@@ -1209,8 +1227,9 @@ int main(int argc, char **argv)
   }
 
   // --- 7f. the reference line: across the plot at 0 while 0 lies inside
-  //          the y range, "0 A" at its right end; phosphor moves its centre
-  //          axis there, without 0 in range it keeps the centre ---
+  //          the y range, "0 A" at its right end; phosphor draws it with
+  //          its fine ticks, without 0 in range it has no line (no cross
+  //          in the middle), the ticks sit on the edges ---
   {
     Settings cfg("reference", tmpDir.path());
     GraphWidget graph(nullptr, &cfg);
@@ -1261,13 +1280,18 @@ int main(int argc, char **argv)
       }
       graph.setColorVariant(GraphWidget::PhosphorGreen);
       graph.setScale(false, false, -2, 10);
-      const QPointF start = centre->path().elementAt(0);
-      check(!line->isVisible() && std::abs(start.y() - zeroY()) < 0.5 && std::abs(zeroY() - chart->plotArea().center().y()) > 10,
-            QString("reference phosphor: the centre axis at 0 (%1), got %2").arg(zeroY()).arg(start.y()));
+      const QRectF pa = chart->plotArea();
+      QList<double> h = pathLines(centre->path(), true, pa.width() - 1);
+      check(!line->isVisible() && h.size() == 1 && std::abs(h.value(0) - zeroY()) < 0.5,
+            QString("reference phosphor: one line, at 0 (%1), got %2 lines").arg(zeroY()).arg(h.size()));
+      check(pathLines(centre->path(), false, pa.height() - 1).isEmpty(), "phosphor: no vertical line in the middle");
       check(label->isVisible() && label->text() == "0 A", "reference phosphor: label '0 A'");
       graph.setScale(false, false, 1, 10);
-      check(std::abs(centre->path().elementAt(0).y - chart->plotArea().center().y()) < 0.5 && !label->isVisible(),
-            QString("reference phosphor: without 0 the centre, got %1").arg(centre->path().elementAt(0).y));
+      check(pathLines(centre->path(), true, pa.width() - 1).isEmpty() && !label->isVisible(),
+            "reference phosphor: without 0 no line (no cross)");
+      // the ticks then on the bottom edge
+      check(centre->path().elementCount() > 0 && std::abs(centre->path().elementAt(0).y + 3 - pa.bottom()) < 0.5,
+            QString("phosphor: the ticks on the bottom edge, got %1").arg(centre->path().elementAt(0).y));
       // a unit with a prefix and none at all
       graph.setColorVariant(GraphWidget::Neutral);
       graph.setScale(false, false, -0.002, 0.01);
@@ -1460,7 +1484,7 @@ int main(int argc, char **argv)
     check(graph.timeCursor(0) < 0, "time cursors: go with the graph cleared");
   }
 
-  // --- 7i. phosphor: the vertical centre axis marks where a pre-triggered
+  // --- 7i. phosphor: a vertical line only where a pre-triggered
   //          recording triggered ---
   {
     Settings cfg("phosphortrigger", tmpDir.path());
@@ -1479,15 +1503,14 @@ int main(int argc, char **argv)
     graph.setGraphSize(60);
     for (int i = 0; i < 10; ++i)
       feed.value(1.0);
-    // the vertical axis is the path's second line
-    auto verticalX = [&] { return centre ? centre->path().elementAt(2).x : -1.0; };
-    check(std::abs(verticalX() - chart->plotArea().center().x()) < 0.5, "phosphor: the vertical centre axis in the middle");
+    auto vertical = [&] { return centre ? pathLines(centre->path(), false, chart->plotArea().height() - 1) : QList<double>(); };
+    check(vertical().isEmpty(), "phosphor: no vertical line without a trigger");
     graph.store()->addMark(RecordingStore::kTriggerColor, "Trigger");
     feed.value(1.0);
     const double triggerX = chart->mapToPosition(QPointF(graph.store()->marks().last().t / 1000.0, 1),
                                                  chart->series().first()).x();
-    check(std::abs(verticalX() - triggerX) < 0.5 && std::abs(triggerX - chart->plotArea().center().x()) > 10,
-          QString("phosphor: the vertical axis at the trigger (%1), got %2").arg(triggerX).arg(verticalX()));
+    check(vertical().size() == 1 && std::abs(vertical().value(0) - triggerX) < 0.5,
+          QString("phosphor: the vertical line at the trigger (%1), got %2 lines").arg(triggerX).arg(vertical().size()));
   }
 
   // --- 8. EngNumberValidator: what engValue() writes, value() must read

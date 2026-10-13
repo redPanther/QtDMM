@@ -467,16 +467,16 @@ protected:
   bool             phosphor() const { return m_variant == PhosphorGreen || m_variant == PhosphorAmber; }
   /// The y range, widened to 8 whole divisions of 1-2-5 steps when divisions().
   void             setYRange(double min, double max);
-  /// Phosphor: the centre axes with 5 fine ticks per division; the
-  /// horizontal one is the reference line while that is shown.
+  /// Phosphor: 5 fine ticks per division on the reference line (else the
+  /// bottom edge) and on the trigger's mark (else the left edge).
   QGraphicsPathItem *m_centreTicks;
   void             updateCentreTicks();
   /// @name The reference line
   /// Across the plot at the reference value (0) while that lies inside the
   /// y range, with the value small at its right end ("0 A"): a current
-  /// that charges and discharges reads against it. Phosphor moves its
-  /// centre axis there instead; without the value in range phosphor keeps
-  /// the centre, the other variants show no line.
+  /// that charges and discharges reads against it; without the value in
+  /// range there is no line. Phosphor draws it with its fine ticks
+  /// (updateCentreTicks()).
   /// @{
   QGraphicsLineItem       *m_referenceLine = nullptr;
   QGraphicsSimpleTextItem *m_referenceLabel = nullptr;

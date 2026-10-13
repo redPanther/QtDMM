@@ -1027,31 +1027,46 @@ void GraphWidget::updateCentreTicks()
     m_centreTicks->setPath(QPainterPath());
     return;
   }
+  // No cross in the middle: it said nothing and looked like a reference.
+  // The horizontal line is the reference line while that is in view, the
+  // vertical one the trigger of a pre-triggered recording; without them
+  // the fine ticks sit on the plot's bottom and left edge.
   const QRectF pa = m_chart->plotArea();
   const double ref = referenceY();
-  double cx = pa.center().x();
-  const double cy = std::isfinite(ref) ? ref : pa.center().y();
-  // the vertical one marks where a pre-triggered recording triggered, as
-  // on a scope, while that is in view
+  const bool horizontal = std::isfinite(ref);
+  const double cy = horizontal ? ref : pa.bottom();
+  bool vertical = false;
+  double cx = pa.left();
   const double min = m_xAxis->min(), max = m_xAxis->max();
   for (const RecordingStore::Mark &m : m_store->marks())
     if (m.color == RecordingStore::kTriggerColor && max > min && m.t / 1000.0 >= min && m.t / 1000.0 <= max)
+    {
       cx = pa.left() + (m.t / 1000.0 - min) / (max - min) * pa.width();
+      vertical = true;
+    }
   QPainterPath path;
-  path.moveTo(pa.left(), cy);
-  path.lineTo(pa.right(), cy);
-  path.moveTo(cx, pa.top());
-  path.lineTo(cx, pa.bottom());
+  if (horizontal)
+  {
+    path.moveTo(pa.left(), cy);
+    path.lineTo(pa.right(), cy);
+  }
+  if (vertical)
+  {
+    path.moveTo(cx, pa.top());
+    path.lineTo(cx, pa.bottom());
+  }
+  // on a line both sides, on the edge inwards
+  const double up = 3, down = horizontal ? 3 : 0, right = 3, left = vertical ? 3 : 0;
   const double dx = pa.width() / 50, dy = pa.height() / 40;   // 10 x 8 divisions, 5 ticks each
   for (int i = 0; i <= 50; ++i)
   {
-    path.moveTo(pa.left() + i * dx, cy - 3);
-    path.lineTo(pa.left() + i * dx, cy + 3);
+    path.moveTo(pa.left() + i * dx, cy - up);
+    path.lineTo(pa.left() + i * dx, cy + down);
   }
   for (int i = 0; i <= 40; ++i)
   {
-    path.moveTo(cx - 3, pa.top() + i * dy);
-    path.lineTo(cx + 3, pa.top() + i * dy);
+    path.moveTo(cx - left, pa.top() + i * dy);
+    path.lineTo(cx + right, pa.top() + i * dy);
   }
   m_centreTicks->setPath(path);
 }
