@@ -93,12 +93,26 @@ public:
     Dot
   };
 
-  /// Which horizontal threshold line the mouse is dragging.
+  /// Which horizontal line the mouse is dragging.
   enum CursorMode
   {
     NoCursor = 0,
     Trigger,      ///< recording start threshold
-    Integration   ///< integration threshold
+    Integration,  ///< integration threshold
+    Reference     ///< the reference line
+  };
+
+  /// What the reference line stands at: 0 (the default), a value of its
+  /// own (dragged there), the mean, minimum or maximum of the window shown
+  /// - those follow the readings - or an alarm threshold.
+  enum ReferenceKind
+  {
+    RefZero = 0,
+    RefValue,
+    RefMean,
+    RefMin,
+    RefMax,
+    RefAlarm
   };
 
   /// The graph's colours (context menu "Graph colours", Graph/variant).
@@ -129,7 +143,8 @@ public:
     IDCopyImage,
     IDExportImage,
     IDColorVariant,  ///< property "variant" says which
-    IDLive
+    IDLive,
+    IDReference      ///< properties "kind" and "value"
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -191,6 +206,20 @@ public:
   /// 30 min, 1, 2, 3, 6, 12 h, days) that is at least @p v seconds: the
   /// x division. Public for the tests.
   static double    timeStep(double v);
+  /// Puts the reference line at @p kind; @p value for RefValue and
+  /// RefAlarm (a value of 0 is RefZero).
+  void             setReference(ReferenceKind kind, double value = 0);
+  ReferenceKind    referenceKind() const { return m_referenceKind; }
+  /// Where the line is now, in base units; NaN when the mean, minimum or
+  /// maximum has no reading in the window.
+  double           referenceValue() const { return m_reference; }
+  /// The reference as kept per window (Windows/graph-reference, the
+  /// workspace): "" for 0, "mean", "min", "max", "alarm <value>", "<value>".
+  QString          referenceSetting() const;
+  void             setReferenceSetting(const QString &text);
+  /// The alarms' thresholds (base units): the reference line snaps to them.
+  /// A line on a threshold that went stays where it is.
+  void             setAlarmThresholds(const QList<double> &values);
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
   /// Draws a vertical mark at the current sample (an alarm raised); marks
@@ -234,6 +263,8 @@ Q_SIGNALS:
   void             windowRequested(int seconds);
   /// A threshold line was dragged with the mouse.
   void             thresholdChanged(GraphWidget::CursorMode, double);
+  /// The reference line was dragged or chosen in the context menu.
+  void             referenceChanged();
   /// @name Context menu requests, handled by InstanceWidget
   /// @{
   void             connectDMM(bool);
@@ -428,9 +459,18 @@ protected:
   /// centre axis there instead; without the value in range phosphor keeps
   /// the centre, the other variants show no line.
   /// @{
-  QGraphicsLineItem       *m_referenceLine;
-  QGraphicsSimpleTextItem *m_referenceLabel;
+  QGraphicsLineItem       *m_referenceLine = nullptr;
+  QGraphicsSimpleTextItem *m_referenceLabel = nullptr;
   double           m_reference = 0;
+  ReferenceKind    m_referenceKind = RefZero;
+  QList<double>    m_alarmThresholds;
+  /// The statistics of the window shown, for RefMean, RefMin, RefMax.
+  RecordingStore::Stats windowStats() const;
+  /// The line dragged to @p y in the scene: it snaps to 0, the window's
+  /// mean, minimum and maximum and the alarm thresholds within a few
+  /// pixels, else takes the value there, rounded to a hundredth of the
+  /// scale.
+  void             dragReference(double y);
   /// The reference line's y in the scene, NaN when the value is not
   /// inside the y range (on its edge the axis is the line).
   double           referenceY() const;

@@ -1278,6 +1278,99 @@ int main(int argc, char **argv)
     }
   }
 
+  // --- 7g. the reference line moves: dragged it snaps to 0, the window's
+  //          mean, minimum and maximum and the alarm thresholds, else takes
+  //          the value; the context menu chooses the same; the setting
+  //          round-trips ---
+  {
+    Settings cfg("referencedrag", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setUnit("A");
+    graph.setScale(false, false, -2, 6);
+    graph.setGraphSize(60);
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QWidget *viewport = graph.findChild<QChartView *>()->viewport();
+    QChartView *view = graph.findChild<QChartView *>();
+    QGraphicsSimpleTextItem *label = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *t = dynamic_cast<QGraphicsSimpleTextItem *>(item); t && item->data(0).toString() == "reference")
+        label = t;
+    QSignalSpy changed(&graph, &GraphWidget::referenceChanged);
+    QSignalSpy thresholds(&graph, &GraphWidget::thresholdChanged);
+    // a minute of 1 A and 3 A, a second each: mean 2, min 1, max 3
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    graph.setGraphSize(60);
+    for (int i = 0; i < 70; ++i)
+      feed.value(i % 2 ? 3.0 : 1.0);
+    const QRectF plot = chart->plotArea();
+    auto yOf = [&](double v) { return plot.bottom() - (v + 2) / 8 * plot.height(); };
+    auto mouse = [&](QEvent::Type type, double y, Qt::MouseButton button = Qt::NoButton)
+    {
+      const QPointF at = view->mapFromScene(QPointF(plot.center().x(), y));
+      QMouseEvent ev(type, at, viewport->mapToGlobal(at), button,
+                     type == QEvent::MouseButtonRelease ? Qt::NoButton : Qt::MouseButtons(button), Qt::NoModifier);
+      QCoreApplication::sendEvent(viewport, &ev);
+    };
+    auto drag = [&](double fromY, double toY)
+    {
+      mouse(QEvent::MouseMove, fromY);   // hovering finds the line
+      mouse(QEvent::MouseButtonPress, fromY, Qt::LeftButton);
+      mouse(QEvent::MouseMove, toY, Qt::LeftButton);
+      mouse(QEvent::MouseButtonRelease, toY, Qt::LeftButton);
+    };
+    drag(yOf(0), yOf(2) + 3);
+    check(graph.referenceKind() == GraphWidget::RefMean && std::abs(graph.referenceValue() - 2) < 0.1,
+          QString("reference dragged near the mean: snaps to it, got kind %1 at %2").arg(graph.referenceKind()).arg(graph.referenceValue()));
+    check(label && label->text().startsWith("mean ") && label->text().endsWith(" A"), "reference on the mean: 'mean 2 A', got "
+          + (label ? label->text() : QString()));
+    check(!changed.isEmpty() && thresholds.isEmpty(), "reference dragged: referenceChanged, no thresholdChanged");
+    drag(yOf(2), yOf(3) - 2);
+    check(graph.referenceKind() == GraphWidget::RefMax && graph.referenceValue() == 3, "reference: snaps to the maximum");
+    drag(yOf(3), yOf(1) + 2);
+    check(graph.referenceKind() == GraphWidget::RefMin && graph.referenceValue() == 1, "reference: snaps to the minimum");
+    graph.setAlarmThresholds({ 5.0 });
+    drag(yOf(1), yOf(5) + 4);
+    check(graph.referenceKind() == GraphWidget::RefAlarm && graph.referenceValue() == 5, "reference: snaps to an alarm threshold");
+    check(graph.referenceSetting() == "alarm 5", "reference setting: 'alarm 5', got " + graph.referenceSetting());
+    graph.setAlarmThresholds({ 4.0 });
+    check(graph.referenceKind() == GraphWidget::RefValue && graph.referenceValue() == 5,
+          "reference: a threshold that went leaves the line where it is");
+    // away from all of them: the value there, rounded to the scale
+    drag(yOf(5), yOf(4.47));
+    // (a hundredth of the 8 A scale is 0.08, the 1-2-5 step 0.1)
+    check(graph.referenceKind() == GraphWidget::RefValue && std::abs(graph.referenceValue() - 4.5) < 1e-9,
+          QString("reference dragged freely: 4.5, got %1").arg(graph.referenceValue(), 0, 'g', 12));
+    check(graph.referenceSetting() == QString::number(graph.referenceValue(), 'g', 12), "reference setting: the value");
+    drag(yOf(graph.referenceValue()), yOf(0) - 1);
+    check(graph.referenceKind() == GraphWidget::RefZero && graph.referenceSetting().isEmpty(), "reference: back to 0, setting empty");
+
+    // the setting round-trips
+    for (const QString &text : { QString("mean"), QString("min"), QString("max"), QString("alarm 4"), QString("1.25"), QString() })
+    {
+      graph.setReferenceSetting(text);
+      check(graph.referenceSetting() == text, QString("reference setting '%1' round-trips, got '%2'").arg(text, graph.referenceSetting()));
+    }
+    graph.setReferenceSetting("nonsense");
+    check(graph.referenceKind() == GraphWidget::RefZero, "reference setting: nonsense is 0");
+
+    // the context menu: right click, "Mean of the window"
+    mouse(QEvent::MouseButtonPress, yOf(1), Qt::RightButton);
+    QAction *mean = nullptr;
+    for (QAction *a : graph.findChildren<QAction *>())
+      if (a->text().remove('&') == "Mean of the window")
+        mean = a;
+    check(mean != nullptr, "reference: the context menu has 'Mean of the window'");
+    if (mean)
+      mean->trigger();
+    for (QMenu *m : graph.findChildren<QMenu *>())
+      m->close();
+    check(graph.referenceKind() == GraphWidget::RefMean, "reference: chosen in the context menu");
+  }
+
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
   //         back. engValue() emits "µ" while value() used to recognise only
   //         "u", so micro thresholds silently lost their factor. ---

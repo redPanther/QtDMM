@@ -594,6 +594,7 @@ void GraphWidget::updateXAxisRange()
   m_xAxis->setTickAnchor(0);
   m_xAxis->setTickInterval(div);
   updateXLabels();
+  updateReferenceLine();   // the window's mean, minimum or maximum
 }
 
 double GraphWidget::timeStep(double v)
@@ -731,8 +732,100 @@ double GraphWidget::referenceY() const
   return plot.bottom() - (m_reference - min) / (max - min) * plot.height();
 }
 
+RecordingStore::Stats GraphWidget::windowStats() const
+{
+  return m_store->stats(qRound64(m_xAxis->min() * 1000), qRound64(m_xAxis->max() * 1000));
+}
+
+void GraphWidget::setReference(ReferenceKind kind, double value)
+{
+  if (kind == RefValue && value == 0)
+    kind = RefZero;
+  const bool changed = kind != m_referenceKind || (kind != RefZero && value != m_reference);
+  m_referenceKind = kind;
+  if (kind == RefZero)
+    m_reference = 0;
+  else if (kind == RefValue || kind == RefAlarm)
+    m_reference = value;
+  updateReferenceLine();
+  if (changed)
+    Q_EMIT referenceChanged();
+}
+
+QString GraphWidget::referenceSetting() const
+{
+  switch (m_referenceKind)
+  {
+    case RefMean:  return QStringLiteral("mean");
+    case RefMin:   return QStringLiteral("min");
+    case RefMax:   return QStringLiteral("max");
+    case RefAlarm: return QStringLiteral("alarm ") + QString::number(m_reference, 'g', 12);
+    case RefValue: return QString::number(m_reference, 'g', 12);
+    case RefZero:  break;
+  }
+  return QString();
+}
+
+void GraphWidget::setReferenceSetting(const QString &text)
+{
+  const QString t = text.trimmed();
+  bool ok = false;
+  if (t == QLatin1String("mean"))
+    setReference(RefMean);
+  else if (t == QLatin1String("min"))
+    setReference(RefMin);
+  else if (t == QLatin1String("max"))
+    setReference(RefMax);
+  else if (const double v = t.section(' ', 1).toDouble(&ok); t.startsWith(QLatin1String("alarm ")) && ok)
+    setReference(RefAlarm, v);
+  else if (const double v = t.toDouble(&ok); ok && std::isfinite(v))
+    setReference(RefValue, v);
+  else
+    setReference(RefZero);
+}
+
+void GraphWidget::setAlarmThresholds(const QList<double> &values)
+{
+  m_alarmThresholds = values;
+  if (m_referenceKind == RefAlarm && !values.contains(m_reference))
+    m_referenceKind = RefValue;
+  updateReferenceLine();
+}
+
+void GraphWidget::dragReference(double y)
+{
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_yAxis->min(), max = m_yAxis->max();
+  if (!(max > min) || plot.height() <= 0)
+    return;
+  auto sceneY = [&](double v) { return plot.bottom() - (v - min) / (max - min) * plot.height(); };
+  QList<std::pair<ReferenceKind, double>> snaps { { RefZero, 0.0 } };
+  const RecordingStore::Stats st = windowStats();
+  if (st.count > 0)
+    snaps << std::pair{ RefMean, st.mean } << std::pair{ RefMin, st.min } << std::pair{ RefMax, st.max };
+  for (double a : m_alarmThresholds)
+    snaps << std::pair{ RefAlarm, a };
+  for (const auto &[kind, v] : snaps)
+    if (std::abs(sceneY(v) - y) <= 6)
+    {
+      setReference(kind, v);
+      return;
+    }
+  const double step = niceStep((max - min) / 100);
+  const double v = min + (plot.bottom() - y) / plot.height() * (max - min);
+  setReference(RefValue, std::round(v / step) * step);
+}
+
 void GraphWidget::updateReferenceLine()
 {
+  if (!m_referenceLine)
+    return;
+  // the window's statistics follow the readings and the window
+  if (m_referenceKind == RefMean || m_referenceKind == RefMin || m_referenceKind == RefMax)
+  {
+    const RecordingStore::Stats st = windowStats();
+    m_reference = m_referenceKind == RefMean ? st.mean : m_referenceKind == RefMin ? st.min : st.max;
+  }
   const double y = referenceY();
   const bool shown = std::isfinite(y);
   // phosphor draws it with its centre axis
@@ -747,8 +840,17 @@ void GraphWidget::updateReferenceLine()
   QString prefix;
   const double v = SiPrefix::scale(m_reference, &prefix);
   const QString base = m_store->unit();
-  m_referenceLabel->setText(base.isEmpty() ? QString::number(v, 'g', 4)
-                                           : QString("%1 %2%3").arg(QString::number(v, 'g', 4), prefix, base));
+  QString what;
+  switch (m_referenceKind)
+  {
+    case RefMean:  what = tr("mean") + ' '; break;
+    case RefMin:   what = tr("min") + ' '; break;
+    case RefMax:   what = tr("max") + ' '; break;
+    case RefAlarm: what = tr("alarm") + ' '; break;
+    default: break;
+  }
+  m_referenceLabel->setText(what + (base.isEmpty() ? QString::number(v, 'g', 4)
+                                                   : QString("%1 %2%3").arg(QString::number(v, 'g', 4), prefix, base)));
   m_referenceLabel->setFont(m_yAxis->labelsFont());
   const QRectF r = m_referenceLabel->boundingRect();
   // above the line, unless that leaves the plot
@@ -1140,6 +1242,8 @@ void GraphWidget::onAppended(bool shifted)
     setYRange(m_scaleMin, m_scaleMax);
     updateThresholdLinePositions();
   }
+  else if (m_referenceKind == RefMean || m_referenceKind == RefMin || m_referenceKind == RefMax)
+    updateReferenceLine();
 }
 
 void GraphWidget::setUnit(const QString &unit)
@@ -1343,6 +1447,38 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     for (ColorVariant v : { Neutral, ScopeBlue, PhosphorGreen, PhosphorAmber, ChartRecorder, Custom })
       variant(variantTitle(v), v);
 
+    // where the reference line stands (it can also be dragged)
+    QMenu *reference = m_popup->addMenu(tr("&Reference line"));
+    auto refEntry = [this, reference](const QString &text, ReferenceKind kind, double value = 0)
+    {
+      QAction *a = reference->addAction(text);
+      a->setProperty("ID", IDReference);
+      a->setProperty("kind", int(kind));
+      a->setProperty("value", value);
+      a->setCheckable(true);
+      a->setChecked(m_referenceKind == kind && (kind != RefAlarm || m_reference == value));
+      return a;
+    };
+    auto valueText = [this](double v)
+    {
+      QString unit;
+      const QString number = formatEngineeringValue(v, &unit);
+      return QString("%1 %2").arg(number, unit).trimmed();
+    };
+    refEntry(tr("At &0"), RefZero);
+    refEntry(tr("&Mean of the window"), RefMean);
+    refEntry(tr("M&inimum of the window"), RefMin);
+    refEntry(tr("Ma&ximum of the window"), RefMax);
+    if (!m_alarmThresholds.isEmpty())
+      reference->addSeparator();
+    for (double a : m_alarmThresholds)
+      refEntry(tr("Alarm threshold %1").arg(valueText(a)), RefAlarm, a);
+    if (m_referenceKind == RefValue)
+    {
+      reference->addSeparator();
+      refEntry(tr("At %1 (dragged)").arg(valueText(m_reference)), RefValue, m_reference)->setEnabled(false);
+    }
+
     if (!m_store->isRunning())
     {
       m_popup->addSeparator();
@@ -1398,6 +1534,9 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
       case Integration:
         m_store->setIntegrationThreshold(value);
         break;
+      case Reference:
+        dragReference(scenePos.y());
+        return;
       case NoCursor:
         break;
     }
@@ -1420,10 +1559,13 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
       return item->isVisible() && fabs(scenePos.y() - item->line().y1()) < tolerance;
     };
 
+    const double refY = referenceY();
     if (near(m_triggerLine))
       m_cursorMode = Trigger;
     else if (near(m_integrationLine))
       m_cursorMode = Integration;
+    else if (std::isfinite(refY) && fabs(scenePos.y() - refY) < tolerance)
+      m_cursorMode = Reference;
     else
       m_cursorMode = NoCursor;
 
@@ -2028,6 +2170,9 @@ void GraphWidget::popupSLOT(QAction *action)
     case IDColorVariant:
       setColorVariant(m_defaultVariant, action->property("variant").toInt());
       Q_EMIT colorVariantChanged(m_variantOverride);
+      break;
+    case IDReference:
+      setReference(ReferenceKind(action->property("kind").toInt()), action->property("value").toDouble());
       break;
   }
 }
