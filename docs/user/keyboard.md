@@ -75,6 +75,7 @@ The zoom shortcuts work anywhere in the main window; the plain keys
 | Middle button drag | Pan the time axis |
 | Hover | Crosshair with time and value |
 | Left button drag on a threshold line | Move the threshold |
+| Left button drag on the reference line | Move it; it snaps to 0, the mean, minimum and maximum shown and the alarm thresholds |
 | Right button | Menu: connect, start/stop, clear, configure, copy image, import/export |
 
 ## Readings table
