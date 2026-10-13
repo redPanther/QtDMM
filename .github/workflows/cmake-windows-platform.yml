@@ -51,8 +51,16 @@ jobs:
       with:
         arch: x64
 
+    # ccache: no cache is kept between runs, but the tests compile many
+    # sources again, those come from the cache within the build. ccache
+    # handles MSVC as long as there is no PDB (/Zi), which Release has not
+    - name: Install ccache
+      run: choco install ccache -y --no-progress
+
     - name: Configure
-      run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+      run: >
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     - name: Build
       run: cmake --build build

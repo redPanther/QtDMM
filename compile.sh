@@ -16,6 +16,9 @@ usage: compile.sh <install|clean|qt6>
    pack    : create packages (DEB and source)
    run     : run qtdmm after successfull build
 
+ Ninja and ccache are used when installed (Ninja only for a new build
+ directory: "clean" switches an existing one over).
+
 EOF
 	exit 0
 }
@@ -50,6 +53,18 @@ then
 else
 	JOBS=$(sysctl -n hw.ncpu)
 	CMAKE_PARAMS="-DCMAKE_PREFIX_PATH=$(brew --prefix qt@6)"
+fi
+
+# Ninja and ccache when installed: the tests build many sources again, a
+# rebuild after clean or a branch switch then mostly comes from the cache. An
+# existing build directory keeps its generator (cmake refuses to change it)
+if [ ! -f build/CMakeCache.txt ] && command -v ninja >/dev/null
+then
+	CMAKE_PARAMS="${CMAKE_PARAMS} -G Ninja"
+fi
+if command -v ccache >/dev/null
+then
+	CMAKE_PARAMS="${CMAKE_PARAMS} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 fi
 
 cmake ${CMAKE_PARAMS} -DBUILD_TESTING=$(${CTEST} && echo "ON" || echo "OFF") \

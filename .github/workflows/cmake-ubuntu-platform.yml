@@ -31,6 +31,8 @@ jobs:
           libhidapi-hidraw0 \
           cmake \
           build-essential \
+          ninja-build \
+          ccache \
           zsync \
           libxkbcommon-x11-dev
 

@@ -45,15 +45,23 @@ jobs:
         modules: 'qtserialport qtcharts'
         cache: true
 
+    # ccache: no cache is kept between runs, but the tests compile many
+    # sources again, those come from the cache within the build
+    - name: Install build tools
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: 1
+      run: brew install ninja ccache
+
     - name: Configure
       run: >
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DQTDMM_WERROR=ON
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DQTDMM_WERROR=ON
         -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 -DCMAKE_OSX_ARCHITECTURES=arm64
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     - name: Build
-      # one job per core: a bare --parallel means make -j without a limit,
-      # which swamps the 3-core runner (the first runs sat in this step for
-      # half an hour)
+      # one job per core: with make a bare --parallel had no limit and
+      # swamped the 3-core runner (the first runs sat in this step for half
+      # an hour)
       run: cmake --build build --parallel "$(sysctl -n hw.ncpu)"
 
     - name: Check the bundle icon
@@ -68,8 +76,9 @@ jobs:
     - name: Build universal (release only)
       if: inputs.release
       run: |
-        cmake -S . -B build-universal -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DQTDMM_WERROR=OFF \
-          -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+        cmake -S . -B build-universal -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DQTDMM_WERROR=OFF \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         cmake --build build-universal --parallel "$(sysctl -n hw.ncpu)"
 
     # The .dmg: Qt and hidapi copied into the bundle (macdeployqt), signed
