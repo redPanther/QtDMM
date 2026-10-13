@@ -143,6 +143,10 @@ were; the integration curve carries on across a gap.
   and pan first.
 - Hovering shows a crosshair with the time (to the millisecond) and the
   value of the reading at the cursor.
+- The **reference line** runs across the graph at 0 whenever 0 lies inside
+  the vertical scale, with its value small at the right end (`0 A`): a
+  current that charges and discharges, or a voltage around zero, reads
+  against it at a glance. The phosphor colours put their centre line there.
 - **Integration** (**Settings → Graph → Integration curve**) draws a second curve: the
   integral over time of the readings above a threshold, in the unit times
   seconds (V·s, A·s, W·s), scaled and offset as configured — for charge or
@@ -165,7 +169,8 @@ were; the integration curve carries on across a gap.
   6 × 10 s); in Live the grid lines run along with the readings, like the
   paper of a recorder.
   The phosphor colours add a fine scale on the centre lines and dash the
-  integration curve.
+  integration curve; the horizontal centre line sits at 0 when 0 is in
+  the scale (the reference line).
 - **Custom** uses the colour buttons that show up beside it.
 
 A curve colour you chose yourself stays in every variant. The graph's
