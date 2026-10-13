@@ -147,6 +147,12 @@ were; the integration curve carries on across a gap.
   the vertical scale, with its value small at the right end (`0 A`): a
   current that charges and discharges, or a voltage around zero, reads
   against it at a glance. The phosphor colours put their centre line there.
+  Drag the line to move it: it snaps to 0, to the mean, minimum and
+  maximum of what the graph shows and to the thresholds of the alarms; in
+  between it takes the value where you let go. The right-click menu,
+  **Reference line**, chooses the same. On the mean, minimum or maximum the
+  line follows the readings and says what it is (`mean 1.83 A`). Where it
+  stands is kept with the window layout and in a saved workspace.
 - **Integration** (**Settings → Graph → Integration curve**) draws a second curve: the
   integral over time of the readings above a threshold, in the unit times
   seconds (V·s, A·s, W·s), scaled and offset as configured — for charge or
