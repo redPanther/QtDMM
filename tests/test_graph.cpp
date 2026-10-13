@@ -10,6 +10,7 @@
 #include <QFileInfo>
 
 #include "ui/views/graphwidget.h"
+#include "ui/views/graphminimap.h"
 #include "recording/recordingfile.h"
 #include "recording/recordingstore.h"
 #include <QChartView>
@@ -1540,6 +1541,159 @@ int main(int argc, char **argv)
                                                  chart->series().first()).x();
     check(vertical().size() == 1 && std::abs(vertical().value(0) - triggerX) < 0.5,
           QString("phosphor: the vertical line at the trigger (%1), got %2 lines").arg(triggerX).arg(vertical().size()));
+  }
+
+  // --- 7j. the overview below the graph: all the store keeps, the
+  //          minimum to the maximum per column (a spike stays), overloads,
+  //          gaps and marks, in the design's colours; dragging moves the
+  //          window, in Live that pauses it until the right end; the
+  //          brackets zoom; the columns are counted anew only when the
+  //          strip doubles ---
+  {
+    Settings cfg("minimap", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    QObject::connect(&graph, &GraphWidget::windowRequested, [&](int s) { graph.setGraphSize(s); });
+    GraphMinimap *map = graph.minimap();
+    QScrollBar *bar = graph.findChild<QScrollBar *>();
+    check(map && map->isVisible() && bar && !bar->isVisible(), "overview: shown in place of the scroll bar");
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "1 min")
+        b->click();
+    check(graph.windowSeconds() == 60, QString("overview: a window of 1 min, got %1 s").arg(graph.windowSeconds()));
+    const int rebuilds = map->rebuilds();
+    qint64 staleAt = -1;
+    for (int i = 0; i < 1800; ++i)   // 30 min
+    {
+      if (i == 1200)
+      {
+        // silent for a minute
+        feed.now += 1500;
+        graph.store()->setStale(true);
+        staleAt = graph.store()->series().last().t;
+        feed.now += 60000;
+      }
+      feed.value(i == 700 ? 9.0 : i == 1000 ? qQNaN() : 1.0 + (i % 2) * 0.01);
+      if (i == 500)
+        graph.store()->addMark(0xffff00ff, "alarm");
+    }
+    check(map->rebuilds() - rebuilds < 20,
+          QString("overview: 1800 readings counted anew %1 times").arg(map->rebuilds() - rebuilds));
+    check(map->columnMs() == 4096, QString("overview: columns of 4096 ms, got %1").arg(map->columnMs()));
+    const GraphMinimap::Column *spike = map->column(700000);
+    check(spike && spike->max == 9.0 && spike->min >= 1.0 && spike->min <= 1.01,
+          "overview: the spike stays in its column");
+    const GraphMinimap::Column *ol = map->column(1000000);
+    check(ol && ol->overload && !ol->gap, "overview: the overload in its column");
+    const GraphMinimap::Column *gap = map->column(staleAt);
+    const GraphMinimap::Column *silent = map->column(staleAt + 30000);
+    check(gap && gap->gap && std::isnan(gap->last) && silent && !silent->any, "overview: the gap, nothing after it");
+    // the window at the right end (the clock is a reading on)
+    check(map->viewWidth() == 60000 && map->to() - (map->viewStart() + map->viewWidth()) <= 2000,
+          QString("overview: the window %1 + %2 at the end %3").arg(map->viewStart()).arg(map->viewWidth()).arg(map->to()));
+
+    // what is drawn: the spike up to the top, the mark as a dot on the
+    // bottom edge
+    {
+      const QImage img = map->grab().toImage();
+      const int x = int(map->xOf(700000));
+      check(img.pixelColor(x, 6) != img.pixelColor(x + 40, 6), "overview: the spike is drawn");
+      const int mx = int(std::round(map->xOf(graph.store()->marks().last().t)));
+      const QColor dot = img.pixelColor(mx, img.height() - 3);
+      check(dot.red() > 200 && dot.blue() > 200 && dot.green() < 80,
+            "overview: the mark a dot on the bottom edge, got " + dot.name());
+    }
+    graph.setColorVariant(GraphWidget::PhosphorGreen);
+    {
+      const QImage img = map->grab().toImage();
+      const QColor curve = img.pixelColor(int(map->xOf(700000)), 6);
+      check(std::abs(curve.hue() - 135) < 20, QString("overview: the phosphor curve green, got hue %1").arg(curve.hue()));
+    }
+    graph.setColorVariant(GraphWidget::Neutral);
+
+    auto mouse = [&](QEvent::Type type, double x)
+    {
+      const QPointF at(x, map->height() / 2.0);
+      const Qt::MouseButtons buttons = type == QEvent::MouseButtonRelease ? Qt::NoButton : Qt::MouseButtons(Qt::LeftButton);
+      QMouseEvent ev(type, at, map->mapToGlobal(at), type == QEvent::MouseMove ? Qt::NoButton : Qt::LeftButton,
+                     buttons, Qt::NoModifier);
+      QCoreApplication::sendEvent(map, &ev);
+    };
+    auto drag = [&](double from, double to)
+    {
+      mouse(QEvent::MouseButtonPress, from);
+      mouse(QEvent::MouseMove, (from + to) / 2);
+      mouse(QEvent::MouseMove, to);
+      mouse(QEvent::MouseButtonRelease, to);
+    };
+    const double perPixel = double(map->to() - map->from()) / map->width();
+    // dragged back 300 px: Live pauses there
+    const qint64 start = map->viewStart();
+    const double centre = map->xOf(start + 30000);
+    drag(centre, centre - 300);
+    check(graph.livePaused() && graph.stateText() == "Live paused" && graph.store()->state() == RecordingStore::Live,
+          "overview: dragged back, Live paused, got " + graph.stateText());
+    check(std::abs(map->viewStart() - (start - 300 * perPixel)) < 2 * perPixel,
+          QString("overview: the window moved 300 px back, %1 -> %2").arg(start).arg(map->viewStart()));
+    const qint64 held = map->viewStart();
+    for (int i = 0; i < 10; ++i)
+      feed.value(1.0);
+    check(map->viewStart() == held, "overview: paused, the window stays while readings come");
+    // a click at the right end follows again
+    mouse(QEvent::MouseButtonPress, map->width() - 2);
+    mouse(QEvent::MouseButtonRelease, map->width() - 2);
+    check(!graph.livePaused() && graph.stateText().isEmpty() && map->to() - (map->viewStart() + map->viewWidth()) <= 2000,
+          "overview: a click at the right end, Live follows");
+
+    // the left bracket 100 px out: a wider window, still following
+    drag(map->xOf(map->viewStart()), map->xOf(map->viewStart()) - 100);
+    check(graph.windowSeconds() > 250 && graph.windowSeconds() < 350 && !graph.livePaused(),
+          QString("overview: the left bracket widens to %1 s, Live follows").arg(graph.windowSeconds()));
+    bool anyChecked = false;
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->isCheckable() && b->isChecked() && b->property("seconds").toInt() != graph.windowSeconds())
+        anyChecked = true;
+    check(!anyChecked, "overview: no time button for a window of its own");
+    // the right bracket 50 px back: narrower, paused
+    const int wide = graph.windowSeconds();
+    const double right = map->xOf(map->viewStart() + map->viewWidth()) - 1;
+    drag(right, right - 50);
+    check(graph.windowSeconds() < wide && graph.livePaused(),
+          QString("overview: the right bracket back, %1 s, Live paused").arg(graph.windowSeconds()));
+    // a time button follows again
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "1 min")
+        b->click();
+    check(!graph.livePaused() && graph.windowSeconds() == 60, "overview: a time button, Live follows");
+
+    // a recording viewed: the overview moves the scroll bar's window
+    graph.setMode(GraphWidget::Manual);
+    graph.startSLOT();
+    for (int i = 0; i < 600; ++i)   // 10 min
+      feed.value(i % 60);
+    graph.stopSLOT();
+    check(graph.store()->state() == RecordingStore::View, "overview: the recording viewed");
+    mouse(QEvent::MouseButtonPress, map->width() / 2.0);
+    mouse(QEvent::MouseButtonRelease, map->width() / 2.0);
+    const qint64 middle = (map->from() + map->to()) / 2;
+    check(std::abs(map->viewStart() + 30000 - middle) < 2000 && bar->value() > 0 && bar->value() < bar->maximum(),
+          QString("overview: a click in the middle centres the window, %1").arg(map->viewStart()));
+    mouse(QEvent::MouseButtonPress, map->width() - 2);
+    mouse(QEvent::MouseButtonRelease, map->width() - 2);
+    check(bar->value() == bar->maximum(), "overview: the right end, the end of the recording");
+
+    // off in the context menu: the scroll bar again
+    graph.setMinimapVisible(false);
+    check(!map->isVisible() && bar->isVisible() && graph.findChild<QChartView *>()->height() == graph.height() - 16,
+          "overview: off, the scroll bar again");
+    graph.setMinimapVisible(true);
+    check(map->isVisible() && !bar->isVisible()
+            && graph.findChild<QChartView *>()->height() == graph.height() - GraphMinimap::kHeight,
+          "overview: on again");
   }
 
   // --- 8. EngNumberValidator: what engValue() writes, value() must read

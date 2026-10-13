@@ -30,6 +30,7 @@
 #include <QPdfWriter>
 
 #include "ui/views/graphwidget.h"
+#include "ui/views/graphminimap.h"
 
 #include <cmath>
 #include "core/siprefix.h"
@@ -81,6 +82,13 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   scrollbar->setCursor(Qt::ArrowCursor);
 
   connect(scrollbar, &QScrollBar::valueChanged, this, [this](int) { updateXAxisRange(); updateMarkPositions(); });
+
+  // the overview in place of the scroll bar: it asks, the graph moves
+  m_minimap = new GraphMinimap(this);
+  m_minimap->setStore(m_store);
+  connect(m_minimap, &GraphMinimap::moveRequested, this, &GraphWidget::showFrom);
+  connect(m_minimap, &GraphMinimap::endRequested, this, &GraphWidget::followEnd);
+  connect(m_minimap, &GraphMinimap::widthRequested, this, &GraphWidget::showSpan);
 
   emitInfo();
 
@@ -250,6 +258,8 @@ void GraphWidget::setStore(RecordingStore *store)
     return;
   m_store->disconnect(this);
   m_store = store;
+  m_liveHold = false;
+  m_minimap->setStore(store);
   connectStore();
   // the view shows the new store as it is
   onCleared();
@@ -261,6 +271,9 @@ void GraphWidget::setStore(RecordingStore *store)
 
 void GraphWidget::timeButtonClicked(int seconds)
 {
+  // "the last 5 min": Live follows again
+  if (m_liveHold)
+    followEnd();
   m_followAll = (seconds == 0);
   if (m_followAll)
     requestAll(false);
@@ -390,10 +403,80 @@ void GraphWidget::print(QPrinter *prt, const QString &title, const QString &comm
   p.end();
 }
 
+void GraphWidget::layoutParts()
+{
+  const int strip = m_minimapOn ? GraphMinimap::kHeight : 16;
+  m_chartView->setGeometry(0, 0, width(), height() - strip);
+  scrollbar->setGeometry(0, height() - 16, width(), 16);
+  m_minimap->setGeometry(0, height() - strip, width(), strip);
+  scrollbar->setVisible(!m_minimapOn);
+  m_minimap->setVisible(m_minimapOn);
+}
+
+void GraphWidget::setMinimapVisible(bool on)
+{
+  if (on == m_minimapOn)
+    return;
+  m_minimapOn = on;
+  // without the overview nothing would bring a paused Live back
+  if (!on)
+    followEnd();
+  layoutParts();
+}
+
+void GraphWidget::updateMinimapView()
+{
+  m_minimap->setView(windowStart(), qint64(qMax(1, m_windowSeconds)) * 1000);
+}
+
+void GraphWidget::showFrom(qint64 start)
+{
+  const qint64 origin = m_store->origin();
+  if (m_store->state() == RecordingStore::Live)
+  {
+    // the store runs on, the window stays where it was put
+    m_liveHold = true;
+    m_holdStart = qMax(origin, start);
+    updateXAxisRange();
+    updateMarkPositions();
+    updateStateLabel();
+  }
+  else
+    scrollbar->setValue(int(qBound<qint64>(0, (start - origin) / 100, qint64(scrollbar->maximum()))));
+}
+
+void GraphWidget::followEnd()
+{
+  if (m_store->state() != RecordingStore::Live)
+  {
+    scrollbar->setValue(scrollbar->maximum());
+    return;
+  }
+  if (!m_liveHold)
+    return;
+  m_liveHold = false;
+  updateXAxisRange();
+  updateMarkPositions();
+  updateStateLabel();
+}
+
+void GraphWidget::showSpan(qint64 start, qint64 width, bool atEnd)
+{
+  // a window of its own, as a zoom: back through the settings
+  const int seconds = qMax(1, int((width + 500) / 1000));
+  m_followAll = false;
+  if (seconds != m_windowSeconds || seconds != m_savedWindow)
+    Q_EMIT windowRequested(seconds);
+  if (atEnd)
+    followEnd();
+  else
+    showFrom(start);
+  updateTimeButtons();
+}
+
 void GraphWidget::resizeEvent(QResizeEvent *)
 {
-  m_chartView->setGeometry(0, 0, width(), height() - 16);
-  scrollbar->setGeometry(0, height() - 16, width(), 16);
+  layoutParts();
   placeTimeBar();
 
   // Simpler than tracking/restoring hover state across a resize: just hide it,
@@ -579,7 +662,9 @@ qint64 GraphWidget::windowStart() const
   {
     const qint64 window = qint64(qMax(1, m_windowSeconds)) * 1000;
     const qint64 shortOf = qMin<qint64>(m_store->sampleTime() * 100, window / 10);
-    return qMax(m_store->origin(), m_store->duration() - window + shortOf);
+    const qint64 follow = qMax(m_store->origin(), m_store->duration() - window + shortOf);
+    // paused by the overview: where it was put, while the store keeps it
+    return m_liveHold ? qBound(m_store->origin(), m_holdStart, follow) : follow;
   }
   // the scroll bar counts tenths of a second from what the store keeps
   return m_store->origin() + qint64(qMax(0, scrollbar->value())) * 100;
@@ -609,6 +694,7 @@ void GraphWidget::updateXAxisRange()
   m_xAxis->setTickInterval(div);
   updateXLabels();
   updateReferenceLine();   // the window's mean, minimum or maximum
+  updateMinimapView();
 }
 
 double GraphWidget::timeStep(double v)
@@ -1078,6 +1164,7 @@ void GraphWidget::updateSeriesAppearance()
 {
   m_dataLine->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
   m_dataLine->setVisible(m_lineMode != NoLine);
+  m_minimap->setCurveColor(dataColor());
 
   QScatterSeries::MarkerShape shape = QScatterSeries::MarkerShapeCircle;
   int size = 7;
@@ -1265,12 +1352,14 @@ void GraphWidget::stopSLOT()
 
 void GraphWidget::liveSLOT()
 {
+  followEnd();
   m_store->live();
 }
 
 void GraphWidget::onStateChanged()
 {
   const bool live = m_store->state() == RecordingStore::Live;
+  m_liveHold = false;
   // a file viewed is gone with Live or a recording
   if (m_store->state() != RecordingStore::View)
     m_sourceFile.clear();
@@ -1298,7 +1387,7 @@ QString GraphWidget::stateText() const
   switch (m_store->state())
   {
     case RecordingStore::Live:
-      return QString();
+      return m_liveHold ? tr("Live paused") : QString();
     case RecordingStore::Record:
     {
       const qint64 seconds = m_store->duration() / 1000;
@@ -1445,6 +1534,11 @@ void GraphWidget::onCleared()
   m_intPoints->clear();
   m_tailData = m_tailInt = m_tailDataPts = m_tailIntPts = 0;
   clearTimeCursors();
+  if (m_liveHold)
+  {
+    m_liveHold = false;
+    updateStateLabel();
+  }
   // Qt Charts does not repaint a series emptied: without this the old curve
   // stood after Record until the next click
   m_chartView->viewport()->update();
@@ -1623,6 +1717,10 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     }
     reference->addSeparator();
     refEntry(tr("&Off"), RefOff);
+    QAction *overview = m_popup->addAction(tr("Over&view"));
+    overview->setProperty("ID", IDMinimap);
+    overview->setCheckable(true);
+    overview->setChecked(m_minimapOn);
     if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
     {
       QAction *a = m_popup->addAction(tr("Remove time cursors"));
@@ -2158,6 +2256,7 @@ void GraphWidget::applyThemeColors()
       break;
   }
   m_chart->setBackgroundBrush(background);
+  m_minimap->setColors(plot.style() != Qt::NoBrush ? plot : background, labels);
   // the reference line: the lettering, half strong - above the grid, below
   // the curve
   m_referenceLine->setPen(QPen(QColor(labels.red(), labels.green(), labels.blue(), 150), 1));
@@ -2362,6 +2461,9 @@ void GraphWidget::popupSLOT(QAction *action)
       break;
     case IDClearCursors:
       clearTimeCursors();
+      break;
+    case IDMinimap:
+      setMinimapVisible(action->isChecked());
       break;
   }
 }

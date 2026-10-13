@@ -36,6 +36,7 @@
 #include "ui/views/gapline.h"
 #include "recording/recordingstore.h"
 
+class GraphMinimap;
 class Settings;
 
 /// The recorder's view: plots the curve a RecordingStore keeps.
@@ -148,7 +149,8 @@ public:
     IDColorVariant,  ///< property "variant" says which
     IDLive,
     IDReference,     ///< properties "kind" and "value"
-    IDClearCursors
+    IDClearCursors,
+    IDMinimap
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -240,6 +242,19 @@ public:
   /// What the cursors say, as shown top right in the plot; empty without
   /// cursor. Public for the tests.
   QString          timeCursorText() const;
+  /// @}
+  /// @name The overview strip below the graph (GraphMinimap)
+  /// All the store keeps, the window between two brackets; in place of
+  /// the scroll bar while it is shown (context menu "Overview", kept per
+  /// window as Windows/graph-minimap). Moved back from the newest reading
+  /// in Live, the window stays where it is ("Live paused") until the
+  /// strip, a time button or Live bring it back.
+  /// @{
+  void             setMinimapVisible(bool on);
+  bool             minimapVisible() const { return m_minimapOn; }
+  GraphMinimap    *minimap() const { return m_minimap; }
+  /// Live, but the window held where the overview put it.
+  bool             livePaused() const { return m_liveHold; }
   /// @}
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
@@ -350,6 +365,20 @@ protected:
   bool             writeImage(const QString &fileName, QSize size);
 
   QScrollBar      *scrollbar;
+  GraphMinimap    *m_minimap = nullptr;
+  bool             m_minimapOn = true;
+  bool             m_liveHold = false;   ///< Live, the window held at m_holdStart
+  qint64           m_holdStart = 0;      ///< ms since the start of the recording
+  /// The chart, and below it the overview or the scroll bar.
+  void             layoutParts();
+  /// The overview asks for the window to start at @p start.
+  void             showFrom(qint64 start);
+  /// The window follows the newest reading again (Live), or goes to the end.
+  void             followEnd();
+  /// The overview asks for a window of @p width ms from @p start.
+  void             showSpan(qint64 start, qint64 width, bool atEnd);
+  /// Tells the overview the window shown.
+  void             updateMinimapView();
   qint64           m_bucket = 1;    ///< ms per drawn min/max pair (see bucketSize())
   int              m_tailData = 0;  ///< points the newest bucket gave the data line (1 or 2; a gap is 1)
   int              m_tailInt = 0;   ///< the same for the integral
