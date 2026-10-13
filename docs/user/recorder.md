@@ -146,7 +146,8 @@ were; the integration curve carries on across a gap.
 - The **reference line** runs across the graph at 0 whenever 0 lies inside
   the vertical scale, with its value small at the right end (`0 A`): a
   current that charges and discharges, or a voltage around zero, reads
-  against it at a glance. The phosphor colours put their centre line there.
+  against it at a glance. The phosphor colours draw it with their fine
+  scale.
   Drag the line to move it: it snaps to 0, to the mean, minimum and
   maximum of what the graph shows and to the thresholds of the alarms; in
   between it takes the value where you let go. The right-click menu,
@@ -181,10 +182,10 @@ were; the integration curve carries on across a gap.
   in up to 10 divisions of a whole step (10 min: 10 × 1 min, 1 min:
   6 × 10 s); in Live the grid lines run along with the readings, like the
   paper of a recorder.
-  The phosphor colours add a fine scale on the centre lines and dash the
-  integration curve; the horizontal centre line sits at 0 when 0 is in
-  the scale (the reference line), the vertical one at the trigger of a
-  pre-triggered recording, as on a scope.
+  The phosphor colours dash the integration curve and add a fine scale:
+  on the reference line, else along the bottom edge, and on the trigger
+  of a pre-triggered recording, else along the left edge. They have no
+  cross in the middle - it looked like a reference and said nothing.
 - **Custom** uses the colour buttons that show up beside it.
 
 A curve colour you chose yourself stays in every variant. The graph's
