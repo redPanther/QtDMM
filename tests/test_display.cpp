@@ -113,6 +113,24 @@ int main(int argc, char **argv)
             .arg(two.x()).arg(two.width()).arg(three.x()).arg(three.width()));
   }
 
+  // --- 1e. a value with more digits than the display count (a Victron
+  //         current "-10.967" at 6000 counts) widens the field: the same
+  //         picture as with a count of five digits, the unit after the number
+  //         and not on its last digit ---
+  {
+    LcdWidget a, b;
+    a.setDisplayMode(6000, true, false, 1);
+    b.setDisplayMode(60000, true, false, 1);
+    for (LcdWidget *d : { &a, &b })
+    {
+      d->setUnit(0, "A");
+      d->setValue(0, "-10.967");
+      d->setMinUnit("A");
+      d->setMinValue("-11.100");
+    }
+    check(render(a, QSize(520, 200)) == render(b, QSize(520, 200)), "LCD: -10.967 A at 6000 counts gets five digits");
+  }
+
   // --- 2. render: a value paints more dark pixels than an empty display ---
   const QString dump = qEnvironmentVariable("TEST_DISPLAY_DUMP");
   const QSize size(520, 200);

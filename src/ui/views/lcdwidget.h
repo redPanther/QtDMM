@@ -142,6 +142,8 @@ protected:
 
 private:
   int numDigits() const;
+  // remembers a value with more digits than the display count
+  void fitDigits(const QString &value);
   void renderStatic();
   void drawFlags(QPainter &p, const Layout &l) const;
   void drawMain(QPainter &p, const Layout &l) const;
@@ -169,6 +171,7 @@ private:
   Quantity m_quantity[4] = { Quantity::Unknown, Quantity::Unknown, Quantity::Unknown, Quantity::Unknown };
   QString m_minValue, m_maxValue, m_minUnit, m_maxUnit;
   int m_counts = 4000;
+  int m_seenDigits = 0;   ///< widest value since the display count was set
   bool m_showMinMax = true;
   bool m_showBar = true;
   bool m_paintBar = false;
