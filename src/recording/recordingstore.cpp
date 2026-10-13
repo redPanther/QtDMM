@@ -58,6 +58,31 @@ qint64 RecordingStore::duration() const
   return m_series.isEmpty() ? 0 : m_series.last().t;
 }
 
+RecordingStore::Stats RecordingStore::stats(qint64 from, qint64 to) const
+{
+  Stats st;
+  if (from > to)
+    std::swap(from, to);
+  to = qMin(to, duration());
+  const int n = m_series.count();
+  for (int i = qMax(0, m_series.holding(from)); i < n && m_series.at(i).t < to; ++i)
+  {
+    const RawPoint &p = m_series.at(i);
+    const qint64 begin = qMax(from, p.t);
+    const qint64 end = qMin(to, i + 1 < n ? m_series.at(i + 1).t : duration());
+    if (end <= begin || p.gap())
+      continue;
+    st.count++;
+    st.min = st.count == 1 ? p.value : qMin(st.min, p.value);
+    st.max = st.count == 1 ? p.value : qMax(st.max, p.value);
+    st.integral += p.value * double(end - begin) / 1000;
+    st.covered += end - begin;
+  }
+  if (st.covered > 0)
+    st.mean = st.integral * 1000 / double(st.covered);
+  return st;
+}
+
 qint64 RecordingStore::origin() const
 {
   // Live runs through what it keeps (an hour); a recording keeps all of it, unless it
