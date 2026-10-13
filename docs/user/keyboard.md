@@ -76,7 +76,10 @@ The zoom shortcuts work anywhere in the main window; the plain keys
 | Hover | Crosshair with time and value |
 | Left button drag on a threshold line | Move the threshold |
 | Left button drag on the reference line | Move it; it snaps to 0, the mean, minimum and maximum shown and the alarm thresholds |
-| Right button | Menu: connect, start/stop, clear, configure, copy image, import/export |
+| Click / Shift+click | Time cursor A / B: time and value, with both the span, the change, the mean and the integral |
+| Left button drag on a time cursor | Move it |
+| Esc | Remove the time cursors |
+| Right button | Menu: connect, start/stop, clear, configure, copy image, colours, reference line, time cursors, import/export |
 
 ## Readings table
 

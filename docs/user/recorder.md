@@ -153,6 +153,13 @@ were; the integration curve carries on across a gap.
   **Reference line**, chooses the same. On the mean, minimum or maximum the
   line follows the readings and says what it is (`mean 1.83 A`). Where it
   stands is kept with the window layout and in a saved workspace.
+- **Time cursors:** a click into the graph sets cursor **A**, Shift+click
+  cursor **B**; drag them to move them, Esc or **Remove time cursors** in
+  the right-click menu takes them away. Top right the graph shows the time
+  and value at each cursor and, with both, the time between them, the
+  change of the value (Δ), the mean and the integral: in Ah for a current,
+  Wh for a power, else the unit times seconds - the charge a battery took
+  between two points, for instance.
 - **Integration** (**Settings → Graph → Integration curve**) draws a second curve: the
   integral over time of the readings above a threshold, in the unit times
   seconds (V·s, A·s, W·s), scaled and offset as configured — for charge or
@@ -176,7 +183,8 @@ were; the integration curve carries on across a gap.
   paper of a recorder.
   The phosphor colours add a fine scale on the centre lines and dash the
   integration curve; the horizontal centre line sits at 0 when 0 is in
-  the scale (the reference line).
+  the scale (the reference line), the vertical one at the trigger of a
+  pre-triggered recording, as on a scope.
 - **Custom** uses the colour buttons that show up beside it.
 
 A curve colour you chose yourself stays in every variant. The graph's
