@@ -336,6 +336,13 @@ void DeviceSettings::load(const QVariantMap &keys)
   ui_sigrokOptions->setText   (cfgString("Port settings/sigrok-options"));
   ui_bleAddress->setCurrentText(cfgString("Port settings/ble-address"));
   ui_bleKey->setText          (cfgString("Port settings/ble-key"));
+  // filled again from the loaded choice: widgets still filled for the same
+  // model kept the choice of before (a Victron always showed the voltage
+  // after a takeover, a typed sigrok driver went back to the model's)
+  ui_sigrokDriver->setProperty("model", QVariant());
+  ui_bleMain->setProperty("readoutType", QVariant());
+  ui_bleMain->clear();
+  ui_bleSecond->clear();
   updateBleFields();
   ui_calcUnit->setText        (cfgString("DMM/calc-unit", "W"));
   ui_calcExpression->setText  (cfgString("DMM/calc-expression"));
@@ -616,10 +623,16 @@ void DeviceSettings::updateCalcMode()
   if (sigrok)
   {
     // the model's driver, unless the user typed another one for this model
+    // (then it is in the loaded port string)
     if (ui_sigrokDriver->property("model").toString() != m_dmmInfo.model)
     {
       ui_sigrokDriver->setProperty("model", m_dmmInfo.model);
-      ui_sigrokDriver->setText(m_dmmInfo.sigrokDriver);
+      const QString stored = m_loaded.value("Port settings/device").toString();
+      QString driver = m_dmmInfo.sigrokDriver;
+      if (stored.section(' ', 0, 0).compare("sigrok", Qt::CaseInsensitive) == 0
+          && DmmDecoder::sameModel(m_loaded.value("DMM/model").toString(), m_dmmInfo.vendor + " " + m_dmmInfo.model))
+        driver = stored.section(' ', 1).section(':', 0, 0).trimmed();
+      ui_sigrokDriver->setText(driver.isEmpty() ? m_dmmInfo.sigrokDriver : driver);
     }
     if (ui_sigrokConn->count() == 0)
     {
@@ -898,8 +911,9 @@ void DeviceSettings::updateBleFields()
     ui_bleSecond->addItem(label, QString::fromLatin1(f.id));
   }
   ui_bleMain->setCurrentIndex(qMax(0, ui_bleMain->findData(main)));
+  // "none" (index 0) is a choice too; nothing chosen yet: the model's second value
   const int secondIndex = ui_bleSecond->findData(second);
-  ui_bleSecond->setCurrentIndex(secondIndex > 0 ? secondIndex : qMin(2, ui_bleSecond->count() - 1));
+  ui_bleSecond->setCurrentIndex(secondIndex >= 0 ? secondIndex : qMin(2, ui_bleSecond->count() - 1));
 }
 
 namespace

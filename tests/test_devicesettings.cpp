@@ -97,6 +97,31 @@ int main(int argc, char **argv)
   check(w.isBluetooth() && shown(w, "ui_bleGroup") && !shown(w, "ButtonGroup11"), "Victron: Bluetooth group");
   check(w.keys().value("Port settings/device") == "ble AA:BB:CC:DD:EE:FF", "Victron: place " + w.keys().value("Port settings/device").toString());
   check(w.keys().value("Port settings/ble-key") == "00112233445566778899aabbccddeeff", "Victron: key kept");
+  // the chosen values of the stored settings, also when the same model was
+  // loaded before (another device taken over, the settings dialog reloaded)
+  for (const auto &[main, second] : { std::pair{"I", "SOC"}, std::pair{"SOC", "-"}, std::pair{"P", "V"} })
+  {
+    w.load({{"DMM/model", "Victron SmartShunt"}, {"Port settings/device", "ble AA:BB:CC:DD:EE:FF"},
+            {"Port settings/ble-address", "AA:BB:CC:DD:EE:FF"}, {"Port settings/ble-key", "00112233445566778899aabbccddeeff"},
+            {"Port settings/ble-main", main}, {"Port settings/ble-second", second}});
+    const QString fields = w.device().section(' ', 3);
+    check(fields == QString("%1 %2").arg(main, second), QString("Victron: values %1 %2, got %3").arg(main, second, fields));
+  }
+
+  // 6b. sigrok: the driver of the stored port string, also a typed one
+  // (manual settings have no model driver)
+  for (const QString &dev : { QString("SIGROK fluke-dmm:conn=/dev/ttyUSB0"), QString("SIGROK uni-t-ut61e:conn=/dev/ttyUSB1") })
+  {
+    w.load({{"DMM/model", "Manual"}, {"DMM/data-format", "Sigrok"}, {"Port settings/device", dev},
+            {"Port settings/sigrok-conn", dev.section("conn=", 1)}});
+    check(w.device() == dev, "sigrok manual: " + w.device() + " != " + dev);
+  }
+  w.load({{"DMM/model", "Keysight 34465A (sigrok) *"}, {"Port settings/device", "SIGROK scpi-dmm:conn=tcp-raw/10.0.0.5/5025"},
+          {"Port settings/sigrok-conn", "tcp-raw/10.0.0.5/5025"}});
+  check(w.device() == "SIGROK scpi-dmm:conn=tcp-raw/10.0.0.5/5025", "sigrok model: " + w.device());
+  w.load({{"DMM/model", "Keysight 34465A (sigrok) *"}, {"Port settings/device", "SIGROK other-dmm:conn=tcp-raw/10.0.0.5/5025"},
+          {"Port settings/sigrok-conn", "tcp-raw/10.0.0.5/5025"}});
+  check(w.device() == "SIGROK other-dmm:conn=tcp-raw/10.0.0.5/5025", "sigrok typed driver: " + w.device());
 
   // 7. a missing key gets its default (a known model brings its own instead)
   w.load({{"DMM/model", "Manual"}});
