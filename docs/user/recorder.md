@@ -13,9 +13,10 @@ changes range.
 The graph is in one of three modes:
 
 - **Live** — right after connecting the graph runs with the meter: it
-  holds the readings of the last recording length (or of the visible
-  window when the recording has no length) and older ones fall out on the
-  left; without a recording length it keeps an hour at most. The newest
+  holds the readings of the last recording length, or of the last hour
+  when the recording has no length, and older ones fall out on the left.
+  A shorter time span for a while loses nothing: back on **All** the curve
+  still starts where Live started (up to the hour). The newest
   reading is at the right edge. Live starts with **All**: the graph shows
   what there is and grows with it up to the recording length (or the
   hour). The time begins with the first reading, so the curve starts at 0
@@ -58,7 +59,8 @@ vertical scale (**Y axis**: automatic, or a fixed minimum and maximum).
 The status bar shows how much is recorded and the recording's length, the
 time left until the length stops the recording, and whether it records:
 `0:42 / 10:00 - 9:18 left - Recording`. While live it shows how much the
-live graph holds of what it keeps: `0:42 / 10:00 - Live`.
+live graph holds and the time span shown (the recording length, if one is
+set): `12:30 / 1:00 - Live`.
 
 The vertical axis is in the unit that suits its range - mV for an axis up to
 0.4 V. A meter that changes range (V, mV) does not change the axis.

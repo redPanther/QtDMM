@@ -56,7 +56,7 @@ struct LoggedReading
 /// integration threshold.
 ///
 /// The store is in one of three states (State): Live, the readings of the
-/// last liveWindow() running through without being a recording; Record,
+/// last liveKept() running through without being a recording; Record,
 /// cleared at the start and kept until it stops; View, standing still - a
 /// recording that ended, or a file loaded. Live shows what the meter does
 /// right after connecting; a recording starts from it and ends in View.
@@ -97,7 +97,7 @@ public:
   enum State
   {
     View = 0,    ///< stands: a recording that ended, a file loaded, or nothing yet
-    Live,        ///< the last liveWindow() of readings, running through
+    Live,        ///< the last liveKept() of readings, running through
     Record       ///< recording since start(), until stop() or the length
   };
   Q_ENUM(State)
@@ -181,10 +181,14 @@ public:
   State       state() const { return m_state; }
   /// Recording (not Live).
   bool        isRunning() const { return m_state == Record; }
-  /// How much Live keeps (ms): the recording length, or the graph's window
+  /// How wide Live is (ms): the recording length, or the graph's window
   /// when it records until stopped, then at most kLiveMaxMs; at least the
   /// pre-trigger.
   qint64      liveWindow() const;
+  /// How much Live keeps (ms): with a recording length liveWindow(), else
+  /// kLiveMaxMs (or the longer pre-trigger) - a shorter window for a while
+  /// loses nothing that "All" shows.
+  qint64      liveKept() const;
   /// How long the graph can get (ms, 0 = open): Live's window (an hour
   /// without a recording length), a recording's length plus its pre-trigger, what a
   /// stopped recording or a file holds.

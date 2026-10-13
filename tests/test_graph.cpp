@@ -1167,6 +1167,15 @@ int main(int argc, char **argv)
       feed.value(1.0);
       check(qFuzzyCompare(x->min() - before + 1, 2.0) && qFuzzyCompare(x->max() - x->min(), 60.0),
             QString("scope Live: the axis moves with each reading, %1 -> %2 (%3 s wide)").arg(before).arg(x->min()).arg(x->max() - x->min()));
+      // back to All: the curve from the start of Live, not only the last
+      // minute shown before
+      for (QAbstractButton *b : graph.findChildren<QAbstractButton *>())
+        if (b->text() == "All")
+          b->click();
+      feed.value(1.0);
+      const QString xs = seriesX(graph);
+      check(xs.section(' ', 0, 0) == "0" && x->min() <= 0.0,
+            QString("Live All after 1 min: from 0 on, first point %1, axis from %2").arg(xs.section(' ', 0, 0)).arg(x->min()));
     }
     graph.setGraphSize(7200);
     graph.setColorVariant(GraphWidget::Neutral);

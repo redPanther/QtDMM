@@ -572,6 +572,32 @@ int main(int argc, char **argv)
     store.setReading(clock.at(0, reading(1, "1", "DC")));
     check(store.count() == 0, "states: View records nothing");
 
+    // without a recording length Live keeps the last hour, not only the
+    // window: 1 min for a while and back to All still has the start
+    {
+      RecordingStore kept;
+      TestClock c;
+      c.attach(kept);
+      kept.setLiveWidth(120);
+      kept.live();
+      for (int i = 0; i <= 120; ++i)   // 2 min at 1 Hz
+        kept.setReading(c.at(i * 1000, reading(i, QString::number(i), "DC")));
+      kept.setLiveWidth(60);            // 1 min ...
+      for (int i = 121; i <= 300; ++i)  // ... for 3 min
+        kept.setReading(c.at(i * 1000, reading(i, QString::number(i), "DC")));
+      kept.setLiveWidth(300);           // All
+      check(kept.liveKept() == RecordingStore::kLiveMaxMs && kept.liveWindow() == 300000,
+            QString("live kept: an hour, the window %1 ms").arg(kept.liveWindow()));
+      check(kept.origin() == 0 && kept.series().first().t == 0 && kept.count() == 301,
+            QString("live kept: from 0 on after 1 min, origin %1, first %2, %3 readings")
+              .arg(kept.origin()).arg(kept.series().first().t).arg(kept.count()));
+      for (int i = 301; i <= 3900; ++i) // past the hour
+        kept.setReading(c.at(i * 1000, reading(i, QString::number(i), "DC")));
+      const qint64 slack = RecordingStore::kLiveMaxMs / 20 + 1000;
+      check(kept.origin() == 3900000 - RecordingStore::kLiveMaxMs && kept.series().first().t >= kept.origin() - slack,
+            QString("live kept: the last hour, origin %1, first %2").arg(kept.origin()).arg(kept.series().first().t));
+    }
+
     // the live window: the recording length, or the graph's window
     store.setLiveWidth(60);
     store.setSampleLength(20);   // 2 s
