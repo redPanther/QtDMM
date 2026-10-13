@@ -156,9 +156,12 @@ were; the integration curve carries on across a gap.
 
 - **Neutral** follows the window's design.
 - **Scope blue** (the default), **Phosphor green**, **Phosphor amber** and **Chart
-  recorder** look like an oscilloscope or a paper recorder. They divide the
-  graph into 10 × 8 squares of 1, 2 or 5 units each (1 V, 2 V, 5 V, 10 V,
-  ...), so the visible time and the vertical scale grow to whole squares.
+  recorder** look like an oscilloscope or a paper recorder. The vertical
+  scale has 8 divisions of 1, 2 or 5 units each (1 V, 2 V, 5 V, 10 V, ...)
+  and grows to whole divisions. The time axis shows exactly the chosen time,
+  in up to 10 divisions of a whole step (10 min: 10 × 1 min, 1 min:
+  6 × 10 s); in Live the grid lines run along with the readings, like the
+  paper of a recorder.
   The phosphor colours add a fine scale on the centre lines and dash the
   integration curve.
 - **Custom** uses the colour buttons that show up beside it.
