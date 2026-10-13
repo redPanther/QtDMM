@@ -1373,7 +1373,8 @@ int main(int argc, char **argv)
     check(graph.referenceKind() == GraphWidget::RefZero && graph.referenceSetting().isEmpty(), "reference: back to 0, setting empty");
 
     // the setting round-trips
-    for (const QString &text : { QString("mean"), QString("min"), QString("max"), QString("alarm 4"), QString("1.25"), QString() })
+    for (const QString &text : { QString("mean"), QString("min"), QString("max"), QString("alarm 4"), QString("1.25"), QString("off"),
+                                 QString() })
     {
       graph.setReferenceSetting(text);
       check(graph.referenceSetting() == text, QString("reference setting '%1' round-trips, got '%2'").arg(text, graph.referenceSetting()));
@@ -1393,6 +1394,34 @@ int main(int argc, char **argv)
     for (QMenu *m : graph.findChildren<QMenu *>())
       m->close();
     check(graph.referenceKind() == GraphWidget::RefMean, "reference: chosen in the context menu");
+
+    // switched off in the context menu: no line, no label, nothing to drag
+    mouse(QEvent::MouseButtonPress, yOf(1), Qt::RightButton);
+    QAction *off = nullptr;
+    for (QAction *a : graph.findChildren<QAction *>())
+      if (a->text().remove('&') == "Off")
+        off = a;
+    check(off != nullptr, "reference: the context menu has 'Off'");
+    if (off)
+      off->trigger();
+    for (QMenu *m : graph.findChildren<QMenu *>())
+      m->close();
+    QGraphicsLineItem *refLine = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *l = dynamic_cast<QGraphicsLineItem *>(item); l && item->data(0).toString() == "reference")
+        refLine = l;
+    check(graph.referenceKind() == GraphWidget::RefOff && graph.referenceSetting() == "off"
+            && refLine && !refLine->isVisible() && label && !label->isVisible(),
+          "reference off: no line, no label, setting 'off'");
+    drag(yOf(0), yOf(3));
+    check(graph.referenceKind() == GraphWidget::RefOff, "reference off: nothing to drag at 0");
+    graph.setColorVariant(GraphWidget::PhosphorGreen);
+    QGraphicsPathItem *centre = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *p = dynamic_cast<QGraphicsPathItem *>(item))
+        centre = p;
+    check(centre && pathLines(centre->path(), true, chart->plotArea().width() - 1).isEmpty(),
+          "reference off: phosphor has no horizontal line either");
   }
 
   // --- 7h. time cursors: a click sets A, Shift+click B, both can be

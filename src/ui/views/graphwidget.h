@@ -106,7 +106,7 @@ public:
 
   /// What the reference line stands at: 0 (the default), a value of its
   /// own (dragged there), the mean, minimum or maximum of the window shown
-  /// - those follow the readings - or an alarm threshold.
+  /// - those follow the readings - or an alarm threshold; or no line.
   enum ReferenceKind
   {
     RefZero = 0,
@@ -114,7 +114,8 @@ public:
     RefMean,
     RefMin,
     RefMax,
-    RefAlarm
+    RefAlarm,
+    RefOff
   };
 
   /// The graph's colours (context menu "Graph colours", Graph/variant).
@@ -217,7 +218,8 @@ public:
   /// maximum has no reading in the window.
   double           referenceValue() const { return m_reference; }
   /// The reference as kept per window (Windows/graph-reference, the
-  /// workspace): "" for 0, "mean", "min", "max", "alarm <value>", "<value>".
+  /// workspace): "" for 0, "mean", "min", "max", "alarm <value>", "<value>",
+  /// "off".
   QString          referenceSetting() const;
   void             setReferenceSetting(const QString &text);
   /// The alarms' thresholds (base units): the reference line snaps to them.

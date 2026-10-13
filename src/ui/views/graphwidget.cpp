@@ -837,7 +837,7 @@ double GraphWidget::referenceY() const
 {
   const double min = m_yAxis->min(), max = m_yAxis->max();
   const QRectF plot = m_chart->plotArea();
-  if (!(m_reference > min && m_reference < max) || plot.height() <= 0)
+  if (m_referenceKind == RefOff || !(m_reference > min && m_reference < max) || plot.height() <= 0)
     return std::nan("");
   return plot.bottom() - (m_reference - min) / (max - min) * plot.height();
 }
@@ -851,7 +851,7 @@ void GraphWidget::setReference(ReferenceKind kind, double value)
 {
   if (kind == RefValue && value == 0)
     kind = RefZero;
-  const bool changed = kind != m_referenceKind || (kind != RefZero && value != m_reference);
+  const bool changed = kind != m_referenceKind || ((kind == RefValue || kind == RefAlarm) && value != m_reference);
   m_referenceKind = kind;
   if (kind == RefZero)
     m_reference = 0;
@@ -871,6 +871,7 @@ QString GraphWidget::referenceSetting() const
     case RefMax:   return QStringLiteral("max");
     case RefAlarm: return QStringLiteral("alarm ") + QString::number(m_reference, 'g', 12);
     case RefValue: return QString::number(m_reference, 'g', 12);
+    case RefOff:   return QStringLiteral("off");
     case RefZero:  break;
   }
   return QString();
@@ -886,6 +887,8 @@ void GraphWidget::setReferenceSetting(const QString &text)
     setReference(RefMin);
   else if (t == QLatin1String("max"))
     setReference(RefMax);
+  else if (t == QLatin1String("off"))
+    setReference(RefOff);
   else if (const double v = t.section(' ', 1).toDouble(&ok); t.startsWith(QLatin1String("alarm ")) && ok)
     setReference(RefAlarm, v);
   else if (const double v = t.toDouble(&ok); ok && std::isfinite(v))
@@ -1618,6 +1621,8 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
       reference->addSeparator();
       refEntry(tr("At %1 (dragged)").arg(valueText(m_reference)), RefValue, m_reference)->setEnabled(false);
     }
+    reference->addSeparator();
+    refEntry(tr("&Off"), RefOff);
     if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
     {
       QAction *a = m_popup->addAction(tr("Remove time cursors"));
