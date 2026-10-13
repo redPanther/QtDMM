@@ -1371,6 +1371,125 @@ int main(int argc, char **argv)
     check(graph.referenceKind() == GraphWidget::RefMean, "reference: chosen in the context menu");
   }
 
+  // --- 7h. time cursors: a click sets A, Shift+click B, both can be
+  //          dragged; A says time and value, with B the change, the mean and
+  //          the integral between them (Ah for a current); Esc clears ---
+  {
+    Settings cfg("timecursors", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setUnit("A");
+    graph.setScale(false, false, 0, 5);
+    graph.show();
+    QTest::qWait(50);
+    QChartView *view = graph.findChild<QChartView *>();
+    QChart *chart = view->chart();
+    QWidget *viewport = view->viewport();
+    QLabel *info = graph.findChild<QLabel *>("ui_graphCursors");
+    // 2 A for 10 s, then 4 A for 10 s
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    graph.setGraphSize(60);
+    for (int i = 0; i < 21; ++i)
+      feed.value(i < 10 ? 2.0 : 4.0);
+    feed.now -= 1000;   // now is the last reading
+    check(graph.timeCursorText().isEmpty() && info && info->isHidden(), "time cursors: none at first");
+
+    auto xOf = [&](qint64 t)
+    {
+      return chart->mapToPosition(QPointF(t / 1000.0, 1), chart->series().first()).x();
+    };
+    auto mouse = [&](QEvent::Type type, double x, Qt::MouseButton button = Qt::NoButton, Qt::KeyboardModifiers mods = Qt::NoModifier)
+    {
+      const QPointF at = view->mapFromScene(QPointF(x, chart->plotArea().center().y()));
+      QMouseEvent ev(type, at, viewport->mapToGlobal(at), button,
+                     type == QEvent::MouseButtonRelease ? Qt::NoButton : Qt::MouseButtons(button), mods);
+      QCoreApplication::sendEvent(viewport, &ev);
+    };
+    auto click = [&](double x, Qt::KeyboardModifiers mods = Qt::NoModifier)
+    {
+      mouse(QEvent::MouseMove, x);
+      mouse(QEvent::MouseButtonPress, x, Qt::LeftButton, mods);
+      mouse(QEvent::MouseButtonRelease, x, Qt::LeftButton, mods);
+    };
+    click(xOf(5000));
+    check(std::abs(graph.timeCursor(0) - 5000) < 200 && graph.timeCursor(1) < 0,
+          QString("time cursors: a click sets A at 5 s, got %1").arg(graph.timeCursor(0)));
+    check(info && !info->isHidden() && graph.timeCursorText().count('\n') == 0
+            && graph.timeCursorText().startsWith("A  12:00:0") && graph.timeCursorText().endsWith("  2 A"),
+          "time cursors: A says time and value, got " + graph.timeCursorText());
+    click(xOf(15000), Qt::ShiftModifier);
+    check(std::abs(graph.timeCursor(1) - 15000) < 200 && std::abs(graph.timeCursor(0) - 5000) < 200,
+          QString("time cursors: Shift+click sets B, A stays: %1, %2").arg(graph.timeCursor(0)).arg(graph.timeCursor(1)));
+
+    // exactly: 5 s of 2 A, 5 s of 4 A
+    graph.setTimeCursor(0, 5000);
+    graph.setTimeCursor(1, 15000);
+    const QStringList lines = graph.timeCursorText().split('\n');
+    check(lines.size() == 4 && lines[1].endsWith("  4 A"), "time cursors: two lines for A and B, got " + lines.join(" | "));
+    check(lines.size() == 4 && lines[2] == QString::fromUtf8("Δt 10.00 s  Δ 2 A"),
+          "time cursors: 'Δt 10.00 s  Δ 2 A', got " + lines.value(2));
+    // 30 A s = 8.333 mAh
+    check(lines.size() == 4 && lines[3] == QString::fromUtf8("mean 3 A  ∫ 8.333 mAh"),
+          "time cursors: 'mean 3 A  ∫ 8.333 mAh', got " + lines.value(3));
+
+    // dragging B moves it, no new cursor
+    mouse(QEvent::MouseMove, xOf(15000));
+    mouse(QEvent::MouseButtonPress, xOf(15000), Qt::LeftButton);
+    mouse(QEvent::MouseMove, xOf(18000), Qt::LeftButton);
+    mouse(QEvent::MouseButtonRelease, xOf(18000), Qt::LeftButton);
+    check(std::abs(graph.timeCursor(1) - 18000) < 200 && graph.timeCursor(0) == 5000,
+          QString("time cursors: B dragged to 18 s, A stays: %1, %2").arg(graph.timeCursor(0)).arg(graph.timeCursor(1)));
+    // a drag on empty ground sets nothing
+    mouse(QEvent::MouseMove, xOf(9000));
+    mouse(QEvent::MouseButtonPress, xOf(9000), Qt::LeftButton);
+    mouse(QEvent::MouseMove, xOf(11000), Qt::LeftButton);
+    mouse(QEvent::MouseButtonRelease, xOf(11000), Qt::LeftButton);
+    check(graph.timeCursor(0) == 5000, "time cursors: a drag is no click");
+    // a voltage: the integral in V s
+    graph.setUnit("V");
+    check(graph.timeCursorText().contains(QString::fromUtf8("V·s")), "time cursors: a voltage integrates to V·s, got "
+          + graph.timeCursorText());
+    graph.setUnit("A");
+
+    QKeyEvent esc(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+    QCoreApplication::sendEvent(view, &esc);
+    check(graph.timeCursor(0) < 0 && graph.timeCursor(1) < 0 && info->isHidden(), "time cursors: Esc takes them away");
+    graph.setTimeCursor(0, 3000);
+    graph.clearSLOT();
+    check(graph.timeCursor(0) < 0, "time cursors: go with the graph cleared");
+  }
+
+  // --- 7i. phosphor: the vertical centre axis marks where a pre-triggered
+  //          recording triggered ---
+  {
+    Settings cfg("phosphortrigger", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setColorVariant(GraphWidget::PhosphorGreen);
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QGraphicsPathItem *centre = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *p = dynamic_cast<QGraphicsPathItem *>(item))
+        centre = p;
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    graph.setGraphSize(60);
+    for (int i = 0; i < 10; ++i)
+      feed.value(1.0);
+    // the vertical axis is the path's second line
+    auto verticalX = [&] { return centre ? centre->path().elementAt(2).x : -1.0; };
+    check(std::abs(verticalX() - chart->plotArea().center().x()) < 0.5, "phosphor: the vertical centre axis in the middle");
+    graph.store()->addMark(RecordingStore::kTriggerColor, "Trigger");
+    feed.value(1.0);
+    const double triggerX = chart->mapToPosition(QPointF(graph.store()->marks().last().t / 1000.0, 1),
+                                                 chart->series().first()).x();
+    check(std::abs(verticalX() - triggerX) < 0.5 && std::abs(triggerX - chart->plotArea().center().x()) > 10,
+          QString("phosphor: the vertical axis at the trigger (%1), got %2").arg(triggerX).arg(verticalX()));
+  }
+
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
   //         back. engValue() emits "µ" while value() used to recognise only
   //         "u", so micro thresholds silently lost their factor. ---

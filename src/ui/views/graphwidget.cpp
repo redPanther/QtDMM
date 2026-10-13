@@ -159,6 +159,15 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
     item->setZValue(1000);
     item->setVisible(false);
   }
+  for (int i = 0; i < 2; ++i)
+  {
+    m_cursorLine[i] = new QGraphicsLineItem(m_chart);
+    m_cursorLine[i]->setZValue(1000);
+    m_cursorLine[i]->setVisible(false);
+    m_cursorName[i] = new QGraphicsSimpleTextItem(i ? QStringLiteral("B") : QStringLiteral("A"), m_chart);
+    m_cursorName[i]->setZValue(1000);
+    m_cursorName[i]->setVisible(false);
+  }
 
   m_chartView = new QChartView(m_chart, this);
   m_chartView->setRenderHint(QPainter::Antialiasing);
@@ -203,6 +212,11 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_cursorLabel = new QLabel(m_chartView);
   m_cursorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);   // no Leave for the view
   m_cursorLabel->hide();
+
+  m_cursorInfo = new QLabel(m_chartView);
+  m_cursorInfo->setObjectName("ui_graphCursors");
+  m_cursorInfo->setAttribute(Qt::WA_TransparentForMouseEvents);
+  m_cursorInfo->hide();
 
   m_stateLabel = new QLabel(m_chartView);
   m_stateLabel->setObjectName("ui_graphState");
@@ -657,6 +671,102 @@ void GraphWidget::updateXLabels()
     const double x = plot.left() + (values[i] - min) / (max - min) * plot.width();
     item->setPos(x - item->boundingRect().width() / 2, top);
   }
+  updateTimeCursors();
+}
+
+double GraphWidget::valueAt(qint64 t) const
+{
+  const RecordingSeries &series = m_store->series();
+  const int i = series.holding(t);
+  if (i < 0 || t > m_store->duration() || series.at(i).gap())
+    return std::nan("");
+  return series.at(i).value;
+}
+
+void GraphWidget::setTimeCursor(int which, qint64 t)
+{
+  m_cursorT[which & 1] = t < 0 ? -1 : qBound(m_store->origin(), t, qMax(m_store->origin(), m_store->duration()));
+  updateTimeCursors();
+}
+
+void GraphWidget::clearTimeCursors()
+{
+  m_cursorT[0] = m_cursorT[1] = -1;
+  updateTimeCursors();
+}
+
+// "250 ms", "12.5 s", "1:05:09"
+static QString spanText(qint64 ms)
+{
+  if (ms < 1000)
+    return QString("%1 ms").arg(ms);
+  if (ms < 60000)
+    return QString("%1 s").arg(QString::number(ms / 1000.0, 'f', ms < 10000 ? 3 : 2));
+  return durationText(qRound64(ms / 1000.0));
+}
+
+QString GraphWidget::timeCursorText() const
+{
+  const QString base = m_store->unit();
+  auto withUnit = [](double v, const QString &unit)
+  {
+    if (!std::isfinite(v))
+      return QStringLiteral("--");
+    QString prefix;
+    const double x = SiPrefix::scale(v, &prefix);
+    return QString("%1 %2%3").arg(QString::number(x, 'g', 4), prefix, unit).trimmed();
+  };
+  QStringList lines;
+  for (int i = 0; i < 2; ++i)
+    if (m_cursorT[i] >= 0)
+      lines << QString("%1  %2  %3").arg(i ? "B" : "A",
+                                         m_store->startDateTime().addMSecs(m_cursorT[i]).time().toString("HH:mm:ss.zzz"),
+                                         withUnit(valueAt(m_cursorT[i]), base));
+  if (m_cursorT[0] >= 0 && m_cursorT[1] >= 0)
+  {
+    const RecordingStore::Stats st = m_store->stats(m_cursorT[0], m_cursorT[1]);
+    lines << QString("%1 %2  %3 %4").arg(QChar(0x0394) + QStringLiteral("t"), spanText(std::abs(m_cursorT[1] - m_cursorT[0])),
+                                         QChar(0x0394), withUnit(valueAt(m_cursorT[1]) - valueAt(m_cursorT[0]), base));
+    // the integral in hours for a current or a power (Ah, Wh), else x s
+    const bool hours = base == QLatin1String("A") || base == QLatin1String("W");
+    const QString integral = hours ? withUnit(st.integral / 3600, base + "h")
+                                   : withUnit(st.integral, base.isEmpty() ? QStringLiteral("s") : base + QStringLiteral("·s"));
+    lines << tr("mean %1  %2 %3").arg(withUnit(st.mean, base), QChar(0x222b), st.count ? integral : QStringLiteral("--"));
+  }
+  return lines.join('\n');
+}
+
+void GraphWidget::updateTimeCursors()
+{
+  if (!m_cursorLine[0])
+    return;
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  for (int i = 0; i < 2; ++i)
+  {
+    const double x = m_cursorT[i] / 1000.0;
+    const bool shown = m_cursorT[i] >= 0 && max > min && x >= min && x <= max;
+    m_cursorLine[i]->setVisible(shown);
+    m_cursorName[i]->setVisible(shown);
+    if (!shown)
+      continue;
+    const double px = plot.left() + (x - min) / (max - min) * plot.width();
+    m_cursorLine[i]->setLine(px, plot.top(), px, plot.bottom());
+    m_cursorName[i]->setFont(m_xAxis->labelsFont());
+    m_cursorName[i]->setPos(px + 3, plot.top() + 2);
+  }
+  if (!m_cursorInfo)
+    return;
+  const QString text = timeCursorText();
+  m_cursorInfo->setVisible(!text.isEmpty());
+  if (text.isEmpty())
+    return;
+  m_cursorInfo->setText(text);
+  m_cursorInfo->adjustSize();
+  // top right in the plot, below the time buttons
+  const QPoint topRight = m_chartView->mapFromScene(plot.topRight());
+  m_cursorInfo->move(topRight.x() - m_cursorInfo->width() - 6, topRight.y() + 4);
+  m_cursorInfo->raise();
 }
 
 QString GraphWidget::yPrefix() const
@@ -919,7 +1029,14 @@ void GraphWidget::updateCentreTicks()
   }
   const QRectF pa = m_chart->plotArea();
   const double ref = referenceY();
-  const double cx = pa.center().x(), cy = std::isfinite(ref) ? ref : pa.center().y();
+  double cx = pa.center().x();
+  const double cy = std::isfinite(ref) ? ref : pa.center().y();
+  // the vertical one marks where a pre-triggered recording triggered, as
+  // on a scope, while that is in view
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  for (const RecordingStore::Mark &m : m_store->marks())
+    if (m.color == RecordingStore::kTriggerColor && max > min && m.t / 1000.0 >= min && m.t / 1000.0 <= max)
+      cx = pa.left() + (m.t / 1000.0 - min) / (max - min) * pa.width();
   QPainterPath path;
   path.moveTo(pa.left(), cy);
   path.lineTo(pa.right(), cy);
@@ -1038,6 +1155,7 @@ void GraphWidget::syncMarks()
     m_marks << line;
   }
   updateMarkPositions();
+  updateCentreTicks();   // phosphor: the trigger's mark is the vertical centre
 }
 
 void GraphWidget::updateMarkPositions()
@@ -1244,6 +1362,8 @@ void GraphWidget::onAppended(bool shifted)
   }
   else if (m_referenceKind == RefMean || m_referenceKind == RefMin || m_referenceKind == RefMax)
     updateReferenceLine();
+  if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
+    updateTimeCursors();
 }
 
 void GraphWidget::setUnit(const QString &unit)
@@ -1306,6 +1426,7 @@ void GraphWidget::onCleared()
   m_intLine->clear();
   m_intPoints->clear();
   m_tailData = m_tailInt = m_tailDataPts = m_tailIntPts = 0;
+  clearTimeCursors();
   // Qt Charts does not repaint a series emptied: without this the old curve
   // stood after Record until the next click
   m_chartView->viewport()->update();
@@ -1383,6 +1504,10 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
   {
     m_mouseDown = true;
     m_mousePan = false;
+    // not on a line: a click sets a time cursor (on release)
+    m_pressPos = pos;
+    m_pressShift = ev->modifiers() & Qt::ShiftModifier;
+    m_clickCandidate = m_cursorMode == NoCursor;
   }
   else if (ev->button() == Qt::MiddleButton)
   {
@@ -1478,6 +1603,11 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
       reference->addSeparator();
       refEntry(tr("At %1 (dragged)").arg(valueText(m_reference)), RefValue, m_reference)->setEnabled(false);
     }
+    if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
+    {
+      QAction *a = m_popup->addAction(tr("Remove time cursors"));
+      a->setProperty("ID", IDClearCursors);
+    }
 
     if (!m_store->isRunning())
     {
@@ -1520,6 +1650,9 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
     return;
   }
 
+  if (m_clickCandidate && (pos - m_pressPos).manhattanLength() > 3)
+    m_clickCandidate = false;
+
   if (m_mouseDown && m_cursorMode != NoCursor)
   {
     QPointF scenePos = m_chartView->mapToScene(pos);
@@ -1536,6 +1669,10 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
         break;
       case Reference:
         dragReference(scenePos.y());
+        return;
+      case TimeCursorA:
+      case TimeCursorB:
+        setTimeCursor(m_cursorMode == TimeCursorB, qRound64(m_chart->mapToValue(scenePos, m_dataSeries).x() * 1000));
         return;
       case NoCursor:
         break;
@@ -1566,10 +1703,16 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
       m_cursorMode = Integration;
     else if (std::isfinite(refY) && fabs(scenePos.y() - refY) < tolerance)
       m_cursorMode = Reference;
+    else if (m_cursorLine[1]->isVisible() && fabs(scenePos.x() - m_cursorLine[1]->line().x1()) < tolerance)
+      m_cursorMode = TimeCursorB;
+    else if (m_cursorLine[0]->isVisible() && fabs(scenePos.x() - m_cursorLine[0]->line().x1()) < tolerance)
+      m_cursorMode = TimeCursorA;
     else
       m_cursorMode = NoCursor;
 
-    m_chartView->viewport()->setCursor(m_cursorMode == NoCursor ? Qt::ArrowCursor : Qt::SplitVCursor);
+    m_chartView->viewport()->setCursor(m_cursorMode == NoCursor ? Qt::ArrowCursor
+                                       : m_cursorMode == TimeCursorA || m_cursorMode == TimeCursorB ? Qt::SplitHCursor
+                                       : Qt::SplitVCursor);
 
     if (m_cursorMode != NoCursor || !m_crosshair)
     {
@@ -1623,8 +1766,19 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
   }
 }
 
-void GraphWidget::handleChartMouseRelease(QMouseEvent *)
+void GraphWidget::handleChartMouseRelease(QMouseEvent *ev)
 {
+  if (m_clickCandidate && ev->button() == Qt::LeftButton)
+  {
+    const QPointF scenePos = m_chartView->mapToScene(m_pressPos);
+    if (m_chart->plotArea().contains(scenePos))
+    {
+      const qint64 t = qRound64(m_chart->mapToValue(scenePos, m_dataSeries).x() * 1000);
+      // Shift+click sets B; without A the first cursor is A
+      setTimeCursor(m_pressShift && m_cursorT[0] >= 0 ? 1 : 0, t);
+    }
+  }
+  m_clickCandidate = false;
   m_mouseDown = false;
   m_mousePan = false;
 }
@@ -2055,6 +2209,18 @@ void GraphWidget::applyThemeColors()
   const QColor cursor = pick(m_cursorColor, Qt::black, labels);
   m_crosshairVLine->setPen(QPen(cursor));
   m_crosshairHLine->setPen(QPen(cursor));
+  for (int i = 0; i < 2; ++i)
+  {
+    m_cursorLine[i]->setPen(QPen(cursor, 1, Qt::DashLine));
+    m_cursorName[i]->setBrush(cursor);
+  }
+  if (m_cursorInfo)
+  {
+    const QColor bg = background.color().isValid() ? background.color() : palette().color(QPalette::Base);
+    m_cursorInfo->setStyleSheet(QString("QLabel { color: %1; background: %2; border: 1px solid %3; padding: 2px 4px; }")
+                                  .arg(labels.name(), QColor(bg.red(), bg.green(), bg.blue(), 220).name(QColor::HexArgb),
+                                       QColor(labels.red(), labels.green(), labels.blue(), 110).name(QColor::HexArgb)));
+  }
   m_triggerLine->setPen(QPen(pick(m_startColor, Qt::magenta, start), 1, lineStyle));
   // dotted: by default it takes the integration curve's colour and must not
   // pass for a curve (phosphor dashes the curve)
@@ -2174,6 +2340,9 @@ void GraphWidget::popupSLOT(QAction *action)
     case IDReference:
       setReference(ReferenceKind(action->property("kind").toInt()), action->property("value").toDouble());
       break;
+    case IDClearCursors:
+      clearTimeCursors();
+      break;
   }
 }
 
@@ -2210,6 +2379,11 @@ bool GraphWidget::handleChartKey(QKeyEvent *ev)
       return true;
     case Qt::Key_End:
       scrollToEnd();
+      return true;
+    case Qt::Key_Escape:
+      if (m_cursorT[0] < 0 && m_cursorT[1] < 0)
+        return false;
+      clearTimeCursors();
       return true;
     default:
       return false;

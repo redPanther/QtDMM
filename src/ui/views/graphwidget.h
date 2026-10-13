@@ -99,7 +99,9 @@ public:
     NoCursor = 0,
     Trigger,      ///< recording start threshold
     Integration,  ///< integration threshold
-    Reference     ///< the reference line
+    Reference,    ///< the reference line
+    TimeCursorA,  ///< the time cursor set with a click
+    TimeCursorB   ///< the one set with Shift+click
   };
 
   /// What the reference line stands at: 0 (the default), a value of its
@@ -144,7 +146,8 @@ public:
     IDExportImage,
     IDColorVariant,  ///< property "variant" says which
     IDLive,
-    IDReference      ///< properties "kind" and "value"
+    IDReference,     ///< properties "kind" and "value"
+    IDClearCursors
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -220,6 +223,22 @@ public:
   /// The alarms' thresholds (base units): the reference line snaps to them.
   /// A line on a threshold that went stays where it is.
   void             setAlarmThresholds(const QList<double> &values);
+  /// @name Time cursors
+  /// A click into the graph sets cursor A, Shift+click cursor B; both can
+  /// be dragged, Esc and the context menu take them away. A alone says the
+  /// time and the value there; with B the graph says the time and the
+  /// change of the value between them, their mean and the integral (Ah for
+  /// a current, Wh for a power).
+  /// @{
+  /// Puts cursor @p which (0 = A, 1 = B) at @p t, ms since the start of
+  /// the recording; -1 takes it away.
+  void             setTimeCursor(int which, qint64 t);
+  qint64           timeCursor(int which) const { return m_cursorT[which & 1]; }
+  void             clearTimeCursors();
+  /// What the cursors say, as shown top right in the plot; empty without
+  /// cursor. Public for the tests.
+  QString          timeCursorText() const;
+  /// @}
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
   /// Draws a vertical mark at the current sample (an alarm raised); marks
@@ -475,6 +494,20 @@ protected:
   /// inside the y range (on its edge the axis is the line).
   double           referenceY() const;
   void             updateReferenceLine();
+  /// @}
+  /// @name Time cursors (setTimeCursor())
+  /// @{
+  qint64           m_cursorT[2] = { -1, -1 };      ///< ms since the start, -1 = none
+  QGraphicsLineItem *m_cursorLine[2] = {};
+  QGraphicsSimpleTextItem *m_cursorName[2] = {};   ///< "A" and "B" at the top of the lines
+  QLabel          *m_cursorInfo = nullptr;          ///< timeCursorText(), top right in the plot
+  QPoint           m_pressPos;                      ///< where the left button went down
+  bool             m_clickCandidate = false;        ///< a press that may become a click: sets a cursor
+  bool             m_pressShift = false;
+  /// Places the lines and the text anew.
+  void             updateTimeCursors();
+  /// The reading's value that holds at @p t; NaN in a gap or outside.
+  double           valueAt(qint64 t) const;
   /// @}
   QColor           m_defaultAxisLine;   ///< the chart's own axis line colour
   void             applyThemeColors();
