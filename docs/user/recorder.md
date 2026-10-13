@@ -130,6 +130,18 @@ were; the integration curve carries on across a gap.
   Zooming ends **All**; the window set under **Settings → Graph → Time
   axis** stays the start. While a recording runs and the graph shows its
   end, the graph follows it; scroll back to stay at a part.
+- The **overview** below the graph shows everything the graph holds, the
+  part on screen between two brackets. Each pixel shows the lowest to the
+  highest reading there, so a short spike stays visible in a recording of
+  hours. A red band along the top marks an overload, hatching a gap, dots
+  on the bottom edge the alarm marks. Drag the part between the brackets
+  (or click beside it) to move there; drag a bracket to widen or narrow
+  the window. Moved back while live, the graph stays at that part
+  (`Live paused` top left) while the readings go on; a click at the right
+  end of the overview, a time button or *Live* follows the newest reading
+  again. **Overview** in the right-click menu switches it off: the scroll
+  bar is back. Whether it shows is kept with the window layout and in a
+  saved workspace.
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see

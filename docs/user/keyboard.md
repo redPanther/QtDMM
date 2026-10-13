@@ -79,7 +79,9 @@ The zoom shortcuts work anywhere in the main window; the plain keys
 | Click / Shift+click | Time cursor A / B: time and value, with both the span, the change, the mean and the integral |
 | Left button drag on a time cursor | Move it |
 | Esc | Remove the time cursors |
-| Right button | Menu: connect, start/stop, clear, configure, copy image, colours, reference line, time cursors, import/export |
+| Drag in the overview | Move the window; while live it pauses there, a click at the right end follows again |
+| Drag a bracket of the overview | Widen or narrow the window |
+| Right button | Menu: connect, start/stop, clear, configure, copy image, colours, reference line, time cursors, overview, import/export |
 
 ## Readings table
 
