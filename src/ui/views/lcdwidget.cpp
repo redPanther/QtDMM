@@ -76,15 +76,27 @@ QSize LcdWidget::minimumSizeHint() const
 
 // ---------------------------------------------------------------- state
 
-void LcdWidget::setValue(int id, const QString &v) { m_value[id] = v; }
+void LcdWidget::setValue(int id, const QString &v)
+{
+  m_value[id] = v;
+  fitDigits(v);
+}
 void LcdWidget::setUnit(int id, const QString &v) { m_unit[id] = v; }
 void LcdWidget::setMode(int id, quint32 flags, Quantity quantity)
 {
   m_flags[id] = flags;
   m_quantity[id] = quantity;
 }
-void LcdWidget::setMinValue(const QString &v) { m_minValue = v; }
-void LcdWidget::setMaxValue(const QString &v) { m_maxValue = v; }
+void LcdWidget::setMinValue(const QString &v)
+{
+  m_minValue = v;
+  fitDigits(v);
+}
+void LcdWidget::setMaxValue(const QString &v)
+{
+  m_maxValue = v;
+  fitDigits(v);
+}
 void LcdWidget::setMinUnit(const QString &v) { m_minUnit = v; }
 void LcdWidget::setMaxUnit(const QString &v) { m_maxUnit = v; }
 void LcdWidget::setShowBar(bool on) { m_paintBar = on; }
@@ -103,6 +115,7 @@ void LcdWidget::setManu(bool on)
 void LcdWidget::setDisplayMode(int counts, bool minMax, bool bar, int numValues)
 {
   m_counts = counts > 0 ? counts : 4000;
+  m_seenDigits = 0;
   m_showMinMax = minMax;
   m_showBar = bar;
   m_numValues = qBound(1, numValues, 4);
@@ -194,8 +207,22 @@ QColor LcdWidget::ghost() const
 
 int LcdWidget::numDigits() const
 {
-  // digits of the display count: 2000 -> 4, 22000 -> 5, 1000000 -> 7
-  return QString::number(m_counts).size();
+  // digits of the display count: 2000 -> 4, 22000 -> 5, 1000000 -> 7; more
+  // when a value had more (a Victron current "-10.967" with 6000 counts),
+  // else the unit would sit on its last digit
+  return qMax(int(QString::number(m_counts).size()), m_seenDigits);
+}
+
+void LcdWidget::fitDigits(const QString &value)
+{
+  int cells = 0;
+  for (QChar ch : value.trimmed())
+    if (ch != '-' && ch != '+' && ch != '.' && ch != ',' && !ch.isSpace())
+      ++cells;
+  if (cells <= numDigits())
+    return;
+  m_seenDigits = cells;
+  m_staticDirty = true;
 }
 
 // ---------------------------------------------------------- segments
@@ -679,7 +706,7 @@ void LcdWidget::drawBar(QPainter &p, const Layout &l, bool staticPart) const
   if (!m_showBar)
     return;
 
-  const int digits = numDigits();
+  const int digits = int(QString::number(m_counts).size());
   int divisions = int(m_counts / std::pow(10.0, digits - 2));
   if (divisions < 20 || divisions > 60)
     divisions = 50;
