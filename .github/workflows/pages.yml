@@ -1,7 +1,12 @@
-name: API documentation
+name: GitHub Pages
 
-# Builds the Doxygen developer documentation from master and publishes it on
-# GitHub Pages (https://qtdmm.github.io/QtDMM/). Pages must be set to
+# Builds the whole site https://qtdmm.github.io/QtDMM/ and publishes it:
+#   /         landing page (assets/pages)
+#   /api/     Doxygen developer documentation, built from master
+#   /repos/   own package repositories (placeholder until 26.3)
+#   404.html  sends old links to API pages (/QtDMM/classFoo.html) to api/
+# Every deployment replaces the whole site, so everything is built here in one
+# job, on every merge and on every published release. Pages must be set to
 # "Source: GitHub Actions" in the repository settings.
 
 on:
@@ -12,7 +17,11 @@ on:
       - "docs/dev/**"
       - "docs/user/scpi-server.md"
       - "Doxyfile"
-      - ".github/workflows/apidoc.yml"
+      - "assets/pages/**"
+      - "assets/icons/app/qtdmm.svg"
+      - ".github/workflows/pages.yml"
+  release:
+    types: [ published ]
   workflow_dispatch:
 
 permissions:
@@ -33,6 +42,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        ref: master      # also for a release: the API pages always show master
         fetch-depth: 0   # tags: the version shown on the pages comes from git describe
 
     - name: Install Doxygen
@@ -47,9 +57,16 @@ jobs:
         mkdir -p build/doxygen   # doxygen creates only the last level
         ( cat Doxyfile; echo "PROJECT_NUMBER = $version" ) | doxygen -
 
+    - name: Put the site together
+      run: |
+        mkdir site
+        cp -r assets/pages/. site/
+        cp assets/icons/app/qtdmm.svg site/
+        cp -r build/doxygen/html site/api
+
     - uses: actions/upload-pages-artifact@v3
       with:
-        path: build/doxygen/html
+        path: site
 
   deploy:
     needs: build

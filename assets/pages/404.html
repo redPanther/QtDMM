@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found</title>
+<link rel="stylesheet" href="/QtDMM/style.css">
+<script>
+  // The API documentation used to be at the top of this site. An old link to
+  // one of its pages (/QtDMM/classFoo.html) goes on to /QtDMM/api/classFoo.html.
+  // Links into api/ and repos/ are left alone, so a missing page there ends here.
+  (function () {
+    var base = "/QtDMM/";
+    var p = location.pathname;
+    if (p.indexOf(base) !== 0)
+      return;
+    var rest = p.substring(base.length);
+    if (rest === "" || /^(api|repos)(\/|$)/.test(rest))
+      return;
+    location.replace(base + "api/" + rest + location.search + location.hash);
+  })();
+</script>
+</head>
+<body>
+<main>
+  <h1>Page not found</h1>
+  <p>This page does not exist (any more). Start again on the
+    <a href="/QtDMM/">QtDMM page</a> or in the
+    <a href="/QtDMM/api/">API documentation</a>.</p>
+</main>
+</body>
+</html>
