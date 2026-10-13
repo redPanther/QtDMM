@@ -1288,6 +1288,25 @@ int main(int argc, char **argv)
     check(graph.stateText().isEmpty() && graph.store()->count() <= 1, "live again: the file goes");
   }
 
+  // --- 9b. the status bar's time runs on while live, also with a fixed
+  //          window (only "All", whose window grows, said it anew) ---
+  {
+    GraphWidget graph(nullptr, &settings);
+    QObject::connect(&graph, &GraphWidget::windowRequested, [&](int s) { graph.setGraphSize(s); });
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "1 min")
+        b->click();
+    QSignalSpy info(&graph, &GraphWidget::info);
+    for (int i = 0; i < 70; ++i)
+      feed.value(1.0);
+    graph.store()->poll();   // the store's clock, every second
+    check(!info.isEmpty() && info.last().first().toString().startsWith("1:10"),
+          "live: the status bar says 1:10 with a window of 1 min, got "
+            + (info.isEmpty() ? QString("nothing") : info.last().first().toString()));
+  }
+
   if (failed == 0)
     qInfo() << "All GraphWidget baseline tests passed.";
   else
