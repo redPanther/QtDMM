@@ -151,7 +151,7 @@ were; the integration curve carries on across a gap.
   Drag the line to move it: it snaps to 0, to the mean, minimum and
   maximum of what the graph shows and to the thresholds of the alarms; in
   between it takes the value where you let go. The right-click menu,
-  **Reference line**, chooses the same. On the mean, minimum or maximum the
+  **Reference line**, chooses the same, and **Off** hides the line. On the mean, minimum or maximum the
   line follows the readings and says what it is (`mean 1.83 A`). Where it
   stands is kept with the window layout and in a saved workspace.
 - **Time cursors:** a click into the graph sets cursor **A**, Shift+click
