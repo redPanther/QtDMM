@@ -130,6 +130,14 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   });
   m_centreTicks = new QGraphicsPathItem(m_chart);
   m_centreTicks->setZValue(5);   // above the grid, below the curves' markers
+  m_referenceLine = new QGraphicsLineItem(m_chart);
+  m_referenceLine->setZValue(5);
+  m_referenceLine->setData(0, QStringLiteral("reference"));
+  m_referenceLine->setVisible(false);
+  m_referenceLabel = new QGraphicsSimpleTextItem(m_chart);
+  m_referenceLabel->setZValue(5);
+  m_referenceLabel->setData(0, QStringLiteral("reference"));
+  m_referenceLabel->setVisible(false);
   m_dataSeries->attachAxis(m_yAxis);
   m_dataPoints->attachAxis(m_yAxis);
   m_intSeries->attachAxis(m_yAxis);
@@ -711,6 +719,41 @@ void GraphWidget::updateYLabels()
     const double y = plot.bottom() - (values[i] - min) / (max - min) * plot.height();
     item->setPos(qMax(1.0, plot.left() - r.width() - gap), y - r.height() / 2);
   }
+  updateReferenceLine();
+}
+
+double GraphWidget::referenceY() const
+{
+  const double min = m_yAxis->min(), max = m_yAxis->max();
+  const QRectF plot = m_chart->plotArea();
+  if (!(m_reference > min && m_reference < max) || plot.height() <= 0)
+    return std::nan("");
+  return plot.bottom() - (m_reference - min) / (max - min) * plot.height();
+}
+
+void GraphWidget::updateReferenceLine()
+{
+  const double y = referenceY();
+  const bool shown = std::isfinite(y);
+  // phosphor draws it with its centre axis
+  m_referenceLine->setVisible(shown && !phosphor());
+  m_referenceLabel->setVisible(shown);
+  updateCentreTicks();
+  if (!shown)
+    return;
+  const QRectF plot = m_chart->plotArea();
+  m_referenceLine->setLine(plot.left(), y, plot.right(), y);
+  // as the y labels: 4 digits with the prefix that suits the value
+  QString prefix;
+  const double v = SiPrefix::scale(m_reference, &prefix);
+  const QString base = m_store->unit();
+  m_referenceLabel->setText(base.isEmpty() ? QString::number(v, 'g', 4)
+                                           : QString("%1 %2%3").arg(QString::number(v, 'g', 4), prefix, base));
+  m_referenceLabel->setFont(m_yAxis->labelsFont());
+  const QRectF r = m_referenceLabel->boundingRect();
+  // above the line, unless that leaves the plot
+  const double top = y - r.height() - 1 >= plot.top() ? y - r.height() - 1 : y + 1;
+  m_referenceLabel->setPos(plot.right() - r.width() - 3, top);
 }
 
 double GraphWidget::niceStep(double v)
@@ -773,7 +816,8 @@ void GraphWidget::updateCentreTicks()
     return;
   }
   const QRectF pa = m_chart->plotArea();
-  const double cx = pa.center().x(), cy = pa.center().y();
+  const double ref = referenceY();
+  const double cx = pa.center().x(), cy = std::isfinite(ref) ? ref : pa.center().y();
   QPainterPath path;
   path.moveTo(pa.left(), cy);
   path.lineTo(pa.right(), cy);
@@ -1798,6 +1842,10 @@ void GraphWidget::applyThemeColors()
       break;
   }
   m_chart->setBackgroundBrush(background);
+  // the reference line: the lettering, half strong - above the grid, below
+  // the curve
+  m_referenceLine->setPen(QPen(QColor(labels.red(), labels.green(), labels.blue(), 150), 1));
+  m_referenceLabel->setBrush(labels);
   // the scrollbar in the graph's colours: a dark graph gets no light strip
   {
     QPalette pal = scrollbar->palette();

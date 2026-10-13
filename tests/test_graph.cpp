@@ -1208,6 +1208,76 @@ int main(int argc, char **argv)
     }
   }
 
+  // --- 7f. the reference line: across the plot at 0 while 0 lies inside
+  //          the y range, "0 A" at its right end; phosphor moves its centre
+  //          axis there, without 0 in range it keeps the centre ---
+  {
+    Settings cfg("reference", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setUnit("A");
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QAbstractSeries *series = chart->series().first();
+    QGraphicsLineItem *line = nullptr;
+    QGraphicsSimpleTextItem *label = nullptr;
+    QGraphicsPathItem *centre = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+    {
+      if (item->data(0).toString() == "reference")
+      {
+        if (auto *l = dynamic_cast<QGraphicsLineItem *>(item))
+          line = l;
+        else if (auto *t = dynamic_cast<QGraphicsSimpleTextItem *>(item))
+          label = t;
+      }
+      else if (auto *p = dynamic_cast<QGraphicsPathItem *>(item))
+        centre = p;
+    }
+    check(line && label && centre, "reference: line, label and centre axis found");
+    if (line && label && centre)
+    {
+      auto zeroY = [&] { return chart->mapToPosition(QPointF(0, 0), series).y(); };
+      for (auto v : { GraphWidget::Neutral, GraphWidget::ScopeBlue, GraphWidget::ChartRecorder, GraphWidget::Custom })
+      {
+        graph.setColorVariant(v);
+        graph.setScale(false, false, -2, 10);
+        check(line->isVisible() && std::abs(line->line().y1() - zeroY()) < 0.5 && line->line().y1() == line->line().y2()
+                && std::abs(line->line().x2() - line->line().x1() - chart->plotArea().width()) < 0.5,
+              QString("reference %1: across the plot at 0 (%2), got y %3").arg(GraphWidget::variantName(v))
+                .arg(zeroY()).arg(line->line().y1()));
+        check(label->isVisible() && label->text() == "0 A", QString("reference %1: label '0 A', got '%2'")
+              .arg(GraphWidget::variantName(v), label->isVisible() ? label->text() : "hidden"));
+        check(label->pos().x() + label->boundingRect().width() <= chart->plotArea().right()
+                && label->pos().x() > chart->plotArea().center().x(),
+              QString("reference %1: the label at the right end").arg(GraphWidget::variantName(v)));
+        graph.setScale(false, false, 1, 10);
+        check(!line->isVisible() && !label->isVisible(),
+              QString("reference %1: no line without 0 in range").arg(GraphWidget::variantName(v)));
+        // 0 on the edge: the axis is the line
+        graph.setScale(false, false, 0, 10);
+        check(!line->isVisible(), QString("reference %1: no line on the axis").arg(GraphWidget::variantName(v)));
+      }
+      graph.setColorVariant(GraphWidget::PhosphorGreen);
+      graph.setScale(false, false, -2, 10);
+      const QPointF start = centre->path().elementAt(0);
+      check(!line->isVisible() && std::abs(start.y() - zeroY()) < 0.5 && std::abs(zeroY() - chart->plotArea().center().y()) > 10,
+            QString("reference phosphor: the centre axis at 0 (%1), got %2").arg(zeroY()).arg(start.y()));
+      check(label->isVisible() && label->text() == "0 A", "reference phosphor: label '0 A'");
+      graph.setScale(false, false, 1, 10);
+      check(std::abs(centre->path().elementAt(0).y - chart->plotArea().center().y()) < 0.5 && !label->isVisible(),
+            QString("reference phosphor: without 0 the centre, got %1").arg(centre->path().elementAt(0).y));
+      // a unit with a prefix and none at all
+      graph.setColorVariant(GraphWidget::Neutral);
+      graph.setScale(false, false, -0.002, 0.01);
+      check(label->text() == "0 A", "reference: 0 takes no prefix, got " + label->text());
+      graph.setUnit("");
+      graph.setScale(false, false, -2, 10);
+      check(label->text() == "0", "reference without unit: '0', got " + label->text());
+    }
+  }
+
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
   //         back. engValue() emits "µ" while value() used to recognise only
   //         "u", so micro thresholds silently lost their factor. ---
