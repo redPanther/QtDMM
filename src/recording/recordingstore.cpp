@@ -429,7 +429,9 @@ void RecordingStore::poll()
       start();
     }
   }
-  if (m_state == Record && !lengthReached(elapsed()))
+  // the status bar's time, also while live: there only a window that
+  // grows ("All") said it anew, a fixed one stood still
+  if (m_state == Live || (m_state == Record && !lengthReached(elapsed())))
     Q_EMIT progressChanged();
 }
 
