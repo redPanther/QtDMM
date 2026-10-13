@@ -569,19 +569,14 @@ void GraphWidget::updateXAxisRange()
   const double window = qMax(1, m_windowSeconds);
   double start = windowStart() / 1000.0, end = start + window - qMin(m_store->sampleTime() / 10.0, window / 10);
   double div = timeStep((end - start) / 6);   // about 5 ticks
-  if (divisions() && end > start)
+  if (divisions())
   {
-    // 10 divisions of a time step that cover the window, starting on a
-    // step: 600 s are 10 x 1 min
-    div = timeStep((end - start) / 10);
-    double first = std::floor(start / div) * div;
-    while (first + 10 * div < end - div * 1e-9)
-    {
-      div = timeStep(div * 1.01);
-      first = std::floor(start / div) * div;
-    }
-    start = first;
-    end = first + 10 * div;
+    // up to 10 divisions of a whole time step over exactly the window:
+    // 600 s are 10 x 1 min, 1 min 6 x 10 s. The axis is not moved onto a
+    // step - that made 1 min 100 s wide and Live jump every 10 s; the grid
+    // lines stay on whole steps and run with the readings
+    div = timeStep(window / 10);
+    end = start + window;
   }
   m_xAxis->setRange(start, end);
   // the ticks on whole steps, counted from the start of the recording

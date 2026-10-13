@@ -1147,6 +1147,37 @@ int main(int argc, char **argv)
     check(x->tickInterval() == 2 && x->titleText() == "[sec]", QString("scope 20 s: 10 x 2 s, got %1").arg(x->tickInterval()));
     graph.setGraphSize(7200);
     check(x->tickInterval() == 900 && x->titleText() == "[min]", QString("scope 2 h: 10 x 15 min, got %1").arg(x->tickInterval()));
+    // 1 min is not 10 x a whole step: 6 x 10 s over exactly the minute (was
+    // 10 x 10 s, the readings in the left 60 % of the graph)
+    graph.setGraphSize(60);
+    check(x->tickInterval() == 10 && qFuzzyCompare(x->max() - x->min(), 60.0),
+          QString("scope 1 min: 6 x 10 s over 60 s, got %1 s wide, a tick every %2 s").arg(x->max() - x->min()).arg(x->tickInterval()));
+    // Live runs on smoothly: one reading later the axis is one second on,
+    // not a whole step (it jumped every 10 s)
+    {
+      Feed feed(graph, 1000);
+      graph.liveSLOT();
+      for (QAbstractButton *b : graph.findChildren<QAbstractButton *>())
+        if (b->text() == "1 min")
+          b->click();
+      graph.setGraphSize(60);   // InstanceWidget applies the request through the settings
+      for (int i = 0; i < 95; ++i)
+        feed.value(1.0);
+      const double before = x->min();
+      feed.value(1.0);
+      check(qFuzzyCompare(x->min() - before + 1, 2.0) && qFuzzyCompare(x->max() - x->min(), 60.0),
+            QString("scope Live: the axis moves with each reading, %1 -> %2 (%3 s wide)").arg(before).arg(x->min()).arg(x->max() - x->min()));
+      // back to All: the curve from the start of Live, not only the last
+      // minute shown before
+      for (QAbstractButton *b : graph.findChildren<QAbstractButton *>())
+        if (b->text() == "All")
+          b->click();
+      feed.value(1.0);
+      const QString xs = seriesX(graph);
+      check(xs.section(' ', 0, 0) == "0" && x->min() <= 0.0,
+            QString("Live All after 1 min: from 0 on, first point %1, axis from %2").arg(xs.section(' ', 0, 0)).arg(x->min()));
+    }
+    graph.setGraphSize(7200);
     graph.setColorVariant(GraphWidget::Neutral);
     check(x->tickInterval() == 1800 && x->titleText() == "[min]", QString("neutral 2 h: every 30 min, got %1").arg(x->tickInterval()));
   }

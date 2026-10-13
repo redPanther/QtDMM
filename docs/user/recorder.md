@@ -13,9 +13,10 @@ changes range.
 The graph is in one of three modes:
 
 - **Live** — right after connecting the graph runs with the meter: it
-  holds the readings of the last recording length (or of the visible
-  window when the recording has no length) and older ones fall out on the
-  left; without a recording length it keeps an hour at most. The newest
+  holds the readings of the last recording length, or of the last hour
+  when the recording has no length, and older ones fall out on the left.
+  A shorter time span for a while loses nothing: back on **All** the curve
+  still starts where Live started (up to the hour). The newest
   reading is at the right edge. Live starts with **All**: the graph shows
   what there is and grows with it up to the recording length (or the
   hour). The time begins with the first reading, so the curve starts at 0
@@ -58,7 +59,8 @@ vertical scale (**Y axis**: automatic, or a fixed minimum and maximum).
 The status bar shows how much is recorded and the recording's length, the
 time left until the length stops the recording, and whether it records:
 `0:42 / 10:00 - 9:18 left - Recording`. While live it shows how much the
-live graph holds of what it keeps: `0:42 / 10:00 - Live`.
+live graph holds and the time span shown (the recording length, if one is
+set): `12:30 / 1:00 - Live`.
 
 The vertical axis is in the unit that suits its range - mV for an axis up to
 0.4 V. A meter that changes range (V, mV) does not change the axis.
@@ -156,9 +158,12 @@ were; the integration curve carries on across a gap.
 
 - **Neutral** follows the window's design.
 - **Scope blue** (the default), **Phosphor green**, **Phosphor amber** and **Chart
-  recorder** look like an oscilloscope or a paper recorder. They divide the
-  graph into 10 × 8 squares of 1, 2 or 5 units each (1 V, 2 V, 5 V, 10 V,
-  ...), so the visible time and the vertical scale grow to whole squares.
+  recorder** look like an oscilloscope or a paper recorder. The vertical
+  scale has 8 divisions of 1, 2 or 5 units each (1 V, 2 V, 5 V, 10 V, ...)
+  and grows to whole divisions. The time axis shows exactly the chosen time,
+  in up to 10 divisions of a whole step (10 min: 10 × 1 min, 1 min:
+  6 × 10 s); in Live the grid lines run along with the readings, like the
+  paper of a recorder.
   The phosphor colours add a fine scale on the centre lines and dash the
   integration curve.
 - **Custom** uses the colour buttons that show up beside it.

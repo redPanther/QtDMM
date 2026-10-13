@@ -60,11 +60,18 @@ qint64 RecordingStore::duration() const
 
 qint64 RecordingStore::origin() const
 {
-  // Live runs through its window; a recording keeps all of it, unless it
+  // Live runs through what it keeps (an hour); a recording keeps all of it, unless it
   // outgrew the most points
   if (m_state == Live)
-    return qMax<qint64>(0, duration() - liveWindow());
+    return qMax<qint64>(0, duration() - liveKept());
   return m_floorMs;
+}
+
+qint64 RecordingStore::liveKept() const
+{
+  // without a recording length not the window: switching to 1 min and back
+  // to All would have lost what was before
+  return m_sampleLength > 0 ? liveWindow() : qMax(kLiveMaxMs, liveWindow());
 }
 
 qint64 RecordingStore::liveWindow() const
@@ -593,7 +600,7 @@ bool RecordingStore::trim()
   int drop = 0;
   if (m_state == Live)
   {
-    const qint64 slack = qMax<qint64>(1000, liveWindow() / 20);
+    const qint64 slack = qMax<qint64>(1000, liveKept() / 20);
     if (m_series.count() > 1 && m_series.at(1).t < from - slack)
       drop = qMax(0, m_series.holding(from));
   }
