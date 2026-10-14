@@ -243,7 +243,7 @@ bool AnalogMeter::neverNegative(const QString &unit)
 {
   const QString base = SiPrefix::split(unit).baseUnit;
   return base == QLatin1String("ppm") || base == QLatin1String("%") || base == QLatin1String("lx")
-         || base == QLatin1String("fc");
+         || base == QLatin1String("fc") || base == QLatin1String("%RH") || base == QLatin1String("m/s");
 }
 
 void AnalogMeter::setFullScale(double fs)
@@ -628,7 +628,8 @@ QString AnalogMeter::readoutFor(double value, int decimals, double fullScale, in
   const SiPrefix::Split split = SiPrefix::split(unit);
   const QString base = split.baseUnit;
   const bool prefixable = !base.isEmpty() && !base.startsWith(QChar(0x00b0)) && base != QLatin1String("%")
-                          && base != QLatin1String("ppm") && base != QLatin1String("fc");
+                          && base != QLatin1String("ppm") && base != QLatin1String("fc") && base != QLatin1String("%RH")
+                          && base != QLatin1String("m/s");
   if (prefixable && fullScale > 0.0 && std::fabs(value) > fullScale * 1.0001)
   {
     // from another range: its own prefix, and the unit says which

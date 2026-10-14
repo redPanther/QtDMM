@@ -142,8 +142,9 @@ int main(int argc, char **argv)
     check(m.bipolar(), "centre zero: a voltage is bipolar");
     check(AnalogMeter::neverNegative("ppm") && AnalogMeter::neverNegative("%") && !AnalogMeter::neverNegative("mV"),
           "neverNegative: ppm, %, not mV");
-    check(AnalogMeter::neverNegative("lx") && AnalogMeter::neverNegative("klx") && AnalogMeter::neverNegative("fc"),
-          "neverNegative: lx, klx, fc (not femto-c)");
+    check(AnalogMeter::neverNegative("lx") && AnalogMeter::neverNegative("klx") && AnalogMeter::neverNegative("fc")
+              && AnalogMeter::neverNegative("m/s") && AnalogMeter::neverNegative("%RH"),
+          "neverNegative: lx, klx, fc (not femto-c), m/s, %RH");
   }
   check(std::isnan(AnalogMeter::fullScaleFromReading("3.856", 0)), "no counts, no scale");
 

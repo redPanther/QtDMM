@@ -97,6 +97,12 @@ int main(int argc, char **argv)
     check(v.adaptValue(300, "300", "min", "DC", "", false, true, false, 0, 0).port.quantity == Quantity::TimeToGo,
           "Victron min: time to go");
     check(one(a, "50.0", "%", "DC").port.toString() == "duty_cycle", "a meter's %: duty cycle");
+    const PortSample rh = one(a, "45.2", "%RH", "");
+    check(rh.port.toString() == "relative_humidity" && rh.unit.base == "%" && std::isnan(rh.sample.range.full),
+          "%RH of any meter: relative humidity in %, no range");
+    const PortSample ws = one(a, "3.47", "m/s", "");
+    check(ws.port.toString() == "wind_speed" && ws.sample.displayPrefix.isEmpty() && qFuzzyCompare(ws.sample.value, 3.47),
+          "m/s: wind speed, not milli-/s");
   }
 
   // --- quality, range, bar ---
