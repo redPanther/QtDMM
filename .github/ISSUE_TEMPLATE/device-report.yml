@@ -1,0 +1,62 @@
+name: Device report
+description: A meter works with QtDMM, or partly - also one that is not in the list yet.
+labels: [device report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reports from real meters are how QtDMM learns which models work. Models marked ¹ in the [supported devices](https://github.com/qtdmm/QtDMM/blob/master/docs/user/supported-devices.md) have not been tried with QtDMM yet; a report on one of them is especially welcome. "It works" is a useful report.
+  - type: input
+    id: meter
+    attributes:
+      label: Meter
+      description: Manufacturer and model as printed on the meter.
+      placeholder: Brymen BM869s
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model chosen in QtDMM
+      description: The entry in the device list, or the protocol and port settings used with *Manual settings*.
+    validations:
+      required: true
+  - type: input
+    id: cable
+    attributes:
+      label: Cable or adapter
+      description: The cable, adapter or Bluetooth module, with its chip if you know it (lsusb or the Device Manager show it).
+      placeholder: UT-D09 (CH9329), CP2102, built-in Bluetooth
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Everything I tried works
+        - Works, but some functions read wrong or not at all
+        - Does not connect or shows no reading
+    validations:
+      required: true
+  - type: textarea
+    id: functions
+    attributes:
+      label: Functions tried
+      description: Which functions and ranges you tried, and which read wrong (what the meter showed, what QtDMM showed). Keys like HOLD or MIN/MAX too.
+      placeholder: |
+        V DC, V AC, Ω, continuity: correct
+        °C: QtDMM shows 2.53 °C, the meter 25.3 °C
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: QtDMM version and operating system
+      placeholder: 26.2-rc1, Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: capture
+    attributes:
+      label: Debug output
+      description: For a function that reads wrong, the output of `qtdmm --debug` with a note of what the display showed, see [Capturing a meter](https://github.com/qtdmm/QtDMM/blob/master/CONTRIBUTING.md#capturing-a-meter).
+      render: text

@@ -61,6 +61,9 @@ Source code and bug reports: <https://github.com/qtdmm/QtDMM>.
 - **[Development](docs/dev/index.md)** — building, testing, and extending QtDMM,
   including how to add support for a new meter; the Doxygen API
   documentation is at <https://qtdmm.github.io/QtDMM/api/>.
+- **[Contributing](https://github.com/qtdmm/QtDMM/blob/master/CONTRIBUTING.md)** —
+  reporting a bug or a meter, capturing a meter's frames, translations and
+  pull requests.
 
 This site is published at <https://qtdmm.de/docs/>. Build it locally with
 `pip install mkdocs` and `mkdocs serve` from the repository root.

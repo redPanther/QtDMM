@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security problem
+    url: https://github.com/qtdmm/QtDMM/security/policy
+    about: Please do not report security problems in a public issue; see the security policy.
+  - name: Handbook
+    url: https://qtdmm.de/docs/
+    about: Connecting a meter, troubleshooting and every function of QtDMM.
