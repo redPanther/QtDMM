@@ -1520,6 +1520,14 @@ int main(int argc, char **argv)
                 QString("time cursors: flag %1 under the plot, centred on its line").arg(flag->text()));
         }
       check(flagsShown == 2, QString("time cursors: two flags, got %1").arg(flagsShown));
+      // an alarm mark: a flag with its number and name, in the row with A and B
+      graph.store()->addMark(0xffd03030, "Alarm Above 3 A");
+      GraphFlagItem *markFlag = nullptr;
+      for (QGraphicsItem *item : chart->childItems())
+        if (item->data(0).toString() == "mark-flag" && item->isVisible())
+          markFlag = static_cast<GraphFlagItem *>(item);
+      check(markFlag && markFlag->text() == QString::fromUtf8("1 · Above 3 A") && markFlag->tagRect().top() >= plot.bottom(),
+            "time cursors: the mark's flag '1 · Above 3 A' (no 'Alarm') under the plot, got " + (markFlag ? markFlag->text() : "none"));
       // out of the scale: no level
       graph.setScale(false, false, 0, 3);
       int shown = 0;
@@ -1562,16 +1570,27 @@ int main(int argc, char **argv)
   {
     const QRectF plot(10, 10, 200, 100);
     auto width = [](const QString &t) { return 10.0 * t.size(); };
-    QList<GraphFlags::Flag> flags = { { 100, "A", {} }, { 112, "B", {} } };
+    QList<GraphFlags::Flag> flags = { { 100, "A", {}, {}, {} }, { 112, "B", {}, {}, {} } };
     GraphFlags::layout(flags, plot, 14, width);
     // 18 px wide each: A 91..109, B would start at 103, slides to 112
     check(flags[0].rect == QRectF(91, 110 + GraphFlags::kPoint, 18, 14), "flags: A centred under its line");
     check(flags[1].rect.left() == 109 + GraphFlags::kAir && flags[1].rect.contains(QPointF(112, flags[1].rect.center().y())),
           "flags: B slides right, its line still on it");
-    flags = { { 100, "A", {} }, { 101, "B", {} } };
+    flags = { { 100, "A", {}, {}, {} }, { 101, "B", {}, {}, {} } };
     GraphFlags::layout(flags, plot, 14, width);
     check(!flags[0].rect.isEmpty() && flags[1].rect.isEmpty(), "flags: B would leave its line, left out");
-    flags = { { 205, "long", {} } };
+    // notes as far as the neighbours leave room
+    flags = { { 100, "1", "Above 5 V", {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(flags[0].text == QString::fromUtf8("1 · Above 5 V"), "flags: alone, the whole note: " + flags[0].text);
+    flags = { { 60, "1", "Above 5 V", {}, {} }, { 140, "2", "Below 1 V", {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(flags[0].text == QString::fromUtf8("1 · A…") && flags[1].text == QString::fromUtf8("2 · B…"),
+          "flags: 80 px apart, the notes cut: " + flags[0].text + " | " + flags[1].text);
+    flags = { { 100, "1", "Above 5 V", {}, {} }, { 130, "2", "Below", {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(flags[0].text == "1" && flags[1].text == "2", "flags: 30 px apart, the numbers alone");
+    flags = { { 205, "long", {}, {}, {} } };
     GraphFlags::layout(flags, plot, 14, width);
     check(flags[0].rect.right() == 210 && flags[0].rect.contains(QPointF(205, flags[0].rect.center().y())),
           "flags: at the right edge it slides inward");

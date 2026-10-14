@@ -10,10 +10,33 @@ namespace GraphFlags
 void layout(QList<Flag> &flags, const QRectF &plot, double height, const std::function<double(const QString &)> &widthOf)
 {
   double prevRight = -qInf();
-  for (Flag &f : flags)
+  for (qsizetype i = 0; i < flags.size(); ++i)
   {
+    Flag &f = flags[i];
     f.rect = QRectF();
-    const double width = widthOf(f.label) + 2 * kPad;
+    // the note as far as there is room between the neighbouring lines
+    const double before = i > 0 ? f.x - flags[i - 1].x : qInf();
+    const double after = i + 1 < flags.size() ? flags[i + 1].x - f.x : qInf();
+    const double room = qMin(kMaxWidth, qMin(before, after) - kAir) - 2 * kPad;
+    f.text = f.label;
+    const QString note = f.note.trimmed();
+    if (!note.isEmpty())
+    {
+      const QString sep = f.label + QStringLiteral(" ") + QChar(0x00b7) + QStringLiteral(" ");
+      if (widthOf(sep + note) <= room)
+        f.text = sep + note;
+      else
+        for (qsizetype k = note.size() - 1; k > 0; --k)
+        {
+          const QString cut = sep + note.left(k).trimmed() + QChar(0x2026);
+          if (widthOf(cut) <= room)
+          {
+            f.text = cut;
+            break;
+          }
+        }
+    }
+    const double width = widthOf(f.text) + 2 * kPad;
     double left = qMax(plot.left(), qMin(f.x - width / 2, plot.right() - width));
     left = qMax(left, prevRight + kAir);
     // the point has to leave from the tag

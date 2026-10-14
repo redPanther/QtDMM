@@ -13,12 +13,15 @@
 /// name (marks). The idea after dmm-tools' marker flags; no code taken.
 namespace GraphFlags
 {
-/// One flag: the line's x, its text; layout() fills in rect.
+/// One flag: the line's x, its name and a note; layout() fills in text
+/// and rect.
 struct Flag
 {
   double  x = 0;
-  QString label;
-  QRectF  rect;   ///< the tag, below the plot; empty when left out
+  QString label;   ///< always shown ("A", "3")
+  QString note;    ///< after the label as room allows ("3 · Above 5 V", "3 · Abo…")
+  QRectF  rect;    ///< the tag, below the plot; empty when left out
+  QString text;    ///< what the tag says
 };
 
 /// Air between two tags and the space either side of the text.
@@ -26,8 +29,12 @@ constexpr double kAir = 3;
 constexpr double kPad = 4;
 /// Height of the point between the plot's edge and the tag.
 constexpr double kPoint = 4;
+/// The widest a tag gets with its note.
+constexpr double kMaxWidth = 160;
 
 /// Places @p flags (ascending x) under @p plot, each centred on its line.
+/// A note gets no more than the room to the nearer neighbouring line (and
+/// kMaxWidth), cut short with "…" or left off; the label always stays.
 /// One that would touch the one before slides right, near an edge a tag
 /// slides inward; one whose line would no longer leave from its tag is
 /// left out (rect empty) - its line still shows. @p widthOf measures a

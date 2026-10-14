@@ -26,6 +26,7 @@
 #include <QPen>
 #include <QRegularExpression>
 #include <cmath>
+#include <numeric>
 #include <QSvgGenerator>
 #include <QPdfWriter>
 
@@ -995,32 +996,7 @@ void GraphWidget::updateTimeCursors()
     const double px = plot.left() + (x - min) / (max - min) * plot.width();
     m_cursorLine[i]->setLine(px, plot.top(), px, plot.bottom());
   }
-  // the names as flags under the plot, in the time labels' row
-  {
-    const QFont font = m_xAxis->labelsFont();
-    const QFontMetricsF fm(font);
-    QList<GraphFlags::Flag> flags;
-    QList<int> which;
-    for (int i = 0; i < 2; ++i)
-      if (m_cursorLine[i]->isVisible())
-      {
-        flags << GraphFlags::Flag{ m_cursorLine[i]->line().x1(), m_cursorName[i]->text(), {} };
-        which << i;
-      }
-    if (flags.size() == 2 && flags[1].x < flags[0].x)
-    {
-      flags.swapItemsAt(0, 1);
-      which.swapItemsAt(0, 1);
-    }
-    GraphFlags::layout(flags, plot, fm.height() + 2, [&](const QString &t) { return fm.horizontalAdvance(t); });
-    for (int j = 0; j < flags.size(); ++j)
-    {
-      GraphFlagItem *flag = m_cursorName[which[j]];
-      flag->setFont(font);
-      flag->setPlace(flags[j].rect, flags[j].x);
-      flag->setVisible(!flags[j].rect.isEmpty());
-    }
-  }
+  updateFlags();
   if (!m_cursorInfo)
     return;
   const QString text = timeCursorText();
@@ -1428,6 +1404,60 @@ void GraphWidget::updateThresholdLinePositions()
   updateMarkPositions();
 }
 
+// The flags of the time cursors and of the marks share the row of the
+// time labels: laid out together, they never cover each other. A mark's
+// flag carries its number and, as room allows, its name.
+void GraphWidget::updateFlags()
+{
+  if (!m_cursorName[0])
+    return;
+  const QRectF plot = m_chart->plotArea();
+  const QFont font = m_xAxis->labelsFont();
+  const QFontMetricsF fm(font);
+  QList<GraphFlags::Flag> flags;
+  QList<GraphFlagItem *> items;
+  for (int i = 0; i < 2; ++i)
+  {
+    m_cursorName[i]->setVisible(false);
+    if (m_cursorLine[i]->isVisible())
+    {
+      flags << GraphFlags::Flag{ m_cursorLine[i]->line().x1(), m_cursorName[i]->text(), {}, {}, {} };
+      items << m_cursorName[i];
+    }
+  }
+  const QList<RecordingStore::Mark> marks = m_store->marks();
+  // "Alarm Peak" says "Peak" on the flag: every mark is an alarm's, the
+  // word would take the room (the tooltip keeps it)
+  const QString alarmWord = QCoreApplication::translate("Alarm", "Alarm") + ' ';
+  for (int i = 0; i < m_markFlags.size() && i < m_marks.size() && i < marks.size(); ++i)
+  {
+    m_markFlags[i]->setVisible(false);
+    if (m_marks[i]->isVisible())
+    {
+      QString note = marks[i].name;
+      if (note.startsWith(alarmWord, Qt::CaseInsensitive) && note.size() > alarmWord.size())
+        note = note.mid(alarmWord.size());
+      flags << GraphFlags::Flag{ m_marks[i]->line().x1(), QString::number(i + 1), note, {}, {} };
+      items << m_markFlags[i];
+    }
+  }
+  QList<int> order(flags.size());
+  std::iota(order.begin(), order.end(), 0);
+  std::stable_sort(order.begin(), order.end(), [&](int a, int b) { return flags[a].x < flags[b].x; });
+  QList<GraphFlags::Flag> sorted;
+  for (int i : order)
+    sorted << flags[i];
+  GraphFlags::layout(sorted, plot, fm.height() + 2, [&](const QString &t) { return fm.horizontalAdvance(t); });
+  for (qsizetype j = 0; j < sorted.size(); ++j)
+  {
+    GraphFlagItem *flag = items[order[j]];
+    flag->setFont(font);
+    flag->setText(sorted[j].text);
+    flag->setPlace(sorted[j].rect, sorted[j].x);
+    flag->setVisible(!sorted[j].rect.isEmpty());
+  }
+}
+
 void GraphWidget::addMark(const QColor &color, const QString &name)
 {
   m_store->addMark(color.rgba(), name);
@@ -1437,6 +1467,8 @@ void GraphWidget::syncMarks()
 {
   qDeleteAll(m_marks);
   m_marks.clear();
+  qDeleteAll(m_markFlags);
+  m_markFlags.clear();
   for (const RecordingStore::Mark &m : m_store->marks())
   {
     auto *line = new QGraphicsLineItem(m_chart);
@@ -1444,6 +1476,13 @@ void GraphWidget::syncMarks()
     line->setZValue(999);
     line->setToolTip(m.name);
     m_marks << line;
+    auto *flag = new GraphFlagItem(m_chart);
+    flag->setColor(QColor::fromRgba(m.color));
+    flag->setToolTip(m.name);
+    flag->setZValue(999);
+    flag->setData(0, QStringLiteral("mark-flag"));
+    flag->setVisible(false);
+    m_markFlags << flag;
   }
   updateMarkPositions();
   updateCentreTicks();   // phosphor: the trigger's mark is the vertical centre
@@ -1464,6 +1503,7 @@ void GraphWidget::updateMarkPositions()
     const double px = m_chart->mapToPosition(QPointF(x, m_yAxis->min()), m_dataSeries).x();
     line->setLine(px, plot.top(), px, plot.bottom());
   }
+  updateFlags();
 }
 
 int GraphWidget::lengthLimit() const

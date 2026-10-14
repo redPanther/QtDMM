@@ -598,6 +598,9 @@ protected:
   /// Alarm marks: a vertical line at the sample the alarm raised on, one
   /// per RecordingStore::marks() in the same order.
   QList<QGraphicsLineItem *> m_marks;
+  QList<GraphFlagItem *> m_markFlags;   ///< number and name under each mark
+  /// The flags under the plot, the cursors' and the marks', in one row.
+  void             updateFlags();
   void             updateMarkPositions();
 
   void             resizeEvent(QResizeEvent *)Q_DECL_OVERRIDE;
