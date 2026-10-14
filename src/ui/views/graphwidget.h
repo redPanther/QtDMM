@@ -552,6 +552,9 @@ protected:
   qint64           m_cursorT[2] = { -1, -1 };      ///< ms since the start, -1 = none
   QGraphicsLineItem *m_cursorLine[2] = {};
   QGraphicsSimpleTextItem *m_cursorName[2] = {};   ///< "A" and "B" at the top of the lines
+  /// across the plot at the value under each cursor: the change is the
+  /// distance between the two
+  QGraphicsLineItem *m_cursorLevel[2] = {};
   QLabel          *m_cursorInfo = nullptr;          ///< timeCursorText(), top right in the plot
   QPoint           m_pressPos;                      ///< where the left button went down
   bool             m_clickCandidate = false;        ///< a press that may become a click: sets a cursor

@@ -180,6 +180,11 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
     m_cursorName[i] = new QGraphicsSimpleTextItem(i ? QStringLiteral("B") : QStringLiteral("A"), m_chart);
     m_cursorName[i]->setZValue(1000);
     m_cursorName[i]->setVisible(false);
+    m_cursorLevel[i] = new QGraphicsLineItem(m_chart);
+    m_cursorLevel[i]->setPen(QPen(Qt::DashLine));   // the colour comes with the design
+    m_cursorLevel[i]->setZValue(1000);
+    m_cursorLevel[i]->setData(0, QStringLiteral("cursor-level"));
+    m_cursorLevel[i]->setVisible(false);
   }
 
   m_chartView = new QChartView(m_chart, this);
@@ -966,12 +971,22 @@ void GraphWidget::updateTimeCursors()
     return;
   const QRectF plot = m_chart->plotArea();
   const double min = m_xAxis->min(), max = m_xAxis->max();
+  const double yMin = m_yAxis->min(), yMax = m_yAxis->max();
   for (int i = 0; i < 2; ++i)
   {
     const double x = m_cursorT[i] / 1000.0;
     const bool shown = m_cursorT[i] >= 0 && max > min && x >= min && x <= max;
     m_cursorLine[i]->setVisible(shown);
     m_cursorName[i]->setVisible(shown);
+    // the level: only for a value inside the scale (none in a gap)
+    const double v = shown ? valueAt(m_cursorT[i]) : qQNaN();
+    const bool level = std::isfinite(v) && yMax > yMin && v >= yMin && v <= yMax;
+    m_cursorLevel[i]->setVisible(level);
+    if (level)
+    {
+      const double py = plot.bottom() - (v - yMin) / (yMax - yMin) * plot.height();
+      m_cursorLevel[i]->setLine(plot.left(), py, plot.right(), py);
+    }
     if (!shown)
       continue;
     const double px = plot.left() + (x - min) / (max - min) * plot.width();
@@ -1056,6 +1071,7 @@ void GraphWidget::updateYLabels()
   }
   updateReferenceLine();
   updateEnvelope();
+  updateTimeCursors();   // their levels
 }
 
 double GraphWidget::referenceY() const
@@ -2481,6 +2497,7 @@ void GraphWidget::applyThemeColors()
   for (int i = 0; i < 2; ++i)
   {
     m_cursorLine[i]->setPen(QPen(cursor, 1, Qt::DashLine));
+    m_cursorLevel[i]->setPen(QPen(cursor, 1, Qt::DashLine));
     m_cursorName[i]->setBrush(cursor);
   }
   if (m_cursorInfo)

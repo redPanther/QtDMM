@@ -1487,6 +1487,35 @@ int main(int argc, char **argv)
     check(lines.size() == 4 && lines[3] == QString::fromUtf8("mean 3 A  ∫ 8.333 mAh"),
           "time cursors: 'mean 3 A  ∫ 8.333 mAh', got " + lines.value(3));
 
+    // a dashed line across the plot at each cursor's value: at 2 A and 4 A,
+    // the change their distance
+    {
+      QList<QGraphicsLineItem *> levels;
+      for (QGraphicsItem *item : chart->childItems())
+        if (item->data(0).toString() == "cursor-level" && item->isVisible())
+          levels << static_cast<QGraphicsLineItem *>(item);
+      auto yOf = [&](double v) { return chart->mapToPosition(QPointF(10, v), chart->series().first()).y(); };
+      const QRectF plot = chart->plotArea();
+      check(levels.size() == 2, QString("time cursors: two levels, got %1").arg(levels.size()));
+      bool at2 = false, at4 = false;
+      for (QGraphicsLineItem *l : levels)
+      {
+        const QLineF line = l->line();
+        const bool across = line.y1() == line.y2() && line.x1() == plot.left() && line.x2() == plot.right()
+                            && l->pen().style() == Qt::DashLine;
+        at2 = at2 || (across && std::abs(line.y1() - yOf(2)) < 0.5);
+        at4 = at4 || (across && std::abs(line.y1() - yOf(4)) < 0.5);
+      }
+      check(at2 && at4, "time cursors: dashed levels across the plot at 2 A and 4 A");
+      // out of the scale: no level
+      graph.setScale(false, false, 0, 3);
+      int shown = 0;
+      for (QGraphicsItem *item : chart->childItems())
+        shown += item->data(0).toString() == "cursor-level" && item->isVisible();
+      check(shown == 1, QString("time cursors: 4 A above a scale to 3, one level, got %1").arg(shown));
+      graph.setScale(false, false, 0, 5);
+    }
+
     // dragging B moves it, no new cursor
     mouse(QEvent::MouseMove, xOf(15000));
     mouse(QEvent::MouseButtonPress, xOf(15000), Qt::LeftButton);
