@@ -1,3 +1,7 @@
+* 26.2 (changes after rc1; the release candidate below lists everything new before)
+- Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell
+  to build it; on NixOS the udev rule comes with services.udev.packages (see INSTALL)
+
 * 12/10/2026 26.2-rc1 (first release candidate for 26.2)
 - New main window: display, analog meter, graph and readings table are windows in one area, arranged
   automatically ("Displays on top", "Displays on the left"), fixed or freely. In the arranged modes the gaps
