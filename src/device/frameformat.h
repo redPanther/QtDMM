@@ -77,6 +77,7 @@ public:
     UniTUT382,
     BenetechGM1020,
     UniTUT202BT,
+    UniTiENV,
     EndOfList              // new stuff always before!
   };
 

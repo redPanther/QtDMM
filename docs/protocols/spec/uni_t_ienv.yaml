@@ -1,0 +1,76 @@
+protocol: UniTiENV
+decoder: src/device/decoders/uni_t_ienv.cpp
+devices: [UNI-T UT383BT, UNI-T UT353BT]
+frames_per_reading: 1
+sources:
+  - ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py (MIT; UT383BT frames from an Android btsnoop capture of UNI-T's app)
+  - ablage/ienv/ut383bt-lux-ble-python/docs/PROTOCOL.md (WTFPL; FF01 write, FF02 notify, poll 0x5E)
+  - ablage/ienv/esphome_uni_trend_sound_meter (MIT; UT353BT frames, service FF12)
+
+# UNI-T iENV meters over Bluetooth LE, service FF12: the poll 0x5E written to
+# FF01 is answered by one 19-byte frame on FF02:
+#
+#   0-1   AA BB          header
+#   2     10             length of what follows (16)
+#   3     01             always 01 in the captures
+#   4     model          3A UT383BT, 3B UT353BT
+#   5-13  display        9 ASCII characters, value right-aligned then the unit
+#                        word (" 158LUX", "101.1dBA")
+#   14-16 unknown        ';' 30 00 (UT383BT), '=' 34 00 (UT353BT); no capture
+#                        with HOLD, MAX/MIN, low battery or overload
+#   17-18 checksum       16-bit big-endian sum of bytes 0-16, as in the iDMM
+#                        frame (true for every capture below)
+#
+# The vectors are captures from the sources, not synthetic. The first answer
+# after subscribing can be 26 bytes: the frame and seven bytes more.
+vectors:
+  - source_line: "UT383BT 158 LUX"
+    source: ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py
+    bytes: AA BB 10 01 3A 20 20 20 31 35 38 4C 55 58 3B 30 00 04 12
+    reading: {value: "158", unit: "lx"}
+    expect: {val: "158"}
+  - source_line: "UT383BT 159 LUX"
+    source: ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py
+    bytes: AA BB 10 01 3A 20 20 20 31 35 39 4C 55 58 3B 30 00 04 13
+    reading: {value: "159", unit: "lx"}
+    expect: {val: "159"}
+  - source_line: "UT383BT 157 LUX"
+    source: ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py
+    bytes: AA BB 10 01 3A 20 20 20 31 35 37 4C 55 58 3B 30 00 04 11
+    reading: {value: "157", unit: "lx"}
+    expect: {val: "157"}
+  - source_line: "UT383BT 153 LUX"
+    source: ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py
+    bytes: AA BB 10 01 3A 20 20 20 31 35 33 4C 55 58 3B 30 00 04 0D
+    reading: {value: "153", unit: "lx"}
+    expect: {val: "153"}
+  - source_line: "UT383BT 112 LUX"
+    source: ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py
+    bytes: AA BB 10 01 3A 20 20 20 31 31 32 4C 55 58 3B 30 00 04 08
+    reading: {value: "112", unit: "lx"}
+    expect: {val: "112"}
+  - source_line: "UT383BT 91 LUX"
+    source: ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py
+    bytes: AA BB 10 01 3A 20 20 20 20 39 31 4C 55 58 3B 30 00 03 FE
+    reading: {value: "91", unit: "lx"}
+    expect: {val: "91"}
+  - source_line: "UT383BT 71 LUX"
+    source: ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py
+    bytes: AA BB 10 01 3A 20 20 20 20 37 31 4C 55 58 3B 30 00 03 FC
+    reading: {value: "71", unit: "lx"}
+    expect: {val: "71"}
+  - source_line: "UT383BT 158 LUX, the 26-byte first answer: the frame and seven bytes more"
+    source: ablage/ienv/ha-ut383bt-lux-meter/tests/ut383bt/test_protocol.py
+    bytes: AA BB 10 01 3A 20 20 20 31 35 38 4C 55 58 3B 30 00 04 12 30 00 04 16 00 00 00
+    reading: {value: "158", unit: "lx"}
+    expect: {val: "158"}
+  - source_line: "UT353BT 101.1 dBA"
+    source: ablage/ienv/esphome_uni_trend_sound_meter/components/uni_trend_sound_meter/uni_trend_sound_meter.cpp
+    bytes: AA BB 10 01 3B 20 31 30 31 2E 31 64 42 41 3D 34 00 04 1A
+    reading: {value: "101.1", unit: "dBA"}
+    expect: {val: "101.1"}
+  - source_line: "UT353BT 37.9 dBA"
+    source: ablage/ienv/esphome_uni_trend_sound_meter/components/uni_trend_sound_meter/uni_trend_sound_meter.cpp
+    bytes: AA BB 10 01 3B 20 20 33 37 2E 39 64 42 41 3D 34 00 04 1A
+    reading: {value: "37.9", unit: "dBA"}
+    expect: {val: "37.9"}
