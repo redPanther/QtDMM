@@ -11,14 +11,16 @@ class QToolButton;
 struct Reading;
 
 /// The meter's keys under the display, for meters QtDMM can remote-control
-/// (the UNI-T iDMM protocol: UT60BT, UT61B+/D+/E+, UT161). Groups from left
-/// to right as on the meter's front - function, range, display, LIGHT and
-/// HOLD on the right - that wrap to a second row when the window is narrow.
+/// (the UNI-T iDMM protocol: UT60BT, UT61B+/D+/E+, UT161, UT202BT). Groups
+/// from left to right as on the meter's front - function, range, display,
+/// LIGHT and HOLD on the right - that wrap to a second row when the window
+/// is narrow; a group without a key of the meter is hidden.
 ///
 /// HOLD, AUTO, REL, MIN/MAX and PEAK show the meter's state as the readings
 /// report it, not the last click; RANGE, SELECT, Hz/% and LIGHT are plain
 /// keys. MIN/MAX and PEAK are left as on the meter: by holding the key
-/// (keyPressed("minmax_off")). The keys are enabled while the meter is
+/// (keyPressed("minmax_off")). The UT202BT's A~ and NCV/PEAK keys held send
+/// another key (inrush, peak capture: "fn_a_long", "fn_ncv_long"). The keys are enabled while the meter is
 /// connected; setProtocol() hides those the meter does not have (PEAK on
 /// the UT60BT). MainWindow sends them (MeterController::pressKey()).
 class ControlBar : public QWidget
