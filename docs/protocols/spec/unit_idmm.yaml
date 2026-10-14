@@ -18,7 +18,9 @@ sources:
 #
 #   0-1  AB CD            header
 #   2    10               length of what follows (16)
-#   3    function         bit 7 masked: 0 ACV, 1 ACmV, 2 DCV, 3 DCmV, 4 Hz, 5 %,
+#   3    function         bit 7: a frame of the second display (clamps:
+#                         Hz beside AC V/A, F beside C; dmm-tools family spec
+#                         2.3), read as the second value; bits 0-6: 0 ACV, 1 ACmV, 2 DCV, 3 DCmV, 4 Hz, 5 %,
 #                         6 OHM, 7 CONT, 8 DIODE, 9 CAP, 10 C, 11 F, 12 DCuA,
 #                         13 ACuA, 14 DCmA, 15 ACmA, 16 DCA, 17 ACA, 18 hFE,
 #                         20 NCV, 21 LozV (22-30 other UNI-T models)
@@ -194,3 +196,8 @@ vectors:
     bytes: AB CD 10 0E 31 20 20 31 2E 32 33 34 00 00 00 00 00 02 FF
     reading: {value: "1.234", unit: "A", range_mode: auto}
     expect: {special: "DC", val: "1.234"}
+  - source_line: "second display: Hz r0 50.00 with bit 7 set (dmm-tools family spec 2.3; synthetic frame)"
+    source: ablage/dmm-tools/docs/research/ut61-family/reverse-engineered-protocol.md
+    bytes: AB CD 10 84 30 20 20 35 30 2E 30 30 00 00 00 00 00 03 6F
+    reading: {value: "50.00", unit: "Hz"}
+    expect: {special: "HZ", val: "50.00", id: 1, showBar: false}

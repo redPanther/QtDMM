@@ -21,8 +21,9 @@
 ///
 /// fn selects the function (DCV, OHM, ...), range an ASCII digit that, with
 /// fn, gives unit and prefix; the display string carries sign and decimal
-/// point exactly as on the LCD. Other frames (the 11-byte name answer) fail
-/// the length/checksum test and are skipped.
+/// point exactly as on the LCD. Bit 7 of fn marks a frame of the second
+/// display (DmmResponse::id + 1, no flags). Other frames (the 11-byte name
+/// answer) fail the length/checksum test and are skipped.
 ///
 /// The meter's keys are frames of the same kind, `AB CD 03 <cmd> <16 bit BE
 /// sum>` (keyRequest()): 0x46 RANGE, 0x47 AUTO, 0x48 REL, 0x4A HOLD, 0x4B
@@ -51,4 +52,8 @@ public:
   /// True when @p frame (kFrameLength bytes) has the header, the length byte
   /// and a matching checksum.
   static bool frameValid(const unsigned char *frame);
+
+private:
+  /// The display text of @p frame into m_result: val, and dval with @p prefix.
+  DmmResponse displayed(const unsigned char *frame, const char *prefix);
 };

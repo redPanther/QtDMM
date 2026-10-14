@@ -196,6 +196,11 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
   if (!frameValid(f))
     return std::nullopt;
 
+  // bit 7: the meter's second display in a frame of its own (dmm-tools,
+  // family spec §2.3, after UNI-T's app): the frequency beside AC V and AC A
+  // of a clamp, °F beside °C. Function and range as a main frame; bar and
+  // flags are not known there, so the second value takes none of them
+  const bool second = f[3] & 0x80;
   const int fn = f[3] & 0x7F;
   const bool plus = m_type == FrameFormat::UniTUT61Plus;
   if (fn >= (plus ? kFunctionCount61Plus : kFunctionCount))
@@ -217,8 +222,14 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
                                    : QString::fromLatin1(flagsC & 0x08 ? "AC" : "DC");
   // UT61E+ DC V position with AC shown alongside: the meter alternates, the
   // AC frames become the second value (display line 2, "2nd" in the table)
-  if (plus && fn == 25 && (flagsC & 0x08))
+  if ((plus && fn == 25 && (flagsC & 0x08)) || second)
     m_result.id = id + 1;
+  m_result.unit = QString::fromUtf8(prefix) + QString::fromLatin1(func.unit);
+  if (second)
+  {
+    m_result.showBar = false;
+    return displayed(f, prefix);
+  }
   m_result.hold = flagsA & 0x02;
   // the meter's other keys: A bit3 MAX, bit2 MIN, bit0 REL; C bit2/bit1 peak
   // max/min
@@ -231,8 +242,11 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
   if (flagsC & 0x06)
     m_result.states |= SampleFlag::Peak;
   m_result.range = (flagsB & 0x04) ? "MANU" : "AUTO";
-  m_result.unit = QString::fromUtf8(prefix) + QString::fromLatin1(func.unit);
+  return displayed(f, prefix);
+}
 
+DmmDecoder::DmmResponse DecoderUniTiDMM::displayed(const unsigned char *f, const char *prefix)
+{
   // the LCD text: sign and decimal point included; the dot also floats
   // inside "OL" ("OL.", "O.L", ".OL") depending on the range
   QString text = QString::fromLatin1(reinterpret_cast<const char *>(f + 5), 7).trimmed();
