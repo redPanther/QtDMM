@@ -16,3 +16,6 @@ __pycache__/
 #kdevelop
 .kdev4/
 *.kdev4
+
+# nix build
+/result
