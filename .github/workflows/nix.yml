@@ -1,8 +1,7 @@
 name: Nix build
 
-# Builds flake.nix, so that it keeps up with CMakeLists.txt. A run without
-# flake.lock in the repository locks nixpkgs and offers the lock file as an
-# artifact to commit.
+# Builds flake.nix, so that it keeps up with CMakeLists.txt. nixpkgs is
+# pinned in flake.lock; `nix flake update` moves it on.
 
 on:
   push:
@@ -20,9 +19,6 @@ jobs:
 
     - uses: cachix/install-nix-action@v31
 
-    - name: Lock file present?
-      run: test -f flake.lock || echo "NEW_LOCK=1" >> "$GITHUB_ENV"
-
     - name: Build
       run: nix build -L
 
@@ -32,9 +28,3 @@ jobs:
     - name: Development shell
       run: nix develop --command cmake --version
 
-    - name: Lock file
-      if: env.NEW_LOCK == '1'
-      uses: actions/upload-artifact@v4
-      with:
-        name: flake.lock
-        path: flake.lock
