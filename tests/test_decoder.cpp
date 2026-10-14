@@ -62,6 +62,21 @@ int main(int argc, char **argv)
     expect(ut61plus, "select2", "abcd034901c4");
     expect(ut61plus, "peak", "abcd034d01c8");
     expect(ut61plus, "peak_off", "abcd034e01c9");
+    // the UT202BT: RANGE, HOLD and its colour keys, as UNI-T's app sends them
+    const FrameFormat::DataFormat ut202bt = FrameFormat::UniTUT202BT;
+    expect(ut202bt, "range", "abcd034601c1");
+    expect(ut202bt, "hold", "abcd034a01c5");
+    expect(ut202bt, "fn_a", "abcd033101ac");
+    expect(ut202bt, "fn_a_long", "abcd033201ad");
+    expect(ut202bt, "fn_v", "abcd033301ae");
+    expect(ut202bt, "fn_ohm", "abcd033501b0");
+    expect(ut202bt, "fn_ncv", "abcd033601b1");
+    expect(ut202bt, "fn_ncv_long", "abcd033701b2");
+    expect(ut202bt, "auto", "");
+    expect(ut202bt, "lamp", "");
+    expect(ut202bt, "peak", "");
+    expect(ut60bt, "fn_a", "");
+    expect(ut61plus, "fn_v", "");
     expect(FrameFormat::Metex14, "hold", "");   // no remote control
 
     // the Keysight U12xx polling loop as it runs: a request each tick, the

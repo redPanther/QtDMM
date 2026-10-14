@@ -1,0 +1,85 @@
+protocol: UniTUT202BT
+decoder: src/device/decoders/unit_idmm.cpp
+devices: [UNI-T UT202BT]
+frames_per_reading: 1
+unit_map:                      # spec spelling -> what the decoder emits
+  "u": "µ"
+sources:
+  - "ablage/dmm-tools/crates/dmm-lib/src/protocol/ut61eplus/tables/ut202bt.rs (dmm-tools, GPL-3.0-or-later: the table of UNI-T's app asset funOl1_UT202BT.json with the manual's ranges)"
+  - "ablage/dmm-tools/docs/research/ut61-family/reverse-engineered-protocol.md (sections 2.3 second display, 6.4 start order, 6.5 keys, 9 ranges)"
+  - "ablage/multimeter-main/docs/protocols/ut202bt.md (libreble, MIT: same frame and GATT service as the UT60BT)"
+
+# The UT202BT clamp speaks the UNI-T iDMM frame of the UT60BT (unit_idmm.yaml
+# has the layout) over the same Bluetooth LE service, with its own function
+# codes and ranges: V and A 9.999 / 99.99 / 600.0, Ohm from 99.99 Ohm in seven
+# ranges, CAP 99.99 nF to 99.9 mF, Hz to 9.999 MHz, LPF in range 2 only, C in
+# range 1, F in range 0. The clamp codes 22 (AC A), 28 (LPF A) and 30 (inrush)
+# are amperes. The second display (Hz beside AC V and AC A, F beside C) comes
+# in frames of its own with bit 7 of the function byte set.
+#
+# SYNTHETIC: no UT202BT has been connected (to QtDMM nor, per their docs, to
+# dmm-tools or libreble). The frames are built from that description with
+# correct checksums and test the decoder's reading of it, not the meter. Open:
+# whether AC A comes as code 17 or 22 (both are tested), the flags of the
+# second display's frame, which byte starts PEAK. Replace with captures.
+vectors:
+  - source_line: "AC V r2: 230.5 V (600.0 V range)"
+    bytes: AB CD 10 00 32 20 20 32 33 30 2E 35 00 00 00 00 08 02 FA
+    reading: {value: "230.5", unit: "V", range_mode: auto}
+    expect: {special: "AC", val: "230.5"}
+  - source_line: "DC V r0: 3.715 V (9.999 V range - volts, not mV as on the UT60BT)"
+    bytes: AB CD 10 02 30 20 20 33 2E 37 31 35 00 00 00 00 00 02 F8
+    reading: {value: "3.715", unit: "V", range_mode: auto}
+    expect: {special: "DC", val: "3.715"}
+  - source_line: "AC A as code 17 r1: 12.34 A"
+    bytes: AB CD 10 11 31 20 20 31 32 2E 33 34 00 00 00 00 08 03 0A
+    reading: {value: "12.34", unit: "A", range_mode: auto}
+    expect: {special: "AC", val: "12.34"}
+  - source_line: "AC A as code 22 (clamp) r0: 4.567 A - amperes, not volts"
+    bytes: AB CD 10 16 30 20 20 34 2E 35 36 37 00 00 00 00 08 03 1A
+    reading: {value: "4.567", unit: "A", range_mode: auto}
+    expect: {special: "AC", val: "4.567"}
+  - source_line: "AC A LPF code 28 r2: 123.4 A"
+    bytes: AB CD 10 1C 32 20 20 31 32 33 2E 34 00 00 00 00 08 03 16
+    reading: {value: "123.4", unit: "A", range_mode: auto}
+    expect: {special: "AC", val: "123.4"}
+  - source_line: "inrush code 30 r1: 45.67 A, manual range"
+    bytes: AB CD 10 1E 31 20 20 34 35 2E 36 37 00 00 00 04 08 03 27
+    reading: {value: "45.67", unit: "A", range_mode: manual}
+    expect: {special: "AC", val: "45.67"}
+  - source_line: "AC V LPF code 24 r2: 229.8 V"
+    bytes: AB CD 10 18 32 20 20 32 32 39 2E 38 00 00 00 00 08 03 1D
+    reading: {value: "229.8", unit: "V", range_mode: auto}
+    expect: {special: "AC", val: "229.8"}
+  - source_line: "OHM r0: 56.78 Ohm (99.99 Ohm range, the UT60BT starts at 999.9)"
+    bytes: AB CD 10 06 30 20 20 35 36 2E 37 38 00 00 00 00 00 03 06
+    reading: {value: "56.78", unit: "Ohm", range_mode: auto}
+    expect: {special: "OH", val: "56.78"}
+  - source_line: "OHM r2: 4.700 kOhm"
+    bytes: AB CD 10 06 32 20 20 34 2E 37 30 30 00 00 00 00 00 02 F9
+    reading: {value: "4.700", unit: "kOhm", range_mode: auto}
+    expect: {special: "OH", val: "4.700"}
+  - source_line: "OHM r6: OL"
+    bytes: AB CD 10 06 36 20 20 20 20 4F 4C 2E 00 00 00 00 00 03 0D
+    reading: {value: "OL", unit: "MOhm", range_mode: auto}
+    expect: {special: "OH", val: "OL"}
+  - source_line: "CAP r6: 47.1 mF (99.9 mF range)"
+    bytes: AB CD 10 09 36 20 20 20 34 37 2E 31 00 00 00 00 00 02 F1
+    reading: {value: "47.1", unit: "mF", range_mode: auto}
+    expect: {special: "CA", val: "47.1"}
+  - source_line: "Hz r5: 1.234 MHz"
+    bytes: AB CD 10 04 35 20 20 31 2E 32 33 34 00 00 00 00 00 02 F9
+    reading: {value: "1.234", unit: "MHz", range_mode: auto}
+    expect: {special: "HZ", val: "1.234"}
+  - source_line: "C r1: 23.4"
+    bytes: AB CD 10 0A 31 20 20 20 32 33 2E 34 00 00 00 00 00 02 EA
+    reading: {value: "23.4", unit: "C", range_mode: auto}
+    expect: {special: "TE", val: "23.4"}
+  - source_line: "second display beside AC V: Hz r0 50.00, bit 7 set"
+    bytes: AB CD 10 84 30 20 20 35 30 2E 30 30 00 00 00 00 00 03 6F
+    reading: {value: "50.00", unit: "Hz"}
+    expect: {special: "HZ", val: "50.00", id: 1, showBar: false}
+  - source_line: "second display beside C: F r0 74.1, bit 7 set"
+    bytes: AB CD 10 8B 30 20 20 20 37 34 2E 31 00 00 00 00 00 03 6D
+    reading: {value: "74.1", unit: "dF"}
+    expect: {special: "TE", val: "74.1", id: 1, showBar: false}

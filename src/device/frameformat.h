@@ -76,6 +76,7 @@ public:
     Appa500,
     UniTUT382,
     BenetechGM1020,
+    UniTUT202BT,
     EndOfList              // new stuff always before!
   };
 

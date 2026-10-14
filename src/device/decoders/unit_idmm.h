@@ -4,14 +4,14 @@
 
 #include "device/dmmdecoder.h"
 
-/// UNI-T "iDMM" protocol of the Bluetooth meters (UT60BT, UT161A-E) and of the
+/// UNI-T "iDMM" protocol of the Bluetooth meters (UT60BT, UT161A-E, UT202BT) and of the
 /// UT61B+/D+/E+: `AB CD`-framed packets, over Bluetooth LE a Microchip/ISSC
 /// "Transparent UART" GATT service (BleGattDevice; UT60BT built in, UT-D07B
 /// adapter for the UT61x+), over USB the UT-D09 HID UART cable at 9600 8N1.
 ///
-/// Two protocol rows share this class: UniTiDMM (UT60BT, UT161) and
-/// UniTUT61Plus (UT61B+/D+/E+), which differ only in the range tables - see
-/// the tables in the .cpp.
+/// Three protocol rows share this class: UniTiDMM (UT60BT), UniTUT61Plus
+/// (UT61B+/D+/E+, UT161) and UniTUT202BT (clamp), which differ in the range
+/// tables and keys - see the tables in the .cpp.
 ///
 /// QtDMM polls: every request `AB CD 03 5E 01 D9` ('^') is answered by one
 /// 19-byte measurement frame

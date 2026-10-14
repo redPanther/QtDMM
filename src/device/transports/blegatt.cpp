@@ -45,6 +45,14 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT60BT" } };
     case FrameFormat::UniTUT61Plus:   // UT161 built in; UT61B+/D+/E+ through the UT-D07B adapter
       return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT161", "UT-D07" } };
+    case FrameFormat::UniTUT202BT:
+      // UNI-T's app asks the name (0x5F) before anything else, and a UT60BT
+      // is reported to need it (dmm-tools, UT61 family spec §6.4; our UT60BT
+      // answers the poll without). UNVERIFIED on the UT202BT: whether it
+      // answers the 0x5E poll at all, or only streams after 0x5D as the app
+      // has it
+      return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT202BT" },
+                      QByteArray::fromHex("abcd035f01da") };
     default:
       return std::nullopt;
   }
@@ -293,6 +301,8 @@ void BleGattDevice::setReady()
   if (m_connectTimeout)
     m_connectTimeout->stop();
   qCDebug(lcBle) << m_address << "ready";
+  if (!m_profile->hello.isEmpty())
+    sendCommand(m_profile->hello);
   sendPoll();   // the reader's poll from before is still waiting
 }
 

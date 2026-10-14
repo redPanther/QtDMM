@@ -23,6 +23,8 @@ static const bool registered = []() {
   DmmDecoder::addConfig({"Uni-Trend", "UT61E+ (UT-D07B Bluetooth) *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 22000, 0, 0, 0});
   DmmDecoder::addConfig({"Uni-Trend", "UT61D+ (UT-D07B Bluetooth) *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
   DmmDecoder::addConfig({"Uni-Trend", "UT61B+ (UT-D07B Bluetooth) *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
+  // UT202BT clamp, Bluetooth built in, 9999 counts; not tried with QtDMM
+  DmmDecoder::addConfig({"Uni-Trend", "UT202BT *", "", 0, FrameFormat::UniTUT202BT, 8, 1, 1, 0, 10000, 0, 0, 0});
   return true;
 }();
 
@@ -121,6 +123,52 @@ const Function kFunctions61Plus[] = {
 };
 constexpr int kFunctionCount61Plus = int(sizeof(kFunctions61Plus) / sizeof(kFunctions61Plus[0]));
 
+// The UT202BT clamp: no dial, colour keys pick the function. Its functions
+// and ranges as UNI-T's app has them (asset funOl1_UT202BT.json) with the
+// manual's printed ranges, after dmm-tools (GPL-3.0-or-later, tables/
+// ut202bt.rs and the UT61 family spec §9; no code taken): V and A 9.999,
+// 99.99 and 600.0, Ω from 99.99 Ω in 7 ranges, CAP 99.99 nF to 99.9 mF, Hz
+// to 9.999 MHz, LPF only in range 2, °C in range 1, °F in range 0. The
+// clamp's codes 22 (AC A), 28 (LPF A) and 30 (inrush) are amperes here,
+// where the generic table has volts. UNVERIFIED, no UT202BT has been
+// connected: whether AC A comes as 17 or 22 (the app names both "ACA"),
+// and the inrush range 0 (the asset's alone). A code the meter does not
+// have is no reading (nullptr).
+const Function kFunctions202[] = {
+  /*  0 */ { "ACV",    "",    "V",   { "" } },
+  /*  1 */ { nullptr,  "",    "",    { "" } },
+  /*  2 */ { "DCV",    "",    "V",   { "" } },
+  /*  3 */ { nullptr,  "",    "",    { "" } },
+  /*  4 */ { "Hz",     "HZ",  "Hz",  { "", "", "k", "k", "k", "M" } },
+  /*  5 */ { nullptr,  "",    "",    { "" } },
+  /*  6 */ { "OHM",    "OH",  "Ohm", { "", "", "k", "k", "k", "M", "M" } },
+  /*  7 */ { "CONT",   "BUZ", "Ohm", { "" } },
+  /*  8 */ { nullptr,  "",    "",    { "" } },
+  /*  9 */ { "CAP",    "CA",  "F",   { "n", "n", "µ", "µ", "µ", "m", "m" } },
+  /* 10 */ { "°C",     "TE",  "C",   { "" } },
+  /* 11 */ { "°F",     "TE",  "dF",  { "" } },
+  /* 12 */ { nullptr,  "",    "",    { "" } },
+  /* 13 */ { nullptr,  "",    "",    { "" } },
+  /* 14 */ { nullptr,  "",    "",    { "" } },
+  /* 15 */ { nullptr,  "",    "",    { "" } },
+  /* 16 */ { nullptr,  "",    "",    { "" } },
+  /* 17 */ { "ACA",    "",    "A",   { "" } },
+  /* 18 */ { nullptr,  "",    "",    { "" } },
+  /* 19 */ { nullptr,  "",    "",    { "" } },
+  /* 20 */ { "NCV",    "NCV", "",    { "" } },
+  /* 21 */ { nullptr,  "",    "",    { "" } },
+  /* 22 */ { "ACA",    "",    "A",   { "" } },
+  /* 23 */ { nullptr,  "",    "",    { "" } },
+  /* 24 */ { "LPF",    "",    "V",   { "" } },
+  /* 25 */ { nullptr,  "",    "",    { "" } },
+  /* 26 */ { nullptr,  "",    "",    { "" } },
+  /* 27 */ { nullptr,  "",    "",    { "" } },
+  /* 28 */ { "LPFA",   "",    "A",   { "" } },
+  /* 29 */ { nullptr,  "",    "",    { "" } },
+  /* 30 */ { "INRUSH", "",    "A",   { "" } },
+};
+constexpr int kFunctionCount202 = int(sizeof(kFunctions202) / sizeof(kFunctions202[0]));
+
 // The poll: AB CD, length 3, '^' (0x5E), 0x01, 16-bit BE sum of the first four
 const QByteArray kPoll = QByteArray::fromHex("abcd035e01d9");
 }
@@ -145,9 +193,25 @@ QByteArray DecoderUniTiDMM::commandFrame(quint8 cmd)
 // The key codes: ble-multimeter (uni-t.md, Controls, tried on a UT60BTk) and
 // ut61eplus.py (_COMMANDS) agree. The UT60BT has no Hz/%, MAX/MIN and PEAK
 // keys (its Hz is a dial position; tried 2026-10-06: they do nothing), the
-// UT61x+ has them
+// UT61x+ has them.
+//
+// The UT202BT: the bytes UNI-T's app sends it and no others (dmm-tools, UT61
+// family spec §6.5): RANGE and HOLD, and its colour keys, 0x31 A~ (long
+// press 0x32, inrush), 0x33 V~, 0x35 Ω, 0x36 NCV/PEAK (long press 0x37,
+// peak capture). UNVERIFIED: what each does on the meter; whether the
+// family's 0x4D starts PEAK there instead of 0x37, and whether 0x47 AUTO
+// works (the app never sends it, so neither does QtDMM)
 QByteArray DecoderUniTiDMM::keyRequest(const QString &key) const
 {
+  if (m_type == FrameFormat::UniTUT202BT)
+  {
+    static const QHash<QString, quint8> codes202 = {
+      { "range", 0x46 }, { "hold", 0x4A }, { "fn_a", 0x31 }, { "fn_a_long", 0x32 }, { "fn_v", 0x33 },
+      { "fn_ohm", 0x35 }, { "fn_ncv", 0x36 }, { "fn_ncv_long", 0x37 },
+    };
+    const auto it = codes202.constFind(key);
+    return it != codes202.constEnd() ? commandFrame(it.value()) : QByteArray();
+  }
   static const QHash<QString, quint8> codes = {
     { "range", 0x46 }, { "auto", 0x47 }, { "rel", 0x48 }, { "hold", 0x4A }, { "lamp", 0x4B }, { "select1", 0x4C },
   };
@@ -203,9 +267,12 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
   const bool second = f[3] & 0x80;
   const int fn = f[3] & 0x7F;
   const bool plus = m_type == FrameFormat::UniTUT61Plus;
-  if (fn >= (plus ? kFunctionCount61Plus : kFunctionCount))
+  const bool clamp = m_type == FrameFormat::UniTUT202BT;
+  if (fn >= (plus ? kFunctionCount61Plus : clamp ? kFunctionCount202 : kFunctionCount))
     return std::nullopt;
-  const Function &func = plus ? kFunctions61Plus[fn] : kFunctions[fn];
+  const Function &func = plus ? kFunctions61Plus[fn] : clamp ? kFunctions202[fn] : kFunctions[fn];
+  if (!func.name)
+    return std::nullopt;
   const int range = f[4] - '0';
   const unsigned char flagsA = f[14], flagsB = f[15], flagsC = f[16];
 
