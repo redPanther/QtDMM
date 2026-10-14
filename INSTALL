@@ -100,6 +100,17 @@ deb/rpm based Linux:
 ./compile.sh pack
 will create a deb/rpm package. You can install this cleanly in your system.
 
+Nix (Linux):
+nix run github:qtdmm/QtDMM
+starts QtDMM straight from the repository (flake.nix); `nix build` builds it
+into ./result, `nix develop` opens a shell with everything to build and
+test. The version shown is <year>.1-dev.<count>+g<hash>: the Nix source has
+no git tags. On NixOS, add the flake as an input and the package to the
+system, with its udev rule for the USB-HID cables:
+  environment.systemPackages = [ qtdmm.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+  services.udev.packages = [ qtdmm.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+  users.users.<you>.extraGroups = [ "dialout" ];   # serial ports
+
 
 Multimeter Compatibility:
 =========================
