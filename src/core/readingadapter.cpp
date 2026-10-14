@@ -80,6 +80,8 @@ Meaning meaning(const QString &base, const QString &mode, FrameFormat::DataForma
     { "fc",     Quantity::Illuminance,       "fc" },    // foot-candle, 1 fc = 10.764 lx
     { "%RH",    Quantity::RelativeHumidity,  "%" },     // hygrometers; the TFA sensor's plain % below
     { "m/s",    Quantity::WindSpeed,         "m/s" },
+    { "dBA",    Quantity::SoundPressureLevel, "dBA" },  // sound level meters, A and C weighting
+    { "dBC",    Quantity::SoundPressureLevel, "dBC" },
   };
   for (const Row &r : kRows)
     if (base == QString::fromUtf8(r.base))
@@ -132,6 +134,7 @@ bool hasRange(Quantity q)
     case Quantity::Temperature:
     case Quantity::RelativeHumidity:
     case Quantity::WindSpeed:
+    case Quantity::SoundPressureLevel:
     case Quantity::CarbonDioxide:
     case Quantity::DutyCycle:
     case Quantity::StateOfCharge:

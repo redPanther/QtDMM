@@ -103,6 +103,9 @@ int main(int argc, char **argv)
     const PortSample ws = one(a, "3.47", "m/s", "");
     check(ws.port.toString() == "wind_speed" && ws.sample.displayPrefix.isEmpty() && qFuzzyCompare(ws.sample.value, 3.47),
           "m/s: wind speed, not milli-/s");
+    const PortSample spl = one(a, "101.1", "dBA", "");
+    check(spl.port.toString() == "sound_pressure_level" && spl.unit.base == "dBA" && std::isnan(spl.sample.range.full),
+          "dBA: sound pressure level, no range");
   }
 
   // --- quality, range, bar ---

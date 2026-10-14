@@ -70,6 +70,7 @@ PORT_BY_UNIT = {
     "VA": "apparent_power", "dBm": "power", "dBV": "voltage", "dB": "gain", "s": "time",
     "C": "temperature", "°C": "temperature", "dF": "temperature", "°F": "temperature",
     "Ah": "electric_charge", "Wh": "energy", "lx": "illuminance", "fc": "illuminance",
+    "dBA": "sound_pressure_level", "dBC": "sound_pressure_level",
 }
 PORT_BY_FUNCTION = {
     "resistance": "resistance", "continuity": "continuity", "diode": "voltage",
