@@ -30,6 +30,7 @@
 #include <QPdfWriter>
 
 #include "ui/views/graphwidget.h"
+#include "ui/views/graphflags.h"
 #include "ui/views/graphminimap.h"
 
 #include <cmath>
@@ -177,7 +178,9 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
     m_cursorLine[i] = new QGraphicsLineItem(m_chart);
     m_cursorLine[i]->setZValue(1000);
     m_cursorLine[i]->setVisible(false);
-    m_cursorName[i] = new QGraphicsSimpleTextItem(i ? QStringLiteral("B") : QStringLiteral("A"), m_chart);
+    m_cursorName[i] = new GraphFlagItem(m_chart);
+    m_cursorName[i]->setText(i ? QStringLiteral("B") : QStringLiteral("A"));
+    m_cursorName[i]->setData(0, QStringLiteral("cursor-flag"));
     m_cursorName[i]->setZValue(1000);
     m_cursorName[i]->setVisible(false);
     m_cursorLevel[i] = new QGraphicsLineItem(m_chart);
@@ -977,7 +980,7 @@ void GraphWidget::updateTimeCursors()
     const double x = m_cursorT[i] / 1000.0;
     const bool shown = m_cursorT[i] >= 0 && max > min && x >= min && x <= max;
     m_cursorLine[i]->setVisible(shown);
-    m_cursorName[i]->setVisible(shown);
+    m_cursorName[i]->setVisible(false);   // placed below, with the other flag
     // the level: only for a value inside the scale (none in a gap)
     const double v = shown ? valueAt(m_cursorT[i]) : qQNaN();
     const bool level = std::isfinite(v) && yMax > yMin && v >= yMin && v <= yMax;
@@ -991,8 +994,32 @@ void GraphWidget::updateTimeCursors()
       continue;
     const double px = plot.left() + (x - min) / (max - min) * plot.width();
     m_cursorLine[i]->setLine(px, plot.top(), px, plot.bottom());
-    m_cursorName[i]->setFont(m_xAxis->labelsFont());
-    m_cursorName[i]->setPos(px + 3, plot.top() + 2);
+  }
+  // the names as flags under the plot, in the time labels' row
+  {
+    const QFont font = m_xAxis->labelsFont();
+    const QFontMetricsF fm(font);
+    QList<GraphFlags::Flag> flags;
+    QList<int> which;
+    for (int i = 0; i < 2; ++i)
+      if (m_cursorLine[i]->isVisible())
+      {
+        flags << GraphFlags::Flag{ m_cursorLine[i]->line().x1(), m_cursorName[i]->text(), {} };
+        which << i;
+      }
+    if (flags.size() == 2 && flags[1].x < flags[0].x)
+    {
+      flags.swapItemsAt(0, 1);
+      which.swapItemsAt(0, 1);
+    }
+    GraphFlags::layout(flags, plot, fm.height() + 2, [&](const QString &t) { return fm.horizontalAdvance(t); });
+    for (int j = 0; j < flags.size(); ++j)
+    {
+      GraphFlagItem *flag = m_cursorName[which[j]];
+      flag->setFont(font);
+      flag->setPlace(flags[j].rect, flags[j].x);
+      flag->setVisible(!flags[j].rect.isEmpty());
+    }
   }
   if (!m_cursorInfo)
     return;
@@ -2498,7 +2525,7 @@ void GraphWidget::applyThemeColors()
   {
     m_cursorLine[i]->setPen(QPen(cursor, 1, Qt::DashLine));
     m_cursorLevel[i]->setPen(QPen(cursor, 1, Qt::DashLine));
-    m_cursorName[i]->setBrush(cursor);
+    m_cursorName[i]->setColor(cursor);
   }
   if (m_cursorInfo)
   {

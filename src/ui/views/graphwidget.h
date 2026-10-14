@@ -36,6 +36,7 @@
 #include "ui/views/gapline.h"
 #include "recording/recordingstore.h"
 
+class GraphFlagItem;
 class GraphMinimap;
 class Settings;
 
@@ -551,7 +552,7 @@ protected:
   /// @{
   qint64           m_cursorT[2] = { -1, -1 };      ///< ms since the start, -1 = none
   QGraphicsLineItem *m_cursorLine[2] = {};
-  QGraphicsSimpleTextItem *m_cursorName[2] = {};   ///< "A" and "B" at the top of the lines
+  GraphFlagItem    *m_cursorName[2] = {};   ///< "A" and "B" as flags under the lines
   /// across the plot at the value under each cursor: the change is the
   /// distance between the two
   QGraphicsLineItem *m_cursorLevel[2] = {};

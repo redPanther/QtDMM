@@ -26,7 +26,7 @@ if (BUILD_TESTING)
 	endforeach()
 
 	set( TEST_GRAPH test_graph)
-	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/ui/views/graphwidget.cpp src/ui/views/graphminimap.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/settings.cpp src/core/siprefix.cpp src/ui/engnumbervalidator.cpp)
+	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/ui/views/graphwidget.cpp src/ui/views/graphminimap.cpp src/ui/views/graphflags.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/settings.cpp src/core/siprefix.cpp src/ui/engnumbervalidator.cpp)
 	target_link_libraries(${TEST_GRAPH} PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Charts Qt6::Svg Qt::Core Qt::Test)
 	add_test(NAME dmmgraph COMMAND ${TEST_GRAPH} "${CMAKE_SOURCE_DIR}/tests/data/graph")
 
@@ -129,7 +129,7 @@ if (BUILD_TESTING)
 		src/ui/settings/settingspage.cpp src/ui/settings/generalprefs.cpp src/ui/settings/guiprefs.cpp
 		src/ui/settings/graphprefs.cpp src/ui/settings/recorderprefs.cpp src/ui/dialogs/recordlengthdlg.cpp
 		src/ui/designs.cpp src/ui/colorbutton.cpp src/ui/engnumbervalidator.cpp src/core/settings.cpp
-		src/ui/views/graphwidget.cpp src/ui/views/graphminimap.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp
+		src/ui/views/graphwidget.cpp src/ui/views/graphminimap.cpp src/ui/views/graphflags.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp
 		src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
 	target_include_directories(test_settingspages PRIVATE src)
 	target_link_libraries(test_settingspages PRIVATE Qt6::Widgets Qt6::Charts Qt6::PrintSupport Qt6::Svg Qt::Core)

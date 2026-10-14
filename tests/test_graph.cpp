@@ -10,6 +10,7 @@
 #include <QFileInfo>
 
 #include "ui/views/graphwidget.h"
+#include "ui/views/graphflags.h"
 #include "ui/views/graphminimap.h"
 #include "recording/recordingfile.h"
 #include "recording/recordingstore.h"
@@ -1507,6 +1508,18 @@ int main(int argc, char **argv)
         at4 = at4 || (across && std::abs(line.y1() - yOf(4)) < 0.5);
       }
       check(at2 && at4, "time cursors: dashed levels across the plot at 2 A and 4 A");
+      // A and B as flags under the plot, their points up at their lines
+      int flagsShown = 0;
+      for (QGraphicsItem *item : chart->childItems())
+        if (item->data(0).toString() == "cursor-flag" && item->isVisible())
+        {
+          auto *flag = static_cast<GraphFlagItem *>(item);
+          const double x = flag->text() == "A" ? xOf(5000) : xOf(15000);
+          flagsShown++;
+          check(flag->tagRect().top() >= plot.bottom() && std::abs(flag->tagRect().center().x() - x) < 1,
+                QString("time cursors: flag %1 under the plot, centred on its line").arg(flag->text()));
+        }
+      check(flagsShown == 2, QString("time cursors: two flags, got %1").arg(flagsShown));
       // out of the scale: no level
       graph.setScale(false, false, 0, 3);
       int shown = 0;
@@ -1541,6 +1554,27 @@ int main(int argc, char **argv)
     graph.setTimeCursor(0, 3000);
     graph.clearSLOT();
     check(graph.timeCursor(0) < 0, "time cursors: go with the graph cleared");
+  }
+
+  // --- 7h2. the flags' layout: centred on their lines, the next one
+  //           slides right when they would touch, one that would leave its
+  //           line is left out, at the edge a flag slides inward ---
+  {
+    const QRectF plot(10, 10, 200, 100);
+    auto width = [](const QString &t) { return 10.0 * t.size(); };
+    QList<GraphFlags::Flag> flags = { { 100, "A", {} }, { 112, "B", {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    // 18 px wide each: A 91..109, B would start at 103, slides to 112
+    check(flags[0].rect == QRectF(91, 110 + GraphFlags::kPoint, 18, 14), "flags: A centred under its line");
+    check(flags[1].rect.left() == 109 + GraphFlags::kAir && flags[1].rect.contains(QPointF(112, flags[1].rect.center().y())),
+          "flags: B slides right, its line still on it");
+    flags = { { 100, "A", {} }, { 101, "B", {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(!flags[0].rect.isEmpty() && flags[1].rect.isEmpty(), "flags: B would leave its line, left out");
+    flags = { { 205, "long", {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(flags[0].rect.right() == 210 && flags[0].rect.contains(QPointF(205, flags[0].rect.center().y())),
+          "flags: at the right edge it slides inward");
   }
 
   // --- 7i. phosphor: a vertical line only where a pre-triggered
