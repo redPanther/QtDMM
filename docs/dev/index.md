@@ -42,6 +42,10 @@ The network instrument QtDMM presents (Settings → SCPI server) is
 specified in [SCPI command reference](scpi-commands.md): message format,
 every accepted header, the answers and the error codes.
 
+[MCP server for test sessions](qtdmm-mcp.md): `tools/qtdmm-mcp.py` lets an
+AI assistant read a running test instance - values, status and a
+screenshot - through the SCPI server.
+
 ## API documentation
 
 The headers under `src/` carry Doxygen comments; the class descriptions of

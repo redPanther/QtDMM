@@ -28,4 +28,5 @@ nav:
   - Development:
       - Overview: dev/index.md
       - SCPI command reference: dev/scpi-commands.md
+      - MCP server for test sessions: dev/qtdmm-mcp.md
       - Versions and releases: dev/releasing.md
