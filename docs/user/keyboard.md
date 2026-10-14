@@ -81,7 +81,7 @@ The zoom shortcuts work anywhere in the main window; the plain keys
 | Esc | Remove the time cursors |
 | Drag in the overview | Move the window; while live it pauses there, a click at the right end follows again |
 | Drag a bracket of the overview | Widen or narrow the window |
-| Right button | Menu: connect, start/stop, clear, configure, copy image, colours, reference line, time cursors, overview, import/export |
+| Right button | Menu: connect, start/stop, clear, configure, copy image, colours, reference line, time cursors, overview, min/max band, import/export |
 
 ## Readings table
 

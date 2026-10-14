@@ -142,6 +142,11 @@ were; the integration curve carries on across a gap.
   again. **Overview** in the right-click menu switches it off: the scroll
   bar is back. Whether it shows is kept with the window layout and in a
   saved workspace.
+- **Min/max band** in the right-click menu draws a faint band behind the
+  curve: at each point the lowest to the highest the curve reaches within
+  four pixels to either side. It shows how much a value scatters around
+  the curve, as wide on screen at 1 minute as at 1 hour. It is off at
+  first; whether it shows is kept with the window layout.
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see
