@@ -1,0 +1,68 @@
+name: Bug report
+description: QtDMM does something wrong, crashes or decodes a reading wrongly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting. The [troubleshooting page](https://qtdmm.de/docs/user/troubleshooting/) covers ports, permissions and drivers.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: QtDMM version
+      description: "`qtdmm --version`, or *About* in the main menu."
+      placeholder: 26.2-rc1
+    validations:
+      required: true
+  - type: dropdown
+    id: package
+    attributes:
+      label: Installed from
+      options:
+        - Release package (deb, rpm, pkg)
+        - AppImage
+        - macOS .dmg
+        - Windows installer or zip
+        - Built from source
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 24.04, Windows 11, macOS 15, FreeBSD 14
+    validations:
+      required: true
+  - type: input
+    id: meter
+    attributes:
+      label: Meter
+      description: The model as printed on the meter, and the model chosen in QtDMM if it differs.
+      placeholder: UNI-T UT61E+
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options:
+        - No meter involved
+        - Serial or USB-serial cable
+        - USB-HID cable
+        - Bluetooth LE
+        - Network (SCPI)
+        - sigrok
+        - Simulated meter
+  - type: textarea
+    id: capture
+    attributes:
+      label: Debug output
+      description: |
+        For a wrong or missing reading: start QtDMM with `qtdmm --debug 2> capture.txt` and note what the meter's display showed. Attach the file or paste a few lines, see [Capturing a meter](https://github.com/qtdmm/QtDMM/blob/master/CONTRIBUTING.md#capturing-a-meter). A Bluetooth address in it may be replaced with `XX:XX:XX:XX:XX:XX`.
+      render: text

@@ -1,0 +1,50 @@
+name: New meter
+description: Ask for a meter QtDMM does not support yet.
+labels: [new device]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A new meter needs its protocol. Please first check the [supported devices](https://github.com/qtdmm/QtDMM/blob/master/docs/user/supported-devices.md): a meter with the same chip often works with a listed model or with *Manual settings*.
+  - type: input
+    id: meter
+    attributes:
+      label: Meter
+      description: Manufacturer and model as printed on the meter.
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Manufacturer's page
+      description: A link to the meter on the manufacturer's site (not a shop or file mirror).
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options:
+        - Serial or USB-serial cable
+        - USB-HID cable
+        - Bluetooth LE
+        - Network (SCPI, LAN or USB-TMC)
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: What is known about the protocol
+      description: A protocol description, the vendor's PC software or app, the chip in the meter, another open-source project that reads it.
+  - type: textarea
+    id: capture
+    attributes:
+      label: Capture
+      description: |
+        If you have one: the output of `qtdmm --debug` (or of the vendor's software in a sniffer) with notes of what the display showed at each step, see [Capturing a meter](https://github.com/qtdmm/QtDMM/blob/master/CONTRIBUTING.md#capturing-a-meter). For Bluetooth LE: the advertised name and the services and characteristics (for instance from nRF Connect).
+      render: text
+  - type: checkboxes
+    id: test
+    attributes:
+      label: Testing
+      options:
+        - label: I have the meter and can test a development build.
