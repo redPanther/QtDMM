@@ -150,7 +150,8 @@ public:
     IDLive,
     IDReference,     ///< properties "kind" and "value"
     IDClearCursors,
-    IDMinimap
+    IDMinimap,
+    IDEnvelope
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -253,6 +254,21 @@ public:
   void             setMinimapVisible(bool on);
   bool             minimapVisible() const { return m_minimapOn; }
   GraphMinimap    *minimap() const { return m_minimap; }
+  /// @}
+  /// @name The min/max band behind the curve
+  /// Per pixel column the lowest and the highest value of the columns
+  /// within kEnvelopeColumns either side: a band as wide on screen whatever
+  /// the window, which shows the spread around the curve. Off by default
+  /// (context menu "Min/max band", kept per window as
+  /// Windows/graph-envelope).
+  /// @{
+  void             setEnvelopeVisible(bool on);
+  bool             envelopeVisible() const { return m_envelopeOn; }
+  /// The band's outline in scene coordinates, empty while off. For the tests.
+  QPainterPath     envelopePath() const;
+  static constexpr int kEnvelopeColumns = 4;
+  /// @}
+  /// @{
   /// Live, but the window held where the overview put it.
   bool             livePaused() const { return m_liveHold; }
   /// @}
@@ -367,6 +383,11 @@ protected:
   QScrollBar      *scrollbar;
   GraphMinimap    *m_minimap = nullptr;
   bool             m_minimapOn = true;
+  bool             m_envelopeOn = false;
+  QGraphicsPathItem *m_envelope = nullptr;
+  /// The curve's points (bucketPoints(), gaps as NaN) for the band
+  QList<QPointF>   m_curvePts;
+  void             updateEnvelope();
   bool             m_liveHold = false;   ///< Live, the window held at m_holdStart
   qint64           m_holdStart = 0;      ///< ms since the start of the recording
   /// The chart, and below it the overview or the scroll bar.

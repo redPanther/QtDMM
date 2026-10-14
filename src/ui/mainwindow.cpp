@@ -1460,6 +1460,7 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
   m_poincareAction->setChecked(get("Windows/poincare", false).toBool());
   m_wid->graph()->setReferenceSetting(get("Windows/graph-reference", QString()).toString());
   m_wid->graph()->setMinimapVisible(get("Windows/graph-minimap", true).toBool());
+  m_wid->graph()->setEnvelopeVisible(get("Windows/graph-envelope", false).toBool());
   // an unchecked action did not toggle: hide its window explicitly
   for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction, m_poincareAction })
     qobject_cast<QWidget *>(a->property("window").value<QObject *>())->setVisible(a->isChecked());
@@ -1490,6 +1491,7 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("MainWindow/show-graph", action_Graph->isChecked());
   set("Windows/graph-reference", m_wid->graph()->referenceSetting());
   set("Windows/graph-minimap", m_wid->graph()->minimapVisible());
+  set("Windows/graph-envelope", m_wid->graph()->envelopeVisible());
 }
 
 // A workspace file is an ini file with the same keys as the settings, plus

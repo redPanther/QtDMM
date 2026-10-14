@@ -1696,6 +1696,55 @@ int main(int argc, char **argv)
           "overview: on again");
   }
 
+  // --- 7k. the min/max band: off by default; per pixel column the lowest
+  //          and highest of the columns within four either side, so it
+  //          spreads around a spike by that much and no further; a gap
+  //          parts it ---
+  {
+    Settings cfg("envelope", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    QObject::connect(&graph, &GraphWidget::windowRequested, [&](int s) { graph.setGraphSize(s); });
+    Feed feed(graph, 100);
+    graph.liveSLOT();
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "1 min")
+        b->click();
+    qint64 spikeT = -1;
+    for (int i = 0; i < 900; ++i)   // 1.5 min of 1.0 and 2.0 in turn, a spike of 5 after a minute
+    {
+      if (i == 600)
+        spikeT = feed.now;
+      feed.value(i == 600 ? 5.0 : 1.0 + (i % 2));
+    }
+    check(!graph.envelopeVisible() && graph.envelopePath().isEmpty(), "band: off by default");
+    graph.setEnvelopeVisible(true);
+    const QPainterPath band = graph.envelopePath();
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QAbstractSeries *curve = chart->series().first();
+    auto at = [&](qint64 t, double v) { return chart->mapToPosition(QPointF(t / 1000.0, v), curve); };
+    const qint64 middle = spikeT - 20000;
+    check(!band.isEmpty() && band.contains(at(middle, 1.5)) && !band.contains(at(middle, 2.3)),
+          "band: from 1 to 2 where the curve alternates");
+    const QPointF spike = at(spikeT, 4.0);
+    check(band.contains(spike + QPointF(3, 0)) && band.contains(spike - QPointF(3, 0)),
+          "band: the spike spreads 3 px either side");
+    check(!band.contains(spike + QPointF(7, 0)) && !band.contains(spike - QPointF(7, 0)),
+          "band: ... and not 7 px");
+    // a minute silent, then readings again: two pieces
+    feed.now += 1500;
+    graph.store()->setStale(true);
+    feed.now += 20000;
+    for (int i = 0; i < 100; ++i)
+      feed.value(1.0 + (i % 2));
+    check(graph.envelopePath().toSubpathPolygons().size() == 2,
+          QString("band: the gap parts it, %1 pieces").arg(graph.envelopePath().toSubpathPolygons().size()));
+    graph.setEnvelopeVisible(false);
+    check(graph.envelopePath().isEmpty(), "band: off again");
+  }
+
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
   //         back. engValue() emits "µ" while value() used to recognise only
   //         "u", so micro thresholds silently lost their factor. ---

@@ -138,6 +138,11 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   });
   m_centreTicks = new QGraphicsPathItem(m_chart);
   m_centreTicks->setZValue(5);   // above the grid, below the curves' markers
+  // the min/max band: below the reference line and the curve
+  m_envelope = new QGraphicsPathItem(m_chart);
+  m_envelope->setZValue(4);
+  m_envelope->setPen(Qt::NoPen);
+  m_envelope->setVisible(false);
   m_referenceLine = new QGraphicsLineItem(m_chart);
   m_referenceLine->setZValue(5);
   m_referenceLine->setData(0, QStringLiteral("reference"));
@@ -424,6 +429,135 @@ void GraphWidget::setMinimapVisible(bool on)
   layoutParts();
 }
 
+void GraphWidget::setEnvelopeVisible(bool on)
+{
+  if (on == m_envelopeOn)
+    return;
+  m_envelopeOn = on;
+  updateEnvelope();
+}
+
+QPainterPath GraphWidget::envelopePath() const
+{
+  return m_envelope->isVisible() ? m_envelope->path() : QPainterPath();
+}
+
+// Columns of one pixel over the plot (and kEnvelopeColumns beyond each
+// edge, so the band runs out of the plot as the curve does): the lowest
+// and highest of the curve as drawn in each, its points and the lines
+// between them - readings further apart than the band is wide would leave
+// it a staircase. The curve has a point for every bucket, its minimum and
+// maximum, the buckets themselves a column wide, so this reads a few
+// points per column, not the readings. A gap (NaN) parts the band as it
+// parts the curve. Each column gets the extremes of the columns within
+// kEnvelopeColumns of it on its side of a gap.
+void GraphWidget::updateEnvelope()
+{
+  const QRectF plot = m_chart->plotArea();
+  const double x0 = m_xAxis->min(), x1 = m_xAxis->max();
+  const double y0 = m_yAxis->min(), y1 = m_yAxis->max();
+  if (!m_envelopeOn || m_curvePts.isEmpty() || plot.width() < 2 || plot.height() <= 0 || !(x1 > x0) || !(y1 > y0))
+  {
+    m_envelope->setVisible(false);
+    return;
+  }
+  const int k = kEnvelopeColumns;
+  const int columns = int(plot.width()) + 2 * k;
+  const double perColumn = (x1 - x0) / plot.width();
+  const double from = x0 - k * perColumn, to = x1 + k * perColumn;
+  struct Column
+  {
+    double lo = qInf(), hi = -qInf();
+    int run = -1;   ///< which stretch between gaps; -1 no point
+  };
+  QList<Column> col(columns);
+  auto take = [&](int c, double lo, double hi, int r)
+  {
+    Column &cc = col[c];
+    cc.lo = qMin(cc.lo, lo);
+    cc.hi = qMax(cc.hi, hi);
+    cc.run = r;
+  };
+  auto columnOf = [&](double x) { return qBound(0, int((x - from) / perColumn), columns - 1); };
+  // the point before the window too: its line runs into it
+  auto it = std::lower_bound(m_curvePts.cbegin(), m_curvePts.cend(), from,
+                             [](const QPointF &p, double x) { return p.x() < x; });
+  if (it != m_curvePts.cbegin())
+    --it;
+  int run = 0;
+  const QPointF *prev = nullptr;
+  for (; it != m_curvePts.cend(); ++it)
+  {
+    if (std::isnan(it->y()))
+    {
+      // a gap parts the curve and the band
+      if (it->x() > to)
+        break;
+      run++;
+      prev = nullptr;
+      continue;
+    }
+    if (it->x() >= from)
+    {
+      const int c = columnOf(it->x());
+      take(c, it->y(), it->y(), run);
+      // the line from the point before: in each column it crosses, the
+      // part of it there
+      if (prev)
+        for (int j = columnOf(prev->x()); j <= c; ++j)
+        {
+          const double xa = qMax(prev->x(), from + j * perColumn), xb = qMin(it->x(), from + (j + 1) * perColumn);
+          const double dx = it->x() - prev->x();
+          auto yAt = [&](double x) { return dx > 0 ? prev->y() + (it->y() - prev->y()) * (x - prev->x()) / dx : it->y(); };
+          take(j, qMin(yAt(xa), yAt(xb)), qMax(yAt(xa), yAt(xb)), run);
+        }
+    }
+    if (it->x() > to)
+      break;
+    prev = &*it;
+  }
+  auto yOf = [&](double v) { return plot.bottom() - (v - y0) / (y1 - y0) * plot.height(); };
+  auto xOf = [&](int c) { return plot.left() + (c - k + 0.5); };
+  QPainterPath path;
+  QList<QPointF> upper, lower;
+  auto flush = [&]
+  {
+    if (upper.size() > 1)
+    {
+      QPolygonF poly(upper);
+      for (qsizetype i = lower.size() - 1; i >= 0; --i)
+        poly << lower[i];
+      path.addPolygon(poly);
+      path.closeSubpath();
+    }
+    upper.clear();
+    lower.clear();
+  };
+  int lastRun = -1;
+  for (int c = 0; c < columns; ++c)
+  {
+    if (col[c].run < 0)
+      continue;
+    if (col[c].run != lastRun)
+      flush();
+    lastRun = col[c].run;
+    double lo = col[c].lo, hi = col[c].hi;
+    for (int j = qMax(0, c - k); j <= qMin(columns - 1, c + k); ++j)
+      if (col[j].run == col[c].run)
+      {
+        lo = qMin(lo, col[j].lo);
+        hi = qMax(hi, col[j].hi);
+      }
+    upper << QPointF(xOf(c), yOf(hi));
+    lower << QPointF(xOf(c), yOf(lo));
+  }
+  flush();
+  QPainterPath clip;
+  clip.addRect(plot);
+  m_envelope->setPath(path.intersected(clip));
+  m_envelope->setVisible(true);
+}
+
 void GraphWidget::updateMinimapView()
 {
   m_minimap->setView(windowStart(), qint64(qMax(1, m_windowSeconds)) * 1000);
@@ -602,6 +736,7 @@ void GraphWidget::rebuildSeries()
   }
 
   m_dataLine->replace(points);
+  m_curvePts = points;
   m_dataPoints->replace(withoutGaps(points));
   m_intLine->replace(intPoints);
   m_intPoints->replace(withoutGaps(intPoints));
@@ -618,6 +753,7 @@ void GraphWidget::appendToSeries()
   if (first != count - 1)
   {
     m_dataLine->removeLast(m_tailData);
+    m_curvePts.resize(qMax<qsizetype>(0, m_curvePts.size() - m_tailData));
     m_dataPoints->removePoints(m_dataPoints->count() - m_tailDataPts, m_tailDataPts);
     m_intLine->removeLast(m_tailInt);
     m_intPoints->removePoints(m_intPoints->count() - m_tailIntPts, m_tailIntPts);
@@ -626,6 +762,7 @@ void GraphWidget::appendToSeries()
   m_tailData = bucketPoints(first, count - 1, false, points);
   m_tailInt = bucketPoints(first, count - 1, true, intPoints);
   m_dataLine->append(points);
+  m_curvePts.append(points);
   m_intLine->append(intPoints);
   const QList<QPointF> dataPts = withoutGaps(points), intPts = withoutGaps(intPoints);
   m_dataPoints->append(dataPts);
@@ -695,6 +832,7 @@ void GraphWidget::updateXAxisRange()
   updateXLabels();
   updateReferenceLine();   // the window's mean, minimum or maximum
   updateMinimapView();
+  updateEnvelope();
 }
 
 double GraphWidget::timeStep(double v)
@@ -917,6 +1055,7 @@ void GraphWidget::updateYLabels()
     item->setPos(qMax(1.0, plot.left() - r.width() - gap), y - r.height() / 2);
   }
   updateReferenceLine();
+  updateEnvelope();
 }
 
 double GraphWidget::referenceY() const
@@ -1165,6 +1304,10 @@ void GraphWidget::updateSeriesAppearance()
   m_dataLine->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
   m_dataLine->setVisible(m_lineMode != NoLine);
   m_minimap->setCurveColor(dataColor());
+  // the band: the curve's colour, faint
+  QColor band = dataColor();
+  band.setAlpha(60);
+  m_envelope->setBrush(band);
 
   QScatterSeries::MarkerShape shape = QScatterSeries::MarkerShapeCircle;
   int size = 7;
@@ -1471,6 +1614,7 @@ void GraphWidget::onAppended(bool shifted)
     updateReferenceLine();
   if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
     updateTimeCursors();
+  updateEnvelope();
 }
 
 void GraphWidget::setUnit(const QString &unit)
@@ -1529,6 +1673,8 @@ void GraphWidget::onCleared()
   }
 
   m_dataLine->clear();
+  m_curvePts.clear();
+  m_envelope->setVisible(false);
   m_dataPoints->clear();
   m_intLine->clear();
   m_intPoints->clear();
@@ -1721,6 +1867,10 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     overview->setProperty("ID", IDMinimap);
     overview->setCheckable(true);
     overview->setChecked(m_minimapOn);
+    QAction *envelope = m_popup->addAction(tr("Min/max &band"));
+    envelope->setProperty("ID", IDEnvelope);
+    envelope->setCheckable(true);
+    envelope->setChecked(m_envelopeOn);
     if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
     {
       QAction *a = m_popup->addAction(tr("Remove time cursors"));
@@ -2464,6 +2614,9 @@ void GraphWidget::popupSLOT(QAction *action)
       break;
     case IDMinimap:
       setMinimapVisible(action->isChecked());
+      break;
+    case IDEnvelope:
+      setEnvelopeVisible(action->isChecked());
       break;
   }
 }
