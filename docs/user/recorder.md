@@ -177,7 +177,9 @@ were; the integration curve carries on across a gap.
   and value at each cursor and, with both, the time between them, the
   change of the value (Δ), the mean and the integral: in Ah for a current,
   Wh for a power, else the unit times seconds - the charge a battery took
-  between two points, for instance.
+  between two points, for instance. A dashed line across the graph at the
+  value under each cursor shows the change as the distance between them;
+  the cursors' names hang as flags under the graph, at the time labels.
 - **Integration** (**Settings → Graph → Integration curve**) draws a second curve: the
   integral over time of the readings above a threshold, in the unit times
   seconds (V·s, A·s, W·s), scaled and offset as configured — for charge or
