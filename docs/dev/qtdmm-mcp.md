@@ -19,6 +19,8 @@ It needs Python 3.10 or newer and the MCP SDK:
 pip install mcp
 ```
 
+Versions 1 and 2 of the SDK both work.
+
 Start the QtDMM instance to test with the SCPI server on (Settings → SCPI
 server). The tool uses port 5099 unless told otherwise, so that it does not
 reach a QtDMM in everyday use on the default port 5025 by accident. For
@@ -37,6 +39,15 @@ Claude Code, a `.mcp.json` in the working directory (not committed):
 
 Options: `--host` (default `localhost`), `--port` (default 5099),
 `--timeout` in seconds (default 3).
+
+A test instance needs no display: with `QT_QPA_PLATFORM=offscreen` QtDMM
+runs without a window on screen, and `screenshot` still returns the
+window as it would look. Give it its own configuration and, beside a QtDMM
+in use, its own shared memory key:
+
+```
+QT_QPA_PLATFORM=offscreen QTDMM_IPC_KEY=mcptest qtdmm --config-dir /tmp/qtdmm-test --config-id mcp
+```
 
 ## Tools
 

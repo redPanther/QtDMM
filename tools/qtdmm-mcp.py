@@ -16,7 +16,12 @@ import socket
 import time
 from datetime import datetime
 
-from mcp.server.fastmcp import FastMCP, Image
+try:  # mcp 2.x renamed FastMCP to MCPServer
+    from mcp.server.mcpserver import Image, MCPServer as FastMCP
+    from mcp.server.mcpserver.exceptions import ToolError
+except ImportError:
+    from mcp.server.fastmcp import FastMCP, Image
+    from mcp.server.fastmcp.exceptions import ToolError
 
 parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 parser.add_argument("--host", default="localhost", help="host of the QtDMM instance (default: localhost)")
@@ -28,13 +33,13 @@ mcp = FastMCP("qtdmm")
 
 
 class Scpi:
-    """One connection for a few queries; every error becomes a short RuntimeError."""
+    """One connection for a few queries; every error becomes a ToolError, which the client reads as a message."""
 
     def __enter__(self):
         try:
             self.sock = socket.create_connection((args.host, args.port), timeout=args.timeout)
         except OSError as e:
-            raise RuntimeError(f"No QtDMM SCPI server at {args.host}:{args.port} ({e.strerror or e}). "
+            raise ToolError(f"No QtDMM SCPI server at {args.host}:{args.port} ({e.strerror or e}). "
                                "Is QtDMM running with the SCPI server on?") from None
         self.buf = b""
         return self
@@ -52,9 +57,9 @@ class Scpi:
         try:
             chunk = self.sock.recv(65536)
         except socket.timeout:
-            raise RuntimeError(f"No answer from QtDMM within {args.timeout} s") from None
+            raise ToolError(f"No answer from QtDMM within {args.timeout} s") from None
         if not chunk:
-            raise RuntimeError("QtDMM closed the connection")
+            raise ToolError("QtDMM closed the connection")
         self.buf += chunk
 
     def query(self, cmd):
@@ -68,7 +73,7 @@ class Scpi:
         """An IEEE 488.2 definite length block: #<n><length><data>."""
         self.sock.sendall(cmd.encode() + b"\n")
         if self._read(1) != b"#":
-            raise RuntimeError(f"{cmd} did not answer with a block")
+            raise ToolError(f"{cmd} did not answer with a block")
         digits = int(self._read(1))
         data = self._read(int(self._read(digits)))
         self.buf = self.buf.lstrip(b"\r\n")
@@ -121,7 +126,7 @@ def status() -> dict:
 
 
 @mcp.tool()
-def errors() -> list[str]:
+def errors() -> dict:
     """Empties the error queue (SYSTem:ERRor? until 0,"No error"). The queue is shared by all clients."""
     out = []
     with Scpi() as s:
@@ -130,7 +135,7 @@ def errors() -> list[str]:
             if e.startswith("0,"):
                 break
             out.append(e)
-    return out
+    return {"errors": out}
 
 
 @mcp.tool()
