@@ -1,5 +1,5 @@
 [![](https://img.shields.io/github/v/release/qtdmm/QtDMM?sort=date)](https://github.com/qtdmm/QtDMM/releases)
-[![License: GPL-3.0-or-later](https://img.shields.io/github/license/qtdmm/QtDMM)](LICENSE)
+[![License: GPL-3.0-or-later](https://img.shields.io/github/license/qtdmm/QtDMM)](https://github.com/qtdmm/QtDMM/blob/master/LICENSE)
 
 # QtDMM
 

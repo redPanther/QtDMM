@@ -1,7 +1,7 @@
 <!-- GENERATED from docs/ by tests/generate_docs.py - edit the pages in docs/, not this file -->
 
 [![](https://img.shields.io/github/v/release/qtdmm/QtDMM?sort=date)](https://github.com/qtdmm/QtDMM/releases)
-[![License: GPL-3.0-or-later](https://img.shields.io/github/license/qtdmm/QtDMM)](docs/LICENSE)
+[![License: GPL-3.0-or-later](https://img.shields.io/github/license/qtdmm/QtDMM)](https://github.com/qtdmm/QtDMM/blob/master/LICENSE)
 
 # QtDMM
 
