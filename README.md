@@ -48,7 +48,7 @@ Source code and bug reports: <https://github.com/qtdmm/QtDMM>.
 - Recording via network remote with RFC2217 remote serial support
 - Runs several meters side by side and combines them (power from U and I)
 - No proprietary software required
-- Fully **open source** and GPL-V3 licensed
+- Fully **open source**, licensed under the GPL version 3 or later
 - Easy to use and extend
 
 ## Documentation
@@ -380,5 +380,6 @@ thing to attach when reporting a decoding problem.
 - **0.9.5 until today tuxmaster and various contributors, see AUTHORS file**
 - **0.9.3 and before (c) 2001-2016 M.Toussaint <qtdmm@mtoussaint.de>**
 
-QtDMM 0.9.0 and beyond is distributed under the GNU Public License, version 3.
-(Prior to 0.9.0 are licensed under GNU GPL 2.0)
+QtDMM 0.9.0 and beyond is distributed under the GNU General Public License,
+version 3 or (at your option) any later version. Versions before 0.9.0 are
+licensed under the GNU GPL version 2 or later.

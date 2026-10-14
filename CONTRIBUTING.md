@@ -108,7 +108,7 @@ test the result as you would your own code: you are its author.
 
 ## License
 
-QtDMM is licensed under the GNU General Public License, version 3 (see
-[LICENSE](LICENSE)).
+QtDMM is licensed under the GNU General Public License, version 3 or later
+(see [LICENSE](LICENSE)).
 By contributing you agree that your contribution is published under the
 same license.
