@@ -6,8 +6,9 @@
 // This file is part of QtDMM.
 //
 // QtDMM is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License version 3
-// as published by the Free Software Foundation.
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // QtDMM is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,7 +16,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+// along with QtDMM.  If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
 // Copyright (c) 2001 Matthias Toussaint
 //======================================================================
@@ -916,8 +917,8 @@ void MainWindow::on_action_About_triggered()
   about.setTextFormat(Qt::RichText);
   about.setText(tr("<h2>QtDMM %1</h2>"
                    "<p>A readout and transient recorder for digital multimeters.</p>"
-                   "<p>Built with <b>Qt</b> %2. Licensed under the <b>GNU GPL 3</b> "
-                   "(versions before 0.9.0 under GPL 2).</p>"
+                   "<p>Built with <b>Qt</b> %2. Licensed under the <b>GNU GPL 3 or later</b> "
+                   "(versions before 0.9.0 under GPL 2 or later).</p>"
                    "<p>0.9.5 onwards: tuxmaster and contributors, see the AUTHORS file.<br>"
                    "0.9.3 and before: &copy; 2001-2016 M. Toussaint "
                    "&lt;<a href='mailto:qtdmm@mtoussaint.de'>qtdmm@mtoussaint.de</a>&gt;</p>"

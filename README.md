@@ -1,6 +1,7 @@
 <!-- GENERATED from docs/ by tests/generate_docs.py - edit the pages in docs/, not this file -->
 
 [![](https://img.shields.io/github/v/release/qtdmm/QtDMM?sort=date)](https://github.com/qtdmm/QtDMM/releases)
+[![License: GPL-3.0-or-later](https://img.shields.io/github/license/qtdmm/QtDMM)](https://github.com/qtdmm/QtDMM/blob/master/LICENSE)
 
 # QtDMM
 
@@ -47,7 +48,7 @@ Source code and bug reports: <https://github.com/qtdmm/QtDMM>.
 - Recording via network remote with RFC2217 remote serial support
 - Runs several meters side by side and combines them (power from U and I)
 - No proprietary software required
-- Fully **open source** and GPL-V3 licensed
+- Fully **open source**, licensed under the GPL version 3 or later
 - Easy to use and extend
 
 ## Documentation
@@ -232,7 +233,7 @@ meter working, please report it on the
 | Tecpel | DMM-8061 ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | TekPower | TP4000ZC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Tenma | 72-1016 | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
-| Tenma | 72-6870 ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Tenma | 72-6870 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Tenma | 72-7712 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Tenma | 72-7715 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Tenma | 72-7730 ¹ | - | `VC940Continuous` | 2400 7O1 | DTR | 20000 |
@@ -379,5 +380,6 @@ thing to attach when reporting a decoding problem.
 - **0.9.5 until today tuxmaster and various contributors, see AUTHORS file**
 - **0.9.3 and before (c) 2001-2016 M.Toussaint <qtdmm@mtoussaint.de>**
 
-QtDMM 0.9.0 and beyond is distributed under the GNU Public License, version 3.
-(Prior to 0.9.0 are licensed under GNU GPL 2.0)
+QtDMM 0.9.0 and beyond is distributed under the GNU General Public License,
+version 3 or (at your option) any later version. Versions before 0.9.0 are
+licensed under the GNU GPL version 2 or later.

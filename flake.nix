@@ -48,7 +48,7 @@
         meta = {
           description = "Graphical front-end for digital multimeters";
           homepage = "https://qtdmm.de";
-          license = pkgs.lib.licenses.gpl3Only;
+          license = with pkgs.lib.licenses; [ gpl3Plus lgpl3Plus ];   # QtDMM; the Breeze and Oxygen symbols
           mainProgram = "qtdmm";
           platforms = pkgs.lib.platforms.linux;
         };
