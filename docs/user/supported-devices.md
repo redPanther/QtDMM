@@ -162,7 +162,7 @@ meter working, please report it on the
 | Tecpel | DMM-8061 ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | TekPower | TP4000ZC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Tenma | 72-1016 | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
-| Tenma | 72-6870 ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Tenma | 72-6870 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Tenma | 72-7712 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Tenma | 72-7715 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Tenma | 72-7730 ¹ | - | `VC940Continuous` | 2400 7O1 | DTR | 20000 |
