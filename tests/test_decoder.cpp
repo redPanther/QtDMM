@@ -231,12 +231,18 @@ int main(int argc, char **argv)
       QString model = m.model;
       if (model.endsWith(" *"))
         model.chop(2);
+      // a model registered twice shows twice in the model list (a test that
+      // registered QtDMM's own meters again, when all of src/ is linked)
+      if (registered.contains(m.vendor + '\n' + model.trimmed()))
+      {
+        qWarning() << "model registered twice:" << m.vendor << m.model;
+        ++problems;
+      }
       registered.insert(m.vendor + '\n' + model.trimmed());
       ++count[DeviceType::id(DeviceType::of(m))];
     }
     for (const auto &[vendor, model] : DeviceType::exceptions())
-      // QtDMM's own meters are registered outside the decoders
-      if (vendor != "QtDMM" && !registered.contains(vendor + '\n' + model))
+      if (!registered.contains(vendor + '\n' + model))
       {
         qWarning() << "device type listed for a model that does not exist:" << vendor << model;
         ++problems;
