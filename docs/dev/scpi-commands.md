@@ -2,8 +2,10 @@
 
 Everything the [SCPI server](../user/scpi-server.md) understands, as
 implemented in `src/service/scpiserver.cpp` (`ScpiServer::handle()`) and checked by
-`tests/test_scpi.cpp`. The server is an instrument that only *reports*: no
-command changes what the meter measures.
+`tests/test_scpi.cpp`. No command changes what the meter measures (its
+function or range); the commands under *Control* start and stop the
+recorder, connect the meter, reset min/max, set marks and press the keys
+of the meters that have remote keys.
 
 ## Message format
 
@@ -82,7 +84,7 @@ The range is `AUTO`, `MANUAL` or the meter's own range text.
 | Command | Answer | Notes |
 |---|---|---|
 | `STATus:QUEStionable?`, `STATus:QUEStionable:CONDition?`, `…:EVENt?` | integer | bit 0 (1) overload · bit 1 (2) hold · bit 2 (4) meter not connected (connecting, silent, or lost and reconnecting) · bit 3 (8) no current reading (nothing for 5 s; bits 0 and 1 are then 0) |
-| `STATus:OPERation?`, `…:CONDition?`, `…:EVENt?` | integer | bit 4 (16) *measuring*: the recorder is running |
+| `STATus:OPERation?`, `…:CONDition?`, `…:EVENt?` | integer | bit 4 (16) *measuring*: the recorder is running · bit 9 (512, QtDMM's own) an alarm is raised, acknowledged or not |
 | `INPut?`, `INPut:STATe?` | `1` / `0` | meter connected and sending? `0` also while QtDMM reconnects a lost meter |
 | `SYSTem:VERSion?` | `1999.0` | SCPI version |
 
@@ -94,6 +96,29 @@ The range is `AUTO`, `MANUAL` or the meter's own range text.
 | `ABORt` | stops the recorder |
 | `INPut ON`, `INPut 1`, `INPut:STATe ON` | connects the meter (like the Connect button) |
 | `INPut OFF`, `INPut 0` | disconnects the meter, also one that is lost and being reconnected |
+| `CALCulate:AVERage:CLEar` | resets the min/max memory (F4) |
+| `QTDMM:ALARm:ACKnowledge` | acknowledges the raised alarms |
+| `QTDMM:MARK "text"` | a mark at the newest reading, graph and readings table; `SCPI` without text |
+| `QTDMM:KEY "hold"` | presses a key of the meter (`DmmDecoder::keyNames()` the decoder supports); `-241` for a meter without keys, `-224` for a key it lacks, `-240` when not sent |
+
+There is no lock: every client that reaches the port may use these. The
+qtdmm-mcp tool offers them only with `--allow-control`.
+
+## Min/max and QtDMM's own queries
+
+| Command | Answer | Notes |
+|---|---|---|
+| `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` | NR3 | the min/max memory of the main value (`MinMaxMemory`), arithmetic mean; `9.91E+37` while empty |
+| `CALCulate:AVERage:COUNt?` | integer | readings since the last reset, overloads not counted |
+| `QTDMM:RECord?` | `IDLE\|LIVE\|REC\|VIEW,<s>,<n>,"<unit>"` | `RecordingStore` state; `IDLE` = view with no readings; seconds = `duration()` |
+| `QTDMM:RECord:DATA? [<n>\|MAX]` | definite-length block | CSV `seconds,value`, the last n points (100 default, `ScpiServer::kMaxDataPoints` = 10000 at most, more is cut to it); overload `9.9E+37`, gap `nan`; `-222` for n < 1 or not whole, `-104` for not a number |
+| `QTDMM:ALARm?` | integer | alarms raised or acknowledged |
+| `QTDMM:ALARm:LIST?` | `"<name>",<state>,…` | `OFF\|PEND\|RAIS\|ACKN` per alarm, `""` when none is set up; quotes in a name doubled |
+| `QTDMM:KEY:CATalog?` | `"<KEY>",…` | upper case, `""` for none |
+| `QTDMM:INSTances?` | `"<id>",<value>,"<unit>",…` | running instances (`SharedStateManager`), `9.91E+37` without a current reading |
+
+What the server does not hold itself it asks for through
+`ScpiServer::Sources`, set by `MeterController::installScpiSources()`.
 
 ## Screen dump
 
@@ -115,7 +140,8 @@ while len(png) < length:
 ```
 
 (`lxi screenshot` and the lxi-gui button talk VXI-11 only and pick a
-plugin by `*IDN?`; both are on the list for a later round.)
+plugin by `*IDN?`; with VXI-11 switched on they work with the plugin given
+by hand: `lxi screenshot -a host -p keysight-dmm`.)
 
 ## Error queue
 
@@ -133,9 +159,12 @@ The queue holds 20 entries; when full, the last one becomes
 | `-109` | Missing parameter | `INPut` without ON/OFF |
 | `-113` | Undefined header | unknown command; the query is skipped in the answer line |
 | `-114` | Header suffix out of range | suffix other than 1 or 2 |
-| `-224` | Illegal parameter value | `INPut MAYBE` |
+| `-104` | Data type error | `QTDMM:RECord:DATA? lots` |
+| `-222` | Data out of range | `QTDMM:RECord:DATA? 0` |
+| `-224` | Illegal parameter value | `INPut MAYBE`, `QTDMM:KEY "peak"` on a meter without PEAK |
 | `-230` | Data corrupt or stale | a reading query answered `9.91E+37` |
-| `-240` | Hardware error | `HCOPy:SDUMp:DATA?` when no window is there to dump |
+| `-240` | Hardware error | `HCOPy:SDUMp:DATA?` when no window is there to dump; `QTDMM:KEY` not sent (meter not connected) |
+| `-241` | Hardware missing | `QTDMM:KEY` for a meter without keys |
 | `-350` | Queue overflow | more than 20 errors unread |
 | `-363` | Input buffer overrun | 64 KB without a line terminator; the buffer was discarded |
 
@@ -151,6 +180,7 @@ INIT;STAT:OPER?              → 16
 FOO?;READ?                   → +1.234500E+00       (FOO? skipped, -113 queued)
 ```
 
-Not implemented, on purpose: `TRIGger`, `SAMPle`, `CALCulate`, range and
+Not implemented, on purpose: `TRIGger`, `SAMPle`, `CALCulate` beyond
+`AVERage`, range and
 function setters (`CONF:VOLT:DC 20`) – the meters QtDMM reads have no
 remote control – and the `SYSTem:COMMunicate` tree.
