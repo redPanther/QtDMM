@@ -98,12 +98,13 @@ if (BUILD_TESTING)
 	target_link_libraries(test_devicesettings PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
 	add_test(NAME device_settings COMMAND test_devicesettings)
 	## the assistant "Add device": pages per connection, models, name, Next, the buttons that finish it
-	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp src/ui/dialogs/adddevicedlg.cpp src/ui/tilebutton.cpp src/ui/devicesettings.cpp src/device/devicetype.cpp
+	qt_add_resources(DEVICE_SYMBOL_RES ${CMAKE_BINARY_DIR}/devices.qrc)
+	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp ${DEVICE_SYMBOL_RES} src/ui/dialogs/adddevicedlg.cpp src/ui/devicesymbol.cpp src/ui/tilebutton.cpp src/ui/devicesettings.cpp src/device/devicetype.cpp
 		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
 		src/device/discovery/discovery.cpp src/service/mdnsbrowser.cpp
 		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
 	target_include_directories(test_adddevice PRIVATE src ${CMAKE_BINARY_DIR})
-	target_link_libraries(test_adddevice PRIVATE Qt6::Widgets Qt6::SerialPort Qt6::Network ${HIDAPI_TARGET} Qt::Core)
+	target_link_libraries(test_adddevice PRIVATE Qt6::Widgets Qt6::Svg Qt6::SerialPort Qt6::Network ${HIDAPI_TARGET} Qt::Core)
 	if (QTDMM_WITH_BLE)
 		target_link_libraries(test_adddevice PRIVATE Qt6::Bluetooth)
 		target_compile_definitions(test_adddevice PRIVATE QTDMM_WITH_BLE)

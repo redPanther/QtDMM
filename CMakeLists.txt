@@ -61,6 +61,20 @@ foreach(file_path IN LISTS THEME_FILES)
 endforeach()
 set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
+## pictures of the kinds of instrument (DeviceSymbol), :/devices/<type id>.svg
+file(GLOB DEVICE_SYMBOLS CONFIGURE_DEPENDS assets/devices/*.svg)
+list(SORT DEVICE_SYMBOLS)
+set(DEVICE_RES "    <qresource prefix=\"/devices\">\n")
+foreach(file_path IN LISTS DEVICE_SYMBOLS)
+	get_filename_component(alias "${file_path}" NAME)
+	set(DEVICE_RES "${DEVICE_RES}        <file alias=\"${alias}\">${file_path}</file>\n")
+endforeach()
+set(DEVICE_RES "${DEVICE_RES}    </qresource>\n")
+set(RES_CONTENT "${RES_CONTENT}${DEVICE_RES}")
+## the same alone for the tests that draw the symbols
+file(WRITE "${CMAKE_BINARY_DIR}/devices.qrc.new" "<RCC>\n${DEVICE_RES}</RCC>\n")
+configure_file("${CMAKE_BINARY_DIR}/devices.qrc.new" "${CMAKE_BINARY_DIR}/devices.qrc" COPYONLY)
+
 ## in-app help: the user guide pages, aliased by their path below docs/user so
 ## relative Markdown links resolve the same way in QTextBrowser and in MkDocs
 file(GLOB_RECURSE HELP_FILES CONFIGURE_DEPENDS docs/user/*.md docs/user/*.png docs/user/*.svg docs/user/*.jpg)

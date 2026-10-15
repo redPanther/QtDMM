@@ -1,0 +1,31 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 260" width="300" height="260">
+  <!-- Generic air quality meter (CO2, temperature, humidity; desktop unit). Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font: bold 30px monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .bezel { fill: #2B2E32; }
+    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .label { fill: #E6E8EA; font: 10px sans-serif; text-anchor: middle; }
+  </style>
+  <!-- tabletop unit, slanted front -->
+  <path class="primary" d="M14 250 L36 10 H264 L286 250 Z"/>
+  <path class="secondary" d="M30 236 L48 24 H252 L270 236 Z"/>
+  <rect class="dark" x="70" y="40" width="160" height="96" rx="6"/>
+  <rect class="lcd" x="75" y="45" width="150" height="86" rx="3"/>
+  <text class="lcdtext" x="150" y="92" text-anchor="middle" style="font-size:32px">812</text>
+  <text class="lcdtext" x="150" y="118" text-anchor="middle" style="font-size:12px">ppm CO2</text>
+  <!-- traffic light -->
+  <circle cx="100" cy="166" r="12" fill="#3FA34D"/>
+  <circle cx="150" cy="166" r="12" fill="#E8B82B"/>
+  <circle cx="200" cy="166" r="12" fill="#D9372E"/>
+  <text class="label" x="104" y="210" style="font-size:16px">23.1°C</text>
+  <text class="label" x="196" y="210" style="font-size:16px">45 %</text>
+</svg>

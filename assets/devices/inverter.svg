@@ -1,0 +1,29 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 240" width="300" height="240">
+  <!-- Generic inverter. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font: bold 30px monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .bezel { fill: #2B2E32; }
+    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .label { fill: #E6E8EA; font: 10px sans-serif; text-anchor: middle; }
+  </style>
+  <rect class="primary" x="10" y="4" width="280" height="232" rx="14"/>
+  <rect class="secondary" x="22" y="16" width="256" height="208" rx="8"/>
+  <!-- DC -> AC symbol -->
+  <rect class="light" x="60" y="56" width="180" height="120" rx="10"/>
+  <path class="dline" d="M60 176 L240 56" style="stroke-width:3"/>
+  <g class="dline"><path d="M80 82 h50"/><path d="M80 98 h12 M104 98 h12 M128 98 h2"/></g>
+  <path class="dline" d="M170 146 q12 -22 24 0 t24 0"/>
+  <!-- outlet + terminals -->
+  <circle class="dark" cx="60" cy="200" r="8"/><circle class="dark" cx="84" cy="200" r="8"/>
+  <rect class="dark" x="200" y="190" width="56" height="22" rx="6"/>
+  <circle cx="264" cy="32" r="5" fill="#3FA34D"/>
+</svg>

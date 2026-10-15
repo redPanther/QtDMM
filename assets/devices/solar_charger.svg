@@ -1,0 +1,30 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 240" width="300" height="240">
+  <!-- Generic solar charge controller. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font: bold 30px monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .bezel { fill: #2B2E32; }
+    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .label { fill: #E6E8EA; font: 10px sans-serif; text-anchor: middle; }
+  </style>
+  <rect class="primary" x="10" y="4" width="280" height="232" rx="14"/>
+  <rect class="secondary" x="22" y="16" width="256" height="170" rx="8"/>
+  <!-- cooling fins -->
+  <g class="dark"><rect x="22" y="196" width="256" height="30" rx="4"/></g>
+  <g class="key"><rect x="30" y="200" width="6" height="22"/><rect x="48" y="200" width="6" height="22"/><rect x="66" y="200" width="6" height="22"/><rect x="84" y="200" width="6" height="22"/><rect x="102" y="200" width="6" height="22"/><rect x="120" y="200" width="6" height="22"/><rect x="138" y="200" width="6" height="22"/><rect x="156" y="200" width="6" height="22"/><rect x="174" y="200" width="6" height="22"/><rect x="192" y="200" width="6" height="22"/><rect x="210" y="200" width="6" height="22"/><rect x="228" y="200" width="6" height="22"/><rect x="246" y="200" width="6" height="22"/><rect x="264" y="200" width="6" height="22"/></g>
+  <!-- solar panel symbol -->
+  <path class="light" d="M60 120 L84 40 H164 L188 120 Z"/>
+  <g class="dline" style="stroke-width:3;stroke:#00FFFF"><path d="M72 80 H176 M110 40 L104 120 M138 40 L144 120"/></g>
+  <!-- arrow to battery -->
+  <path class="line" d="M196 80 h24 m-8 -8 l8 8 l-8 8"/>
+  <rect class="light" x="230" y="62" width="34" height="40" rx="4"/><rect class="light" x="240" y="56" width="14" height="8" rx="2"/>
+  <circle cx="44" cy="160" r="6" fill="#3FA34D"/><circle cx="64" cy="160" r="6" fill="#E8B82B"/>
+</svg>

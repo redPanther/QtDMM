@@ -11,6 +11,8 @@
 
 #include "ui/dialogs/adddevicedlg.h"
 #include "ui/devicesettings.h"
+#include "ui/devicesymbol.h"
+#include "device/devicetype.h"
 #include "core/devicelibrary.h"
 
 // src/device/transports/calc.cpp registers these with its CalcDevice
@@ -95,6 +97,75 @@ int main(int argc, char **argv)
 
   // the searches of the real dialog look at this machine; here the finds are given
   auto noSearch = [](AddDeviceDlg::Connection) { return QList<Discoverer *>(); };
+
+  // 2a. page 4 shows the device: its picture and what was set up. Every
+  // kind's template draws with QSvgRenderer; with QTDMM_SHOT_DIR set the
+  // page is saved as a picture to look at
+  {
+    auto drawn = [](const QPixmap &pm)
+    {
+      const QImage img = pm.toImage();
+      int n = 0;
+      for (int y = 0; y < img.height(); ++y)
+        for (int x = 0; x < img.width(); ++x)
+          n += qAlpha(img.pixel(x, y)) > 0;
+      return n;
+    };
+    for (int t = DeviceType::HandheldDmm; t <= DeviceType::Generic; ++t)
+    {
+      const auto type = static_cast<DeviceType::Type>(t);
+      check(drawn(DeviceSymbol::pixmap(type, QSize(130, 150))) > 2000, "symbol drawn: " + DeviceType::id(type));
+    }
+    check(drawn(DeviceSymbol::unknown(QSize(130, 150))) > 2000, "symbol drawn: unknown");
+
+    const QString shots = qEnvironmentVariable("QTDMM_SHOT_DIR");
+    struct Case
+    {
+      QString shot;
+      AddDeviceDlg::Connection connection;
+      QString port;
+      QVariantMap keys;
+      QString type;          ///< in the info, "-" for manual settings
+      QString connectionText;
+    };
+    const QList<Case> cases = {
+      { "handheld", AddDeviceDlg::Cable, "/dev/ttyUSB0", { { "DMM/model", "Uni-Trend UT61E" } }, "Handheld multimeter",
+        "/dev/ttyUSB0, 19200 7O1" },
+      { "bench", AddDeviceDlg::Cable, "HID 0x1a86:0xe008 /dev/hidraw3", { { "DMM/model", "Uni-Trend UT803" } },
+        "Bench multimeter", "USB-HID /dev/hidraw3<" },
+      { "victron", AddDeviceDlg::Bluetooth, "AA:BB:CC:DD:EE:FF",
+        { { "DMM/model", "Victron SmartSolar MPPT" }, { "Port settings/ble-address", "AA:BB:CC:DD:EE:FF" },
+          { "Port settings/ble-key", "00112233445566778899aabbccddeeff" } }, "Solar charge controller", "Bluetooth LE" },
+      { "simulated", AddDeviceDlg::Simulated, QString(), {}, "Virtual meter", "simulated in QtDMM" },
+      { "manual", AddDeviceDlg::Cable, "/dev/ttyACM0", {}, "-", "/dev/ttyACM0" },
+    };
+    for (const Case &c : cases)
+    {
+      AddDeviceDlg dlg(&library);
+      dlg.setDiscoverers(noSearch);
+      dlg.chooseConnection(c.connection);
+      if (!c.port.isEmpty())
+      {
+        dlg.setPort(c.port);
+        dlg.next();
+      }
+      if (!c.keys.isEmpty())
+        dlg.settings()->load(c.keys);
+      dlg.next();
+      check(dlg.page() == AddDeviceDlg::TargetPage, c.shot + ": page 4");
+      const QString info = dlg.findChild<QLabel *>("ui_deviceInfo")->text();
+      check(info.contains(">" + c.type + "<") && info.contains(c.connectionText), c.shot + ": info " + info);
+      check(!info.contains("00112233445566778899aabbccddeeff") && !info.contains("SERIAL "), c.shot + ": no key, no SERIAL: " + info);
+      check(drawn(dlg.findChild<QLabel *>("ui_deviceSymbol")->pixmap()) > 2000, c.shot + ": a picture");
+      if (!shots.isEmpty())
+      {
+        dlg.resize(660, 560);
+        dlg.show();
+        QApplication::processEvents();
+        dlg.grab().save(QDir(shots).filePath("page4_" + c.shot + ".png"));
+      }
+    }
+  }
 
   // 2b. the empty start: no page 4, page 3 finishes with Add into this window
   {

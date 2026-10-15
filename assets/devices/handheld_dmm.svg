@@ -1,0 +1,54 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 360" width="200" height="360">
+  <!-- Generic handheld DMM. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font: bold 34px monospace; }
+    .light { fill: #E6E8EA; }
+    .dark { fill: #1E2124; }
+    .label { fill: #E6E8EA; font: 9px sans-serif; text-anchor: middle; }
+  </style>
+  <!-- holster -->
+  <rect class="primary" x="4" y="4" width="192" height="352" rx="28"/>
+  <!-- face -->
+  <rect class="secondary" x="18" y="18" width="164" height="324" rx="16"/>
+  <!-- LCD -->
+  <rect class="dark" x="30" y="32" width="140" height="70" rx="6"/>
+  <rect class="lcd" x="35" y="37" width="130" height="60" rx="3"/>
+  <text class="lcdtext" x="100" y="80" text-anchor="middle">12.34</text>
+  <!-- buttons -->
+  <g class="light">
+    <rect x="30" y="114" width="28" height="12" rx="3"/>
+    <rect x="66" y="114" width="28" height="12" rx="3"/>
+    <rect x="102" y="114" width="28" height="12" rx="3"/>
+    <rect x="138" y="114" width="28" height="12" rx="3"/>
+  </g>
+  <!-- rotary dial -->
+  <circle class="dark" cx="100" cy="200" r="52"/>
+  <circle class="primary" cx="100" cy="200" r="40"/>
+  <rect class="light" x="96" y="160" width="8" height="40" rx="3"/>
+  <g class="light">
+    <circle cx="100" cy="142" r="3"/><circle cx="141" cy="159" r="3"/>
+    <circle cx="158" cy="200" r="3"/><circle cx="141" cy="241" r="3"/>
+    <circle cx="59" cy="241" r="3"/><circle cx="42" cy="200" r="3"/>
+    <circle cx="59" cy="159" r="3"/>
+  </g>
+  <!-- jacks -->
+  <g>
+    <circle class="dark" cx="44" cy="300" r="12"/>
+    <circle class="dark" cx="80" cy="300" r="12"/>
+    <circle class="dark" cx="120" cy="300" r="12"/>
+    <circle class="primary" cx="156" cy="300" r="12"/>
+    <circle class="light" cx="44" cy="300" r="4"/>
+    <circle class="light" cx="80" cy="300" r="4"/>
+    <circle class="light" cx="120" cy="300" r="4"/>
+    <circle class="light" cx="156" cy="300" r="4"/>
+  </g>
+  <text class="label" x="44" y="326">A</text>
+  <text class="label" x="80" y="326">mA</text>
+  <text class="label" x="120" y="326">COM</text>
+  <text class="label" x="156" y="326">VΩ</text>
+</svg>

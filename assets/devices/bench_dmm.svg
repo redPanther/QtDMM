@@ -1,0 +1,65 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
+  <!-- Generic bench DMM. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .bezel { fill: #2B2E32; }
+    .lcd { fill: #1A1D20; }
+    .lcdtext { fill: #E6E8EA; font: bold 30px monospace; }
+    .lcdsmall { fill: #9AA0A6; font: 10px monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .label { fill: #E6E8EA; font: 8px sans-serif; text-anchor: middle; }
+  </style>
+  <!-- feet -->
+  <rect class="dark" x="24" y="186" width="40" height="10" rx="3"/>
+  <rect class="dark" x="336" y="186" width="40" height="10" rx="3"/>
+  <!-- case -->
+  <rect class="primary" x="4" y="4" width="392" height="184" rx="10"/>
+  <!-- front panel -->
+  <rect class="bezel" x="14" y="14" width="372" height="164" rx="6"/>
+  <rect class="secondary" x="17" y="17" width="366" height="158" rx="5"/>
+  <!-- display -->
+  <rect class="bezel" x="30" y="30" width="190" height="80" rx="4"/>
+  <rect class="lcd" x="34" y="34" width="182" height="72" rx="2"/>
+  <text class="lcdsmall" x="42" y="50">DC V</text>
+  <text class="lcdsmall" x="208" y="50" text-anchor="end">AUTO</text>
+  <text class="lcdtext" x="125" y="90" text-anchor="middle">12.3456</text>
+  <!-- softkeys under display -->
+  <g class="key">
+    <rect x="34" y="118" width="32" height="10" rx="2"/>
+    <rect x="72" y="118" width="32" height="10" rx="2"/>
+    <rect x="110" y="118" width="32" height="10" rx="2"/>
+    <rect x="148" y="118" width="32" height="10" rx="2"/>
+    <rect x="186" y="118" width="30" height="10" rx="2"/>
+  </g>
+  <!-- power -->
+  <rect class="dark" x="30" y="146" width="22" height="18" rx="3"/>
+  <circle class="light" cx="41" cy="155" r="4"/>
+  <!-- function keys -->
+  <g class="key">
+    <rect x="236" y="30" width="26" height="16" rx="3"/><rect x="268" y="30" width="26" height="16" rx="3"/>
+    <rect x="236" y="54" width="26" height="16" rx="3"/><rect x="268" y="54" width="26" height="16" rx="3"/>
+    <rect x="236" y="78" width="26" height="16" rx="3"/><rect x="268" y="78" width="26" height="16" rx="3"/>
+  </g>
+  <!-- range/arrow keys -->
+  <g class="light">
+    <rect x="248" y="112" width="34" height="12" rx="3"/>
+    <rect x="248" y="130" width="34" height="12" rx="3"/>
+  </g>
+  <!-- terminals -->
+  <rect class="bezel" x="312" y="26" width="62" height="140" rx="4"/>
+  <g>
+    <circle class="dark" cx="330" cy="50" r="9"/><circle class="light" cx="330" cy="50" r="3"/>
+    <circle class="dark" cx="330" cy="90" r="9"/><circle class="light" cx="330" cy="90" r="3"/>
+    <circle class="dark" cx="356" cy="50" r="9"/><circle class="light" cx="356" cy="50" r="3"/>
+    <circle class="dark" cx="356" cy="90" r="9"/><circle class="light" cx="356" cy="90" r="3"/>
+    <circle class="dark" cx="343" cy="136" r="9"/><circle class="light" cx="343" cy="136" r="3"/>
+  </g>
+  <text class="label" x="343" y="40">HI</text>
+  <text class="label" x="343" y="80">LO</text>
+  <text class="label" x="343" y="160">I</text>
+</svg>

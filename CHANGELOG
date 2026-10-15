@@ -34,7 +34,8 @@
 - Device types: every model has a kind - handheld or bench multimeter, thermometer, luxmeter, air quality meter,
   battery monitor, solar charge controller, inverter, ... (by its protocol, a few models named one by one). The
   model list of Add device and the device settings shows it as a tooltip, the list of supported devices in a
-  column of its own. Later each kind gets a symbol
+  column of its own. The last page of Add device ("Where should it go?") shows a picture of the kind with the
+  name, model, type, protocol and connection of the device
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

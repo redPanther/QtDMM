@@ -5,15 +5,19 @@
 #include <QtWidgets>
 
 #include "core/devicelibrary.h"
+#include "device/devicetype.h"
 #include "device/discovery/discovery.h"
 #include "device/protocols.h"
 #include "ui/devicesettings.h"
+#include "ui/devicesymbol.h"
 #include "ui/tilebutton.h"
 
 namespace
 {
 const QSize kTileSize(180, 120);
 const QSize kTargetSize(230, 140);
+// the picture of the device on page 4, the templates scaled into it
+const QSize kSymbolSize(130, 150);
 }
 
 AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
@@ -150,9 +154,31 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
   connect(m_name, &QLineEdit::textChanged, this, &AddDeviceDlg::updateButtons);
   m_pages->addWidget(device);
 
-  // page 4: where it goes; a click finishes
+  // page 4: the device as set up - its picture, name, kind and connection -
+  // then where it goes; a click finishes
   auto *target = new QWidget(m_pages);
-  auto *targets = new QHBoxLayout(target);
+  auto *targetLayout = new QVBoxLayout(target);
+  auto *about = new QHBoxLayout;
+  m_symbol = new QLabel(target);
+  m_symbol->setObjectName("ui_deviceSymbol");
+  m_symbol->setFixedSize(kSymbolSize);
+  m_symbol->setAlignment(Qt::AlignCenter);
+  m_deviceInfo = new QLabel(target);
+  m_deviceInfo->setObjectName("ui_deviceInfo");
+  m_deviceInfo->setTextFormat(Qt::RichText);
+  m_deviceInfo->setWordWrap(true);
+  m_deviceInfo->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  about->addStretch();
+  about->addWidget(m_symbol);
+  about->addSpacing(fontMetrics().averageCharWidth() * 3);
+  about->addWidget(m_deviceInfo, 1);
+  about->addStretch();
+  targetLayout->addStretch();
+  targetLayout->addLayout(about);
+  targetLayout->addSpacing(fontMetrics().height());
+  auto *targets = new QHBoxLayout;
+  targetLayout->addLayout(targets);
+  targetLayout->addStretch();
   m_thisWindow = tile("go-next", QString(), QString());
   m_thisWindow->setObjectName("ui_thisWindow");
   m_thisWindow->setFixedSize(kTargetSize);
@@ -541,6 +567,8 @@ void AddDeviceDlg::showPage(Page page)
     case DevicePage:     m_title->setText(tr("Which meter is it?")); break;
     case TargetPage:     m_title->setText(tr("Where should it go?")); break;
   }
+  if (page == TargetPage)
+    updateDeviceInfo();
   if (page == DevicePage)
     m_name->setFocus();
   if (page == PortPage)
@@ -569,6 +597,59 @@ void AddDeviceDlg::suggestName()
                        : DmmDecoder::sameModel(model, QStringLiteral("QtDMM Simulated meter")) ? tr("Simulated meter")
                                                                                               : QString(model).remove(" *");
   m_name->setText(m_library ? m_library->uniqueName(base) : base);
+}
+
+void AddDeviceDlg::updateDeviceInfo()
+{
+  const DmmDecoder::DMMInfo info = m_settings->dmmInfo();
+  const bool manual = m_settings->keys().value("DMM/model").toString() == QLatin1String("Manual");
+  const DeviceType::Type type = DeviceType::of(info);
+  const qreal dpr = devicePixelRatioF();
+  m_symbol->setPixmap(manual ? DeviceSymbol::unknown(kSymbolSize, dpr)
+                             : DeviceSymbol::pixmap(type, kSymbolSize, dpr));
+
+  // how it is reached: a Bluetooth address, QtDMM itself, or the port with
+  // its serial parameters
+  QString connection;
+  const QString device = m_settings->device();
+  if (m_settings->isVirtual())
+    connection = tr("simulated in QtDMM");
+  else if (m_settings->isCalculated())
+    connection = tr("calculated in QtDMM: %1").arg(device.section(' ', 1));
+  else if (m_settings->isBluetooth())
+    // the address only: a Victron device string carries its key after it
+    connection = tr("Bluetooth LE, %1").arg(device.section(' ', 1, 1));
+  else if (m_settings->isSigrokMeter())
+    connection = tr("sigrok-cli, %1").arg(device.section(' ', 1));
+  else
+  {
+    // "SERIAL /dev/ttyUSB0" -> "/dev/ttyUSB0", "HID 0x1a86:0xe008 /dev/hidraw3" -> "USB-HID /dev/hidraw3"
+    const QString kind = device.section(' ', 0, 0);
+    connection = kind == QLatin1String("HID") ? tr("USB-HID %1").arg(device.section(' ', -1))
+                 : kind == QLatin1String("SERIAL") ? device.section(' ', 1) : device;
+    if (m_settings->speed() > 0 && kind != QLatin1String("HID"))
+    {
+      const char parity = m_settings->parity() == QSerialPort::EvenParity ? 'E'
+                          : m_settings->parity() == QSerialPort::OddParity ? 'O' : 'N';
+      connection += QString(", %1 %2%3%4").arg(m_settings->speed()).arg(int(m_settings->bits())).arg(parity)
+                      .arg(m_settings->stopBits() == QSerialPort::TwoStop ? 2 : 1);
+    }
+  }
+
+  QString model = manual ? tr("Manual settings") : info.name;
+  if (model.endsWith(" *"))
+    model.chop(2);
+  const QList<std::pair<QString, QString>> rows = {
+    { tr("Name"), m_name->text().trimmed() },
+    { tr("Model"), model },
+    { tr("Type"), manual ? QStringLiteral("-") : DeviceType::displayName(type) },
+    { tr("Protocol"), FrameFormat::toString(m_settings->format()) },
+    { tr("Connection"), connection },
+  };
+  QString html = "<table cellspacing=\"0\" cellpadding=\"2\">";
+  for (const auto &[label, value] : rows)
+    html += QString("<tr><td><b>%1</b>&nbsp;&nbsp;</td><td>%2</td></tr>").arg(label.toHtmlEscaped(), value.toHtmlEscaped());
+  m_deviceInfo->setText(html + "</table>");
 }
 
 void AddDeviceDlg::finish(Target target)

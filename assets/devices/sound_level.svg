@@ -1,0 +1,30 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 380" width="200" height="380">
+  <!-- Generic sound level meter. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font: bold 30px monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .bezel { fill: #2B2E32; }
+    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .label { fill: #E6E8EA; font: 10px sans-serif; text-anchor: middle; }
+  </style>
+  <!-- microphone + windscreen -->
+  <rect class="dark" x="88" y="70" width="24" height="40"/>
+  <circle class="key" cx="100" cy="46" r="40"/>
+  <g class="dline" style="stroke-width:2;stroke:#6E747A"><path d="M66 36h68M62 52h76M70 22h60M68 68h64M100 6v80M80 10v72M120 10v72"/></g>
+  <path class="primary" d="M60 104 h80 l30 40 v220 a14 14 0 0 1 -14 14 h-112 a14 14 0 0 1 -14 -14 v-220z"/>
+  <path class="secondary" d="M66 116 h68 l24 32 v206 a8 8 0 0 1 -8 8 h-100 a8 8 0 0 1 -8 -8 v-206z"/>
+  <rect class="dark" x="48" y="160" width="104" height="60" rx="6"/>
+  <rect class="lcd" x="53" y="165" width="94" height="50" rx="3"/>
+  <text class="lcdtext" style="font-size:26px" x="100.0" y="199.1" text-anchor="middle">68.4</text>
+  <text class="label" x="100" y="238">dB(A)</text>
+  <g class="key"><rect x="52" y="262" width="28" height="14" rx="4"/><rect x="86" y="262" width="28" height="14" rx="4"/><rect x="120" y="262" width="28" height="14" rx="4"/>
+  <rect x="52" y="290" width="28" height="14" rx="4"/><rect x="86" y="290" width="28" height="14" rx="4"/><rect x="120" y="290" width="28" height="14" rx="4"/></g>
+</svg>

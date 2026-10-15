@@ -1,0 +1,31 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 360" width="200" height="360">
+  <!-- Generic luxmeter. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font: bold 30px monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .bezel { fill: #2B2E32; }
+    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .label { fill: #E6E8EA; font: 10px sans-serif; text-anchor: middle; }
+  </style>
+  <rect class="primary" x="20" y="4" width="160" height="352" rx="30"/>
+  <rect class="secondary" x="32" y="16" width="136" height="328" rx="20"/>
+  <!-- light sensor dome -->
+  <circle class="dark" cx="100" cy="78" r="46"/>
+  <circle class="light" cx="100" cy="78" r="34"/>
+  <circle class="key" cx="100" cy="78" r="18"/>
+  <rect class="dark" x="44" y="150" width="112" height="64" rx="6"/>
+  <rect class="lcd" x="49" y="155" width="102" height="54" rx="3"/>
+  <text class="lcdtext" style="font-size:28px" x="100.0" y="191.8" text-anchor="middle">850</text>
+  <!-- sun symbol -->
+  <circle class="light" cx="100" cy="266" r="12"/>
+  <g class="line" style="stroke-width:3"><path d="M100 240v-8M100 300v-8M74 266h-8M134 266h-8M82 248l-6-6M124 290l-6-6M118 248l6-6M76 290l6-6"/></g>
+  <g class="key"><rect x="48" y="314" width="30" height="14" rx="4"/><rect x="85" y="314" width="30" height="14" rx="4"/><rect x="122" y="314" width="30" height="14" rx="4"/></g>
+</svg>
