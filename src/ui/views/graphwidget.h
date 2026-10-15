@@ -36,6 +36,8 @@
 #include "ui/views/gapline.h"
 #include "recording/recordingstore.h"
 
+class GraphFlagItem;
+class GraphMinimap;
 class Settings;
 
 /// The recorder's view: plots the curve a RecordingStore keeps.
@@ -93,12 +95,29 @@ public:
     Dot
   };
 
-  /// Which horizontal threshold line the mouse is dragging.
+  /// Which horizontal line the mouse is dragging.
   enum CursorMode
   {
     NoCursor = 0,
     Trigger,      ///< recording start threshold
-    Integration   ///< integration threshold
+    Integration,  ///< integration threshold
+    Reference,    ///< the reference line
+    TimeCursorA,  ///< the time cursor set with a click
+    TimeCursorB   ///< the one set with Shift+click
+  };
+
+  /// What the reference line stands at: 0 (the default), a value of its
+  /// own (dragged there), the mean, minimum or maximum of the window shown
+  /// - those follow the readings - or an alarm threshold; or no line.
+  enum ReferenceKind
+  {
+    RefZero = 0,
+    RefValue,
+    RefMean,
+    RefMin,
+    RefMax,
+    RefAlarm,
+    RefOff
   };
 
   /// The graph's colours (context menu "Graph colours", Graph/variant).
@@ -129,7 +148,11 @@ public:
     IDCopyImage,
     IDExportImage,
     IDColorVariant,  ///< property "variant" says which
-    IDLive
+    IDLive,
+    IDReference,     ///< properties "kind" and "value"
+    IDClearCursors,
+    IDMinimap,
+    IDEnvelope
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -191,6 +214,65 @@ public:
   /// 30 min, 1, 2, 3, 6, 12 h, days) that is at least @p v seconds: the
   /// x division. Public for the tests.
   static double    timeStep(double v);
+  /// Puts the reference line at @p kind; @p value for RefValue and
+  /// RefAlarm (a value of 0 is RefZero).
+  void             setReference(ReferenceKind kind, double value = 0);
+  ReferenceKind    referenceKind() const { return m_referenceKind; }
+  /// Where the line is now, in base units; NaN when the mean, minimum or
+  /// maximum has no reading in the window.
+  double           referenceValue() const { return m_reference; }
+  /// The reference as kept per window (Windows/graph-reference, the
+  /// workspace): "" for 0, "mean", "min", "max", "alarm <value>", "<value>",
+  /// "off".
+  QString          referenceSetting() const;
+  void             setReferenceSetting(const QString &text);
+  /// The alarms' thresholds (base units): the reference line snaps to them.
+  /// A line on a threshold that went stays where it is.
+  void             setAlarmThresholds(const QList<double> &values);
+  /// @name Time cursors
+  /// A click into the graph sets cursor A, Shift+click cursor B; both can
+  /// be dragged, Esc and the context menu take them away. A alone says the
+  /// time and the value there; with B the graph says the time and the
+  /// change of the value between them, their mean and the integral (Ah for
+  /// a current, Wh for a power).
+  /// @{
+  /// Puts cursor @p which (0 = A, 1 = B) at @p t, ms since the start of
+  /// the recording; -1 takes it away.
+  void             setTimeCursor(int which, qint64 t);
+  qint64           timeCursor(int which) const { return m_cursorT[which & 1]; }
+  void             clearTimeCursors();
+  /// What the cursors say, as shown top right in the plot; empty without
+  /// cursor. Public for the tests.
+  QString          timeCursorText() const;
+  /// @}
+  /// @name The overview strip below the graph (GraphMinimap)
+  /// All the store keeps, the window between two brackets; in place of
+  /// the scroll bar while it is shown (context menu "Overview", kept per
+  /// window as Windows/graph-minimap). Moved back from the newest reading
+  /// in Live, the window stays where it is ("Live paused") until the
+  /// strip, a time button or Live bring it back.
+  /// @{
+  void             setMinimapVisible(bool on);
+  bool             minimapVisible() const { return m_minimapOn; }
+  GraphMinimap    *minimap() const { return m_minimap; }
+  /// @}
+  /// @name The min/max band behind the curve
+  /// Per pixel column the lowest and the highest value of the columns
+  /// within kEnvelopeColumns either side: a band as wide on screen whatever
+  /// the window, which shows the spread around the curve. Off by default
+  /// (context menu "Min/max band", kept per window as
+  /// Windows/graph-envelope).
+  /// @{
+  void             setEnvelopeVisible(bool on);
+  bool             envelopeVisible() const { return m_envelopeOn; }
+  /// The band's outline in scene coordinates, empty while off. For the tests.
+  QPainterPath     envelopePath() const;
+  static constexpr int kEnvelopeColumns = 4;
+  /// @}
+  /// @{
+  /// Live, but the window held where the overview put it.
+  bool             livePaused() const { return m_liveHold; }
+  /// @}
   /// Line widths of the data and the integration curve.
   void             setLine(int d, int i);
   /// Draws a vertical mark at the current sample (an alarm raised); marks
@@ -234,6 +316,8 @@ Q_SIGNALS:
   void             windowRequested(int seconds);
   /// A threshold line was dragged with the mouse.
   void             thresholdChanged(GraphWidget::CursorMode, double);
+  /// The reference line was dragged or chosen in the context menu.
+  void             referenceChanged();
   /// @name Context menu requests, handled by InstanceWidget
   /// @{
   void             connectDMM(bool);
@@ -298,6 +382,25 @@ protected:
   bool             writeImage(const QString &fileName, QSize size);
 
   QScrollBar      *scrollbar;
+  GraphMinimap    *m_minimap = nullptr;
+  bool             m_minimapOn = true;
+  bool             m_envelopeOn = false;
+  QGraphicsPathItem *m_envelope = nullptr;
+  /// The curve's points (bucketPoints(), gaps as NaN) for the band
+  QList<QPointF>   m_curvePts;
+  void             updateEnvelope();
+  bool             m_liveHold = false;   ///< Live, the window held at m_holdStart
+  qint64           m_holdStart = 0;      ///< ms since the start of the recording
+  /// The chart, and below it the overview or the scroll bar.
+  void             layoutParts();
+  /// The overview asks for the window to start at @p start.
+  void             showFrom(qint64 start);
+  /// The window follows the newest reading again (Live), or goes to the end.
+  void             followEnd();
+  /// The overview asks for a window of @p width ms from @p start.
+  void             showSpan(qint64 start, qint64 width, bool atEnd);
+  /// Tells the overview the window shown.
+  void             updateMinimapView();
   qint64           m_bucket = 1;    ///< ms per drawn min/max pair (see bucketSize())
   int              m_tailData = 0;  ///< points the newest bucket gave the data line (1 or 2; a gap is 1)
   int              m_tailInt = 0;   ///< the same for the integral
@@ -417,9 +520,51 @@ protected:
   bool             phosphor() const { return m_variant == PhosphorGreen || m_variant == PhosphorAmber; }
   /// The y range, widened to 8 whole divisions of 1-2-5 steps when divisions().
   void             setYRange(double min, double max);
-  /// Phosphor: the centre axes with 5 fine ticks per division.
+  /// Phosphor: 5 fine ticks per division on the reference line (else the
+  /// bottom edge) and on the trigger's mark (else the left edge).
   QGraphicsPathItem *m_centreTicks;
   void             updateCentreTicks();
+  /// @name The reference line
+  /// Across the plot at the reference value (0) while that lies inside the
+  /// y range, with the value small at its right end ("0 A"): a current
+  /// that charges and discharges reads against it; without the value in
+  /// range there is no line. Phosphor draws it with its fine ticks
+  /// (updateCentreTicks()).
+  /// @{
+  QGraphicsLineItem       *m_referenceLine = nullptr;
+  QGraphicsSimpleTextItem *m_referenceLabel = nullptr;
+  double           m_reference = 0;
+  ReferenceKind    m_referenceKind = RefZero;
+  QList<double>    m_alarmThresholds;
+  /// The statistics of the window shown, for RefMean, RefMin, RefMax.
+  RecordingStore::Stats windowStats() const;
+  /// The line dragged to @p y in the scene: it snaps to 0, the window's
+  /// mean, minimum and maximum and the alarm thresholds within a few
+  /// pixels, else takes the value there, rounded to a hundredth of the
+  /// scale.
+  void             dragReference(double y);
+  /// The reference line's y in the scene, NaN when the value is not
+  /// inside the y range (on its edge the axis is the line).
+  double           referenceY() const;
+  void             updateReferenceLine();
+  /// @}
+  /// @name Time cursors (setTimeCursor())
+  /// @{
+  qint64           m_cursorT[2] = { -1, -1 };      ///< ms since the start, -1 = none
+  QGraphicsLineItem *m_cursorLine[2] = {};
+  GraphFlagItem    *m_cursorName[2] = {};   ///< "A" and "B" as flags under the lines
+  /// across the plot at the value under each cursor: the change is the
+  /// distance between the two
+  QGraphicsLineItem *m_cursorLevel[2] = {};
+  QLabel          *m_cursorInfo = nullptr;          ///< timeCursorText(), top right in the plot
+  QPoint           m_pressPos;                      ///< where the left button went down
+  bool             m_clickCandidate = false;        ///< a press that may become a click: sets a cursor
+  bool             m_pressShift = false;
+  /// Places the lines and the text anew.
+  void             updateTimeCursors();
+  /// The reading's value that holds at @p t; NaN in a gap or outside.
+  double           valueAt(qint64 t) const;
+  /// @}
   QColor           m_defaultAxisLine;   ///< the chart's own axis line colour
   void             applyThemeColors();
   void             placeYTitle();
@@ -453,6 +598,9 @@ protected:
   /// Alarm marks: a vertical line at the sample the alarm raised on, one
   /// per RecordingStore::marks() in the same order.
   QList<QGraphicsLineItem *> m_marks;
+  QList<GraphFlagItem *> m_markFlags;   ///< number and name under each mark
+  /// The flags under the plot, the cursors' and the marks', in one row.
+  void             updateFlags();
   void             updateMarkPositions();
 
   void             resizeEvent(QResizeEvent *)Q_DECL_OVERRIDE;

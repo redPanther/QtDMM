@@ -598,6 +598,39 @@ int main(int argc, char **argv)
             QString("live kept: the last hour, origin %1, first %2").arg(kept.origin()).arg(kept.series().first().t));
     }
 
+    // stats between two times: each value for as long as it held, a gap
+    // counts nothing, the last value up to now
+    {
+      RecordingStore st;
+      TestClock c;
+      c.attach(st);
+      st.setLiveWidth(120);
+      st.live();
+      st.setReading(c.at(0, reading(2, "2", "DC")));
+      st.setReading(c.at(1000, reading(4, "4", "DC")));
+      st.setReading(c.at(2000, reading(0, "OL", "DC")));
+      st.setReading(c.at(3000, reading(-1, "-1", "DC")));
+      c.now = 5000;
+      auto text = [](const RecordingStore::Stats &s)
+      {
+        return QString("%1 readings, %2..%3, mean %4, integral %5, %6 ms")
+          .arg(s.count).arg(s.min).arg(s.max).arg(s.mean).arg(s.integral).arg(s.covered);
+      };
+      RecordingStore::Stats s = st.stats(0, 5000);
+      check(s.count == 3 && s.min == -1 && s.max == 4 && s.integral == 4 && s.covered == 4000 && s.mean == 1,
+            "stats over all: 3 readings, -1..4, mean 1, integral 4, 4000 ms; got " + text(s));
+      s = st.stats(1500, 500);
+      check(s.count == 2 && s.min == 2 && s.max == 4 && s.mean == 3 && s.integral == 3 && s.covered == 1000,
+            "stats across a reading, either order: 2 and 4 half each; got " + text(s));
+      s = st.stats(2100, 2900);
+      check(s.count == 0 && std::isnan(s.mean) && std::isnan(s.min) && s.covered == 0 && s.integral == 0,
+            "stats in a gap: nothing; got " + text(s));
+      s = st.stats(4000, 9000);
+      check(s.count == 1 && s.mean == -1 && s.covered == 1000, "stats past now: up to now; got " + text(s));
+      s = st.stats(2500, 2500);
+      check(s.count == 0 && s.covered == 0, "stats of no time: nothing; got " + text(s));
+    }
+
     // the live window: the recording length, or the graph's window
     store.setLiveWidth(60);
     store.setSampleLength(20);   // 2 s

@@ -175,6 +175,20 @@ public:
   /// The start of what the store still keeps (ms since the start of the
   /// recording): 0 until older readings had to go.
   qint64      origin() const;
+  /// What the readings did between two times (graph cursors, the
+  /// reference line on the mean of the window).
+  struct Stats
+  {
+    int     count = 0;           ///< readings whose value holds for a while in the span
+    double  min = std::nan("");
+    double  max = std::nan("");
+    double  mean = std::nan(""); ///< over time: each value for as long as it held
+    double  integral = 0;        ///< value x s over the span; gaps count nothing
+    qint64  covered = 0;         ///< ms of the span with a value
+  };
+  /// Stats from @p from to @p to (ms since the start, either order). A
+  /// value holds until the next reading, the last one up to duration().
+  Stats       stats(qint64 from, qint64 to) const;
   /// When the recording started (for an import: the file's first time stamp;
   /// in Live: when the live window started).
   QDateTime   startDateTime() const { return m_start; }

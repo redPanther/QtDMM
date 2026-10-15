@@ -630,6 +630,19 @@ void InstanceWidget::readConfig()
   ui_graph->setThresholds(m_configDlg->fallingThreshold(),
                           m_configDlg->raisingThreshold());
 
+  // the reference line snaps to the alarms' thresholds
+  {
+    QList<double> thresholds;
+    for (const Alarm &a : m_configDlg->alarms())
+    {
+      if (!a.enabled || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
+        continue;
+      thresholds << a.a;
+      if (a.condition == Alarm::Outside || a.condition == Alarm::Inside)
+        thresholds << a.b;
+    }
+    ui_graph->setAlarmThresholds(thresholds);
+  }
   ui_graph->setScale(m_configDlg->automaticScale(),
                      m_configDlg->includeZero(),
                      m_configDlg->scaleMin(),

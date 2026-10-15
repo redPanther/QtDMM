@@ -10,6 +10,8 @@
 #include <QFileInfo>
 
 #include "ui/views/graphwidget.h"
+#include "ui/views/graphflags.h"
+#include "ui/views/graphminimap.h"
 #include "recording/recordingfile.h"
 #include "recording/recordingstore.h"
 #include <QChartView>
@@ -34,6 +36,24 @@ static void check(bool cond, const QString &what)
 {
   if (!cond)
     fail(what);
+}
+
+// The lines of a path at least @p length long, horizontal (their y) or
+// vertical (their x): phosphor's lines, not its ticks
+static QList<double> pathLines(const QPainterPath &path, bool horizontal, double length)
+{
+  QList<double> out;
+  for (int i = 1; i < path.elementCount(); ++i)
+  {
+    const QPainterPath::Element a = path.elementAt(i - 1), b = path.elementAt(i);
+    if (!a.isMoveTo() || !b.isLineTo())
+      continue;
+    if (horizontal && std::abs(a.y - b.y) < 0.01 && std::abs(b.x - a.x) >= length)
+      out << a.y;
+    else if (!horizontal && std::abs(a.x - b.x) < 0.01 && std::abs(b.y - a.y) >= length)
+      out << a.x;
+  }
+  return out;
 }
 
 // Reads a whole file as text (used to compare export output byte-for-byte).
@@ -1206,6 +1226,605 @@ int main(int argc, char **argv)
             QString("empty, include zero %1: 0..1, got %2..%3")
               .arg(includeZero).arg(yAxis->min()).arg(yAxis->max()));
     }
+  }
+
+  // --- 7f. the reference line: across the plot at 0 while 0 lies inside
+  //          the y range, "0 A" at its right end; phosphor draws it with
+  //          its fine ticks, without 0 in range it has no line (no cross
+  //          in the middle), the ticks sit on the edges ---
+  {
+    Settings cfg("reference", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setUnit("A");
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QAbstractSeries *series = chart->series().first();
+    QGraphicsLineItem *line = nullptr;
+    QGraphicsSimpleTextItem *label = nullptr;
+    QGraphicsPathItem *centre = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+    {
+      if (item->data(0).toString() == "reference")
+      {
+        if (auto *l = dynamic_cast<QGraphicsLineItem *>(item))
+          line = l;
+        else if (auto *t = dynamic_cast<QGraphicsSimpleTextItem *>(item))
+          label = t;
+      }
+      else if (auto *p = dynamic_cast<QGraphicsPathItem *>(item))
+        centre = p;
+    }
+    check(line && label && centre, "reference: line, label and centre axis found");
+    if (line && label && centre)
+    {
+      auto zeroY = [&] { return chart->mapToPosition(QPointF(0, 0), series).y(); };
+      for (auto v : { GraphWidget::Neutral, GraphWidget::ScopeBlue, GraphWidget::ChartRecorder, GraphWidget::Custom })
+      {
+        graph.setColorVariant(v);
+        graph.setScale(false, false, -2, 10);
+        check(line->isVisible() && std::abs(line->line().y1() - zeroY()) < 0.5 && line->line().y1() == line->line().y2()
+                && std::abs(line->line().x2() - line->line().x1() - chart->plotArea().width()) < 0.5,
+              QString("reference %1: across the plot at 0 (%2), got y %3").arg(GraphWidget::variantName(v))
+                .arg(zeroY()).arg(line->line().y1()));
+        check(label->isVisible() && label->text() == "0 A", QString("reference %1: label '0 A', got '%2'")
+              .arg(GraphWidget::variantName(v), label->isVisible() ? label->text() : "hidden"));
+        check(label->pos().x() + label->boundingRect().width() <= chart->plotArea().right()
+                && label->pos().x() > chart->plotArea().center().x(),
+              QString("reference %1: the label at the right end").arg(GraphWidget::variantName(v)));
+        graph.setScale(false, false, 1, 10);
+        check(!line->isVisible() && !label->isVisible(),
+              QString("reference %1: no line without 0 in range").arg(GraphWidget::variantName(v)));
+        // 0 on the edge: the axis is the line
+        graph.setScale(false, false, 0, 10);
+        check(!line->isVisible(), QString("reference %1: no line on the axis").arg(GraphWidget::variantName(v)));
+      }
+      graph.setColorVariant(GraphWidget::PhosphorGreen);
+      graph.setScale(false, false, -2, 10);
+      const QRectF pa = chart->plotArea();
+      QList<double> h = pathLines(centre->path(), true, pa.width() - 1);
+      check(!line->isVisible() && h.size() == 1 && std::abs(h.value(0) - zeroY()) < 0.5,
+            QString("reference phosphor: one line, at 0 (%1), got %2 lines").arg(zeroY()).arg(h.size()));
+      check(pathLines(centre->path(), false, pa.height() - 1).isEmpty(), "phosphor: no vertical line in the middle");
+      check(label->isVisible() && label->text() == "0 A", "reference phosphor: label '0 A'");
+      graph.setScale(false, false, 1, 10);
+      check(pathLines(centre->path(), true, pa.width() - 1).isEmpty() && !label->isVisible(),
+            "reference phosphor: without 0 no line (no cross)");
+      // the ticks then on the bottom edge
+      check(centre->path().elementCount() > 0 && std::abs(centre->path().elementAt(0).y + 3 - pa.bottom()) < 0.5,
+            QString("phosphor: the ticks on the bottom edge, got %1").arg(centre->path().elementAt(0).y));
+      // a unit with a prefix and none at all
+      graph.setColorVariant(GraphWidget::Neutral);
+      graph.setScale(false, false, -0.002, 0.01);
+      check(label->text() == "0 A", "reference: 0 takes no prefix, got " + label->text());
+      graph.setUnit("");
+      graph.setScale(false, false, -2, 10);
+      check(label->text() == "0", "reference without unit: '0', got " + label->text());
+    }
+  }
+
+  // --- 7g. the reference line moves: dragged it snaps to 0, the window's
+  //          mean, minimum and maximum and the alarm thresholds, else takes
+  //          the value; the context menu chooses the same; the setting
+  //          round-trips ---
+  {
+    Settings cfg("referencedrag", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setUnit("A");
+    graph.setScale(false, false, -2, 6);
+    graph.setGraphSize(60);
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QWidget *viewport = graph.findChild<QChartView *>()->viewport();
+    QChartView *view = graph.findChild<QChartView *>();
+    QGraphicsSimpleTextItem *label = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *t = dynamic_cast<QGraphicsSimpleTextItem *>(item); t && item->data(0).toString() == "reference")
+        label = t;
+    QSignalSpy changed(&graph, &GraphWidget::referenceChanged);
+    QSignalSpy thresholds(&graph, &GraphWidget::thresholdChanged);
+    // a minute of 1 A and 3 A, a second each: mean 2, min 1, max 3
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    graph.setGraphSize(60);
+    for (int i = 0; i < 70; ++i)
+      feed.value(i % 2 ? 3.0 : 1.0);
+    const QRectF plot = chart->plotArea();
+    auto yOf = [&](double v) { return plot.bottom() - (v + 2) / 8 * plot.height(); };
+    auto mouse = [&](QEvent::Type type, double y, Qt::MouseButton button = Qt::NoButton)
+    {
+      const QPointF at = view->mapFromScene(QPointF(plot.center().x(), y));
+      QMouseEvent ev(type, at, viewport->mapToGlobal(at), button,
+                     type == QEvent::MouseButtonRelease ? Qt::NoButton : Qt::MouseButtons(button), Qt::NoModifier);
+      QCoreApplication::sendEvent(viewport, &ev);
+    };
+    auto drag = [&](double fromY, double toY)
+    {
+      mouse(QEvent::MouseMove, fromY);   // hovering finds the line
+      mouse(QEvent::MouseButtonPress, fromY, Qt::LeftButton);
+      mouse(QEvent::MouseMove, toY, Qt::LeftButton);
+      mouse(QEvent::MouseButtonRelease, toY, Qt::LeftButton);
+    };
+    drag(yOf(0), yOf(2) + 3);
+    check(graph.referenceKind() == GraphWidget::RefMean && std::abs(graph.referenceValue() - 2) < 0.1,
+          QString("reference dragged near the mean: snaps to it, got kind %1 at %2").arg(graph.referenceKind()).arg(graph.referenceValue()));
+    check(label && label->text().startsWith("mean ") && label->text().endsWith(" A"), "reference on the mean: 'mean 2 A', got "
+          + (label ? label->text() : QString()));
+    check(!changed.isEmpty() && thresholds.isEmpty(), "reference dragged: referenceChanged, no thresholdChanged");
+    drag(yOf(2), yOf(3) - 2);
+    check(graph.referenceKind() == GraphWidget::RefMax && graph.referenceValue() == 3, "reference: snaps to the maximum");
+    drag(yOf(3), yOf(1) + 2);
+    check(graph.referenceKind() == GraphWidget::RefMin && graph.referenceValue() == 1, "reference: snaps to the minimum");
+    graph.setAlarmThresholds({ 5.0 });
+    drag(yOf(1), yOf(5) + 4);
+    check(graph.referenceKind() == GraphWidget::RefAlarm && graph.referenceValue() == 5, "reference: snaps to an alarm threshold");
+    check(graph.referenceSetting() == "alarm 5", "reference setting: 'alarm 5', got " + graph.referenceSetting());
+    graph.setAlarmThresholds({ 4.0 });
+    check(graph.referenceKind() == GraphWidget::RefValue && graph.referenceValue() == 5,
+          "reference: a threshold that went leaves the line where it is");
+    // away from all of them: the value there, rounded to the scale
+    drag(yOf(5), yOf(4.47));
+    // (a hundredth of the 8 A scale is 0.08, the 1-2-5 step 0.1)
+    check(graph.referenceKind() == GraphWidget::RefValue && std::abs(graph.referenceValue() - 4.5) < 1e-9,
+          QString("reference dragged freely: 4.5, got %1").arg(graph.referenceValue(), 0, 'g', 12));
+    check(graph.referenceSetting() == QString::number(graph.referenceValue(), 'g', 12), "reference setting: the value");
+    drag(yOf(graph.referenceValue()), yOf(0) - 1);
+    check(graph.referenceKind() == GraphWidget::RefZero && graph.referenceSetting().isEmpty(), "reference: back to 0, setting empty");
+
+    // the setting round-trips
+    for (const QString &text : { QString("mean"), QString("min"), QString("max"), QString("alarm 4"), QString("1.25"), QString("off"),
+                                 QString() })
+    {
+      graph.setReferenceSetting(text);
+      check(graph.referenceSetting() == text, QString("reference setting '%1' round-trips, got '%2'").arg(text, graph.referenceSetting()));
+    }
+    graph.setReferenceSetting("nonsense");
+    check(graph.referenceKind() == GraphWidget::RefZero, "reference setting: nonsense is 0");
+
+    // the context menu: right click, "Mean of the window"
+    mouse(QEvent::MouseButtonPress, yOf(1), Qt::RightButton);
+    QAction *mean = nullptr;
+    for (QAction *a : graph.findChildren<QAction *>())
+      if (a->text().remove('&') == "Mean of the window")
+        mean = a;
+    check(mean != nullptr, "reference: the context menu has 'Mean of the window'");
+    if (mean)
+      mean->trigger();
+    for (QMenu *m : graph.findChildren<QMenu *>())
+      m->close();
+    check(graph.referenceKind() == GraphWidget::RefMean, "reference: chosen in the context menu");
+
+    // switched off in the context menu: no line, no label, nothing to drag
+    mouse(QEvent::MouseButtonPress, yOf(1), Qt::RightButton);
+    QAction *off = nullptr;
+    for (QAction *a : graph.findChildren<QAction *>())
+      if (a->text().remove('&') == "Off")
+        off = a;
+    check(off != nullptr, "reference: the context menu has 'Off'");
+    if (off)
+      off->trigger();
+    for (QMenu *m : graph.findChildren<QMenu *>())
+      m->close();
+    QGraphicsLineItem *refLine = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *l = dynamic_cast<QGraphicsLineItem *>(item); l && item->data(0).toString() == "reference")
+        refLine = l;
+    check(graph.referenceKind() == GraphWidget::RefOff && graph.referenceSetting() == "off"
+            && refLine && !refLine->isVisible() && label && !label->isVisible(),
+          "reference off: no line, no label, setting 'off'");
+    drag(yOf(0), yOf(3));
+    check(graph.referenceKind() == GraphWidget::RefOff, "reference off: nothing to drag at 0");
+    graph.setColorVariant(GraphWidget::PhosphorGreen);
+    QGraphicsPathItem *centre = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *p = dynamic_cast<QGraphicsPathItem *>(item))
+        centre = p;
+    check(centre && pathLines(centre->path(), true, chart->plotArea().width() - 1).isEmpty(),
+          "reference off: phosphor has no horizontal line either");
+  }
+
+  // --- 7h. time cursors: a click sets A, Shift+click B, both can be
+  //          dragged; A says time and value, with B the change, the mean and
+  //          the integral between them (Ah for a current); Esc clears ---
+  {
+    Settings cfg("timecursors", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setUnit("A");
+    graph.setScale(false, false, 0, 5);
+    graph.show();
+    QTest::qWait(50);
+    QChartView *view = graph.findChild<QChartView *>();
+    QChart *chart = view->chart();
+    QWidget *viewport = view->viewport();
+    QLabel *info = graph.findChild<QLabel *>("ui_graphCursors");
+    // 2 A for 10 s, then 4 A for 10 s
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    graph.setGraphSize(60);
+    for (int i = 0; i < 21; ++i)
+      feed.value(i < 10 ? 2.0 : 4.0);
+    feed.now -= 1000;   // now is the last reading
+    check(graph.timeCursorText().isEmpty() && info && info->isHidden(), "time cursors: none at first");
+
+    auto xOf = [&](qint64 t)
+    {
+      return chart->mapToPosition(QPointF(t / 1000.0, 1), chart->series().first()).x();
+    };
+    auto mouse = [&](QEvent::Type type, double x, Qt::MouseButton button = Qt::NoButton, Qt::KeyboardModifiers mods = Qt::NoModifier)
+    {
+      const QPointF at = view->mapFromScene(QPointF(x, chart->plotArea().center().y()));
+      QMouseEvent ev(type, at, viewport->mapToGlobal(at), button,
+                     type == QEvent::MouseButtonRelease ? Qt::NoButton : Qt::MouseButtons(button), mods);
+      QCoreApplication::sendEvent(viewport, &ev);
+    };
+    auto click = [&](double x, Qt::KeyboardModifiers mods = Qt::NoModifier)
+    {
+      mouse(QEvent::MouseMove, x);
+      mouse(QEvent::MouseButtonPress, x, Qt::LeftButton, mods);
+      mouse(QEvent::MouseButtonRelease, x, Qt::LeftButton, mods);
+    };
+    click(xOf(5000));
+    check(std::abs(graph.timeCursor(0) - 5000) < 200 && graph.timeCursor(1) < 0,
+          QString("time cursors: a click sets A at 5 s, got %1").arg(graph.timeCursor(0)));
+    check(info && !info->isHidden() && graph.timeCursorText().count('\n') == 0
+            && graph.timeCursorText().startsWith("A  12:00:0") && graph.timeCursorText().endsWith("  2 A"),
+          "time cursors: A says time and value, got " + graph.timeCursorText());
+    click(xOf(15000), Qt::ShiftModifier);
+    check(std::abs(graph.timeCursor(1) - 15000) < 200 && std::abs(graph.timeCursor(0) - 5000) < 200,
+          QString("time cursors: Shift+click sets B, A stays: %1, %2").arg(graph.timeCursor(0)).arg(graph.timeCursor(1)));
+
+    // exactly: 5 s of 2 A, 5 s of 4 A
+    graph.setTimeCursor(0, 5000);
+    graph.setTimeCursor(1, 15000);
+    const QStringList lines = graph.timeCursorText().split('\n');
+    check(lines.size() == 4 && lines[1].endsWith("  4 A"), "time cursors: two lines for A and B, got " + lines.join(" | "));
+    check(lines.size() == 4 && lines[2] == QString::fromUtf8("Δt 10.00 s  Δ 2 A"),
+          "time cursors: 'Δt 10.00 s  Δ 2 A', got " + lines.value(2));
+    // 30 A s = 8.333 mAh
+    check(lines.size() == 4 && lines[3] == QString::fromUtf8("mean 3 A  ∫ 8.333 mAh"),
+          "time cursors: 'mean 3 A  ∫ 8.333 mAh', got " + lines.value(3));
+
+    // a dashed line across the plot at each cursor's value: at 2 A and 4 A,
+    // the change their distance
+    {
+      QList<QGraphicsLineItem *> levels;
+      for (QGraphicsItem *item : chart->childItems())
+        if (item->data(0).toString() == "cursor-level" && item->isVisible())
+          levels << static_cast<QGraphicsLineItem *>(item);
+      auto yOf = [&](double v) { return chart->mapToPosition(QPointF(10, v), chart->series().first()).y(); };
+      const QRectF plot = chart->plotArea();
+      check(levels.size() == 2, QString("time cursors: two levels, got %1").arg(levels.size()));
+      bool at2 = false, at4 = false;
+      for (QGraphicsLineItem *l : levels)
+      {
+        const QLineF line = l->line();
+        const bool across = line.y1() == line.y2() && line.x1() == plot.left() && line.x2() == plot.right()
+                            && l->pen().style() == Qt::DashLine;
+        at2 = at2 || (across && std::abs(line.y1() - yOf(2)) < 0.5);
+        at4 = at4 || (across && std::abs(line.y1() - yOf(4)) < 0.5);
+      }
+      check(at2 && at4, "time cursors: dashed levels across the plot at 2 A and 4 A");
+      // A and B as flags under the plot, their points up at their lines
+      int flagsShown = 0;
+      for (QGraphicsItem *item : chart->childItems())
+        if (item->data(0).toString() == "cursor-flag" && item->isVisible())
+        {
+          auto *flag = static_cast<GraphFlagItem *>(item);
+          const double x = flag->text() == "A" ? xOf(5000) : xOf(15000);
+          flagsShown++;
+          check(flag->tagRect().top() >= plot.bottom() && std::abs(flag->tagRect().center().x() - x) < 1,
+                QString("time cursors: flag %1 under the plot, centred on its line").arg(flag->text()));
+        }
+      check(flagsShown == 2, QString("time cursors: two flags, got %1").arg(flagsShown));
+      // an alarm mark: a flag with its number and name, in the row with A and B
+      graph.store()->addMark(0xffd03030, "Alarm Above 3 A");
+      GraphFlagItem *markFlag = nullptr;
+      for (QGraphicsItem *item : chart->childItems())
+        if (item->data(0).toString() == "mark-flag" && item->isVisible())
+          markFlag = static_cast<GraphFlagItem *>(item);
+      check(markFlag && markFlag->text() == QString::fromUtf8("1 · Above 3 A") && markFlag->tagRect().top() >= plot.bottom(),
+            "time cursors: the mark's flag '1 · Above 3 A' (no 'Alarm') under the plot, got " + (markFlag ? markFlag->text() : "none"));
+      // out of the scale: no level
+      graph.setScale(false, false, 0, 3);
+      int shown = 0;
+      for (QGraphicsItem *item : chart->childItems())
+        shown += item->data(0).toString() == "cursor-level" && item->isVisible();
+      check(shown == 1, QString("time cursors: 4 A above a scale to 3, one level, got %1").arg(shown));
+      graph.setScale(false, false, 0, 5);
+    }
+
+    // dragging B moves it, no new cursor
+    mouse(QEvent::MouseMove, xOf(15000));
+    mouse(QEvent::MouseButtonPress, xOf(15000), Qt::LeftButton);
+    mouse(QEvent::MouseMove, xOf(18000), Qt::LeftButton);
+    mouse(QEvent::MouseButtonRelease, xOf(18000), Qt::LeftButton);
+    check(std::abs(graph.timeCursor(1) - 18000) < 200 && graph.timeCursor(0) == 5000,
+          QString("time cursors: B dragged to 18 s, A stays: %1, %2").arg(graph.timeCursor(0)).arg(graph.timeCursor(1)));
+    // a drag on empty ground sets nothing
+    mouse(QEvent::MouseMove, xOf(9000));
+    mouse(QEvent::MouseButtonPress, xOf(9000), Qt::LeftButton);
+    mouse(QEvent::MouseMove, xOf(11000), Qt::LeftButton);
+    mouse(QEvent::MouseButtonRelease, xOf(11000), Qt::LeftButton);
+    check(graph.timeCursor(0) == 5000, "time cursors: a drag is no click");
+    // a voltage: the integral in V s
+    graph.setUnit("V");
+    check(graph.timeCursorText().contains(QString::fromUtf8("V·s")), "time cursors: a voltage integrates to V·s, got "
+          + graph.timeCursorText());
+    graph.setUnit("A");
+
+    QKeyEvent esc(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+    QCoreApplication::sendEvent(view, &esc);
+    check(graph.timeCursor(0) < 0 && graph.timeCursor(1) < 0 && info->isHidden(), "time cursors: Esc takes them away");
+    graph.setTimeCursor(0, 3000);
+    graph.clearSLOT();
+    check(graph.timeCursor(0) < 0, "time cursors: go with the graph cleared");
+  }
+
+  // --- 7h2. the flags' layout: centred on their lines, the next one
+  //           slides right when they would touch, one that would leave its
+  //           line is left out, at the edge a flag slides inward ---
+  {
+    const QRectF plot(10, 10, 200, 100);
+    auto width = [](const QString &t) { return 10.0 * t.size(); };
+    QList<GraphFlags::Flag> flags = { { 100, "A", {}, {}, {} }, { 112, "B", {}, {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    // 18 px wide each: A 91..109, B would start at 103, slides to 112
+    check(flags[0].rect == QRectF(91, 110 + GraphFlags::kPoint, 18, 14), "flags: A centred under its line");
+    check(flags[1].rect.left() == 109 + GraphFlags::kAir && flags[1].rect.contains(QPointF(112, flags[1].rect.center().y())),
+          "flags: B slides right, its line still on it");
+    flags = { { 100, "A", {}, {}, {} }, { 101, "B", {}, {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(!flags[0].rect.isEmpty() && flags[1].rect.isEmpty(), "flags: B would leave its line, left out");
+    // notes as far as the neighbours leave room
+    flags = { { 100, "1", "Above 5 V", {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(flags[0].text == QString::fromUtf8("1 · Above 5 V"), "flags: alone, the whole note: " + flags[0].text);
+    flags = { { 60, "1", "Above 5 V", {}, {} }, { 140, "2", "Below 1 V", {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(flags[0].text == QString::fromUtf8("1 · A…") && flags[1].text == QString::fromUtf8("2 · B…"),
+          "flags: 80 px apart, the notes cut: " + flags[0].text + " | " + flags[1].text);
+    flags = { { 100, "1", "Above 5 V", {}, {} }, { 130, "2", "Below", {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(flags[0].text == "1" && flags[1].text == "2", "flags: 30 px apart, the numbers alone");
+    flags = { { 205, "long", {}, {}, {} } };
+    GraphFlags::layout(flags, plot, 14, width);
+    check(flags[0].rect.right() == 210 && flags[0].rect.contains(QPointF(205, flags[0].rect.center().y())),
+          "flags: at the right edge it slides inward");
+  }
+
+  // --- 7i. phosphor: a vertical line only where a pre-triggered
+  //          recording triggered ---
+  {
+    Settings cfg("phosphortrigger", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setColorVariant(GraphWidget::PhosphorGreen);
+    graph.show();
+    QTest::qWait(50);
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QGraphicsPathItem *centre = nullptr;
+    for (QGraphicsItem *item : chart->childItems())
+      if (auto *p = dynamic_cast<QGraphicsPathItem *>(item))
+        centre = p;
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    graph.setGraphSize(60);
+    for (int i = 0; i < 10; ++i)
+      feed.value(1.0);
+    auto vertical = [&] { return centre ? pathLines(centre->path(), false, chart->plotArea().height() - 1) : QList<double>(); };
+    check(vertical().isEmpty(), "phosphor: no vertical line without a trigger");
+    graph.store()->addMark(RecordingStore::kTriggerColor, "Trigger");
+    feed.value(1.0);
+    const double triggerX = chart->mapToPosition(QPointF(graph.store()->marks().last().t / 1000.0, 1),
+                                                 chart->series().first()).x();
+    check(vertical().size() == 1 && std::abs(vertical().value(0) - triggerX) < 0.5,
+          QString("phosphor: the vertical line at the trigger (%1), got %2 lines").arg(triggerX).arg(vertical().size()));
+  }
+
+  // --- 7j. the overview below the graph: all the store keeps, the
+  //          minimum to the maximum per column (a spike stays), overloads,
+  //          gaps and marks, in the design's colours; dragging moves the
+  //          window, in Live that pauses it until the right end; the
+  //          brackets zoom; the columns are counted anew only when the
+  //          strip doubles ---
+  {
+    Settings cfg("minimap", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    QObject::connect(&graph, &GraphWidget::windowRequested, [&](int s) { graph.setGraphSize(s); });
+    GraphMinimap *map = graph.minimap();
+    QScrollBar *bar = graph.findChild<QScrollBar *>();
+    check(map && map->isVisible() && bar && !bar->isVisible(), "overview: shown in place of the scroll bar");
+    Feed feed(graph, 1000);
+    graph.liveSLOT();
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "1 min")
+        b->click();
+    check(graph.windowSeconds() == 60, QString("overview: a window of 1 min, got %1 s").arg(graph.windowSeconds()));
+    const int rebuilds = map->rebuilds();
+    qint64 staleAt = -1;
+    for (int i = 0; i < 1800; ++i)   // 30 min
+    {
+      if (i == 1200)
+      {
+        // silent for a minute
+        feed.now += 1500;
+        graph.store()->setStale(true);
+        staleAt = graph.store()->series().last().t;
+        feed.now += 60000;
+      }
+      feed.value(i == 700 ? 9.0 : i == 1000 ? qQNaN() : 1.0 + (i % 2) * 0.01);
+      if (i == 500)
+        graph.store()->addMark(0xffff00ff, "alarm");
+    }
+    check(map->rebuilds() - rebuilds < 20,
+          QString("overview: 1800 readings counted anew %1 times").arg(map->rebuilds() - rebuilds));
+    check(map->columnMs() == 4096, QString("overview: columns of 4096 ms, got %1").arg(map->columnMs()));
+    const GraphMinimap::Column *spike = map->column(700000);
+    check(spike && spike->max == 9.0 && spike->min >= 1.0 && spike->min <= 1.01,
+          "overview: the spike stays in its column");
+    const GraphMinimap::Column *ol = map->column(1000000);
+    check(ol && ol->overload && !ol->gap, "overview: the overload in its column");
+    const GraphMinimap::Column *gap = map->column(staleAt);
+    const GraphMinimap::Column *silent = map->column(staleAt + 30000);
+    check(gap && gap->gap && std::isnan(gap->last) && silent && !silent->any, "overview: the gap, nothing after it");
+    // the window at the right end (the clock is a reading on)
+    check(map->viewWidth() == 60000 && map->to() - (map->viewStart() + map->viewWidth()) <= 2000,
+          QString("overview: the window %1 + %2 at the end %3").arg(map->viewStart()).arg(map->viewWidth()).arg(map->to()));
+
+    // what is drawn: the spike up to the top, the mark as a dot on the
+    // bottom edge
+    {
+      const QImage img = map->grab().toImage();
+      const int x = int(map->xOf(700000));
+      check(img.pixelColor(x, 6) != img.pixelColor(x + 40, 6), "overview: the spike is drawn");
+      const int mx = int(std::round(map->xOf(graph.store()->marks().last().t)));
+      const QColor dot = img.pixelColor(mx, img.height() - 3);
+      check(dot.red() > 200 && dot.blue() > 200 && dot.green() < 80,
+            "overview: the mark a dot on the bottom edge, got " + dot.name());
+    }
+    graph.setColorVariant(GraphWidget::PhosphorGreen);
+    {
+      const QImage img = map->grab().toImage();
+      const QColor curve = img.pixelColor(int(map->xOf(700000)), 6);
+      check(std::abs(curve.hue() - 135) < 20, QString("overview: the phosphor curve green, got hue %1").arg(curve.hue()));
+    }
+    graph.setColorVariant(GraphWidget::Neutral);
+
+    auto mouse = [&](QEvent::Type type, double x)
+    {
+      const QPointF at(x, map->height() / 2.0);
+      const Qt::MouseButtons buttons = type == QEvent::MouseButtonRelease ? Qt::NoButton : Qt::MouseButtons(Qt::LeftButton);
+      QMouseEvent ev(type, at, map->mapToGlobal(at), type == QEvent::MouseMove ? Qt::NoButton : Qt::LeftButton,
+                     buttons, Qt::NoModifier);
+      QCoreApplication::sendEvent(map, &ev);
+    };
+    auto drag = [&](double from, double to)
+    {
+      mouse(QEvent::MouseButtonPress, from);
+      mouse(QEvent::MouseMove, (from + to) / 2);
+      mouse(QEvent::MouseMove, to);
+      mouse(QEvent::MouseButtonRelease, to);
+    };
+    const double perPixel = double(map->to() - map->from()) / map->width();
+    // dragged back 300 px: Live pauses there
+    const qint64 start = map->viewStart();
+    const double centre = map->xOf(start + 30000);
+    drag(centre, centre - 300);
+    check(graph.livePaused() && graph.stateText() == "Live paused" && graph.store()->state() == RecordingStore::Live,
+          "overview: dragged back, Live paused, got " + graph.stateText());
+    check(std::abs(map->viewStart() - (start - 300 * perPixel)) < 2 * perPixel,
+          QString("overview: the window moved 300 px back, %1 -> %2").arg(start).arg(map->viewStart()));
+    const qint64 held = map->viewStart();
+    for (int i = 0; i < 10; ++i)
+      feed.value(1.0);
+    check(map->viewStart() == held, "overview: paused, the window stays while readings come");
+    // a click at the right end follows again
+    mouse(QEvent::MouseButtonPress, map->width() - 2);
+    mouse(QEvent::MouseButtonRelease, map->width() - 2);
+    check(!graph.livePaused() && graph.stateText().isEmpty() && map->to() - (map->viewStart() + map->viewWidth()) <= 2000,
+          "overview: a click at the right end, Live follows");
+
+    // the left bracket 100 px out: a wider window, still following
+    drag(map->xOf(map->viewStart()), map->xOf(map->viewStart()) - 100);
+    check(graph.windowSeconds() > 250 && graph.windowSeconds() < 350 && !graph.livePaused(),
+          QString("overview: the left bracket widens to %1 s, Live follows").arg(graph.windowSeconds()));
+    bool anyChecked = false;
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->isCheckable() && b->isChecked() && b->property("seconds").toInt() != graph.windowSeconds())
+        anyChecked = true;
+    check(!anyChecked, "overview: no time button for a window of its own");
+    // the right bracket 50 px back: narrower, paused
+    const int wide = graph.windowSeconds();
+    const double right = map->xOf(map->viewStart() + map->viewWidth()) - 1;
+    drag(right, right - 50);
+    check(graph.windowSeconds() < wide && graph.livePaused(),
+          QString("overview: the right bracket back, %1 s, Live paused").arg(graph.windowSeconds()));
+    // a time button follows again
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "1 min")
+        b->click();
+    check(!graph.livePaused() && graph.windowSeconds() == 60, "overview: a time button, Live follows");
+
+    // a recording viewed: the overview moves the scroll bar's window
+    graph.setMode(GraphWidget::Manual);
+    graph.startSLOT();
+    for (int i = 0; i < 600; ++i)   // 10 min
+      feed.value(i % 60);
+    graph.stopSLOT();
+    check(graph.store()->state() == RecordingStore::View, "overview: the recording viewed");
+    mouse(QEvent::MouseButtonPress, map->width() / 2.0);
+    mouse(QEvent::MouseButtonRelease, map->width() / 2.0);
+    const qint64 middle = (map->from() + map->to()) / 2;
+    check(std::abs(map->viewStart() + 30000 - middle) < 2000 && bar->value() > 0 && bar->value() < bar->maximum(),
+          QString("overview: a click in the middle centres the window, %1").arg(map->viewStart()));
+    mouse(QEvent::MouseButtonPress, map->width() - 2);
+    mouse(QEvent::MouseButtonRelease, map->width() - 2);
+    check(bar->value() == bar->maximum(), "overview: the right end, the end of the recording");
+
+    // off in the context menu: the scroll bar again
+    graph.setMinimapVisible(false);
+    check(!map->isVisible() && bar->isVisible() && graph.findChild<QChartView *>()->height() == graph.height() - 16,
+          "overview: off, the scroll bar again");
+    graph.setMinimapVisible(true);
+    check(map->isVisible() && !bar->isVisible()
+            && graph.findChild<QChartView *>()->height() == graph.height() - GraphMinimap::kHeight,
+          "overview: on again");
+  }
+
+  // --- 7k. the min/max band: off by default; per pixel column the lowest
+  //          and highest of the columns within four either side, so it
+  //          spreads around a spike by that much and no further; a gap
+  //          parts it ---
+  {
+    Settings cfg("envelope", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    QObject::connect(&graph, &GraphWidget::windowRequested, [&](int s) { graph.setGraphSize(s); });
+    Feed feed(graph, 100);
+    graph.liveSLOT();
+    for (QToolButton *b : graph.findChildren<QToolButton *>())
+      if (b->text() == "1 min")
+        b->click();
+    qint64 spikeT = -1;
+    for (int i = 0; i < 900; ++i)   // 1.5 min of 1.0 and 2.0 in turn, a spike of 5 after a minute
+    {
+      if (i == 600)
+        spikeT = feed.now;
+      feed.value(i == 600 ? 5.0 : 1.0 + (i % 2));
+    }
+    check(!graph.envelopeVisible() && graph.envelopePath().isEmpty(), "band: off by default");
+    graph.setEnvelopeVisible(true);
+    const QPainterPath band = graph.envelopePath();
+    QChart *chart = graph.findChild<QChartView *>()->chart();
+    QAbstractSeries *curve = chart->series().first();
+    auto at = [&](qint64 t, double v) { return chart->mapToPosition(QPointF(t / 1000.0, v), curve); };
+    const qint64 middle = spikeT - 20000;
+    check(!band.isEmpty() && band.contains(at(middle, 1.5)) && !band.contains(at(middle, 2.3)),
+          "band: from 1 to 2 where the curve alternates");
+    const QPointF spike = at(spikeT, 4.0);
+    check(band.contains(spike + QPointF(3, 0)) && band.contains(spike - QPointF(3, 0)),
+          "band: the spike spreads 3 px either side");
+    check(!band.contains(spike + QPointF(7, 0)) && !band.contains(spike - QPointF(7, 0)),
+          "band: ... and not 7 px");
+    // a minute silent, then readings again: two pieces
+    feed.now += 1500;
+    graph.store()->setStale(true);
+    feed.now += 20000;
+    for (int i = 0; i < 100; ++i)
+      feed.value(1.0 + (i % 2));
+    check(graph.envelopePath().toSubpathPolygons().size() == 2,
+          QString("band: the gap parts it, %1 pieces").arg(graph.envelopePath().toSubpathPolygons().size()));
+    graph.setEnvelopeVisible(false);
+    check(graph.envelopePath().isEmpty(), "band: off again");
   }
 
   // --- 8. EngNumberValidator: what engValue() writes, value() must read

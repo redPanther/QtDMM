@@ -26,10 +26,13 @@
 #include <QPen>
 #include <QRegularExpression>
 #include <cmath>
+#include <numeric>
 #include <QSvgGenerator>
 #include <QPdfWriter>
 
 #include "ui/views/graphwidget.h"
+#include "ui/views/graphflags.h"
+#include "ui/views/graphminimap.h"
 
 #include <cmath>
 #include "core/siprefix.h"
@@ -82,6 +85,13 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
 
   connect(scrollbar, &QScrollBar::valueChanged, this, [this](int) { updateXAxisRange(); updateMarkPositions(); });
 
+  // the overview in place of the scroll bar: it asks, the graph moves
+  m_minimap = new GraphMinimap(this);
+  m_minimap->setStore(m_store);
+  connect(m_minimap, &GraphMinimap::moveRequested, this, &GraphWidget::showFrom);
+  connect(m_minimap, &GraphMinimap::endRequested, this, &GraphWidget::followEnd);
+  connect(m_minimap, &GraphMinimap::widthRequested, this, &GraphWidget::showSpan);
+
   emitInfo();
 
   m_chart = new QChart();
@@ -130,6 +140,19 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   });
   m_centreTicks = new QGraphicsPathItem(m_chart);
   m_centreTicks->setZValue(5);   // above the grid, below the curves' markers
+  // the min/max band: below the reference line and the curve
+  m_envelope = new QGraphicsPathItem(m_chart);
+  m_envelope->setZValue(4);
+  m_envelope->setPen(Qt::NoPen);
+  m_envelope->setVisible(false);
+  m_referenceLine = new QGraphicsLineItem(m_chart);
+  m_referenceLine->setZValue(5);
+  m_referenceLine->setData(0, QStringLiteral("reference"));
+  m_referenceLine->setVisible(false);
+  m_referenceLabel = new QGraphicsSimpleTextItem(m_chart);
+  m_referenceLabel->setZValue(5);
+  m_referenceLabel->setData(0, QStringLiteral("reference"));
+  m_referenceLabel->setVisible(false);
   m_dataSeries->attachAxis(m_yAxis);
   m_dataPoints->attachAxis(m_yAxis);
   m_intSeries->attachAxis(m_yAxis);
@@ -150,6 +173,22 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   {
     item->setZValue(1000);
     item->setVisible(false);
+  }
+  for (int i = 0; i < 2; ++i)
+  {
+    m_cursorLine[i] = new QGraphicsLineItem(m_chart);
+    m_cursorLine[i]->setZValue(1000);
+    m_cursorLine[i]->setVisible(false);
+    m_cursorName[i] = new GraphFlagItem(m_chart);
+    m_cursorName[i]->setText(i ? QStringLiteral("B") : QStringLiteral("A"));
+    m_cursorName[i]->setData(0, QStringLiteral("cursor-flag"));
+    m_cursorName[i]->setZValue(1000);
+    m_cursorName[i]->setVisible(false);
+    m_cursorLevel[i] = new QGraphicsLineItem(m_chart);
+    m_cursorLevel[i]->setPen(QPen(Qt::DashLine));   // the colour comes with the design
+    m_cursorLevel[i]->setZValue(1000);
+    m_cursorLevel[i]->setData(0, QStringLiteral("cursor-level"));
+    m_cursorLevel[i]->setVisible(false);
   }
 
   m_chartView = new QChartView(m_chart, this);
@@ -196,6 +235,11 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_cursorLabel->setAttribute(Qt::WA_TransparentForMouseEvents);   // no Leave for the view
   m_cursorLabel->hide();
 
+  m_cursorInfo = new QLabel(m_chartView);
+  m_cursorInfo->setObjectName("ui_graphCursors");
+  m_cursorInfo->setAttribute(Qt::WA_TransparentForMouseEvents);
+  m_cursorInfo->hide();
+
   m_stateLabel = new QLabel(m_chartView);
   m_stateLabel->setObjectName("ui_graphState");
   m_stateLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -228,6 +272,8 @@ void GraphWidget::setStore(RecordingStore *store)
     return;
   m_store->disconnect(this);
   m_store = store;
+  m_liveHold = false;
+  m_minimap->setStore(store);
   connectStore();
   // the view shows the new store as it is
   onCleared();
@@ -239,6 +285,9 @@ void GraphWidget::setStore(RecordingStore *store)
 
 void GraphWidget::timeButtonClicked(int seconds)
 {
+  // "the last 5 min": Live follows again
+  if (m_liveHold)
+    followEnd();
   m_followAll = (seconds == 0);
   if (m_followAll)
     requestAll(false);
@@ -368,10 +417,209 @@ void GraphWidget::print(QPrinter *prt, const QString &title, const QString &comm
   p.end();
 }
 
+void GraphWidget::layoutParts()
+{
+  const int strip = m_minimapOn ? GraphMinimap::kHeight : 16;
+  m_chartView->setGeometry(0, 0, width(), height() - strip);
+  scrollbar->setGeometry(0, height() - 16, width(), 16);
+  m_minimap->setGeometry(0, height() - strip, width(), strip);
+  scrollbar->setVisible(!m_minimapOn);
+  m_minimap->setVisible(m_minimapOn);
+}
+
+void GraphWidget::setMinimapVisible(bool on)
+{
+  if (on == m_minimapOn)
+    return;
+  m_minimapOn = on;
+  // without the overview nothing would bring a paused Live back
+  if (!on)
+    followEnd();
+  layoutParts();
+}
+
+void GraphWidget::setEnvelopeVisible(bool on)
+{
+  if (on == m_envelopeOn)
+    return;
+  m_envelopeOn = on;
+  updateEnvelope();
+}
+
+QPainterPath GraphWidget::envelopePath() const
+{
+  return m_envelope->isVisible() ? m_envelope->path() : QPainterPath();
+}
+
+// Columns of one pixel over the plot (and kEnvelopeColumns beyond each
+// edge, so the band runs out of the plot as the curve does): the lowest
+// and highest of the curve as drawn in each, its points and the lines
+// between them - readings further apart than the band is wide would leave
+// it a staircase. The curve has a point for every bucket, its minimum and
+// maximum, the buckets themselves a column wide, so this reads a few
+// points per column, not the readings. A gap (NaN) parts the band as it
+// parts the curve. Each column gets the extremes of the columns within
+// kEnvelopeColumns of it on its side of a gap.
+void GraphWidget::updateEnvelope()
+{
+  const QRectF plot = m_chart->plotArea();
+  const double x0 = m_xAxis->min(), x1 = m_xAxis->max();
+  const double y0 = m_yAxis->min(), y1 = m_yAxis->max();
+  if (!m_envelopeOn || m_curvePts.isEmpty() || plot.width() < 2 || plot.height() <= 0 || !(x1 > x0) || !(y1 > y0))
+  {
+    m_envelope->setVisible(false);
+    return;
+  }
+  const int k = kEnvelopeColumns;
+  const int columns = int(plot.width()) + 2 * k;
+  const double perColumn = (x1 - x0) / plot.width();
+  const double from = x0 - k * perColumn, to = x1 + k * perColumn;
+  struct Column
+  {
+    double lo = qInf(), hi = -qInf();
+    int run = -1;   ///< which stretch between gaps; -1 no point
+  };
+  QList<Column> col(columns);
+  auto take = [&](int c, double lo, double hi, int r)
+  {
+    Column &cc = col[c];
+    cc.lo = qMin(cc.lo, lo);
+    cc.hi = qMax(cc.hi, hi);
+    cc.run = r;
+  };
+  auto columnOf = [&](double x) { return qBound(0, int((x - from) / perColumn), columns - 1); };
+  // the point before the window too: its line runs into it
+  auto it = std::lower_bound(m_curvePts.cbegin(), m_curvePts.cend(), from,
+                             [](const QPointF &p, double x) { return p.x() < x; });
+  if (it != m_curvePts.cbegin())
+    --it;
+  int run = 0;
+  const QPointF *prev = nullptr;
+  for (; it != m_curvePts.cend(); ++it)
+  {
+    if (std::isnan(it->y()))
+    {
+      // a gap parts the curve and the band
+      if (it->x() > to)
+        break;
+      run++;
+      prev = nullptr;
+      continue;
+    }
+    if (it->x() >= from)
+    {
+      const int c = columnOf(it->x());
+      take(c, it->y(), it->y(), run);
+      // the line from the point before: in each column it crosses, the
+      // part of it there
+      if (prev)
+        for (int j = columnOf(prev->x()); j <= c; ++j)
+        {
+          const double xa = qMax(prev->x(), from + j * perColumn), xb = qMin(it->x(), from + (j + 1) * perColumn);
+          const double dx = it->x() - prev->x();
+          auto yAt = [&](double x) { return dx > 0 ? prev->y() + (it->y() - prev->y()) * (x - prev->x()) / dx : it->y(); };
+          take(j, qMin(yAt(xa), yAt(xb)), qMax(yAt(xa), yAt(xb)), run);
+        }
+    }
+    if (it->x() > to)
+      break;
+    prev = &*it;
+  }
+  auto yOf = [&](double v) { return plot.bottom() - (v - y0) / (y1 - y0) * plot.height(); };
+  auto xOf = [&](int c) { return plot.left() + (c - k + 0.5); };
+  QPainterPath path;
+  QList<QPointF> upper, lower;
+  auto flush = [&]
+  {
+    if (upper.size() > 1)
+    {
+      QPolygonF poly(upper);
+      for (qsizetype i = lower.size() - 1; i >= 0; --i)
+        poly << lower[i];
+      path.addPolygon(poly);
+      path.closeSubpath();
+    }
+    upper.clear();
+    lower.clear();
+  };
+  int lastRun = -1;
+  for (int c = 0; c < columns; ++c)
+  {
+    if (col[c].run < 0)
+      continue;
+    if (col[c].run != lastRun)
+      flush();
+    lastRun = col[c].run;
+    double lo = col[c].lo, hi = col[c].hi;
+    for (int j = qMax(0, c - k); j <= qMin(columns - 1, c + k); ++j)
+      if (col[j].run == col[c].run)
+      {
+        lo = qMin(lo, col[j].lo);
+        hi = qMax(hi, col[j].hi);
+      }
+    upper << QPointF(xOf(c), yOf(hi));
+    lower << QPointF(xOf(c), yOf(lo));
+  }
+  flush();
+  QPainterPath clip;
+  clip.addRect(plot);
+  m_envelope->setPath(path.intersected(clip));
+  m_envelope->setVisible(true);
+}
+
+void GraphWidget::updateMinimapView()
+{
+  m_minimap->setView(windowStart(), qint64(qMax(1, m_windowSeconds)) * 1000);
+}
+
+void GraphWidget::showFrom(qint64 start)
+{
+  const qint64 origin = m_store->origin();
+  if (m_store->state() == RecordingStore::Live)
+  {
+    // the store runs on, the window stays where it was put
+    m_liveHold = true;
+    m_holdStart = qMax(origin, start);
+    updateXAxisRange();
+    updateMarkPositions();
+    updateStateLabel();
+  }
+  else
+    scrollbar->setValue(int(qBound<qint64>(0, (start - origin) / 100, qint64(scrollbar->maximum()))));
+}
+
+void GraphWidget::followEnd()
+{
+  if (m_store->state() != RecordingStore::Live)
+  {
+    scrollbar->setValue(scrollbar->maximum());
+    return;
+  }
+  if (!m_liveHold)
+    return;
+  m_liveHold = false;
+  updateXAxisRange();
+  updateMarkPositions();
+  updateStateLabel();
+}
+
+void GraphWidget::showSpan(qint64 start, qint64 width, bool atEnd)
+{
+  // a window of its own, as a zoom: back through the settings
+  const int seconds = qMax(1, int((width + 500) / 1000));
+  m_followAll = false;
+  if (seconds != m_windowSeconds || seconds != m_savedWindow)
+    Q_EMIT windowRequested(seconds);
+  if (atEnd)
+    followEnd();
+  else
+    showFrom(start);
+  updateTimeButtons();
+}
+
 void GraphWidget::resizeEvent(QResizeEvent *)
 {
-  m_chartView->setGeometry(0, 0, width(), height() - 16);
-  scrollbar->setGeometry(0, height() - 16, width(), 16);
+  layoutParts();
   placeTimeBar();
 
   // Simpler than tracking/restoring hover state across a resize: just hide it,
@@ -497,6 +745,7 @@ void GraphWidget::rebuildSeries()
   }
 
   m_dataLine->replace(points);
+  m_curvePts = points;
   m_dataPoints->replace(withoutGaps(points));
   m_intLine->replace(intPoints);
   m_intPoints->replace(withoutGaps(intPoints));
@@ -513,6 +762,7 @@ void GraphWidget::appendToSeries()
   if (first != count - 1)
   {
     m_dataLine->removeLast(m_tailData);
+    m_curvePts.resize(qMax<qsizetype>(0, m_curvePts.size() - m_tailData));
     m_dataPoints->removePoints(m_dataPoints->count() - m_tailDataPts, m_tailDataPts);
     m_intLine->removeLast(m_tailInt);
     m_intPoints->removePoints(m_intPoints->count() - m_tailIntPts, m_tailIntPts);
@@ -521,6 +771,7 @@ void GraphWidget::appendToSeries()
   m_tailData = bucketPoints(first, count - 1, false, points);
   m_tailInt = bucketPoints(first, count - 1, true, intPoints);
   m_dataLine->append(points);
+  m_curvePts.append(points);
   m_intLine->append(intPoints);
   const QList<QPointF> dataPts = withoutGaps(points), intPts = withoutGaps(intPoints);
   m_dataPoints->append(dataPts);
@@ -557,7 +808,9 @@ qint64 GraphWidget::windowStart() const
   {
     const qint64 window = qint64(qMax(1, m_windowSeconds)) * 1000;
     const qint64 shortOf = qMin<qint64>(m_store->sampleTime() * 100, window / 10);
-    return qMax(m_store->origin(), m_store->duration() - window + shortOf);
+    const qint64 follow = qMax(m_store->origin(), m_store->duration() - window + shortOf);
+    // paused by the overview: where it was put, while the store keeps it
+    return m_liveHold ? qBound(m_store->origin(), m_holdStart, follow) : follow;
   }
   // the scroll bar counts tenths of a second from what the store keeps
   return m_store->origin() + qint64(qMax(0, scrollbar->value())) * 100;
@@ -586,6 +839,9 @@ void GraphWidget::updateXAxisRange()
   m_xAxis->setTickAnchor(0);
   m_xAxis->setTickInterval(div);
   updateXLabels();
+  updateReferenceLine();   // the window's mean, minimum or maximum
+  updateMinimapView();
+  updateEnvelope();
 }
 
 double GraphWidget::timeStep(double v)
@@ -648,6 +904,111 @@ void GraphWidget::updateXLabels()
     const double x = plot.left() + (values[i] - min) / (max - min) * plot.width();
     item->setPos(x - item->boundingRect().width() / 2, top);
   }
+  updateTimeCursors();
+}
+
+double GraphWidget::valueAt(qint64 t) const
+{
+  const RecordingSeries &series = m_store->series();
+  const int i = series.holding(t);
+  if (i < 0 || t > m_store->duration() || series.at(i).gap())
+    return std::nan("");
+  return series.at(i).value;
+}
+
+void GraphWidget::setTimeCursor(int which, qint64 t)
+{
+  m_cursorT[which & 1] = t < 0 ? -1 : qBound(m_store->origin(), t, qMax(m_store->origin(), m_store->duration()));
+  updateTimeCursors();
+}
+
+void GraphWidget::clearTimeCursors()
+{
+  m_cursorT[0] = m_cursorT[1] = -1;
+  updateTimeCursors();
+}
+
+// "250 ms", "12.5 s", "1:05:09"
+static QString spanText(qint64 ms)
+{
+  if (ms < 1000)
+    return QString("%1 ms").arg(ms);
+  if (ms < 60000)
+    return QString("%1 s").arg(QString::number(ms / 1000.0, 'f', ms < 10000 ? 3 : 2));
+  return durationText(qRound64(ms / 1000.0));
+}
+
+QString GraphWidget::timeCursorText() const
+{
+  const QString base = m_store->unit();
+  auto withUnit = [](double v, const QString &unit)
+  {
+    if (!std::isfinite(v))
+      return QStringLiteral("--");
+    QString prefix;
+    const double x = SiPrefix::scale(v, &prefix);
+    return QString("%1 %2%3").arg(QString::number(x, 'g', 4), prefix, unit).trimmed();
+  };
+  QStringList lines;
+  for (int i = 0; i < 2; ++i)
+    if (m_cursorT[i] >= 0)
+      lines << QString("%1  %2  %3").arg(i ? "B" : "A",
+                                         m_store->startDateTime().addMSecs(m_cursorT[i]).time().toString("HH:mm:ss.zzz"),
+                                         withUnit(valueAt(m_cursorT[i]), base));
+  if (m_cursorT[0] >= 0 && m_cursorT[1] >= 0)
+  {
+    const RecordingStore::Stats st = m_store->stats(m_cursorT[0], m_cursorT[1]);
+    lines << QString("%1 %2  %3 %4").arg(QChar(0x0394) + QStringLiteral("t"), spanText(std::abs(m_cursorT[1] - m_cursorT[0])),
+                                         QChar(0x0394), withUnit(valueAt(m_cursorT[1]) - valueAt(m_cursorT[0]), base));
+    // the integral in hours for a current or a power (Ah, Wh), else x s
+    const bool hours = base == QLatin1String("A") || base == QLatin1String("W");
+    const QString integral = hours ? withUnit(st.integral / 3600, base + "h")
+                                   : withUnit(st.integral, base.isEmpty() ? QStringLiteral("s") : base + QStringLiteral("·s"));
+    lines << tr("mean %1  %2 %3").arg(withUnit(st.mean, base), QChar(0x222b), st.count ? integral : QStringLiteral("--"));
+  }
+  return lines.join('\n');
+}
+
+void GraphWidget::updateTimeCursors()
+{
+  if (!m_cursorLine[0])
+    return;
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  const double yMin = m_yAxis->min(), yMax = m_yAxis->max();
+  for (int i = 0; i < 2; ++i)
+  {
+    const double x = m_cursorT[i] / 1000.0;
+    const bool shown = m_cursorT[i] >= 0 && max > min && x >= min && x <= max;
+    m_cursorLine[i]->setVisible(shown);
+    m_cursorName[i]->setVisible(false);   // placed below, with the other flag
+    // the level: only for a value inside the scale (none in a gap)
+    const double v = shown ? valueAt(m_cursorT[i]) : qQNaN();
+    const bool level = std::isfinite(v) && yMax > yMin && v >= yMin && v <= yMax;
+    m_cursorLevel[i]->setVisible(level);
+    if (level)
+    {
+      const double py = plot.bottom() - (v - yMin) / (yMax - yMin) * plot.height();
+      m_cursorLevel[i]->setLine(plot.left(), py, plot.right(), py);
+    }
+    if (!shown)
+      continue;
+    const double px = plot.left() + (x - min) / (max - min) * plot.width();
+    m_cursorLine[i]->setLine(px, plot.top(), px, plot.bottom());
+  }
+  updateFlags();
+  if (!m_cursorInfo)
+    return;
+  const QString text = timeCursorText();
+  m_cursorInfo->setVisible(!text.isEmpty());
+  if (text.isEmpty())
+    return;
+  m_cursorInfo->setText(text);
+  m_cursorInfo->adjustSize();
+  // top right in the plot, below the time buttons
+  const QPoint topRight = m_chartView->mapFromScene(plot.topRight());
+  m_cursorInfo->move(topRight.x() - m_cursorInfo->width() - 6, topRight.y() + 4);
+  m_cursorInfo->raise();
 }
 
 QString GraphWidget::yPrefix() const
@@ -711,6 +1072,147 @@ void GraphWidget::updateYLabels()
     const double y = plot.bottom() - (values[i] - min) / (max - min) * plot.height();
     item->setPos(qMax(1.0, plot.left() - r.width() - gap), y - r.height() / 2);
   }
+  updateReferenceLine();
+  updateEnvelope();
+  updateTimeCursors();   // their levels
+}
+
+double GraphWidget::referenceY() const
+{
+  const double min = m_yAxis->min(), max = m_yAxis->max();
+  const QRectF plot = m_chart->plotArea();
+  if (m_referenceKind == RefOff || !(m_reference > min && m_reference < max) || plot.height() <= 0)
+    return std::nan("");
+  return plot.bottom() - (m_reference - min) / (max - min) * plot.height();
+}
+
+RecordingStore::Stats GraphWidget::windowStats() const
+{
+  return m_store->stats(qRound64(m_xAxis->min() * 1000), qRound64(m_xAxis->max() * 1000));
+}
+
+void GraphWidget::setReference(ReferenceKind kind, double value)
+{
+  if (kind == RefValue && value == 0)
+    kind = RefZero;
+  const bool changed = kind != m_referenceKind || ((kind == RefValue || kind == RefAlarm) && value != m_reference);
+  m_referenceKind = kind;
+  if (kind == RefZero)
+    m_reference = 0;
+  else if (kind == RefValue || kind == RefAlarm)
+    m_reference = value;
+  updateReferenceLine();
+  if (changed)
+    Q_EMIT referenceChanged();
+}
+
+QString GraphWidget::referenceSetting() const
+{
+  switch (m_referenceKind)
+  {
+    case RefMean:  return QStringLiteral("mean");
+    case RefMin:   return QStringLiteral("min");
+    case RefMax:   return QStringLiteral("max");
+    case RefAlarm: return QStringLiteral("alarm ") + QString::number(m_reference, 'g', 12);
+    case RefValue: return QString::number(m_reference, 'g', 12);
+    case RefOff:   return QStringLiteral("off");
+    case RefZero:  break;
+  }
+  return QString();
+}
+
+void GraphWidget::setReferenceSetting(const QString &text)
+{
+  const QString t = text.trimmed();
+  bool ok = false;
+  if (t == QLatin1String("mean"))
+    setReference(RefMean);
+  else if (t == QLatin1String("min"))
+    setReference(RefMin);
+  else if (t == QLatin1String("max"))
+    setReference(RefMax);
+  else if (t == QLatin1String("off"))
+    setReference(RefOff);
+  else if (const double v = t.section(' ', 1).toDouble(&ok); t.startsWith(QLatin1String("alarm ")) && ok)
+    setReference(RefAlarm, v);
+  else if (const double v = t.toDouble(&ok); ok && std::isfinite(v))
+    setReference(RefValue, v);
+  else
+    setReference(RefZero);
+}
+
+void GraphWidget::setAlarmThresholds(const QList<double> &values)
+{
+  m_alarmThresholds = values;
+  if (m_referenceKind == RefAlarm && !values.contains(m_reference))
+    m_referenceKind = RefValue;
+  updateReferenceLine();
+}
+
+void GraphWidget::dragReference(double y)
+{
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_yAxis->min(), max = m_yAxis->max();
+  if (!(max > min) || plot.height() <= 0)
+    return;
+  auto sceneY = [&](double v) { return plot.bottom() - (v - min) / (max - min) * plot.height(); };
+  QList<std::pair<ReferenceKind, double>> snaps { { RefZero, 0.0 } };
+  const RecordingStore::Stats st = windowStats();
+  if (st.count > 0)
+    snaps << std::pair{ RefMean, st.mean } << std::pair{ RefMin, st.min } << std::pair{ RefMax, st.max };
+  for (double a : m_alarmThresholds)
+    snaps << std::pair{ RefAlarm, a };
+  for (const auto &[kind, v] : snaps)
+    if (std::abs(sceneY(v) - y) <= 6)
+    {
+      setReference(kind, v);
+      return;
+    }
+  const double step = niceStep((max - min) / 100);
+  const double v = min + (plot.bottom() - y) / plot.height() * (max - min);
+  setReference(RefValue, std::round(v / step) * step);
+}
+
+void GraphWidget::updateReferenceLine()
+{
+  if (!m_referenceLine)
+    return;
+  // the window's statistics follow the readings and the window
+  if (m_referenceKind == RefMean || m_referenceKind == RefMin || m_referenceKind == RefMax)
+  {
+    const RecordingStore::Stats st = windowStats();
+    m_reference = m_referenceKind == RefMean ? st.mean : m_referenceKind == RefMin ? st.min : st.max;
+  }
+  const double y = referenceY();
+  const bool shown = std::isfinite(y);
+  // phosphor draws it with its centre axis
+  m_referenceLine->setVisible(shown && !phosphor());
+  m_referenceLabel->setVisible(shown);
+  updateCentreTicks();
+  if (!shown)
+    return;
+  const QRectF plot = m_chart->plotArea();
+  m_referenceLine->setLine(plot.left(), y, plot.right(), y);
+  // as the y labels: 4 digits with the prefix that suits the value
+  QString prefix;
+  const double v = SiPrefix::scale(m_reference, &prefix);
+  const QString base = m_store->unit();
+  QString what;
+  switch (m_referenceKind)
+  {
+    case RefMean:  what = tr("mean") + ' '; break;
+    case RefMin:   what = tr("min") + ' '; break;
+    case RefMax:   what = tr("max") + ' '; break;
+    case RefAlarm: what = tr("alarm") + ' '; break;
+    default: break;
+  }
+  m_referenceLabel->setText(what + (base.isEmpty() ? QString::number(v, 'g', 4)
+                                                   : QString("%1 %2%3").arg(QString::number(v, 'g', 4), prefix, base)));
+  m_referenceLabel->setFont(m_yAxis->labelsFont());
+  const QRectF r = m_referenceLabel->boundingRect();
+  // above the line, unless that leaves the plot
+  const double top = y - r.height() - 1 >= plot.top() ? y - r.height() - 1 : y + 1;
+  m_referenceLabel->setPos(plot.right() - r.width() - 3, top);
 }
 
 double GraphWidget::niceStep(double v)
@@ -772,23 +1274,46 @@ void GraphWidget::updateCentreTicks()
     m_centreTicks->setPath(QPainterPath());
     return;
   }
+  // No cross in the middle: it said nothing and looked like a reference.
+  // The horizontal line is the reference line while that is in view, the
+  // vertical one the trigger of a pre-triggered recording; without them
+  // the fine ticks sit on the plot's bottom and left edge.
   const QRectF pa = m_chart->plotArea();
-  const double cx = pa.center().x(), cy = pa.center().y();
+  const double ref = referenceY();
+  const bool horizontal = std::isfinite(ref);
+  const double cy = horizontal ? ref : pa.bottom();
+  bool vertical = false;
+  double cx = pa.left();
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  for (const RecordingStore::Mark &m : m_store->marks())
+    if (m.color == RecordingStore::kTriggerColor && max > min && m.t / 1000.0 >= min && m.t / 1000.0 <= max)
+    {
+      cx = pa.left() + (m.t / 1000.0 - min) / (max - min) * pa.width();
+      vertical = true;
+    }
   QPainterPath path;
-  path.moveTo(pa.left(), cy);
-  path.lineTo(pa.right(), cy);
-  path.moveTo(cx, pa.top());
-  path.lineTo(cx, pa.bottom());
+  if (horizontal)
+  {
+    path.moveTo(pa.left(), cy);
+    path.lineTo(pa.right(), cy);
+  }
+  if (vertical)
+  {
+    path.moveTo(cx, pa.top());
+    path.lineTo(cx, pa.bottom());
+  }
+  // on a line both sides, on the edge inwards
+  const double up = 3, down = horizontal ? 3 : 0, right = 3, left = vertical ? 3 : 0;
   const double dx = pa.width() / 50, dy = pa.height() / 40;   // 10 x 8 divisions, 5 ticks each
   for (int i = 0; i <= 50; ++i)
   {
-    path.moveTo(pa.left() + i * dx, cy - 3);
-    path.lineTo(pa.left() + i * dx, cy + 3);
+    path.moveTo(pa.left() + i * dx, cy - up);
+    path.lineTo(pa.left() + i * dx, cy + down);
   }
   for (int i = 0; i <= 40; ++i)
   {
-    path.moveTo(cx - 3, pa.top() + i * dy);
-    path.lineTo(cx + 3, pa.top() + i * dy);
+    path.moveTo(cx - left, pa.top() + i * dy);
+    path.lineTo(cx + right, pa.top() + i * dy);
   }
   m_centreTicks->setPath(path);
 }
@@ -797,6 +1322,11 @@ void GraphWidget::updateSeriesAppearance()
 {
   m_dataLine->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
   m_dataLine->setVisible(m_lineMode != NoLine);
+  m_minimap->setCurveColor(dataColor());
+  // the band: the curve's colour, faint
+  QColor band = dataColor();
+  band.setAlpha(60);
+  m_envelope->setBrush(band);
 
   QScatterSeries::MarkerShape shape = QScatterSeries::MarkerShapeCircle;
   int size = 7;
@@ -874,6 +1404,60 @@ void GraphWidget::updateThresholdLinePositions()
   updateMarkPositions();
 }
 
+// The flags of the time cursors and of the marks share the row of the
+// time labels: laid out together, they never cover each other. A mark's
+// flag carries its number and, as room allows, its name.
+void GraphWidget::updateFlags()
+{
+  if (!m_cursorName[0])
+    return;
+  const QRectF plot = m_chart->plotArea();
+  const QFont font = m_xAxis->labelsFont();
+  const QFontMetricsF fm(font);
+  QList<GraphFlags::Flag> flags;
+  QList<GraphFlagItem *> items;
+  for (int i = 0; i < 2; ++i)
+  {
+    m_cursorName[i]->setVisible(false);
+    if (m_cursorLine[i]->isVisible())
+    {
+      flags << GraphFlags::Flag{ m_cursorLine[i]->line().x1(), m_cursorName[i]->text(), {}, {}, {} };
+      items << m_cursorName[i];
+    }
+  }
+  const QList<RecordingStore::Mark> marks = m_store->marks();
+  // "Alarm Peak" says "Peak" on the flag: every mark is an alarm's, the
+  // word would take the room (the tooltip keeps it)
+  const QString alarmWord = QCoreApplication::translate("Alarm", "Alarm") + ' ';
+  for (int i = 0; i < m_markFlags.size() && i < m_marks.size() && i < marks.size(); ++i)
+  {
+    m_markFlags[i]->setVisible(false);
+    if (m_marks[i]->isVisible())
+    {
+      QString note = marks[i].name;
+      if (note.startsWith(alarmWord, Qt::CaseInsensitive) && note.size() > alarmWord.size())
+        note = note.mid(alarmWord.size());
+      flags << GraphFlags::Flag{ m_marks[i]->line().x1(), QString::number(i + 1), note, {}, {} };
+      items << m_markFlags[i];
+    }
+  }
+  QList<int> order(flags.size());
+  std::iota(order.begin(), order.end(), 0);
+  std::stable_sort(order.begin(), order.end(), [&](int a, int b) { return flags[a].x < flags[b].x; });
+  QList<GraphFlags::Flag> sorted;
+  for (int i : order)
+    sorted << flags[i];
+  GraphFlags::layout(sorted, plot, fm.height() + 2, [&](const QString &t) { return fm.horizontalAdvance(t); });
+  for (qsizetype j = 0; j < sorted.size(); ++j)
+  {
+    GraphFlagItem *flag = items[order[j]];
+    flag->setFont(font);
+    flag->setText(sorted[j].text);
+    flag->setPlace(sorted[j].rect, sorted[j].x);
+    flag->setVisible(!sorted[j].rect.isEmpty());
+  }
+}
+
 void GraphWidget::addMark(const QColor &color, const QString &name)
 {
   m_store->addMark(color.rgba(), name);
@@ -883,6 +1467,8 @@ void GraphWidget::syncMarks()
 {
   qDeleteAll(m_marks);
   m_marks.clear();
+  qDeleteAll(m_markFlags);
+  m_markFlags.clear();
   for (const RecordingStore::Mark &m : m_store->marks())
   {
     auto *line = new QGraphicsLineItem(m_chart);
@@ -890,8 +1476,16 @@ void GraphWidget::syncMarks()
     line->setZValue(999);
     line->setToolTip(m.name);
     m_marks << line;
+    auto *flag = new GraphFlagItem(m_chart);
+    flag->setColor(QColor::fromRgba(m.color));
+    flag->setToolTip(m.name);
+    flag->setZValue(999);
+    flag->setData(0, QStringLiteral("mark-flag"));
+    flag->setVisible(false);
+    m_markFlags << flag;
   }
   updateMarkPositions();
+  updateCentreTicks();   // phosphor: the trigger's mark is the vertical centre
 }
 
 void GraphWidget::updateMarkPositions()
@@ -909,6 +1503,7 @@ void GraphWidget::updateMarkPositions()
     const double px = m_chart->mapToPosition(QPointF(x, m_yAxis->min()), m_dataSeries).x();
     line->setLine(px, plot.top(), px, plot.bottom());
   }
+  updateFlags();
 }
 
 int GraphWidget::lengthLimit() const
@@ -983,12 +1578,14 @@ void GraphWidget::stopSLOT()
 
 void GraphWidget::liveSLOT()
 {
+  followEnd();
   m_store->live();
 }
 
 void GraphWidget::onStateChanged()
 {
   const bool live = m_store->state() == RecordingStore::Live;
+  m_liveHold = false;
   // a file viewed is gone with Live or a recording
   if (m_store->state() != RecordingStore::View)
     m_sourceFile.clear();
@@ -1016,7 +1613,7 @@ QString GraphWidget::stateText() const
   switch (m_store->state())
   {
     case RecordingStore::Live:
-      return QString();
+      return m_liveHold ? tr("Live paused") : QString();
     case RecordingStore::Record:
     {
       const qint64 seconds = m_store->duration() / 1000;
@@ -1096,6 +1693,11 @@ void GraphWidget::onAppended(bool shifted)
     setYRange(m_scaleMin, m_scaleMax);
     updateThresholdLinePositions();
   }
+  else if (m_referenceKind == RefMean || m_referenceKind == RefMin || m_referenceKind == RefMax)
+    updateReferenceLine();
+  if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
+    updateTimeCursors();
+  updateEnvelope();
 }
 
 void GraphWidget::setUnit(const QString &unit)
@@ -1154,10 +1756,18 @@ void GraphWidget::onCleared()
   }
 
   m_dataLine->clear();
+  m_curvePts.clear();
+  m_envelope->setVisible(false);
   m_dataPoints->clear();
   m_intLine->clear();
   m_intPoints->clear();
   m_tailData = m_tailInt = m_tailDataPts = m_tailIntPts = 0;
+  clearTimeCursors();
+  if (m_liveHold)
+  {
+    m_liveHold = false;
+    updateStateLabel();
+  }
   // Qt Charts does not repaint a series emptied: without this the old curve
   // stood after Record until the next click
   m_chartView->viewport()->update();
@@ -1235,6 +1845,10 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
   {
     m_mouseDown = true;
     m_mousePan = false;
+    // not on a line: a click sets a time cursor (on release)
+    m_pressPos = pos;
+    m_pressShift = ev->modifiers() & Qt::ShiftModifier;
+    m_clickCandidate = m_cursorMode == NoCursor;
   }
   else if (ev->button() == Qt::MiddleButton)
   {
@@ -1299,6 +1913,53 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     for (ColorVariant v : { Neutral, ScopeBlue, PhosphorGreen, PhosphorAmber, ChartRecorder, Custom })
       variant(variantTitle(v), v);
 
+    // where the reference line stands (it can also be dragged)
+    QMenu *reference = m_popup->addMenu(tr("&Reference line"));
+    auto refEntry = [this, reference](const QString &text, ReferenceKind kind, double value = 0)
+    {
+      QAction *a = reference->addAction(text);
+      a->setProperty("ID", IDReference);
+      a->setProperty("kind", int(kind));
+      a->setProperty("value", value);
+      a->setCheckable(true);
+      a->setChecked(m_referenceKind == kind && (kind != RefAlarm || m_reference == value));
+      return a;
+    };
+    auto valueText = [this](double v)
+    {
+      QString unit;
+      const QString number = formatEngineeringValue(v, &unit);
+      return QString("%1 %2").arg(number, unit).trimmed();
+    };
+    refEntry(tr("At &0"), RefZero);
+    refEntry(tr("&Mean of the window"), RefMean);
+    refEntry(tr("M&inimum of the window"), RefMin);
+    refEntry(tr("Ma&ximum of the window"), RefMax);
+    if (!m_alarmThresholds.isEmpty())
+      reference->addSeparator();
+    for (double a : m_alarmThresholds)
+      refEntry(tr("Alarm threshold %1").arg(valueText(a)), RefAlarm, a);
+    if (m_referenceKind == RefValue)
+    {
+      reference->addSeparator();
+      refEntry(tr("At %1 (dragged)").arg(valueText(m_reference)), RefValue, m_reference)->setEnabled(false);
+    }
+    reference->addSeparator();
+    refEntry(tr("&Off"), RefOff);
+    QAction *overview = m_popup->addAction(tr("Over&view"));
+    overview->setProperty("ID", IDMinimap);
+    overview->setCheckable(true);
+    overview->setChecked(m_minimapOn);
+    QAction *envelope = m_popup->addAction(tr("Min/max &band"));
+    envelope->setProperty("ID", IDEnvelope);
+    envelope->setCheckable(true);
+    envelope->setChecked(m_envelopeOn);
+    if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
+    {
+      QAction *a = m_popup->addAction(tr("Remove time cursors"));
+      a->setProperty("ID", IDClearCursors);
+    }
+
     if (!m_store->isRunning())
     {
       m_popup->addSeparator();
@@ -1340,6 +2001,9 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
     return;
   }
 
+  if (m_clickCandidate && (pos - m_pressPos).manhattanLength() > 3)
+    m_clickCandidate = false;
+
   if (m_mouseDown && m_cursorMode != NoCursor)
   {
     QPointF scenePos = m_chartView->mapToScene(pos);
@@ -1354,6 +2018,13 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
       case Integration:
         m_store->setIntegrationThreshold(value);
         break;
+      case Reference:
+        dragReference(scenePos.y());
+        return;
+      case TimeCursorA:
+      case TimeCursorB:
+        setTimeCursor(m_cursorMode == TimeCursorB, qRound64(m_chart->mapToValue(scenePos, m_dataSeries).x() * 1000));
+        return;
       case NoCursor:
         break;
     }
@@ -1376,14 +2047,23 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
       return item->isVisible() && fabs(scenePos.y() - item->line().y1()) < tolerance;
     };
 
+    const double refY = referenceY();
     if (near(m_triggerLine))
       m_cursorMode = Trigger;
     else if (near(m_integrationLine))
       m_cursorMode = Integration;
+    else if (std::isfinite(refY) && fabs(scenePos.y() - refY) < tolerance)
+      m_cursorMode = Reference;
+    else if (m_cursorLine[1]->isVisible() && fabs(scenePos.x() - m_cursorLine[1]->line().x1()) < tolerance)
+      m_cursorMode = TimeCursorB;
+    else if (m_cursorLine[0]->isVisible() && fabs(scenePos.x() - m_cursorLine[0]->line().x1()) < tolerance)
+      m_cursorMode = TimeCursorA;
     else
       m_cursorMode = NoCursor;
 
-    m_chartView->viewport()->setCursor(m_cursorMode == NoCursor ? Qt::ArrowCursor : Qt::SplitVCursor);
+    m_chartView->viewport()->setCursor(m_cursorMode == NoCursor ? Qt::ArrowCursor
+                                       : m_cursorMode == TimeCursorA || m_cursorMode == TimeCursorB ? Qt::SplitHCursor
+                                       : Qt::SplitVCursor);
 
     if (m_cursorMode != NoCursor || !m_crosshair)
     {
@@ -1437,8 +2117,19 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
   }
 }
 
-void GraphWidget::handleChartMouseRelease(QMouseEvent *)
+void GraphWidget::handleChartMouseRelease(QMouseEvent *ev)
 {
+  if (m_clickCandidate && ev->button() == Qt::LeftButton)
+  {
+    const QPointF scenePos = m_chartView->mapToScene(m_pressPos);
+    if (m_chart->plotArea().contains(scenePos))
+    {
+      const qint64 t = qRound64(m_chart->mapToValue(scenePos, m_dataSeries).x() * 1000);
+      // Shift+click sets B; without A the first cursor is A
+      setTimeCursor(m_pressShift && m_cursorT[0] >= 0 ? 1 : 0, t);
+    }
+  }
+  m_clickCandidate = false;
   m_mouseDown = false;
   m_mousePan = false;
 }
@@ -1798,6 +2489,11 @@ void GraphWidget::applyThemeColors()
       break;
   }
   m_chart->setBackgroundBrush(background);
+  m_minimap->setColors(plot.style() != Qt::NoBrush ? plot : background, labels);
+  // the reference line: the lettering, half strong - above the grid, below
+  // the curve
+  m_referenceLine->setPen(QPen(QColor(labels.red(), labels.green(), labels.blue(), 150), 1));
+  m_referenceLabel->setBrush(labels);
   // the scrollbar in the graph's colours: a dark graph gets no light strip
   {
     QPalette pal = scrollbar->palette();
@@ -1865,6 +2561,19 @@ void GraphWidget::applyThemeColors()
   const QColor cursor = pick(m_cursorColor, Qt::black, labels);
   m_crosshairVLine->setPen(QPen(cursor));
   m_crosshairHLine->setPen(QPen(cursor));
+  for (int i = 0; i < 2; ++i)
+  {
+    m_cursorLine[i]->setPen(QPen(cursor, 1, Qt::DashLine));
+    m_cursorLevel[i]->setPen(QPen(cursor, 1, Qt::DashLine));
+    m_cursorName[i]->setColor(cursor);
+  }
+  if (m_cursorInfo)
+  {
+    const QColor bg = background.color().isValid() ? background.color() : palette().color(QPalette::Base);
+    m_cursorInfo->setStyleSheet(QString("QLabel { color: %1; background: %2; border: 1px solid %3; padding: 2px 4px; }")
+                                  .arg(labels.name(), QColor(bg.red(), bg.green(), bg.blue(), 220).name(QColor::HexArgb),
+                                       QColor(labels.red(), labels.green(), labels.blue(), 110).name(QColor::HexArgb)));
+  }
   m_triggerLine->setPen(QPen(pick(m_startColor, Qt::magenta, start), 1, lineStyle));
   // dotted: by default it takes the integration curve's colour and must not
   // pass for a curve (phosphor dashes the curve)
@@ -1981,6 +2690,18 @@ void GraphWidget::popupSLOT(QAction *action)
       setColorVariant(m_defaultVariant, action->property("variant").toInt());
       Q_EMIT colorVariantChanged(m_variantOverride);
       break;
+    case IDReference:
+      setReference(ReferenceKind(action->property("kind").toInt()), action->property("value").toDouble());
+      break;
+    case IDClearCursors:
+      clearTimeCursors();
+      break;
+    case IDMinimap:
+      setMinimapVisible(action->isChecked());
+      break;
+    case IDEnvelope:
+      setEnvelopeVisible(action->isChecked());
+      break;
   }
 }
 
@@ -2017,6 +2738,11 @@ bool GraphWidget::handleChartKey(QKeyEvent *ev)
       return true;
     case Qt::Key_End:
       scrollToEnd();
+      return true;
+    case Qt::Key_Escape:
+      if (m_cursorT[0] < 0 && m_cursorT[1] < 0)
+        return false;
+      clearTimeCursors();
       return true;
     default:
       return false;

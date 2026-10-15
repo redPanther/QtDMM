@@ -45,7 +45,9 @@ What happens when an alarm raises; tick any of them:
 - **Popup window** with message, value and time.
 - **Bring the QtDMM window to the front**.
 - **Mark in the recorder graph** - a dashed vertical line in the alarm's
-  colour at the moment it raised, kept with the recording; and **in the
+  colour at the moment it raised, with a flag under the graph: the mark's
+  number and, where there is room, the alarm's name. Kept with the
+  recording; and **in the
   readings table** - the row gets the colour.
 - **Recording** - start or stop a recording.
 - **Run program** - a command line; `%v` is the value, `%u` its unit,

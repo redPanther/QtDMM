@@ -130,6 +130,23 @@ were; the integration curve carries on across a gap.
   Zooming ends **All**; the window set under **Settings → Graph → Time
   axis** stays the start. While a recording runs and the graph shows its
   end, the graph follows it; scroll back to stay at a part.
+- The **overview** below the graph shows everything the graph holds, the
+  part on screen between two brackets. Each pixel shows the lowest to the
+  highest reading there, so a short spike stays visible in a recording of
+  hours. A red band along the top marks an overload, hatching a gap, dots
+  on the bottom edge the alarm marks. Drag the part between the brackets
+  (or click beside it) to move there; drag a bracket to widen or narrow
+  the window. Moved back while live, the graph stays at that part
+  (`Live paused` top left) while the readings go on; a click at the right
+  end of the overview, a time button or *Live* follows the newest reading
+  again. **Overview** in the right-click menu switches it off: the scroll
+  bar is back. Whether it shows is kept with the window layout and in a
+  saved workspace.
+- **Min/max band** in the right-click menu draws a faint band behind the
+  curve: at each point the lowest to the highest the curve reaches within
+  four pixels to either side. It shows how much a value scatters around
+  the curve, as wide on screen at 1 minute as at 1 hour. It is off at
+  first; whether it shows is kept with the window layout.
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see
@@ -143,6 +160,26 @@ were; the integration curve carries on across a gap.
   and pan first.
 - Hovering shows a crosshair with the time (to the millisecond) and the
   value of the reading at the cursor.
+- The **reference line** runs across the graph at 0 whenever 0 lies inside
+  the vertical scale, with its value small at the right end (`0 A`): a
+  current that charges and discharges, or a voltage around zero, reads
+  against it at a glance. The phosphor colours draw it with their fine
+  scale.
+  Drag the line to move it: it snaps to 0, to the mean, minimum and
+  maximum of what the graph shows and to the thresholds of the alarms; in
+  between it takes the value where you let go. The right-click menu,
+  **Reference line**, chooses the same, and **Off** hides the line. On the mean, minimum or maximum the
+  line follows the readings and says what it is (`mean 1.83 A`). Where it
+  stands is kept with the window layout and in a saved workspace.
+- **Time cursors:** a click into the graph sets cursor **A**, Shift+click
+  cursor **B**; drag them to move them, Esc or **Remove time cursors** in
+  the right-click menu takes them away. Top right the graph shows the time
+  and value at each cursor and, with both, the time between them, the
+  change of the value (Δ), the mean and the integral: in Ah for a current,
+  Wh for a power, else the unit times seconds - the charge a battery took
+  between two points, for instance. A dashed line across the graph at the
+  value under each cursor shows the change as the distance between them;
+  the cursors' names hang as flags under the graph, at the time labels.
 - **Integration** (**Settings → Graph → Integration curve**) draws a second curve: the
   integral over time of the readings above a threshold, in the unit times
   seconds (V·s, A·s, W·s), scaled and offset as configured — for charge or
@@ -164,8 +201,10 @@ were; the integration curve carries on across a gap.
   in up to 10 divisions of a whole step (10 min: 10 × 1 min, 1 min:
   6 × 10 s); in Live the grid lines run along with the readings, like the
   paper of a recorder.
-  The phosphor colours add a fine scale on the centre lines and dash the
-  integration curve.
+  The phosphor colours dash the integration curve and add a fine scale:
+  on the reference line, else along the bottom edge, and on the trigger
+  of a pre-triggered recording, else along the left edge. They have no
+  cross in the middle - it looked like a reference and said nothing.
 - **Custom** uses the colour buttons that show up beside it.
 
 A curve colour you chose yourself stays in every variant. The graph's

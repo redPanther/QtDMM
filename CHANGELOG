@@ -8,6 +8,24 @@
   dark digits for contrast; a third of it in the meter's dial), also after Acknowledge until the reading is back;
   with several alarms the one raised last. A switch per alarm (on by default), and "Coloured displays blink" on
   the Alarms page (off by default)
+- Graph: a reference line at 0 whenever 0 is in the scale, its value at the right end; phosphor draws it with
+  its fine scale. It can be dragged and snaps to 0, the mean, minimum and maximum shown and the alarm thresholds
+  (also in the right-click menu, Reference line, which can also switch it off); kept with the window layout and
+  in workspaces
+- Graph: time cursors - click sets A, Shift+click B, both can be dragged, Esc removes them. Time and value at
+  each, with both the span, the change, the mean and the integral (Ah for a current, Wh for a power); a dashed
+  line across the graph at the value under each cursor, the names A and B as flags under the graph
+- Graph: alarm marks get a flag under the graph with their number and, as room allows, the alarm's name;
+  phosphor draws a vertical line on the trigger of a pre-triggered recording
+- Graph, phosphor: no cross in the middle any more (it said nothing); the fine scale sits on the reference line and
+  the trigger line, else on the bottom and left edge
+- Graph: an overview below the graph shows all it holds, the window between two brackets; each pixel the lowest
+  to the highest reading (a spike stays visible), overloads, gaps and alarm marks. Drag it to move, drag a
+  bracket to zoom; moved back while live the graph pauses there until the right end, a time button or Live.
+  Can be switched off in the right-click menu (the scroll bar is back); kept with the window layout
+- Graph: a min/max band behind the curve (right-click menu, off at first): the lowest to the highest the curve
+  reaches within four pixels either side, so the scatter around it shows at any window; kept with the window layout
+- Design Silver: the area behind the windows is a plain grey; its gradient showed as stripes across it
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell
