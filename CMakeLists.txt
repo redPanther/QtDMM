@@ -118,6 +118,11 @@ list(APPEND SRC_FILES src/3rdparty/tiny-aes/aes.c)
 list(APPEND SRC_FILES src/3rdparty/miniz/miniz.c)
 set_source_files_properties(src/3rdparty/miniz/miniz.c PROPERTIES
 	COMPILE_DEFINITIONS "MINIZ_NO_STDIO;MINIZ_NO_ARCHIVE_WRITING_APIS;MINIZ_NO_TIME")
+# without the archive writer two of its helpers are unused; clang (macOS)
+# warns about them in every build. miniz itself stays as it came.
+if(NOT MSVC)
+	set_property(SOURCE src/3rdparty/miniz/miniz.c APPEND PROPERTY COMPILE_OPTIONS -Wno-unused-function)
+endif()
 
 ## Translations: the build only compiles the .ts files (lrelease). Updating
 ## them from the sources is a manual step - `cmake --build build --target
@@ -232,12 +237,10 @@ if(QTDMM_WERROR)
 	set(_third_party src/3rdparty/miniz/miniz.c src/3rdparty/tiny-aes/aes.c)
 	if(MSVC)
 		set(QTDMM_WARNING_FLAGS /W4 /WX)
-		set_source_files_properties(${_third_party}
-			PROPERTIES COMPILE_OPTIONS "/WX-")
+		set_property(SOURCE ${_third_party} APPEND PROPERTY COMPILE_OPTIONS "/WX-")
 	else()
 		set(QTDMM_WARNING_FLAGS -Wall -Werror) # -Wextra -Wpedantic
-		set_source_files_properties(${_third_party}
-			PROPERTIES COMPILE_OPTIONS "-Wno-error")
+		set_property(SOURCE ${_third_party} APPEND PROPERTY COMPILE_OPTIONS "-Wno-error")
 	endif()
 	# the tests get the same flags (cmake/ctest.cmake)
 	target_compile_options(${PROJECT_NAME} PRIVATE ${QTDMM_WARNING_FLAGS})
