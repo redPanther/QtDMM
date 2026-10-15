@@ -79,6 +79,9 @@ public:
   /// when the meter has no such key, or is not connected (a Bluetooth link
   /// still being set up).
   bool    sendKey(const QString &key);
+  /// The keys of DmmDecoder::keyNames() the meter's decoder can press; empty
+  /// for a meter without.
+  QStringList keys() const;
   void    setName(const QString &name)  {  m_name = name; }
   /// The meter description; passed on to the port device and the reader.
   void    setDmmInfo(const DmmDecoder::DMMInfo info)  {  m_dmmInfo = info; }

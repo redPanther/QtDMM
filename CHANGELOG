@@ -26,6 +26,11 @@
 - Graph: a min/max band behind the curve (right-click menu, off at first): the lowest to the highest the curve
   reaches within four pixels either side, so the scatter around it shows at any window; kept with the window layout
 - Design Silver: the area behind the windows is a plain grey; its gradient showed as stripes across it
+- SCPI server: CALCulate:AVERage:MINimum?/MAXimum?/AVERage?/COUNt? read the min/max memory, CLEar resets it;
+  QTDMM:RECord? (live, recording, view, with seconds, readings and unit), QTDMM:RECord:DATA? (the last readings as
+  CSV, at most 10000), QTDMM:ALARm?/:LIST?/:ACKnowledge, QTDMM:MARK "text", QTDMM:KEY "hold" and :CATalog? (the
+  UNI-T Bluetooth meters' keys), QTDMM:INSTances?; STATus:OPERation? bit 9 while an alarm is raised
+- Graph: the mark at a change of function reads "Function changed", not "Alarm Function changed"
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

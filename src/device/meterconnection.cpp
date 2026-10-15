@@ -202,6 +202,16 @@ bool MeterConnection::sendKey(const QString &key)
   return port->write(frame) == frame.size();
 }
 
+QStringList MeterConnection::keys() const
+{
+  QStringList keys;
+  if (m_decoder)
+    for (const QString &k : DmmDecoder::keyNames())
+      if (!m_decoder->keyRequest(k).isEmpty())
+        keys << k;
+  return keys;
+}
+
 bool MeterConnection::open()
 {
   m_wanted = true;

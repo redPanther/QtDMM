@@ -104,6 +104,11 @@ public:
   /// "minmax_off", "peak", "peak_off", "lamp"); empty when the meter has no
   /// such key or cannot be remote-controlled.
   virtual QByteArray keyRequest(const QString &key) const { Q_UNUSED(key); return QByteArray(); }
+  /// Every key name keyRequest() may know, in the order of the meters' keypads.
+  static QStringList keyNames()
+  {
+    return { "select1", "select2", "range", "auto", "hold", "rel", "minmax", "minmax_off", "peak", "peak_off", "lamp" };
+  }
   /// Decodes one frame (getPacketLength() bytes, or a variable-length one
   /// with its terminator). @p id tells which of
   /// DMMInfo::numValues frames this is. Returns nothing when the frame is

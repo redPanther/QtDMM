@@ -8,6 +8,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
+#include <algorithm>
 #include <cmath>
 
 Q_LOGGING_CATEGORY(lcScpi, "qtdmm.scpi", QtWarningMsg)
@@ -349,7 +350,189 @@ QByteArray ScpiServer::handle(const Command &cmd, bool &isQuery)
       pushError(f.isEmpty() ? -109 : -224, f.isEmpty() ? "Missing parameter" : "Illegal parameter value");
     return {};
   }
+  if (matches(head, "QTDMM") && depth == 3 && matches(cmd.path[1], "RECord") && matches(cmd.path[2], "DATA"))
+    return recordingData(cmd, isQuery);
   return handleText(cmd, isQuery).toUtf8();
+}
+
+// QTDMM:RECord:DATA? [<n>|MAX]: the last n readings of the graph (100 when
+// none is given, at most kMaxDataPoints) as CSV in a definite-length block -
+// "seconds,value" lines, an overload 9.9E+37, a gap nan
+QByteArray ScpiServer::recordingData(const Command &cmd, bool &isQuery)
+{
+  isQuery = cmd.query;
+  if (!cmd.query)
+  {
+    pushError(-100, "Command error");
+    isQuery = false;
+    return {};
+  }
+  int count = 100;
+  const QString arg = cmd.args.trimmed();
+  if (matches(arg, "MAXimum"))
+    count = kMaxDataPoints;
+  else if (!arg.isEmpty())
+  {
+    bool ok = false;
+    const double n = arg.toDouble(&ok);
+    if (!ok)
+    {
+      pushError(-104, "Data type error");
+      isQuery = false;
+      return {};
+    }
+    if (n < 1 || n != std::floor(n))
+    {
+      pushError(-222, "Data out of range");
+      isQuery = false;
+      return {};
+    }
+    count = int(std::min(n, double(kMaxDataPoints)));
+  }
+  QByteArray csv = "seconds,value\n";
+  if (m_sources.recordingData)
+    for (const Point &p : m_sources.recordingData(count))
+    {
+      const QByteArray value = p.overload ? QByteArray(kOverload)
+                               : std::isnan(p.value) ? QByteArray("nan") : number(p.value).toLatin1();
+      csv += QByteArray::number(p.seconds, 'f', 3) + ',' + value + '\n';
+    }
+  return block(csv);
+}
+
+QString ScpiServer::unquote(const QString &arg)
+{
+  QString s = arg.trimmed();
+  if (s.size() >= 2 && (s.front() == '"' || s.front() == '\'') && s.back() == s.front())
+  {
+    const QChar q = s.front();
+    s = s.mid(1, s.size() - 2);
+    s.replace(QString(2, q), QString(q));
+  }
+  return s;
+}
+
+namespace
+{
+QString quoted(const QString &s)
+{
+  return '"' + QString(s).replace('"', "\"\"") + '"';
+}
+}
+
+// The commands of QtDMM's own: what a bench meter does not have - the
+// recording, the alarms, marks, the meter's keys and the other instances
+QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
+{
+  const int depth = cmd.path.size();
+  const QString sub = depth > 1 ? cmd.path[1] : QString();
+  const QString leaf = depth > 2 ? cmd.path[2] : QString();
+  isQuery = cmd.query;
+  auto fail = [this, &isQuery](int code, const QString &text)
+  {
+    pushError(code, text);
+    isQuery = false;
+    return QString();
+  };
+  auto wantQuery = [&]() { return cmd.query || (fail(-100, "Command error"), false); };
+  auto wantCommand = [&]() { return !cmd.query || (fail(-100, "Command error"), false); };
+
+  // QTDMM:RECord? - IDLE|LIVE|REC|VIEW,<seconds>,<readings>,"<unit>"
+  if (matches(sub, "RECord") && depth == 2)
+  {
+    if (!wantQuery())
+      return {};
+    const RecordingState r = m_sources.recording ? m_sources.recording() : RecordingState();
+    static const char *const modes[] = { "IDLE", "LIVE", "REC", "VIEW" };
+    return QString("%1,%2,%3,%4").arg(modes[r.mode]).arg(r.seconds, 0, 'f', 3).arg(r.count).arg(quoted(r.unit));
+  }
+
+  // QTDMM:ALARm? the alarms raised (acknowledged ones too), :LIST? each
+  // with its state, :ACKnowledge as the banner's button
+  if (matches(sub, "ALARm") && depth <= 3)
+  {
+    const QList<AlarmState> alarms = m_sources.alarms ? m_sources.alarms() : QList<AlarmState>();
+    if (depth == 2)
+    {
+      if (!wantQuery())
+        return {};
+      int raised = 0;
+      for (const AlarmState &a : alarms)
+        raised += a.level >= AlarmState::Raised;
+      return QString::number(raised);
+    }
+    if (matches(leaf, "LIST"))
+    {
+      if (!wantQuery())
+        return {};
+      static const char *const levels[] = { "OFF", "PEND", "RAIS", "ACKN" };
+      QStringList out;
+      for (const AlarmState &a : alarms)
+        out << quoted(a.name) << levels[a.level];
+      return out.isEmpty() ? QString("\"\"") : out.join(',');
+    }
+    if (matches(leaf, "ACKnowledge"))
+    {
+      if (wantCommand())
+        Q_EMIT acknowledgeAlarmsRequested();
+      return {};
+    }
+    return fail(-113, "Undefined header");
+  }
+
+  // QTDMM:MARK "text": a mark at the newest reading
+  if (matches(sub, "MARK") && depth == 2)
+  {
+    if (wantCommand())
+    {
+      const QString text = unquote(cmd.args);
+      Q_EMIT markRequested(text.isEmpty() ? QStringLiteral("SCPI") : text);
+    }
+    return {};
+  }
+
+  // QTDMM:KEY "hold" presses a key of the meter, QTDMM:KEY:CATalog? lists them
+  if (matches(sub, "KEY") && depth <= 3)
+  {
+    const QStringList keys = m_sources.keys ? m_sources.keys() : QStringList();
+    if (depth == 3)
+    {
+      if (!matches(leaf, "CATalog"))
+        return fail(-113, "Undefined header");
+      if (!wantQuery())
+        return {};
+      QStringList out;
+      for (const QString &k : keys)
+        out << quoted(k.toUpper());
+      return out.isEmpty() ? QString("\"\"") : out.join(',');
+    }
+    if (!wantCommand())
+      return {};
+    const QString key = unquote(cmd.args).toLower();
+    if (key.isEmpty())
+      return fail(-109, "Missing parameter");
+    if (keys.isEmpty())
+      return fail(-241, "Hardware missing; the meter has no keys QtDMM can press");
+    if (!keys.contains(key))
+      return fail(-224, "Illegal parameter value");
+    if (!m_sources.pressKey || !m_sources.pressKey(key))
+      return fail(-240, "Hardware error; the key was not sent");
+    return {};
+  }
+
+  // QTDMM:INSTances? - "<id>",<value>,"<unit>" for each running instance
+  if (matches(sub, "INSTances") && depth == 2)
+  {
+    if (!wantQuery())
+      return {};
+    QStringList out;
+    if (m_sources.instances)
+      for (const Instance &i : m_sources.instances())
+        out << quoted(i.id) << (i.valid ? number(i.value) : QString(kNotANumber)) << quoted(i.unit);
+    return out.isEmpty() ? QString("\"\"") : out.join(',');
+  }
+
+  return fail(-113, "Undefined header");
 }
 
 QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
@@ -519,6 +702,33 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
     return {};
   }
 
+  // CALCulate:AVERage: the min/max memory, as on Keysight's bench meters
+  if (matches(head, "CALCulate") && depth == 3 && matches(cmd.path[1], "AVERage"))
+  {
+    const QString what = cmd.path[2];
+    if (matches(what, "CLEar"))
+    {
+      if (noQuery())
+        Q_EMIT resetMinMaxRequested();
+      return {};
+    }
+    const bool min = matches(what, "MINimum"), max = matches(what, "MAXimum");
+    const bool mean = matches(what, "AVERage"), count = matches(what, "COUNt");
+    if (!min && !max && !mean && !count)
+      return undefined();
+    if (!queryOnly())
+      return {};
+    const Stats s = m_sources.stats ? m_sources.stats() : Stats();
+    if (count)
+      return QString::number(s.count);
+    if (s.count == 0)
+      return kNotANumber;
+    return number(min ? s.min : max ? s.max : s.mean);
+  }
+
+  if (matches(head, "QTDMM"))
+    return handleQtdmm(cmd, isQuery);
+
   // STATus
   if (matches(head, "STATus") && depth >= 2)
   {
@@ -543,8 +753,14 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
     }
     if (matches(cmd.path[1], "OPERation"))
     {
-      // SCPI bit 4 = measuring: the recorder runs
-      return QString::number(m_recording ? 16 : 0);
+      // SCPI bit 4 = measuring: the recorder runs; bit 9 (QtDMM's own) an
+      // alarm is raised, acknowledged or not
+      int bits = m_recording ? 16 : 0;
+      if (m_sources.alarms)
+        for (const AlarmState &a : m_sources.alarms())
+          if (a.level >= AlarmState::Raised)
+            bits |= 512;
+      return QString::number(bits);
     }
     return undefined();
   }

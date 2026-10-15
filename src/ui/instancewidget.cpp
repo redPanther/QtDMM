@@ -160,7 +160,7 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   connect(m_ctl, &MeterController::markRequested, this, [this](const QColor &color, const QString &name, bool graph, bool)
   {
     if (graph)
-      ui_graph->addMark(color, Alarm::title(name));
+      ui_graph->addMark(color, name);
   });
   m_ctl->setAlarms(m_configDlg->alarms());
 

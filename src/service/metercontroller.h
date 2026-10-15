@@ -154,7 +154,9 @@ Q_SIGNALS:
   void        alertColorChanged(const QColor &color);
   /// An alarm wants the recorder started (true) or stopped.
   void        recordingRequested(bool start);
-  /// An alarm wants a mark in the graph and/or the readings table.
+  /// A mark in the graph and/or the readings table: an alarm ("Alarm
+  /// Overvoltage"), a change of function, a SCPI client (QTDMM:MARK);
+  /// @p name is the text shown.
   void        markRequested(const QColor &color, const QString &name, bool graph, bool table);
 
   /// A SCPI client asked to connect/disconnect the meter.
@@ -174,6 +176,8 @@ private:
   void        onAlarmRaised(int index, const Alarm &alarm, double value);
   void        updateBanner();
   void        updateScpiStatus();
+  /// What the QTDMM: and CALCulate queries read (ScpiServer::Sources).
+  void        installScpiSources();
   void        timerEvent(QTimerEvent *) override;
 
   MeterConnection                *m_dmm;

@@ -106,6 +106,13 @@ MeterController::MeterController(QObject *parent)
         m_connectPending.reset();
     }, Qt::QueuedConnection);
   });
+  connect(m_scpi, &ScpiServer::resetMinMaxRequested, this, &MeterController::resetMinMax);
+  connect(m_scpi, &ScpiServer::acknowledgeAlarmsRequested, this, &MeterController::acknowledgeAlarms);
+  connect(m_scpi, &ScpiServer::markRequested, this, [this](const QString &text)
+  {
+    Q_EMIT markRequested(QColor(0x1e, 0x90, 0xff), text, true, true);
+  });
+  installScpiSources();
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
   connect(m_hislip, &HislipServer::sessionsChanged, this, [this](int) { updateScpiStatus(); });
 
@@ -305,7 +312,7 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
   else if (alarm.recorder == Alarm::RecorderStop)
     Q_EMIT recordingRequested(false);
   if (alarm.markGraph || alarm.markTable)
-    Q_EMIT markRequested(alarm.color, alarm.name, alarm.markGraph, alarm.markTable);
+    Q_EMIT markRequested(alarm.color, Alarm::title(alarm.name), alarm.markGraph, alarm.markTable);
   if (!alarm.command.isEmpty())
   {
     QString cmd = alarm.command;
@@ -391,6 +398,83 @@ void MeterController::updateBanner()
 }
 
 // ---------------------------------------------------------------- SCPI
+
+// What the QTDMM: and CALCulate queries read: the min/max memory, the
+// recording, the alarms, the meter's keys and the other instances
+void MeterController::installScpiSources()
+{
+  ScpiServer::Sources s;
+  s.stats = [this]
+  {
+    ScpiServer::Stats st;
+    if (!m_minMax.isEmpty())
+    {
+      st.count = m_minMax.count();
+      st.min = m_minMax.minimum();
+      st.max = m_minMax.maximum();
+      st.mean = m_minMax.mean();
+    }
+    return st;
+  };
+  s.recording = [this]
+  {
+    ScpiServer::RecordingState r;
+    r.count = m_recorder->count();
+    switch (m_recorder->state())
+    {
+      case RecordingStore::Live:   r.mode = ScpiServer::RecordingState::Live; break;
+      case RecordingStore::Record: r.mode = ScpiServer::RecordingState::Record; break;
+      default: r.mode = r.count ? ScpiServer::RecordingState::View : ScpiServer::RecordingState::Idle;
+    }
+    r.seconds = m_recorder->duration() / 1000.0;
+    r.unit = m_recorder->unit();
+    return r;
+  };
+  s.recordingData = [this](int count)
+  {
+    QList<ScpiServer::Point> points;
+    const RecordingSeries &series = m_recorder->series();
+    for (int i = std::max(0, series.count() - count); i < series.count(); ++i)
+    {
+      const RawPoint &p = series.at(i);
+      points.append({ p.t / 1000.0, p.value, p.quality == Quality::Overload });
+    }
+    return points;
+  };
+  s.alarms = [this]
+  {
+    QList<ScpiServer::AlarmState> alarms;
+    const QList<Alarm> &list = m_alarms->alarms();
+    for (int i = 0; i < list.size(); ++i)
+      alarms.append({ list[i].name, ScpiServer::AlarmState::Level(m_alarms->state(i)) });
+    return alarms;
+  };
+  s.keys = [this] { return m_dmm->keys(); };
+  s.pressKey = [this](const QString &key) { return pressKey(key); };
+  s.instances = [this]
+  {
+    QList<ScpiServer::Instance> list;
+    if (!m_stateMgr)
+      return list;
+    const auto readings = m_stateMgr->readings();
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    for (const QString &id : m_stateMgr->instances())
+    {
+      ScpiServer::Instance in;
+      in.id = id;
+      const auto it = readings.constFind(id);
+      if (it != readings.constEnd())
+      {
+        in.value = it->value;
+        in.unit = it->unit;
+        in.valid = it->valid && now - it->msecs <= ScpiServer::kStaleMs;
+      }
+      list << in;
+    }
+    return list;
+  };
+  m_scpi->setSources(std::move(s));
+}
 
 void MeterController::setScreenshotSource(std::function<QByteArray(const QByteArray &)> source)
 {
