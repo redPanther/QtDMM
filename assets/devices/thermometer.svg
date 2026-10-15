@@ -1,0 +1,34 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 360" width="200" height="360">
+  <!-- Generic thermometer (handheld, probe). Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .bezel { fill: #2B2E32; }
+    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
+  </style>
+  <!-- probe cable + probe -->
+  <path d="M100 8 v20" class="dline" style="stroke-width:6"/>
+  <rect class="dark" x="40" y="4" width="120" height="8" rx="4"/>
+  <rect class="light" x="150" y="2" width="44" height="12" rx="4"/>
+  <rect class="primary" x="20" y="28" width="160" height="328" rx="30"/>
+  <rect class="secondary" x="32" y="40" width="136" height="304" rx="20"/>
+  <rect class="dark" x="44" y="56" width="112" height="64" rx="6"/>
+  <rect class="lcd" x="49" y="61" width="102" height="54" rx="3"/>
+  <text class="lcdtext" style="font-weight:bold;font-family:monospace;font-size:26px" x="100.0" y="97.1" text-anchor="middle">23.5°</text>
+  <!-- thermometer symbol -->
+  <rect class="light" x="92" y="150" width="16" height="100" rx="8"/>
+  <circle class="light" cx="100" cy="262" r="20"/>
+  <rect class="primary" x="96" y="190" width="8" height="70" rx="4"/>
+  <circle class="primary" cx="100" cy="262" r="13"/>
+  <g class="light"><rect x="116" y="170" width="14" height="3"/><rect x="116" y="190" width="10" height="3"/><rect x="116" y="210" width="14" height="3"/><rect x="116" y="230" width="10" height="3"/></g>
+  <g class="key"><rect x="48" y="302" width="30" height="14" rx="4"/><rect x="85" y="302" width="30" height="14" rx="4"/><rect x="122" y="302" width="30" height="14" rx="4"/></g>
+</svg>

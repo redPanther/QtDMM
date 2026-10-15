@@ -1,0 +1,26 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Generic virtual meter (QtDMM: simulated meter, calculated value). Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .bezel { fill: #2B2E32; }
+    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
+  </style>
+  <!-- dashed outline: not a physical device -->
+  <rect x="8" y="8" width="184" height="184" rx="24" fill="none" stroke="#FF00FF" stroke-width="6" stroke-dasharray="16 10"/>
+  <rect class="secondary" x="24" y="24" width="152" height="152" rx="16"/>
+  <rect class="dark" x="40" y="44" width="120" height="58" rx="6"/>
+  <rect class="lcd" x="45" y="49" width="110" height="48" rx="3"/>
+  <text class="lcdtext" style="font-weight:bold;font-family:monospace;font-size:26px" x="100.0" y="82.1" text-anchor="middle">f(x)</text>
+  <!-- sine wave -->
+  <path class="line" d="M40 140 q20 -40 40 0 t40 0 t40 0"/>
+</svg>

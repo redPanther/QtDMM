@@ -159,6 +159,8 @@ protected:
   void fillModels();
   void populateModelsForVendor(const QString &vendor);
   void populateAllModels();
+  /// One entry of the model list, with the kind of instrument as its tooltip.
+  void addModelItem(const DmmDecoder::DMMInfo &cfg);
   void enterManualMode();
   /// Shows the formula group instead of the port/protocol groups, or back.
   void updateCalcMode();

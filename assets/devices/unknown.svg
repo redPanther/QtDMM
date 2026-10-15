@@ -1,0 +1,23 @@
+<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Generic unknown device (fallback when no type or template matches). Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+  <style>
+    .primary { fill: #FF00FF; }
+    .secondary { fill: #00FFFF; }
+    .lcd { fill: #C9D3C0; }
+    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
+    .light { fill: #E6E8EA; }
+    .key { fill: #8A9096; }
+    .dark { fill: #1E2124; }
+    .bezel { fill: #2B2E32; }
+    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
+  </style>
+  <!-- plain box + large question mark (virtual has the dashed frame) -->
+  <rect class="primary" x="10" y="10" width="180" height="180" rx="24"/>
+  <rect class="secondary" x="26" y="26" width="148" height="148" rx="16"/>
+  <circle class="light" cx="100" cy="94" r="46" fill-opacity="0.15"/>
+  <text x="100" y="134" text-anchor="middle" style="font-weight: bold; font-size: 110px; font-family: sans-serif;fill:#E6E8EA">?</text>
+</svg>

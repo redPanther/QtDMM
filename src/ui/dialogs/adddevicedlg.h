@@ -109,6 +109,8 @@ private:
   /// From page 2 to page 3: the find (or the typed port) into the fields,
   /// a known entry with its name.
   void        takePort();
+  /// Page 4: the picture of the kind of instrument and what was set up.
+  void        updateDeviceInfo();
 
   DeviceLibrary  *m_library = nullptr;
   DeviceSettings *m_settings = nullptr;
@@ -117,6 +119,8 @@ private:
   QLineEdit      *m_name = nullptr;
   QToolButton    *m_thisWindow = nullptr;
   QToolButton    *m_newWindow = nullptr;
+  QLabel         *m_symbol = nullptr;
+  QLabel         *m_deviceInfo = nullptr;
   QProgressBar   *m_progress = nullptr;
   QListWidget    *m_cards = nullptr;
   QLabel         *m_hint = nullptr;

@@ -58,6 +58,29 @@ def protocol_table():
 
 
 CHIP = {name: row["chip"] for name, row in protocol_table().items() if row["chip"]}
+
+
+def device_types():
+    """src/device/devicetype.cpp: each protocol's kind, the models listed one
+    by one, and the kinds' names - (by_protocol, by_model, names)."""
+    src = (REPO / "src" / "device" / "devicetype.cpp").read_text(encoding="utf-8")
+    names = dict(re.findall(r'case (\w+):\s*return QCoreApplication::translate\("DeviceType", "([^"]+)"\)', src))
+    body = src[src.index("Type ofProtocol"):src.index("namespace\n{")]
+    by_protocol, pending = {}, []
+    for line in body.splitlines():
+        m = re.search(r"case FrameFormat::(\w+):", line)
+        if m:
+            pending.append(m.group(1))
+        m = re.search(r"return (\w+);", line)
+        if m and pending:
+            for p in pending:
+                by_protocol[p] = m.group(1)
+            pending = []
+    by_model = {(v, mo): t for v, mo, t in re.findall(r'\{ "([^"]+)", "([^"]+)", (\w+) \}', src)}
+    return by_protocol, by_model, names
+
+
+TYPE_BY_PROTOCOL, TYPE_BY_MODEL, TYPE_NAMES = device_types()
 # How a meter is reached when it has no baud rate - "Bluetooth LE",
 # "USB-HID (BU-86X)", "sigrok-cli" - straight from src/device/protocols.cpp, so a
 # new backend is declared next to its protocol rather than guessed here.
@@ -107,6 +130,8 @@ def devices():
                 "vendor": d["vendor"], "model": model.rstrip("* ").strip() + marks,
                 "hardware_mod": hardware_mod(d["vendor"], model),
                 "protocol": d["protocol"], "chip": CHIP.get(d["protocol"], "-"),
+                "type": TYPE_NAMES[TYPE_BY_MODEL.get((d["vendor"], model.rstrip("* ").strip()),
+                                                     TYPE_BY_PROTOCOL[d["protocol"]])],
                 # baud 0: not a serial line, the protocol's transport says what it is
                 "serial": f'{d["baud"]} {d["bits"]}{PARITY[d["parity"]]}{d["stop"]}' if d["baud"] != "0"
                           else TRANSPORT.get(d["protocol"], "?"),
@@ -130,7 +155,8 @@ def render_devices(rows):
         "(named in its manual or on the sigrok wiki) usually speaks the same",
         "protocol. See [Connecting a meter](connecting.md).",
         "",
-        "*Serial* is baud rate, data bits, parity (N/E/O) and stop bits; meters that",
+        "*Type* is the kind of instrument (handheld or bench multimeter, thermometer,",
+        "battery monitor, ...). *Serial* is baud rate, data bits, parity (N/E/O) and stop bits; meters that",
         "are not read over a serial line say how they are reached instead",
         "(*USB-HID (BU-86X)* for the Brymen cable, *Bluetooth LE*, *sigrok-cli*).",
         "*Lines* are the control lines the cable needs driven. *Counts* is the display",
@@ -142,11 +168,11 @@ def render_devices(rows):
         "meter working, please report it on the",
         "[project page](https://github.com/qtdmm/QtDMM/issues).",
         "",
-        "| Vendor | Model | Chip | Protocol | Serial | Lines | Counts |",
-        "|---|---|---|---|---|---|---|",
+        "| Vendor | Model | Type | Chip | Protocol | Serial | Lines | Counts |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for r in rows:
-        out.append(f'| {r["vendor"]} | {r["model"]} | {r["chip"]} | `{r["protocol"]}` | {r["serial"]} '
+        out.append(f'| {r["vendor"]} | {r["model"]} | {r["type"]} | {r["chip"]} | `{r["protocol"]}` | {r["serial"]} '
                    f'| {r["lines"]} | {r["counts"]} |')
     out.append("")
     out.append("¹ settings taken from the chip, not yet confirmed on hardware with QtDMM.")
@@ -164,6 +190,12 @@ def render_devices(rows):
             out.append(f"- **{names}**: {r['hardware_mod']}")
     out.append("")
     out.append(f"{len(rows)} devices across {len({r['vendor'] for r in rows})} vendors.")
+    kinds = {}
+    for r in rows:
+        kinds[r["type"]] = kinds.get(r["type"], 0) + 1
+    out.append("")
+    out.append("By type: " + ", ".join(f"{t} {n}" for t, n in
+                                       sorted(kinds.items(), key=lambda k: (-k[1], k[0]))) + ".")
     return "\n".join(out) + "\n"
 
 
