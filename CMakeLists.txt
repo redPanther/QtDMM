@@ -25,12 +25,12 @@ file(GLOB ICON_FILES CONFIGURE_DEPENDS assets/icons/app/*.png )
 ## It lives in the build directory with absolute paths: the source tree stays
 ## untouched, and several build directories don't overwrite each other's file.
 list(SORT ICON_FILES)
-set(RES_CONTENT " <qresource prefix=\"/Symbols\">\n")
+set(RES_CONTENT "    <qresource prefix=\"/Symbols\">\n")
 foreach(file_path IN LISTS ICON_FILES)
 	get_filename_component(base_name "${file_path}" NAME)
-	set(RES_CONTENT "${RES_CONTENT} <file alias=\"${base_name}\">${file_path}</file>\n")
+	set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${base_name}\">${file_path}</file>\n")
 endforeach()
-set(RES_CONTENT "${RES_CONTENT} </qresource>\n")
+set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
 ## Translations are compiled into the binary by default: one file, nothing to
 ## find at run time. Linux/BSD distributions that package them as files
@@ -42,12 +42,12 @@ if (WIN32 OR APPLE)
 endif()
 
 if (QTDMM_EMBED_TRANSLATIONS)
-	set(RES_CONTENT "${RES_CONTENT} <qresource prefix=\"/Translations\">\n")
+	set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/Translations\">\n")
 	foreach(translation_file IN LISTS TRANSLATIONS)
 		get_filename_component(qm_name "${translation_file}" NAME_WE)
-		set(RES_CONTENT "${RES_CONTENT} <file alias=\"${qm_name}.qm\">${CMAKE_BINARY_DIR}/${qm_name}.qm</file>\n")
+		set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${qm_name}.qm\">${CMAKE_BINARY_DIR}/${qm_name}.qm</file>\n")
 	endforeach()
-	set(RES_CONTENT "${RES_CONTENT} </qresource>\n")
+	set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 endif()
 
 ## icon sets (Breeze light and dark, Oxygen; tools/update_icons.py), each an
@@ -55,35 +55,35 @@ endif()
 file(GLOB_RECURSE THEME_FILES CONFIGURE_DEPENDS assets/icons/sets/*/index.theme assets/icons/sets/*.svg
      assets/icons/sets/*.png)
 list(SORT THEME_FILES)
-set(RES_CONTENT "${RES_CONTENT} <qresource prefix=\"/icons\">\n")
+set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/icons\">\n")
 foreach(file_path IN LISTS THEME_FILES)
 	file(RELATIVE_PATH alias "${CMAKE_SOURCE_DIR}/assets/icons/sets" "${file_path}")
-	set(RES_CONTENT "${RES_CONTENT} <file alias=\"${alias}\">${file_path}</file>\n")
+	set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${alias}\">${file_path}</file>\n")
 endforeach()
-set(RES_CONTENT "${RES_CONTENT} </qresource>\n")
+set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
 ## pictures of the kinds of instrument (DeviceSymbol), :/devices/<type id>.svg
 ## (the tests get them from qtdmm_resources, too)
 file(GLOB DEVICE_SYMBOLS CONFIGURE_DEPENDS assets/devices/*.svg)
 list(SORT DEVICE_SYMBOLS)
-set(DEVICE_RES " <qresource prefix=\"/devices\">\n")
+set(DEVICE_RES "    <qresource prefix=\"/devices\">\n")
 foreach(file_path IN LISTS DEVICE_SYMBOLS)
 	get_filename_component(alias "${file_path}" NAME)
-	set(DEVICE_RES "${DEVICE_RES} <file alias=\"${alias}\">${file_path}</file>\n")
+	set(DEVICE_RES "${DEVICE_RES}        <file alias=\"${alias}\">${file_path}</file>\n")
 endforeach()
-set(DEVICE_RES "${DEVICE_RES} </qresource>\n")
+set(DEVICE_RES "${DEVICE_RES}    </qresource>\n")
 set(RES_CONTENT "${RES_CONTENT}${DEVICE_RES}")
 
 ## in-app help: the user guide pages, aliased by their path below docs/user so
 ## relative Markdown links resolve the same way in QTextBrowser and in MkDocs
 file(GLOB_RECURSE HELP_FILES CONFIGURE_DEPENDS docs/user/*.md docs/user/*.png docs/user/*.svg docs/user/*.jpg)
 list(SORT HELP_FILES)
-set(RES_CONTENT "${RES_CONTENT} <qresource prefix=\"/Help\">\n")
+set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/Help\">\n")
 foreach(file_path IN LISTS HELP_FILES)
 	file(RELATIVE_PATH alias "${CMAKE_SOURCE_DIR}/docs/user" "${file_path}")
-	set(RES_CONTENT "${RES_CONTENT} <file alias=\"${alias}\">${file_path}</file>\n")
+	set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${alias}\">${file_path}</file>\n")
 endforeach()
-set(RES_CONTENT "${RES_CONTENT} </qresource>\n")
+set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
 ## written only when the content changed, so a reconfigure doesn't rebuild the resources
 file(WRITE "${CMAKE_BINARY_DIR}/resources.qrc.new" "<!-- ATTENTION this file is auto generated -->\n<RCC>\n${RES_CONTENT}</RCC>\n")
