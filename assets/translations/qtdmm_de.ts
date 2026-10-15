@@ -2490,82 +2490,82 @@ Keine Berechtigung? Der Sensor braucht eine udev-Regel für die USB-ID %1:%2.</t
         <translation>Aufnahme gestoppt: gewechselt zu %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="520"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="522"/>
         <source>Loading a file replaces it.</source>
         <translation>Eine Datei zu laden ersetzt sie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="520"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="522"/>
         <source>Load without saving</source>
         <translation>Laden ohne speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="538"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="540"/>
         <source>Clear deletes it.</source>
         <translation>Leeren löscht sie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="538"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="540"/>
         <source>Clear without saving</source>
         <translation>Leeren ohne speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="554"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="556"/>
         <source>Live clears it.</source>
         <translation>Live leert sie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="554"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="556"/>
         <source>Live without saving</source>
         <translation>Live ohne speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="564"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="566"/>
         <source>A new recording clears it.</source>
         <translation>Eine neue Aufnahme leert sie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="564"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="566"/>
         <source>Record without saving</source>
         <translation>Aufnehmen ohne speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="572"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="574"/>
         <source>It starts now. A recording at %1 starts by itself from Live.</source>
         <translation>Sie beginnt jetzt. Eine Aufnahme um %1 beginnt von selbst aus Live.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="574"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="576"/>
         <source>It starts now. A recording at the threshold starts by itself from Live.</source>
         <translation>Sie beginnt jetzt. Eine Aufnahme an der Schwelle beginnt von selbst aus Live.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="697"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="699"/>
         <source>Automatic start at %1</source>
         <translation>Automatisch starten bei %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="699"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="701"/>
         <source>Raising threshold %1</source>
         <translation>Grenzwert steigent %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="701"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="703"/>
         <source>Falling threshold %1</source>
         <translation>Grenzwert fallend %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="736"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="738"/>
         <source>calculated</source>
         <translation>berechnet</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="745"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="747"/>
         <source>no meter configured</source>
         <translation>kein Multimeter konfiguriert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="778"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="780"/>
         <source>QtDMM alarm: %1</source>
         <translation>QtDMM-Alarm: %1</translation>
     </message>
@@ -2905,22 +2905,22 @@ Keine Berechtigung? Der Sensor braucht eine udev-Regel für die USB-ID %1:%2.</t
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Anzeige und Transientenrekorder für digitale Multimeter.&lt;/p&gt;&lt;p&gt;Gebaut mit &lt;b&gt;Qt&lt;/b&gt; %2. Lizenziert unter der &lt;b&gt;GNU GPL 3 oder neuer&lt;/b&gt; (Versionen vor 0.9.0 unter GPL 2 oder neuer).&lt;/p&gt;&lt;p&gt;Ab 0.9.5: tuxmaster und Mitwirkende, siehe Datei AUTHORS.&lt;br&gt;0.9.3 und davor: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Kontakt: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Quellcode und Fehlermeldungen: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Die Symbole stammen aus den Symbolthemen &lt;b&gt;Oxygen&lt;/b&gt; und &lt;b&gt;Breeze&lt;/b&gt; der KDE-Gemeinschaft (LGPL 3); die eigenen Symbole von QtDMM sind in seinem Stil gezeichnet.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1306"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1308"/>
         <source>The formulas now use &quot;%1&quot;. The running instances %2 use it after a restart.</source>
         <translation>Die Formeln verwenden jetzt „%1“. Die laufenden Instanzen %2 übernehmen das nach einem Neustart.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1353"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1355"/>
         <source>%1 is in use in this window</source>
         <translation>%1 ist in diesem Fenster in Gebrauch</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1359"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1361"/>
         <source>%1 is in use by the instance %2</source>
         <translation>%1 ist in der Instanz %2 in Gebrauch</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1364"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1366"/>
         <source>%1 opens in the new window %2</source>
         <translation>%1 öffnet sich im neuen Fenster %2</translation>
     </message>
@@ -3189,78 +3189,83 @@ Please choose which instance should record.</translation>
     </message>
     <message>
         <location filename="../../src/ui/mainwindow.cpp" line="1215"/>
+        <source>VXI-11 for VISA and lxi-tools: %1, %2 connected.</source>
+        <translation>VXI-11 für VISA und lxi-tools: %1, %2 verbunden.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="1217"/>
         <source>SCPI server (raw socket) on %1, %2 connected.</source>
         <translation>SCPI-Server (Raw-Socket) auf %1, %2 verbunden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1266"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1268"/>
         <source>stopped</source>
         <translation>gestoppt</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1285"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1287"/>
         <source>The instance %1 starts</source>
         <translation>Die Instanz %1 startet</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1294"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1305"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1296"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1307"/>
         <source>Rename instance</source>
         <translation>Instanz umbenennen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1384"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1386"/>
         <source>%1: readings are coming in</source>
         <translation>%1: Messwerte kommen an</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1385"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1387"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: seit 3 s kein Messwert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1506"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1508"/>
         <source>Save workspace</source>
         <translation>Arbeitsbereich speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1507"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1533"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1509"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1535"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>QtDMM-Arbeitsbereich (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1520"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1522"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Arbeitsbereich speichern</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1520"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1522"/>
         <source>Could not write %1.</source>
         <translation>%1 konnte nicht geschrieben werden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1524"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1526"/>
         <source>Workspace saved to %1</source>
         <translation>Arbeitsbereich gespeichert in %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1532"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1534"/>
         <source>Load workspace</source>
         <translation>Arbeitsbereich laden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1539"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1541"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Arbeitsbereich laden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1540"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1542"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 ist kein QtDMM-Arbeitsbereich.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1564"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1566"/>
         <source>Workspace loaded from %1</source>
         <translation>Arbeitsbereich geladen aus %1</translation>
     </message>
@@ -3373,119 +3378,140 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
 <context>
     <name>MeterController</name>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="51"/>
+        <location filename="../../src/service/metercontroller.cpp" line="59"/>
         <source>Recording stopped: the meter measures %2 now, not %1</source>
         <translation>Aufnahme beendet: Das Messgerät misst jetzt %2 statt %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="52"/>
+        <location filename="../../src/service/metercontroller.cpp" line="60"/>
         <source>Function changed</source>
         <translation>Funktion gewechselt</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="58"/>
+        <location filename="../../src/service/metercontroller.cpp" line="66"/>
         <source>%1 cleared</source>
         <translation>%1 erloschen</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="71"/>
+        <location filename="../../src/service/metercontroller.cpp" line="79"/>
         <source>already starting, the recording goes on</source>
         <translation>Aufnahme startet bereits und geht weiter</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="81"/>
-        <location filename="../../src/service/metercontroller.cpp" line="88"/>
+        <location filename="../../src/service/metercontroller.cpp" line="89"/>
+        <location filename="../../src/service/metercontroller.cpp" line="96"/>
         <source>SCPI: %1</source>
         <translation>SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="122"/>
+        <location filename="../../src/service/metercontroller.cpp" line="131"/>
         <source>%1 ended with exit code %2</source>
         <translation>%1 beendet mit Exit-Code %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="285"/>
+        <location filename="../../src/service/metercontroller.cpp" line="294"/>
         <source>already recording, the recording goes on</source>
         <translation>Aufnahme läuft bereits und geht weiter</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="287"/>
+        <location filename="../../src/service/metercontroller.cpp" line="296"/>
         <source>start ignored, the recording shown is not saved yet</source>
         <translation>Start ignoriert, die angezeigte Aufnahme ist noch nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="305"/>
+        <location filename="../../src/service/metercontroller.cpp" line="314"/>
         <source>%1: %2 (%3)</source>
         <translation>%1: %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="311"/>
+        <location filename="../../src/service/metercontroller.cpp" line="320"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="327"/>
-        <location filename="../../src/service/metercontroller.cpp" line="352"/>
+        <location filename="../../src/service/metercontroller.cpp" line="336"/>
+        <location filename="../../src/service/metercontroller.cpp" line="361"/>
         <source>%1: could not run %2</source>
         <translation>%1: %2 konnte nicht gestartet werden</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="330"/>
+        <location filename="../../src/service/metercontroller.cpp" line="339"/>
         <source>%1: %2 is still running</source>
         <translation>%1: %2 läuft noch</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="503"/>
+        <location filename="../../src/service/metercontroller.cpp" line="512"/>
         <source>SCPI server: %1</source>
         <translation>SCPI-Server: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="516"/>
+        <location filename="../../src/service/metercontroller.cpp" line="525"/>
+        <location filename="../../src/service/metercontroller.cpp" line="548"/>
         <source>the SCPI server is not running</source>
         <translation>der SCPI-Server läuft nicht</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="525"/>
+        <location filename="../../src/service/metercontroller.cpp" line="534"/>
         <source>HiSLIP server: %1</source>
         <translation>HiSLIP-Server: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="551"/>
+        <location filename="../../src/service/metercontroller.cpp" line="557"/>
+        <source>VXI-11 server: %1</source>
+        <translation>VXI-11-Server: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="588"/>
         <source>The server is not running.</source>
         <translation>Der Server läuft nicht.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="552"/>
+        <location filename="../../src/service/metercontroller.cpp" line="589"/>
         <source>The server could not start: %1.</source>
         <translation>Der Server konnte nicht starten: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="557"/>
+        <location filename="../../src/service/metercontroller.cpp" line="594"/>
         <source>1 client</source>
         <translation>1 Client</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="557"/>
+        <location filename="../../src/service/metercontroller.cpp" line="594"/>
         <source>%1 clients</source>
         <translation>%1 Clients</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="558"/>
+        <location filename="../../src/service/metercontroller.cpp" line="595"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>Lauscht auf %1, Port %2, %3 verbunden.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="560"/>
+        <location filename="../../src/service/metercontroller.cpp" line="597"/>
         <source>HiSLIP on port %1: %2.</source>
         <translation>HiSLIP auf Port %1: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="562"/>
+        <location filename="../../src/service/metercontroller.cpp" line="599"/>
         <source>HiSLIP could not start: %1.</source>
         <translation>HiSLIP konnte nicht starten: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="564"/>
+        <location filename="../../src/service/metercontroller.cpp" line="601"/>
+        <source>VXI-11 through the system rpcbind: %1.</source>
+        <translation>VXI-11 über das rpcbind des Systems: %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="602"/>
+        <source>VXI-11 with an own portmapper on port %2: %1.</source>
+        <translation>VXI-11 mit eigenem Portmapper auf Port %2: %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="605"/>
+        <source>VXI-11 is off: %1.</source>
+        <translation>VXI-11 ist aus: %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="607"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Angekündigt als „%1“.</translation>
     </message>
@@ -3759,19 +3785,29 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../src/main.cpp" line="132"/>
+        <location filename="../../src/main.cpp" line="133"/>
         <source>protocol debugging information</source>
         <translation>Protokol debugging Informationen</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="133"/>
+        <location filename="../../src/main.cpp" line="134"/>
         <source>sets directory where config files are located</source>
         <translation>setzt das Verzeichnis wo die Konfiguration sich befindet</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="134"/>
+        <location filename="../../src/main.cpp" line="135"/>
         <source>sets &lt;config-id&gt;</source>
         <translation>setzt die &lt;config-id&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/main.cpp" line="136"/>
+        <source>VXI-11 portmapper for this run: auto, system (rpcbind) or own (port 111)</source>
+        <translation>VXI-11-Portmapper für diesen Lauf: auto, system (rpcbind) oder own (Port 111)</translation>
+    </message>
+    <message>
+        <location filename="../../src/main.cpp" line="152"/>
+        <source>--vxi11-rpc: auto, system or own, not &quot;%1&quot;</source>
+        <translation>--vxi11-rpc: auto, system oder own, nicht „%1“</translation>
     </message>
     <message>
         <location filename="../../src/device/meterconnection.cpp" line="85"/>
@@ -4540,13 +4576,58 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
     </message>
     <message>
         <location filename="../../src/ui/settings/scpiprefs.cpp" line="61"/>
+        <source>Also &amp;VXI-11, for older VISA and lxi discover (port 111)</source>
+        <translation>Auch &amp;VXI-11, für ältere VISA und lxi discover (Port 111)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="62"/>
+        <source>VXI-11 is the older LAN protocol of VISA: TCPIP::host::INSTR. Clients ask the portmapper on port 111 for it, so only one program per computer can offer it. Prefer HiSLIP where the client has it.</source>
+        <translation>VXI-11 ist das ältere LAN-Protokoll von VISA: TCPIP::host::INSTR. Clients fragen dafür den Portmapper auf Port 111, deshalb kann es nur ein Programm pro Rechner anbieten. Wo der Client HiSLIP kann, ist HiSLIP vorzuziehen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="67"/>
+        <source>Automatic</source>
+        <translation>Automatisch</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="68"/>
+        <source>System rpcbind</source>
+        <translation>rpcbind des Systems</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="69"/>
+        <source>Own, on port 111</source>
+        <translation>Eigener, auf Port 111</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="70"/>
+        <source>Automatic: the system&apos;s rpcbind when it runs, otherwise an own portmapper. The own one needs port 111, which Linux and BSD allow only with extra rights; QtDMM never asks for them. The handbook (SCPI server, VXI-11) says how to set it up.</source>
+        <translation>Automatisch: das rpcbind des Systems, wenn es läuft, sonst ein eigener Portmapper. Der eigene braucht Port 111, den Linux und BSD nur mit besonderen Rechten erlauben; QtDMM fordert sie nie an. Das Handbuch (SCPI-Server, VXI-11) beschreibt die Einrichtung.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="73"/>
+        <source>Port&amp;mapper:</source>
+        <translation>Port&amp;mapper:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="76"/>
         <source>&amp;Announce by mDNS (_scpi-raw._tcp, _hislip._tcp), so lxi discover finds it</source>
         <translation>Per mDNS &amp;ankündigen (_scpi-raw._tcp, _hislip._tcp), damit lxi discover ihn findet</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/scpiprefs.cpp" line="119"/>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="77"/>
+        <source>With VXI-11 on, also as _vxi-11._tcp.</source>
+        <translation>Mit eingeschaltetem VXI-11 auch als _vxi-11._tcp.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="141"/>
         <source>VISA address: &lt;code&gt;%1&lt;/code&gt;</source>
         <translation>VISA-Adresse: &lt;code&gt;%1&lt;/code&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="144"/>
+        <source>VXI-11: &lt;code&gt;%1&lt;/code&gt;, or &lt;code&gt;lxi scpi -a %2 &quot;*IDN?&quot;&lt;/code&gt;</source>
+        <translation>VXI-11: &lt;code&gt;%1&lt;/code&gt;, oder &lt;code&gt;lxi scpi -a %2 &quot;*IDN?&quot;&lt;/code&gt;</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/scpiprefs.cpp" line="35"/>
@@ -4574,7 +4655,7 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
         <translation>&amp;Lauschen auf:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/scpiprefs.cpp" line="114"/>
+        <location filename="../../src/ui/settings/scpiprefs.cpp" line="136"/>
         <source>Try it: &lt;code&gt;lxi scpi -a %1 -p %2 &quot;*IDN?&quot;&lt;/code&gt; or &lt;code&gt;printf &apos;READ?\n&apos; | nc %1 %2&lt;/code&gt;</source>
         <translation>Ausprobieren: &lt;code&gt;lxi scpi -a %1 -p %2 &quot;*IDN?&quot;&lt;/code&gt; oder &lt;code&gt;printf &apos;READ?\n&apos; | nc %1 %2&lt;/code&gt;</translation>
     </message>
@@ -5490,6 +5571,54 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
         <location filename="../../src/device/victronble.cpp" line="125"/>
         <source>AC current</source>
         <translation>AC-Strom</translation>
+    </message>
+</context>
+<context>
+    <name>Vxi11Server</name>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="74"/>
+        <source>core channel: %1</source>
+        <translation>Core-Kanal: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="80"/>
+        <source>abort channel: %1</source>
+        <translation>Abort-Kanal: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="106"/>
+        <source>no rpcbind is running on this computer</source>
+        <translation>auf diesem Rechner läuft kein rpcbind</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="118"/>
+        <source>port %1 is in use by another program</source>
+        <translation>Port %1 wird von einem anderen Programm benutzt</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="119"/>
+        <source>port %1 is not allowed for this program (a privileged port: see the handbook, SCPI server, VXI-11)</source>
+        <translation>Port %1 ist für dieses Programm nicht erlaubt (ein privilegierter Port: siehe Handbuch, SCPI-Server, VXI-11)</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="126"/>
+        <source>UDP port %1: %2</source>
+        <translation>UDP-Port %1: %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="151"/>
+        <source>another program or QtDMM instance offers VXI-11 already (port %1); there can be only one per computer</source>
+        <translation>ein anderes Programm oder eine andere QtDMM-Instanz bietet VXI-11 schon an (Port %1); es kann nur eins pro Rechner geben</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="164"/>
+        <source>rpcbind refused the registration over TCP; it takes it over its Unix socket (/run/rpcbind.sock), which is missing</source>
+        <translation>rpcbind hat die Anmeldung über TCP abgelehnt; es nimmt sie über seinen Unix-Socket (/run/rpcbind.sock) an, und der fehlt</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/vxi11server.cpp" line="166"/>
+        <source>rpcbind refused the registration</source>
+        <translation>rpcbind hat die Anmeldung abgelehnt</translation>
     </message>
 </context>
 </TS>

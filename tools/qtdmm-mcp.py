@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """MCP server (stdio) that reads a running QtDMM through its SCPI server.
 
-A development tool: lets an assistant session read values, status and a
-screenshot of a QtDMM test instance. Read-only - it sends no command that
-starts or stops anything. Not part of QtDMM and not installed with it.
+A development tool: lets an assistant session read values, status, the
+recording, the alarms and a screenshot of a QtDMM test instance. Read-only
+unless started with --allow-control, which adds tools that connect the
+meter, record, set marks, reset min/max, acknowledge alarms and press the
+meter's keys. Not part of QtDMM and not installed with it.
 
     pip install mcp
-    python3 tools/qtdmm-mcp.py --port 5099
+    python3 tools/qtdmm-mcp.py --port 5099 [--allow-control]
 
 See docs/dev/qtdmm-mcp.md.
 """
@@ -27,6 +29,8 @@ parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 parser.add_argument("--host", default="localhost", help="host of the QtDMM instance (default: localhost)")
 parser.add_argument("--port", type=int, default=5099, help="its SCPI port (default: 5099)")
 parser.add_argument("--timeout", type=float, default=3.0, help="seconds to wait for an answer (default: 3)")
+parser.add_argument("--allow-control", action="store_true",
+                    help="also offer the tools that change what QtDMM does (connect, record, mark, keys, ...)")
 args = parser.parse_args()
 
 mcp = FastMCP("qtdmm")
@@ -80,6 +84,33 @@ class Scpi:
         return data
 
 
+def split_list(text):
+    """A SCPI answer list such as "a",1.5E+00,"b" as a list of strings, the
+    quotes removed (a doubled quote inside is one)."""
+    out, cur, quoted, i = [], "", False, 0
+    while i < len(text):
+        c = text[i]
+        if c == '"':
+            if quoted and text[i + 1:i + 2] == '"':
+                cur += '"'
+                i += 1
+            else:
+                quoted = not quoted
+                if not quoted:
+                    out.append(cur)
+                    cur = None
+        elif c == "," and not quoted:
+            if cur is not None:
+                out.append(cur.strip())
+            cur = ""
+        elif cur is not None:
+            cur += c
+        i += 1
+    if cur is not None and cur.strip():
+        out.append(cur.strip())
+    return out
+
+
 def value(text):
     """+1.2E+00 as a number; overload and no reading as words."""
     v = float(text)
@@ -122,7 +153,7 @@ def status() -> dict:
         stb = int(s.query("*STB?"))
     return {"questionable": q, "overload": bool(q & 1), "hold": bool(q & 2),
             "not_connected": bool(q & 4), "no_reading": bool(q & 8),
-            "operation": op, "recording": bool(op & 16), "stb": stb}
+            "operation": op, "recording": bool(op & 16), "alarm": bool(op & 512), "stb": stb}
 
 
 @mcp.tool()
@@ -159,6 +190,124 @@ def watch(count: int = 10, interval: float = 1.0) -> list[dict]:
             out.append({"time": datetime.now().isoformat(timespec="milliseconds"),
                         "value": value(s.query("READ?")), "unit": unit})
     return out
+
+
+@mcp.tool()
+def min_max() -> dict:
+    """The min/max memory of the main value as the displays show it (CALCulate:AVERage):
+    minimum, maximum, mean and number of readings since the last reset, in SI base units."""
+    with Scpi() as s:
+        count = int(s.query("CALCulate:AVERage:COUNt?"))
+        unit = s.query("UNIT?").strip('"')
+        if not count:
+            return {"count": 0, "unit": unit}
+        return {"count": count, "min": value(s.query("CALCulate:AVERage:MINimum?")),
+                "max": value(s.query("CALCulate:AVERage:MAXimum?")),
+                "mean": value(s.query("CALCulate:AVERage:AVERage?")), "unit": unit}
+
+
+@mcp.tool()
+def recording() -> dict:
+    """What the graph does (QTDMM:RECord?): live, recording, view or idle, the seconds it spans,
+    the number of readings and the unit."""
+    with Scpi() as s:
+        mode, seconds, count, unit = split_list(s.query("QTDMM:RECord?"))
+    names = {"LIVE": "live", "REC": "recording", "VIEW": "view", "IDLE": "idle"}
+    return {"mode": names.get(mode, mode), "seconds": float(seconds), "readings": int(count), "unit": unit}
+
+
+@mcp.tool()
+def recording_data(count: int = 100) -> dict:
+    """The last count readings of the graph (QTDMM:RECord:DATA?, at most 10000), oldest first:
+    seconds since the start and the value in SI base units, "overload" or "gap"."""
+    count = max(1, min(count, 10000))
+    with Scpi() as s:
+        unit = s.query("QTDMM:RECord?").rsplit(",", 1)[-1].strip('"')
+        csv = s.block(f"QTDMM:RECord:DATA? {count}").decode()
+    points = []
+    for line in csv.splitlines()[1:]:
+        t, v = line.split(",")
+        points.append({"seconds": float(t), "value": "gap" if v == "nan" else value(v)})
+    return {"unit": unit, "readings": points}
+
+
+@mcp.tool()
+def alarms() -> dict:
+    """The alarms of the meter with their state (QTDMM:ALARm:LIST?): off, pending (the condition
+    holds, not yet long enough), raised or acknowledged."""
+    states = {"OFF": "off", "PEND": "pending", "RAIS": "raised", "ACKN": "acknowledged"}
+    with Scpi() as s:
+        items = split_list(s.query("QTDMM:ALARm:LIST?"))
+    pairs = [] if items == [""] else list(zip(items[0::2], items[1::2]))
+    return {"alarms": [{"name": n, "state": states.get(st, st)} for n, st in pairs]}
+
+
+@mcp.tool()
+def instances() -> dict:
+    """The running QtDMM instances with their last reading (QTDMM:INSTances?)."""
+    with Scpi() as s:
+        items = split_list(s.query("QTDMM:INSTances?"))
+    triples = [] if items == [""] else list(zip(items[0::3], items[1::3], items[2::3]))
+    return {"instances": [{"id": i, "value": value(v), "unit": u} for i, v, u in triples]}
+
+
+@mcp.tool()
+def keys() -> dict:
+    """The meter's keys QtDMM can press (QTDMM:KEY:CATalog?); empty for a meter without."""
+    with Scpi() as s:
+        items = split_list(s.query("QTDMM:KEY:CATalog?"))
+    return {"keys": [k.lower() for k in items if k]}
+
+
+def command(cmd):
+    """Sends a command and reads the error queue once: an error there becomes the tool's error.
+    The queue is shared by all clients, so an older error may show up here too."""
+    with Scpi() as s:
+        s.sock.sendall(cmd.encode() + b"\n")
+        e = s.query("SYSTem:ERRor?")
+    if not e.startswith("0,"):
+        raise ToolError(f"QtDMM answered {cmd} with {e}")
+    return "ok"
+
+
+if args.allow_control:
+    @mcp.tool()
+    def connect(on: bool = True) -> str:
+        """Connects (on) or disconnects the meter (INPut ON|OFF). The connection starts after the
+        command; read status a moment later."""
+        return command("INPut ON" if on else "INPut OFF")
+
+    @mcp.tool()
+    def record_start() -> str:
+        """Starts a recording (INITiate). QtDMM may ask for the length in a dialog first; while it
+        records, or over a recording not saved yet, it refuses (error -213)."""
+        return command("INITiate")
+
+    @mcp.tool()
+    def record_stop() -> str:
+        """Stops the recording (ABORt)."""
+        return command("ABORt")
+
+    @mcp.tool()
+    def mark(text: str = "") -> str:
+        """A mark at the newest reading in the graph and the readings table (QTDMM:MARK)."""
+        return command('QTDMM:MARK "' + text.replace('"', '""') + '"')
+
+    @mcp.tool()
+    def reset_min_max() -> str:
+        """Resets the min/max memory, like F4 (CALCulate:AVERage:CLEar)."""
+        return command("CALCulate:AVERage:CLEar")
+
+    @mcp.tool()
+    def acknowledge_alarms() -> str:
+        """Acknowledges the raised alarms, like the banner's button (QTDMM:ALARm:ACKnowledge)."""
+        return command("QTDMM:ALARm:ACKnowledge")
+
+    @mcp.tool()
+    def press_key(key: str) -> str:
+        """Presses a key of the meter (QTDMM:KEY), one of those the tool keys lists: "hold", "range",
+        "select1", ... Only UNI-T Bluetooth meters (UT60BT, UT61B+/D+/E+, UT161) have keys."""
+        return command('QTDMM:KEY "' + key.replace('"', '""') + '"')
 
 
 if __name__ == "__main__":

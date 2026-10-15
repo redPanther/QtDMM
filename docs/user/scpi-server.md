@@ -6,9 +6,10 @@ same for the meter it reads: switch on the **SCPI server** under
 **Settings → SCPI server** and a consumer multimeter on a USB cable, a
 Victron device over Bluetooth or the simulated meter becomes an instrument
 that [lxi-tools](https://github.com/lxi-tools/lxi-tools), LabVIEW,
-a Python script or a second QtDMM can query - over a plain TCP socket, or
+a Python script or a second QtDMM can query - over a plain TCP socket,
 over **HiSLIP**, the LAN protocol of VISA (NI-VISA, LabVIEW, Keysight IO
-Libraries, PyVISA).
+Libraries, PyVISA), or over **VXI-11**, its older one (lxi-tools, older
+VISA).
 
 The server only reports. It never sends anything to the meter; the meter
 keeps deciding what it measures.
@@ -22,16 +23,19 @@ keeps deciding what it measures.
 | Listen on | *This computer only* binds to `localhost`; *All network interfaces* opens the port to the network |
 | Also HiSLIP | the same commands for VISA on a second port, off by default; see *VISA (HiSLIP)* below |
 | HiSLIP port | 4880 is the port VISA tries when the address names none; taken, the next free one is used |
-| Announce by mDNS | with the port open to the network, QtDMM registers as `_scpi-raw._tcp` (and `_hislip._tcp`) so that `lxi discover -m` and every DNS-SD browser list it as "QtDMM *host*" (or "QtDMM *instance*" with `--config-id`) |
+| Also VXI-11 | the same commands over VXI-11, off by default; needs port 111, see *VXI-11* below |
+| Portmapper | for VXI-11: *Automatic* (the system's rpcbind when it runs, else an own one), *System rpcbind* or *Own, on port 111* |
+| Announce by mDNS | with the port open to the network, QtDMM registers as `_scpi-raw._tcp` (and `_hislip._tcp`, `_vxi-11._tcp`) so that `lxi discover -m` and every DNS-SD browser list it as "QtDMM *host*" (or "QtDMM *instance*" with `--config-id`) |
 
-The sidebar (F9) lists both under **Services**: *SCPI* and *HiSLIP* with
-their port, or *off*. The dot is dark green while the service waits for a
+The sidebar (F9) lists them under **Services**: *SCPI*, *HiSLIP* and
+*VXI-11* with their port (for VXI-11 the portmapper's, 111), or *off*. The dot is dark green while the service waits for a
 client and turns bright green while one is connected, the tooltip has the
 address and the number of clients. *failed* with a red dot means switched
 on but not running, usually because all ten ports from the one set here
 are taken; the tooltip and the status line of these settings say why. A
 double click opens these settings; the context menu also copies the
-address (`localhost:5025`, `TCPIP::localhost::hislip0::INSTR`).
+address (`localhost:5025`, `TCPIP::localhost::hislip0::INSTR`,
+`TCPIP::localhost::INSTR`).
 There is **no authentication**: whoever can reach the port can read the
 meter, start the recorder, connect or disconnect - and fetch a picture of
 the QtDMM window (`HCOPy:SDUMp:DATA?`), which shows the readings, the
@@ -71,7 +75,7 @@ long or the short form (`MEASure?`, `MEAS?`), case does not matter.
 | `STATus:OPERation?` | 16 while the recorder runs, plus 512 while an alarm is raised (acknowledged or not) |
 | `INITiate` / `ABORt` | starts / stops the recorder; while it records, or over a recording shown and not saved yet, `INITiate` is ignored with error -213 *Init ignored* |
 | `INPut ON|OFF`, `INPut?` | connects / disconnects the meter, asks whether it is; the connection starts after the command, so `INPut ON;INPut?` still answers 0 |
-| `HCOPy:SDUMp:DATA?` | a screenshot of the QtDMM window as PNG (IEEE 488.2 block), like a bench instrument's screen dump |
+| `HCOPy:SDUMp:DATA?` | a screenshot of the QtDMM window as PNG (IEEE 488.2 block), like a bench instrument's screen dump; `HCOPy:SDUMp:DATA:FORMat PNG\|BMP\|JPG` chooses the format |
 | `SYSTem:ERRor?` `SYSTem:ERRor:COUNt?` | the error queue: `0,"No error"`, `-113,"Undefined header"`, `-230,"Data corrupt or stale"`, ... |
 | `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` `…:COUNt?` | the min/max memory of the main value as the displays show it: minimum, maximum, mean and number of readings since the last reset (overloads not counted); `9.91E+37` while it is empty |
 | `CALCulate:AVERage:CLEar` | resets min/max, like F4 |
@@ -123,8 +127,8 @@ or newer. Older PyVISA-py, as some distributions still package it (Ubuntu
 "Connection refused". Install a current one with
 `python3 -m venv ~/visa && ~/visa/bin/pip install pyvisa pyvisa-py`.
 lxi-tools speaks VXI-11 and raw sockets only, not HiSLIP; `lxi discover`
-finds QtDMM only with `-m` (mDNS), without it lxi looks for VXI-11
-instruments.
+finds QtDMM with `-m` (mDNS), without it only when VXI-11 is on (see
+below).
 
 ```python
 import pyvisa
@@ -150,6 +154,61 @@ in the queue; a query that could not be answered is skipped in the `;`
 list. The complete list of accepted forms, answers and error codes is the
 [SCPI command reference](../dev/scpi-commands.md).
 
+## VXI-11
+
+VXI-11 is the LAN protocol VISA used before HiSLIP. Older VISA versions,
+old PyVISA-py and lxi-tools (`lxi scpi -a host` without `-p`, `lxi discover`
+without `-m`) speak it. With **Also VXI-11** switched on, QtDMM is
+
+```
+TCPIP::bench.local::INSTR
+```
+
+```
+$ lxi discover
+Searching for LXI devices - please wait...
+  Found "QtDMM,Uni-Trend UT61E,0,26.3" on address 192.168.1.20
+$ lxi scpi -a bench.local "READ?"
++1.234500E+00
+```
+
+`lxi screenshot` (and the screenshot page of lxi-gui) fetches a picture of
+the QtDMM window over VXI-11. lxi picks its plugin by the `*IDN?` answer
+and knows no QtDMM, so name the plugin: QtDMM answers the commands of
+Keysight's Truevolt multimeters.
+
+```
+$ lxi screenshot -a bench.local -p keysight-dmm
+```
+
+In lxi-gui choose the plugin *keysight-dmm* instead of *auto*.
+
+**Prefer HiSLIP** where the client has it: VXI-11 needs a portmapper on
+port 111, which clients ask for the VXI-11 ports. A computer has one
+portmapper, so **only one program per computer** can offer VXI-11: a
+second QtDMM instance with VXI-11 shows *failed* and says which port
+serves it already. HiSLIP and the raw socket keep running in either case.
+
+QtDMM never raises its own rights. The portmapper comes from one of two
+places (setting *Portmapper*, or `--vxi11-rpc auto|system|own` for one
+run):
+
+| Portmapper | How | What it needs |
+|---|---|---|
+| System rpcbind | QtDMM registers with the rpcbind of the system, over its Unix socket `/run/rpcbind.sock` | rpcbind running: Debian/Ubuntu `sudo apt install rpcbind`, then `sudo systemctl enable --now rpcbind.socket`; Fedora the same with `dnf`. No root for QtDMM |
+| Own, on port 111 | QtDMM answers on 111 itself (TCP and UDP, also the broadcasts of `lxi discover`) | Windows and macOS (10.14 and newer): nothing. Linux: port 111 is privileged - either `sudo setcap cap_net_bind_service=+ep /usr/bin/qtdmm` (applies to the whole program, not possible for the AppImage) or `sudo sysctl net.ipv4.ip_unprivileged_port_start=111` (applies to the whole system). FreeBSD: root, or `sysctl net.inet.ip.portrange.reservedhigh=0` |
+
+*Automatic* takes the system rpcbind when one runs and an own portmapper
+otherwise. A system rpcbind opens port 111 to the network: mind the
+firewall. With *This computer only* QtDMM's own portmapper and the VXI-11
+channels listen on `localhost` only; then `lxi discover` (a broadcast to
+the network) does not find it, `lxi scpi -a localhost` does.
+
+QtDMM serves 16 links at a time; a message may be 1 MB at most. A lock
+(`viLock`) is held until the client unlocks, closes the link or its
+connection goes away. There is no interrupt channel (no service
+requests).
+
 ## Notes
 
 - Values are in base units: a meter showing `12.34 mV` answers
@@ -159,7 +218,7 @@ list. The complete list of accepted forms, answers and error codes is the
   faster than that repeats values.
 - Every instance of QtDMM (`--config-id`) has its own server; with the
   same port configured they line up on 5025, 5026, ... and for HiSLIP on
-  4880, 4881, ...
+  4880, 4881, ... VXI-11 only one of them can offer (see above).
 - sigrok's `scpi-dmm` driver identifies instruments by `*IDN?` and does not
   know QtDMM, so it will not talk to this server. lxi-tools, PyVISA and
   plain sockets work; the PyVISA resource string is

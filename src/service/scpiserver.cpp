@@ -221,6 +221,8 @@ ScpiEndpoint ScpiServer::endpoint()
   ScpiEndpoint ep;
   ep.process = [this](const QByteArray &line) { return process(line); };
   ep.statusByte = [this]() { return statusByte(); };
+  // device clear (VXI-11 device_clear, HiSLIP DeviceClear): the error queue goes, as with *CLS
+  ep.deviceClear = [this]() { m_errors.clear(); };
   return ep;
 }
 

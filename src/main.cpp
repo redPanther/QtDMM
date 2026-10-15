@@ -28,6 +28,7 @@
 #include "ui/mnemoniccheck.h"
 #include "ui/dialogs/adddevicedlg.h"
 #include "core/settings.h"
+#include "service/metercontroller.h"
 
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
@@ -132,6 +133,8 @@ int main(int argc, char **argv)
   parser.addOption({"debug", QObject::tr("protocol debugging information")});
   parser.addOption({"config-dir",QObject::tr("sets directory where config files are located"), "config-dir"});
   parser.addOption({"config-id",QObject::tr("sets <config-id>"), "config-id"});
+  parser.addOption({"vxi11-rpc", QObject::tr("VXI-11 portmapper for this run: auto, system (rpcbind) or own (port 111)"),
+                    "mode"});
   // for the tests: list doubled Alt letters and keys, then quit
   QCommandLineOption checkMnemonics("check-mnemonics");
   checkMnemonics.setFlags(QCommandLineOption::HiddenFromHelp);
@@ -139,6 +142,19 @@ int main(int argc, char **argv)
   parser.addHelpOption();
   parser.addVersionOption();
   parser.process(app);
+
+  if (parser.isSet("vxi11-rpc"))
+  {
+    bool ok = false;
+    const Vxi11Server::RpcbindMode mode = Vxi11Server::modeFromName(parser.value("vxi11-rpc"), &ok);
+    if (!ok)
+    {
+      std::cerr << qPrintable(QObject::tr("--vxi11-rpc: auto, system or own, not \"%1\"").arg(parser.value("vxi11-rpc")))
+                << std::endl;
+      return 2;
+    }
+    MeterController::setVxi11RpcOverride(mode);
+  }
 
   if (parser.isSet(checkMnemonics))
   {

@@ -1211,6 +1211,8 @@ void MainWindow::updateServices()
       row.tooltip = tr("%1 is off. Double-click for its settings.").arg(state.name);
     else if (state.id == QLatin1String("hislip"))
       row.tooltip = tr("HiSLIP for VISA (NI-VISA, LabVIEW, PyVISA): %1, %2 connected.").arg(state.address, clients);
+    else if (state.id == QLatin1String("vxi11"))
+      row.tooltip = tr("VXI-11 for VISA and lxi-tools: %1, %2 connected.").arg(state.address, clients);
     else
       row.tooltip = tr("SCPI server (raw socket) on %1, %2 connected.").arg(state.address, clients);
     rows << row;

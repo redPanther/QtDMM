@@ -8,6 +8,7 @@ qtdmm [options]
 |---|---|
 | `--config-id <id>` | Use the named configuration instead of `default`. Each id has its own settings file, so one meter can be set up per id. |
 | `--config-dir <dir>` | Directory for the configuration files (default: the platform's user config location). |
+| `--vxi11-rpc auto\|system\|own` | For this run, where VXI-11 gets its portmapper from: the system's rpcbind, an own one on port 111, or automatically (see [SCPI server](scpi-server.md#vxi-11)). Replaces the setting without changing it. |
 | `--debug` | Print every frame received from the meter as hex to the console. Useful when a meter is not decoded correctly — include this output in a bug report. |
 | `-h`, `--help` | Show the options. |
 | `-v`, `--version` | Show the version. |
