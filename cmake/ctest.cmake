@@ -1,271 +1,182 @@
 if (BUILD_TESTING)
-	## QTDMM_WERROR: warnings in the tests fail the build, too
-	add_compile_options(${QTDMM_WARNING_FLAGS})
 
-	set( TEST_DECODER test_decoder)
 	enable_testing()
 
-	file(GLOB DECODER_FILES CONFIGURE_DEPENDS src/device/decoders/*.h  src/device/decoders/*.cpp )
-	## the Victron decoder reads bit fields through src/device/victronble.cpp (which also carries the AES)
-	list(APPEND DECODER_FILES src/device/victronble.cpp src/3rdparty/tiny-aes/aes.c)
-	add_executable(${TEST_DECODER} MACOSX_BUNDLE tests/test_decoder.cpp src/device/dmmdecoder.cpp src/device/devicetype.cpp src/device/protocols.cpp src/core/siprefix.cpp src/core/readingadapter.cpp ${DECODER_FILES})
-	target_link_libraries(${TEST_DECODER} PRIVATE Qt::Core Qt::Test)
-	add_test(NAME protocol_table COMMAND ${TEST_DECODER} --table)
-	add_test(NAME meter_keys COMMAND ${TEST_DECODER} --keys)
-	add_test(NAME device_types COMMAND ${TEST_DECODER} --types)
+	## All sources of the program (except main.cpp) are compiled once, in the
+	## object library qtdmm_core (CMakeLists.txt). A test is just its own
+	## tests/test_*.cpp linked against it.
+	##
+	## qtdmm_test_exe(<target> <source>)
+	##     executable <target> from <source>, linked with qtdmm_core and QtTest;
+	##     QTDMM_WERROR: warnings in the tests fail the build, too
+	## qtdmm_add_test(<test name> <target> <source> [args...])
+	##     the same, plus one ctest test running it with the args
+	##
+	## A test that needs the compiled resources (:/Help, :/icons, :/devices,
+	## the .qm files) adds: target_link_libraries(<target> PRIVATE qtdmm_resources)
 
-	## the core's base types and ReadingAdapter (the decoder fixtures check the ports too)
-	add_executable(test_adapter tests/test_adapter.cpp src/core/readingadapter.cpp src/core/siprefix.cpp)
-	target_include_directories(test_adapter PRIVATE src)
-	target_link_libraries(test_adapter PRIVATE Qt::Core)
-	add_test(NAME reading_adapter COMMAND test_adapter)
+	function(qtdmm_test_exe target source)
+		add_executable(${target} MACOSX_BUNDLE ${source})
+		target_link_libraries(${target} PRIVATE qtdmm_core Qt6::Test)
+		if (QTDMM_WARNING_FLAGS)
+			target_compile_options(${target} PRIVATE ${QTDMM_WARNING_FLAGS})
+		endif()
+	endfunction()
 
-	file(GLOB TEST_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/tests/data/decoder/*.json")
+	function(qtdmm_add_test name target source)
+		qtdmm_test_exe(${target} ${source})
+		add_test(NAME ${name} COMMAND ${target} ${ARGN})
+	endfunction()
+
+	set(TEST_DATA "${CMAKE_SOURCE_DIR}/tests/data")
+
+	## decoders: protocol table, meter keys, device types, then one test per fixture
+	qtdmm_test_exe(test_decoder tests/test_decoder.cpp)
+	add_test(NAME protocol_table COMMAND test_decoder --table)
+	add_test(NAME meter_keys     COMMAND test_decoder --keys)
+	add_test(NAME device_types   COMMAND test_decoder --types)
+
+	file(GLOB TEST_FILES CONFIGURE_DEPENDS "${TEST_DATA}/decoder/*.json")
 	foreach(test_file ${TEST_FILES})
 		get_filename_component(name ${test_file} NAME_WE)
-		add_test(NAME ${name} COMMAND ${TEST_DECODER} ${test_file})
+		add_test(NAME ${name} COMMAND test_decoder ${test_file})
 	endforeach()
 
-	set( TEST_GRAPH test_graph)
-	add_executable(${TEST_GRAPH} MACOSX_BUNDLE tests/test_graph.cpp src/ui/views/graphwidget.cpp src/ui/views/graphminimap.cpp src/ui/views/graphflags.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/settings.cpp src/core/siprefix.cpp src/ui/engnumbervalidator.cpp)
-	target_link_libraries(${TEST_GRAPH} PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Charts Qt6::Svg Qt::Core Qt::Test)
-	add_test(NAME dmmgraph COMMAND ${TEST_GRAPH} "${CMAKE_SOURCE_DIR}/tests/data/graph")
+	## the core's base types and ReadingAdapter (the decoder fixtures check the ports too)
+	qtdmm_add_test(reading_adapter test_adapter tests/test_adapter.cpp)
 
-	## the recorder's store on its own: QtCore only, no widgets
-	add_executable(test_recordingstore tests/test_recordingstore.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp src/core/readingadapter.cpp)
-	target_include_directories(test_recordingstore PRIVATE src)
-	target_link_libraries(test_recordingstore PRIVATE Qt::Core Qt::Test)
-	add_test(NAME recording_store COMMAND test_recordingstore "${CMAKE_SOURCE_DIR}/tests/data/graph")
+	qtdmm_add_test(dmmgraph test_graph tests/test_graph.cpp "${TEST_DATA}/graph")
+
+	## the recorder's store on its own
+	qtdmm_add_test(recording_store test_recordingstore tests/test_recordingstore.cpp "${TEST_DATA}/graph")
 
 	## the recorder against readings with given times: the grid export, the
 	## integral and the triggers, as recorded with the 100 ms sample clock
-	add_executable(test_recording_golden tests/test_recording_golden.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp src/core/readingadapter.cpp)
-	target_include_directories(test_recording_golden PRIVATE src)
-	target_link_libraries(test_recording_golden PRIVATE Qt::Core)
-	add_test(NAME recording_golden COMMAND test_recording_golden "${CMAKE_SOURCE_DIR}/tests/data/recording")
+	qtdmm_add_test(recording_golden test_recording_golden tests/test_recording_golden.cpp "${TEST_DATA}/recording")
 
 	## the handbook: same compiled resources as the application, so the test
 	## sees exactly the pages the user gets under :/Help/
-	set( TEST_HELP test_help)
-	## links the same compiled resources as the application (qtdmm_resources
-	## also carries the generated ui header helpdlg.cpp needs)
-	add_executable(${TEST_HELP} MACOSX_BUNDLE tests/test_help.cpp src/ui/dialogs/helpdlg.cpp src/core/settings.cpp)
-	target_include_directories(${TEST_HELP} PRIVATE src)
-	target_link_libraries(${TEST_HELP} PRIVATE qtdmm_resources Qt6::Widgets Qt::Core)
-	add_test(NAME handbook COMMAND ${TEST_HELP})
+	qtdmm_add_test(handbook test_help tests/test_help.cpp)
+	target_link_libraries(test_help PRIVATE qtdmm_resources)
 
 	## the analog meter: angle mapping, full-scale derivation, ballistics and
 	## a headless render check
-	set( TEST_METER test_meter)
-	add_executable(${TEST_METER} MACOSX_BUNDLE tests/test_meter.cpp src/ui/views/analogmeter.cpp src/ui/panelframe.cpp src/core/siprefix.cpp src/core/readingadapter.cpp)
-	target_include_directories(${TEST_METER} PRIVATE src)
-	target_link_libraries(${TEST_METER} PRIVATE Qt6::Widgets Qt::Core Qt::Test)
-	add_test(NAME analog_meter COMMAND ${TEST_METER})
+	qtdmm_add_test(analog_meter test_meter tests/test_meter.cpp)
 
 	## the MDI window arrangement: automatic layout, order, title bars
-	set( TEST_MDI test_mdiarranger)
-	add_executable(${TEST_MDI} MACOSX_BUNDLE tests/test_mdiarranger.cpp src/ui/mdiarranger.cpp)
-	target_include_directories(${TEST_MDI} PRIVATE src)
-	target_link_libraries(${TEST_MDI} PRIVATE Qt6::Widgets Qt::Core Qt::Test)
-	add_test(NAME mdi_arranger COMMAND ${TEST_MDI})
+	qtdmm_add_test(mdi_arranger test_mdiarranger tests/test_mdiarranger.cpp)
 
 	## the digital display: glyph table and a headless render check
-	set( TEST_DISPLAY test_display)
-	add_executable(${TEST_DISPLAY} MACOSX_BUNDLE tests/test_display.cpp src/ui/views/lcdwidget.cpp src/ui/panelframe.cpp src/core/siprefix.cpp)
-	target_include_directories(${TEST_DISPLAY} PRIVATE src)
-	target_link_libraries(${TEST_DISPLAY} PRIVATE Qt6::Widgets Qt::Core)
-	add_test(NAME digital_display COMMAND ${TEST_DISPLAY})
+	qtdmm_add_test(digital_display test_display tests/test_display.cpp)
 
 	## instance coordination over shared memory: registration, state channel
 	## and published readings
-	set( TEST_SHAREDSTATE test_sharedstate)
-	add_executable(${TEST_SHAREDSTATE} MACOSX_BUNDLE tests/test_sharedstate.cpp src/service/sharedstatemanager.cpp)
-	target_include_directories(${TEST_SHAREDSTATE} PRIVATE src)
-	target_link_libraries(${TEST_SHAREDSTATE} PRIVATE Qt::Core)
-	add_test(NAME shared_state COMMAND ${TEST_SHAREDSTATE})
+	qtdmm_add_test(shared_state test_sharedstate tests/test_sharedstate.cpp)
 
 	## instances: names, renaming one with the formulas that use it, a new one copies all but the meter
-	set( TEST_INSTANCES test_instances)
-	add_executable(${TEST_INSTANCES} MACOSX_BUNDLE tests/test_instances.cpp src/core/instances.cpp src/core/settings.cpp src/core/devicelibrary.cpp
-		src/core/calcexpr.cpp src/core/siprefix.cpp)
-	target_include_directories(${TEST_INSTANCES} PRIVATE src)
-	target_link_libraries(${TEST_INSTANCES} PRIVATE Qt6::Gui Qt::Core)
-	add_test(NAME instances COMMAND ${TEST_INSTANCES})
+	qtdmm_add_test(instances test_instances tests/test_instances.cpp)
+
 	## the meter's settings widget (DeviceSettings): keys in and out, "Advanced", groups per kind of meter
-	add_executable(test_devicesettings MACOSX_BUNDLE tests/test_devicesettings.cpp src/ui/devicesettings.cpp src/device/devicetype.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
-		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
-	target_include_directories(test_devicesettings PRIVATE src ${CMAKE_BINARY_DIR})
-	target_link_libraries(test_devicesettings PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
-	add_test(NAME device_settings COMMAND test_devicesettings)
-	## the assistant "Add device": pages per connection, models, name, Next, the buttons that finish it
-	qt_add_resources(DEVICE_SYMBOL_RES ${CMAKE_BINARY_DIR}/devices.qrc)
-	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp ${DEVICE_SYMBOL_RES} src/ui/dialogs/adddevicedlg.cpp src/ui/devicesymbol.cpp src/ui/tilebutton.cpp src/ui/devicesettings.cpp src/device/devicetype.cpp
-		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
-		src/device/discovery/discovery.cpp src/service/mdnsbrowser.cpp
-		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
-	target_include_directories(test_adddevice PRIVATE src ${CMAKE_BINARY_DIR})
-	target_link_libraries(test_adddevice PRIVATE Qt6::Widgets Qt6::Svg Qt6::SerialPort Qt6::Network ${HIDAPI_TARGET} Qt::Core)
-	if (QTDMM_WITH_BLE)
-		target_link_libraries(test_adddevice PRIVATE Qt6::Bluetooth)
-		target_compile_definitions(test_adddevice PRIVATE QTDMM_WITH_BLE)
-		target_sources(test_adddevice PRIVATE src/device/transports/blegatt.cpp src/device/transports/ble.cpp)
-	endif()
-	add_test(NAME add_device COMMAND test_adddevice)
+	qtdmm_add_test(device_settings test_devicesettings tests/test_devicesettings.cpp)
+
+	## the assistant "Add device": pages per connection, models, name, Next, the
+	## buttons that finish it; draws the device symbols (:/devices)
+	qtdmm_add_test(add_device test_adddevice tests/test_adddevice.cpp)
+	target_link_libraries(test_adddevice PRIVATE qtdmm_resources)
+
 	## the sidebar "Devices": My devices in order, the one in use, click, rename, when it is shown; Settings of an entry; the instances
-	add_executable(test_devicesidebar MACOSX_BUNDLE tests/test_devicesidebar.cpp src/ui/devicesidebar.cpp
-		src/ui/dialogs/devicesettingsdlg.cpp src/ui/devicesettings.cpp src/device/devicetype.cpp
-		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
-		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
-	target_include_directories(test_devicesidebar PRIVATE src ${CMAKE_BINARY_DIR})
-	target_link_libraries(test_devicesidebar PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
-	add_test(NAME device_sidebar COMMAND test_devicesidebar)
+	qtdmm_add_test(device_sidebar test_devicesidebar tests/test_devicesidebar.cpp)
+
 	## the meter's keys under the display: which a meter has, what a click sends, the states
-	add_executable(test_controlbar MACOSX_BUNDLE tests/test_controlbar.cpp src/ui/controlbar.cpp
-		src/device/protocols.cpp src/device/dmmdecoder.cpp src/core/siprefix.cpp ${DECODER_FILES})
-	target_include_directories(test_controlbar PRIVATE src)
-	target_link_libraries(test_controlbar PRIVATE Qt6::Widgets Qt::Test Qt::Core)
-	add_test(NAME control_bar COMMAND test_controlbar)
+	qtdmm_add_test(control_bar test_controlbar tests/test_controlbar.cpp)
+
 	## the settings pages: keys through the pages, fields with their choice,
 	## the recording length asked by Record
-	add_executable(test_settingspages MACOSX_BUNDLE tests/test_settingspages.cpp
-		src/ui/settings/settingspage.cpp src/ui/settings/generalprefs.cpp src/ui/settings/guiprefs.cpp
-		src/ui/settings/graphprefs.cpp src/ui/settings/recorderprefs.cpp src/ui/dialogs/recordlengthdlg.cpp
-		src/ui/designs.cpp src/ui/colorbutton.cpp src/ui/engnumbervalidator.cpp src/core/settings.cpp
-		src/ui/views/graphwidget.cpp src/ui/views/graphminimap.cpp src/ui/views/graphflags.cpp src/ui/views/gapline.cpp src/recording/recordingstore.cpp
-		src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
-	target_include_directories(test_settingspages PRIVATE src)
-	target_link_libraries(test_settingspages PRIVATE Qt6::Widgets Qt6::Charts Qt6::PrintSupport Qt6::Svg Qt::Core)
-	add_test(NAME settings_pages COMMAND test_settingspages)
+	qtdmm_add_test(settings_pages test_settingspages tests/test_settingspages.cpp)
+
 	## the keys of the main window's commands and the page Keyboard
-	add_executable(test_shortcuts MACOSX_BUNDLE tests/test_shortcuts.cpp src/ui/shortcuts.cpp
-		src/ui/settings/keyboardprefs.cpp src/ui/settings/settingspage.cpp src/ui/designs.cpp)
-	target_include_directories(test_shortcuts PRIVATE src)
-	target_link_libraries(test_shortcuts PRIVATE Qt6::Widgets Qt::Core)
-	add_test(NAME shortcuts COMMAND test_shortcuts)
+	qtdmm_add_test(shortcuts test_shortcuts tests/test_shortcuts.cpp)
+
 	## the formula evaluator of calculated instances
-	set( TEST_CALC test_calc)
-	add_executable(${TEST_CALC} MACOSX_BUNDLE tests/test_calc.cpp src/core/calcexpr.cpp src/core/siprefix.cpp)
-	target_include_directories(${TEST_CALC} PRIVATE src)
-	target_link_libraries(${TEST_CALC} PRIVATE Qt::Core)
-	add_test(NAME calc_expression COMMAND ${TEST_CALC})
+	qtdmm_add_test(calc_expression test_calc tests/test_calc.cpp)
 
 	## the calculated-value source: formula over the other instances' readings,
 	## checked through the real ASCII decoder
-	set( TEST_CALC_DEVICE test_calc_device)
-	add_executable(${TEST_CALC_DEVICE} MACOSX_BUNDLE tests/test_calc_device.cpp src/device/transports/calc.cpp src/core/calcexpr.cpp
-		src/service/sharedstatemanager.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
-	target_include_directories(${TEST_CALC_DEVICE} PRIVATE src)
-	target_link_libraries(${TEST_CALC_DEVICE} PRIVATE Qt::Core)
-	add_test(NAME calc_device COMMAND ${TEST_CALC_DEVICE})
+	qtdmm_add_test(calc_device test_calc_device tests/test_calc_device.cpp)
 
 	## HID cable chips: report layouts and chip detection, no hardware needed
-	set( TEST_HID test_hid)
-	add_executable(${TEST_HID} MACOSX_BUNDLE tests/test_hid.cpp src/device/transports/hidserial.cpp src/device/transports/hidreader.cpp src/device/transports/hidholtek.cpp src/device/transports/hidpath.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
-	target_include_directories(${TEST_HID} PRIVATE src)
-	target_link_libraries(${TEST_HID} PRIVATE Qt::Core ${HIDAPI_TARGET})
-	add_test(NAME hid_cable COMMAND ${TEST_HID} "${CMAKE_SOURCE_DIR}/tests/data/hid_cables.json")
+	qtdmm_add_test(hid_cable test_hid tests/test_hid.cpp "${TEST_DATA}/hid_cables.json")
 
 	## DMM connection state machine (Connecting/Connected/Timeout/Error/reconnect)
-	## against a fake RFC 2217 server; needs the whole port stack
-	set( TEST_DMM test_dmm)
-	add_executable(${TEST_DMM} MACOSX_BUNDLE tests/test_dmm.cpp src/device/meterconnection.cpp src/device/framereader.cpp src/device/transport.cpp
-		src/device/transports/serial.cpp src/device/transports/hidserial.cpp src/device/transports/hidreader.cpp src/device/transports/hidholtek.cpp src/device/transports/hidpath.cpp src/device/transports/rfc2217serial.cpp src/device/transports/sigrok.cpp
-		src/device/transports/calc.cpp src/core/calcexpr.cpp src/service/sharedstatemanager.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
-	target_include_directories(${TEST_DMM} PRIVATE src)
-	target_link_libraries(${TEST_DMM} PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Network Qt::Core ${HIDAPI_TARGET})
-	add_test(NAME dmm_link_state COMMAND ${TEST_DMM})
+	## against a fake RFC 2217 server
+	qtdmm_add_test(dmm_link_state test_dmm tests/test_dmm.cpp)
 
 	## MeterController behind its SCPI server: what a command asks of the UI
-	## runs after it, once (review R10-05); needs the whole port stack too
-	set( TEST_CONTROLLER test_metercontroller)
-	add_executable(${TEST_CONTROLLER} MACOSX_BUNDLE tests/test_metercontroller.cpp src/service/metercontroller.cpp
-		src/service/scpiserver.cpp src/service/hislipserver.cpp src/service/oncrpc.cpp src/service/rpcbindclient.cpp
-		src/service/vxi11core.cpp src/service/vxi11server.cpp src/service/mdnsresponder.cpp src/service/mdnsbrowser.cpp
-		src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c
-		src/core/alarm.cpp src/core/readingadapter.cpp src/ui/engnumbervalidator.cpp
-		src/device/meterconnection.cpp src/device/framereader.cpp src/device/transport.cpp
-		src/device/transports/serial.cpp src/device/transports/hidserial.cpp src/device/transports/hidreader.cpp src/device/transports/hidholtek.cpp src/device/transports/hidpath.cpp src/device/transports/rfc2217serial.cpp src/device/transports/sigrok.cpp
-		src/device/transports/calc.cpp src/core/calcexpr.cpp src/service/sharedstatemanager.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
-	target_include_directories(${TEST_CONTROLLER} PRIVATE src)
-	target_link_libraries(${TEST_CONTROLLER} PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Network Qt::Core ${HIDAPI_TARGET})
-	add_test(NAME meter_controller COMMAND ${TEST_CONTROLLER})
+	## runs after it, once (review R10-05)
+	qtdmm_add_test(meter_controller test_metercontroller tests/test_metercontroller.cpp)
 
 	## RFC 2217 client against a fake server: negotiation, telnet filtering, IAC escaping
-	set( TEST_RFC2217 test_rfc2217)
-	add_executable(${TEST_RFC2217} MACOSX_BUNDLE tests/test_rfc2217.cpp src/device/transports/rfc2217serial.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
-	target_include_directories(${TEST_RFC2217} PRIVATE src)
-	target_link_libraries(${TEST_RFC2217} PRIVATE Qt::Core Qt::Network)
-	add_test(NAME rfc2217_client COMMAND ${TEST_RFC2217})
+	qtdmm_add_test(rfc2217_client test_rfc2217 tests/test_rfc2217.cpp)
 
 	## the recorder's CSV formats, without widgets
-	set( TEST_RECORDING test_recording)
-	add_executable(${TEST_RECORDING} MACOSX_BUNDLE tests/test_recording.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
-	target_include_directories(${TEST_RECORDING} PRIVATE src)
-	target_link_libraries(${TEST_RECORDING} PRIVATE Qt::Core)
-	add_test(NAME recording_file COMMAND ${TEST_RECORDING} "${CMAKE_SOURCE_DIR}/tests/data/graph")
+	qtdmm_add_test(recording_file test_recording tests/test_recording.cpp "${TEST_DATA}/graph")
 
 	## the readings table model, without its widget
-	set( TEST_READINGLOG test_readinglog)
-	add_executable(${TEST_READINGLOG} MACOSX_BUNDLE tests/test_readinglog.cpp src/recording/readingsmodel.cpp src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c src/core/siprefix.cpp)
-	target_include_directories(${TEST_READINGLOG} PRIVATE src)
-	target_link_libraries(${TEST_READINGLOG} PRIVATE Qt6::Gui Qt::Core Qt::Test)
-	add_test(NAME reading_log COMMAND ${TEST_READINGLOG})
+	qtdmm_add_test(reading_log test_readinglog tests/test_readinglog.cpp)
 
 	## Victron Instant Readout: advertisement parsing, AES-CTR, the decoder
-	set( TEST_VICTRON test_victronble)
-	add_executable(${TEST_VICTRON} MACOSX_BUNDLE tests/test_victronble.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp ${DECODER_FILES})
-	target_include_directories(${TEST_VICTRON} PRIVATE src ${CMAKE_BINARY_DIR})
-	target_link_libraries(${TEST_VICTRON} PRIVATE Qt::Core Qt::Test)
-	add_test(NAME victron_instant_readout COMMAND ${TEST_VICTRON})
+	qtdmm_add_test(victron_instant_readout test_victronble tests/test_victronble.cpp)
 
 	## mDNS browsing for qtdmm-bridge announcements
-	set( TEST_MDNS test_mdns)
-	add_executable(${TEST_MDNS} MACOSX_BUNDLE tests/test_mdns.cpp src/service/mdnsbrowser.cpp)
-	target_include_directories(${TEST_MDNS} PRIVATE src)
-	target_link_libraries(${TEST_MDNS} PRIVATE Qt::Core Qt6::Network Qt::Test)
-	add_test(NAME mdns_browse COMMAND ${TEST_MDNS} "${CMAKE_SOURCE_DIR}/tests/data/mdns" "${CMAKE_SOURCE_DIR}/tools/qtdmm-bridge")
+	qtdmm_add_test(mdns_browse test_mdns tests/test_mdns.cpp
+		"${TEST_DATA}/mdns" "${CMAKE_SOURCE_DIR}/tools/qtdmm-bridge")
 
 	## SCPI server: command interpreter, TCP round trip, mDNS announcement
-	set( TEST_SCPI test_scpi)
-	add_executable(${TEST_SCPI} MACOSX_BUNDLE tests/test_scpi.cpp src/service/scpiserver.cpp src/service/mdnsresponder.cpp src/service/mdnsbrowser.cpp src/service/mdnsbrowser.cpp)
-	target_include_directories(${TEST_SCPI} PRIVATE src)
-	target_link_libraries(${TEST_SCPI} PRIVATE Qt::Core Qt6::Network Qt::Test)
-	add_test(NAME scpi_server COMMAND ${TEST_SCPI})
+	qtdmm_add_test(scpi_server test_scpi tests/test_scpi.cpp)
 
 	## HiSLIP (VISA over LAN) in front of the SCPI interpreter, over TCP on localhost
-	set( TEST_HISLIP test_hislip)
-	add_executable(${TEST_HISLIP} MACOSX_BUNDLE tests/test_hislip.cpp src/service/hislipserver.cpp src/service/scpiserver.cpp)
-	target_include_directories(${TEST_HISLIP} PRIVATE src)
-	target_link_libraries(${TEST_HISLIP} PRIVATE Qt::Core Qt6::Network)
-	add_test(NAME scpi_hislip COMMAND ${TEST_HISLIP})
+	qtdmm_add_test(scpi_hislip test_hislip tests/test_hislip.cpp)
 
 	## VXI-11 over TCP/UDP on localhost: own portmapper on a high port, links, locks,
 	## limits, abort channel, and the registration with a (fake) system rpcbind
-	add_executable(test_vxi11 MACOSX_BUNDLE tests/test_vxi11.cpp src/service/oncrpc.cpp src/service/rpcbindclient.cpp
-		src/service/vxi11core.cpp src/service/vxi11server.cpp)
-	target_include_directories(test_vxi11 PRIVATE src)
-	target_link_libraries(test_vxi11 PRIVATE Qt::Core Qt6::Network)
-	add_test(NAME scpi_vxi11 COMMAND test_vxi11)
+	qtdmm_add_test(scpi_vxi11 test_vxi11 tests/test_vxi11.cpp)
 
 	## alarms: conditions, duration, hysteresis, acknowledge, JSON
-	set( TEST_ALARM test_alarm)
-	add_executable(${TEST_ALARM} MACOSX_BUNDLE tests/test_alarm.cpp src/core/alarm.cpp src/ui/engnumbervalidator.cpp src/core/siprefix.cpp)
-	target_include_directories(${TEST_ALARM} PRIVATE src)
-	target_link_libraries(${TEST_ALARM} PRIVATE Qt6::Gui Qt::Core Qt::Test)
-	add_test(NAME alarms COMMAND ${TEST_ALARM})
+	qtdmm_add_test(alarms test_alarm tests/test_alarm.cpp)
 
 	## XLSX/ODS writer, read back with LibreOffice when installed
-	set( TEST_SPREADSHEET test_spreadsheet)
-	add_executable(${TEST_SPREADSHEET} MACOSX_BUNDLE tests/test_spreadsheet.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c)
-	target_include_directories(${TEST_SPREADSHEET} PRIVATE src)
-	target_link_libraries(${TEST_SPREADSHEET} PRIVATE Qt::Core Qt::Test)
-	add_test(NAME spreadsheet COMMAND ${TEST_SPREADSHEET})
+	qtdmm_add_test(spreadsheet test_spreadsheet tests/test_spreadsheet.cpp)
+
+	## the min/max memory: kept across range changes, afresh on another port
+	## (header only: nothing to link but QtCore)
+	add_executable(test_minmax MACOSX_BUNDLE tests/test_minmax.cpp)
+	target_include_directories(test_minmax PRIVATE src)
+	target_link_libraries(test_minmax PRIVATE Qt6::Core)
+	if (QTDMM_WARNING_FLAGS)
+		target_compile_options(test_minmax PRIVATE ${QTDMM_WARNING_FLAGS})
+	endif()
+	add_test(NAME minmax_memory COMMAND test_minmax)
+
+	## the Poincaré plot's values: pairs, SD1/SD2, gaps, port changes
+	qtdmm_add_test(poincare_series test_poincare tests/test_poincare.cpp)
+
+	## "My devices": the meter keys, devices.conf, the stable port name
+	qtdmm_add_test(device_library test_devicelibrary tests/test_devicelibrary.cpp)
+
+	## "Find device": families, adapters, access check, udev rules; nothing is opened
+	qtdmm_add_test(device_discovery test_discovery tests/test_discovery.cpp "${CMAKE_SOURCE_DIR}")
+
+	## symbol sets: under "System" QtDMM's own symbols from the plain set
+	qtdmm_add_test(icon_sets test_icons tests/test_icons.cpp)
+	target_link_libraries(test_icons PRIVATE qtdmm_resources)
 
 	## generated documents must match their sources (device table from the
 	## decoders, README from docs/)
 	find_package(Python3 COMPONENTS Interpreter)
+
 	if (Python3_Interpreter_FOUND)
 		add_test(NAME docs_generated COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tests/generate_docs.py" --check)
+
 		## the network bridge (tools/qtdmm-bridge) has its own unittest suite, no pyserial needed
 		if (Python3_VERSION VERSION_GREATER_EQUAL 3.11)
 			add_test(NAME qtdmm_bridge COMMAND ${Python3_EXECUTABLE} -m unittest discover -s tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tools/qtdmm-bridge")
@@ -281,47 +192,11 @@ if (BUILD_TESTING)
 	if (DESKTOP_FILE_VALIDATE)
 		add_test(NAME desktop_entry COMMAND ${DESKTOP_FILE_VALIDATE} "${CMAKE_SOURCE_DIR}/assets/io.github.qtdmm.qtdmm.desktop")
 	endif()
+
 	find_program(APPSTREAMCLI appstreamcli)
 	if (APPSTREAMCLI)
 		add_test(NAME appstream_metadata COMMAND ${APPSTREAMCLI} validate --no-net "${CMAKE_SOURCE_DIR}/assets/appimage/qtdmm.appdata.xml")
 	endif()
-
-	## the min/max memory: kept across range changes, afresh on another port
-	set( TEST_MINMAX test_minmax)
-	add_executable(${TEST_MINMAX} MACOSX_BUNDLE tests/test_minmax.cpp)
-	target_include_directories(${TEST_MINMAX} PRIVATE src)
-	target_link_libraries(${TEST_MINMAX} PRIVATE Qt::Core)
-	add_test(NAME minmax_memory COMMAND ${TEST_MINMAX})
-
-	## the Poincaré plot's values: pairs, SD1/SD2, gaps, port changes
-	add_executable(test_poincare MACOSX_BUNDLE tests/test_poincare.cpp src/core/poincare.cpp src/core/readingadapter.cpp src/core/siprefix.cpp)
-	target_include_directories(test_poincare PRIVATE src)
-	target_link_libraries(test_poincare PRIVATE Qt::Core)
-	add_test(NAME poincare_series COMMAND test_poincare)
-
-	## "My devices": the meter keys, devices.conf, the stable port name
-	add_executable(test_devicelibrary MACOSX_BUNDLE tests/test_devicelibrary.cpp src/core/devicelibrary.cpp src/core/settings.cpp src/device/transports/serial.cpp)
-	target_include_directories(test_devicelibrary PRIVATE src)
-	target_link_libraries(test_devicelibrary PRIVATE Qt6::Gui Qt6::SerialPort Qt::Core Qt::Test)
-	add_test(NAME device_library COMMAND test_devicelibrary)
-
-	## "Find device": families, adapters, access check, udev rules; nothing is opened
-	add_executable(test_discovery MACOSX_BUNDLE tests/test_discovery.cpp src/device/discovery/discovery.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp src/service/mdnsbrowser.cpp ${DECODER_FILES})
-	target_include_directories(test_discovery PRIVATE src)
-	target_link_libraries(test_discovery PRIVATE Qt6::SerialPort Qt6::Network ${HIDAPI_TARGET} Qt::Core Qt::Test)
-	add_test(NAME device_discovery COMMAND test_discovery "${CMAKE_SOURCE_DIR}")
-	if (QTDMM_WITH_BLE)
-		target_link_libraries(test_discovery PRIVATE Qt6::Bluetooth)
-		target_compile_definitions(test_discovery PRIVATE QTDMM_WITH_BLE)
-		target_sources(test_discovery PRIVATE src/device/transports/blegatt.cpp src/device/transports/ble.cpp)
-	endif()
-
-	## symbol sets: under "System" QtDMM's own symbols from the plain set
-	set( TEST_ICONS test_icons)
-	add_executable(${TEST_ICONS} MACOSX_BUNDLE tests/test_icons.cpp src/ui/designs.cpp)
-	target_include_directories(${TEST_ICONS} PRIVATE src)
-	target_link_libraries(${TEST_ICONS} PRIVATE qtdmm_resources Qt6::Widgets Qt::Core)
-	add_test(NAME icon_sets COMMAND ${TEST_ICONS})
 
 	## Alt letters used twice in a menu or among the widgets shown together
 	## (and doubled keys), in the real program in every language: it starts
@@ -349,4 +224,5 @@ if (BUILD_TESTING)
 			set_tests_properties(${_test} PROPERTIES ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;PYTHONDONTWRITEBYTECODE=1")
 		endif()
 	endforeach()
+
 endif()

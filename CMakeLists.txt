@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
+
 project(qtdmm VERSION "0.0.0" HOMEPAGE_URL "https://qtdmm.de" LANGUAGES C CXX)
 
 ## main settings
@@ -20,7 +21,6 @@ file(GLOB UI_FILES CONFIGURE_DEPENDS src/ui/forms/*.ui)
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp src/*.h )
 file(GLOB ICON_FILES CONFIGURE_DEPENDS assets/icons/app/*.png )
 
-
 ## generate resources.qrc so you can't forget to add the icons and translations.
 ## It lives in the build directory with absolute paths: the source tree stays
 ## untouched, and several build directories don't overwrite each other's file.
@@ -40,6 +40,7 @@ option(QTDMM_EMBED_TRANSLATIONS "Compile the translations into the binary instea
 if (WIN32 OR APPLE)
 	set(QTDMM_EMBED_TRANSLATIONS ON)
 endif()
+
 if (QTDMM_EMBED_TRANSLATIONS)
 	set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/Translations\">\n")
 	foreach(translation_file IN LISTS TRANSLATIONS)
@@ -62,6 +63,7 @@ endforeach()
 set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
 ## pictures of the kinds of instrument (DeviceSymbol), :/devices/<type id>.svg
+## (the tests get them from qtdmm_resources, too)
 file(GLOB DEVICE_SYMBOLS CONFIGURE_DEPENDS assets/devices/*.svg)
 list(SORT DEVICE_SYMBOLS)
 set(DEVICE_RES "    <qresource prefix=\"/devices\">\n")
@@ -71,9 +73,6 @@ foreach(file_path IN LISTS DEVICE_SYMBOLS)
 endforeach()
 set(DEVICE_RES "${DEVICE_RES}    </qresource>\n")
 set(RES_CONTENT "${RES_CONTENT}${DEVICE_RES}")
-## the same alone for the tests that draw the symbols
-file(WRITE "${CMAKE_BINARY_DIR}/devices.qrc.new" "<RCC>\n${DEVICE_RES}</RCC>\n")
-configure_file("${CMAKE_BINARY_DIR}/devices.qrc.new" "${CMAKE_BINARY_DIR}/devices.qrc" COPYONLY)
 
 ## in-app help: the user guide pages, aliased by their path below docs/user so
 ## relative Markdown links resolve the same way in QTextBrowser and in MkDocs
@@ -111,7 +110,9 @@ if (APPLE)
 else()
 	set(QTDMM_WITH_BLE_DEFAULT ON)
 endif()
+
 option(QTDMM_WITH_BLE "Bluetooth LE port (needs Qt6 Bluetooth)" ${QTDMM_WITH_BLE_DEFAULT})
+
 if (QTDMM_WITH_BLE)
 	find_package(Qt6 COMPONENTS Bluetooth)
 	if (NOT Qt6Bluetooth_FOUND)
@@ -119,16 +120,19 @@ if (QTDMM_WITH_BLE)
 		set(QTDMM_WITH_BLE OFF)
 	endif()
 endif()
+
 if (NOT QTDMM_WITH_BLE)
 	list(FILTER SRC_FILES EXCLUDE REGEX "transports/ble(gatt)?\\.(h|cpp)$")
 endif()
+
 ## AES-128-CTR for the encrypted Victron advertisements (public domain tiny-AES-c)
 list(APPEND SRC_FILES src/3rdparty/tiny-aes/aes.c)
+
 ## ZIP writer for the XLSX/ODS export (MIT, miniz). Only deflate and CRC are
 ## used - spreadsheet.cpp writes the ZIP container itself - so stdio and the
 ## archive writer stay out (the stdio path also prints a "may not support
 ## large files" pragma at every build). The archive reader stays for the
-## spreadsheet test, fed from memory. Source property: applies to the tests, too.
+## spreadsheet test, fed from memory.
 list(APPEND SRC_FILES src/3rdparty/miniz/miniz.c)
 set_source_files_properties(src/3rdparty/miniz/miniz.c PROPERTIES
 	COMPILE_DEFINITIONS "MINIZ_NO_STDIO;MINIZ_NO_ARCHIVE_WRITING_APIS;MINIZ_NO_TIME")
@@ -143,11 +147,13 @@ endif()
 ## update_translations` - because lupdate rewrites files in the source tree,
 ## and when two targets ran it in parallel they truncated each other's .ts.
 qt_add_translation(QM_FILES ${TRANSLATIONS})
+
 add_custom_target(update_translations
 	COMMAND Qt6::lupdate -no-obsolete ${CMAKE_SOURCE_DIR}/src -ts ${TRANSLATIONS}
 	COMMENT "Updating translation sources from src/"
 	VERBATIM
 )
+
 qt_wrap_ui(UI_HEADERS ${UI_FILES})
 qt_add_resources(RES_SOURCES ${RESOURCES})
 
@@ -167,6 +173,8 @@ endif()
 ## Compiled resources (icons, help pages, .qm files) and the generated ui
 ## headers live in one object library, so rcc/lrelease/uic run exactly once
 ## no matter how many executables (the app, the tests) use them.
+## Link it to the executable itself, not to qtdmm_core: the rcc initialisers
+## are static constructors nobody references.
 add_library(qtdmm_resources OBJECT ${RES_SOURCES} ${QM_FILES} ${UI_HEADERS})
 target_link_libraries(qtdmm_resources PRIVATE Qt6::Core)
 
@@ -218,6 +226,7 @@ endif()
 
 ## compile the application
 add_definitions(-DAPP_VERSION="${QTDMM_VERSION}" -DAPP_NAME="${APP_NAME}" -DAPP_ORGANIZATION="${APP_ORGANIZATION}" )
+
 include_directories(src ${CMAKE_BINARY_DIR})
 
 if(WIN32)
@@ -232,13 +241,41 @@ if(APPLE)
 	set_source_files_properties(${MAC_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
+## Everything except main.cpp is compiled exactly once, here, and then linked
+## by the application and by every test (cmake/ctest.cmake). An OBJECT library
+## on purpose: all objects end up in each executable, so nothing that registers
+## itself through a static initialiser (decoders, transports) can be dropped
+## by the linker, as it could from a static archive.
+list(REMOVE_ITEM SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+
+add_library(qtdmm_core OBJECT ${SRC_FILES})
+
+# ui_*.h come from qtdmm_resources
+add_dependencies(qtdmm_core qtdmm_resources)
+
+target_link_libraries(qtdmm_core PUBLIC
+	Qt6::Widgets
+	Qt6::SerialPort
+	Qt6::PrintSupport
+	Qt6::Network
+	Qt6::Charts
+	Qt6::Svg
+	${HIDAPI_TARGET}
+	$<$<BOOL:${QTDMM_WITH_BLE}>:Qt6::Bluetooth>
+)
+
+if (QTDMM_WITH_BLE)
+	target_compile_definitions(qtdmm_core PUBLIC QTDMM_WITH_BLE)
+endif()
+
 add_executable(${PROJECT_NAME}
 	MACOSX_BUNDLE
 	WIN32
-	${SRC_FILES}
+	src/main.cpp
 	${WIN_RESOURCES}
 	${MAC_RESOURCES}
 )
+
 if(APPLE)
 	set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE qtdmm.icns)
 endif()
@@ -246,6 +283,7 @@ endif()
 # paranoia options, force you to correct all compiler warnings
 # (compile.sh turns this on for ctest builds, so CI fails on a new warning)
 option(QTDMM_WERROR "Treat compiler warnings in QtDMM's own code as errors" OFF)
+
 if(QTDMM_WERROR)
 	# bundled third-party code keeps its warnings; they are not ours to fix
 	set(_third_party src/3rdparty/miniz/miniz.c src/3rdparty/tiny-aes/aes.c)
@@ -257,23 +295,14 @@ if(QTDMM_WERROR)
 		set_property(SOURCE ${_third_party} APPEND PROPERTY COMPILE_OPTIONS "-Wno-error")
 	endif()
 	# the tests get the same flags (cmake/ctest.cmake)
+	target_compile_options(qtdmm_core PRIVATE ${QTDMM_WARNING_FLAGS})
 	target_compile_options(${PROJECT_NAME} PRIVATE ${QTDMM_WARNING_FLAGS})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
+	qtdmm_core
 	qtdmm_resources
-	Qt6::Widgets
-	Qt6::SerialPort
-	Qt6::PrintSupport
-	Qt6::Network
-	Qt6::Charts
-	Qt6::Svg
-	${HIDAPI_TARGET}
-	$<$<BOOL:${QTDMM_WITH_BLE}>:Qt6::Bluetooth>
 )
-if (QTDMM_WITH_BLE)
-	target_compile_definitions(${PROJECT_NAME} PRIVATE QTDMM_WITH_BLE)
-endif()
 
 ## install files
 install(TARGETS ${PROJECT_NAME}
@@ -299,9 +328,11 @@ if (NOT WIN32)
 	install(FILES assets/icons/app/qtdmm_128.png DESTINATION share/icons/hicolor/128x128/apps RENAME io.github.qtdmm.qtdmm.png)
 	install(FILES assets/icons/app/qtdmm.svg DESTINATION share/icons/hicolor/scalable/apps RENAME io.github.qtdmm.qtdmm.svg)
 	install(FILES ${CMAKE_BINARY_DIR}/qtdmm.1.gz DESTINATION share/man/man1)
+
 	## the USB-HID cables and sensors of meters for the logged-in user (uaccess);
 	## the same rules "Find device" shows for an AppImage or Flatpak
 	install(FILES assets/linux/70-qtdmm.rules DESTINATION lib/udev/rules.d)
+
 	## AppStream metadata for software centres, named after the component id
 	install(FILES assets/appimage/qtdmm.appdata.xml DESTINATION share/metainfo RENAME io.github.qtdmm.qtdmm.metainfo.xml)
 endif()
@@ -309,6 +340,7 @@ endif()
 ## the licence texts: QtDMM's (GPL) and those of the symbol sets built in
 ## (Breeze, Oxygen: LGPL); the macOS bundle gets them in the workflow
 set(QTDMM_LICENSE_FILES LICENSE assets/icons/sets/LICENSE.breeze assets/icons/sets/LICENSE.oxygen)
+
 if (WIN32)
 	install(FILES ${QTDMM_LICENSE_FILES} DESTINATION licenses)
 elseif (NOT APPLE)

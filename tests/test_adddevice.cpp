@@ -15,13 +15,6 @@
 #include "device/devicetype.h"
 #include "core/devicelibrary.h"
 
-// src/device/transports/calc.cpp registers these with its CalcDevice
-static const bool registered = [] {
-  DmmDecoder::addConfig({"QtDMM", "Calculated value", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 400000, 0, 0, 0});
-  DmmDecoder::addConfig({"QtDMM", "Simulated meter", "", 0, FrameFormat::Sigrok, 8, 1, 1, 0, 40000, 0, 0, 0});
-  return true;
-}();
-
 static int failed = 0;
 
 static void check(bool cond, const QString &what)
