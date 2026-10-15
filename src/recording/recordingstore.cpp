@@ -65,21 +65,51 @@ RecordingStore::Stats RecordingStore::stats(qint64 from, qint64 to) const
     std::swap(from, to);
   to = qMin(to, duration());
   const int n = m_series.count();
-  for (int i = qMax(0, m_series.holding(from)); i < n && m_series.at(i).t < to; ++i)
+  // a loaded file ends at its last reading, which then holds for no time:
+  // it still counts (count, min, max). A file on its own grid has each row
+  // as the mean over the step before it, so a row weighs that step, and the
+  // first row (its step lies before the file) holds no time either
+  const bool loaded = m_state == View && m_stopT < 0;
+  const qint64 step = loaded ? qint64(m_loadedGrid) * 100 : 0;
+  double sum = 0;
+  for (int i = qMax(0, m_series.holding(from)); i < n; ++i)
   {
     const RawPoint &p = m_series.at(i);
-    const qint64 begin = qMax(from, p.t);
-    const qint64 end = qMin(to, i + 1 < n ? m_series.at(i + 1).t : duration());
-    if (end <= begin || p.gap())
+    qint64 begin = 0;
+    qint64 end = 0;
+    bool counts = false;
+    if (step > 0)
+    {
+      if (p.t - step >= to && i > 0)
+        break;
+      begin = qMax(from, p.t - step);
+      end = qMin(to, p.t);
+      counts = i == 0 && p.t >= from && p.t <= to;
+    }
+    else
+    {
+      if (p.t >= to && !(loaded && i == n - 1 && p.t == to))
+        break;
+      begin = qMax(from, p.t);
+      end = qMin(to, i + 1 < n ? m_series.at(i + 1).t : duration());
+      counts = loaded && i == n - 1 && p.t >= from;
+    }
+    if (p.gap() || (end <= begin && !counts))
       continue;
     st.count++;
     st.min = st.count == 1 ? p.value : qMin(st.min, p.value);
     st.max = st.count == 1 ? p.value : qMax(st.max, p.value);
-    st.integral += p.value * double(end - begin) / 1000;
-    st.covered += end - begin;
+    sum += p.value;
+    if (end > begin)
+    {
+      st.integral += p.value * double(end - begin) / 1000;
+      st.covered += end - begin;
+    }
   }
   if (st.covered > 0)
     st.mean = st.integral * 1000 / double(st.covered);
+  else if (st.count > 0)
+    st.mean = sum / st.count; // readings that held for no time (a file of one row)
   return st;
 }
 

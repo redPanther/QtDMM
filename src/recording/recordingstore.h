@@ -187,7 +187,9 @@ public:
     qint64  covered = 0;         ///< ms of the span with a value
   };
   /// Stats from @p from to @p to (ms since the start, either order). A
-  /// value holds until the next reading, the last one up to duration().
+  /// value holds until the next reading, the last one up to duration(); in a
+  /// loaded file it holds for no time but counts. A loaded file on its own
+  /// grid weighs each row over the step before it.
   Stats       stats(qint64 from, qint64 to) const;
   /// When the recording started (for an import: the file's first time stamp;
   /// in Live: when the live window started).
