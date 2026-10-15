@@ -50,6 +50,27 @@ int main(int argc, char **argv)
   check(key(bar, "select1") && !key(bar, "select1")->isHidden(), "UT60BT: SELECT shown");
   check(key(bar, "peak")->isHidden() && key(bar, "minmax")->isHidden() && key(bar, "select2")->isHidden(),
         "UT60BT: no PEAK, MIN/MAX, Hz/%");
+  check(key(bar, "fn_v")->parentWidget()->isHidden(), "UT60BT: no function keys, their group hidden");
+  bar.setProtocol(FrameFormat::UniTUT202BT);
+  check(!key(bar, "fn_v")->isHidden() && !key(bar, "fn_a")->isHidden() && !key(bar, "fn_ohm")->isHidden()
+          && !key(bar, "fn_ncv")->isHidden() && !key(bar, "range")->isHidden() && !key(bar, "hold")->isHidden(),
+        "UT202BT: V~, A~, Ω, NCV/PEAK, RANGE, HOLD shown");
+  check(key(bar, "auto")->isHidden() && key(bar, "lamp")->isHidden() && key(bar, "peak")->isHidden()
+          && key(bar, "select1")->parentWidget()->isHidden() && key(bar, "rel")->parentWidget()->isHidden()
+          && !key(bar, "hold")->parentWidget()->isHidden(),
+        "UT202BT: no AUTO, LIGHT, PEAK; SELECT and REL groups hidden, HOLD's shown");
+  {
+    // A~ held: inrush; a short click: A~
+    QSignalSpy keys(&bar, &ControlBar::keyPressed);
+    QTest::mouseClick(key(bar, "fn_a"), Qt::LeftButton);
+    QTest::mousePress(key(bar, "fn_a"), Qt::LeftButton);
+    QTest::qWait(ControlBar::kLongPressMs + 100);
+    QTest::mouseRelease(key(bar, "fn_a"), Qt::LeftButton);
+    check(keys.size() == 2 && keys[0][0].toString() == "fn_a" && keys[1][0].toString() == "fn_a_long",
+          "UT202BT A~: click fn_a, held fn_a_long");
+    check(!key(bar, "fn_a")->isCheckable() && key(bar, "fn_v")->styleSheet().contains("#e03c31"),
+          "UT202BT: function keys are plain keys, V~ red");
+  }
   bar.setProtocol(FrameFormat::UniTUT61Plus);
   check(!key(bar, "peak")->isHidden() && !key(bar, "minmax")->isHidden() && !key(bar, "select2")->isHidden(),
         "UT61x+: PEAK, MIN/MAX, Hz/% shown");
@@ -105,7 +126,8 @@ int main(int argc, char **argv)
   {
     const QString dir = qEnvironmentVariable("QTDMM_SHOT");
     bar.resize(bar.sizeHint());
-    for (auto [format, name] : { std::pair{ FrameFormat::UniTiDMM, "ut60bt" }, std::pair{ FrameFormat::UniTUT61Plus, "ut61plus" } })
+    for (auto [format, name] : { std::pair{ FrameFormat::UniTiDMM, "ut60bt" }, std::pair{ FrameFormat::UniTUT61Plus, "ut61plus" },
+                                 std::pair{ FrameFormat::UniTUT202BT, "ut202bt" } })
     {
       bar.setProtocol(format);
       bar.resize(bar.sizeHint());

@@ -46,6 +46,7 @@ public:
     QBluetoothUuid notify;
     QList<QBluetoothUuid> write;   ///< in order of preference
     QStringList namePrefixes;      ///< for scan(): advertised names that belong to it
+    QByteArray hello;              ///< written once when ready, before the first poll
   };
   /// The profile for @p format, or nullopt when it is not a GATT protocol.
   static std::optional<Profile> profile(FrameFormat::DataFormat format);

@@ -25,6 +25,11 @@ const QBluetoothUuid kIsscNotify(QStringLiteral("49535343-1e4d-4bd9-ba61-23c6472
 const QBluetoothUuid kIsscWrite(QStringLiteral("49535343-8841-43f4-a8d4-ecbe34729bb3"));
 const QBluetoothUuid kIsscWriteFallback(QStringLiteral("49535343-6daa-4d02-abf6-19569aca69fe"));
 
+// UNI-T's iENV meters (UT383BT, UT353BT): a vendor service with 16-bit UUIDs
+const QBluetoothUuid kIenvService(quint16(0xFF12));
+const QBluetoothUuid kIenvNotify(quint16(0xFF02));
+const QBluetoothUuid kIenvWrite(quint16(0xFF01));
+
 // connecting and finding the characteristics takes a second or two; a
 // meter that is switched off or out of range never answers
 constexpr int kConnectTimeoutMs = 20000;
@@ -45,6 +50,18 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT60BT" } };
     case FrameFormat::UniTUT61Plus:   // UT161 built in; UT61B+/D+/E+ through the UT-D07B adapter
       return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT161", "UT-D07" } };
+    case FrameFormat::UniTiENV:
+      // the UT353BT advertises as "UT353BT" (esphome_uni_trend_sound_meter);
+      // the UT383BT's name is assumed alike
+      return Profile{ kIenvService, kIenvNotify, { kIenvWrite }, { "UT383BT", "UT353BT" } };
+    case FrameFormat::UniTUT202BT:
+      // UNI-T's app asks the name (0x5F) before anything else, and a UT60BT
+      // is reported to need it (dmm-tools, UT61 family spec §6.4; our UT60BT
+      // answers the poll without). UNVERIFIED on the UT202BT: whether it
+      // answers the 0x5E poll at all, or only streams after 0x5D as the app
+      // has it
+      return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT202BT" },
+                      QByteArray::fromHex("abcd035f01da") };
     default:
       return std::nullopt;
   }
@@ -293,6 +310,8 @@ void BleGattDevice::setReady()
   if (m_connectTimeout)
     m_connectTimeout->stop();
   qCDebug(lcBle) << m_address << "ready";
+  if (!m_profile->hello.isEmpty())
+    sendCommand(m_profile->hello);
   sendPoll();   // the reader's poll from before is still waiting
 }
 

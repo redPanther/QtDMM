@@ -50,7 +50,10 @@ Type ofProtocol(FrameFormat::DataFormat protocol)
     case FrameFormat::UniTUT382:
     case FrameFormat::BenetechGM1020:
       return Luxmeter;
+    case FrameFormat::UniTUT202BT:
+      return ClampMeter;
     case FrameFormat::TfaAirControl:
+    case FrameFormat::UniTiENV:   // UNI-T's environment meters; the luxmeter and the sound level meter below
       return Environment;
     case FrameFormat::VictronBLE:
       return BatteryMonitor;
@@ -90,6 +93,8 @@ const Exception kExceptions[] = {
   { "Generic", "DTM0660 6000 count", Generic },
   { "Generic", "DTM0660 8000 count", Generic },
   { "sigrok", "SCPI DMM (any scpi-dmm model)", Generic },
+  { "Uni-Trend", "UT383BT", Luxmeter },
+  { "Uni-Trend", "UT353BT", SoundLevel },
   { "Victron", "SmartSolar MPPT", SolarCharger },
   { "Victron", "BlueSolar MPPT", SolarCharger },
   { "Victron", "Phoenix Inverter Smart", Inverter },

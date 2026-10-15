@@ -432,6 +432,20 @@
         "special": "DC",
         "val": "1.234"
       }
+    },
+    {
+      "comment": "[reverse-engineered-protocol.md] 'second display: Hz r0 50.00 with bit 7 set (dmm-tools family spec 2.3; synthetic frame)'",
+      "hex": "AB CD 10 84 30 20 20 35 30 2E 30 30 00 00 00 00 00 03 6F",
+      "expected": {
+        "dval": 50.0,
+        "unit": "Hz",
+        "hold": false,
+        "port": "frequency",
+        "special": "HZ",
+        "val": "50.00",
+        "id": 1,
+        "showBar": false
+      }
     }
   ]
 }

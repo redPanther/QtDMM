@@ -33,8 +33,18 @@ QString keyColour(const QColor &face, const QColor &text)
 ControlBar::ControlBar(QWidget *parent) :
   QWidget(parent)
 {
-  struct Key { const char *key; const char *text; const char *tip; bool state; };
+  // longKey: a key the meter reads differently when held, sent instead when
+  // the click was a long one
+  struct Key { const char *key; const char *text; const char *tip; bool state; const char *longKey = nullptr; };
   const QList<QList<Key>> groups = {
+    // the UT202BT's function keys, in the colours of the clamp
+    { { "fn_v", QT_TR_NOOP("V~"), QT_TR_NOOP("The V key (red): AC V, AC V LPF and DC V in turn"), false },
+      { "fn_a", QT_TR_NOOP("A~"), QT_TR_NOOP("The A key (yellow): AC A and AC A LPF in turn; held, inrush current"),
+        false, "fn_a_long" },
+      { "fn_ohm", QT_TR_NOOP("Ω"), QT_TR_NOOP("The Ω key (blue): resistance, continuity, capacitance and temperature in turn"),
+        false },
+      { "fn_ncv", QT_TR_NOOP("NCV/PEAK"), QT_TR_NOOP("Non-contact voltage; held, peak capture (AC V and AC A)"), false,
+        "fn_ncv_long" } },
     { { "select1", QT_TR_NOOP("SELECT"), QT_TR_NOOP("The meter's SELECT key (the orange one): the next function on this switch position"), false },
       { "select2", QT_TR_NOOP("Hz/%"), QT_TR_NOOP("Frequency and duty cycle"), false } },
     { { "range", QT_TR_NOOP("RANGE"), QT_TR_NOOP("The next range (switches to manual ranging)"), false },
@@ -78,6 +88,16 @@ ControlBar::ControlBar(QWidget *parent) :
           Q_EMIT keyPressed(off ? key + "_off" : key);
         });
       }
+      else if (k.longKey)
+      {
+        auto *held = new QElapsedTimer;
+        connect(b, &QObject::destroyed, b, [held] { delete held; });
+        connect(b, &QToolButton::pressed, b, [held] { held->start(); });
+        connect(b, &QToolButton::clicked, this, [this, key, longKey = QString::fromLatin1(k.longKey), held]
+        {
+          Q_EMIT keyPressed(held->isValid() && held->elapsed() >= kLongPressMs ? longKey : key);
+        });
+      }
       else
         // a state key shows what the meter reports, not the click
         connect(b, &QToolButton::clicked, this, [this, b, key, state = k.state]
@@ -89,11 +109,14 @@ ControlBar::ControlBar(QWidget *parent) :
       row->addWidget(b);
       m_keys << b;
       b->setProperty("key", key);
-      // SELECT and HOLD in the colours of the meter's keys (UT60BT)
-      if (key == "select1")
+      // SELECT and HOLD in the colours of the meter's keys (UT60BT), the
+      // clamp's V, A and Ω keys in theirs (UT202BT)
+      if (key == "select1" || key == "fn_a")
         b->setStyleSheet(keyColour(QColor(0xff, 0xc6, 0x1c), QColor(0x20, 0x20, 0x20)));
-      else if (key == "hold")
+      else if (key == "hold" || key == "fn_ohm")
         b->setStyleSheet(keyColour(QColor(0x3c, 0x9a, 0xff), Qt::white));
+      else if (key == "fn_v")
+        b->setStyleSheet(keyColour(QColor(0xe0, 0x3c, 0x31), Qt::white));
       if (key == "hold")
         m_hold = b;
       else if (key == "auto")
@@ -114,7 +137,8 @@ ControlBar::ControlBar(QWidget *parent) :
 
 bool ControlBar::supported(const DmmDecoder::DMMInfo &info)
 {
-  return info.protocol == FrameFormat::UniTiDMM || info.protocol == FrameFormat::UniTUT61Plus;
+  return info.protocol == FrameFormat::UniTiDMM || info.protocol == FrameFormat::UniTUT61Plus
+         || info.protocol == FrameFormat::UniTUT202BT;
 }
 
 void ControlBar::setConnected(bool connected)
@@ -128,6 +152,14 @@ void ControlBar::setProtocol(FrameFormat::DataFormat format)
   const std::shared_ptr<DmmDecoder> decoder = DmmDecoder::getInstance(format);
   for (QToolButton *b : std::as_const(m_keys))
     b->setVisible(decoder && !decoder->keyRequest(b->property("key").toString()).isEmpty());
+  // a group without a key of this meter takes no place
+  for (QWidget *g : std::as_const(m_groups))
+  {
+    bool any = false;
+    for (QToolButton *b : g->findChildren<QToolButton *>())
+      any = any || !b->isHidden();
+    g->setVisible(any);
+  }
   updateGeometry();
 }
 
@@ -147,14 +179,18 @@ int ControlBar::layoutGroups(int width, bool apply) const
     const int gap = 2 * kGap;
     int y = 0;
     int i = 0;
-    const int n = m_groups.size();
+    QList<QWidget *> groups;
+    for (QWidget *g : m_groups)
+      if (!g->isHidden())
+        groups << g;
+    const int n = groups.size();
     while (i < n)
     {
         // evaluate row from group i
         int rowWidth = 0, rowHeight = 0, j = i;
         while (j < n)
         {
-            const QSize s = m_groups[j]->sizeHint();
+            const QSize s = groups[j]->sizeHint();
             const int w = rowWidth + (j > i ? gap : 0) + s.width();
             if (j > i && w > width)
                 break;
@@ -167,8 +203,8 @@ int ControlBar::layoutGroups(int width, bool apply) const
             int x = qMax(0, (width - rowWidth) / 2);
             for (int k = i; k < j; ++k)
             {
-                const QSize s = m_groups[k]->sizeHint();
-                m_groups[k]->setGeometry(x, y, s.width(), s.height());
+                const QSize s = groups[k]->sizeHint();
+                groups[k]->setGeometry(x, y, s.width(), s.height());
                 x += s.width() + gap;
             }
         }
@@ -189,7 +225,8 @@ QSize ControlBar::sizeHint() const
 {
   int w = 0;
   for (QWidget *g : m_groups)
-    w += g->sizeHint().width() + 2 * kGap;
+    if (!g->isHidden())
+      w += g->sizeHint().width() + 2 * kGap;
   return QSize(w - 2 * kGap, heightForWidth(w));
 }
 
@@ -197,7 +234,8 @@ QSize ControlBar::minimumSizeHint() const
 {
   int w = 0;
   for (QWidget *g : m_groups)
-    w = qMax(w, g->sizeHint().width());
+    if (!g->isHidden())
+      w = qMax(w, g->sizeHint().width());
   return QSize(w, heightForWidth(w));
 }
 
