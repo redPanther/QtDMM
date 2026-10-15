@@ -1,4 +1,5 @@
-* 26.2 (changes after rc1; the release candidate below lists everything new before)
+* 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
+  before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell
   to build it; on NixOS the udev rule comes with services.udev.packages (see INSTALL)
 
