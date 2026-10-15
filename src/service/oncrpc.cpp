@@ -1,6 +1,6 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
-#include "service/rpc.h"
+#include "service/oncrpc.h"
 
 #include <QNetworkDatagram>
 #include <QPointer>

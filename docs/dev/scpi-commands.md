@@ -14,7 +14,7 @@ of the meters that have remote keys.
   mode, no locks, messages up to 1 MB, `tests/test_hislip.cpp`), where a
   message may also hold several lines and each query line answers with a
   message of its own; or VXI-11 (`src/service/vxi11core.cpp`,
-  `vxi11server.cpp`, `rpc.cpp`; core and abort channel, no interrupt
+  `vxi11server.cpp`, `oncrpc.cpp`; core and abort channel, no interrupt
   channel, 16 links, messages up to 1 MB, a lock ends with its connection,
   `tests/test_vxi11.cpp`), the same way: a `device_write` with END runs
   the lines, each query answer is read with `device_read` of its own.

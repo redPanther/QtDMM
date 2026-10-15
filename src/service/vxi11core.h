@@ -4,7 +4,7 @@
 
 // VXI-11 core and abort channel as RPC services.
 
-#include "service/rpc.h"
+#include "service/oncrpc.h"
 #include "service/scpiendpoint.h"
 
 #include <QHash>

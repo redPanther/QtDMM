@@ -10,7 +10,7 @@
 #include <QtCore>
 #include <QtNetwork>
 
-#include "service/rpc.h"
+#include "service/oncrpc.h"
 #include "service/vxi11server.h"
 
 static int failed = 0;

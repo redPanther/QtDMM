@@ -12,7 +12,7 @@
 // (Windows, macOS since 10.14, Linux with CAP_NET_BIND_SERVICE or ip_unprivileged_port_start),
 // the system rpcbind needs to run. docs/user/scpi-server.md says how.
 
-#include "service/rpc.h"
+#include "service/oncrpc.h"
 #include "service/rpcbindclient.h"
 #include "service/scpiendpoint.h"
 #include "service/vxi11core.h"
