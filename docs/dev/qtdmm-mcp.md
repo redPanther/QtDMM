@@ -57,7 +57,7 @@ QT_QPA_PLATFORM=offscreen QTDMM_IPC_KEY=mcptest qtdmm --config-dir /tmp/qtdmm-te
 | Tool | SCPI | Answer |
 |---|---|---|
 | `identify` | `*IDN?` | `QtDMM,<meter>,0,<version>` |
-| `reading` | `READ?`, `UNIT?`, `CONFigure?` | value in base units, unit, function; `overload` or `no reading` instead of the value |
+| `reading` | `READ?`, `UNIT?`, `CONFigure?` | value in base units, unit, function; `overload` (`-overload` for -OL) or `no reading` instead of the value |
 | `reading2` | `READ2?`, `UNIT2?`, `CONFigure2?` | the same for the second value; a meter without one answers `no reading` and leaves `-230` in the error queue |
 | `status` | `STATus:QUEStionable?`, `STATus:OPERation?`, `*STB?` | the registers and their bits: overload, hold, not connected, no reading, recording, alarm |
 | `errors` | `SYSTem:ERRor?` | the error queue, emptied; it is shared by all clients of the instance |
@@ -82,7 +82,7 @@ may show up too).
 | `connect` | `INPut ON\|OFF` | connects (`on`, default) or disconnects the meter |
 | `record_start` | `INITiate` | starts a recording; refused while one runs or over one not saved |
 | `record_stop` | `ABORt` | stops it |
-| `mark` | `QTDMM:MARK` | a mark with `text` in the graph and the readings table |
+| `mark` | `QTDMM:MARK` | a mark with `text` in the graph and the readings table (one line: a line break is refused) |
 | `reset_min_max` | `CALCulate:AVERage:CLEar` | resets min/max, like F4 |
 | `acknowledge_alarms` | `QTDMM:ALARm:ACKnowledge` | acknowledges the raised alarms |
 | `press_key` | `QTDMM:KEY` | presses one of the keys `keys` lists (UNI-T Bluetooth meters) |
