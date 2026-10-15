@@ -112,10 +112,10 @@ def split_list(text):
 
 
 def value(text):
-    """+1.2E+00 as a number; overload and no reading as words."""
+    """+1.2E+00 as a number; overload (-overload for -OL) and no reading as words."""
     v = float(text)
-    if v == 9.9e37:
-        return "overload"
+    if abs(v) == 9.9e37:
+        return "overload" if v > 0 else "-overload"
     if v == 9.91e37:
         return "no reading"
     return v
@@ -262,6 +262,10 @@ def keys() -> dict:
 def command(cmd):
     """Sends a command and reads the error queue once: an error there becomes the tool's error.
     The queue is shared by all clients, so an older error may show up here too."""
+    # the server reads line by line: a line break in a mark's text or a key would send
+    # commands of its own
+    if "\n" in cmd or "\r" in cmd:
+        raise ToolError("no line breaks in a text or key")
     with Scpi() as s:
         s.sock.sendall(cmd.encode() + b"\n")
         e = s.query("SYSTem:ERRor?")

@@ -631,6 +631,40 @@ int main(int argc, char **argv)
       check(s.count == 0 && s.covered == 0, "stats of no time: nothing; got " + text(s));
     }
 
+    // stats of a loaded file: the last reading counts although nothing comes
+    // after it; a file on its own grid weighs each row over the step before it
+    {
+      auto text = [](const RecordingStore::Stats &s)
+      {
+        return QString("%1 readings, %2..%3, mean %4, %5 ms").arg(s.count).arg(s.min).arg(s.max).arg(s.mean).arg(s.covered);
+      };
+      Recording file;
+      file.start = TestClock::wall(0);
+      file.sampleTimeTenths = 10;
+      file.values = { 1, 2, 3, 10 };
+      RecordingStore st;
+      st.load(file);
+      RecordingStore::Stats s = st.stats(0, st.duration());
+      check(s.count == 4 && s.min == 1 && s.max == 10 && s.mean == 5 && s.covered == 3000,
+            "loaded grid: 4 rows, 1..10, mean 5 (2, 3, 10 a step each); got " + text(s));
+      s = st.stats(0, 1000000);
+      check(s.count == 4 && s.max == 10 && s.mean == 5, "loaded grid, cursor past the end; got " + text(s));
+      s = st.stats(2500, 3000);
+      check(s.count == 1 && s.min == 10 && s.mean == 10 && s.covered == 500, "loaded grid: the last step; got " + text(s));
+
+      file.times = { 0, 700, 1900, 2500 };
+      st.load(file);
+      s = st.stats(0, st.duration());
+      check(s.count == 4 && s.max == 10 && s.covered == 2500 && qAbs(s.mean - 1.96) < 1e-9,
+            "loaded readings: 4, the last up to 10, mean over time 1.96; got " + text(s));
+
+      file.times.clear();
+      file.values = { 7 };
+      st.load(file);
+      s = st.stats(0, st.duration());
+      check(s.count == 1 && s.min == 7 && s.max == 7 && s.mean == 7, "a file of one row; got " + text(s));
+    }
+
     // the live window: the recording length, or the graph's window
     store.setLiveWidth(60);
     store.setSampleLength(20);   // 2 s

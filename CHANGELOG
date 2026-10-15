@@ -2,8 +2,9 @@
 - Keys of your own: the new settings page Keyboard lists the commands of the main window with their key and
   the default; a key can be changed, taken away or set back, a key in use is taken from the other command after
   a question. One set for all instances (shortcuts.conf), a running instance takes a change over at once
-- Hide toolbar (Ctrl+M, in the menu): the toolbar goes away for more room, the same key brings it back; the
-  workspace keeps it. The menu moves from Ctrl+M to F7
+- Hide toolbar (Ctrl+M, in the menu and the right-click menu of the windows): the toolbar goes away for more
+  room, the same key brings it back (a note says so, until "Do not show this again"); the workspace keeps it.
+  The menu moves from Ctrl+M to F7
 - Alarms: while an alarm is raised, the display and the analog meter take its colour (the LCD's face, light or
   dark digits for contrast; a third of it in the meter's dial), also after Acknowledge until the reading is back;
   with several alarms the one raised last. A switch per alarm (on by default), and "Coloured displays blink" on
@@ -39,7 +40,8 @@
 - SCPI server: also VXI-11, the older LAN protocol of VISA (TCPIP::host::INSTR) - for VISA libraries without
   HiSLIP and for lxi-tools (lxi discover, lxi screenshot with -p keysight-dmm). Off by default, switched on in
   Settings, SCPI server. It needs a portmapper on port 111: the system's rpcbind, or an own one where QtDMM may
-  open that port (QtDMM never asks for extra rights; the handbook says how); --vxi11-rpc picks it for one run.
+  open that port (QtDMM never asks for extra rights; the handbook says how); --vxi11-rpc picks it for one run,
+  --vxi11-portmapper-port puts an own one on another port (for tests).
   Sidebar Services row VXI-11, mDNS _vxi-11._tcp. Only one program per computer can offer VXI-11
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)

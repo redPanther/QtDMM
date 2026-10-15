@@ -92,9 +92,13 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray 
 
   bool ok = false;
   const double shown = text.toDouble(&ok);
+  // no overload captured. A word ("OL") goes on as it comes, ReadingAdapter
+  // makes it an overload; dashes or a blank display are no reading now (as
+  // with APPA), not a valid 0
+  static const QRegularExpression letters("[A-Za-z]");
+  if (!ok && !text.contains(letters))
+    return std::nullopt;
   m_result.val = text;
-  // no overload captured: whatever is no number ("OL", "----") is shown as
-  // it comes, with no value
   m_result.dval = ok ? shown : 0;
   return m_result;
 }

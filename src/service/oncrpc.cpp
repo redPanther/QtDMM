@@ -235,11 +235,12 @@ private:
       QPointer<QTcpSocket> sock = m_sock;
       m_busy = true;
       const QByteArray reply = m_dispatcher->handle(msg, m_id);
+      if (!sock)
+        return; // gone during the call, and we with it (a child of the socket): touch nothing
       m_busy = false;
-      if (!sock || m_deleteAfter)
+      if (m_deleteAfter)
       {
-        if (sock)
-          sock->deleteLater();
+        sock->deleteLater();
         return;
       }
       if (!reply.isEmpty())

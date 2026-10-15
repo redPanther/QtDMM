@@ -156,6 +156,15 @@ int main(int argc, char **argv)
     last = ask(s, "SYST:ERR?");
   check(last.startsWith("-350,"), "last entry is the overflow " + last);
 
+  // device clear (VXI-11, HiSLIP) leaves the error queue alone, only *CLS empties it
+  s.process("NOPE");
+  {
+    const ScpiEndpoint ep = s.endpoint();
+    if (ep.deviceClear)
+      ep.deviceClear();
+  }
+  check(ask(s, "*STB?") == "4" && ask(s, "SYST:ERR?").startsWith("-113,"), "device clear keeps the error queue");
+
   // --- 4b. QtDMM's own commands and CALCulate ---
   {
     ScpiServer q;
@@ -226,6 +235,11 @@ int main(int argc, char **argv)
     q.process("QTDMM:MARK \"Load on\"");
     q.process("QTDMM:MARK");
     check(marks == QStringList({ "Load on", "SCPI" }), "MARK with and without text");
+    marks.clear();
+    q.process("QTDMM:MARK 'a;b'");
+    q.process("QTDMM:MARK \"x;y\";:QTDMM:MARK 'it''s \"z\"'");
+    check(marks == QStringList({ "a;b", "x;y", "it's \"z\"" }) && ask(q, "SYST:ERR?") == "0,\"No error\"",
+          "a ; in single or double quotes stays in the string " + marks.join('|'));
 
     check(ask(q, "QTDMM:KEY:CATalog?") == "\"RANGE\",\"HOLD\"", "KEY:CATalog?");
     q.process("QTDMM:KEY \"HOLD\"");

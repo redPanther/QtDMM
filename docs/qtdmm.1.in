@@ -12,6 +12,8 @@ qtdmm \- read out and record digital multimeters
 .IR dir ]
 .RB [ \-\-vxi11\-rpc
 .IR mode ]
+.RB [ \-\-vxi11\-portmapper\-port
+.IR port ]
 .RB [ \-\-debug ]
 .br
 .B qtdmm
@@ -73,6 +75,15 @@ or
 .B own
 (port 111 itself, which needs the right to bind a privileged port).
 Replaces the setting without changing it.
+.TP
+.BI \-\-vxi11\-portmapper\-port " port"
+For tests and development: the VXI\-11 server with an own portmapper on
+.I port
+instead of 111
+.RB ( 0 :
+any free one), for this run only; implies
+.BR "\-\-vxi11\-rpc own" .
+VISA libraries and lxi\-tools ask port 111 and do not find it there.
 .TP
 .B \-\-debug
 Print every frame received from the meter as a line of hex bytes on

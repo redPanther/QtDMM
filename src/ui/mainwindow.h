@@ -101,6 +101,7 @@ protected Q_SLOTS:
   void      setFullScreen(bool on);
   /// Ctrl+M: all toolbars at once
   void      setToolbarsHidden(bool hide);
+  void      toolbarHiddenHint();   ///< after hiding the toolbar by hand: how it comes back (until switched off)
   /// Arrange actions and the title-bar action follow the arranger.
   void      syncArrangeActions();
   /// The readings dot in the status bar and its tooltip (meter and port).

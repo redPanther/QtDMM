@@ -15,10 +15,13 @@ of the meters that have remote keys.
   message may also hold several lines and each query line answers with a
   message of its own; or VXI-11 (`src/service/vxi11core.cpp`,
   `vxi11server.cpp`, `oncrpc.cpp`; core and abort channel, no interrupt
-  channel, 16 links, messages up to 1 MB, a lock ends with its connection,
+  channel, 16 links, messages up to 1 MB (the rest of a bigger one is
+  dropped up to its END), a link counts only on the connection that created
+  it, a lock ends with its connection,
   `tests/test_vxi11.cpp`), the same way: a `device_write` with END runs
   the lines, each query answer is read with `device_read` of its own.
-  `device_clear` (and HiSLIP's device clear) empties the error queue.
+  `device_clear` (and HiSLIP's device clear) leaves the error queue and
+  the status alone, as IEEE 488.2 asks; only `*CLS` empties them.
 - Several commands per message separated by `;`. Their query answers come
   back in one line, separated by `;`, terminated by `\n`. A message without
   a query gets no answer at all.

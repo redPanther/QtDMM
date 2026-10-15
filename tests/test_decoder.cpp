@@ -181,6 +181,38 @@ int main(int argc, char **argv)
       qWarning() << "the states change the port";
       ++problems;
     }
+    // iENV: a display without a number is no reading (R11-06), "OL" an
+    // overload; not in any capture yet, so synthetic frames
+    auto ienv = [](const char *display)
+    {
+      QByteArray f = QByteArray::fromHex("aabb10013a");
+      f.append(display, 9).append(QByteArray::fromHex("3b3000"));
+      unsigned sum = 0;
+      for (char ch : std::as_const(f))
+        sum += static_cast<unsigned char>(ch);
+      return f.append(char(sum >> 8)).append(char(sum & 0xFF));
+    };
+    {
+      auto decoder = DmmDecoder::getInstance(FrameFormat::UniTiENV);
+      const auto lux = decoder->decode(ienv("   158LUX"), 0);
+      if (!lux || lux->dval != 158 || lux->unit != "lx")
+      {
+        qWarning() << "iENV: the synthetic frame of 158 lx does not decode";
+        ++problems;
+      }
+      if (decoder->decode(ienv("  ----LUX"), 0) || decoder->decode(ienv("      LUX"), 0))
+      {
+        qWarning() << "iENV: dashes or a blank display give a reading";
+        ++problems;
+      }
+      const auto ol = decoder->decode(ienv("   OL LUX"), 0);
+      ReadingAdapter adapter;
+      if (!ol || adapter.adapt(*ol, 0).first().sample.quality != Quality::Overload)
+      {
+        qWarning() << "iENV: OL is no overload";
+        ++problems;
+      }
+    }
     if (problems == 0)
       qInfo() << "Meter keys and their states consistent.";
     return problems == 0 ? 0 : 1;

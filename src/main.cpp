@@ -135,6 +135,10 @@ int main(int argc, char **argv)
   parser.addOption({"config-id",QObject::tr("sets <config-id>"), "config-id"});
   parser.addOption({"vxi11-rpc", QObject::tr("VXI-11 portmapper for this run: auto, system (rpcbind) or own (port 111)"),
                     "mode"});
+  parser.addOption({"vxi11-portmapper-port",
+                    QObject::tr("for tests and development: VXI-11 with an own portmapper on this port instead of 111 "
+                                "(0: any free one) for this run; VISA and lxi-tools ask port 111"),
+                    "port"});
   // for the tests: list doubled Alt letters and keys, then quit
   QCommandLineOption checkMnemonics("check-mnemonics");
   checkMnemonics.setFlags(QCommandLineOption::HiddenFromHelp);
@@ -154,6 +158,23 @@ int main(int argc, char **argv)
       return 2;
     }
     MeterController::setVxi11RpcOverride(mode);
+  }
+  if (parser.isSet("vxi11-portmapper-port"))
+  {
+    bool ok = false;
+    const uint port = parser.value("vxi11-portmapper-port").toUInt(&ok);
+    bool system = false;
+    if (parser.isSet("vxi11-rpc"))
+      system = Vxi11Server::modeFromName(parser.value("vxi11-rpc")) == Vxi11Server::RpcbindMode::System;
+    if (!ok || port > 65535 || system)
+    {
+      std::cerr << qPrintable(system ? QObject::tr("--vxi11-portmapper-port needs the own portmapper, not --vxi11-rpc system")
+                                     : QObject::tr("--vxi11-portmapper-port: a port from 0 to 65535, not \"%1\"")
+                                         .arg(parser.value("vxi11-portmapper-port")))
+                << std::endl;
+      return 2;
+    }
+    MeterController::setVxi11PortmapperPort(quint16(port));
   }
 
   if (parser.isSet(checkMnemonics))

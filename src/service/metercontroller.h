@@ -109,6 +109,9 @@ public:
   /// How VXI-11 reaches the portmapper, from --vxi11-rpc: it replaces the setting for this run
   /// (scripts, service starts). Set before the first applyScpi().
   static void setVxi11RpcOverride(std::optional<Vxi11Server::RpcbindMode> mode);
+  /// From --vxi11-portmapper-port (tests, development): an own portmapper on this port instead of
+  /// 111 for this run (0: any free one). Set before the first applyScpi().
+  static void setVxi11PortmapperPort(std::optional<quint16> port);
   /// The SCPI server, HiSLIP and VXI-11, running or not.
   QList<ServiceState> services() const;
   /// Source of the SCPI screen dump (HCOPy:SDUMp:DATA?): format -> image bytes.
