@@ -500,6 +500,8 @@ void InstanceWidget::applySLOT()
   scpi.mdns = m_configDlg->scpiMdns();
   scpi.hislip = m_configDlg->scpiHislip();
   scpi.hislipPort = quint16(m_configDlg->scpiHislipPort());
+  scpi.vxi11 = m_configDlg->scpiVxi11();
+  scpi.vxi11Rpc = Vxi11Server::modeFromName(m_configDlg->scpiVxi11Rpc());
   m_ctl->applyScpi(scpi);
   syncDevice();
   Q_EMIT configChanged();

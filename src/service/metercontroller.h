@@ -14,6 +14,7 @@
 #include "core/readingadapter.h"
 #include "core/reading.h"
 #include "core/stalerule.h"
+#include "service/vxi11server.h"
 
 class MeterConnection;
 class QProcess;
@@ -32,14 +33,16 @@ struct ScpiConfig
   bool    mdns = false;            ///< announce as _scpi-raw._tcp (and _hislip._tcp)
   bool    hislip = false;          ///< also HiSLIP for VISA (NI-VISA, LabVIEW, PyVISA)
   quint16 hislipPort = 4880;
+  bool    vxi11 = false;           ///< also VXI-11 (portmapper on 111): older VISA, lxi discover
+  Vxi11Server::RpcbindMode vxi11Rpc = Vxi11Server::RpcbindMode::Auto;   ///< system rpcbind or own portmapper
 };
 
 /// One network service of the session (the SCPI server, HiSLIP), as the
 /// sidebar shows it.
 struct ServiceState
 {
-  QString id;               ///< "scpi", "hislip"
-  QString name;             ///< "SCPI", "HiSLIP"
+  QString id;               ///< "scpi", "hislip", "vxi11"
+  QString name;             ///< "SCPI", "HiSLIP", "VXI-11"
   bool    running = false;
   quint16 port = 0;
   QString address;          ///< "localhost:5025", "TCPIP::localhost::hislip0::INSTR"
@@ -101,7 +104,12 @@ public:
   /// The VISA address of the HiSLIP server ("TCPIP::localhost::hislip0::INSTR"),
   /// empty while it does not run.
   QString     hislipResource() const;
-  /// The SCPI server and HiSLIP, running or not.
+  /// The VISA address of the VXI-11 server, "TCPIP::host::INSTR"; empty when it does not run.
+  QString     vxi11Resource() const;
+  /// How VXI-11 reaches the portmapper, from --vxi11-rpc: it replaces the setting for this run
+  /// (scripts, service starts). Set before the first applyScpi().
+  static void setVxi11RpcOverride(std::optional<Vxi11Server::RpcbindMode> mode);
+  /// The SCPI server, HiSLIP and VXI-11, running or not.
   QList<ServiceState> services() const;
   /// Source of the SCPI screen dump (HCOPy:SDUMp:DATA?): format -> image bytes.
   void        setScreenshotSource(std::function<QByteArray(const QByteArray &)> source);
@@ -188,6 +196,9 @@ private:
   MdnsResponder      *m_mdns;
   HislipServer       *m_hislip;       ///< the same interpreter over HiSLIP
   MdnsResponder      *m_mdnsHislip;
+  Vxi11Server        *m_vxi11;        ///< and over VXI-11
+  MdnsResponder      *m_mdnsVxi11;
+  QString             m_vxi11Error;
   QString             m_scpiError;    ///< why the switched-on server is not running
   QString             m_hislipError;
   // a SCPI start or (dis)connect checked but not run yet (it runs after the

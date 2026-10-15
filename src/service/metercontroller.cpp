@@ -17,6 +17,12 @@
 #include "service/sharedstatemanager.h"
 #include "core/siprefix.h"
 
+namespace
+{
+// --vxi11-rpc: replaces the setting Scpi/vxi11-rpc for this run
+std::optional<Vxi11Server::RpcbindMode> s_vxi11RpcOverride;
+}
+
 
 MeterController::MeterController(QObject *parent)
   : QObject(parent)
@@ -27,6 +33,8 @@ MeterController::MeterController(QObject *parent)
   , m_mdns(new MdnsResponder(this))
   , m_hislip(new HislipServer(m_scpi->endpoint(), this))
   , m_mdnsHislip(new MdnsResponder(this))
+  , m_vxi11(new Vxi11Server(m_scpi->endpoint(), this))
+  , m_mdnsVxi11(new MdnsResponder(this))
   , m_external(new QProcess(this))
 {
   qRegisterMetaType<Reading>();
@@ -115,6 +123,7 @@ MeterController::MeterController(QObject *parent)
   installScpiSources();
   connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
   connect(m_hislip, &HislipServer::sessionsChanged, this, [this](int) { updateScpiStatus(); });
+  connect(m_vxi11, &Vxi11Server::linksChanged, this, [this](int) { updateScpiStatus(); });
 
   // an alarm's program that had the port to itself has ended: the meter again
   connect(m_external, &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus)
@@ -526,6 +535,29 @@ void MeterController::applyScpi(const ScpiConfig &config)
     }
   }
 
+  // VXI-11: one per computer (one portmapper entry), with the system rpcbind
+  // or an own portmapper on 111; switched on but not possible, it stays off
+  // with a reason, the other two run on
+  const bool vxi11 = config.enabled && config.vxi11 && m_scpi->isListening();
+  const Vxi11Server::RpcbindMode rpc = s_vxi11RpcOverride.value_or(config.vxi11Rpc);
+  const bool sameVxi11 = m_vxi11->isRunning() && m_vxi11->address() == address && m_vxi11->mode() == rpc;
+  if (!vxi11)
+  {
+    m_mdnsVxi11->stop();
+    m_vxi11->stop();
+    m_vxi11Error = config.enabled && config.vxi11 ? tr("the SCPI server is not running") : QString();
+  }
+  else if (!sameVxi11)
+  {
+    m_mdnsVxi11->stop();
+    m_vxi11Error.clear();
+    if (!m_vxi11->start(address, rpc))
+    {
+      m_vxi11Error = m_vxi11->error();
+      Q_EMIT error(tr("VXI-11 server: %1").arg(m_vxi11Error));
+    }
+  }
+
   QMap<QString, QString> txt;
   txt["txtvers"] = "1";
   txt["model"] = m_model;
@@ -541,6 +573,11 @@ void MeterController::applyScpi(const ScpiConfig &config)
     m_mdnsHislip->start("_hislip._tcp", instance, m_hislip->port(), txt);
   else if (!config.mdns)
     m_mdnsHislip->stop();
+  // VXI-11 clients ask the portmapper: the announced port is 111
+  if (m_vxi11->isRunning() && config.mdns && !m_mdnsVxi11->isActive())
+    m_mdnsVxi11->start("_vxi-11._tcp", instance, Vxi11Server::kPortmapperPort, txt);
+  else if (!config.mdns)
+    m_mdnsVxi11->stop();
   updateScpiStatus();
 }
 
@@ -553,13 +590,19 @@ void MeterController::updateScpiStatus()
     return;
   }
   const QString where = m_scpi->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
-  const int n = m_scpi->clientCount() + m_hislip->sessionCount();
+  const int n = m_scpi->clientCount() + m_hislip->sessionCount() + m_vxi11->linkCount();
   const QString clients = n == 1 ? tr("1 client") : tr("%1 clients").arg(n);
   QString text = tr("Listening on %1, port %2, %3 connected.").arg(where).arg(m_scpi->port()).arg(clients);
   if (m_hislip->isListening())
     text += ' ' + tr("HiSLIP on port %1: %2.").arg(m_hislip->port()).arg(hislipResource());
   else if (!m_hislipError.isEmpty())
     text += ' ' + tr("HiSLIP could not start: %1.").arg(m_hislipError);
+  if (m_vxi11->isRunning())
+    text += ' ' + (m_vxi11->usesSystemRpcbind() ? tr("VXI-11 through the system rpcbind: %1.")
+                                                : tr("VXI-11 with an own portmapper on port %2: %1."))
+                    .arg(vxi11Resource()).arg(m_vxi11->portmapperPort());
+  else if (!m_vxi11Error.isEmpty())
+    text += ' ' + tr("VXI-11 is off: %1.").arg(m_vxi11Error);
   if (m_mdns->isActive())
     text += ' ' + tr("Announced as \"%1\".").arg(m_mdns->instanceName());
   Q_EMIT scpiStatusChanged(text);
@@ -592,7 +635,32 @@ QList<ServiceState> MeterController::services() const
   }
   else
     hislip.error = m_hislipError;
-  return { scpi, hislip };
+  ServiceState vxi11;
+  vxi11.id = "vxi11";
+  vxi11.name = "VXI-11";
+  vxi11.running = m_vxi11->isRunning();
+  if (vxi11.running)
+  {
+    vxi11.port = m_vxi11->portmapperPort();
+    vxi11.address = vxi11Resource();
+    vxi11.clients = m_vxi11->linkCount();
+  }
+  else
+    vxi11.error = m_vxi11Error;
+  return { scpi, hislip, vxi11 };
+}
+
+QString MeterController::vxi11Resource() const
+{
+  if (!m_vxi11->isRunning())
+    return QString();
+  const QString host = m_vxi11->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
+  return QString("TCPIP::%1::INSTR").arg(host);
+}
+
+void MeterController::setVxi11RpcOverride(std::optional<Vxi11Server::RpcbindMode> mode)
+{
+  s_vxi11RpcOverride = mode;
 }
 
 QString MeterController::hislipResource() const

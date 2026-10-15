@@ -58,7 +58,23 @@ ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
   auto *hislipLabel = new QLabel(tr("HiSLIP p&ort:"), group);
   hislipLabel->setBuddy(m_hislipPort);
   form->addRow(hislipLabel, m_hislipPort);
+  m_vxi11 = new QCheckBox(tr("Also &VXI-11, for older VISA and lxi discover (port 111)"), group);
+  m_vxi11->setToolTip(tr("VXI-11 is the older LAN protocol of VISA: TCPIP::host::INSTR. Clients ask the portmapper "
+                         "on port 111 for it, so only one program per computer can offer it. Prefer HiSLIP where "
+                         "the client has it."));
+  form->addRow(QString(), m_vxi11);
+  m_vxi11Rpc = new QComboBox(group);
+  m_vxi11Rpc->addItem(tr("Automatic"), "auto");
+  m_vxi11Rpc->addItem(tr("System rpcbind"), "system");
+  m_vxi11Rpc->addItem(tr("Own, on port 111"), "own");
+  m_vxi11Rpc->setToolTip(tr("Automatic: the system's rpcbind when it runs, otherwise an own portmapper. The own one "
+                            "needs port 111, which Linux and BSD allow only with extra rights; QtDMM never asks "
+                            "for them. The handbook (SCPI server, VXI-11) says how to set it up."));
+  auto *rpcLabel = new QLabel(tr("Port&mapper:"), group);
+  rpcLabel->setBuddy(m_vxi11Rpc);
+  form->addRow(rpcLabel, m_vxi11Rpc);
   m_mdns = new QCheckBox(tr("&Announce by mDNS (_scpi-raw._tcp, _hislip._tcp), so lxi discover finds it"), group);
+  m_mdns->setToolTip(tr("With VXI-11 on, also as _vxi-11._tcp."));
   form->addRow(QString(), m_mdns);
 
   m_hint = new QLabel(this);
@@ -76,12 +92,16 @@ ScpiPrefs::ScpiPrefs(QWidget *parent) : SettingsPage(parent)
   connect(m_hislip, &QCheckBox::toggled, this, &ScpiPrefs::updateHint);
   connect(m_hislipPort, &QSpinBox::valueChanged, this, &ScpiPrefs::updateHint);
   connect(m_hislip, &QCheckBox::toggled, this, [this](bool on) { m_hislipPort->setEnabled(on && m_enabled->isChecked()); });
+  connect(m_vxi11, &QCheckBox::toggled, this, &ScpiPrefs::updateHint);
+  connect(m_vxi11, &QCheckBox::toggled, this, [this](bool on) { m_vxi11Rpc->setEnabled(on && m_enabled->isChecked()); });
   connect(m_enabled, &QCheckBox::toggled, this, [this](bool on)
   {
     m_port->setEnabled(on);
     m_bind->setEnabled(on);
     m_hislip->setEnabled(on);
     m_hislipPort->setEnabled(on && m_hislip->isChecked());
+    m_vxi11->setEnabled(on);
+    m_vxi11Rpc->setEnabled(on && m_vxi11->isChecked());
     m_mdns->setEnabled(on && m_bind->currentIndex() == 1);
   });
   connect(m_bind, &QComboBox::currentIndexChanged, this, [this](int idx)
@@ -97,6 +117,8 @@ bool ScpiPrefs::allInterfaces() const { return m_bind->currentIndex() == 1; }
 bool ScpiPrefs::mdns() const { return m_mdns->isChecked() && allInterfaces(); }
 bool ScpiPrefs::hislip() const { return m_hislip->isChecked(); }
 int ScpiPrefs::hislipPort() const { return m_hislipPort->value(); }
+bool ScpiPrefs::vxi11() const { return m_vxi11->isChecked(); }
+QString ScpiPrefs::vxi11Rpc() const { return m_vxi11Rpc->currentData().toString(); }
 
 void ScpiPrefs::setStatus(const QString &text)
 {
@@ -118,6 +140,9 @@ void ScpiPrefs::updateHint()
     const QString port = m_hislipPort->value() == 4880 ? QString() : QString(",%1").arg(m_hislipPort->value());
     text += "<br>" + tr("VISA address: <code>%1</code>").arg(QString("TCPIP::%1::hislip0%2::INSTR").arg(host, port));
   }
+  if (m_vxi11->isChecked())
+    text += "<br>" + tr("VXI-11: <code>%1</code>, or <code>lxi scpi -a %2 \"*IDN?\"</code>")
+                       .arg(QString("TCPIP::%1::INSTR").arg(host), host);
   m_hint->setText(text);
 }
 
@@ -129,6 +154,8 @@ void ScpiPrefs::defaultsSLOT()
   m_mdns->setChecked(m_cfg->getBool("Scpi/mdns", true));
   m_hislip->setChecked(m_cfg->getBool("Scpi/hislip", false));
   m_hislipPort->setValue(m_cfg->getInt("Scpi/hislip-port", 4880));
+  m_vxi11->setChecked(m_cfg->getBool("Scpi/vxi11", false));
+  m_vxi11Rpc->setCurrentIndex(qMax(0, m_vxi11Rpc->findData(m_cfg->getString("Scpi/vxi11-rpc", "auto"))));
   m_enabled->toggled(m_enabled->isChecked());
   updateHint();
 }
@@ -141,6 +168,8 @@ void ScpiPrefs::factoryDefaultsSLOT()
   m_mdns->setChecked(true);
   m_hislip->setChecked(false);
   m_hislipPort->setValue(4880);
+  m_vxi11->setChecked(false);
+  m_vxi11Rpc->setCurrentIndex(0);
   updateHint();
 }
 
@@ -152,4 +181,6 @@ void ScpiPrefs::applySLOT()
   m_cfg->setBool("Scpi/mdns", m_mdns->isChecked());
   m_cfg->setBool("Scpi/hislip", m_hislip->isChecked());
   m_cfg->setInt("Scpi/hislip-port", m_hislipPort->value());
+  m_cfg->setBool("Scpi/vxi11", m_vxi11->isChecked());
+  m_cfg->setString("Scpi/vxi11-rpc", vxi11Rpc());
 }

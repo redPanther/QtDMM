@@ -184,6 +184,8 @@ public:
   bool                  scpiAllInterfaces() const;
   bool                  scpiMdns() const;
   bool                  scpiHislip() const;
+  bool                  scpiVxi11() const;
+  QString               scpiVxi11Rpc() const;   ///< "auto", "system", "own"
   int                   scpiHislipPort() const;
   void                  setScpiStatus(const QString &text);
   /// @}

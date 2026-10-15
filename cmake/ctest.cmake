@@ -177,7 +177,8 @@ if (BUILD_TESTING)
 	## runs after it, once (review R10-05); needs the whole port stack too
 	set( TEST_CONTROLLER test_metercontroller)
 	add_executable(${TEST_CONTROLLER} MACOSX_BUNDLE tests/test_metercontroller.cpp src/service/metercontroller.cpp
-		src/service/scpiserver.cpp src/service/hislipserver.cpp src/service/mdnsresponder.cpp src/service/mdnsbrowser.cpp
+		src/service/scpiserver.cpp src/service/hislipserver.cpp src/service/oncrpc.cpp src/service/rpcbindclient.cpp
+		src/service/vxi11core.cpp src/service/vxi11server.cpp src/service/mdnsresponder.cpp src/service/mdnsbrowser.cpp
 		src/recording/recordingstore.cpp src/recording/recordingfile.cpp src/recording/spreadsheet.cpp src/3rdparty/miniz/miniz.c
 		src/core/alarm.cpp src/core/readingadapter.cpp src/ui/engnumbervalidator.cpp
 		src/device/meterconnection.cpp src/device/framereader.cpp src/device/transport.cpp
@@ -235,6 +236,14 @@ if (BUILD_TESTING)
 	target_include_directories(${TEST_HISLIP} PRIVATE src)
 	target_link_libraries(${TEST_HISLIP} PRIVATE Qt::Core Qt6::Network)
 	add_test(NAME scpi_hislip COMMAND ${TEST_HISLIP})
+
+	## VXI-11 over TCP/UDP on localhost: own portmapper on a high port, links, locks,
+	## limits, abort channel, and the registration with a (fake) system rpcbind
+	add_executable(test_vxi11 MACOSX_BUNDLE tests/test_vxi11.cpp src/service/oncrpc.cpp src/service/rpcbindclient.cpp
+		src/service/vxi11core.cpp src/service/vxi11server.cpp)
+	target_include_directories(test_vxi11 PRIVATE src)
+	target_link_libraries(test_vxi11 PRIVATE Qt::Core Qt6::Network)
+	add_test(NAME scpi_vxi11 COMMAND test_vxi11)
 
 	## alarms: conditions, duration, hysteresis, acknowledge, JSON
 	set( TEST_ALARM test_alarm)
