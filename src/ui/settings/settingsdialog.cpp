@@ -745,6 +745,11 @@ int SettingsDialog::pointMode() const
   return m_graph->pointMode();
 }
 
+bool SettingsDialog::alarmBlink() const
+{
+  return m_alarms->blink();
+}
+
 QList<Alarm> SettingsDialog::alarms() const
 {
   return m_alarms->alarms();

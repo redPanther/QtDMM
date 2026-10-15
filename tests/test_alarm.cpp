@@ -180,6 +180,10 @@ int main(int argc, char **argv)
             && r.recorder == Alarm::RecorderStart && !r.markTable && r.markGraph, "actions round trip");
       check(back[1].condition == Alarm::Below && back[1].beep && back[1].banner, "defaults survive");
     }
+    Alarm plain = low; plain.tintDisplay = false;
+    check(!Alarm::listFromJson(Alarm::listToJson({plain})).value(0).tintDisplay, "tint off round trip");
+    check(Alarm::listFromJson(R"([{"name":"old","condition":"below","a":5}])").value(0).tintDisplay,
+          "an alarm stored before the option colours the display");
     check(Alarm::listFromJson("not json").isEmpty(), "junk gives no alarms");
     check(low.describe("V") == "below 5V", "describe: " + low.describe("V"));
     check(a.describe("V") == "outside 11V to 13V for 2.5 s", "describe range+duration: " + a.describe("V"));
@@ -196,6 +200,31 @@ int main(int argc, char **argv)
     for (double v : {4.7512, 1234.0, 0.04712, -2.5e-6, 0.0})
       check(qFuzzyCompare(EngNumberValidator::value(EngNumberValidator::engText(v)) + 1.0, v + 1.0),
             QString("engText(%1) reads back as %2").arg(v).arg(EngNumberValidator::value(EngNumberValidator::engText(v))));
+  }
+
+  // --- 8. the display's colour: the alarm raised last, also acknowledged, until it clears ---
+  {
+    AlarmManager m;
+    Alarm red = low; red.name = "red"; red.color = QColor("#d82222"); red.hysteresis = 0;
+    Alarm blue = high; blue.name = "blue"; blue.color = QColor("#2222d8");
+    Alarm quiet = out; quiet.name = "quiet"; quiet.tintDisplay = false;
+    m.setAlarms({red, blue, quiet});
+    m.feed(8, false, 0);
+    check(!m.displayColor().isValid(), "nothing raised: no colour");
+    m.feed(4, false, 1000);
+    check(m.displayColor() == red.color, "red raised: red");
+    m.acknowledgeAll();
+    check(m.displayColor() == red.color, "acknowledged: still red");
+    // a second alarm on another condition: a list of two where both hold
+    Alarm blue2 = blue; blue2.condition = Alarm::Below; blue2.a = 3;
+    m.setAlarms({red, blue2, quiet});
+    m.feed(2, false, 2000);
+    check(m.state(1) == AlarmManager::Raised && m.displayColor() == blue.color, "blue raised last: blue");
+    m.feed(4, false, 3000);
+    check(m.state(1) == AlarmManager::Off && m.displayColor() == red.color, "blue cleared: red again");
+    m.feed(14, false, 4000);   // red clears; quiet (outside 11..13) is raised since 4 V, it does not colour
+    check(m.state(0) == AlarmManager::Off && m.state(2) != AlarmManager::Off && !m.displayColor().isValid(),
+          "red cleared, quiet raised: no colour");
   }
 
   if (failed == 0)

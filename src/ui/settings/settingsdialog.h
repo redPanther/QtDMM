@@ -173,6 +173,7 @@ public:
 
   /// The alarms as applied (Alarms page).
   QList<Alarm>          alarms() const;
+  bool                  alarmBlink() const;   ///< AlarmPrefs::blink()
   /// Base unit of the reading, for the alarm page's threshold labels.
   void                  setAlarmUnit(const QString &unit);
 

@@ -248,47 +248,47 @@
 <context>
     <name>Alarm</name>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="117"/>
+        <location filename="../../src/core/alarm.cpp" line="119"/>
         <source>below %1</source>
         <translation>sous %1</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="118"/>
+        <location filename="../../src/core/alarm.cpp" line="120"/>
         <source>above %1</source>
         <translation>au-dessus de %1</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="119"/>
+        <location filename="../../src/core/alarm.cpp" line="121"/>
         <source>outside %1 to %2</source>
         <translation>hors de %1 à %2</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="120"/>
+        <location filename="../../src/core/alarm.cpp" line="122"/>
         <source>inside %1 to %2</source>
         <translation>entre %1 et %2</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="121"/>
+        <location filename="../../src/core/alarm.cpp" line="123"/>
         <source>overload</source>
         <translation>dépassement</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="122"/>
+        <location filename="../../src/core/alarm.cpp" line="124"/>
         <source>no readings for %1 s</source>
         <translation>aucune mesure depuis %1 s</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="125"/>
+        <location filename="../../src/core/alarm.cpp" line="127"/>
         <source>for %1 s</source>
         <translation>pendant %1 s</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="336"/>
+        <location filename="../../src/core/alarm.cpp" line="354"/>
         <source>Alarm</source>
         <translation>Alarme</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="339"/>
+        <location filename="../../src/core/alarm.cpp" line="357"/>
         <source>Alarm %1</source>
         <translation>Alarme %1</translation>
     </message>
@@ -309,203 +309,213 @@
 <context>
     <name>AlarmDlg</name>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="163"/>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="328"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="176"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="345"/>
         <source>Alarm</source>
         <translation>Alarme</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="168"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="181"/>
         <source>&amp;Enabled</source>
         <translation>&amp;Activée</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="173"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="186"/>
         <source>&amp;Name:</source>
         <translation>&amp;Nom :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="179"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="192"/>
         <source>Condition</source>
         <translation>Condition</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="182"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="195"/>
         <source>Reading below</source>
         <translation>Mesure inférieure à</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="183"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="196"/>
         <source>Reading above</source>
         <translation>Mesure supérieure à</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="184"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="197"/>
         <source>Reading outside a range</source>
         <translation>Mesure hors d&apos;une plage</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="185"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="198"/>
         <source>Reading inside a range</source>
         <translation>Mesure dans une plage</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="186"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="199"/>
         <source>Overload (OL)</source>
         <translation>Dépassement (OL)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="187"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="200"/>
         <source>No readings for a while</source>
         <translation>Aucune mesure depuis un moment</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="189"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="202"/>
         <source>&amp;Condition:</source>
         <translation>&amp;Condition :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="197"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="210"/>
         <source>&amp;Upper bound (%1):</source>
         <translation>Borne s&amp;upérieure (%1) :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="206"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="219"/>
         <source>&amp;Hysteresis (%1):</source>
         <translation>&amp;Hystérésis (%1) :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="208"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="221"/>
         <source>The reading must come back by this much before the alarm clears - keeps it from flickering when the reading sits at the threshold.</source>
         <translation>La mesure doit revenir d&apos;autant avant que l&apos;alarme ne s&apos;efface – évite le clignotement quand la mesure reste au seuil.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="214"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="227"/>
         <source>Actions</source>
         <translation>Actions</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="217"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="230"/>
         <source>the condition in words</source>
         <translation>la condition en toutes lettres</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="218"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="231"/>
         <source>&amp;Message:</source>
         <translation>&amp;Message :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="231"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="244"/>
         <source>Alarm colour</source>
         <translation>Couleur de l&apos;alarme</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="238"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="251"/>
         <source>Co&amp;lour:</source>
         <translation>Cou&amp;leur :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="239"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="252"/>
         <source>Banner over the display (with Acknowledge)</source>
         <translation>Bandeau au-dessus de l&apos;affichage (avec Acquitter)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="241"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="254"/>
+        <source>Display and analog meter in the alarm&apos;s colour</source>
+        <translation>Affichage et galvanomètre à la couleur de l&apos;alarme</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="255"/>
+        <source>While the alarm is raised, also after Acknowledge, until the reading is back. With several alarms the one raised last gives the colour.</source>
+        <translation>Tant que l&apos;alarme est déclenchée, même après Acquitter, jusqu&apos;au retour de la mesure. Avec plusieurs alarmes, la dernière déclenchée donne la couleur.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="258"/>
         <source>Beep</source>
         <translation>Bip</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="243"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="260"/>
         <source>Popup window</source>
         <translation>Fenêtre surgissante</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="245"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="262"/>
         <source>Bring the QtDMM window to the front</source>
         <translation>Mettre la fenêtre QtDMM au premier plan</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="247"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="264"/>
         <source>Mark in the graph</source>
         <translation>Marquer dans le graphique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="258"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="275"/>
         <source>&amp;Recording:</source>
         <translation>&amp;Enregistrement :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="249"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="266"/>
         <source>Mark in the readings table</source>
         <translation>Marque dans le tableau des mesures</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="254"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="271"/>
         <source>leave alone</source>
         <translation>ne rien faire</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="255"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="272"/>
         <source>start</source>
         <translation>démarrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="256"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="273"/>
         <source>stop</source>
         <translation>arrêter</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="260"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="277"/>
         <source>none</source>
         <translation>aucun</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="261"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="278"/>
         <source>Program to run when the alarm raises. %v is the value, %u its unit, %n the alarm&apos;s name.</source>
         <translation>Programme lancé au déclenchement. %v est la valeur, %u son unité, %n le nom de l&apos;alarme.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="265"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="282"/>
         <source>Choose the program</source>
         <translation>Choisir le programme</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="272"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="289"/>
         <source>Program to run</source>
         <translation>Programme à lancer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="284"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="301"/>
         <source>Run &amp;program:</source>
         <translation>Lancer un &amp;programme :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="287"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="304"/>
         <source>&amp;Disconnect first</source>
         <translation>&amp;Déconnecter d&apos;abord</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="289"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="306"/>
         <source>Close the port while the program runs and open it again when it has ended - so the program can talk to the meter itself.</source>
         <translation>Ferme le port pendant l&apos;exécution du programme et le rouvre quand il est terminé - le programme peut ainsi parler lui-même à l&apos;appareil.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="313"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="330"/>
         <source>&amp;Lower bound (%1):</source>
         <translation>Borne &amp;inférieure (%1) :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="313"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="330"/>
         <source>&amp;Threshold (%1):</source>
         <translation>&amp;Seuil (%1) :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="319"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="336"/>
         <source>&amp;Silence (s):</source>
         <translation>&amp;Silence (s) :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="319"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="336"/>
         <source>&amp;For at least (s):</source>
         <translation>Pendant au &amp;moins (s) :</translation>
     </message>
@@ -548,7 +558,17 @@
         <translation>&amp;Supprimer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/alarmprefs.cpp" line="120"/>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="73"/>
+        <source>Coloured displays &amp;blink</source>
+        <translation>Les affichages colorés &amp;clignotent</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="74"/>
+        <source>The display and the analog meter switch between the alarm&apos;s colour and their own once a second, for alarms that colour them.</source>
+        <translation>L&apos;affichage et le galvanomètre alternent une fois par seconde entre la couleur de l&apos;alarme et la leur, pour les alarmes qui les colorent.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/alarmprefs.cpp" line="133"/>
         <source>Alarm %1</source>
         <translation>Alarme %1</translation>
     </message>
@@ -556,24 +576,24 @@
 <context>
     <name>AnalogMeter</name>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="558"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="580"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="559"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="581"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="565"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="566"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="574"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="587"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="588"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="596"/>
         <source>OL</source>
         <translation>OL</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="654"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="676"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
@@ -2213,122 +2233,122 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="246"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="261"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM : données non enregistrées</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="261"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="276"/>
         <source>Export data first</source>
         <translation>Exporter d&apos;abord</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="237"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="252"/>
         <source>Quit without saving</source>
         <translation>Quitter sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="237"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="252"/>
         <source>If you quit now it will be lost.</source>
         <translation>Si vous quittez maintenant, elles seront perdues.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="247"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="262"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. %1&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Des mesures non enregistrées sont encore en mémoire. %1&lt;p&gt;Voulez-vous d&apos;abord les exporter ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="384"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="399"/>
         <source>Switching to %1 clears it.</source>
         <translation>Passer à %1 les efface.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="384"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="399"/>
         <source>Switch without saving</source>
         <translation>Changer sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="414"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="429"/>
         <source>Recording stopped: switched to %1</source>
         <translation>Enregistrement arrêté : passage à %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="503"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="520"/>
         <source>Loading a file replaces it.</source>
         <translation>Charger un fichier les remplace.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="503"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="520"/>
         <source>Load without saving</source>
         <translation>Charger sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="521"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="538"/>
         <source>Clear deletes it.</source>
         <translation>Vider les efface.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="521"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="538"/>
         <source>Clear without saving</source>
         <translation>Vider sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="537"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="554"/>
         <source>Live clears it.</source>
         <translation>Le direct les efface.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="537"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="554"/>
         <source>Live without saving</source>
         <translation>Direct sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="547"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="564"/>
         <source>A new recording clears it.</source>
         <translation>Un nouvel enregistrement les efface.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="547"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="564"/>
         <source>Record without saving</source>
         <translation>Enregistrer sans sauvegarder</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="555"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="572"/>
         <source>It starts now. A recording at %1 starts by itself from Live.</source>
         <translation>Il démarre maintenant. Un enregistrement à %1 démarre de lui-même depuis le Direct.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="557"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="574"/>
         <source>It starts now. A recording at the threshold starts by itself from Live.</source>
         <translation>Il démarre maintenant. Un enregistrement au seuil démarre de lui-même depuis le Direct.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="667"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="684"/>
         <source>Automatic start at %1</source>
         <translation>Démarrage automatique à %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="669"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="686"/>
         <source>Raising threshold %1</source>
         <translation>Seuil montant %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="671"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="688"/>
         <source>Falling threshold %1</source>
         <translation>Seuil descendant %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="706"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="723"/>
         <source>calculated</source>
         <translation>calculé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="715"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="732"/>
         <source>no meter configured</source>
         <translation>aucun multimètre configuré</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="748"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="765"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarme QtDMM : %1</translation>
     </message>
@@ -2437,19 +2457,19 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
 <context>
     <name>LcdWidget</name>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="557"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="581"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="583"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="667"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="683"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="607"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="691"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="707"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="682"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="706"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
@@ -3197,57 +3217,57 @@ Le multimètre est-il branché et allumé ?</translation>
         <translation>%1 : %2 est toujours en cours</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="411"/>
+        <location filename="../../src/service/metercontroller.cpp" line="419"/>
         <source>SCPI server: %1</source>
         <translation>Serveur SCPI : %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="424"/>
+        <location filename="../../src/service/metercontroller.cpp" line="432"/>
         <source>the SCPI server is not running</source>
         <translation>le serveur SCPI n&apos;est pas actif</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="433"/>
+        <location filename="../../src/service/metercontroller.cpp" line="441"/>
         <source>HiSLIP server: %1</source>
         <translation>Serveur HiSLIP : %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="459"/>
+        <location filename="../../src/service/metercontroller.cpp" line="467"/>
         <source>The server is not running.</source>
         <translation>Le serveur n&apos;est pas actif.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="460"/>
+        <location filename="../../src/service/metercontroller.cpp" line="468"/>
         <source>The server could not start: %1.</source>
         <translation>Le serveur n&apos;a pas pu démarrer : %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="465"/>
+        <location filename="../../src/service/metercontroller.cpp" line="473"/>
         <source>1 client</source>
         <translation>1 client</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="465"/>
+        <location filename="../../src/service/metercontroller.cpp" line="473"/>
         <source>%1 clients</source>
         <translation>%1 clients</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="466"/>
+        <location filename="../../src/service/metercontroller.cpp" line="474"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>À l&apos;écoute sur %1, port %2, %3 connecté(s).</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="468"/>
+        <location filename="../../src/service/metercontroller.cpp" line="476"/>
         <source>HiSLIP on port %1: %2.</source>
         <translation>HiSLIP sur le port %1 : %2.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="470"/>
+        <location filename="../../src/service/metercontroller.cpp" line="478"/>
         <source>HiSLIP could not start: %1.</source>
         <translation>HiSLIP n&apos;a pas pu démarrer : %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="472"/>
+        <location filename="../../src/service/metercontroller.cpp" line="480"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Annoncé sous « %1 ».</translation>
     </message>

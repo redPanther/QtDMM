@@ -91,6 +91,12 @@ public:
   void setScaleMode(ScaleMode mode);
   /// Colours and options; the static layers are re-rendered.
   void setStyle(const AnalogMeterStyle &style);
+  /// An alarm's colour, mixed into the dial (about a third) while it is
+  /// raised so scale and pointer stay readable; invalid: the style's own.
+  void setAlertColor(const QColor &color);
+  QColor alertColor() const { return m_alert; }
+  /// The dial as painted now.
+  QColor dialColor() const;
   void reset();   ///< peak and Auto-bipolar latch
 
   /// @name Fed by the MeterController
@@ -200,6 +206,7 @@ private:
   int m_decimals = 0;   ///< most decimals of a reading (not an overload) since reset()
   double m_rangelessScale = std::numeric_limits<double>::quiet_NaN();   ///< grown scale of a temperature, NaN otherwise
   AnalogMeterStyle m_style = AnalogMeterStyle::dark();
+  QColor m_alert;   ///< an alarm's colour over the dial, invalid when none
   ScaleMode m_scaleMode = Auto;
   bool m_bipolar = false;   ///< the scale shown: -FS .. FS
   bool m_latched = false;   ///< Auto: a clearly negative value came since reset()

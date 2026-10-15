@@ -139,6 +139,14 @@ void LcdWidget::setLcdVariant(LcdVariant variant)
   applyVariant();
 }
 
+void LcdWidget::setAlertColor(const QColor &color)
+{
+  if (color == m_alert)
+    return;
+  m_alert = color;
+  applyVariant();
+}
+
 QColor LcdWidget::classicFace()
 {
   return QColor(0xda, 0xdc, 0x77);
@@ -169,6 +177,22 @@ void LcdWidget::applyVariant()
       m_face = m_customFace.isValid() ? m_customFace : classicFace();
       m_segment = QColor(0x16, 0x1e, 0x14);
       break;
+  }
+  if (m_alert.isValid())
+  {
+    // light or dark segments, whichever has more contrast on the colour
+    // (WCAG relative luminance: on the default alarm red light ones)
+    auto luminance = [](const QColor &c)
+    {
+      auto lin = [](double v) { return v <= 0.03928 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4); };
+      return 0.2126 * lin(c.redF()) + 0.7152 * lin(c.greenF()) + 0.0722 * lin(c.blueF());
+    };
+    const QColor light(0xf4, 0xf4, 0xf0), dark(0x16, 0x1e, 0x14);
+    const double l = luminance(m_alert);
+    const double onLight = (luminance(light) + 0.05) / (l + 0.05);
+    const double onDark = (l + 0.05) / (luminance(dark) + 0.05);
+    m_face = m_alert;
+    m_segment = onLight >= onDark ? light : dark;
   }
   m_staticDirty = true;
   update();

@@ -69,6 +69,16 @@ AlarmPrefs::AlarmPrefs(QWidget *parent) : SettingsPage(parent)
   buttons->addWidget(m_remove);
   buttons->addStretch(1);
   layout->addLayout(buttons);
+
+  m_blink = new QCheckBox(tr("Coloured displays &blink"), this);
+  m_blink->setToolTip(tr("The display and the analog meter switch between the alarm's colour and their own "
+                         "once a second, for alarms that colour them."));
+  layout->addWidget(m_blink);
+}
+
+bool AlarmPrefs::blink() const
+{
+  return m_blink->isChecked();
 }
 
 void AlarmPrefs::setUnit(const QString &unit)
@@ -80,18 +90,21 @@ void AlarmPrefs::setUnit(const QString &unit)
 void AlarmPrefs::defaultsSLOT()
 {
   m_alarms = Alarm::listFromJson(m_cfg->getString("Alarms/list"));
+  m_blink->setChecked(m_cfg->getBool("Alarms/blink", false));
   refresh();
 }
 
 void AlarmPrefs::factoryDefaultsSLOT()
 {
   m_alarms.clear();
+  m_blink->setChecked(false);
   refresh();
 }
 
 void AlarmPrefs::applySLOT()
 {
   m_cfg->setString("Alarms/list", Alarm::listToJson(m_alarms));
+  m_cfg->setBool("Alarms/blink", m_blink->isChecked());
 }
 
 void AlarmPrefs::refresh()
@@ -238,6 +251,10 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   af->addRow(tr("Co&lour:"), m_color);
   m_banner = new QCheckBox(tr("Banner over the display (with Acknowledge)"), act);
   m_banner->setChecked(alarm.banner);
+  m_tint = new QCheckBox(tr("Display and analog meter in the alarm's colour"), act);
+  m_tint->setToolTip(tr("While the alarm is raised, also after Acknowledge, until the reading is back. With "
+                        "several alarms the one raised last gives the colour."));
+  m_tint->setChecked(alarm.tintDisplay);
   m_beep = new QCheckBox(tr("Beep"), act);
   m_beep->setChecked(alarm.beep);
   m_popup = new QCheckBox(tr("Popup window"), act);
@@ -248,7 +265,7 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   m_markGraph->setChecked(alarm.markGraph);
   m_markTable = new QCheckBox(tr("Mark in the readings table"), act);
   m_markTable->setChecked(alarm.markTable);
-  for (QCheckBox *cb : {m_banner, m_beep, m_popup, m_raise, m_markGraph, m_markTable})
+  for (QCheckBox *cb : {m_banner, m_tint, m_beep, m_popup, m_raise, m_markGraph, m_markTable})
     af->addRow(QString(), cb);
   m_recorder = new QComboBox(act);
   m_recorder->addItem(tr("leave alone"), Alarm::RecorderNone);
@@ -335,6 +352,7 @@ Alarm AlarmDlg::alarm() const
   al.message = m_message->text().trimmed();
   al.color = m_colorValue;
   al.banner = m_banner->isChecked();
+  al.tintDisplay = m_tint->isChecked();
   al.beep = m_beep->isChecked();
   al.popup = m_popup->isChecked();
   al.raiseWindow = m_raise->isChecked();

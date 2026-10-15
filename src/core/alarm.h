@@ -27,6 +27,7 @@ struct Alarm
   QString message;           ///< shown in the banner; empty = the condition in words
   QColor color = QColor(0xd8, 0x22, 0x22);
   bool banner = true;
+  bool tintDisplay = true;   ///< the display and the analog meter take the colour while it is raised
   bool beep = true;
   bool popup = false;
   bool raiseWindow = false;
@@ -73,6 +74,10 @@ public:
   const QList<Alarm> &alarms() const { return m_alarms; }
   State state(int index) const { return m_state.value(index, Off); }
   bool anyRaised() const;
+  /// The colour for the display and the analog meter: that of the alarm
+  /// raised last among those still raised (acknowledged or not) with
+  /// Alarm::tintDisplay; invalid when there is none.
+  QColor displayColor() const;
 
   /// A reading arrived: @p value in base units, @p overload for OL.
   void feed(double value, bool overload, qint64 nowMs);
@@ -104,4 +109,5 @@ private:
   qint64 m_silenceFrom = -1;   ///< when the meter was connected, -1 while it is not
   double m_lastValue = 0;
   bool m_lastOverload = false;
+  QStringList m_raiseOrder;    ///< names in the order they raised, last = newest
 };

@@ -284,6 +284,24 @@ int main(int argc, char **argv)
     }
   }
 
+  // --- an alarm's colour over the variant, and back ---
+  {
+    LcdWidget f;
+    f.setLcdVariant(LcdWidget::Amber);
+    const QColor face = f.faceColor(), segment = f.segmentColor();
+    f.setAlertColor(QColor("#d82222"));
+    check(f.faceColor() == QColor("#d82222"), "alarm: the face takes the alarm's colour");
+    check(f.segmentColor().lightness() > 200, "alarm red: light segments read better");
+    f.setAlertColor(QColor("#ffe040"));
+    check(f.segmentColor().lightness() < 60, "alarm yellow: dark segments");
+    check(f.lcdVariant() == LcdWidget::Amber, "the variant stays");
+    f.setAlertColor(QColor());
+    check(f.faceColor() == face && f.segmentColor() == segment, "no alarm: the variant's colours again");
+    f.setAlertColor(QColor("#d82222"));
+    f.setLcdVariant(LcdWidget::BacklightBlue);
+    check(f.faceColor() == QColor("#d82222"), "a variant chosen during the alarm keeps the alarm's colour");
+  }
+
   if (failed == 0)
     qInfo() << "All digital display tests passed.";
   else

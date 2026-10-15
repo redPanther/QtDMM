@@ -4,6 +4,10 @@
   a question. One set for all instances (shortcuts.conf), a running instance takes a change over at once
 - Hide toolbar (Ctrl+M, in the menu): the toolbar goes away for more room, the same key brings it back; the
   workspace keeps it. The menu moves from Ctrl+M to F7
+- Alarms: while an alarm is raised, the display and the analog meter take its colour (the LCD's face, light or
+  dark digits for contrast; a third of it in the meter's dial), also after Acknowledge until the reading is back;
+  with several alarms the one raised last. A switch per alarm (on by default), and "Coloured displays blink" on
+  the Alarms page (off by default)
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

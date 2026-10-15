@@ -34,6 +34,13 @@ What happens when an alarm raises; tick any of them:
 - **Banner** over the graph in the alarm's colour with its message (or the
   condition in words). **Acknowledge** hides it; the alarm stays raised
   until the reading is back and raises again only after that.
+- **Display and analog meter in the alarm's colour** (on by default): the
+  LCD's face takes the colour, its digits turn light or dark, whichever
+  reads better; the analog meter's dial takes a third of it, so scale and
+  pointer stay readable. The colour stays after Acknowledge until the
+  reading is back. With several alarms raised, the one raised last gives
+  the colour. The colour is never the only sign: banner, beep and the
+  status line tell the same.
 - **Beep**.
 - **Popup window** with message, value and time.
 - **Bring the QtDMM window to the front**.
@@ -56,6 +63,25 @@ What happens when an alarm raises; tick any of them:
 
 The status line reports every raise and clear too.
 
+**Coloured displays blink**, below the list of alarms, makes the display
+and the analog meter switch between the alarm's colour and their own once
+a second. It is off by default.
+
 Alarms judge the main reading only. For a condition on several meters -
 power over a limit, say - set up a [calculated value](calculated-values.md)
 and put the alarm on that instance.
+
+## Example: setting a voltage
+
+An alarm can also say "on target" instead of "wrong". Setting the reference
+voltage of a stepper motor driver with its trimmer, say to 2.00 V:
+
+- Condition **inside**, from 1.95 V to 2.05 V; duration 0, no hysteresis.
+- Colour **green**, **Display and analog meter in the alarm's colour** on.
+- **Banner**, **Beep** and the two **Mark** boxes off: the beep would sound
+  every time the reading enters the range, and every entry would be a mark.
+
+Now turn the trimmer and watch the screen from the corner of your eye:
+the display turns green while the voltage is in the range and goes back
+to its own colour as soon as it leaves it. With a narrower range the
+target is hit more exactly.

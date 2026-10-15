@@ -380,6 +380,14 @@ void MeterController::updateBanner()
       color = al.color;
   }
   Q_EMIT alarmBannerChanged(lines.join('\n'), color);
+
+  // the display: the newest raised alarm that colours it, acknowledged or not
+  const QColor alert = m_alarms->displayColor();
+  if (alert != m_alertColor)
+  {
+    m_alertColor = alert;
+    Q_EMIT alertColorChanged(alert);
+  }
 }
 
 // ---------------------------------------------------------------- SCPI

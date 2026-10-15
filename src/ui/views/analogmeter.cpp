@@ -44,6 +44,14 @@ const double kOmega = 2.0 * M_PI * 1.5;   // rad/s
 const double kZeta = 0.7;
 const int kTickMs = 16;
 
+// An alarm's colour over the dial: a third of it, so the scale stays readable
+QColor mixed(const QColor &dial, const QColor &alert)
+{
+  const double k = 0.35;
+  return QColor::fromRgbF(dial.redF() * (1 - k) + alert.redF() * k, dial.greenF() * (1 - k) + alert.greenF() * k,
+                          dial.blueF() * (1 - k) + alert.blueF() * k);
+}
+
 // Point on a circle around the pivot; angle in degrees, 0 = straight up,
 // positive = clockwise (to the right).
 QPointF polar(const QPointF &pivot, double radius, double angleDeg)
@@ -353,9 +361,23 @@ void AnalogMeter::drawBezel(QPainter &p, const Geometry &g) const
   PanelFrame::Colors c;
   c.bezelLight = m_style.bezelLight;
   c.bezelDark = m_style.bezelDark;
-  c.face = m_style.face;
-  c.faceGlow = m_style.faceGlow;
+  c.face = dialColor();
+  c.faceGlow = m_alert.isValid() ? mixed(m_style.faceGlow, m_alert) : m_style.faceGlow;
   PanelFrame::paint(p, g.bezel, c, g.pivot, g.radius * 1.2);
+}
+
+void AnalogMeter::setAlertColor(const QColor &color)
+{
+  if (color == m_alert)
+    return;
+  m_alert = color;
+  m_staticDirty = true;
+  update();
+}
+
+QColor AnalogMeter::dialColor() const
+{
+  return m_alert.isValid() ? mixed(m_style.face, m_alert) : m_style.face;
 }
 
 double AnalogMeter::niceStep(double range, int targetMajors)
