@@ -469,7 +469,7 @@
     <string>Menu</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+M</string>
+    <string>F7</string>
    </property>
   </action>
  </widget>

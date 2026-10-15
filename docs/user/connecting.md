@@ -205,9 +205,9 @@ hidden; then the windows are placed by the rule again.
 
 **Load workspace...** and **Save workspace...** in the same menu keep a
 window layout in a file (`*.qtdmm-workspace`): which windows are shown, the
-arrangement with its dividers, the title bars, the design and the size of
-the main window - for instance one layout for the bench and one for long
-recordings. **Save layout on exit** (on by default) makes QtDMM start with
+arrangement with its dividers, the title bars, the toolbar, the design and
+the size of the main window - for instance one layout for the bench and one
+for long recordings. **Save layout on exit** (on by default) makes QtDMM start with
 the layout it had when it was closed. Switched off, it starts with the
 layout it had when the option was switched off, or with the workspace
 loaded last.
@@ -217,6 +217,10 @@ flush next to each other - the default for the arranged modes. Right-click
 the display or the meter for its window menu (hide the window, title bar on
 or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
 layouts of versions before 26.1 are not taken over.
+
+**Hide toolbar** (Ctrl+M) in the menu takes the toolbar away for more room;
+the same key brings it back. The menu then opens with F7 at the top right
+of the window, and the other keys keep working.
 
 **Design** in the menu, or on the *Appearance* settings page, sets the colours
 of the window: *System* (the look of your desktop), *Silver* (brushed
@@ -230,4 +234,4 @@ icons, light or dark to match the window) or, on Linux and BSD where the
 desktop has an icon theme, *System* - your desktop's symbols, with the
 plain set for QtDMM's own symbols and anything the theme lacks. **Symbols
 with text** below it puts the names under the toolbar buttons. The toolbars
-are always there.
+cannot be moved; Ctrl+M hides and shows them.

@@ -41,7 +41,7 @@ handbook window are fixed.
 | Shift+F8 | Settings of the device in use (without one: Add device) |
 | Ctrl+F8 | Settings, Recording page |
 | F9 | Show or hide the sidebar with My devices and the instances |
-| Ctrl+M | Open the menu |
+| F7 | Open the menu |
 | F1 | This handbook |
 | Shift+F1 | Direct help — then click any control for an explanation |
 | Ctrl+Q | Quit |
@@ -56,6 +56,7 @@ handbook window are fixed.
 | Ctrl+4 | Show / hide the readings table |
 | Ctrl+5 | Show / hide the Poincaré plot |
 | F10 | Hide / show the title bars of the windows |
+| Ctrl+M | Hide / show the toolbar |
 | F11 | Full screen on / off |
 
 ## Graph

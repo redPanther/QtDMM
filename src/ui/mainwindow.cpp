@@ -398,14 +398,14 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   loadWs->setObjectName("action_LoadWorkspace");
   loadWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Load workspace</span></p>"
                           "<p>Takes a window layout saved with <i>Save workspace</i>: which windows are shown, "
-                          "the arrangement, title bars, design and the size of the main window.</p>"
+                          "the arrangement, title bars, toolbar, design and the size of the main window.</p>"
                           "</body></html>"));
   connect(loadWs, &QAction::triggered, this, &MainWindow::loadWorkspace);
   QAction *saveWs = m_arrangeMenu->addAction(QIcon::fromTheme("document-save-as"), tr("&Save workspace..."));
   saveWs->setObjectName("action_SaveWorkspace");
   saveWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Save workspace</span></p>"
                           "<p>Writes the window layout to a file: which windows are shown, the arrangement, "
-                          "title bars, design and the size of the main window.</p></body></html>"));
+                          "title bars, toolbar, design and the size of the main window.</p></body></html>"));
   connect(saveWs, &QAction::triggered, this, &MainWindow::saveWorkspace);
   m_autoSaveLayout = m_arrangeMenu->addAction(tr("Save layout on e&xit"));
   m_autoSaveLayout->setCheckable(true);
@@ -774,6 +774,15 @@ void MainWindow::createExtraActions()
                                 "again returns to the normal window.</p></body></html>"));
   connect(m_fullScreen, &QAction::toggled, this, &MainWindow::setFullScreen);
 
+  m_toolbars = new QAction(tr("Hide &toolbar"), this);
+  m_toolbars->setObjectName("action_Toolbars");
+  m_toolbars->setCheckable(true);
+  m_toolbars->setShortcut(QKeySequence("Ctrl+M"));
+  m_toolbars->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Hide toolbar</span></p>"
+                              "<p>More room for the instruments. The menu stays at hand with F7, the same key "
+                              "again brings the toolbar back.</p></body></html>"));
+  connect(m_toolbars, &QAction::toggled, this, &MainWindow::setToolbarsHidden);
+
   m_zoomIn = new QAction(tr("Zoom &in"), this);
   m_zoomIn->setObjectName("action_ZoomIn");
   m_zoomIn->setShortcuts({QKeySequence::ZoomIn, QKeySequence("Ctrl+=")});
@@ -798,7 +807,7 @@ void MainWindow::createExtraActions()
   // button nor a key of their own any more
   addActions({action_Configure, action_ConfigureDMM, action_Direct_help, action_Help, action_Quit,
               m_displayAction, m_meterAction, m_readingsAction, m_poincareAction, m_titleBars,
-              m_fullScreen, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage});
+              m_fullScreen, m_toolbars, m_zoomIn, m_zoomOut, m_zoomFit, m_copyImage});
 }
 
 // Every command that may have a key, in the groups of the page Keyboard;
@@ -816,7 +825,7 @@ void MainWindow::createShortcuts(std::initializer_list<QAction *> workspace)
                       action_Import, action_Print })
     m_shortcuts->add(a, recording);
   for (QAction *a : { m_sidebarAction, m_displayAction, m_meterAction, action_Graph, m_readingsAction,
-                      m_poincareAction, m_titleBars, m_fullScreen })
+                      m_poincareAction, m_titleBars, m_toolbars, m_fullScreen })
     m_shortcuts->add(a, windows);
   for (QAction *a : workspace)
     m_shortcuts->add(a, windows);
@@ -844,6 +853,12 @@ void MainWindow::setFullScreen(bool on)
     showFullScreen();
   else
     showNormal();
+}
+
+void MainWindow::setToolbarsHidden(bool hide)
+{
+  for (QToolBar *bar : { toolBarDMM, toolBarRecorder, toolBarFile, toolBarMenu })
+    bar->setVisible(!hide);
 }
 
 void MainWindow::startSLOT()
@@ -988,6 +1003,7 @@ void MainWindow::on_action_Menu_triggered()
     m_menu->addAction(m_poincareAction);
     m_menu->addMenu(m_arrangeMenu);
     m_menu->addMenu(m_designMenu);
+    m_menu->addAction(m_toolbars);
     m_menu->addAction(m_fullScreen);
     m_menu->addSeparator();
     m_menu->addAction(m_zoomIn);
@@ -1002,13 +1018,16 @@ void MainWindow::on_action_Menu_triggered()
     m_menu->addAction(action_Quit);
   }
 
+  // below the menu button; with the toolbar hidden at the top right of the window
   QWidget* widget = this->toolBarMenu->widgetForAction(this->action_Menu);
-  if (widget)
+  if (widget && widget->isVisible())
   {
     m_menu->popup(widget->mapToGlobal(
       QPoint( widget->width() - m_menu->sizeHint().width(), widget->height())
     ));
   }
+  else
+    m_menu->popup(mapToGlobal(QPoint(width() - m_menu->sizeHint().width(), 0)));
 }
 
 
@@ -1415,6 +1434,7 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
   if (!m_arranger->setLayoutText(get("Windows/layout", QString()).toString()))
     m_arranger->setLayoutText(QString());   // a broken one: the rule
   m_arranger->setTitleBarsHidden(get("Windows/title-bars-hidden", !free).toBool());
+  m_toolbars->setChecked(get("Windows/toolbar-hidden", false).toBool());
   if (free)
   {
     QMap<QString, QString> geometry;
@@ -1452,6 +1472,7 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/arrange", QString(modes[m_arranger->mode()]));
   set("Windows/layout", m_arranger->layoutText());
   set("Windows/title-bars-hidden", m_arranger->titleBarsHidden());
+  set("Windows/toolbar-hidden", m_toolbars->isChecked());
   set("Windows/design", Designs::name(Designs::current()));
   if (m_arranger->mode() == MdiArranger::Free)
     for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin, m_poincareWin })

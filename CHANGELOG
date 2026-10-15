@@ -2,6 +2,8 @@
 - Keys of your own: the new settings page Keyboard lists the commands of the main window with their key and
   the default; a key can be changed, taken away or set back, a key in use is taken from the other command after
   a question. One set for all instances (shortcuts.conf), a running instance takes a change over at once
+- Hide toolbar (Ctrl+M, in the menu): the toolbar goes away for more room, the same key brings it back; the
+  workspace keeps it. The menu moves from Ctrl+M to F7
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

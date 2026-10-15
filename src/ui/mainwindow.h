@@ -99,6 +99,8 @@ protected Q_SLOTS:
   void      updateRecorderActions();
   /// F11
   void      setFullScreen(bool on);
+  /// Ctrl+M: all toolbars at once
+  void      setToolbarsHidden(bool hide);
   /// Arrange actions and the title-bar action follow the arranger.
   void      syncArrangeActions();
   /// The readings dot in the status bar and its tooltip (meter and port).
@@ -199,6 +201,7 @@ protected:
   /// A view was shown: grow for it once per session.
   void        growFor(QMdiSubWindow *win);
   QAction    *m_fullScreen;
+  QAction    *m_toolbars;
   QAction    *m_zoomIn;
   QAction    *m_zoomOut;
   QAction    *m_zoomFit;
