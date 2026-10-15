@@ -1177,6 +1177,9 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     menu.addSeparator();
     m_poincare->addMenuActions(&menu);
   }
+  // a way back with the mouse once the toolbar is hidden (and its keys taken away)
+  menu.addSeparator();
+  menu.addAction(m_toolbars);
   QAction *chosen = menu.exec(globalPos);
   if (chosen == hide)
     win->hide();

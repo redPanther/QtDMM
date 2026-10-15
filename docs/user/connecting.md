@@ -219,8 +219,9 @@ or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
 layouts of versions before 26.1 are not taken over.
 
 **Hide toolbar** (Ctrl+M) in the menu takes the toolbar away for more room;
-the same key brings it back. The menu then opens with F7 at the top right
-of the window, and the other keys keep working.
+the same key brings it back, and so does the entry in the right-click menu
+of the display, the analog meter and the Poincaré plot. The menu then opens
+with F7 at the top right of the window, and the other keys keep working.
 
 **Design** in the menu, or on the *Appearance* settings page, sets the colours
 of the window: *System* (the look of your desktop), *Silver* (brushed
