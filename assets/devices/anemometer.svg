@@ -6,14 +6,14 @@
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
     .lcd { fill: #C9D3C0; }
-    .lcdtext { fill: #2A2E2A; font: bold 30px monospace; }
+    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
     .light { fill: #E6E8EA; }
     .key { fill: #8A9096; }
     .dark { fill: #1E2124; }
     .bezel { fill: #2B2E32; }
     .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .label { fill: #E6E8EA; font: 10px sans-serif; text-anchor: middle; }
+    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
   <!-- vane wheel -->
   <circle class="dark" cx="100" cy="76" r="70"/>
@@ -29,7 +29,7 @@
   <rect class="secondary" x="42" y="170" width="116" height="194" rx="14"/>
   <rect class="dark" x="52" y="184" width="96" height="58" rx="6"/>
   <rect class="lcd" x="57" y="189" width="86" height="48" rx="3"/>
-  <text class="lcdtext" style="font-size:26px" x="100.0" y="222.1" text-anchor="middle">4.2</text>
-  <text class="label" x="100" y="260">m/s</text>
+  <text class="lcdtext" style="font-weight:bold;font-family:monospace;font-size:26px" x="100.0" y="222.1" text-anchor="middle">4.2</text>
+  <text style="font-size:10px;font-family:sans-serif" class="label" x="100" y="260">m/s</text>
   <g class="key"><rect x="56" y="290" width="26" height="14" rx="4"/><rect x="87" y="290" width="26" height="14" rx="4"/><rect x="118" y="290" width="26" height="14" rx="4"/></g>
 </svg>

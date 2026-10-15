@@ -6,10 +6,10 @@
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
     .lcd { fill: #C9D3C0; }
-    .lcdtext { fill: #2A2E2A; font: bold 34px monospace; }
+    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 40px; font-family: monospace; }
     .light { fill: #E6E8EA; }
     .dark { fill: #1E2124; }
-    .label { fill: #E6E8EA; font: 9px sans-serif; text-anchor: middle; }
+    .label { fill: #E6E8EA; font-size: 9px; font-family: sans-serif; text-anchor: middle; }
   </style>
   <!-- holster -->
   <rect class="primary" x="4" y="4" width="192" height="352" rx="28"/>
@@ -18,7 +18,7 @@
   <!-- LCD -->
   <rect class="dark" x="30" y="32" width="140" height="70" rx="6"/>
   <rect class="lcd" x="35" y="37" width="130" height="60" rx="3"/>
-  <text class="lcdtext" x="100" y="80" text-anchor="middle">12.34</text>
+  <text style="font-weight:bold;font-size:40px;font-family:monospace" class="lcdtext" x="100" y="82" text-anchor="middle">12.34</text>
   <!-- buttons -->
   <g class="light">
     <rect x="30" y="114" width="28" height="12" rx="3"/>
@@ -47,8 +47,8 @@
     <circle class="light" cx="120" cy="300" r="4"/>
     <circle class="light" cx="156" cy="300" r="4"/>
   </g>
-  <text class="label" x="44" y="326">A</text>
-  <text class="label" x="80" y="326">mA</text>
-  <text class="label" x="120" y="326">COM</text>
-  <text class="label" x="156" y="326">VΩ</text>
+  <text style="font-size:9px;font-family:sans-serif" class="label" x="44" y="326">A</text>
+  <text style="font-size:9px;font-family:sans-serif" class="label" x="80" y="326">mA</text>
+  <text style="font-size:9px;font-family:sans-serif" class="label" x="120" y="326">COM</text>
+  <text style="font-size:9px;font-family:sans-serif" class="label" x="156" y="326">VΩ</text>
 </svg>

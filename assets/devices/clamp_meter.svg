@@ -6,14 +6,14 @@
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
     .lcd { fill: #C9D3C0; }
-    .lcdtext { fill: #2A2E2A; font: bold 30px monospace; }
+    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
     .light { fill: #E6E8EA; }
     .key { fill: #8A9096; }
     .dark { fill: #1E2124; }
     .bezel { fill: #2B2E32; }
     .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .label { fill: #E6E8EA; font: 10px sans-serif; text-anchor: middle; }
+    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
   <!-- jaw -->
   <path class="primary" d="M100 6 a74 74 0 0 1 74 74 v40 h-36 v-40 a38 38 0 0 0 -76 0 v40 h-36 v-40 a74 74 0 0 1 74 -74z"/>
@@ -25,7 +25,7 @@
   <rect class="secondary" x="34" y="128" width="132" height="256" rx="14"/>
   <rect class="dark" x="44" y="140" width="112" height="58" rx="6"/>
   <rect class="lcd" x="49" y="145" width="102" height="48" rx="3"/>
-  <text class="lcdtext" style="font-size:28px" x="100.0" y="178.8" text-anchor="middle">12.3</text>
+  <text class="lcdtext" style="font-weight:bold;font-family:monospace;font-size:28px" x="100.0" y="178.8" text-anchor="middle">12.3</text>
   <g class="light"><rect x="44" y="208" width="24" height="10" rx="3"/><rect x="74" y="208" width="24" height="10" rx="3"/><rect x="104" y="208" width="24" height="10" rx="3"/><rect x="134" y="208" width="22" height="10" rx="3"/></g>
   <circle class="dark" cx="100" cy="276" r="40"/><circle class="primary" cx="100" cy="276" r="30"/>
   <rect class="light" x="96" y="246" width="8" height="30" rx="3"/>

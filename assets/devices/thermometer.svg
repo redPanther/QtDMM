@@ -6,14 +6,14 @@
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
     .lcd { fill: #C9D3C0; }
-    .lcdtext { fill: #2A2E2A; font: bold 30px monospace; }
+    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
     .light { fill: #E6E8EA; }
     .key { fill: #8A9096; }
     .dark { fill: #1E2124; }
     .bezel { fill: #2B2E32; }
     .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .label { fill: #E6E8EA; font: 10px sans-serif; text-anchor: middle; }
+    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
   <!-- probe cable + probe -->
   <path d="M100 8 v20" class="dline" style="stroke-width:6"/>
@@ -23,7 +23,7 @@
   <rect class="secondary" x="32" y="40" width="136" height="304" rx="20"/>
   <rect class="dark" x="44" y="56" width="112" height="64" rx="6"/>
   <rect class="lcd" x="49" y="61" width="102" height="54" rx="3"/>
-  <text class="lcdtext" style="font-size:26px" x="100.0" y="97.1" text-anchor="middle">23.5°</text>
+  <text class="lcdtext" style="font-weight:bold;font-family:monospace;font-size:26px" x="100.0" y="97.1" text-anchor="middle">23.5°</text>
   <!-- thermometer symbol -->
   <rect class="light" x="92" y="150" width="16" height="100" rx="8"/>
   <circle class="light" cx="100" cy="262" r="20"/>

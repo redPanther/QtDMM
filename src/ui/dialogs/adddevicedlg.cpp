@@ -643,7 +643,9 @@ void AddDeviceDlg::updateDeviceInfo()
     { tr("Name"), m_name->text().trimmed() },
     { tr("Model"), model },
     { tr("Type"), manual ? QStringLiteral("-") : DeviceType::displayName(type) },
-    { tr("Protocol"), FrameFormat::toString(m_settings->format()) },
+    // QtDMM's own meters run on the sigrok line format inside; that says nothing to the user
+    { tr("Protocol"), m_settings->isVirtual() || m_settings->isCalculated() ? QStringLiteral("-")
+                                                                             : FrameFormat::toString(m_settings->format()) },
     { tr("Connection"), connection },
   };
   QString html = "<table cellspacing=\"0\" cellpadding=\"2\">";

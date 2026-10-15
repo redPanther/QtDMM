@@ -136,7 +136,7 @@ int main(int argc, char **argv)
       { "victron", AddDeviceDlg::Bluetooth, "AA:BB:CC:DD:EE:FF",
         { { "DMM/model", "Victron SmartSolar MPPT" }, { "Port settings/ble-address", "AA:BB:CC:DD:EE:FF" },
           { "Port settings/ble-key", "00112233445566778899aabbccddeeff" } }, "Solar charge controller", "Bluetooth LE" },
-      { "simulated", AddDeviceDlg::Simulated, QString(), {}, "Virtual meter", "simulated in QtDMM" },
+      { "simulated", AddDeviceDlg::Simulated, QString(), {}, "Virtual meter", "simulated in QtDMM" },   // protocol "-"
       { "manual", AddDeviceDlg::Cable, "/dev/ttyACM0", {}, "-", "/dev/ttyACM0" },
     };
     for (const Case &c : cases)
@@ -156,6 +156,8 @@ int main(int argc, char **argv)
       const QString info = dlg.findChild<QLabel *>("ui_deviceInfo")->text();
       check(info.contains(">" + c.type + "<") && info.contains(c.connectionText), c.shot + ": info " + info);
       check(!info.contains("00112233445566778899aabbccddeeff") && !info.contains("SERIAL "), c.shot + ": no key, no SERIAL: " + info);
+      if (c.connection == AddDeviceDlg::Simulated)
+        check(!info.contains("Sigrok"), "simulated: no internal protocol name: " + info);
       check(drawn(dlg.findChild<QLabel *>("ui_deviceSymbol")->pixmap()) > 2000, c.shot + ": a picture");
       if (!shots.isEmpty())
       {
