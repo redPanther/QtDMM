@@ -405,6 +405,19 @@ int main(int argc, char **argv)
       e = b.write(lidB, block, false);
     check(e == 17, QString("a message over 1 MiB: I/O error (%1)").arg(e));
     check(b.write(lidB, "*IDN?\n") == 17, "the rest of that message up to its END is dropped too");
+    // device_clear and device_abort end the dropping: the next command runs (R11-09)
+    for (int i = 0; i < 20 && b.write(lidB, block, false) == 0; ++i)
+      ;
+    check(b.simple(15, lidB) == 0 && b.write(lidB, "*IDN?\n") == 0 && std::get<2>(b.read(lidB)) == "QtDMM,Test,0,1\n",
+          "after a message too big, device_clear: the next command answers");
+    for (int i = 0; i < 20 && b.write(lidB, block, false) == 0; ++i)
+      ;
+    Client ab;
+    XdrWriter args;
+    args.i32(lidB);
+    check(ab.connect(quint16(la.value(2))) && ab.call(kAbort, 1, 1, args.data()), "device_abort on the abort channel");
+    check(b.write(lidB, "*IDN?\n") == 0 && std::get<2>(b.read(lidB)) == "QtDMM,Test,0,1\n",
+          "after a message too big, device_abort: the next command answers");
     check(b.write(lidB, "*IDN?\n") == 0 && std::get<2>(b.read(lidB)) == "QtDMM,Test,0,1\n", "the link works on");
   }
 

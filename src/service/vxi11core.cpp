@@ -45,6 +45,7 @@ qint32 Vxi11Core::abortLink(qint32 lid)
     return kErrInvalidLink;
   it->in.clear();
   it->out.clear();
+  it->discard = false; // the message too big is gone too: the next write starts a new one
   return kErrNone;
 }
 
@@ -244,6 +245,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
       {
         m_links[lid].in.clear();
         m_links[lid].out.clear();
+        m_links[lid].discard = false;
         if (m_ep.deviceClear)
           m_ep.deviceClear();
       }
