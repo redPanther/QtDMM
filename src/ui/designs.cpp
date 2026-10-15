@@ -240,7 +240,9 @@ QBrush Designs::areaBrush(Design d)
   switch (d)
   {
     case Silver:
-      return vgrad({ { 0, QColor("#c3c9d1") }, { 0.5, QColor("#9aa2ac") }, { 1, QColor("#6f7781") } });
+      // plain: the area paints in pieces, and a gradient over each piece
+      // drew stripes across the background
+      return QColor("#9aa2ac");
     case Dark:
       return QColor(30, 30, 32);
     default:

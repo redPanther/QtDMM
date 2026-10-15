@@ -25,6 +25,7 @@
   Can be switched off in the right-click menu (the scroll bar is back); kept with the window layout
 - Graph: a min/max band behind the curve (right-click menu, off at first): the lowest to the highest the curve
   reaches within four pixels either side, so the scatter around it shows at any window; kept with the window layout
+- Design Silver: the area behind the windows is a plain grey; its gradient showed as stripes across it
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell
