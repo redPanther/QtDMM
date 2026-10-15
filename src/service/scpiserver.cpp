@@ -221,8 +221,8 @@ ScpiEndpoint ScpiServer::endpoint()
   ScpiEndpoint ep;
   ep.process = [this](const QByteArray &line) { return process(line); };
   ep.statusByte = [this]() { return statusByte(); };
-  // device clear (VXI-11 device_clear, HiSLIP DeviceClear): the error queue goes, as with *CLS
-  ep.deviceClear = [this]() { m_errors.clear(); };
+  // no deviceClear: IEEE 488.2 device clear resets I/O and the parser, but the error queue and the
+  // status stay (Keysight: "left unchanged by Device Clear"). Only *CLS empties them.
   return ep;
 }
 

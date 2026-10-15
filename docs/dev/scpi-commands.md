@@ -18,7 +18,8 @@ of the meters that have remote keys.
   channel, 16 links, messages up to 1 MB, a lock ends with its connection,
   `tests/test_vxi11.cpp`), the same way: a `device_write` with END runs
   the lines, each query answer is read with `device_read` of its own.
-  `device_clear` (and HiSLIP's device clear) empties the error queue.
+  `device_clear` (and HiSLIP's device clear) leaves the error queue and
+  the status alone, as IEEE 488.2 asks; only `*CLS` empties them.
 - Several commands per message separated by `;`. Their query answers come
   back in one line, separated by `;`, terminated by `\n`. A message without
   a query gets no answer at all.

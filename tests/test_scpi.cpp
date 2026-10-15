@@ -156,6 +156,15 @@ int main(int argc, char **argv)
     last = ask(s, "SYST:ERR?");
   check(last.startsWith("-350,"), "last entry is the overflow " + last);
 
+  // device clear (VXI-11, HiSLIP) leaves the error queue alone, only *CLS empties it
+  s.process("NOPE");
+  {
+    const ScpiEndpoint ep = s.endpoint();
+    if (ep.deviceClear)
+      ep.deviceClear();
+  }
+  check(ask(s, "*STB?") == "4" && ask(s, "SYST:ERR?").startsWith("-113,"), "device clear keeps the error queue");
+
   // --- 4b. QtDMM's own commands and CALCulate ---
   {
     ScpiServer q;
