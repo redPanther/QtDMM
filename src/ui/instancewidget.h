@@ -33,6 +33,7 @@
 
 class MeterController;
 class SettingsDialog;
+class ShortcutRegistry;
 class LcdWidget;
 class Settings;
 class AnalogMeter;
@@ -67,6 +68,8 @@ public:
   bool        saveWindowSize() const;
   /// The LCD panel to feed; created and docked by MainWindow.
   void        setDisplay(LcdWidget *);
+  /// The main window's commands for the settings page Keyboard.
+  void        setShortcuts(ShortcutRegistry *registry);
   /// The LCD's colours (LcdWidget::LcdVariant), stored as Display/lcd.
   void        setLcdVariant(int variant);
   /// The analog meter's style from its context menu (0 dark, 1 ivory):

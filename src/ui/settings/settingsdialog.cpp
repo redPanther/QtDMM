@@ -30,6 +30,7 @@
 #include "ui/devicesettings.h"
 #include "ui/settings/alarmprefs.h"
 #include "ui/settings/scpiprefs.h"
+#include "ui/settings/keyboardprefs.h"
 #include "ui/settings/graphprefs.h"
 #include "ui/settings/generalprefs.h"
 #include "ui/settings/guiprefs.h"
@@ -75,9 +76,10 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   m_recorder = new RecorderPrefs(ui_stack);
   m_alarms = new AlarmPrefs(ui_stack);
   m_scpi = new ScpiPrefs(ui_stack);
+  m_keyboard = new KeyboardPrefs(ui_stack);
   const QList<QPair<SettingsPage *, PageType>> pages = {
     { m_general, General }, { m_gui, GUI }, { m_graph, Graph },
-    { m_recorder, Recorder }, { m_alarms, Alarms }, { m_scpi, Scpi } };
+    { m_recorder, Recorder }, { m_alarms, Alarms }, { m_scpi, Scpi }, { m_keyboard, Keyboard } };
   for (const auto &[p, id] : pages)
   {
     p->setId(id);
@@ -751,6 +753,11 @@ QList<Alarm> SettingsDialog::alarms() const
 void SettingsDialog::setAlarmUnit(const QString &unit)
 {
   m_alarms->setUnit(unit);
+}
+
+void SettingsDialog::setShortcuts(ShortcutRegistry *registry)
+{
+  m_keyboard->setRegistry(registry);
 }
 
 bool SettingsDialog::scpiEnabled() const { return m_scpi->enabled(); }
