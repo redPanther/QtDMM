@@ -43,10 +43,13 @@ private:
   {
     quint64 conn = 0;      // the TCP connection that created it
     QByteArray in;         // incomplete command received so far
+    bool discard = false;  // the message grew too big: its blocks up to the END are dropped
     QList<QByteArray> out; // responses waiting for device_read, one entry per response message
   };
 
-  qint32 checkAccess(qint32 lid) const;
+  // A lid counts only on the connection that created it (the abort channel is the exception).
+  bool owns(qint32 lid, quint64 conn) const;
+  qint32 checkAccess(qint32 lid, quint64 conn) const;
 
   ScpiEndpoint m_ep;
   quint16 m_abortPort = 0;

@@ -370,6 +370,12 @@ int main(int argc, char **argv)
   const qint32 lidB = b.createLink().value(1);
   check(a.simple(18, lidA) == 0, "A locks");
   check(b.write(lidB, "*IDN?\n") == 11, "B is locked out");
+  // lids are easy to guess: B cannot use, unlock or destroy A's link (R11-04)
+  check(b.write(lidA, "*IDN?\n") == 4 && std::get<0>(b.read(lidA)) == 4, "B cannot write or read on A's lid");
+  check(b.simple(19, lidA) == 4 && b.simple(23, lidA) == 4, "B cannot unlock or destroy A's link");
+  check(b.simple(18, lidA) == 4 && b.simple(15, lidA) == 4, "B cannot lock or clear on A's lid");
+  check(srv.linkCount() == 2 && b.write(lidB, "*IDN?\n") == 11, "A's link and lock are still there");
+  check(a.write(lidA, "*IDN?\n") == 0 && std::get<2>(a.read(lidA)) == "QtDMM,Test,0,1\n", "and A works on");
   a.abort();   // no destroy_link, no unlock: the client is gone
   check(waitFor([&] { return srv.linkCount() == 1; }), "A's link went with its connection");
   check(b.write(lidB, "*IDN?\n") == 0, "B writes again: the lock went too");
@@ -398,6 +404,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < 20 && e == 0; ++i)
       e = b.write(lidB, block, false);
     check(e == 17, QString("a message over 1 MiB: I/O error (%1)").arg(e));
+    check(b.write(lidB, "*IDN?\n") == 17, "the rest of that message up to its END is dropped too");
     check(b.write(lidB, "*IDN?\n") == 0 && std::get<2>(b.read(lidB)) == "QtDMM,Test,0,1\n", "the link works on");
   }
 

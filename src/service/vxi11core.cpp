@@ -22,9 +22,16 @@ constexpr quint32 kReasonEnd = 4;       // device_read: end of the message
 constexpr quint32 kMaxRecvSize = 65536; // largest block a client may send us
 } // namespace
 
-qint32 Vxi11Core::checkAccess(qint32 lid) const
+bool Vxi11Core::owns(qint32 lid, quint64 conn) const
 {
-  if (!m_links.contains(lid))
+  // lids count up from 1 and are easy to guess; another connection's lid is no link of this one
+  const auto it = m_links.constFind(lid);
+  return it != m_links.cend() && it->conn == conn;
+}
+
+qint32 Vxi11Core::checkAccess(qint32 lid, quint64 conn) const
+{
+  if (!owns(lid, conn))
     return kErrInvalidLink;
   if (m_lockOwner != -1 && m_lockOwner != lid)
     return kErrLocked;
@@ -134,7 +141,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
       const QByteArray data = a.opaque();
       if (!a.ok())
         return RpcStatus::GarbageArgs;
-      const qint32 err = checkAccess(lid);
+      const qint32 err = checkAccess(lid, conn);
       if (err)
       {
         r.i32(err);
@@ -142,9 +149,11 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
         return RpcStatus::Success;
       }
       Link &l = m_links[lid];
-      if (l.in.size() + data.size() > kMaxMessage)
+      if (l.discard || l.in.size() + data.size() > kMaxMessage)
       {
+        // too big: the rest of this message is dropped too, not run as a command of its own
         l.in.clear();
+        l.discard = !(flags & kFlagEnd);
         r.i32(kErrIo);
         r.u32(0);
         return RpcStatus::Success;
@@ -175,7 +184,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
       a.u32();
       if (!a.ok())
         return RpcStatus::GarbageArgs;
-      qint32 err = checkAccess(lid);
+      qint32 err = checkAccess(lid, conn);
       if (!err && m_links[lid].out.isEmpty())
         err = kErrTimeout; // nothing to read -> I/O timeout
       if (err)
@@ -203,7 +212,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
     {
       if (!generic())
         return RpcStatus::GarbageArgs;
-      const qint32 err = checkAccess(lid);
+      const qint32 err = checkAccess(lid, conn);
       quint32 stb = 0;
       if (!err)
       {
@@ -222,7 +231,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
     {
       if (!generic())
         return RpcStatus::GarbageArgs;
-      r.i32(checkAccess(lid));
+      r.i32(checkAccess(lid, conn));
       return RpcStatus::Success;
     }
 
@@ -230,7 +239,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
     {
       if (!generic())
         return RpcStatus::GarbageArgs;
-      const qint32 err = checkAccess(lid);
+      const qint32 err = checkAccess(lid, conn);
       if (!err)
       {
         m_links[lid].in.clear();
@@ -250,7 +259,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
       if (!a.ok())
         return RpcStatus::GarbageArgs;
       qint32 err = kErrNone;
-      if (!m_links.contains(lid))
+      if (!owns(lid, conn))
         err = kErrInvalidLink;
       else if (m_lockOwner == -1)
         m_lockOwner = lid;
@@ -266,7 +275,7 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
       if (!a.ok())
         return RpcStatus::GarbageArgs;
       qint32 err = kErrNone;
-      if (!m_links.contains(lid))
+      if (!owns(lid, conn))
         err = kErrInvalidLink;
       else if (m_lockOwner != lid)
         err = kErrNoLock;
@@ -292,8 +301,8 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
       lid = a.i32();
       if (!a.ok())
         return RpcStatus::GarbageArgs;
-      const qint32 err = m_links.remove(lid) ? kErrNone : kErrInvalidLink;
-      if (m_lockOwner == lid)
+      const qint32 err = owns(lid, conn) && m_links.remove(lid) ? kErrNone : kErrInvalidLink;
+      if (!err && m_lockOwner == lid)
         m_lockOwner = -1;
       if (!err && m_linksChanged)
         m_linksChanged();
