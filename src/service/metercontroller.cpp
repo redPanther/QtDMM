@@ -21,6 +21,8 @@ namespace
 {
 // --vxi11-rpc: replaces the setting Scpi/vxi11-rpc for this run
 std::optional<Vxi11Server::RpcbindMode> s_vxi11RpcOverride;
+// --vxi11-portmapper-port: an own portmapper on this port for this run (tests)
+std::optional<quint16> s_vxi11PortmapperPort;
 }
 
 
@@ -539,7 +541,8 @@ void MeterController::applyScpi(const ScpiConfig &config)
   // or an own portmapper on 111; switched on but not possible, it stays off
   // with a reason, the other two run on
   const bool vxi11 = config.enabled && config.vxi11 && m_scpi->isListening();
-  const Vxi11Server::RpcbindMode rpc = s_vxi11RpcOverride.value_or(config.vxi11Rpc);
+  const Vxi11Server::RpcbindMode rpc =
+    s_vxi11PortmapperPort ? Vxi11Server::RpcbindMode::Own : s_vxi11RpcOverride.value_or(config.vxi11Rpc);
   const bool sameVxi11 = m_vxi11->isRunning() && m_vxi11->address() == address && m_vxi11->mode() == rpc;
   if (!vxi11)
   {
@@ -551,7 +554,7 @@ void MeterController::applyScpi(const ScpiConfig &config)
   {
     m_mdnsVxi11->stop();
     m_vxi11Error.clear();
-    if (!m_vxi11->start(address, rpc))
+    if (!m_vxi11->start(address, rpc, 0, 0, s_vxi11PortmapperPort.value_or(Vxi11Server::kPortmapperPort)))
     {
       m_vxi11Error = m_vxi11->error();
       Q_EMIT error(tr("VXI-11 server: %1").arg(m_vxi11Error));
@@ -661,6 +664,11 @@ QString MeterController::vxi11Resource() const
 void MeterController::setVxi11RpcOverride(std::optional<Vxi11Server::RpcbindMode> mode)
 {
   s_vxi11RpcOverride = mode;
+}
+
+void MeterController::setVxi11PortmapperPort(std::optional<quint16> port)
+{
+  s_vxi11PortmapperPort = port;
 }
 
 QString MeterController::hislipResource() const

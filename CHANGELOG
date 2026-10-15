@@ -39,7 +39,8 @@
 - SCPI server: also VXI-11, the older LAN protocol of VISA (TCPIP::host::INSTR) - for VISA libraries without
   HiSLIP and for lxi-tools (lxi discover, lxi screenshot with -p keysight-dmm). Off by default, switched on in
   Settings, SCPI server. It needs a portmapper on port 111: the system's rpcbind, or an own one where QtDMM may
-  open that port (QtDMM never asks for extra rights; the handbook says how); --vxi11-rpc picks it for one run.
+  open that port (QtDMM never asks for extra rights; the handbook says how); --vxi11-rpc picks it for one run,
+  --vxi11-portmapper-port puts an own one on another port (for tests).
   Sidebar Services row VXI-11, mDNS _vxi-11._tcp. Only one program per computer can offer VXI-11
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
