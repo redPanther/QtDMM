@@ -424,6 +424,10 @@ int main(int argc, char **argv)
   check(links == 0, "stop: no links");
 
   // --- 7. the system rpcbind (a fake one on a Unix socket) ---
+  // rpcbind and its Unix socket are Unix only. On Windows QLocalServer is a
+  // named pipe whose instances the quick reconnects below can find busy, and
+  // QtDMM there always runs its own portmapper.
+#ifndef Q_OS_WIN
   {
     QTemporaryDir dir;
     const QString path = dir.filePath("rpcbind.sock");
@@ -460,6 +464,7 @@ int main(int argc, char **argv)
     thread.quit();
     thread.wait();
   }
+#endif
 
   check(Vxi11Server::modeFromName("own") == Vxi11Server::RpcbindMode::Own
         && Vxi11Server::modeName(Vxi11Server::RpcbindMode::System) == "system", "mode names");
