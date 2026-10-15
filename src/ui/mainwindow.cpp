@@ -782,6 +782,12 @@ void MainWindow::createExtraActions()
                               "<p>More room for the instruments. The menu stays at hand with F7, the same key "
                               "again brings the toolbar back.</p></body></html>"));
   connect(m_toolbars, &QAction::toggled, this, &MainWindow::setToolbarsHidden);
+  // hidden by hand (not by a workspace): say how it comes back, a pressed Ctrl+M is easily missed
+  connect(m_toolbars, &QAction::triggered, this, [this](bool hidden)
+  {
+    if (hidden)
+      QTimer::singleShot(0, this, &MainWindow::toolbarHiddenHint);
+  });
 
   m_zoomIn = new QAction(tr("Zoom &in"), this);
   m_zoomIn->setObjectName("action_ZoomIn");
@@ -859,6 +865,30 @@ void MainWindow::setToolbarsHidden(bool hide)
 {
   for (QToolBar *bar : { toolBarDMM, toolBarRecorder, toolBarFile, toolBarMenu })
     bar->setVisible(!hide);
+}
+
+void MainWindow::toolbarHiddenHint()
+{
+  Settings *settings = m_wid->settings();
+  if (!m_toolbars->isChecked() || !settings->getBool("Windows/toolbar-hint", true))
+    return;
+  const QString key = m_toolbars->shortcut().toString(QKeySequence::NativeText);
+  const QString menuKey = action_Menu->shortcut().toString(QKeySequence::NativeText);
+  QString text = key.isEmpty() ? tr("The toolbar is hidden. To bring it back, right-click the display or the "
+                                    "analog meter and choose Hide toolbar again.")
+                               : tr("The toolbar is hidden. %1 brings it back, and so does Hide toolbar in the "
+                                    "right-click menu of the display or the analog meter.").arg(key);
+  if (!menuKey.isEmpty())
+    text += ' ' + tr("The menu opens with %1.").arg(menuKey);
+  QMessageBox box(QMessageBox::Information, tr("Hide toolbar"), text, QMessageBox::Ok, this);
+  auto *again = new QCheckBox(tr("&Do not show this again"), &box);
+  box.setCheckBox(again);
+  box.exec();
+  if (again->isChecked())
+  {
+    settings->setBool("Windows/toolbar-hint", false);
+    settings->save();   // set only stages it, get reads the file
+  }
 }
 
 void MainWindow::startSLOT()
