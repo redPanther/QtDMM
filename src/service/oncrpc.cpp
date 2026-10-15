@@ -309,8 +309,11 @@ UdpRpcServer::UdpRpcServer(const RpcDispatcher *dispatcher, QObject *parent)
     {
       const QNetworkDatagram dg = m_socket.receiveDatagram();
       const QByteArray reply = m_dispatcher->handle(dg.data());
+      // not dg.makeReply(): that sends from the address the request went to
+      // (IP_SENDSRCADDR), which FreeBSD refuses on a socket bound to one
+      // address (127.0.0.1) - the answer never left
       if (!reply.isEmpty())
-        m_socket.writeDatagram(dg.makeReply(reply));
+        m_socket.writeDatagram(reply, dg.senderAddress(), quint16(dg.senderPort()));
     }
   });
 }
