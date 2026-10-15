@@ -8,10 +8,11 @@ if (BUILD_TESTING)
 	file(GLOB DECODER_FILES CONFIGURE_DEPENDS src/device/decoders/*.h  src/device/decoders/*.cpp )
 	## the Victron decoder reads bit fields through src/device/victronble.cpp (which also carries the AES)
 	list(APPEND DECODER_FILES src/device/victronble.cpp src/3rdparty/tiny-aes/aes.c)
-	add_executable(${TEST_DECODER} MACOSX_BUNDLE tests/test_decoder.cpp src/device/dmmdecoder.cpp src/device/protocols.cpp src/core/siprefix.cpp src/core/readingadapter.cpp ${DECODER_FILES})
+	add_executable(${TEST_DECODER} MACOSX_BUNDLE tests/test_decoder.cpp src/device/dmmdecoder.cpp src/device/devicetype.cpp src/device/protocols.cpp src/core/siprefix.cpp src/core/readingadapter.cpp ${DECODER_FILES})
 	target_link_libraries(${TEST_DECODER} PRIVATE Qt::Core Qt::Test)
 	add_test(NAME protocol_table COMMAND ${TEST_DECODER} --table)
 	add_test(NAME meter_keys COMMAND ${TEST_DECODER} --keys)
+	add_test(NAME device_types COMMAND ${TEST_DECODER} --types)
 
 	## the core's base types and ReadingAdapter (the decoder fixtures check the ports too)
 	add_executable(test_adapter tests/test_adapter.cpp src/core/readingadapter.cpp src/core/siprefix.cpp)
@@ -91,13 +92,13 @@ if (BUILD_TESTING)
 	target_link_libraries(${TEST_INSTANCES} PRIVATE Qt6::Gui Qt::Core)
 	add_test(NAME instances COMMAND ${TEST_INSTANCES})
 	## the meter's settings widget (DeviceSettings): keys in and out, "Advanced", groups per kind of meter
-	add_executable(test_devicesettings MACOSX_BUNDLE tests/test_devicesettings.cpp src/ui/devicesettings.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
+	add_executable(test_devicesettings MACOSX_BUNDLE tests/test_devicesettings.cpp src/ui/devicesettings.cpp src/device/devicetype.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
 		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
 	target_include_directories(test_devicesettings PRIVATE src ${CMAKE_BINARY_DIR})
 	target_link_libraries(test_devicesettings PRIVATE Qt6::Widgets Qt6::SerialPort Qt::Core)
 	add_test(NAME device_settings COMMAND test_devicesettings)
 	## the assistant "Add device": pages per connection, models, name, Next, the buttons that finish it
-	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp src/ui/dialogs/adddevicedlg.cpp src/ui/tilebutton.cpp src/ui/devicesettings.cpp
+	add_executable(test_adddevice MACOSX_BUNDLE tests/test_adddevice.cpp src/ui/dialogs/adddevicedlg.cpp src/ui/tilebutton.cpp src/ui/devicesettings.cpp src/device/devicetype.cpp
 		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
 		src/device/discovery/discovery.cpp src/service/mdnsbrowser.cpp
 		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
@@ -111,7 +112,7 @@ if (BUILD_TESTING)
 	add_test(NAME add_device COMMAND test_adddevice)
 	## the sidebar "Devices": My devices in order, the one in use, click, rename, when it is shown; Settings of an entry; the instances
 	add_executable(test_devicesidebar MACOSX_BUNDLE tests/test_devicesidebar.cpp src/ui/devicesidebar.cpp
-		src/ui/dialogs/devicesettingsdlg.cpp src/ui/devicesettings.cpp
+		src/ui/dialogs/devicesettingsdlg.cpp src/ui/devicesettings.cpp src/device/devicetype.cpp
 		src/core/devicelibrary.cpp src/device/protocols.cpp src/device/dmmdecoder.cpp ${DECODER_FILES}
 		src/service/sharedstatemanager.cpp src/core/calcexpr.cpp src/core/siprefix.cpp src/ui/forms/uidevicesettings.ui)
 	target_include_directories(test_devicesidebar PRIVATE src ${CMAKE_BINARY_DIR})

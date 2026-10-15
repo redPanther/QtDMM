@@ -895,129 +895,129 @@
 <context>
     <name>DeviceSettings</name>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="196"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="197"/>
         <source>Manual settings</source>
         <translation>Réglages manuels</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="197"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="198"/>
         <source>All vendors</source>
         <translation>Tous les fabricants</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="594"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="676"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="601"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="683"/>
         <source>Position %1: %2</source>
         <translation>Position %1 : %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="692"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="699"/>
         <source>%1: no such instance running</source>
         <translation>%1 : aucune instance de ce nom n&apos;est lancée</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="702"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="709"/>
         <source>Running instances: %1</source>
         <translation>Instances lancées : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="704"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="711"/>
         <source>No other instance is running.</source>
         <translation>Aucune autre instance n&apos;est lancée.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="907"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="914"/>
         <source>none</source>
         <translation>aucune</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="971"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="978"/>
         <source>%1 was not found or does not run. Install sigrok-cli, or set its path in the settings, page General.</source>
         <translation>%1 est introuvable ou ne fonctionne pas. Installez sigrok-cli ou indiquez son chemin dans les réglages, page Général.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="974"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="981"/>
         <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
         <translation>%1 n&apos;a pas de pilote « %2 » ; voir sigrok-cli --list-supported.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="976"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="983"/>
         <source>%1 found.</source>
         <translation>%1 trouvé.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="986"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="993"/>
         <source>Running %1 --driver %2 --scan ...</source>
         <translation>%1 --driver %2 --scan en cours…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1008"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1015"/>
         <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
         <translation>Aucun appareil n&apos;a répondu en 30 s (un port série sans appareil SCPI fait attendre sigrok-cli indéfiniment).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1010"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1017"/>
         <source>Found: %1</source>
         <translation>Trouvé : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1012"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1019"/>
         <source>No meter answered.</source>
         <translation>Aucun appareil n&apos;a répondu.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1021"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1028"/>
         <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
         <translation>Ce QtDMM a été compilé sans prise en charge du Bluetooth, il ne peut donc pas se connecter à ce multimètre.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1028"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1035"/>
         <source>Pick the device or type its Bluetooth address.</source>
         <translation>Choisissez l&apos;appareil ou saisissez son adresse Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1031"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1038"/>
         <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
         <translation>Activez le Bluetooth du multimètre (le symbole Bluetooth s&apos;affiche) avant de rechercher ou de connecter.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1036"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1043"/>
         <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
         <translation>La clé est la « clé de chiffrement » à 32 chiffres que VictronConnect affiche sous Infos produit, Lecture instantanée via Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1046"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1053"/>
         <source>Scanning for %1 (6 s)...</source>
         <translation>Recherche de %1 (6 s)...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1047"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1054"/>
         <source>Scanning for Victron devices (5 s)...</source>
         <translation>Recherche d&apos;appareils Victron (5 s)…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1058"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1065"/>
         <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
         <translation>Aucun multimètre trouvé. Son Bluetooth est-il activé, et aucun autre programme n&apos;y est-il connecté ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1059"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1066"/>
         <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
         <translation>Aucun appareil Victron trouvé. Le Bluetooth est-il activé, et la lecture instantanée activée sur l&apos;appareil ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1098"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1105"/>
         <source>Load DMM description</source>
         <translation>Charger une description de multimètre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1098"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="1124"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1105"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1131"/>
         <source>DMM description (*.cfg)</source>
         <translation>Description de multimètre (*.cfg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1124"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1131"/>
         <source>Save DMM description</source>
         <translation>Enregistrer la description du multimètre</translation>
     </message>
@@ -1128,6 +1128,74 @@
         <location filename="../../src/ui/devicesidebar.cpp" line="441"/>
         <source>Remove &quot;%1&quot; from My devices?</source>
         <translation>Retirer « %1 » de Mes appareils ?</translation>
+    </message>
+</context>
+<context>
+    <name>DeviceType</name>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="140"/>
+        <source>Handheld multimeter</source>
+        <translation>Multimètre portable</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="141"/>
+        <source>Bench multimeter</source>
+        <translation>Multimètre de table</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="142"/>
+        <source>Clamp meter</source>
+        <translation>Pince ampèremétrique</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="143"/>
+        <source>Thermometer</source>
+        <translation>Thermomètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="144"/>
+        <source>Luxmeter</source>
+        <translation>Luxmètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="145"/>
+        <source>Air quality meter</source>
+        <translation>Mesureur de qualité de l&apos;air</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="146"/>
+        <source>Sound level meter</source>
+        <translation>Sonomètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="147"/>
+        <source>Anemometer</source>
+        <translation>Anémomètre</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="148"/>
+        <source>Battery monitor</source>
+        <translation>Contrôleur de batterie</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="149"/>
+        <source>Solar charge controller</source>
+        <translation>Régulateur de charge solaire</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="150"/>
+        <source>Inverter</source>
+        <translation>Onduleur</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="151"/>
+        <source>Virtual meter</source>
+        <translation>Appareil virtuel</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/devicetype.cpp" line="152"/>
+        <source>Generic</source>
+        <translation>Générique</translation>
     </message>
 </context>
 <context>

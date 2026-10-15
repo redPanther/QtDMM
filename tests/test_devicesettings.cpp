@@ -70,6 +70,16 @@ int main(int argc, char **argv)
   w.findChild<QComboBox *>("ui_vendor")->setCurrentText("Uni-Trend");
   Q_EMIT w.findChild<QComboBox *>("ui_vendor")->activated(w.findChild<QComboBox *>("ui_vendor")->currentIndex());
   check(!w.portParametersShown() && !shown(w, "ui_advancedBox"), "manual, then a model: the fixed parameters hidden");
+  {
+    // the model list names the kind of instrument in its tooltips
+    auto *models = w.findChild<QComboBox *>("ui_model");
+    const int ut61e = models->findText("Uni-Trend UT61E");
+    const int ut803 = models->findText("Uni-Trend UT803");
+    check(ut61e >= 0 && models->itemData(ut61e, Qt::ToolTipRole).toString() == "Handheld multimeter",
+          "UT61E tooltip: " + models->itemData(ut61e, Qt::ToolTipRole).toString());
+    check(ut803 >= 0 && models->itemData(ut803, Qt::ToolTipRole).toString() == "Bench multimeter",
+          "UT803 tooltip: " + models->itemData(ut803, Qt::ToolTipRole).toString());
+  }
 
   // 3. no frames: the groups are sections with a title above
   check(w.findChild<QGroupBox *>("ui_protocol")->title().isEmpty() && w.findChild<QLabel *>("ui_protocol_title"),

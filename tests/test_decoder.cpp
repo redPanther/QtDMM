@@ -7,6 +7,7 @@
 #include <QtTest>
 #include <QRegularExpression>
 
+#include "device/devicetype.h"
 #include "device/dmmdecoder.h"
 #include "device/protocols.h"
 #include "core/readingadapter.h"
@@ -167,6 +168,44 @@ int main(int argc, char **argv)
     }
     if (problems == 0)
       qInfo() << "Meter keys and their states consistent.";
+    return problems == 0 ? 0 : 1;
+  }
+
+  if (argc == 2 && QString::fromLocal8Bit(argv[1]) == "--types")
+  {
+    // every model has a kind (a protocol without one is a compiler warning
+    // in DeviceType::ofProtocol()), every model listed by name exists, ids
+    // and names are there
+    int problems = 0;
+    QSet<QString> registered;
+    QMap<QString, int> count;
+    for (const DmmDecoder::DMMInfo &m : DmmDecoder::getDeviceConfigurations())
+    {
+      QString model = m.model;
+      if (model.endsWith(" *"))
+        model.chop(2);
+      registered.insert(m.vendor + '\n' + model.trimmed());
+      ++count[DeviceType::id(DeviceType::of(m))];
+    }
+    for (const auto &[vendor, model] : DeviceType::exceptions())
+      // QtDMM's own meters are registered outside the decoders
+      if (vendor != "QtDMM" && !registered.contains(vendor + '\n' + model))
+      {
+        qWarning() << "device type listed for a model that does not exist:" << vendor << model;
+        ++problems;
+      }
+    QSet<QString> ids;
+    for (int t = DeviceType::HandheldDmm; t <= DeviceType::Generic; ++t)
+    {
+      const auto type = static_cast<DeviceType::Type>(t);
+      if (DeviceType::displayName(type).isEmpty() || ids.contains(DeviceType::id(type)))
+      {
+        qWarning() << "device type without name or with an id twice:" << DeviceType::id(type);
+        ++problems;
+      }
+      ids.insert(DeviceType::id(type));
+    }
+    qInfo() << "models per type:" << count;
     return problems == 0 ? 0 : 1;
   }
 

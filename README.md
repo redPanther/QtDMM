@@ -80,7 +80,8 @@ protocols - the *Chip* column helps: a meter built around the same chip
 (named in its manual or on the sigrok wiki) usually speaks the same
 protocol. See [Connecting a meter](docs/user/connecting.md).
 
-*Serial* is baud rate, data bits, parity (N/E/O) and stop bits; meters that
+*Type* is the kind of instrument (handheld or bench multimeter, thermometer,
+battery monitor, ...). *Serial* is baud rate, data bits, parity (N/E/O) and stop bits; meters that
 are not read over a serial line say how they are reached instead
 (*USB-HID (BU-86X)* for the Brymen cable, *Bluetooth LE*, *sigrok-cli*).
 *Lines* are the control lines the cable needs driven. *Counts* is the display
@@ -92,230 +93,230 @@ table). If you can confirm one, or get an unlisted
 meter working, please report it on the
 [project page](https://github.com/qtdmm/QtDMM/issues).
 
-| Vendor | Model | Chip | Protocol | Serial | Lines | Counts |
-|---|---|---|---|---|---|---|
-| Agilent | 34405A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 100000 |
-| Agilent | 34410A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
-| Agilent | 34460A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
-| Agilent | U1231A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
-| Agilent | U1232A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
-| Agilent | U1233A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
-| Agilent | U1241A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
-| Agilent | U1241B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
-| Agilent | U1242A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
-| Agilent | U1242B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
-| Agilent | U1251A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
-| Agilent | U1251B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
-| Agilent | U1252A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
-| Agilent | U1252B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
-| Agilent | U1253A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
-| Agilent | U1253B ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
-| Agilent | U1271A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
-| Agilent | U1272A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
-| Agilent | U1273A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
-| APPA | 208 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| APPA | 208B ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| APPA | 501 ¹ | - | `AppaDmm` | 9600 8N1 | - | 40000 |
-| APPA | 502 ¹ | - | `AppaDmm` | 9600 8N1 | - | 40000 |
-| APPA | 503 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
-| APPA | 505 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
-| APPA | 506 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| APPA | 506B ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| APPA | 507 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| APPA | 71 ¹ | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
-| APPA | 73 ¹ | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
-| Benetech | GM1020 ¹ | - | `BenetechGM1020` | 19200 8N1 | - | 4000 |
-| BENNING | MM 12 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| Brymen | BM250 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
-| Brymen | BM251 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
-| Brymen | BM252 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
-| Brymen | BM255 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
-| Brymen | BM257 ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
-| Brymen | BM521s ¹ | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
-| Brymen | BM525s ¹ | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
-| Brymen | BM821s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Brymen | BM822s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Brymen | BM827s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Brymen | BM829s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Brymen | BM867s ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
-| Brymen | BM869s | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
-| CMT | 3503 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
-| CO2Meter | CM-INK-1 ¹ | Holtek | `TfaAirControl` | USB-HID (Holtek) | - | 5000 |
-| Digitech | QM1350 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Digitech | QM1462 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Digitech | QM1537 | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| Digitech | QM1538 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Digitek | DT-9062 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Digitek | DT-9602R+ ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Digitek | DT4000ZC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Digitek | INO2513 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Duratool | DO3122 | - | `DO3122Continuous` | 9600 8N1 | - | 4000 |
-| Elma | BM525s ¹ | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
-| Elma | BM821s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Elma | BM829s ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Elma | BM869s ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
-| ELV | M9803R | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
-| EZA | EZ-735 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| Fluke | 187 ¹ | - | `FlukeQM` | 9600 8N1 | - | 50000 |
-| Fluke | 189 ¹ | - | `FlukeQM` | 9600 8N1 | - | 50000 |
-| Fluke | 287 ¹ | - | `FlukeQM` | 115200 8N1 | - | 50000 |
-| Fluke | 289 ¹ | - | `FlukeQM` | 115200 8N1 | - | 50000 |
-| Fluke | 45 ¹ | - | `Fluke45` | 9600 8N1 | - | 100000 |
-| Fluke | 87-IV ¹ | - | `FlukeQM` | 9600 8N1 | - | 20000 |
-| Fluke | 89-IV ¹ | - | `FlukeQM` | 9600 8N1 | - | 50000 |
-| Generic | DTM0660 4000 count ² | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 4000 |
-| Generic | DTM0660 6000 count ² | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 6000 |
-| Generic | DTM0660 8000 count ² | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 8000 |
-| Greenlee | DM-210A ¹ | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
-| Greenlee | DM-810A ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Greenlee | DM-820A ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Greenlee | DM-830A ¹ | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
-| Greenlee | DM-860A ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
-| GW Instek | GDM-397 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| HoldPeak | HP-90EPC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| HP | 34401A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
-| Iso-Tech | IDM 503 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
-| Iso-Tech | IDM 505 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
-| Iso-Tech | IDM 73 | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
-| Keysight | 34465A (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 1000000 |
-| Keysight | U1241C ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
-| Keysight | U1242C ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
-| Keysight | U1273AX ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
-| Keysight | U1281A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
-| Keysight | U1282A ¹ | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
-| KPS | DMM9000BT ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| MASTECH | M9803R | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
-| MASTECH | MAS-343 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| MASTECH | MAS-345 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| MASTECH | MS6514 ¹ | - | `MastechMS6514` | 9600 8N1 | - | 9999 |
-| MASTECH | MS8250B ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| McVoice | M-345pro | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| McVoice | M-980T | - | `M9803RContinuous` | 9600 7N1 | DTR | 4000 |
-| Metex | M-3360D ¹ | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Metex | M-3640D ¹ | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Metex | M-3660D | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Metex | M-3830D | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Metex | M-3840D | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Metex | M-3850D | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Metex | M-3850M | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 4000 |
-| Metex | M-3870D | Metex KS57C2016 | `Metex14` | 1200 7N1 | DTR | 4000 |
-| Metex | M-4650C | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 20000 |
-| Metex | ME-11 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Metex | ME-21 ¹ | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Metex | ME-22 | Metex KS57C2016 | `Metex14` | 2400 7N2 | DTR | 4000 |
-| Metex | ME-32 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Metex | ME-42 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Metex | Universal System 9140 ¹ | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Metex | universal system 9160 | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Metrel | MD9015 ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| PCE | PCE-DM32 ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| PeakTech | 2025 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| PeakTech | 3315 | ES51962 | `CyrustekES51962` | 2400 7N1 | DTR | 4000 |
-| PeakTech | 3330 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| PeakTech | 3415 ¹ | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 6000 |
-| PeakTech | 3430 | FS9922-DMM4 | `QM1537Continuous` | 19200 7N2 | DTR | 4000 |
-| PeakTech | 4010 | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 4000 |
-| PeakTech | 4015A | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 100000 |
-| PeakTech | 4360 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| PeakTech | 4390 | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 4000 |
-| PeakTech | 451 | - | `PeakTech10` | 600 7N2 | DTR | 4000 |
-| Pro'sKit | MT-1820 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Radioshack | 22-805 DMM | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Radioshack | 22-812 | - | `RS22812Continuous` | 4800 8N1 | DTR | 4000 |
-| Radioshack | RS22-168A | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Sanwa | PC7000 ¹ | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
-| Sefram | 7351 ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| Sefram | 7352B ¹ | - | `AppaDmm` | 9600 8N1 | - | 50000 |
-| Siglent | SDM3055 (sigrok) ¹ | - | `Sigrok` | sigrok-cli | - | 200000 |
-| sigrok | SCPI DMM (any scpi-dmm model) ¹ | - | `Sigrok` | sigrok-cli | - | 100000 |
-| Sinometer | MAS-343 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| SparkFun | 70C ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| Tecpel | DMM-8061 ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| TekPower | TP4000ZC | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Tenma | 72-1016 | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
-| Tenma | 72-6870 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Tenma | 72-7712 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
-| Tenma | 72-7715 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
-| Tenma | 72-7730 ¹ | - | `VC940Continuous` | 2400 7O1 | DTR | 20000 |
-| Tenma | 72-7732 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
-| Tenma | 72-7745 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Tenma | 72-9380A ¹ | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
-| TFA Dostmann | AIRCO2NTROL Coach | Holtek | `TfaAirControl` | USB-HID (Holtek) | - | 5000 |
-| TFA Dostmann | AIRCO2NTROL Mini ¹ | Holtek | `TfaAirControl` | USB-HID (Holtek) | - | 5000 |
-| Uni-Trend | UT161B ¹ | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
-| Uni-Trend | UT161D ¹ | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
-| Uni-Trend | UT161E ¹ | - | `UniTUT61Plus` | Bluetooth LE | - | 22000 |
-| Uni-Trend | UT30A ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Uni-Trend | UT30E ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Uni-Trend | UT321 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
-| Uni-Trend | UT322 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
-| Uni-Trend | UT325 ¹ | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
-| Uni-Trend | UT382 ¹ | - | `UniTUT382` | 19200 8N1 | - | 2000 |
-| Uni-Trend | UT60A | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Uni-Trend | UT60BT | - | `UniTiDMM` | Bluetooth LE | - | 10000 |
-| Uni-Trend | UT60D ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Uni-Trend | UT60E | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Uni-Trend | UT61A ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Uni-Trend | UT61B | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| Uni-Trend | UT61B+ (UT-D07B Bluetooth) ¹ | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
-| Uni-Trend | UT61B+ ¹ | - | `UniTUT61Plus` | 9600 8N1 | - | 6000 |
-| Uni-Trend | UT61C | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Uni-Trend | UT61D | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Uni-Trend | UT61D+ (UT-D07B Bluetooth) ¹ | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
-| Uni-Trend | UT61D+ ¹ | - | `UniTUT61Plus` | 9600 8N1 | - | 6000 |
-| Uni-Trend | UT61E | ES51922 | `CyrustekES51922` | 19200 7O1 | DTR | 22000 |
-| Uni-Trend | UT61E+ (UT-D07B Bluetooth) ¹ | - | `UniTUT61Plus` | Bluetooth LE | - | 22000 |
-| Uni-Trend | UT61E+ ¹ | - | `UniTUT61Plus` | 9600 8N1 | - | 22000 |
-| Uni-Trend | UT70B | ES51962 | `CyrustekES51962` | 2400 7N1 | DTR | 4000 |
-| Uni-Trend | UT71A ¹ | - | `VC940Continuous` | 2400 7O1 | DTR | 20000 |
-| Uni-Trend | UT71B | - | `VC940Continuous` | 2400 7O1 | DTR | 200000 |
-| Uni-Trend | UT71CDE | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
-| Uni-Trend | UT803 | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
-| Uni-Trend | UT804 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
-| V&A | VA18B ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| V&A | VA40B ¹ | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Velleman | DVM4100 ¹ | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 6000 |
-| Vichy | VC99 ² | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Victor | 70C ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| Victor | 86C ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| Victron | BlueSolar MPPT ¹ | - | `VictronBLE` | Bluetooth LE | - | 1000 |
-| Victron | BMV-712 Smart ¹ | - | `VictronBLE` | Bluetooth LE | - | 6000 |
-| Victron | Phoenix Inverter Smart | - | `VictronBLE` | Bluetooth LE | - | 6000 |
-| Victron | SmartShunt | - | `VictronBLE` | Bluetooth LE | - | 6000 |
-| Victron | SmartSolar MPPT | - | `VictronBLE` | Bluetooth LE | - | 1000 |
-| Voltcraft | GDM 703 ¹ | WENS98A | `GDM703Continuous` | 9600 8N1 | DTR | 4000 |
-| Voltcraft | GDM 704 ¹ | WENS98A | `GDM703Continuous` | 9600 8N1 | DTR | 4000 |
-| Voltcraft | GDM 705 ¹ | WENS98A | `GDM703Continuous` | 9600 8N1 | DTR | 4000 |
-| Voltcraft | M-3610D | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Voltcraft | M-3650D | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Voltcraft | M-3860 | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 20000 |
-| Voltcraft | M-4650CR | - | `Voltcraft14Continuous` | 1200 7N2 | DTR | 20000 |
-| Voltcraft | M-4660 | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 50000 |
-| Voltcraft | M-4660A | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 50000 |
-| Voltcraft | M-4660M | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 50000 |
-| Voltcraft | ME-11 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Voltcraft | ME-22T | Metex KS57C2016 | `Metex14` | 2400 7N2 | DTR | 4000 |
-| Voltcraft | ME-32 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Voltcraft | ME-42 | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
-| Voltcraft | MS-9140 ¹ | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Voltcraft | MS-9160 ¹ | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
-| Voltcraft | MXD-4660A | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 50000 |
-| Voltcraft | VC 630 | - | `Voltcraft14Continuous` | 4800 7N1 | DTR | 50000 |
-| Voltcraft | VC 635 | - | `Voltcraft15Continuous` | 2400 7N1 | DTR | 50000 |
-| Voltcraft | VC 650 | - | `Voltcraft14Continuous` | 4800 7N1 | DTR | 50000 |
-| Voltcraft | VC 655 | - | `Voltcraft15Continuous` | 2400 7N1 | DTR | 50000 |
-| Voltcraft | VC 670 | - | `Voltcraft14Continuous` | 4800 7N1 | DTR | 50000 |
-| Voltcraft | VC 820 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Voltcraft | VC 830 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
-| Voltcraft | VC 840 | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
-| Voltcraft | VC 850 ¹ | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| Voltcraft | VC 870 | - | `VC870Continuous` | 9600 8N1 | DTR | 40000 |
-| Voltcraft | VC 920 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
-| Voltcraft | VC 930 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
-| Voltcraft | VC 940 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
-| Voltcraft | VC 950 ¹ | - | `Appa500` | 9600 8N1 | - | 50000 |
-| Voltcraft | VC 960 | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
-| Wintex | TD2200 | ES51922 | `CyrustekES51922` | 19200 7N1 | DTR | 22000 |
+| Vendor | Model | Type | Chip | Protocol | Serial | Lines | Counts |
+|---|---|---|---|---|---|---|---|
+| Agilent | 34405A (sigrok) ¹ | Bench multimeter | - | `Sigrok` | sigrok-cli | - | 100000 |
+| Agilent | 34410A (sigrok) ¹ | Bench multimeter | - | `Sigrok` | sigrok-cli | - | 1000000 |
+| Agilent | 34460A (sigrok) ¹ | Bench multimeter | - | `Sigrok` | sigrok-cli | - | 1000000 |
+| Agilent | U1231A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
+| Agilent | U1232A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
+| Agilent | U1233A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 6000 |
+| Agilent | U1241A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Agilent | U1241B ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Agilent | U1242A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Agilent | U1242B ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Agilent | U1251A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1251B ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1252A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1252B ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1253A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1253B ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 50000 |
+| Agilent | U1271A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| Agilent | U1272A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| Agilent | U1273A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| APPA | 208 ¹ | Bench multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 208B ¹ | Bench multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 501 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 40000 |
+| APPA | 502 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 40000 |
+| APPA | 503 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
+| APPA | 505 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
+| APPA | 506 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 506B ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 507 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 71 ¹ | Handheld multimeter | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
+| APPA | 73 ¹ | Handheld multimeter | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
+| Benetech | GM1020 ¹ | Luxmeter | - | `BenetechGM1020` | 19200 8N1 | - | 4000 |
+| BENNING | MM 12 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| Brymen | BM250 ¹ | Handheld multimeter | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Brymen | BM251 ¹ | Handheld multimeter | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Brymen | BM252 ¹ | Handheld multimeter | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Brymen | BM255 ¹ | Handheld multimeter | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Brymen | BM257 ¹ | Handheld multimeter | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Brymen | BM521s ¹ | Handheld multimeter | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM525s ¹ | Handheld multimeter | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM821s ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM822s ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM827s ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM829s ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Brymen | BM867s ¹ | Handheld multimeter | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
+| Brymen | BM869s | Handheld multimeter | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
+| CMT | 3503 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
+| CO2Meter | CM-INK-1 ¹ | Air quality meter | Holtek | `TfaAirControl` | USB-HID (Holtek) | - | 5000 |
+| Digitech | QM1350 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Digitech | QM1462 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Digitech | QM1537 | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| Digitech | QM1538 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Digitek | DT-9062 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Digitek | DT-9602R+ ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Digitek | DT4000ZC | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Digitek | INO2513 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Duratool | DO3122 | Handheld multimeter | - | `DO3122Continuous` | 9600 8N1 | - | 4000 |
+| Elma | BM525s ¹ | Handheld multimeter | Brymen BM52x (BU-86X) | `BrymenBM52x` | USB-HID (BU-86X) | - | 6000 |
+| Elma | BM821s ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Elma | BM829s ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Elma | BM869s ¹ | Handheld multimeter | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
+| ELV | M9803R | Handheld multimeter | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
+| EZA | EZ-735 ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| Fluke | 187 ¹ | Handheld multimeter | - | `FlukeQM` | 9600 8N1 | - | 50000 |
+| Fluke | 189 ¹ | Handheld multimeter | - | `FlukeQM` | 9600 8N1 | - | 50000 |
+| Fluke | 287 ¹ | Handheld multimeter | - | `FlukeQM` | 115200 8N1 | - | 50000 |
+| Fluke | 289 ¹ | Handheld multimeter | - | `FlukeQM` | 115200 8N1 | - | 50000 |
+| Fluke | 45 ¹ | Bench multimeter | - | `Fluke45` | 9600 8N1 | - | 100000 |
+| Fluke | 87-IV ¹ | Handheld multimeter | - | `FlukeQM` | 9600 8N1 | - | 20000 |
+| Fluke | 89-IV ¹ | Handheld multimeter | - | `FlukeQM` | 9600 8N1 | - | 50000 |
+| Generic | DTM0660 4000 count ² | Generic | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 4000 |
+| Generic | DTM0660 6000 count ² | Generic | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 6000 |
+| Generic | DTM0660 8000 count ² | Generic | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 8000 |
+| Greenlee | DM-210A ¹ | Handheld multimeter | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
+| Greenlee | DM-810A ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Greenlee | DM-820A ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Greenlee | DM-830A ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
+| Greenlee | DM-860A ¹ | Handheld multimeter | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
+| GW Instek | GDM-397 ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| HoldPeak | HP-90EPC | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| HP | 34401A (sigrok) ¹ | Bench multimeter | - | `Sigrok` | sigrok-cli | - | 1000000 |
+| Iso-Tech | IDM 503 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
+| Iso-Tech | IDM 505 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
+| Iso-Tech | IDM 73 | Handheld multimeter | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
+| Keysight | 34465A (sigrok) ¹ | Bench multimeter | - | `Sigrok` | sigrok-cli | - | 1000000 |
+| Keysight | U1241C ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Keysight | U1242C ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 10000 |
+| Keysight | U1273AX ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| Keysight | U1281A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
+| Keysight | U1282A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
+| KPS | DMM9000BT ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| MASTECH | M9803R | Handheld multimeter | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
+| MASTECH | MAS-343 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| MASTECH | MAS-345 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| MASTECH | MS6514 ¹ | Thermometer | - | `MastechMS6514` | 9600 8N1 | - | 9999 |
+| MASTECH | MS8250B ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| McVoice | M-345pro | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| McVoice | M-980T | Handheld multimeter | - | `M9803RContinuous` | 9600 7N1 | DTR | 4000 |
+| Metex | M-3360D ¹ | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metex | M-3640D ¹ | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metex | M-3660D | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metex | M-3830D | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metex | M-3840D | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metex | M-3850D | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metex | M-3850M | Handheld multimeter | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 4000 |
+| Metex | M-3870D | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N1 | DTR | 4000 |
+| Metex | M-4650C | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 20000 |
+| Metex | ME-11 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Metex | ME-21 ¹ | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Metex | ME-22 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 2400 7N2 | DTR | 4000 |
+| Metex | ME-32 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Metex | ME-42 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Metex | Universal System 9140 ¹ | Bench multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metex | universal system 9160 | Bench multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metrel | MD9015 ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| PCE | PCE-DM32 ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| PeakTech | 2025 ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| PeakTech | 3315 | Handheld multimeter | ES51962 | `CyrustekES51962` | 2400 7N1 | DTR | 4000 |
+| PeakTech | 3330 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| PeakTech | 3415 ¹ | Handheld multimeter | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 6000 |
+| PeakTech | 3430 | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 19200 7N2 | DTR | 4000 |
+| PeakTech | 4010 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 4000 |
+| PeakTech | 4015A | Bench multimeter | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 100000 |
+| PeakTech | 4360 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| PeakTech | 4390 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 4000 |
+| PeakTech | 451 | Handheld multimeter | - | `PeakTech10` | 600 7N2 | DTR | 4000 |
+| Pro'sKit | MT-1820 ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Radioshack | 22-805 DMM | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Radioshack | 22-812 | Handheld multimeter | - | `RS22812Continuous` | 4800 8N1 | DTR | 4000 |
+| Radioshack | RS22-168A | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Sanwa | PC7000 ¹ | Handheld multimeter | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
+| Sefram | 7351 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| Sefram | 7352B ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| Siglent | SDM3055 (sigrok) ¹ | Bench multimeter | - | `Sigrok` | sigrok-cli | - | 200000 |
+| sigrok | SCPI DMM (any scpi-dmm model) ¹ | Generic | - | `Sigrok` | sigrok-cli | - | 100000 |
+| Sinometer | MAS-343 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| SparkFun | 70C ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| Tecpel | DMM-8061 ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| TekPower | TP4000ZC | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Tenma | 72-1016 | Bench multimeter | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
+| Tenma | 72-6870 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Tenma | 72-7712 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Tenma | 72-7715 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Tenma | 72-7730 ¹ | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 20000 |
+| Tenma | 72-7732 | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| Tenma | 72-7745 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Tenma | 72-9380A ¹ | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| TFA Dostmann | AIRCO2NTROL Coach | Air quality meter | Holtek | `TfaAirControl` | USB-HID (Holtek) | - | 5000 |
+| TFA Dostmann | AIRCO2NTROL Mini ¹ | Air quality meter | Holtek | `TfaAirControl` | USB-HID (Holtek) | - | 5000 |
+| Uni-Trend | UT161B ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
+| Uni-Trend | UT161D ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
+| Uni-Trend | UT161E ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 22000 |
+| Uni-Trend | UT30A ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Uni-Trend | UT30E ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Uni-Trend | UT321 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Uni-Trend | UT322 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Uni-Trend | UT325 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Uni-Trend | UT382 ¹ | Luxmeter | - | `UniTUT382` | 19200 8N1 | - | 2000 |
+| Uni-Trend | UT60A | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Uni-Trend | UT60BT | Handheld multimeter | - | `UniTiDMM` | Bluetooth LE | - | 10000 |
+| Uni-Trend | UT60D ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Uni-Trend | UT60E | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Uni-Trend | UT61A ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Uni-Trend | UT61B | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| Uni-Trend | UT61B+ (UT-D07B Bluetooth) ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
+| Uni-Trend | UT61B+ ¹ | Handheld multimeter | - | `UniTUT61Plus` | 9600 8N1 | - | 6000 |
+| Uni-Trend | UT61C | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Uni-Trend | UT61D | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Uni-Trend | UT61D+ (UT-D07B Bluetooth) ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
+| Uni-Trend | UT61D+ ¹ | Handheld multimeter | - | `UniTUT61Plus` | 9600 8N1 | - | 6000 |
+| Uni-Trend | UT61E | Handheld multimeter | ES51922 | `CyrustekES51922` | 19200 7O1 | DTR | 22000 |
+| Uni-Trend | UT61E+ (UT-D07B Bluetooth) ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 22000 |
+| Uni-Trend | UT61E+ ¹ | Handheld multimeter | - | `UniTUT61Plus` | 9600 8N1 | - | 22000 |
+| Uni-Trend | UT70B | Handheld multimeter | ES51962 | `CyrustekES51962` | 2400 7N1 | DTR | 4000 |
+| Uni-Trend | UT71A ¹ | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 20000 |
+| Uni-Trend | UT71B | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 200000 |
+| Uni-Trend | UT71CDE | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| Uni-Trend | UT803 | Bench multimeter | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
+| Uni-Trend | UT804 | Bench multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| V&A | VA18B ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| V&A | VA40B ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Velleman | DVM4100 ¹ | Handheld multimeter | DTM0660 | `DTM0660` | 2400 8N1 | DTR | 6000 |
+| Vichy | VC99 ² | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Victor | 70C ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| Victor | 86C ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| Victron | BlueSolar MPPT ¹ | Solar charge controller | - | `VictronBLE` | Bluetooth LE | - | 1000 |
+| Victron | BMV-712 Smart ¹ | Battery monitor | - | `VictronBLE` | Bluetooth LE | - | 6000 |
+| Victron | Phoenix Inverter Smart | Inverter | - | `VictronBLE` | Bluetooth LE | - | 6000 |
+| Victron | SmartShunt | Battery monitor | - | `VictronBLE` | Bluetooth LE | - | 6000 |
+| Victron | SmartSolar MPPT | Solar charge controller | - | `VictronBLE` | Bluetooth LE | - | 1000 |
+| Voltcraft | GDM 703 ¹ | Bench multimeter | WENS98A | `GDM703Continuous` | 9600 8N1 | DTR | 4000 |
+| Voltcraft | GDM 704 ¹ | Bench multimeter | WENS98A | `GDM703Continuous` | 9600 8N1 | DTR | 4000 |
+| Voltcraft | GDM 705 ¹ | Bench multimeter | WENS98A | `GDM703Continuous` | 9600 8N1 | DTR | 4000 |
+| Voltcraft | M-3610D | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Voltcraft | M-3650D | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Voltcraft | M-3860 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 20000 |
+| Voltcraft | M-4650CR | Handheld multimeter | - | `Voltcraft14Continuous` | 1200 7N2 | DTR | 20000 |
+| Voltcraft | M-4660 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 50000 |
+| Voltcraft | M-4660A | Handheld multimeter | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 50000 |
+| Voltcraft | M-4660M | Handheld multimeter | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 50000 |
+| Voltcraft | ME-11 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Voltcraft | ME-22T | Handheld multimeter | Metex KS57C2016 | `Metex14` | 2400 7N2 | DTR | 4000 |
+| Voltcraft | ME-32 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Voltcraft | ME-42 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
+| Voltcraft | MS-9140 ¹ | Bench multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Voltcraft | MS-9160 ¹ | Bench multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Voltcraft | MXD-4660A | Handheld multimeter | Metex KS57C2016 | `Metex14` | 9600 7N2 | DTR | 50000 |
+| Voltcraft | VC 630 | Bench multimeter | - | `Voltcraft14Continuous` | 4800 7N1 | DTR | 50000 |
+| Voltcraft | VC 635 | Bench multimeter | - | `Voltcraft15Continuous` | 2400 7N1 | DTR | 50000 |
+| Voltcraft | VC 650 | Bench multimeter | - | `Voltcraft14Continuous` | 4800 7N1 | DTR | 50000 |
+| Voltcraft | VC 655 | Bench multimeter | - | `Voltcraft15Continuous` | 2400 7N1 | DTR | 50000 |
+| Voltcraft | VC 670 | Bench multimeter | - | `Voltcraft14Continuous` | 4800 7N1 | DTR | 50000 |
+| Voltcraft | VC 820 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Voltcraft | VC 830 ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 6000 |
+| Voltcraft | VC 840 | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
+| Voltcraft | VC 850 ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
+| Voltcraft | VC 870 | Handheld multimeter | - | `VC870Continuous` | 9600 8N1 | DTR | 40000 |
+| Voltcraft | VC 920 | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| Voltcraft | VC 930 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
+| Voltcraft | VC 940 | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| Voltcraft | VC 950 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
+| Voltcraft | VC 960 | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
+| Wintex | TD2200 | Handheld multimeter | ES51922 | `CyrustekES51922` | 19200 7N1 | DTR | 22000 |
 
 ¹ settings taken from the chip, not yet confirmed on hardware with QtDMM.
 
@@ -325,6 +326,8 @@ meter working, please report it on the
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
 222 devices across 48 vendors.
+
+By type: Handheld multimeter 177, Bench multimeter 25, Thermometer 6, Generic 4, Air quality meter 3, Battery monitor 2, Luxmeter 2, Solar charge controller 2, Inverter 1.
 
 ## Command line
 

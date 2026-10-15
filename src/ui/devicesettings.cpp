@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "ui/devicesettings.h"
+#include "device/devicetype.h"
 #include "device/protocols.h"
 #include "core/calcexpr.h"
 #include "device/victronble.h"
@@ -262,7 +263,13 @@ void DeviceSettings::populateModelsForVendor(const QString &vendor)
   });
 
   for (const auto& cfg : m_currentVendorModels)
-    ui_model->addItem(cfg.name);
+    addModelItem(cfg);
+}
+
+void DeviceSettings::addModelItem(const DmmDecoder::DMMInfo &cfg)
+{
+  ui_model->addItem(cfg.name);
+  ui_model->setItemData(ui_model->count() - 1, DeviceType::displayName(DeviceType::of(cfg)), Qt::ToolTipRole);
 }
 
 void DeviceSettings::populateAllModels()
@@ -273,7 +280,7 @@ void DeviceSettings::populateAllModels()
   m_currentVendorModels = m_models;
 
   for (const auto& cfg : m_currentVendorModels)
-    ui_model->addItem(cfg.name);
+    addModelItem(cfg);
 }
 
 void DeviceSettings::on_ui_vendor_activated(int id)
