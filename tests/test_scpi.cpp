@@ -235,6 +235,11 @@ int main(int argc, char **argv)
     q.process("QTDMM:MARK \"Load on\"");
     q.process("QTDMM:MARK");
     check(marks == QStringList({ "Load on", "SCPI" }), "MARK with and without text");
+    marks.clear();
+    q.process("QTDMM:MARK 'a;b'");
+    q.process("QTDMM:MARK \"x;y\";:QTDMM:MARK 'it''s \"z\"'");
+    check(marks == QStringList({ "a;b", "x;y", "it's \"z\"" }) && ask(q, "SYST:ERR?") == "0,\"No error\"",
+          "a ; in single or double quotes stays in the string " + marks.join('|'));
 
     check(ask(q, "QTDMM:KEY:CATalog?") == "\"RANGE\",\"HOLD\"", "KEY:CATalog?");
     q.process("QTDMM:KEY \"HOLD\"");

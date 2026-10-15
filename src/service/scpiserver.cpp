@@ -238,12 +238,14 @@ QByteArray ScpiServer::process(const QByteArray &message)
   QStringList units;
   {
     QString cur;
-    bool quoted = false;
+    QChar quote; // the quote that opened a string ('...' or "..."; IEEE 488.2 7.7.5), null outside
     for (const QChar c : text)
     {
-      if (c == '"')
-        quoted = !quoted;
-      if (c == ';' && !quoted)
+      if (quote.isNull() && (c == '"' || c == '\''))
+        quote = c;
+      else if (c == quote)
+        quote = QChar(); // a doubled quote closes and opens again
+      if (c == ';' && quote.isNull())
       {
         units << cur;
         cur.clear();
