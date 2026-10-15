@@ -179,12 +179,12 @@
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="646"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="647"/>
         <source>Protocol</source>
         <translation>Protokół</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="647"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="649"/>
         <source>Connection</source>
         <translation>Połączenie</translation>
     </message>
@@ -632,24 +632,24 @@
 <context>
     <name>AnalogMeter</name>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="580"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="581"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="581"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="582"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="587"/>
         <location filename="../../src/ui/views/analogmeter.cpp" line="588"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="596"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="589"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="597"/>
         <source>OL</source>
         <translation>OL</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="676"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="678"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
@@ -675,52 +675,52 @@
 <context>
     <name>BleGattDevice</name>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="69"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="86"/>
         <source>No Bluetooth address configured.</source>
         <translation>Nie ustawiono adresu Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="74"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="91"/>
         <source>This meter does not use a Bluetooth LE connection.</source>
         <translation>Ten miernik nie używa połączenia Bluetooth LE.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="149"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="166"/>
         <source>The meter %1 closed the Bluetooth connection.</source>
         <translation>Miernik %1 zamknął połączenie Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="153"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="170"/>
         <source>Bluetooth: %1</source>
         <translation>Bluetooth: %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="88"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="105"/>
         <source>No answer from %1 - is the meter on and its Bluetooth switched on?</source>
         <translation>Brak odpowiedzi od %1 - czy miernik jest włączony i ma włączony Bluetooth?</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="214"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="231"/>
         <source>%1 does not offer the expected Bluetooth service - is it the right meter?</source>
         <translation>%1 nie oferuje oczekiwanej usługi Bluetooth - czy to właściwy miernik?</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="220"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="237"/>
         <source>Could not open the Bluetooth service of %1.</source>
         <translation>Nie można otworzyć usługi Bluetooth urządzenia %1.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="242"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="259"/>
         <source>Bluetooth service error %1 on %2.</source>
         <translation>Błąd usługi Bluetooth %1 na %2.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="255"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="272"/>
         <source>%1 has no notify characteristic.</source>
         <translation>%1 nie ma charakterystyki powiadomień.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="269"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="286"/>
         <source>%1 has no writable characteristic.</source>
         <translation>%1 nie ma zapisywalnej charakterystyki.</translation>
     </message>
@@ -822,97 +822,137 @@
 <context>
     <name>ControlBar</name>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="38"/>
+        <location filename="../../src/ui/controlbar.cpp" line="48"/>
         <source>SELECT</source>
         <translation>SELECT</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="38"/>
+        <location filename="../../src/ui/controlbar.cpp" line="48"/>
         <source>The meter&apos;s SELECT key (the orange one): the next function on this switch position</source>
         <translation>Klawisz SELECT miernika (pomarańczowy): następna funkcja w tej pozycji przełącznika</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="39"/>
+        <location filename="../../src/ui/controlbar.cpp" line="49"/>
         <source>Hz/%</source>
         <translation>Hz/%</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="39"/>
+        <location filename="../../src/ui/controlbar.cpp" line="49"/>
         <source>Frequency and duty cycle</source>
         <translation>Częstotliwość i współczynnik wypełnienia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="40"/>
+        <location filename="../../src/ui/controlbar.cpp" line="50"/>
         <source>RANGE</source>
         <translation>RANGE</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="40"/>
+        <location filename="../../src/ui/controlbar.cpp" line="50"/>
         <source>The next range (switches to manual ranging)</source>
         <translation>Następny zakres (przełącza na ręczny wybór zakresu)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="41"/>
+        <location filename="../../src/ui/controlbar.cpp" line="51"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="41"/>
+        <location filename="../../src/ui/controlbar.cpp" line="51"/>
         <source>Automatic ranging</source>
         <translation>Automatyczny wybór zakresu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="47"/>
+        <location filename="../../src/ui/controlbar.cpp" line="57"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="47"/>
+        <location filename="../../src/ui/controlbar.cpp" line="57"/>
         <source>Freeze the display</source>
         <translation>Zatrzymaj odczyt na wyświetlaczu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="42"/>
+        <location filename="../../src/ui/controlbar.cpp" line="52"/>
         <source>REL</source>
         <translation>REL</translation>
     </message>
     <message>
+        <location filename="../../src/ui/controlbar.cpp" line="41"/>
+        <source>V~</source>
+        <translation>V~</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="41"/>
+        <source>The V key (red): AC V, AC V LPF and DC V in turn</source>
+        <translation>Klawisz V (czerwony): kolejno AC V, AC V LPF i DC V</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/controlbar.cpp" line="42"/>
+        <source>A~</source>
+        <translation>A~</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="42"/>
+        <source>The A key (yellow): AC A and AC A LPF in turn; held, inrush current</source>
+        <translation>Klawisz A (żółty): kolejno AC A i AC A LPF; przytrzymany: prąd rozruchowy</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="44"/>
+        <source>Ω</source>
+        <translation>Ω</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="44"/>
+        <source>The Ω key (blue): resistance, continuity, capacitance and temperature in turn</source>
+        <translation>Klawisz Ω (niebieski): kolejno rezystancja, ciągłość, pojemność i temperatura</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="46"/>
+        <source>NCV/PEAK</source>
+        <translation>NCV/PEAK</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="46"/>
+        <source>Non-contact voltage; held, peak capture (AC V and AC A)</source>
+        <translation>Bezdotykowy wykrywacz napięcia; przytrzymany: wartość szczytowa (AC V i AC A)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="52"/>
         <source>Relative reading: the current value becomes zero</source>
         <translation>Pomiar względny: bieżąca wartość staje się zerem</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="43"/>
+        <location filename="../../src/ui/controlbar.cpp" line="53"/>
         <source>MIN/MAX</source>
         <translation>MIN/MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="43"/>
+        <location filename="../../src/ui/controlbar.cpp" line="53"/>
         <source>The meter&apos;s own minimum and maximum</source>
         <translation>Minimum i maksimum zapamiętane przez miernik</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="44"/>
+        <location filename="../../src/ui/controlbar.cpp" line="54"/>
         <source>PEAK</source>
         <translation>PEAK</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="44"/>
+        <location filename="../../src/ui/controlbar.cpp" line="54"/>
         <source>Peak minimum and maximum</source>
         <translation>Szczytowe minimum i maksimum</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="46"/>
+        <location filename="../../src/ui/controlbar.cpp" line="56"/>
         <source>LIGHT</source>
         <translation>LIGHT</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="46"/>
+        <location filename="../../src/ui/controlbar.cpp" line="56"/>
         <source>The display backlight</source>
         <translation>Podświetlenie wyświetlacza</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="68"/>
+        <location filename="../../src/ui/controlbar.cpp" line="78"/>
         <source>Hold the key to leave it, as on the meter.</source>
         <translation>Przytrzymaj klawisz, aby wyjść, jak na mierniku.</translation>
     </message>
@@ -1188,67 +1228,67 @@
 <context>
     <name>DeviceType</name>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="140"/>
+        <location filename="../../src/device/devicetype.cpp" line="145"/>
         <source>Handheld multimeter</source>
         <translation>Multimetr ręczny</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="141"/>
+        <location filename="../../src/device/devicetype.cpp" line="146"/>
         <source>Bench multimeter</source>
         <translation>Multimetr stacjonarny</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="142"/>
+        <location filename="../../src/device/devicetype.cpp" line="147"/>
         <source>Clamp meter</source>
         <translation>Miernik cęgowy</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="143"/>
+        <location filename="../../src/device/devicetype.cpp" line="148"/>
         <source>Thermometer</source>
         <translation>Termometr</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="144"/>
+        <location filename="../../src/device/devicetype.cpp" line="149"/>
         <source>Luxmeter</source>
         <translation>Luksomierz</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="145"/>
+        <location filename="../../src/device/devicetype.cpp" line="150"/>
         <source>Air quality meter</source>
         <translation>Miernik jakości powietrza</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="146"/>
+        <location filename="../../src/device/devicetype.cpp" line="151"/>
         <source>Sound level meter</source>
         <translation>Miernik poziomu dźwięku</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="147"/>
+        <location filename="../../src/device/devicetype.cpp" line="152"/>
         <source>Anemometer</source>
         <translation>Anemometr</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="148"/>
+        <location filename="../../src/device/devicetype.cpp" line="153"/>
         <source>Battery monitor</source>
         <translation>Monitor baterii</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="149"/>
+        <location filename="../../src/device/devicetype.cpp" line="154"/>
         <source>Solar charge controller</source>
         <translation>Regulator ładowania solarnego</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="150"/>
+        <location filename="../../src/device/devicetype.cpp" line="155"/>
         <source>Inverter</source>
         <translation>Falownik</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="151"/>
+        <location filename="../../src/device/devicetype.cpp" line="156"/>
         <source>Virtual meter</source>
         <translation>Miernik wirtualny</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="152"/>
+        <location filename="../../src/device/devicetype.cpp" line="157"/>
         <source>Generic</source>
         <translation>Ogólny</translation>
     </message>
@@ -1390,12 +1430,12 @@ a potem wyloguj się i zaloguj ponownie.</translation>
 <context>
     <name>FoldButton</name>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="228"/>
+        <location filename="../../src/ui/controlbar.cpp" line="266"/>
         <source>Show controls</source>
         <translation>Pokaż przyciski</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="228"/>
+        <location filename="../../src/ui/controlbar.cpp" line="266"/>
         <source>Hide controls</source>
         <translation>Ukryj przyciski</translation>
     </message>
@@ -2910,22 +2950,22 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Odczyt i rejestrator przebiegów dla multimetrów cyfrowych.&lt;/p&gt;&lt;p&gt;Zbudowany z użyciem &lt;b&gt;Qt&lt;/b&gt; %2. Licencja &lt;b&gt;GNU GPL 3 lub nowsza&lt;/b&gt; (wersje przed 0.9.0 na GPL 2 lub nowszej).&lt;/p&gt;&lt;p&gt;Od 0.9.5: tuxmaster i współtwórcy, zob. plik AUTHORS.&lt;br&gt;0.9.3 i wcześniejsze: &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Strona: &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Kontakt: &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Kod źródłowy i zgłoszenia błędów: &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Symbole pochodzą z motywów ikon &lt;b&gt;Oxygen&lt;/b&gt; i &lt;b&gt;Breeze&lt;/b&gt; społeczności KDE (LGPL 3); własne symbole QtDMM są narysowane w jego stylu.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1308"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1311"/>
         <source>The formulas now use &quot;%1&quot;. The running instances %2 use it after a restart.</source>
         <translation>Formuły używają teraz „%1”. Uruchomione instancje %2 zastosują to po ponownym uruchomieniu.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1355"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1358"/>
         <source>%1 is in use in this window</source>
         <translation>%1 jest używane w tym oknie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1361"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1364"/>
         <source>%1 is in use by the instance %2</source>
         <translation>%1 jest używane przez instancję %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1366"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1369"/>
         <source>%1 opens in the new window %2</source>
         <translation>%1 otwiera się w nowym oknie %2</translation>
     </message>
@@ -3157,119 +3197,119 @@ Wybierz, która instancja ma rejestrować.</translation>
         <translation>&amp;Klasyczna kość słoniowa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1206"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1209"/>
         <source>off</source>
         <translation>wył.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1206"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1209"/>
         <source>failed</source>
         <translation>błąd</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1207"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1210"/>
         <source>1 client</source>
         <translation>1 klient</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1207"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1210"/>
         <source>%1 clients</source>
         <translation>Klienci: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1209"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1212"/>
         <source>%1 could not start: %2. Double-click for its settings.</source>
         <translation>%1 nie mógł wystartować: %2. Dwuklik otwiera ustawienia.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1211"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1214"/>
         <source>%1 is off. Double-click for its settings.</source>
         <translation>%1 jest wyłączony. Dwuklik otwiera ustawienia.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1213"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1216"/>
         <source>HiSLIP for VISA (NI-VISA, LabVIEW, PyVISA): %1, %2 connected.</source>
         <translation>HiSLIP dla VISA (NI-VISA, LabVIEW, PyVISA): %1, połączono: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1215"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1218"/>
         <source>VXI-11 for VISA and lxi-tools: %1, %2 connected.</source>
         <translation>VXI-11 dla VISA i lxi-tools: %1, połączono: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1217"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1220"/>
         <source>SCPI server (raw socket) on %1, %2 connected.</source>
         <translation>Serwer SCPI (surowe gniazdo) na %1, połączono: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1268"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1271"/>
         <source>stopped</source>
         <translation>zatrzymana</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1287"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1290"/>
         <source>The instance %1 starts</source>
         <translation>Instancja %1 uruchamia się</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1296"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1307"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1299"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1310"/>
         <source>Rename instance</source>
         <translation>Zmień nazwę instancji</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1386"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1389"/>
         <source>%1: readings are coming in</source>
         <translation>%1: napływają odczyty</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1387"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1390"/>
         <source>%1: no reading for 3 s</source>
         <translation>%1: brak odczytu od 3 s</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1508"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1511"/>
         <source>Save workspace</source>
         <translation>Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1509"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1535"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1512"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1538"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Obszar roboczy QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1522"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1525"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1522"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1525"/>
         <source>Could not write %1.</source>
         <translation>Nie można zapisać %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1526"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1529"/>
         <source>Workspace saved to %1</source>
         <translation>Obszar roboczy zapisany w %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1534"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1537"/>
         <source>Load workspace</source>
         <translation>Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1541"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1544"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1542"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1545"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 nie jest obszarem roboczym QtDMM.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1566"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1569"/>
         <source>Workspace loaded from %1</source>
         <translation>Obszar roboczy wczytany z %1</translation>
     </message>
@@ -3377,140 +3417,140 @@ Czy multimetr jest podłączony i włączony?</translation>
 <context>
     <name>MeterController</name>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="59"/>
+        <location filename="../../src/service/metercontroller.cpp" line="61"/>
         <source>Recording stopped: the meter measures %2 now, not %1</source>
         <translation>Nagrywanie zatrzymane: miernik mierzy teraz %2, a nie %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="60"/>
+        <location filename="../../src/service/metercontroller.cpp" line="62"/>
         <source>Function changed</source>
         <translation>Zmiana funkcji</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="66"/>
+        <location filename="../../src/service/metercontroller.cpp" line="68"/>
         <source>%1 cleared</source>
         <translation>%1 zgasł</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="79"/>
+        <location filename="../../src/service/metercontroller.cpp" line="81"/>
         <source>already starting, the recording goes on</source>
         <translation>nagrywanie już się uruchamia i jest kontynuowane</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="89"/>
-        <location filename="../../src/service/metercontroller.cpp" line="96"/>
+        <location filename="../../src/service/metercontroller.cpp" line="91"/>
+        <location filename="../../src/service/metercontroller.cpp" line="98"/>
         <source>SCPI: %1</source>
         <translation>SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="131"/>
+        <location filename="../../src/service/metercontroller.cpp" line="133"/>
         <source>%1 ended with exit code %2</source>
         <translation>%1 zakończył się z kodem wyjścia %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="294"/>
+        <location filename="../../src/service/metercontroller.cpp" line="296"/>
         <source>already recording, the recording goes on</source>
         <translation>nagrywanie już trwa i jest kontynuowane</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="296"/>
+        <location filename="../../src/service/metercontroller.cpp" line="298"/>
         <source>start ignored, the recording shown is not saved yet</source>
         <translation>start zignorowany, wyświetlane nagranie nie jest jeszcze zapisane</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="314"/>
+        <location filename="../../src/service/metercontroller.cpp" line="316"/>
         <source>%1: %2 (%3)</source>
         <translation>%1: %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="320"/>
+        <location filename="../../src/service/metercontroller.cpp" line="322"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="336"/>
-        <location filename="../../src/service/metercontroller.cpp" line="361"/>
+        <location filename="../../src/service/metercontroller.cpp" line="338"/>
+        <location filename="../../src/service/metercontroller.cpp" line="363"/>
         <source>%1: could not run %2</source>
         <translation>%1: nie można uruchomić %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="339"/>
+        <location filename="../../src/service/metercontroller.cpp" line="341"/>
         <source>%1: %2 is still running</source>
         <translation>%1: %2 nadal działa</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="512"/>
+        <location filename="../../src/service/metercontroller.cpp" line="514"/>
         <source>SCPI server: %1</source>
         <translation>Serwer SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="525"/>
-        <location filename="../../src/service/metercontroller.cpp" line="548"/>
+        <location filename="../../src/service/metercontroller.cpp" line="527"/>
+        <location filename="../../src/service/metercontroller.cpp" line="551"/>
         <source>the SCPI server is not running</source>
         <translation>serwer SCPI nie jest uruchomiony</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="534"/>
+        <location filename="../../src/service/metercontroller.cpp" line="536"/>
         <source>HiSLIP server: %1</source>
         <translation>Serwer HiSLIP: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="557"/>
+        <location filename="../../src/service/metercontroller.cpp" line="560"/>
         <source>VXI-11 server: %1</source>
         <translation>Serwer VXI-11: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="588"/>
+        <location filename="../../src/service/metercontroller.cpp" line="591"/>
         <source>The server is not running.</source>
         <translation>Serwer nie jest uruchomiony.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="589"/>
+        <location filename="../../src/service/metercontroller.cpp" line="592"/>
         <source>The server could not start: %1.</source>
         <translation>Serwer nie mógł wystartować: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="594"/>
+        <location filename="../../src/service/metercontroller.cpp" line="597"/>
         <source>1 client</source>
         <translation>1 klient</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="594"/>
+        <location filename="../../src/service/metercontroller.cpp" line="597"/>
         <source>%1 clients</source>
         <translation>Klienci: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="595"/>
+        <location filename="../../src/service/metercontroller.cpp" line="598"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>Nasłuchiwanie na %1, port %2, podłączono: %3.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="597"/>
+        <location filename="../../src/service/metercontroller.cpp" line="600"/>
         <source>HiSLIP on port %1: %2.</source>
         <translation>HiSLIP na porcie %1: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="599"/>
+        <location filename="../../src/service/metercontroller.cpp" line="602"/>
         <source>HiSLIP could not start: %1.</source>
         <translation>HiSLIP nie mógł wystartować: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="601"/>
+        <location filename="../../src/service/metercontroller.cpp" line="604"/>
         <source>VXI-11 through the system rpcbind: %1.</source>
         <translation>VXI-11 przez systemowy rpcbind: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="602"/>
+        <location filename="../../src/service/metercontroller.cpp" line="605"/>
         <source>VXI-11 with an own portmapper on port %2: %1.</source>
         <translation>VXI-11 z własnym portmapperem na porcie %2: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="605"/>
+        <location filename="../../src/service/metercontroller.cpp" line="608"/>
         <source>VXI-11 is off: %1.</source>
         <translation>VXI-11 jest wyłączony: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="607"/>
+        <location filename="../../src/service/metercontroller.cpp" line="610"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Ogłaszany jako „%1”.</translation>
     </message>
@@ -3742,41 +3782,51 @@ Czy multimetr jest podłączony i włączony?</translation>
     </message>
     <message>
         <location filename="../../src/device/protocols.cpp" line="49"/>
+        <source>19 bytes binary, polled over Bluetooth LE (UNI-T UT202BT clamp)</source>
+        <translation>19 bajtów binarnie, odpytywany przez Bluetooth LE (cęgi UNI-T UT202BT)</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="50"/>
+        <source>19 bytes, polled over Bluetooth LE, lx or dB (UNI-T UT383BT, UT353BT)</source>
+        <translation>19 bajtów, odpytywany przez Bluetooth LE, lx lub dB (UNI-T UT383BT, UT353BT)</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/protocols.cpp" line="51"/>
         <source>text lines from HID records, CO2/temperature/humidity (TFA AIRCO2NTROL)</source>
         <translation>wiersze tekstu z rekordów HID, CO2/temperatura/wilgotność (TFA AIRCO2NTROL)</translation>
     </message>
     <message>
-        <location filename="../../src/device/protocols.cpp" line="50"/>
+        <location filename="../../src/device/protocols.cpp" line="52"/>
         <source>variable bytes ASCII, polled with CONF?/FETC? (Agilent/Keysight U12xx)</source>
         <translation>zmienna liczba bajtów ASCII, odpytywany przez CONF?/FETC? (Agilent/Keysight U12xx)</translation>
     </message>
     <message>
-        <location filename="../../src/device/protocols.cpp" line="51"/>
+        <location filename="../../src/device/protocols.cpp" line="53"/>
         <source>19 bytes ASCII, continuous after a start byte (UNI-T UT32x thermometers)</source>
         <translation>19 bajtów ASCII, ciągły po bajcie startowym (termometry UNI-T UT32x)</translation>
     </message>
     <message>
-        <location filename="../../src/device/protocols.cpp" line="52"/>
+        <location filename="../../src/device/protocols.cpp" line="54"/>
         <source>18 bytes binary, continuous, two values (MASTECH MS6514 thermometer)</source>
         <translation>18 bajtów binarnych, ciągły, dwie wartości (termometr MASTECH MS6514)</translation>
     </message>
     <message>
-        <location filename="../../src/device/protocols.cpp" line="53"/>
+        <location filename="../../src/device/protocols.cpp" line="55"/>
         <source>17 bytes binary, polled (APPA 506/208, BENNING MM 12)</source>
         <translation>17 bajtów binarnych, odpytywany (APPA 506/208, BENNING MM 12)</translation>
     </message>
     <message>
-        <location filename="../../src/device/protocols.cpp" line="54"/>
+        <location filename="../../src/device/protocols.cpp" line="56"/>
         <source>59 bytes binary, polled (APPA 503/505, Voltcraft VC-930/950)</source>
         <translation>59 bajtów binarnych, odpytywany (APPA 503/505, Voltcraft VC-930/950)</translation>
     </message>
     <message>
-        <location filename="../../src/device/protocols.cpp" line="55"/>
+        <location filename="../../src/device/protocols.cpp" line="57"/>
         <source>33 bytes, continuous, lx or fc (UNI-T UT382 luxmeter)</source>
         <translation>33 bajty, ciągły, lx lub fc (luksomierz UNI-T UT382)</translation>
     </message>
     <message>
-        <location filename="../../src/device/protocols.cpp" line="56"/>
+        <location filename="../../src/device/protocols.cpp" line="58"/>
         <source>8 bytes binary, continuous after a start command, lx and °C (Benetech GM1020)</source>
         <translation>8 bajtów binarnych, ciągły po poleceniu startowym, lx i °C (Benetech GM1020)</translation>
     </message>
@@ -3849,9 +3899,24 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <translation>Portmapper VXI-11 dla tego uruchomienia: auto, system (rpcbind) lub own (port 111)</translation>
     </message>
     <message>
-        <location filename="../../src/main.cpp" line="152"/>
+        <location filename="../../src/main.cpp" line="139"/>
+        <source>for tests and development: VXI-11 with an own portmapper on this port instead of 111 (0: any free one) for this run; VISA and lxi-tools ask port 111</source>
+        <translation>do testów i rozwoju: VXI-11 z własnym portmapperem na tym porcie zamiast 111 (0: dowolny wolny) dla tego uruchomienia; VISA i lxi-tools pytają port 111</translation>
+    </message>
+    <message>
+        <location filename="../../src/main.cpp" line="156"/>
         <source>--vxi11-rpc: auto, system or own, not &quot;%1&quot;</source>
         <translation>--vxi11-rpc: auto, system lub own, nie „%1”</translation>
+    </message>
+    <message>
+        <location filename="../../src/main.cpp" line="171"/>
+        <source>--vxi11-portmapper-port needs the own portmapper, not --vxi11-rpc system</source>
+        <translation>--vxi11-portmapper-port wymaga własnego portmappera, nie --vxi11-rpc system</translation>
+    </message>
+    <message>
+        <location filename="../../src/main.cpp" line="172"/>
+        <source>--vxi11-portmapper-port: a port from 0 to 65535, not &quot;%1&quot;</source>
+        <translation>--vxi11-portmapper-port: port od 0 do 65535, nie „%1”</translation>
     </message>
 </context>
 <context>
@@ -4517,7 +4582,7 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
 <context>
     <name>RecordingStore</name>
     <message>
-        <location filename="../../src/recording/recordingstore.cpp" line="508"/>
+        <location filename="../../src/recording/recordingstore.cpp" line="538"/>
         <source>Trigger</source>
         <translation>Wyzwolenie</translation>
     </message>
