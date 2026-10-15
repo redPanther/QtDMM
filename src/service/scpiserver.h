@@ -70,6 +70,66 @@ public:
   bool connected() const { return m_connected; }
   bool recording() const { return m_recording; }
 
+  /// Min/max memory of the main value (CALCulate:AVERage), in SI base units.
+  struct Stats
+  {
+    int count = 0;      ///< readings since the last reset; 0: min, max and mean are NaN
+    double min = 0;
+    double max = 0;
+    double mean = 0;
+  };
+  /// What the graph is doing (QTDMM:RECord?).
+  struct RecordingState
+  {
+    enum Mode { Idle, Live, Record, View };
+    Mode mode = Idle;
+    double seconds = 0;   ///< from the first to the last reading
+    int count = 0;        ///< readings held
+    QString unit;         ///< base unit, "V"
+  };
+  /// One reading of the recording (QTDMM:RECord:DATA?).
+  struct Point
+  {
+    double seconds = 0;    ///< since the start of the recording
+    double value = 0;      ///< SI base units; NaN = a gap
+    bool overload = false;
+  };
+  /// One alarm of the meter (QTDMM:ALARm:LIST?).
+  struct AlarmState
+  {
+    enum Level { Off, Pending, Raised, Acknowledged };
+    QString name;
+    Level level = Off;
+  };
+  /// A running QtDMM instance with its last reading (QTDMM:INSTances?).
+  struct Instance
+  {
+    QString id;
+    double value = 0;
+    QString unit;
+    bool valid = false;   ///< a current reading, neither held nor overload
+  };
+  /// Where the QTDMM: queries get what the server does not hold itself. A
+  /// source not set answers as if there were nothing.
+  struct Sources
+  {
+    std::function<Stats()> stats;
+    std::function<RecordingState()> recording;
+    /// The last @p count readings of the recording, oldest first.
+    std::function<QList<Point>(int count)> recordingData;
+    std::function<QList<AlarmState>()> alarms;
+    /// The meter's keys QtDMM can press ("hold", "range", ...), empty for a
+    /// meter without.
+    std::function<QStringList()> keys;
+    /// Presses @p key; false when it could not (the meter not connected).
+    std::function<bool(const QString &key)> pressKey;
+    std::function<QList<Instance>()> instances;
+  };
+  void setSources(Sources sources) { m_sources = std::move(sources); }
+
+  /// Largest QTDMM:RECord:DATA? answer, in readings.
+  static constexpr int kMaxDataPoints = 10000;
+
   /// Supplies the screen dump for HCOPy:SDUMp:DATA?: the main window
   /// encoded in @p format ("PNG", "BMP", "JPG"); empty when not possible.
   using ScreenshotSource = std::function<QByteArray(const QByteArray &format)>;
@@ -102,6 +162,12 @@ Q_SIGNALS:
   void stopRecording();
   /// INPut ON|OFF: the client wants the meter connected or disconnected.
   void connectRequested(bool on);
+  /// CALCulate:AVERage:CLEar: start the min/max memory afresh (F4).
+  void resetMinMaxRequested();
+  /// QTDMM:ALARm:ACKnowledge
+  void acknowledgeAlarmsRequested();
+  /// QTDMM:MARK "text": a mark in the graph and the readings table.
+  void markRequested(const QString &text);
 
 private:
   struct Command
@@ -121,6 +187,9 @@ private:
   static bool matches(const QString &mnemonic, const char *longForm);
   static QString number(double v);
   QString function(const Reading &r) const;
+  QString handleQtdmm(const Command &cmd, bool &isQuery);
+  QByteArray recordingData(const Command &cmd, bool &isQuery);
+  static QString unquote(const QString &arg);
   const Reading *reading(int channel);
 
   QTcpServer *m_server;
@@ -137,6 +206,7 @@ private:
   bool m_recording = false;
   QList<QPair<int, QString>> m_errors;
   ScreenshotSource m_screenshot;
+  Sources m_sources;
   QByteArray m_screenshotFormat = "PNG";
   QStringList m_lastPath;   ///< for the "compound header" rule of ';'
 };

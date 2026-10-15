@@ -37,10 +37,12 @@ int main()
   res = m.feed(reading(1.5, "voltage.dc", "V"));
   check(!res.reset && res.newMax && !res.newMin, "mV -> V keeps min/max");
   check(m.minimum() == 0.22118 && m.maximum() == 1.5, "min 221.18 mV, max 1.5 V");
+  check(m.count() == 2 && qAbs(m.mean() - (0.22118 + 1.5) / 2) < 1e-12, "count and mean over both");
   // an overload says nothing about the function, and is no extreme
   res = m.feed(reading(0, "voltage.dc", "V", true));
   check(!res.reset && !res.newMin && !res.newMax, "OL keeps min/max");
   check(m.minimum() == 0.22118 && m.maximum() == 1.5, "min/max unchanged after OL");
+  check(m.count() == 2, "an overload is not counted");
   // a value without a known quantity neither
   res = m.feed(reading(0.5, "", ""));
   check(!res.reset, "unknown quantity keeps min/max");
@@ -57,6 +59,7 @@ int main()
   // the Reset key
   m.clear();
   check(m.minimum() > 1e19 && m.maximum() < -1e19, "clear empties the memory");
+  check(m.isEmpty() && m.count() == 0 && std::isnan(m.mean()), "... and the count, the mean is NaN");
   res = m.feed(reading(3.0, "current.dc", "A"));
   check(!res.reset && res.newMin && res.newMax, "after clear the next value is no port change");
 

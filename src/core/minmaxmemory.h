@@ -4,6 +4,8 @@
 
 #include "core/reading.h"
 
+#include <cmath>
+
 /// The min/max memory of the main value, in SI base units, so it carries
 /// across range changes (mV <-> V, kΩ <-> MΩ). It starts afresh only when
 /// the port changes - another function (V DC -> Ω), another coupling
@@ -45,6 +47,11 @@ public:
       m_min = r.value;
       res.newMin = true;
     }
+    if (!r.overload && r.value == r.value)   // not NaN
+    {
+      m_sum += r.value;
+      ++m_count;
+    }
     return res;
   }
 
@@ -55,17 +62,26 @@ public:
     m_max = kEmptyMax;
     m_port = PortKey();
     m_baseUnit.clear();
+    m_sum = 0;
+    m_count = 0;
   }
 
   /// In SI base units; +-1e20 when empty.
   double minimum() const { return m_min; }
   double maximum() const { return m_max; }
+  /// Readings since the memory started (overloads not counted), and
+  /// their arithmetic mean; NaN when there are none.
+  int    count() const { return m_count; }
+  double mean() const { return m_count ? m_sum / m_count : std::nan(""); }
+  bool   isEmpty() const { return m_max < m_min; }
 
 private:
   static constexpr double kEmptyMin = 1.0E20;
   static constexpr double kEmptyMax = -1.0E20;
   double  m_min = kEmptyMin;
   double  m_max = kEmptyMax;
+  double  m_sum = 0;
+  int     m_count = 0;
   PortKey m_port;          ///< invalid until a reading with a known quantity
   QString m_baseUnit;
 };

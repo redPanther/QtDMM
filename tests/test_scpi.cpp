@@ -156,6 +156,98 @@ int main(int argc, char **argv)
     last = ask(s, "SYST:ERR?");
   check(last.startsWith("-350,"), "last entry is the overflow " + last);
 
+  // --- 4b. QtDMM's own commands and CALCulate ---
+  {
+    ScpiServer q;
+    // nothing to ask yet: empty answers, no crash
+    check(ask(q, "CALC:AVER:COUN?") == "0" && ask(q, "CALC:AVER:MIN?") == "9.91E+37", "min/max without source");
+    check(ask(q, "QTDMM:REC?") == "IDLE,0.000,0,\"\"" && ask(q, "QTDMM:ALAR?") == "0", "recording, alarms without source");
+    check(ask(q, "QTDMM:INST?") == "\"\"" && ask(q, "QTDMM:KEY:CAT?") == "\"\"", "instances, keys without source");
+
+    ScpiServer::Sources src;
+    src.stats = [] { return ScpiServer::Stats{ 3, 0.1, 2.5, 1.2 }; };
+    src.recording = []
+    {
+      ScpiServer::RecordingState r;
+      r.mode = ScpiServer::RecordingState::Record;
+      r.seconds = 42.25;
+      r.count = 170;
+      r.unit = "V";
+      return r;
+    };
+    int asked = 0;
+    src.recordingData = [&asked](int n)
+    {
+      asked = n;
+      return QList<ScpiServer::Point>{ { 0, 1.5, false }, { 0.5, std::nan(""), false }, { 1, std::nan(""), true } };
+    };
+    QList<ScpiServer::AlarmState> alarms = { { "Over \"5\"", ScpiServer::AlarmState::Raised },
+                                             { "Low", ScpiServer::AlarmState::Off } };
+    src.alarms = [&alarms] { return alarms; };
+    QStringList pressed;
+    src.keys = [] { return QStringList{ "range", "hold" }; };
+    src.pressKey = [&pressed](const QString &k) { pressed << k; return k != "range"; };
+    src.instances = [] { return QList<ScpiServer::Instance>{ { "u", 12.5, "V", true }, { "i", 0, "", false } }; };
+    q.setSources(src);
+    int clears = 0, acks = 0;
+    QStringList marks;
+    QObject::connect(&q, &ScpiServer::resetMinMaxRequested, [&] { ++clears; });
+    QObject::connect(&q, &ScpiServer::acknowledgeAlarmsRequested, [&] { ++acks; });
+    QObject::connect(&q, &ScpiServer::markRequested, [&](const QString &t) { marks << t; });
+
+    check(ask(q, "CALC:AVER:MIN?;MAX?;AVER?;COUN?") == "+1.000000E-01;+2.500000E+00;+1.200000E+00;3",
+          "CALCulate:AVERage " + ask(q, "CALC:AVER:MIN?;MAX?;AVER?;COUN?"));
+    q.process("CALCulate:AVERage:CLEar");
+    check(clears == 1, "CALC:AVER:CLEar resets min/max");
+    q.process("CALC:AVER:CLE?");
+    check(ask(q, "SYST:ERR?").startsWith("-100,"), "CLEar is no query");
+
+    check(ask(q, "QTDMM:RECord?") == "REC,42.250,170,\"V\"", "QTDMM:RECord? " + ask(q, "QTDMM:REC?"));
+    const QByteArray data = q.process("QTDMM:REC:DATA? 500");
+    const QByteArray csv = "seconds,value\n0.000,+1.500000E+00\n0.500,nan\n1.000,9.9E+37\n";
+    check(asked == 500 && data == ScpiServer::block(csv) + '\n', "RECord:DATA? block " + QString::fromUtf8(data));
+    q.process("QTDMM:REC:DATA?");
+    check(asked == 100, "100 readings by default");
+    q.process("QTDMM:REC:DATA? 99999");
+    check(asked == ScpiServer::kMaxDataPoints, "at most 10000");
+    q.process("QTDMM:REC:DATA? MAX");
+    check(asked == ScpiServer::kMaxDataPoints, "MAX");
+    check(q.process("QTDMM:REC:DATA? 0").isEmpty() && ask(q, "SYST:ERR?").startsWith("-222,"), "0 readings: out of range");
+    check(q.process("QTDMM:REC:DATA? lots").isEmpty() && ask(q, "SYST:ERR?").startsWith("-104,"), "not a number");
+
+    check(ask(q, "QTDMM:ALARm?") == "1" && ask(q, "QTDMM:ALAR:LIST?") == "\"Over \"\"5\"\"\",RAIS,\"Low\",OFF",
+          "alarms " + ask(q, "QTDMM:ALAR:LIST?"));
+    check(ask(q, "STAT:OPER?") == "512", "operation bit 9 while an alarm is raised " + ask(q, "STAT:OPER?"));
+    alarms[0].level = ScpiServer::AlarmState::Acknowledged;
+    check(ask(q, "QTDMM:ALAR?") == "1" && ask(q, "STAT:OPER?") == "512", "acknowledged counts as raised");
+    q.process("QTDMM:ALARm:ACKnowledge");
+    check(acks == 1, "ALARm:ACKnowledge");
+
+    q.process("QTDMM:MARK \"Load on\"");
+    q.process("QTDMM:MARK");
+    check(marks == QStringList({ "Load on", "SCPI" }), "MARK with and without text");
+
+    check(ask(q, "QTDMM:KEY:CATalog?") == "\"RANGE\",\"HOLD\"", "KEY:CATalog?");
+    q.process("QTDMM:KEY \"HOLD\"");
+    q.process("QTDMM:KEY hold");
+    check(pressed == QStringList({ "hold", "hold" }) && ask(q, "SYST:ERR?") == "0,\"No error\"", "KEY quoted or not");
+    q.process("QTDMM:KEY \"PEAK\"");
+    check(ask(q, "SYST:ERR?").startsWith("-224,"), "a key the meter does not have");
+    q.process("QTDMM:KEY RANGE");
+    check(ask(q, "SYST:ERR?").startsWith("-240,"), "a key not sent");
+    q.process("QTDMM:KEY");
+    check(ask(q, "SYST:ERR?").startsWith("-109,"), "KEY without key");
+
+    check(ask(q, "QTDMM:INSTances?") == "\"u\",+1.250000E+01,\"V\",\"i\",9.91E+37,\"\"", "instances " + ask(q, "QTDMM:INST?"));
+    q.process("QTDMM:NOPE?");
+    check(ask(q, "SYST:ERR?").startsWith("-113,"), "unknown QTDMM header");
+
+    src.keys = [] { return QStringList(); };
+    q.setSources(src);
+    q.process("QTDMM:KEY HOLD");
+    check(ask(q, "SYST:ERR?").startsWith("-241,"), "a meter without keys");
+  }
+
   // --- 5. over TCP ---
   // a port the system picks: a fixed one (and the next) may be in use on the
   // build machine - a client's ephemeral port, another job

@@ -68,12 +68,42 @@ long or the short form (`MEASure?`, `MEAS?`), case does not matter.
 | `UNIT?` `UNIT2?` | the base unit, `"V"` |
 | `CONFigure?` `CONFigure2?` | function and range, `"VOLT:DC AUTO"` - functions `VOLT:DC`, `VOLT:AC`, `CURR:DC`, `CURR:AC`, `RES`, `CONT`, `CAP`, `FREQ`, `TEMP`, `DIOD`, `PER`, `POW` |
 | `STATus:QUEStionable?` | bit 0 overload, bit 1 hold, bit 2 meter not connected (also while QtDMM reconnects it), bit 3 no current reading |
-| `STATus:OPERation?` | 16 while the recorder runs |
+| `STATus:OPERation?` | 16 while the recorder runs, plus 512 while an alarm is raised (acknowledged or not) |
 | `INITiate` / `ABORt` | starts / stops the recorder; while it records, or over a recording shown and not saved yet, `INITiate` is ignored with error -213 *Init ignored* |
 | `INPut ON|OFF`, `INPut?` | connects / disconnects the meter, asks whether it is; the connection starts after the command, so `INPut ON;INPut?` still answers 0 |
 | `HCOPy:SDUMp:DATA?` | a screenshot of the QtDMM window as PNG (IEEE 488.2 block), like a bench instrument's screen dump |
 | `SYSTem:ERRor?` `SYSTem:ERRor:COUNt?` | the error queue: `0,"No error"`, `-113,"Undefined header"`, `-230,"Data corrupt or stale"`, ... |
+| `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` `…:COUNt?` | the min/max memory of the main value as the displays show it: minimum, maximum, mean and number of readings since the last reset (overloads not counted); `9.91E+37` while it is empty |
+| `CALCulate:AVERage:CLEar` | resets min/max, like F4 |
 | `*RST` `*CLS` `*OPC?` `*TST?` `*ESR?` `*STB?` `SYSTem:VERSion?` | the usual IEEE 488.2 replies |
+
+### QtDMM's own commands
+
+What a bench meter does not have - the graph, the alarms, the keys of a
+Bluetooth meter, the other instances - is under `QTDMM:`.
+
+| Command | Answer |
+|---|---|
+| `QTDMM:RECord?` | what the graph does - `LIVE`, `REC` (recording), `VIEW` (a recording that ended, a file) or `IDLE` (nothing yet) - with the seconds it spans, the number of readings and the unit: `REC,42.250,170,"V"` |
+| `QTDMM:RECord:DATA? [<n>\|MAX]` | the last n readings of the graph (100 without n, at most 10000) as CSV in an IEEE 488.2 block: a line `seconds,value`, then one line per reading, seconds since the start; `9.9E+37` for an overload, `nan` for a gap |
+| `QTDMM:ALARm?` | the number of alarms raised (acknowledged ones too) |
+| `QTDMM:ALARm:LIST?` | every alarm with its state: `"Over 5 V",RAIS,"Low",OFF` - `OFF`, `PEND` (the condition holds, not yet for its minimum duration), `RAIS`, `ACKN` |
+| `QTDMM:ALARm:ACKnowledge` | acknowledges the alarms, as the banner's button |
+| `QTDMM:MARK "text"` | a mark at the newest reading, in the graph and the readings table (`SCPI` without text) |
+| `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
+| `QTDMM:INSTances?` | the running instances with their last reading: `"default",+1.234000E+00,"V","psu",9.91E+37,""` |
+
+```
+$ lxi scpi -a localhost -p 5025 -r "QTDMM:REC?;CALC:AVER:MIN?;MAX?"
+LIVE,61.500,246,"V";+1.318300E+00;+5.000000E+00
+$ lxi scpi -a localhost -p 5025 'QTDMM:MARK "load on"'
+```
+
+The commands that change something - `INPut`, `INITiate`, `ABORt`,
+`CALCulate:AVERage:CLEar`, `QTDMM:ALARm:ACKnowledge`, `QTDMM:MARK`,
+`QTDMM:KEY` - work for every client that reaches the port. With *This
+computer only* that is a program on this computer; open the port to the
+network only where everyone on it may do so.
 
 ## VISA (HiSLIP)
 
