@@ -61,8 +61,11 @@ print(float(s.recv(64)))      # 1.2345
 ```
 
 One program message per line; several commands go on one line separated
-by `;` and their answers come back the same way. Mnemonics take the
-long or the short form (`MEASure?`, `MEAS?`), case does not matter.
+by `;` and their answers come back the same way. As in IEEE 488.2, a
+command after `;` continues at the level of the one before
+(`SYST:ERR?;VERS?`); start it with `:` to begin at the top again
+(`QTDMM:REC?;:CALC:AVER:MIN?`). Mnemonics take the long or the short form
+(`MEASure?`, `MEAS?`), case does not matter.
 
 | Command | Answer |
 |---|---|
@@ -98,7 +101,7 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | `QTDMM:INSTances?` | the running instances with their last reading: `"default",+1.234000E+00,"V","psu",9.91E+37,""` |
 
 ```
-$ lxi scpi -a localhost -p 5025 -r "QTDMM:REC?;CALC:AVER:MIN?;MAX?"
+$ lxi scpi -a localhost -p 5025 -r "QTDMM:REC?;:CALC:AVER:MIN?;MAX?"
 LIVE,61.500,246,"V";+1.318300E+00;+5.000000E+00
 $ lxi scpi -a localhost -p 5025 'QTDMM:MARK "load on"'
 ```
