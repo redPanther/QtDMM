@@ -154,6 +154,9 @@ Q_SIGNALS:
   /// The SCPI server or HiSLIP started, stopped or got a client
   /// (controller()->services()).
   void        servicesChanged();
+  /// Another device was taken over (switchDevice()): what the views hold of
+  /// the one before is not this one's.
+  void        meterChanged();
 
 public Q_SLOTS:
   /// Clears min/max memory and the meter's peak/auto-bipolar latch.

@@ -1869,6 +1869,8 @@ void GraphWidget::onCleared()
       m_scaleMin =  1e40;
       m_scaleMax = -1e40;
     }
+    // without a value the axis shows 0..1, not the range of what was before
+    setYRange(m_scaleMin, m_scaleMax);
   }
 
   m_dataLine->clear();
