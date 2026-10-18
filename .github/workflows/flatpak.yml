@@ -1,0 +1,49 @@
+name: Flatpak build
+
+# Builds the Flatpak bundle from assets/flatpak/manifest.yml (the KDE runtime
+# with Qt 6, hidapi as a module) and keeps it as an artifact. release.yml calls
+# it for a version tag and puts the bundle into the draft release.
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_call:   # from release.yml for a version tag
+
+jobs:
+  flatpak:
+    runs-on: ubuntu-latest
+    # flatpak-builder and the KDE runtime/SDK the manifest names, ready installed
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.11
+      options: --privileged
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0   # tags and history: the version comes from git describe
+
+    # the manifest builds the working tree, with .git for git describe; the
+    # container runs as another user than the one owning the checkout
+    - name: Trust the checkout
+      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+    - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+      with:
+        manifest-path: assets/flatpak/manifest.yml
+        bundle: QtDMM.flatpak
+        # hidapi comes from the cache while the manifest stays the same
+        cache-key: flatpak-builder-${{ hashFiles('assets/flatpak/manifest.yml') }}
+        # an artifact only when it may be used: not for pull requests
+        upload-artifact: ${{ github.event_name != 'pull_request' }}
+        artifact-name: QtDMM-linux-Flatpak
+
+    # installed as a user would: hidapi from the Flatpak, the version from git
+    - name: Check the bundle
+      run: |
+        flatpak install --user -y --noninteractive QtDMM.flatpak
+        flatpak run --command=sh io.github.qtdmm.qtdmm -c \
+          'ldd /app/bin/qtdmm; QT_QPA_PLATFORM=offscreen qtdmm --version' | tee check.txt
+        grep -q 'libhidapi-hidraw\.so\.0 => /app/lib/' check.txt || { echo "::error::hidapi is not taken from the Flatpak"; exit 1; }
+        if grep -q 'not found' check.txt; then echo "::error::a library is missing"; exit 1; fi
+        grep -q '^QtDMM [0-9][0-9]\.' check.txt || { echo "::error::no version from git"; exit 1; }

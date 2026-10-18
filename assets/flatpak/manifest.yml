@@ -45,9 +45,9 @@ modules:
       - -DCMAKE_BUILD_TYPE=Release
       - -DBUILD_TESTING=OFF
     sources:
-      # the working tree, with its .git for the version (git describe); a
-      # release build uses the tag instead:
-      #   type: git, url: https://github.com/qtdmm/QtDMM.git, tag: <version>, commit: <hash>
+      # the working tree, with its .git for the version (git describe): a
+      # local build, and CI (.github/workflows/flatpak.yml) builds the
+      # checkout of a commit or a version tag the same way
       - type: dir
         path: ../..
         skip:
