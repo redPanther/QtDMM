@@ -181,7 +181,9 @@ meter working, please report it on the
 | Uni-Trend | UT321 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Uni-Trend | UT322 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
 | Uni-Trend | UT325 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |
+| Uni-Trend | UT333BT | Air quality meter | - | `UniTiENV` | Bluetooth LE | - | 1000 |
 | Uni-Trend | UT353BT ¹ | Sound level meter | - | `UniTiENV` | Bluetooth LE | - | 10000 |
+| Uni-Trend | UT363BT ¹ | Air quality meter | - | `UniTiENV` | Bluetooth LE | - | 10000 |
 | Uni-Trend | UT382 ¹ | Luxmeter | - | `UniTUT382` | 19200 8N1 | - | 2000 |
 | Uni-Trend | UT383BT ¹ | Luxmeter | - | `UniTiENV` | Bluetooth LE | - | 100000 |
 | Uni-Trend | UT60A | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
@@ -257,6 +259,6 @@ meter working, please report it on the
 - **Generic DTM0660 4000 count, DTM0660 6000 count, DTM0660 8000 count**: the DTM0660 chip has a UART, but meters built on it (Victor VC921 and similar) ship without an interface: an IR LED with a 100 Ω resistor goes on the chip's TX pin and the RS232 bit in the 24C02 EEPROM has to be set - [eevblog: hacking the Victor VC-921](https://www.eevblog.com/forum/testgear/hacking-the-victor-vc-921/). PeakTech 3415 and Velleman DVM4100 use the same chip but come with a cable and need no change.
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
-225 devices across 48 vendors.
+227 devices across 48 vendors.
 
-By type: Handheld multimeter 177, Bench multimeter 25, Thermometer 6, Generic 4, Air quality meter 3, Luxmeter 3, Battery monitor 2, Solar charge controller 2, Clamp meter 1, Inverter 1, Sound level meter 1.
+By type: Handheld multimeter 177, Bench multimeter 25, Thermometer 6, Air quality meter 5, Generic 4, Luxmeter 3, Battery monitor 2, Solar charge controller 2, Clamp meter 1, Inverter 1, Sound level meter 1.

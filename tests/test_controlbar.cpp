@@ -44,14 +44,14 @@ int main(int argc, char **argv)
 
   // --- 1. the keys the meter has: no Hz/%, MIN/MAX and PEAK on the UT60BT,
   //        on the UT61x+ ---
-  bar.setProtocol(FrameFormat::UniTiDMM);
+  bar.setProtocol(FrameFormat::UniTiDMM, "UT60BT");
   check(key(bar, "hold") && !key(bar, "hold")->isHidden(), "UT60BT: HOLD shown");
   check(key(bar, "lamp") && !key(bar, "lamp")->isHidden(), "UT60BT: LIGHT shown");
   check(key(bar, "select1") && !key(bar, "select1")->isHidden(), "UT60BT: SELECT shown");
   check(key(bar, "peak")->isHidden() && key(bar, "minmax")->isHidden() && key(bar, "select2")->isHidden(),
         "UT60BT: no PEAK, MIN/MAX, Hz/%");
   check(key(bar, "fn_v")->parentWidget()->isHidden(), "UT60BT: no function keys, their group hidden");
-  bar.setProtocol(FrameFormat::UniTUT202BT);
+  bar.setProtocol(FrameFormat::UniTUT202BT, "UT202BT");
   check(!key(bar, "fn_v")->isHidden() && !key(bar, "fn_a")->isHidden() && !key(bar, "fn_ohm")->isHidden()
           && !key(bar, "fn_ncv")->isHidden() && !key(bar, "range")->isHidden() && !key(bar, "hold")->isHidden(),
         "UT202BT: V~, A~, Ω, NCV/PEAK, RANGE, HOLD shown");
@@ -71,9 +71,30 @@ int main(int argc, char **argv)
     check(!key(bar, "fn_a")->isCheckable() && key(bar, "fn_v")->styleSheet().contains("#e03c31"),
           "UT202BT: function keys are plain keys, V~ red");
   }
-  bar.setProtocol(FrameFormat::UniTUT61Plus);
+  bar.setProtocol(FrameFormat::UniTiENV, "UT363BT *");
+  check(!key(bar, "hold")->isHidden() && !key(bar, "max")->isHidden() && !key(bar, "avg")->isHidden()
+          && !key(bar, "unit")->isHidden() && !key(bar, "unit2")->isHidden(),
+        "UT363BT: HOLD, MAX, AVG, UNIT, °C/°F shown");
+  check(key(bar, "min")->isHidden() && key(bar, "weighting")->isHidden() && key(bar, "minmax")->parentWidget()->isHidden()
+          && key(bar, "select1")->parentWidget()->isHidden(),
+        "UT363BT: no MIN, FAST/SLOW; the MIN/MAX and SELECT groups hidden");
+  bar.setProtocol(FrameFormat::UniTiENV, "UT353BT *");
+  check(!key(bar, "min")->isHidden() && !key(bar, "weighting")->isHidden() && key(bar, "unit2")->isHidden()
+          && key(bar, "avg")->isHidden(),
+        "UT353BT: MIN and FAST/SLOW, no °C/°F, no AVG");
+  {
+    Reading avg;
+    avg.flags = SampleFlag::Avg;
+    bar.showReading(avg);
+    check(key(bar, "avg")->isChecked() && !key(bar, "max")->isChecked() && !key(bar, "min")->isChecked(),
+          "iENV states: AVG");
+    bar.showReading(Reading());
+  }
+  bar.setProtocol(FrameFormat::UniTUT61Plus, "UT61E+");
   check(!key(bar, "peak")->isHidden() && !key(bar, "minmax")->isHidden() && !key(bar, "select2")->isHidden(),
         "UT61x+: PEAK, MIN/MAX, Hz/% shown");
+  check(key(bar, "max")->parentWidget()->isHidden() && key(bar, "unit")->parentWidget()->isHidden(),
+        "UT61x+: no iENV keys");
 
   // SELECT and HOLD in the colours of the meter's keys
   check(key(bar, "select1")->styleSheet().contains("#ffc61c") && key(bar, "hold")->styleSheet().contains("#3c9aff")
@@ -126,10 +147,13 @@ int main(int argc, char **argv)
   {
     const QString dir = qEnvironmentVariable("QTDMM_SHOT");
     bar.resize(bar.sizeHint());
-    for (auto [format, name] : { std::pair{ FrameFormat::UniTiDMM, "ut60bt" }, std::pair{ FrameFormat::UniTUT61Plus, "ut61plus" },
-                                 std::pair{ FrameFormat::UniTUT202BT, "ut202bt" } })
+    struct Shot { FrameFormat::DataFormat format; const char *model; const char *name; };
+    for (const Shot &shot : { Shot{ FrameFormat::UniTiDMM, "UT60BT", "ut60bt" }, Shot{ FrameFormat::UniTUT61Plus, "UT61E+", "ut61plus" },
+                              Shot{ FrameFormat::UniTUT202BT, "UT202BT", "ut202bt" },
+                              Shot{ FrameFormat::UniTiENV, "UT333BT", "ut333bt" } })
     {
-      bar.setProtocol(format);
+      const auto [format, model, name] = shot;
+      bar.setProtocol(format, model);
       bar.resize(bar.sizeHint());
       QTest::qWait(50);
       bar.grab().save(dir + "/controlbar_" + name + ".png");

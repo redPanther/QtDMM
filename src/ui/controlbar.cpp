@@ -52,6 +52,14 @@ ControlBar::ControlBar(QWidget *parent) :
     { { "rel", QT_TR_NOOP("REL"), QT_TR_NOOP("Relative reading: the current value becomes zero"), true },
       { "minmax", QT_TR_NOOP("MIN/MAX"), QT_TR_NOOP("The meter's own minimum and maximum"), true },
       { "peak", QT_TR_NOOP("PEAK"), QT_TR_NOOP("Peak minimum and maximum"), true } },
+    // the UNI-T iENV meters (UT333BT, UT353BT, UT363BT, UT383BT): a key for each mode
+    { { "max", QT_TR_NOOP("MAX"), QT_TR_NOOP("The meter shows its maximum"), true },
+      { "min", QT_TR_NOOP("MIN"), QT_TR_NOOP("The meter shows its minimum"), true },
+      { "avg", QT_TR_NOOP("AVG"), QT_TR_NOOP("The meter shows its average"), true } },
+    { { "unit", QT_TR_NOOP("UNIT"), QT_TR_NOOP("The next unit of the main value (lx/fc, dBA/dBC, %RH/%, m/s ... mph)"),
+        false },
+      { "unit2", QT_TR_NOOP("°C/°F"), QT_TR_NOOP("The unit of the temperature"), false },
+      { "weighting", QT_TR_NOOP("FAST/SLOW"), QT_TR_NOOP("Fast or slow time weighting"), false } },
     // HOLD on the right, as on the UT60BT, where it shares its key with LIGHT
     { { "lamp", QT_TR_NOOP("LIGHT"), QT_TR_NOOP("The display backlight"), false },
       { "hold", QT_TR_NOOP("HOLD"), QT_TR_NOOP("Freeze the display"), true } },
@@ -127,6 +135,12 @@ ControlBar::ControlBar(QWidget *parent) :
         m_minmax = b;
       else if (key == "peak")
         m_peak = b;
+      else if (key == "max")
+        m_max = b;
+      else if (key == "min")
+        m_min = b;
+      else if (key == "avg")
+        m_avg = b;
     }
     m_groups << group;
   }
@@ -138,7 +152,7 @@ ControlBar::ControlBar(QWidget *parent) :
 bool ControlBar::supported(const DmmDecoder::DMMInfo &info)
 {
   return info.protocol == FrameFormat::UniTiDMM || info.protocol == FrameFormat::UniTUT61Plus
-         || info.protocol == FrameFormat::UniTUT202BT;
+         || info.protocol == FrameFormat::UniTUT202BT || info.protocol == FrameFormat::UniTiENV;
 }
 
 void ControlBar::setConnected(bool connected)
@@ -147,11 +161,11 @@ void ControlBar::setConnected(bool connected)
     b->setEnabled(connected);
 }
 
-void ControlBar::setProtocol(FrameFormat::DataFormat format)
+void ControlBar::setProtocol(FrameFormat::DataFormat format, const QString &model)
 {
   const std::shared_ptr<DmmDecoder> decoder = DmmDecoder::getInstance(format);
   for (QToolButton *b : std::as_const(m_keys))
-    b->setVisible(decoder && !decoder->keyRequest(b->property("key").toString()).isEmpty());
+    b->setVisible(decoder && decoder->hasKey(b->property("key").toString(), model));
   // a group without a key of this meter takes no place
   for (QWidget *g : std::as_const(m_groups))
   {
@@ -172,6 +186,9 @@ void ControlBar::showReading(const Reading &reading)
   m_rel->setChecked(reading.flags & SampleFlag::Relative);
   m_minmax->setChecked(reading.flags & (SampleFlag::Max | SampleFlag::Min));
   m_peak->setChecked(reading.flags & SampleFlag::Peak);
+  m_max->setChecked(reading.flags & SampleFlag::Max);
+  m_min->setChecked(reading.flags & SampleFlag::Min);
+  m_avg->setChecked(reading.flags & SampleFlag::Avg);
 }
 
 int ControlBar::layoutGroups(int width, bool apply) const

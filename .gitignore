@@ -13,9 +13,10 @@ site/
 __pycache__/
 *.pyc
 
-#kdevelop
+#ide's
 .kdev4/
 *.kdev4
+.vscode
 
 # nix build
 /result

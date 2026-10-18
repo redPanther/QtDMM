@@ -215,7 +215,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   {
     m_controlsSupported = supported;
     // readConfig() has set the protocol: the keys this meter has
-    m_controls->setProtocol(m_wid->controller()->dmm()->format());
+    m_controls->setProtocol(m_wid->controller()->dmm()->format(), m_wid->controller()->dmm()->dmmInfo().model);
     updateControls();
   });
   m_displayWin = addView(displayBox, tr("Display"), MdiArranger::Instrument, "display");

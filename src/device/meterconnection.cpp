@@ -207,7 +207,7 @@ QStringList MeterConnection::keys() const
   QStringList keys;
   if (m_decoder)
     for (const QString &k : DmmDecoder::keyNames())
-      if (!m_decoder->keyRequest(k).isEmpty())
+      if (m_decoder->hasKey(k, m_dmmInfo.model))
         keys << k;
   return keys;
 }
