@@ -152,6 +152,54 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
 
   createActions();
 
+  createViews();
+  createSidebar();
+  fillViewToolbar();
+  const QList<QAction *> workspace = createArrangeMenu();
+  createDesignMenu();
+
+  updateWindowTitle();
+  connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateWindowTitle);
+  connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateLed);
+  // the design can be chosen in the settings (General), too
+  connect(m_wid, &InstanceWidget::configChanged, this, [this]
+  {
+    const Designs::Design d = Designs::fromName(m_wid->settings()->getString("Windows/design", "dark"));
+    if (d != Designs::current())
+      setDesign(d);
+  });
+
+  createExtraActions();
+  createShortcuts(workspace);
+
+  connect(m_wid, &InstanceWidget::running, this, &MainWindow::runningSLOT);
+  connect(m_wid, &InstanceWidget::recorderState, this, &MainWindow::updateRecorderActions);
+
+  connectSLOT(false);
+
+  createStatusBar();
+  placeWindow();
+  connectInstances();
+
+  // auto-connect at start, but not before a meter was ever chosen: a fresh
+  // instance would otherwise try the first serial port it finds; without
+  // one the window starts empty
+  if (m_stateMgr->registerInstance() && m_wid->dmmConfigured())
+    QTimer::singleShot(1000, action_Connect, &QAction::trigger);
+  updateEmptyStart();
+  connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateEmptyStart);
+  // the sidebar as left, with two devices or more; a window without a meter
+  // shows it when there are devices to choose from
+  const bool sidebarSet = !m_wid->settings()->getString("Windows/sidebar").isEmpty();
+  showSidebar(DeviceSidebar::shownAtStart(sidebarSet ? QVariant(m_wid->settings()->getBool("Windows/sidebar"))
+                                                     : QVariant(),
+                                          int(m_wid->devices()->list().size()), m_wid->dmmConfigured()));
+  updateServices();   // the servers may have started before this window listened
+}
+
+// The MDI area with the alarm banner, the empty start, the views and an action per view.
+void MainWindow::createViews()
+{
   // the window: alarm banner on top, the MDI area with the four views below
   auto *central = new QWidget(this);
   auto *centralLayout = new QVBoxLayout(central);
@@ -279,7 +327,11 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_meterAction->setObjectName("action_WindowMeter");
   m_readingsAction->setObjectName("action_WindowReadings");
   m_poincareAction->setObjectName("action_WindowPoincare");
+}
 
+// The sidebar Devices: My devices, the instances, the services.
+void MainWindow::createSidebar()
+{
   // the sidebar "Devices" at the left: My devices, a click switches
   m_sidebar = new DeviceSidebar(m_wid->devices(), this);
   m_sidebarDock = new QDockWidget(tr("Devices"), this);
@@ -324,7 +376,12 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   m_instancesTimer->setInterval(1000);
   connect(m_instancesTimer, &QTimer::timeout, this, &MainWindow::updateInstances);
   m_instancesTimer->start();
-  toolBarDMM->insertAction(toolBarDMM->actions().value(0), sidebar);
+}
+
+// Add device, Devices and the views on the toolbar.
+void MainWindow::fillViewToolbar()
+{
+  toolBarDMM->insertAction(toolBarDMM->actions().value(0), m_sidebarAction);
   m_addDeviceAction = new QAction(QIcon(new PlusIconEngine("qtdmm-dmm")), tr("&Add device..."), this);
   m_addDeviceAction->setObjectName("action_AddDevice");
   m_addDeviceAction->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
@@ -332,7 +389,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
                                      "<p>Step by step: how the meter is connected, which one it is, and whether it "
                                      "goes into this window or a new one. It is kept in My devices.</p></body></html>"));
   connect(m_addDeviceAction, &QAction::triggered, this, &MainWindow::addDevice);
-  toolBarDMM->insertAction(sidebar, m_addDeviceAction);
+  toolBarDMM->insertAction(m_sidebarAction, m_addDeviceAction);
 
   toolBarDMM->addSeparator();
   toolBarDMM->addAction(m_displayAction);
@@ -342,7 +399,11 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   // the graph is a window like the others (it sat with the recording)
   toolBarDMM->addAction(action_Graph);
   connect(m_displayAction, &QAction::toggled, this, &MainWindow::storeDisplaySLOT);
+}
 
+// Arrange: the arrangement, title bars, workspaces; returns Load and Save workspace for the keys.
+QList<QAction *> MainWindow::createArrangeMenu()
+{
   // arrangement: automatic (displays on top or on the left), fixed or free,
   // title bars on/off
   auto *arrangeGroup = new QActionGroup(this);
@@ -425,7 +486,12 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   toolBarMenu->insertAction(action_Menu, arrangeButton);
   if (auto *button = qobject_cast<QToolButton *>(toolBarMenu->widgetForAction(arrangeButton)))
     button->setPopupMode(QToolButton::InstantPopup);
+  return { loadWs, saveWs };
+}
 
+// Design: the colour designs of the window.
+void MainWindow::createDesignMenu()
+{
   // colour designs of the window (the LCD tint and the meter style are
   // settings of their own)
   m_designMenu = new QMenu(tr("D&esign"), this);
@@ -439,26 +505,11 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     designGroup->addAction(a);
     connect(a, &QAction::triggered, this, [this, d = d] { setDesign(d); });
   }
+}
 
-  updateWindowTitle();
-  connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateWindowTitle);
-  connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateLed);
-  // the design can be chosen in the settings (General), too
-  connect(m_wid, &InstanceWidget::configChanged, this, [this]
-  {
-    const Designs::Design d = Designs::fromName(m_wid->settings()->getString("Windows/design", "dark"));
-    if (d != Designs::current())
-      setDesign(d);
-  });
-
-  createExtraActions();
-  createShortcuts({ loadWs, saveWs });
-
-  connect(m_wid, &InstanceWidget::running, this, &MainWindow::runningSLOT);
-  connect(m_wid, &InstanceWidget::recorderState, this, &MainWindow::updateRecorderActions);
-
-  connectSLOT(false);
-
+// The readings dot, the connection and the info field, and what feeds them.
+void MainWindow::createStatusBar()
+{
   // status bar
   // a dot that blinks green while readings come in and turns grey when they
   // stop; the connection text follows it
@@ -511,7 +562,11 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   connect(m_wid, &InstanceWidget::setConnect, this, &MainWindow::setConnectSLOT);
   connect(m_wid, &InstanceWidget::connectDMM, action_Connect, &QAction::setChecked);
   connect(m_wid, &InstanceWidget::showDisplay, this, &MainWindow::showDisplaySLOT);
+}
 
+// Applies the settings and puts the window where it was, or sizes it to the views shown.
+void MainWindow::placeWindow()
+{
   QRect winRect = m_wid->settingsDialog()->winRect();
 
   m_wid->applySLOT();
@@ -554,7 +609,11 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     resize(qMin(start.width(), int(av.width() * 0.84)), qMin(start.height(), int(av.height() * 0.84)));
   }
   m_expectSize = size();
+}
 
+// The commands of the other instances (record, stop, raise).
+void MainWindow::connectInstances()
+{
   connect(m_stateMgr, &SharedStateManager::stateChanged, this, [=](const QString& state){
     // RECORD_<ms> / STOP_<ms>: a command is new each time - a plain "RECORD"
     // after a recording that ended without Stop (its length, another
@@ -593,21 +652,6 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     QMessageBox::critical(this, APP_NAME,tr("Another instance is running."));
     qApp->quit();
   });
-
-  // auto-connect at start, but not before a meter was ever chosen: a fresh
-  // instance would otherwise try the first serial port it finds; without
-  // one the window starts empty
-  if (m_stateMgr->registerInstance() && m_wid->dmmConfigured())
-    QTimer::singleShot(1000, action_Connect, &QAction::trigger);
-  updateEmptyStart();
-  connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateEmptyStart);
-  // the sidebar as left, with two devices or more; a window without a meter
-  // shows it when there are devices to choose from
-  const bool sidebarSet = !m_wid->settings()->getString("Windows/sidebar").isEmpty();
-  showSidebar(DeviceSidebar::shownAtStart(sidebarSet ? QVariant(m_wid->settings()->getBool("Windows/sidebar"))
-                                                     : QVariant(),
-                                          int(m_wid->devices()->list().size()), m_wid->dmmConfigured()));
-  updateServices();   // the servers may have started before this window listened
 }
 
 void MainWindow::updateEmptyStart()
@@ -822,7 +866,7 @@ void MainWindow::createExtraActions()
 // Every command that may have a key, in the groups of the page Keyboard;
 // the keys the user set (shortcuts.conf, all instances) replace the ones
 // given above, and the tooltips name them
-void MainWindow::createShortcuts(std::initializer_list<QAction *> workspace)
+void MainWindow::createShortcuts(const QList<QAction *> &workspace)
 {
   m_shortcuts = new ShortcutRegistry(this, QDir(m_wid->settings()->configDir()).filePath("shortcuts.conf"), this);
   const QString meter = tr("Meter"), recording = tr("Recording and graph"), windows = tr("Windows"),
