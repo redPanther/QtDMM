@@ -2071,7 +2071,7 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
           a->setProperty("ID", IDValueShown);
           a->setProperty("value", it.key());
           a->setCheckable(true);
-          a->setChecked(!m_hiddenValues.contains(it.key()));
+          a->setChecked(m_shownValues.contains(it.key()));
         }
       }
     }
@@ -2474,7 +2474,7 @@ void GraphWidget::rebuildExtras()
   for (int i = 0; i < n; ++i)
   {
     const RecordingSeries &s = m_store->extra(i);
-    if (!m_hiddenValues.contains(s.id) && !s.unit.isEmpty() && s.unit != main && s.id <= unit2Id)
+    if (m_shownValues.contains(s.id) && !s.unit.isEmpty() && s.unit != main && s.id <= unit2Id)
     {
       unit2Id = s.id;
       m_unit2 = s.unit;
@@ -2510,7 +2510,7 @@ void GraphWidget::rebuildExtras()
     // a series without a unit yet (only gaps) goes with the main one
     const bool left = s.unit.isEmpty() || s.unit == main;
     c.right = !left && s.unit == m_unit2;
-    c.shown = !m_hiddenValues.contains(s.id) && (left || c.right);
+    c.shown = m_shownValues.contains(s.id) && (left || c.right);
     c.line->setAxes({ m_xAxis, c.right ? m_yAxis2 : m_yAxis });
     const bool dashed = phosphor();
     c.line->setPen(QPen(extraColor(s.id), m_lineWidth, dashed ? (s.id % 2 ? Qt::DashLine : Qt::DotLine) : Qt::SolidLine,
@@ -2713,15 +2713,22 @@ void GraphWidget::updateLegend()
   m_legend->raise();
 }
 
-void GraphWidget::setValueHidden(int id, bool hidden)
+void GraphWidget::setValueShown(int id, bool shown)
 {
-  if (hidden == m_hiddenValues.contains(id))
+  if (shown == m_shownValues.contains(id))
     return;
-  if (hidden)
-    m_hiddenValues.insert(id);
+  if (shown)
+    m_shownValues.insert(id);
   else
-    m_hiddenValues.remove(id);
+    m_shownValues.remove(id);
   rebuildExtras();
+}
+
+QList<int> GraphWidget::shownValues() const
+{
+  QList<int> ids(m_shownValues.cbegin(), m_shownValues.cend());
+  std::sort(ids.begin(), ids.end());
+  return ids;
 }
 
 void GraphWidget::setColors(const QColor &bg, const QColor &grid,
@@ -3117,7 +3124,7 @@ void GraphWidget::popupSLOT(QAction *action)
       setEnvelopeVisible(action->isChecked());
       break;
     case IDValueShown:
-      setValueHidden(action->property("value").toInt(), !action->isChecked());
+      setValueShown(action->property("value").toInt(), action->isChecked());
       break;
   }
 }

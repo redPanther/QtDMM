@@ -1496,11 +1496,11 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
   m_wid->graph()->setReferenceSetting(get("Windows/graph-reference", QString()).toString());
   m_wid->graph()->setMinimapVisible(get("Windows/graph-minimap", true).toBool());
   m_wid->graph()->setEnvelopeVisible(get("Windows/graph-envelope", false).toBool());
-  // the meter's other values hidden in the graph: their ids, "1 2"
+  // the meter's other values shown in the graph: their ids, "1 2"; none at first
   {
-    const QStringList hidden = get("Windows/graph-hidden-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
+    const QStringList shown = get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
     for (int id = 1; id <= 3; ++id)
-      m_wid->graph()->setValueHidden(id, hidden.contains(QString::number(id)));
+      m_wid->graph()->setValueShown(id, shown.contains(QString::number(id)));
   }
   // an unchecked action did not toggle: hide its window explicitly
   for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction, m_poincareAction })
@@ -1533,11 +1533,10 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/graph-reference", m_wid->graph()->referenceSetting());
   set("Windows/graph-minimap", m_wid->graph()->minimapVisible());
   set("Windows/graph-envelope", m_wid->graph()->envelopeVisible());
-  QStringList hidden;
-  for (int id : m_wid->graph()->hiddenValues())
-    hidden << QString::number(id);
-  hidden.sort();
-  set("Windows/graph-hidden-values", hidden.join(' '));
+  QStringList shown;
+  for (int id : m_wid->graph()->shownValues())
+    shown << QString::number(id);
+  set("Windows/graph-shown-values", shown.join(' '));
 }
 
 // A workspace file is an ini file with the same keys as the settings, plus

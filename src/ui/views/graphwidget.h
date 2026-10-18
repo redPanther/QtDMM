@@ -275,8 +275,10 @@ public:
   /// (RecordingStore::extra(), a second display), in a colour of its own.
   /// A value in the main value's unit shares its axis; the first other unit
   /// gets an axis on the right with a scale of its own; values in a third
-  /// unit are not drawn (yet). A legend names the curves; a value can be
-  /// hidden (context menu, kept per window as Windows/graph-hidden-values).
+  /// unit are not drawn (yet). A legend names the curves. They are off until
+  /// switched on (context menu "Values", kept per window as
+  /// Windows/graph-shown-values): the graph shows the main value, as it
+  /// always did. The store records them all the same.
   /// Reference line, band, overview, cursor statistics and triggers stay the
   /// main value's.
   /// @{
@@ -290,8 +292,8 @@ public:
   QString          rightAxisTitle() const { return m_y2Title->isVisible() ? m_y2Title->text() : QString(); }
   /// The legend's text, empty while there is only the main value.
   QString          legendText() const;
-  void             setValueHidden(int id, bool hidden);
-  QList<int>       hiddenValues() const { return QList<int>(m_hiddenValues.cbegin(), m_hiddenValues.cend()); }
+  void             setValueShown(int id, bool shown);
+  QList<int>       shownValues() const;
   /// @}
   /// @{
   /// Live, but the window held where the overview put it.
@@ -547,7 +549,7 @@ protected:
   QGraphicsSimpleTextItem *m_y2Title = nullptr;   ///< its title above it, as m_yTitle
   double           m_scale2Min = 1e40;
   double           m_scale2Max = -1e40;
-  QSet<int>        m_hiddenValues;       ///< the meter's values the user hid
+  QSet<int>        m_shownValues;        ///< the meter's other values switched on
   int              m_intValueId = 0;     ///< setIntegrationValue()
   QLabel          *m_legend = nullptr;
   QColor           extraColor(int i) const;

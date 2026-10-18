@@ -155,9 +155,10 @@ were; the integration curve carries on across a gap.
   the main value's unit shares its axis, the first other unit gets an axis
   on the right with a scale of its own; a value in a third unit is not
   drawn yet. When the second display changes what it shows (Hz to %), its
-  curve ends and a new one begins; the recording goes on. The right-click
-  menu, **Values**, hides or shows each of them; that is kept with the
-  window layout. The time cursors show the other values too; the
+  curve ends and a new one begins; the recording goes on. The other values
+  are off at first, so the graph shows the main value as before: the
+  right-click menu, **Values**, switches each of them on or off; that is
+  kept with the window layout. They are recorded either way. The time cursors show the other values too; the
   reference line, the band, the overview, the statistics between the
   cursors, the triggers and the export are the main value's; the
   integration curve can take value 2 (see *Integration* below).

@@ -1865,6 +1865,12 @@ int main(int argc, char **argv)
     QTest::qWait(20);
     const RecordingStore *store = graph.store();
     check(store->extraCount() == 3 && graph.extraCurveCount() == 3, QString("other values: %1 curves").arg(graph.extraCurveCount()));
+    // off at first: the graph shows the main value, as it always did
+    check(!graph.extraCurveShown(0) && !graph.extraCurveShown(1) && !graph.extraCurveShown(2)
+            && graph.legendText().isEmpty() && !graph.rightAxis()->isVisible(),
+          "other values: recorded, not drawn until switched on");
+    for (int id = 1; id <= 3; ++id)
+      graph.setValueShown(id, true);
     int celsius = -1, volts = -1, hertz = -1;
     for (int i = 0; i < store->extraCount(); ++i)
       (store->extra(i).id == 1 ? celsius : store->extra(i).id == 2 ? volts : hertz) = i;
@@ -1931,11 +1937,11 @@ int main(int argc, char **argv)
     }
 
     // hidden: °C goes, Hz gets the right axis
-    graph.setValueHidden(1, true);
+    graph.setValueShown(1, false);
     check(!graph.extraCurveShown(celsius) && graph.extraCurveShown(hertz) && graph.rightAxisTitle() == "[Hz]",
           "°C hidden: Hz on the right axis");
-    check(graph.hiddenValues() == QList<int>{ 1 }, "hidden values: 1");
-    graph.setValueHidden(1, false);
+    check(graph.shownValues() == (QList<int>{ 2, 3 }), "shown values: 2 3");
+    graph.setValueShown(1, true);
     check(graph.extraCurveShown(celsius) && !graph.extraCurveShown(hertz), "°C shown again");
 
     // phosphor: one hue, dashes
