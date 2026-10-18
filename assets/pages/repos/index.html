@@ -35,6 +35,9 @@ flatpak install --user qtdmm io.github.qtdmm.qtdmm//stable</pre>
   <p>The repository is signed with the QtDMM repository key:
     <a href="qtdmm.gpg">qtdmm.gpg</a>. <code>qtdmm.flatpakrepo</code> carries
     it already; Flatpak refuses anything not signed with it.</p>
+  <p>Its fingerprint (RSA 4096, valid until 17 October 2029):</p>
+  <pre>1F24 BD3C 3706 6077 1957  AB09 70AE 0699 0663 233B</pre>
+  <p>To compare: <code>curl -fsSL https://qtdmm.github.io/QtDMM/repos/qtdmm.gpg | gpg --show-keys --with-fingerprint</code></p>
 
   <h2>apt</h2>
   <p>An apt repository for Debian and Ubuntu is planned for later. Until then,
