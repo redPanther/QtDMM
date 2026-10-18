@@ -154,15 +154,22 @@ void GraphWidget::updateEnvelope()
   m_envelope->setVisible(true);
 }
 
-// ms per pixel column. Counted over the window or, while the recording does
-// not fill it yet, over what is there: a short recording in a long window is
-// drawn as it is. Readings further apart than a column are a bucket each.
+// ms per pixel column, rounded up to a power of two. Counted over the window
+// or, while the recording does not fill it yet, over what is there: a short
+// recording in a long window is drawn as it is. Readings further apart than a
+// column are a bucket each. The power of two: a growing recording builds the
+// curve anew only when the buckets double, not every few readings (as the
+// overview, GraphMinimap); a bucket is then one to two columns wide.
 qint64 GraphWidget::bucketSize() const
 {
   const double plotWidth = m_chart->plotArea().width();
   const int columns = qMax(1, int(plotWidth > 0 ? plotWidth : width()));
   const qint64 shown = qMin<qint64>(qint64(m_windowSeconds) * 1000, m_store->duration() - m_store->origin());
-  return qMax<qint64>(1, (shown + columns - 1) / columns);
+  const qint64 need = (shown + columns - 1) / columns;
+  qint64 ms = 1;
+  while (ms < need)
+    ms *= 2;
+  return ms;
 }
 
 // The index of the first reading in the bucket of reading @p i. The buckets
@@ -261,19 +268,19 @@ void GraphWidget::rebuildSeries()
     const qint64 end = (series.at(first).t / m_bucket + 1) * m_bucket;
     const int last = qMin(series.lowerBound(end), count) - 1;
     m_tailData = pointsOf(m_store->series(), first, last, false, points);
-    if (m_intValueId == 0)
+    if (m_intValueId == 0 && m_showIntegration)
       m_tailInt = pointsOf(m_store->series(), first, last, true, intPoints);
     first = last + 1;
   }
 
   m_dataLine->replace(points);
   m_curvePts = points;
-  m_dataPoints->replace(withoutGaps(points));
+  m_dataPoints->replace(pointsShown() ? withoutGaps(points) : QList<QPointF>());
   // the integral of another value: rebuildExtras()
   m_intLine->replace(intPoints);
-  m_intPoints->replace(withoutGaps(intPoints));
-  m_tailDataPts = finiteTail(points, m_tailData);
-  m_tailIntPts = finiteTail(intPoints, m_tailInt);
+  m_intPoints->replace(intPointsShown() ? withoutGaps(intPoints) : QList<QPointF>());
+  m_tailDataPts = pointsShown() ? finiteTail(points, m_tailData) : 0;
+  m_tailIntPts = intPointsShown() ? finiteTail(intPoints, m_tailInt) : 0;
   rebuildExtras();   // the same buckets
 }
 
@@ -283,39 +290,45 @@ void GraphWidget::appendToSeries()
 {
   const int count = m_store->count();
   const int first = bucketStart(count - 1);
-  const bool integral = m_intValueId == 0;   // else onExtraAppended()
-  if (first != count - 1)
+  const bool filling = first != count - 1;
+  if (filling)
   {
     m_dataLine->removeLast(m_tailData);
     m_curvePts.resize(qMax<qsizetype>(0, m_curvePts.size() - m_tailData));
-    m_dataPoints->removePoints(m_dataPoints->count() - m_tailDataPts, m_tailDataPts);
-    if (integral)
-    {
-      m_intLine->removeLast(m_tailInt);
-      m_intPoints->removePoints(m_intPoints->count() - m_tailIntPts, m_tailIntPts);
-    }
   }
   QList<QPointF> points;
   m_tailData = pointsOf(m_store->series(), first, count - 1, false, points);
   m_dataLine->append(points);
   m_curvePts.append(points);
-  const QList<QPointF> dataPts = withoutGaps(points);
-  m_dataPoints->append(dataPts);
-  m_tailDataPts = int(dataPts.size());
-  if (integral)
-    appendIntegral(m_store->series(), first, count - 1);
+  if (pointsShown())
+    m_tailDataPts = replaceTail(m_dataPoints, filling ? m_tailDataPts : 0, withoutGaps(points));
+  if (m_intValueId == 0 && m_showIntegration)   // else onExtraAppended()
+    appendIntegral(m_store->series(), first, count - 1, filling);
 }
 
-// The integral's points of readings first..last of @p series, after the
-// ones of the bucket before (the tail is taken back by the caller).
-void GraphWidget::appendIntegral(const RecordingSeries &series, int first, int last)
+// The integral's points of readings first..last of @p series, in place of
+// the ones they had while the bucket was @p filling.
+void GraphWidget::appendIntegral(const RecordingSeries &series, int first, int last, bool filling)
 {
+  if (filling)
+    m_intLine->removeLast(m_tailInt);
   QList<QPointF> intPoints;
   m_tailInt = pointsOf(series, first, last, true, intPoints);
   m_intLine->append(intPoints);
-  const QList<QPointF> intPts = withoutGaps(intPoints);
-  m_intPoints->append(intPts);
-  m_tailIntPts = int(intPts.size());
+  if (intPointsShown())
+    m_tailIntPts = replaceTail(m_intPoints, filling ? m_tailIntPts : 0, withoutGaps(intPoints));
+}
+
+// The last @p remove points of @p series give way to @p points, in one
+// change: Qt Charts lays a scatter series out anew with every change, and
+// removing and appending point by point were three. Returns how many came.
+int GraphWidget::replaceTail(QScatterSeries *series, int remove, const QList<QPointF> &points)
+{
+  QList<QPointF> all = series->points();
+  all.resize(qMax<qsizetype>(0, all.size() - remove));
+  all.append(points);
+  series->replace(all);
+  return int(points.size());
 }
 
 void GraphWidget::setIntegrationValue(int id)
@@ -509,6 +522,8 @@ void GraphWidget::rebuildOtherIntegral()
       continue;
     if (i < int(m_extraCurves.size()) && m_extraCurves[size_t(i)].right)
       axis = m_yAxis2;
+    if (!m_showIntegration)
+      continue;
     if (!points.isEmpty())
       points.append(QPointF(s.first().t / 1000.0, qQNaN()));
     for (int first = 0; first < s.count();)
@@ -521,9 +536,8 @@ void GraphWidget::rebuildOtherIntegral()
   }
   integralOnAxis(axis);
   m_intLine->replace(points);
-  const QList<QPointF> pts = withoutGaps(points);
-  m_intPoints->replace(pts);
-  m_tailIntPts = finiteTail(points, m_tailInt);
+  m_intPoints->replace(intPointsShown() ? withoutGaps(points) : QList<QPointF>());
+  m_tailIntPts = intPointsShown() ? finiteTail(points, m_tailInt) : 0;
   updateThresholdLinePositions();   // the integration threshold on that axis
 }
 
@@ -547,15 +561,8 @@ void GraphWidget::onExtraAppended(int i)
   const qint64 begin = s.at(count - 1).t / m_bucket * m_bucket;
   const int first = qMin(count - 1, s.lowerBound(begin));
   // the integration curve of this value
-  if (s.id == m_intValueId)
-  {
-    if (first != count - 1)
-    {
-      m_intLine->removeLast(m_tailInt);
-      m_intPoints->removePoints(m_intPoints->count() - m_tailIntPts, m_tailIntPts);
-    }
-    appendIntegral(s, first, count - 1);
-  }
+  if (s.id == m_intValueId && m_showIntegration)
+    appendIntegral(s, first, count - 1, first != count - 1);
   if (!c.shown)
   {
     const double v = s.last().value;

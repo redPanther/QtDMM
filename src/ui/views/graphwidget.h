@@ -254,6 +254,8 @@ public:
   bool             minimapVisible() const { return m_minimapOn; }
   GraphMinimap    *minimap() const { return m_minimap; }
   /// @}
+  /// How often the curves were built anew from the whole store (for the tests).
+  int              rebuilds() const { return m_rebuilds; }
   /// @name The min/max band behind the curve
   /// Per pixel column the lowest and the highest value of the columns
   /// within kEnvelopeColumns either side: a band as wide on screen whatever
@@ -480,7 +482,8 @@ protected:
   static QList<QPointF> withoutGaps(const QList<QPointF> &points);
   static int       finiteTail(const QList<QPointF> &points, int tail);
   void             appendToSeries();
-  void             appendIntegral(const RecordingSeries &series, int first, int last);
+  void             appendIntegral(const RecordingSeries &series, int first, int last, bool filling);
+  static int       replaceTail(QScatterSeries *series, int remove, const QList<QPointF> &points);
   void             onAppended(bool shifted);
   void             onCleared();
   void             onStateChanged();
@@ -674,6 +677,11 @@ protected:
 
   void             emitInfo();
   void             rebuildSeries();
+  /// Whether the points of the curve and of the integral are drawn. Hidden
+  /// ones get no points: Qt Charts lays out a scatter series anew with every
+  /// change, also a hidden one (that was most of the time of a reading).
+  bool             pointsShown() const { return m_pointMode != NoPoint; }
+  bool             intPointsShown() const { return m_showIntegration && m_intPointMode != NoPoint; }
   void             updateXAxisRange();
   void             updateSeriesAppearance();
   void             updateThresholdLinesVisibility();
