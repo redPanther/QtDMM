@@ -21,7 +21,12 @@ public:
   bool blink() const;
   /// Base unit of the current reading, shown next to the thresholds; empty
   /// before the first reading (the labels go without a unit).
-  void setUnit(const QString &unit);
+  void setUnit(const QString &unit) { setValueUnit(0, unit); }
+  /// The same for value @p id of the meter (Reading::id).
+  void setValueUnit(int id, const QString &unit);
+  /// The names of the meter's values ("1: CO2 (ppm)" ...), one each; with
+  /// more than one an alarm chooses the value it watches.
+  void setValueNames(const QStringList &names);
 
 public Q_SLOTS:
   void defaultsSLOT() override;
@@ -36,7 +41,8 @@ private:
   void toggle(int row, bool on);
 
   QList<Alarm> m_alarms;
-  QString m_unit;
+  QMap<int, QString> m_units;   ///< base unit by value id
+  QStringList m_valueNames;
   QListWidget *m_list;
   QLabel *m_empty;   ///< the hint in the empty list
   QPushButton *m_edit, *m_remove;
@@ -48,13 +54,18 @@ class AlarmDlg : public QDialog
 {
   Q_OBJECT
 public:
-  AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent = nullptr);
+  /// @p units by value id; @p valueNames as AlarmPrefs::setValueNames().
+  AlarmDlg(const Alarm &alarm, const QMap<int, QString> &units, const QStringList &valueNames = {},
+           QWidget *parent = nullptr);
   Alarm alarm() const;
 
 private:
   void updateFields();
 
-  QString m_unit;
+  QMap<int, QString> m_units;
+  QString m_unit;   ///< the unit of the value chosen
+  int m_valueId = 0;
+  class QComboBox *m_value = nullptr;   ///< which value; none with one
   class QLineEdit *m_name, *m_a, *m_b, *m_seconds, *m_hysteresis, *m_message, *m_command;
   class QComboBox *m_condition, *m_recorder;
   class QCheckBox *m_enabled, *m_banner, *m_tint, *m_beep, *m_popup, *m_raise, *m_markGraph, *m_markTable, *m_disconnect;

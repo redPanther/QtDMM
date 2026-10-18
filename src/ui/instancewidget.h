@@ -227,6 +227,8 @@ protected:
   /// The values chosen, as far as the meter has them, to the views and the
   /// min/max memory.
   void        applyValueChoice();
+  /// The alarm page's choice of value: the meter's values by name.
+  void        updateAlarmValueNames();
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   Settings    *m_settings;

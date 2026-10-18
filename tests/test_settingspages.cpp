@@ -16,6 +16,7 @@
 
 #include "core/settings.h"
 #include "ui/dialogs/recordlengthdlg.h"
+#include "ui/settings/alarmprefs.h"
 #include "ui/settings/generalprefs.h"
 #include "ui/settings/graphprefs.h"
 #include "ui/settings/guiprefs.h"
@@ -155,6 +156,34 @@ int main(int argc, char **argv)
     check(open.value() == 0 && open.findChild<QRadioButton *>("ui_untilStop")->isChecked()
             && open.findChild<QLabel *>("ui_intro")->text().contains("12:00"),
           "length dialog: until Stop ready, the start hint shown");
+  }
+
+  // --- 5. an alarm on another value: the dialog chooses it, the thresholds
+  //        say its unit; a meter with one value has no choice ---
+  {
+    const QMap<int, QString> units{ { 0, "ppm" }, { 1, "C" }, { 2, "%" } };
+    Alarm al;
+    al.condition = Alarm::Above;
+    AlarmDlg one(al, units);
+    // the condition and the recording: no third one
+    check(one.findChildren<QComboBox *>().size() == 2, "alarm: one value, no choice of value");
+    AlarmDlg dlg(al, units, { "1: CO2 (ppm)", "2: Temperature (°C)", "3: Humidity (%)" });
+    QComboBox *value = nullptr;
+    for (QComboBox *c : dlg.findChildren<QComboBox *>())
+      if (c->count() == 3 && c->itemText(0).startsWith("1: CO2"))
+        value = c;
+    check(value != nullptr, "alarm: three values to choose from");
+    auto threshold = [&]
+    {
+      for (QLabel *l : dlg.findChildren<QLabel *>())
+        if (l->text().startsWith("&Threshold"))
+          return l->text();
+      return QString();
+    };
+    check(threshold() == "&Threshold (ppm):", "alarm: the main value's unit at first, got " + threshold());
+    if (value)
+      value->setCurrentIndex(2);
+    check(threshold() == "&Threshold (%):" && dlg.alarm().value == 2, "alarm: value 3 in %, got " + threshold());
   }
 
   if (failed)

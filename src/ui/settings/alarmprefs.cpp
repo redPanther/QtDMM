@@ -81,9 +81,17 @@ bool AlarmPrefs::blink() const
   return m_blink->isChecked();
 }
 
-void AlarmPrefs::setUnit(const QString &unit)
+void AlarmPrefs::setValueUnit(int id, const QString &unit)
 {
-  m_unit = unit;
+  if (m_units.value(id) == unit && m_units.contains(id))
+    return;
+  m_units[id] = unit;
+  refresh();
+}
+
+void AlarmPrefs::setValueNames(const QStringList &names)
+{
+  m_valueNames = names;
   refresh();
 }
 
@@ -114,7 +122,11 @@ void AlarmPrefs::refresh()
   m_list->clear();
   for (const Alarm &al : m_alarms)
   {
-    auto *item = new QListWidgetItem(QString("%1  —  %2").arg(al.name, al.describe(m_unit)), m_list);
+    // with more than one value: which one it watches
+    const QString what = m_valueNames.size() > 1 && al.condition != Alarm::NoReadings
+                           ? tr("value %1: ").arg(al.value + 1) : QString();
+    auto *item = new QListWidgetItem(QString("%1  —  %2%3").arg(al.name, what, al.describe(m_units.value(al.value))),
+                                     m_list);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(al.enabled ? Qt::Checked : Qt::Unchecked);
     QPixmap swatch(12, 12);
@@ -131,7 +143,7 @@ void AlarmPrefs::add()
 {
   Alarm al;
   al.name = tr("Alarm %1").arg(m_alarms.size() + 1);
-  AlarmDlg dlg(al, m_unit, this);
+  AlarmDlg dlg(al, m_units, m_valueNames, this);
   if (dlg.exec() == QDialog::Accepted)
   {
     m_alarms << dlg.alarm();
@@ -145,7 +157,7 @@ void AlarmPrefs::edit()
   const int row = m_list->currentRow();
   if (row < 0 || row >= m_alarms.size())
     return;
-  AlarmDlg dlg(m_alarms[row], m_unit, this);
+  AlarmDlg dlg(m_alarms[row], m_units, m_valueNames, this);
   if (dlg.exec() == QDialog::Accepted)
   {
     m_alarms[row] = dlg.alarm();
@@ -170,8 +182,8 @@ void AlarmPrefs::toggle(int row, bool on)
 
 // ---------------------------------------------------------------------------
 
-AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
-  : QDialog(parent), m_unit(unit), m_colorValue(alarm.color)
+AlarmDlg::AlarmDlg(const Alarm &alarm, const QMap<int, QString> &units, const QStringList &valueNames, QWidget *parent)
+  : QDialog(parent), m_units(units), m_unit(units.value(alarm.value)), m_valueId(alarm.value), m_colorValue(alarm.color)
 {
   setWindowTitle(tr("Alarm"));
   auto *layout = new QVBoxLayout(this);
@@ -191,6 +203,21 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   // --- condition ---
   auto *cond = new QGroupBox(tr("Condition"), this);
   auto *cf = new QFormLayout(cond);
+  // the meter's value it watches, when it has more than one
+  if (valueNames.size() > 1 || alarm.value > 0)
+  {
+    m_value = new QComboBox(cond);
+    for (int id = 0; id < qMax(int(valueNames.size()), alarm.value + 1); ++id)
+      m_value->addItem(valueNames.value(id, tr("Value %1").arg(id + 1)), id);
+    m_value->setCurrentIndex(m_value->findData(alarm.value));
+    cf->addRow(tr("&Value:"), m_value);
+    connect(m_value, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]
+    {
+      m_valueId = m_value->currentData().toInt();
+      m_unit = m_units.value(m_valueId);
+      updateFields();
+    });
+  }
   m_condition = new QComboBox(cond);
   m_condition->addItem(tr("Reading below"), Alarm::Below);
   m_condition->addItem(tr("Reading above"), Alarm::Above);
@@ -207,8 +234,7 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   cf->addRow(m_aLabel, m_a);
   m_b = new QLineEdit(EngNumberValidator::engText(alarm.b), cond);
   m_b->setValidator(validator);
-  // before the first reading the unit is not known: no unit rather than a guessed one
-  m_bLabel = new QLabel(unit.isEmpty() ? tr("&Upper bound:") : tr("&Upper bound (%1):").arg(unit), cond);
+  m_bLabel = new QLabel(cond);
   m_bLabel->setBuddy(m_b);
   cf->addRow(m_bLabel, m_b);
   m_seconds = new QLineEdit(QString::number(alarm.seconds), cond);
@@ -217,7 +243,7 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   cf->addRow(m_secondsLabel, m_seconds);
   m_hysteresis = new QLineEdit(EngNumberValidator::engText(alarm.hysteresis), cond);
   m_hysteresis->setValidator(validator);
-  m_hystLabel = new QLabel(tr("&Hysteresis (%1):").arg(unit), cond);
+  m_hystLabel = new QLabel(cond);
   m_hystLabel->setBuddy(m_hysteresis);
   m_hysteresis->setToolTip(tr("The reading must come back by this much before the alarm clears - keeps it from "
                               "flickering when the reading sits at the threshold."));
@@ -328,10 +354,22 @@ void AlarmDlg::updateFields()
   const auto c = Alarm::Condition(m_condition->currentData().toInt());
   const bool range = c == Alarm::Outside || c == Alarm::Inside;
   const bool value = c == Alarm::Below || c == Alarm::Above || range;
+  // before the first reading the unit is not known: no unit rather than a guessed one
   if (m_unit.isEmpty())
+  {
     m_aLabel->setText(range ? tr("&Lower bound:") : tr("&Threshold:"));
+    m_bLabel->setText(tr("&Upper bound:"));
+    m_hystLabel->setText(tr("&Hysteresis:"));
+  }
   else
+  {
     m_aLabel->setText(range ? tr("&Lower bound (%1):").arg(m_unit) : tr("&Threshold (%1):").arg(m_unit));
+    m_bLabel->setText(tr("&Upper bound (%1):").arg(m_unit));
+    m_hystLabel->setText(tr("&Hysteresis (%1):").arg(m_unit));
+  }
+  // "no readings" is the meter's silence: no value to choose
+  if (m_value)
+    m_value->setEnabled(c != Alarm::NoReadings);
   m_aLabel->setBuddy(m_a);
   m_a->setEnabled(value);
   m_aLabel->setEnabled(value);
@@ -349,6 +387,7 @@ Alarm AlarmDlg::alarm() const
   al.name = m_name->text().trimmed().isEmpty() ? tr("Alarm") : m_name->text().trimmed();
   al.enabled = m_enabled->isChecked();
   al.condition = Alarm::Condition(m_condition->currentData().toInt());
+  al.value = al.condition == Alarm::NoReadings ? 0 : m_valueId;
   al.a = EngNumberValidator::value(m_a->text().isEmpty() ? "0" : m_a->text());
   al.b = EngNumberValidator::value(m_b->text().isEmpty() ? "0" : m_b->text());
   al.seconds = m_seconds->text().toDouble();

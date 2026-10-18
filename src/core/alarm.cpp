@@ -47,6 +47,8 @@ QJsonObject Alarm::toJson() const
   QJsonObject o;
   o["name"] = name;
   o["enabled"] = enabled;
+  if (value != 0)
+    o["value"] = value;
   o["condition"] = conditionKey(condition);
   o["a"] = a;
   o["b"] = b;
@@ -72,6 +74,7 @@ Alarm Alarm::fromJson(const QJsonObject &o)
   Alarm al;
   al.name = o["name"].toString();
   al.enabled = o["enabled"].toBool(true);
+  al.value = qBound(0, o["value"].toInt(0), 2);
   al.condition = conditionFromKey(o["condition"].toString());
   al.a = o["a"].toDouble();
   al.b = o["b"].toDouble();
@@ -222,16 +225,21 @@ QColor AlarmManager::displayColor() const
   return QColor();
 }
 
-void AlarmManager::feed(double value, bool overload, qint64 nowMs)
+void AlarmManager::feed(double value, bool overload, qint64 nowMs, int id)
 {
-  m_lastReading = nowMs;
-  m_lastValue = value;
-  m_lastOverload = overload;
+  if (id == 0)
+  {
+    m_lastReading = nowMs;
+    m_lastValue = value;
+    m_lastOverload = overload;
+  }
   for (int i = 0; i < m_alarms.size(); ++i)
   {
     const Alarm &al = m_alarms[i];
     if (al.condition == Alarm::NoReadings)
     {
+      if (id != 0)
+        continue;
       // silence ended
       if (m_state[i] != Off)
       {
@@ -241,6 +249,8 @@ void AlarmManager::feed(double value, bool overload, qint64 nowMs)
       m_since[i] = nowMs;
       continue;
     }
+    if (al.value != id)
+      continue;
     evaluate(i, al.matches(value, overload), al.released(value, overload), value, nowMs);
   }
 }

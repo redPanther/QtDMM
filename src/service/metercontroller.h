@@ -126,6 +126,9 @@ public:
   /// The text of the current reading's unit ("mV"), and its base unit ("V").
   QString     unit() const { return m_lastUnit; }
   QString     baseUnit() const { return m_baseUnit; }
+  /// The base unit of value @p id (Reading::id) from its last reading; the
+  /// main value's is baseUnit().
+  QString     valueUnit(int id) const;
   bool        overload() const { return m_overload; }
 
 public Q_SLOTS:
@@ -229,6 +232,8 @@ private:
   int         m_minMaxId = 0;
   QString     m_lastUnit;
   QString     m_baseUnit;
+  QMap<int, QString> m_valueUnits;   ///< base unit by value id, valueUnit()
+  QMap<int, bool> m_valueOverload;   ///< the last reading of each value was OL
   bool        m_overload = false;
   QColor      m_alertColor;   ///< the colour last sent with alertColorChanged()
   QElapsedTimer m_clock;   ///< the stale check's time base, monotonic

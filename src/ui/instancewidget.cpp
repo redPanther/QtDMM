@@ -110,8 +110,16 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
   // what each value measures, for the views' choice of value
   connect(m_ctl, &MeterController::reading, this, [this](const Reading &r)
   {
-    if (!r.text.isEmpty() && !r.overload && r.port.quantity != Quantity::Unknown)
-      m_lastReading[r.id] = r;
+    if (r.text.isEmpty() || r.overload || r.port.quantity == Quantity::Unknown)
+      return;
+    const bool news = m_lastReading.value(r.id).baseUnit != r.baseUnit || !m_lastReading.contains(r.id);
+    m_lastReading[r.id] = r;
+    // the alarms on another value: their thresholds in its unit
+    if (news && r.id > 0)
+    {
+      m_configDlg->alarmPage()->setValueUnit(r.id, r.baseUnit);
+      updateAlarmValueNames();
+    }
   });
   // the alarm thresholds are in the reading's base unit, also while the
   // (modeless) dialog is open
@@ -290,6 +298,7 @@ QString InstanceWidget::valueName(int id) const
 
 void InstanceWidget::applyValueChoice()
 {
+  updateAlarmValueNames();
   const int n = numValues();
   auto has = [n](int id) { return id < n ? id : 0; };
   const int lcd = has(m_lcdValue);
@@ -424,8 +433,17 @@ void InstanceWidget::configSLOT()
   openConfig();
 }
 
+void InstanceWidget::updateAlarmValueNames()
+{
+  QStringList names;
+  for (int id = 0; numValues() > 1 && id < numValues(); ++id)
+    names << QString("%1: %2").arg(id + 1).arg(valueName(id));
+  m_configDlg->alarmPage()->setValueNames(names);
+}
+
 void InstanceWidget::openConfig(int page)
 {
+  updateAlarmValueNames();
   // the meter goes on reading, and a recording on recording: the dialog
   // has no meter page any more (it disconnected for that, and stopped a
   // recording)
@@ -501,6 +519,8 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   m_ctl->recorder()->forgetReading();
   m_ctl->forgetUnit();   // the axis title and the alarm unit come with the first reading
   m_lastReading.clear();   // and what the values measure
+  for (int id = 1; id <= 2; ++id)
+    m_configDlg->alarmPage()->setValueUnit(id, QString());
   ui_graph->liveSLOT();
   Q_EMIT meterChanged();
 
@@ -699,7 +719,8 @@ void InstanceWidget::readConfig()
     QList<double> thresholds;
     for (const Alarm &a : m_configDlg->alarmPage()->alarms())
     {
-      if (!a.enabled || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
+      // the graph's axis is the main value's
+      if (!a.enabled || a.value != 0 || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
         continue;
       thresholds << a.a;
       if (a.condition == Alarm::Outside || a.condition == Alarm::Inside)

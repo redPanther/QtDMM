@@ -221,6 +221,47 @@ int main(int argc, char **argv)
     qInfo() << "All alarm tests passed.";
   else
     qWarning() << failed << "alarm test(s) failed.";
+  // --- 9. an alarm on another value of the meter: only that value's
+  //        readings count; "no readings" stays the meter's silence ---
+  {
+    AlarmManager m;
+    Log log(m);
+    Alarm humid;
+    humid.name = "humid";
+    humid.condition = Alarm::Above;
+    humid.a = 60;
+    humid.value = 2;
+    Alarm silent;
+    silent.name = "silent";
+    silent.condition = Alarm::NoReadings;
+    silent.seconds = 5;
+    m.setAlarms({humid, silent});
+    m.setConnected(true, 0);
+    m.feed(800, false, 0, 0);    // CO2 800 ppm: not the humidity
+    m.feed(22, false, 0, 1);
+    check(log.events.isEmpty(), "value 3: the main value's 800 is not above 60 %");
+    m.feed(65, false, 1000, 2);
+    check(log.events == QStringList{"raised 0 humid 65"}, "value 3: 65 % raises it, got " + log.events.join(", "));
+    m.feed(50, false, 2000, 2);
+    check(log.events.last() == "cleared 0 humid", "value 3: 50 % clears it");
+    // the other values come, the main one does not: the meter is silent
+    for (qint64 t = 3000; t <= 9000; t += 1000)
+    {
+      m.feed(50, false, t, 2);
+      m.tick(t);
+    }
+    check(log.events.last().startsWith("raised 1 silent"), "no readings: the main value's, got " + log.events.last());
+    m.feed(800, false, 9500, 0);
+    check(log.events.last() == "cleared 1 silent", "no readings: ends with the main value");
+  }
+  {
+    Alarm al;
+    al.value = 1;
+    check(Alarm::fromJson(al.toJson()).value == 1 && !Alarm().toJson().contains("value"),
+          "JSON: the value kept, the main one not written");
+    check(Alarm::fromJson(QJsonObject{ { "value", 7 } }).value == 2, "JSON: a value beyond the third is the third");
+  }
+
   // --- the name in messages: default names already say "Alarm" ---
   check(Alarm::title("Alarm 1") == "Alarm 1", "default name is not doubled: " + Alarm::title("Alarm 1"));
   check(Alarm::title("High voltage") == "Alarm High voltage", "own name gets the word: " + Alarm::title("High voltage"));
