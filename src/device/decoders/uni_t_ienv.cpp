@@ -194,8 +194,13 @@ void DecoderUniTiENV::attachTemp(DmmDecoder::DmmResponse &r) const
 
 std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray &data, int id)
 {
+  // every frame is a whole reading, the main value with the temperature as
+  // second value (id2): @p id only counts the frames of the two-value meters
+  // (numValues 2 gives the display its second line). Taken over, every
+  // other frame came as the second value, humidity and temperature in turn
+  Q_UNUSED(id);
   m_result = {};
-  m_result.id = id;
+  m_result.id = 0;
   m_result.showBar = true;
   if (data.size() < kFrameLength)
     return std::nullopt;
@@ -263,7 +268,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray 
     // the main value of the last humidity / wind frame, with the fresh
     // temperature, so every poll answer updates the display
     DmmDecoder::DmmResponse r = m_main;
-    r.id = id;
+    r.id = 0;
     attachTemp(r);
     return r;
   }

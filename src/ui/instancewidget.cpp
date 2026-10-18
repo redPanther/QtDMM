@@ -694,6 +694,7 @@ void InstanceWidget::readConfig()
                            m_configDlg->intScale(),
                            m_configDlg->intThreshold(),
                            m_configDlg->intOffset());
+  ui_graph->setIntegrationValue(m_configDlg->intValue());
 
   if (m_configDlg->sampleMode() == GraphWidget::Time)
     Q_EMIT info(tr("Automatic start at %1").arg(m_configDlg->startTime().toString()));

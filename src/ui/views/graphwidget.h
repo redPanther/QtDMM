@@ -152,7 +152,8 @@ public:
     IDReference,     ///< properties "kind" and "value"
     IDClearCursors,
     IDMinimap,
-    IDEnvelope
+    IDEnvelope,
+    IDValueShown     ///< property "value": the id of the meter's value
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -269,6 +270,31 @@ public:
   QPainterPath     envelopePath() const;
   static constexpr int kEnvelopeColumns = 4;
   /// @}
+  /// @name The meter's other values
+  /// A curve for each series of the store's other values
+  /// (RecordingStore::extra(), a second display), in a colour of its own.
+  /// A value in the main value's unit shares its axis; the first other unit
+  /// gets an axis on the right with a scale of its own; values in a third
+  /// unit are not drawn (yet). A legend names the curves. They are off until
+  /// switched on (context menu "Values", kept per window as
+  /// Windows/graph-shown-values): the graph shows the main value, as it
+  /// always did. The store records them all the same.
+  /// Reference line, band, overview, cursor statistics and triggers stay the
+  /// main value's.
+  /// @{
+  int              extraCurveCount() const { return int(m_extraCurves.size()); }
+  /// The first segment of the curve of extra(@p i) (for the tests).
+  QLineSeries     *extraCurve(int i) const { return m_extraCurves[size_t(i)].series; }
+  bool             extraCurveShown(int i) const { return m_extraCurves[size_t(i)].shown; }
+  bool             extraCurveOnRight(int i) const { return m_extraCurves[size_t(i)].right; }
+  QValueAxis      *rightAxis() const { return m_yAxis2; }
+  /// Its title, "[°C]" (empty while it is hidden).
+  QString          rightAxisTitle() const { return m_y2Title->isVisible() ? m_y2Title->text() : QString(); }
+  /// The legend's text, empty while there is only the main value.
+  QString          legendText() const;
+  void             setValueShown(int id, bool shown);
+  QList<int>       shownValues() const;
+  /// @}
   /// @{
   /// Live, but the window held where the overview put it.
   bool             livePaused() const { return m_liveHold; }
@@ -288,6 +314,11 @@ public:
   /// Integration curve: shown, scale factor, threshold (values at or below
   /// it reset the sum) and offset.
   void             setIntegration(bool, double, double, double);
+  /// Which value of the meter the integration curve integrates: 0 the main
+  /// value, 1 the second display (Graph/int-value). Without that value the
+  /// curve is not drawn; it goes on the axis its value is on.
+  void             setIntegrationValue(int id);
+  int              integrationValue() const { return m_intValueId; }
   void             setSettings(Settings *settings) { m_cfg = settings; }
   /// Since 26.2 the integral is one over time (unit x s), no longer the sum
   /// of the samples. Once per settings file Graph/int-scale is divided by
@@ -453,6 +484,7 @@ protected:
   static QList<QPointF> withoutGaps(const QList<QPointF> &points);
   static int       finiteTail(const QList<QPointF> &points, int tail);
   void             appendToSeries();
+  void             appendIntegral(const RecordingSeries &series, int first, int last);
   void             onAppended(bool shifted);
   void             onCleared();
   void             onStateChanged();
@@ -501,6 +533,36 @@ protected:
   QScatterSeries  *m_intPoints;
   std::unique_ptr<GapLine> m_dataLine;   ///< the data line, split at the gaps
   std::unique_ptr<GapLine> m_intLine;
+  /// A curve of one of the store's other series; kept for reuse when there
+  /// are fewer.
+  struct ExtraCurve
+  {
+    QLineSeries *series = nullptr;   ///< the first segment
+    std::unique_ptr<GapLine> line;
+    int  tail = 0;                   ///< points the newest bucket gave (see m_tailData)
+    bool right = false;              ///< on the right axis
+    bool shown = false;              ///< drawn: an axis has its unit, not hidden
+  };
+  std::vector<ExtraCurve> m_extraCurves;
+  QValueAxis      *m_yAxis2 = nullptr;   ///< the right axis: the first unit other than the main one
+  QString          m_unit2;              ///< its unit; empty while it is hidden
+  QGraphicsSimpleTextItem *m_y2Title = nullptr;   ///< its title above it, as m_yTitle
+  double           m_scale2Min = 1e40;
+  double           m_scale2Max = -1e40;
+  QSet<int>        m_shownValues;        ///< the meter's other values switched on
+  int              m_intValueId = 0;     ///< setIntegrationValue()
+  QLabel          *m_legend = nullptr;
+  QColor           extraColor(int i) const;
+  void             rebuildExtras();
+  void             onExtraAppended(int i);
+  void             rebuildOtherIntegral();
+  /// The integration curve (line and points) on @p axis.
+  void             integralOnAxis(QAbstractAxis *axis);
+  void             updateLegend();
+  /// The right axis from m_scale2Min/Max, with the left axis' tick count.
+  void             updateRightAxis();
+  /// bucketPoints() of any series of the store.
+  int              pointsOf(const RecordingSeries &series, int first, int last, bool integral, QList<QPointF> &out) const;
   QValueAxis      *m_xAxis;
   QValueAxis      *m_yAxis;
   /// The y axis title ("[V]"), written horizontally above the axis: turned

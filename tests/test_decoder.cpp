@@ -241,7 +241,15 @@ int main(int argc, char **argv)
       {
         auto hum = DmmDecoder::getInstance(FrameFormat::UniTiENV);
         hum->decode(ienv("  45.2 RH", 0, 0x32, 0x34), 0);
-        const auto t = hum->decode(ienv("  23.4  C", 0, 0x31, 0x30), 0);
+        // the frame reader counts the frames of a two-value meter (id 1 for
+        // every other one): each is the main value all the same
+        const auto t = hum->decode(ienv("  23.4  C", 0, 0x31, 0x30), 1);
+        const auto h = hum->decode(ienv("  45.3 RH", 0, 0x32, 0x34), 1);
+        if (!t || t->id != 0 || !h || h->id != 0 || h->id2 != 1)
+        {
+          qWarning() << "iENV: a frame counted as the second one is not the main value";
+          ++problems;
+        }
         if (!t || t->val != "45.2" || t->unit2 != "°F" || t->val2 != "74.1" || std::fabs(t->dval2 - 74.12) > 1e-9)
         {
           qWarning() << "iENV: 23.4 °C shown in °F gives" << (t ? t->val2 + " " + t->unit2 : QString("nothing"));

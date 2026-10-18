@@ -313,6 +313,7 @@ void RecordingStore::load(const Recording &rec)
   m_recordPort = PortKey();
   m_sampleTime = qMax(1, rec.sampleTimeTenths);
   m_series.clear();
+  m_extra.clear();
   m_floorMs = 0;
   m_series.reserve(int(rec.values.size()));
   m_marks.clear();
@@ -373,7 +374,10 @@ void RecordingStore::setReading(const Reading &reading)
 {
   logReading(reading);
   if (reading.id != 0)
+  {
+    appendExtra(reading);
     return;
+  }
   m_reading = reading;
   m_haveReading = true;
   const double value = reading.overload ? qQNaN() : reading.value;
@@ -390,6 +394,8 @@ void RecordingStore::setReading(const Reading &reading)
     {
       m_recordPort = reading.port;
       m_recordBaseUnit = reading.baseUnit;
+      m_series.port = reading.port;
+      m_series.unit = reading.baseUnit;
     }
     else if (reading.port != m_recordPort || reading.baseUnit != m_recordBaseUnit)
     {
@@ -404,6 +410,8 @@ void RecordingStore::setReading(const Reading &reading)
       m_lastValValid = false;
       m_recordPort = reading.port;
       m_recordBaseUnit = reading.baseUnit;
+      m_series.port = reading.port;
+      m_series.unit = reading.baseUnit;
     }
   }
   if (m_state == View)
@@ -434,6 +442,137 @@ void RecordingStore::setReading(const Reading &reading)
     append(p);
 }
 
+int RecordingStore::extraIndex(int id) const
+{
+  for (int i = int(m_extra.size()) - 1; i >= 0; --i)
+    if (m_extra[i].id == id)
+      return i;
+  return -1;
+}
+
+void RecordingStore::appendExtraPoint(int i, RawPoint p)
+{
+  RecordingSeries &s = m_extra[i];
+  // the integral as for the main value (appendPoint()): the graph can draw
+  // it for a value other than the main one
+  double run = s.runningIntegral;
+  if (!s.isEmpty())
+  {
+    const RawPoint &prev = s.last();
+    p.t = qMax(p.t, prev.t);
+    if (!prev.gap() && prev.value > m_integrationThreshold)
+      run += prev.value * double(p.t - prev.t) / 1000.0;
+  }
+  else
+    run = 0;
+  if (!p.gap() && p.value <= m_integrationThreshold)
+    run = 0;
+  s.runningIntegral = run;
+  p.integral = p.gap() ? qQNaN() : run;
+  s.append(p);
+  if (m_state == Record)
+    m_dirty = true;
+}
+
+void RecordingStore::appendExtra(const Reading &reading)
+{
+  m_extraReading[reading.id] = reading;
+  // the time counts from the main value's first reading: before it there is
+  // no axis to put this one on
+  if (m_state == View || m_series.isEmpty())
+    return;
+
+  // a second display that is off sends an empty value: a gap
+  const bool off = reading.text.isEmpty();
+  RawPoint p;
+  p.t = qMax<qint64>(0, reading.t - m_t0);
+  p.value = off || reading.overload ? qQNaN() : reading.value;
+  p.quality = off ? Quality::Stale : reading.overload ? Quality::Overload : Quality::Valid;
+  p.flags = reading.flags;
+
+  // what the value measures: another port or unit ends its series and
+  // begins a new one (Hz -> %); an overload or a value without a known
+  // quantity says nothing about it
+  const bool says = !off && !reading.overload && reading.port.quantity != Quantity::Unknown;
+  int i = extraIndex(reading.id);
+  bool began = false;
+  if (i >= 0 && says && m_extra[i].port.isValid()
+      && (reading.port != m_extra[i].port || reading.baseUnit != m_extra[i].unit))
+  {
+    if (!m_extra[i].last().gap())
+    {
+      RawPoint end;
+      end.t = p.t;
+      end.value = qQNaN();
+      end.quality = Quality::Stale;
+      appendExtraPoint(i, end);
+    }
+    i = -1;
+  }
+  if (i < 0)
+  {
+    if (off)
+      return;   // nothing to end, nothing to begin
+    RecordingSeries s;
+    s.id = reading.id;
+    m_extra.append(s);
+    i = int(m_extra.size()) - 1;
+    began = true;
+  }
+  if (says && !m_extra[i].port.isValid())
+  {
+    m_extra[i].port = reading.port;
+    m_extra[i].unit = reading.baseUnit;
+  }
+  if (off && m_extra[i].last().gap())
+    return;   // one gap is enough
+  appendExtraPoint(i, p);
+  // a value as fast as the main one is kept as long; beyond the most points
+  // the oldest go
+  bool trimmed = false;
+  if (m_extra[i].count() > m_maxPoints + m_maxPoints / 100)
+  {
+    m_extra[i].removeFirst(m_extra[i].count() - m_maxPoints);
+    trimmed = true;
+  }
+  if (began || trimmed)
+    Q_EMIT extrasChanged();
+  else
+    Q_EMIT extraAppended(i);
+}
+
+bool RecordingStore::trimExtras()
+{
+  if (m_extra.isEmpty())
+    return false;
+  const qint64 from = m_state == Live ? origin() : m_floorMs;
+  const qint64 slack = m_state == Live ? qMax<qint64>(1000, liveKept() / 20) : 0;
+  bool changed = false;
+  for (int i = int(m_extra.size()) - 1; i >= 0; --i)
+  {
+    RecordingSeries &s = m_extra[i];
+    // a series that ended before what is kept goes; the newest of its value
+    // keeps the point that holds at the start
+    const bool newest = extraIndex(s.id) == i;
+    if (!newest && !s.isEmpty() && s.last().t < from)
+    {
+      m_extra.removeAt(i);
+      changed = true;
+      continue;
+    }
+    if (s.count() > 1 && s.at(1).t < from - slack)
+    {
+      const int drop = qMax(0, s.holding(from));
+      if (drop > 0)
+      {
+        s.removeFirst(drop);
+        changed = true;
+      }
+    }
+  }
+  return changed;
+}
+
 bool RecordingStore::trigger(double val)
 {
   bool started = false;
@@ -462,7 +601,25 @@ bool RecordingStore::trigger(double val)
 
 void RecordingStore::setStale(bool stale)
 {
-  if (!stale || m_state == View || m_series.isEmpty() || m_series.last().gap())
+  if (!stale || m_state == View)
+    return;
+  // the meter fell silent: the other values too
+  bool extras = false;
+  for (int i = 0; i < m_extra.size(); ++i)
+  {
+    const RecordingSeries &s = m_extra[i];
+    if (s.isEmpty() || s.last().gap())
+      continue;
+    RawPoint p;
+    p.t = qMin(s.last().t + m_staleMs, qMax(s.last().t, elapsed()));
+    p.value = qQNaN();
+    p.quality = Quality::Stale;
+    appendExtraPoint(i, p);
+    extras = true;
+  }
+  if (extras)
+    Q_EMIT extrasChanged();
+  if (m_series.isEmpty() || m_series.last().gap())
     return;
   // the last value held until the stale limit, no longer
   RawPoint p;
@@ -512,10 +669,25 @@ void RecordingStore::begin(qint64 preMs)
   // the pre-trigger: what the live window holds of that time, from the
   // reading that held at its start on
   QVector<RawPoint> pre;
+  QList<RecordingSeries> preExtra;   // the other values over the same time
   const qint64 liveT0 = m_t0;
   if (preMs > 0 && m_state == Live)
+  {
     for (int i = qMax(0, m_series.holding(elapsed() - preMs)); i < m_series.count(); ++i)
       pre.append(m_series.at(i));
+    for (const RecordingSeries &s : std::as_const(m_extra))
+    {
+      if (s.isEmpty() || s.last().t < elapsed() - preMs)
+        continue;
+      RecordingSeries part;
+      part.id = s.id;
+      part.port = s.port;
+      part.unit = s.unit;
+      for (int i = qMax(0, s.holding(elapsed() - preMs)); i < s.count(); ++i)
+        part.append(s.at(i));
+      preExtra.append(part);
+    }
+  }
   const State was = m_state;
   m_state = Record;
   clear();
@@ -535,6 +707,22 @@ void RecordingStore::begin(qint64 preMs)
       p.t = qMax<qint64>(0, liveT0 + p.t - m_t0);
       append(p);
     }
+    for (const RecordingSeries &part : std::as_const(preExtra))
+    {
+      RecordingSeries s;
+      s.id = part.id;
+      s.port = part.port;
+      s.unit = part.unit;
+      m_extra.append(s);
+      for (int i = 0; i < part.count(); ++i)
+      {
+        RawPoint p = part.at(i);
+        p.t = qMax<qint64>(0, liveT0 + p.t - m_t0);
+        appendExtraPoint(int(m_extra.size()) - 1, p);
+      }
+    }
+    if (!preExtra.isEmpty())
+      Q_EMIT extrasChanged();
     m_marks.append(Mark { back, kTriggerColor, QCoreApplication::translate("RecordingStore", "Trigger") });
     Q_EMIT marksChanged();
   }
@@ -557,6 +745,16 @@ void RecordingStore::appendCurrent()
   p.quality = m_reading.overload ? Quality::Overload : Quality::Valid;
   p.flags = m_reading.flags;
   append(p);
+  // and what the other displays show, at the same moment
+  const QMap<int, Reading> current = m_extraReading;
+  for (const Reading &r : current)
+    if (m_monotonic() - r.t <= m_staleMs && !r.text.isEmpty())
+    {
+      Reading now = r;
+      now.t = m_t0;
+      appendExtra(now);
+      m_extraReading[r.id] = r;   // it came when it came
+    }
 }
 
 void RecordingStore::stop()
@@ -589,6 +787,9 @@ void RecordingStore::live()
 void RecordingStore::clear()
 {
   m_series.clear();
+  m_extra.clear();
+  m_series.port = PortKey();
+  m_series.unit.clear();
   m_floorMs = 0;
   m_recordPort = PortKey();
   m_recordBaseUnit.clear();
@@ -648,6 +849,15 @@ void RecordingStore::append(const RawPoint &p)
 }
 
 bool RecordingStore::trim()
+{
+  const bool trimmed = trimMain();
+  // the other values keep what the main one keeps
+  if (trimExtras())
+    Q_EMIT extrasChanged();
+  return trimmed;
+}
+
+bool RecordingStore::trimMain()
 {
   if (m_series.isEmpty())
     return false;

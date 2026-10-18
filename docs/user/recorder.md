@@ -147,6 +147,21 @@ were; the integration curve carries on across a gap.
   four pixels to either side. It shows how much a value scatters around
   the curve, as wide on screen at 1 minute as at 1 hour. It is off at
   first; whether it shows is kept with the window layout.
+- **Other values of the meter:** a meter with a second display (the
+  temperature of a hygrometer or an anemometer, the frequency of a UT61E,
+  the second value of a Victron or a Fluke 45) shows it as another curve,
+  recorded with the main value on the same time axis. Each value has a
+  colour of its own; a legend at the top left names the curves. A value in
+  the main value's unit shares its axis, the first other unit gets an axis
+  on the right with a scale of its own; a value in a third unit is not
+  drawn yet. When the second display changes what it shows (Hz to %), its
+  curve ends and a new one begins; the recording goes on. The other values
+  are off at first, so the graph shows the main value as before: the
+  right-click menu, **Values**, switches each of them on or off; that is
+  kept with the window layout. They are recorded either way. The time cursors show the other values too; the
+  reference line, the band, the overview, the statistics between the
+  cursors, the triggers and the export are the main value's; the
+  integration curve can take value 2 (see *Integration* below).
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see
@@ -186,7 +201,11 @@ were; the integration curve carries on across a gap.
   energy over time. Each reading counts for the time it was shown. For
   ampere-hours or watt-hours set the scale to 1/3600, `0.000277778`. A
   scale set before version 26.2, when the curve was the sum of the samples,
-  is converted once, so the curve looks as before.
+  is converted once, so the curve looks as before. **Apply to** chooses the value
+  it integrates: value 1, the main display, or value 2, the second display
+  of a meter that has one (a current on a Victron, for instance); it then
+  goes on that value's axis. Without a second display there is no curve
+  for value 2.
 - **Print** (Ctrl+P) prints the graph with a title and comment.
 
 ## Colours

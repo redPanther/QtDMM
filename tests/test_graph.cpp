@@ -95,6 +95,20 @@ struct Feed
     store->setReading(r);
     now += step;
   }
+  /// Another value of the meter (a second display) now, without moving the clock.
+  void other(int id, double v, const QString &unit, Quantity quantity)
+  {
+    Reading r;
+    r.id = id;
+    r.value = v;
+    r.text = QString::number(v);
+    r.unit = r.baseUnit = unit;
+    r.port.quantity = quantity;
+    r.port.slot = Slot(id);
+    r.t = now;
+    r.msecs = wall(now).toMSecsSinceEpoch();
+    store->setReading(r);
+  }
 };
 
 int main(int argc, char **argv)
@@ -1825,6 +1839,127 @@ int main(int argc, char **argv)
           QString("band: the gap parts it, %1 pieces").arg(graph.envelopePath().toSubpathPolygons().size()));
     graph.setEnvelopeVisible(false);
     check(graph.envelopePath().isEmpty(), "band: off again");
+  }
+
+  // --- 7l. the meter's other values: a curve each in a colour of its own;
+  //          the main unit on the left axis, the first other one on a right
+  //          axis with its own scale, a third unit not drawn; a legend; a
+  //          value can be hidden; phosphor tells them apart by dashes ---
+  {
+    Settings cfg("othervalues", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    graph.setUnit("V");
+    Feed feed(graph);
+    graph.liveSLOT();
+    check(graph.legendText().isEmpty() && !graph.rightAxis()->isVisible(), "other values: none, no legend, no right axis");
+    for (int i = 0; i < 50; ++i)
+    {
+      feed.other(1, 20 + i * 0.1, "°C", Quantity::Temperature);   // comes before the main value: dropped at first
+      feed.value(1.0 + i * 0.01);
+      feed.other(2, 0.5, "V", Quantity::Voltage);
+      feed.other(3, 50, "Hz", Quantity::Frequency);
+    }
+    QTest::qWait(20);
+    const RecordingStore *store = graph.store();
+    check(store->extraCount() == 3 && graph.extraCurveCount() == 3, QString("other values: %1 curves").arg(graph.extraCurveCount()));
+    // off at first: the graph shows the main value, as it always did
+    check(!graph.extraCurveShown(0) && !graph.extraCurveShown(1) && !graph.extraCurveShown(2)
+            && graph.legendText().isEmpty() && !graph.rightAxis()->isVisible(),
+          "other values: recorded, not drawn until switched on");
+    for (int id = 1; id <= 3; ++id)
+      graph.setValueShown(id, true);
+    int celsius = -1, volts = -1, hertz = -1;
+    for (int i = 0; i < store->extraCount(); ++i)
+      (store->extra(i).id == 1 ? celsius : store->extra(i).id == 2 ? volts : hertz) = i;
+    check(graph.extraCurveShown(celsius) && graph.extraCurveOnRight(celsius) && graph.extraCurve(celsius)->count() > 10,
+          QString("°C: on the right, %1 points").arg(graph.extraCurve(celsius)->count()));
+    check(graph.rightAxis()->isVisible() && graph.rightAxisTitle() == "[°C]"
+            && graph.rightAxis()->min() <= 20.1 && graph.rightAxis()->max() >= 24.9,
+          QString("right axis [°C] %1..%2").arg(graph.rightAxis()->min()).arg(graph.rightAxis()->max()));
+    check(graph.extraCurveShown(volts) && !graph.extraCurveOnRight(volts), "V: with the main value on the left");
+    check(!graph.extraCurveShown(hertz), "Hz: a third unit, not drawn");
+    const QString legend = graph.legendText();
+    check(legend.contains("Temperature") && legend.contains("°C") && !legend.contains("Hz"),
+          "legend names the curves drawn: " + legend);
+    check(graph.extraCurve(celsius)->pen().color() != graph.extraCurve(volts)->pen().color(),
+          "other values: a colour each");
+    // a value that keeps coming adds to its curve
+    const int before = graph.extraCurve(celsius)->count();
+    for (int i = 0; i < 20; ++i)
+    {
+      feed.value(1.0);
+      feed.other(1, 30, "°C", Quantity::Temperature);
+    }
+    check(graph.extraCurve(celsius)->count() > before && graph.rightAxis()->max() >= 30,
+          QString("°C goes on: %1 -> %2 points, axis up to %3").arg(before).arg(graph.extraCurve(celsius)->count())
+            .arg(graph.rightAxis()->max()));
+
+    // the integration curve of value 2: its series' integral, on its axis
+    {
+      auto *intSeries = qobject_cast<QXYSeries *>(graph.findChild<QChartView *>()->chart()->series().at(2));
+      graph.setIntegration(true, 1.0, 0.0, 0.0);
+      graph.setIntegrationValue(1);
+      const RecordingSeries &c = store->extra(celsius);
+      check(intSeries->count() > 5 && intSeries->attachedAxes().contains(graph.rightAxis())
+              && std::abs(intSeries->points().last().y() - c.last().integral) < 1e-6,
+            QString("integral of value 2: %1 points, last %2, the store's %3")
+              .arg(intSeries->count()).arg(intSeries->count() ? intSeries->points().last().y() : 0).arg(c.last().integral));
+      const double before = c.last().integral;
+      feed.value(1.0);
+      feed.other(1, 30, "°C", Quantity::Temperature);
+      check(store->extra(celsius).last().integral > before
+              && std::abs(intSeries->points().last().y() - store->extra(celsius).last().integral) < 1e-6,
+            "integral of value 2 goes on with its readings");
+      graph.setIntegrationValue(0);
+      check(intSeries->attachedAxes().contains(graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first())
+              && !intSeries->attachedAxes().contains(graph.rightAxis())
+              && std::abs(intSeries->points().last().y() - store->series().last().integral) < 1e-6,
+            "integral of value 1 again, on the left");
+      graph.setIntegration(false, 1.0, 0.0, 0.0);
+    }
+    // a time cursor shows the other values drawn there
+    graph.setTimeCursor(0, 2000);
+    check(graph.timeCursorText().contains("°C") && graph.timeCursorText().contains("500 mV")
+            && !graph.timeCursorText().contains("Hz"),
+          "time cursor with the other values: " + graph.timeCursorText());
+    // a picture to look at: QTDMM_SHOT=<dir>
+    if (qEnvironmentVariableIsSet("QTDMM_SHOT"))
+    {
+      QTest::qWait(50);
+      graph.grab().save(qEnvironmentVariable("QTDMM_SHOT") + "/graph_other_values.png");
+      graph.setColorVariant(GraphWidget::ScopeBlue);
+      QTest::qWait(50);
+      graph.grab().save(qEnvironmentVariable("QTDMM_SHOT") + "/graph_other_values_scope.png");
+      graph.setColorVariant(GraphWidget::Neutral);
+    }
+
+    // hidden: °C goes, Hz gets the right axis
+    graph.setValueShown(1, false);
+    check(!graph.extraCurveShown(celsius) && graph.extraCurveShown(hertz) && graph.rightAxisTitle() == "[Hz]",
+          "°C hidden: Hz on the right axis");
+    check(graph.shownValues() == (QList<int>{ 2, 3 }), "shown values: 2 3");
+    graph.setValueShown(1, true);
+    check(graph.extraCurveShown(celsius) && !graph.extraCurveShown(hertz), "°C shown again");
+
+    // phosphor: one hue, dashes
+    graph.setColorVariant(GraphWidget::PhosphorGreen);
+    check(graph.extraCurve(celsius)->pen().style() != Qt::SolidLine, "phosphor: the other values dashed");
+    graph.setColorVariant(GraphWidget::Neutral);
+    check(graph.extraCurve(celsius)->pen().style() == Qt::SolidLine, "neutral: solid again");
+
+    // a new window starts with what the displays show
+    graph.liveSLOT();
+    bool fresh = true;
+    for (int i = 0; i < graph.extraCurveCount(); ++i)
+      fresh = fresh && (!graph.extraCurveShown(i) || graph.extraCurve(i)->count() <= 1);
+    check(fresh && graph.rightAxis()->isVisible(), "Live anew: the other curves start again from what is shown");
+    // a recording of a meter without other values: none
+    graph.store()->clear();
+    feed.value(1.0);
+    check(!graph.rightAxis()->isVisible() && graph.legendText().isEmpty(), "cleared: no other curves, no legend");
   }
 
   // --- 8. EngNumberValidator: what engValue() writes, value() must read

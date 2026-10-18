@@ -187,6 +187,9 @@ GraphPrefs::GraphPrefs(QWidget *parent) : SettingsPage(parent)
   ui_showInt->setObjectName("ui_showInt");
   ui_showInt->setToolTip(tr("A second curve: the running integral of the reading, scaled and offset."));
   addSection(m_form, ui_showInt);
+  ui_intValue = combo("ui_intValue", { tr("Value 1 (main display)"), tr("Value 2 (second display, if the meter has one)") });
+  ui_intValue->setToolTip(tr("The value the curve integrates. Without a second display there is no curve for value 2."));
+  m_form->addRow(tr("Appl&y to:"), ui_intValue);
   ui_intColor = colour("ui_intColor", tr("The colour of the integration curve."));
   ui_intThresholdColor = colour("ui_intThresholdColor", tr("The colour of the integration threshold."));
   auto *intColours = row({ ui_intColor, new QLabel(tr("Threshold"), this), ui_intThresholdColor });
@@ -204,13 +207,13 @@ GraphPrefs::GraphPrefs(QWidget *parent) : SettingsPage(parent)
   m_form->addRow(tr("Sc&ale:"), ui_intScale);
   m_form->addRow(tr("O&ffset:"), ui_intOffset);
   m_form->addRow(tr("Reset belo&w:"), ui_intThreshold);
-  m_intRows = { intColours, intLine, ui_intPointMode, ui_intScale, ui_intOffset, ui_intThreshold };
+  m_intRows = { ui_intValue, intColours, intLine, ui_intPointMode, ui_intScale, ui_intOffset, ui_intThreshold };
 
   // the combo boxes line up
   int width = 0;
   for (QComboBox *c : findChildren<QComboBox *>())
     width = qMax(width, c->sizeHint().width());
-  for (QComboBox *c : { m_variant, ui_lineMode, ui_pointMode, ui_intLineMode, ui_intPointMode })
+  for (QComboBox *c : { m_variant, ui_lineMode, ui_pointMode, ui_intValue, ui_intLineMode, ui_intPointMode })
     c->setMinimumWidth(width);
 
   alignLabels(m_form);
@@ -272,6 +275,7 @@ void GraphPrefs::defaultsSLOT()
   ui_intLineMode->setCurrentIndex(m_cfg->getInt("Graph/int-line-mode"));
   ui_intPointMode->setCurrentIndex(m_cfg->getInt("Graph/int-point-mode", 1));
   ui_showInt->setChecked(m_cfg->getBool("Graph/show-integration"));
+  ui_intValue->setCurrentIndex(qBound(0, m_cfg->getInt("Graph/int-value"), 1));
   ui_intScale->setText(m_cfg->getString("Graph/int-scale", "1.0"));
   ui_intOffset->setText(m_cfg->getString("Graph/int-offset", "0.0"));
   ui_intThreshold->setText(m_cfg->getString("Graph/int-threshold", "0.0"));
@@ -305,6 +309,7 @@ void GraphPrefs::factoryDefaultsSLOT()
   ui_intPointMode->setCurrentIndex(1);
   ui_intLineWidth->setValue(2);
   ui_showInt->setChecked(false);
+  ui_intValue->setCurrentIndex(0);
   ui_intScale->setText("1.0");
   ui_intOffset->setText("0.0");
   ui_intThreshold->setText("0.0");
@@ -337,6 +342,7 @@ void GraphPrefs::applySLOT()
   m_cfg->setInt("Graph/int-line-mode", ui_intLineMode->currentIndex());
   m_cfg->setInt("Graph/int-point-mode", ui_intPointMode->currentIndex());
   m_cfg->setBool("Graph/show-integration", ui_showInt->isChecked());
+  m_cfg->setInt("Graph/int-value", ui_intValue->currentIndex());
   m_cfg->setString("Graph/int-scale", ui_intScale->text());
   m_cfg->setString("Graph/int-offset", ui_intOffset->text());
   m_cfg->setString("Graph/int-threshold", ui_intThreshold->text());
@@ -363,6 +369,7 @@ QColor GraphPrefs::intThresholdColor() const { return ui_intThresholdColor->colo
 int GraphPrefs::intLineWidth() const { return ui_intLineWidth->value(); }
 int GraphPrefs::intLineMode() const { return ui_intLineMode->currentIndex(); }
 int GraphPrefs::intPointMode() const { return ui_intPointMode->currentIndex(); }
+int GraphPrefs::intValue() const { return ui_intValue->currentIndex(); }
 double GraphPrefs::intScale() const { return EngNumberValidator::value(ui_intScale->text()); }
 double GraphPrefs::intThreshold() const { return EngNumberValidator::value(ui_intThreshold->text()); }
 double GraphPrefs::intOffset() const { return EngNumberValidator::value(ui_intOffset->text()); }

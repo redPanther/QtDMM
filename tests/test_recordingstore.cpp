@@ -37,6 +37,17 @@ static Reading reading(double value, const QString &text, const QString &special
   return r;
 }
 
+// Another value of the meter (a second display): @p id, in @p unit; an empty
+// @p text is a display that is off
+static Reading other(int id, double value, const QString &text, const QString &unit, const QString &special = "")
+{
+  static ReadingAdapter adapter;
+  Reading r = ReadingAdapter::reading(adapter.adaptValue(value, text, unit, special, "AUTO", false, false, false, id,
+                                                         QDateTime::currentMSecsSinceEpoch()));
+  r.value = value;
+  return r;
+}
+
 // A clock of the test's own for a store: ms on the core clock, the wall
 // clock from a fixed day
 struct TestClock
@@ -91,6 +102,118 @@ int main(int argc, char **argv)
     clock.now = 10000;
     store.start();
     check(store.count() == 0, "start: a stale value is no start value");
+  }
+
+  // --- 1c. the other values (id > 0): series of their own on the same time
+  //         axis, one per value and port; the recording goes on when a
+  //         second display changes what it shows ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    QSignalSpy began(&store, &RecordingStore::extrasChanged);
+    QSignalSpy added(&store, &RecordingStore::extraAppended);
+    store.start();
+    // before the main value's first reading there is no time axis
+    store.setReading(clock.at(100, other(1, 50, "50.00", "Hz")));
+    check(store.extraCount() == 0, "other value before the main one: dropped");
+    store.setReading(clock.at(250, reading(0.01234, "12.34", "DC")));
+    store.setReading(clock.at(260, other(1, 50, "50.00", "Hz")));
+    check(store.count() == 1 && store.extraCount() == 1, QString("other value: %1 series").arg(store.extraCount()));
+    const RecordingSeries &hz = store.extra(0);
+    check(hz.id == 1 && hz.unit == "Hz" && hz.port.quantity == Quantity::Frequency && hz.count() == 1
+            && hz.last().t == 10 && hz.last().value == 50 && hz.last().integral == 0,
+          QString("other value: id %1 unit %2 t %3").arg(hz.id).arg(hz.unit).arg(hz.count() ? hz.last().t : -1));
+    check(began.count() == 1 && added.count() == 0, "other value: a series began");
+    store.setReading(clock.at(500, other(1, 51, "51.00", "Hz")));
+    check(store.extra(0).count() == 2 && added.count() == 1 && added.last().at(0).toInt() == 0,
+          "other value: the next reading appended");
+    // its integral over time, as the main value's: 50 Hz for 0.24 s
+    check(std::abs(store.extra(0).last().integral - 12) < 1e-9,
+          QString("other value: integral %1, expected 12").arg(store.extra(0).last().integral));
+
+    // Hz -> %: the series ends with a gap, a new one begins, still recording
+    store.setReading(clock.at(700, other(1, 25, "25.0", "%")));
+    check(store.isRunning() && store.extraCount() == 2 && store.extra(0).last().gap()
+            && store.extra(0).last().t == 450 && store.extra(1).first().t == 450 && store.extra(1).unit == "%",
+          QString("Hz -> %: %1 series, running %2").arg(store.extraCount()).arg(store.isRunning()));
+    // the display goes off: one gap, not one per frame
+    store.setReading(clock.at(800, other(1, 0, "", "%")));
+    store.setReading(clock.at(900, other(1, 0, "", "%")));
+    check(store.extra(1).count() == 2 && store.extra(1).last().gap()
+            && store.extra(1).last().quality == Quality::Stale,
+          QString("display off: one gap, %1 points").arg(store.extra(1).count()));
+    // an overload is a gap that says so, and keeps the series
+    store.setReading(clock.at(1000, other(1, 0, "OL", "%")));
+    check(store.extraCount() == 2 && store.extra(1).last().quality == Quality::Overload, "other value OL: Overload");
+    // the meter falls silent: a gap in every series that has a value
+    store.setReading(clock.at(1100, other(1, 30, "30.0", "%")));
+    clock.now = 10000;
+    store.setStale(true);
+    check(store.extra(1).last().gap() && store.extra(1).last().t == 850 + 3000,
+          QString("stale: gap at %1").arg(store.extra(1).last().t));
+    // a second other value: a series of its own
+    store.setReading(clock.at(10100, reading(0.02, "20.00", "DC")));
+    store.setReading(clock.at(10110, other(2, 21.5, "21.5", "°C")));
+    check(store.extraCount() == 3 && store.extra(2).id == 2, "a second other value: its own series");
+    // clear empties them, a new recording starts with what the displays show
+    // (°C, fresh; the % of value 1 is too old)
+    store.clear();
+    check(store.extraCount() == 0, "clear: no other series");
+    store.start();
+    check(store.count() == 1 && store.extraCount() == 1 && store.extra(0).id == 2 && store.extra(0).first().t == 0,
+          QString("start: the other values shown, %1 series").arg(store.extraCount()));
+    // a recording that stopped takes nothing more
+    store.stop();
+    store.setReading(clock.at(10500, other(2, 22, "22.0", "°C")));
+    check(store.extra(0).count() == 1, "View: no other value appended");
+    // a file loaded has none
+    Recording rec;
+    rec.start = TestClock::wall(0);
+    rec.sampleTimeTenths = 10;
+    rec.values = { 1, 2 };
+    store.load(rec);
+    check(store.extraCount() == 0, "load: no other series");
+  }
+
+  // --- 1d. the other values in Live: they keep what the main one keeps, and
+  //         a pre-triggered recording takes them along ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setSampleLength(20);   // Live keeps 2 s
+    store.live();
+    for (qint64 t = 0; t <= 6000; t += 100)
+    {
+      store.setReading(clock.at(t, reading(0.001, "1.000", "DC")));
+      store.setReading(clock.at(t + 10, other(1, double(t), "1.0", "Hz")));
+    }
+    const qint64 origin = store.origin();
+    check(store.extraCount() == 1 && store.extra(0).first().t <= origin && store.extra(0).first().t > origin - 1200
+            && store.extra(0).count() < 40,
+          QString("Live: other series from %1 (origin %2), %3 points")
+            .arg(store.extra(0).first().t).arg(origin).arg(store.extra(0).count()));
+    // an old series of another port goes once it ended before what is kept
+    store.setReading(clock.at(6100, other(1, 3, "3.0", "%")));
+    for (qint64 t = 6200; t <= 9000; t += 100)
+    {
+      store.setReading(clock.at(t, reading(0.001, "1.000", "DC")));
+      store.setReading(clock.at(t + 10, other(1, 3, "3.0", "%")));
+    }
+    check(store.extraCount() == 1 && store.extra(0).unit == "%",
+          QString("Live: the ended series went, %1 left").arg(store.extraCount()));
+
+    // pre-trigger: the recording reaches back 1 s, the other value with it
+    store.setPreTrigger(1000);
+    store.setStartMode(RecordingStore::Raising);
+    store.setThresholds(0, 0.005);
+    store.setReading(clock.at(9100, reading(0.01, "10.00", "DC")));
+    check(store.isRunning(), "pre-trigger: started");
+    check(store.extraCount() == 1 && store.extra(0).count() >= 9 && store.extra(0).first().t >= 0
+            && store.extra(0).first().t <= 100 && store.extra(0).unit == "%",
+          QString("pre-trigger: other series %1 points from %2")
+            .arg(store.extraCount() ? store.extra(0).count() : 0).arg(store.extraCount() ? store.extra(0).first().t : -1));
   }
 
   // --- 1b. the time starts with the first reading: Live started while the
