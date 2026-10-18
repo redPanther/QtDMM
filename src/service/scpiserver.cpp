@@ -432,19 +432,11 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
   const QString sub = depth > 1 ? cmd.path[1] : QString();
   const QString leaf = depth > 2 ? cmd.path[2] : QString();
   isQuery = cmd.query;
-  auto fail = [this, &isQuery](int code, const QString &text)
-  {
-    pushError(code, text);
-    isQuery = false;
-    return QString();
-  };
-  auto wantQuery = [&]() { return cmd.query || (fail(-100, "Command error"), false); };
-  auto wantCommand = [&]() { return !cmd.query || (fail(-100, "Command error"), false); };
 
   // QTDMM:RECord? - IDLE|LIVE|REC|VIEW,<seconds>,<readings>,"<unit>"
   if (matches(sub, "RECord") && depth == 2)
   {
-    if (!wantQuery())
+    if (!queryOnly(cmd, isQuery))
       return {};
     const RecordingState r = m_sources.recording ? m_sources.recording() : RecordingState();
     static const char *const modes[] = { "IDLE", "LIVE", "REC", "VIEW" };
@@ -458,7 +450,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     const QList<AlarmState> alarms = m_sources.alarms ? m_sources.alarms() : QList<AlarmState>();
     if (depth == 2)
     {
-      if (!wantQuery())
+      if (!queryOnly(cmd, isQuery))
         return {};
       int raised = 0;
       for (const AlarmState &a : alarms)
@@ -467,7 +459,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     }
     if (matches(leaf, "LIST"))
     {
-      if (!wantQuery())
+      if (!queryOnly(cmd, isQuery))
         return {};
       static const char *const levels[] = { "OFF", "PEND", "RAIS", "ACKN" };
       QStringList out;
@@ -477,17 +469,17 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     }
     if (matches(leaf, "ACKnowledge"))
     {
-      if (wantCommand())
+      if (commandOnly(cmd, isQuery))
         Q_EMIT acknowledgeAlarmsRequested();
       return {};
     }
-    return fail(-113, "Undefined header");
+    return refuse(isQuery, -113, "Undefined header");
   }
 
   // QTDMM:MARK "text": a mark at the newest reading
   if (matches(sub, "MARK") && depth == 2)
   {
-    if (wantCommand())
+    if (commandOnly(cmd, isQuery))
     {
       const QString text = unquote(cmd.args);
       Q_EMIT markRequested(text.isEmpty() ? QStringLiteral("SCPI") : text);
@@ -502,32 +494,32 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     if (depth == 3)
     {
       if (!matches(leaf, "CATalog"))
-        return fail(-113, "Undefined header");
-      if (!wantQuery())
+        return refuse(isQuery, -113, "Undefined header");
+      if (!queryOnly(cmd, isQuery))
         return {};
       QStringList out;
       for (const QString &k : keys)
         out << quoted(k.toUpper());
       return out.isEmpty() ? QString("\"\"") : out.join(',');
     }
-    if (!wantCommand())
+    if (!commandOnly(cmd, isQuery))
       return {};
     const QString key = unquote(cmd.args).toLower();
     if (key.isEmpty())
-      return fail(-109, "Missing parameter");
+      return refuse(isQuery, -109, "Missing parameter");
     if (keys.isEmpty())
-      return fail(-241, "Hardware missing; the meter has no keys QtDMM can press");
+      return refuse(isQuery, -241, "Hardware missing; the meter has no keys QtDMM can press");
     if (!keys.contains(key))
-      return fail(-224, "Illegal parameter value");
+      return refuse(isQuery, -224, "Illegal parameter value");
     if (!m_sources.pressKey || !m_sources.pressKey(key))
-      return fail(-240, "Hardware error; the key was not sent");
+      return refuse(isQuery, -240, "Hardware error; the key was not sent");
     return {};
   }
 
   // QTDMM:INSTances? - "<id>",<value>,"<unit>" for each running instance
   if (matches(sub, "INSTances") && depth == 2)
   {
-    if (!wantQuery())
+    if (!queryOnly(cmd, isQuery))
       return {};
     QStringList out;
     if (m_sources.instances)
@@ -536,159 +528,63 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     return out.isEmpty() ? QString("\"\"") : out.join(',');
   }
 
-  return fail(-113, "Undefined header");
+  return refuse(isQuery, -113, "Undefined header");
 }
 
+QString ScpiServer::refuse(bool &isQuery, int code, const QString &text)
+{
+  pushError(code, text);
+  isQuery = false;
+  return {};
+}
+
+bool ScpiServer::queryOnly(const Command &cmd, bool &isQuery)
+{
+  if (!cmd.query)
+    refuse(isQuery, -100, "Command error");
+  return cmd.query;
+}
+
+bool ScpiServer::commandOnly(const Command &cmd, bool &isQuery)
+{
+  if (cmd.query)
+    refuse(isQuery, -100, "Command error");
+  return !cmd.query;
+}
+
+// By subsystem: the common commands, the readings, the recorder and the
+// connection, the min/max memory, QtDMM's own, STATus and SYSTem
 QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
 {
   const QString head = cmd.path.first();
   const int depth = cmd.path.size();
   isQuery = cmd.query;
-  auto undefined = [this, &isQuery]()
-  {
-    pushError(-113, "Undefined header");
-    isQuery = false;
-    return QString();
-  };
-  auto queryOnly = [this, &cmd, &isQuery]()
-  {
-    if (!cmd.query)
-    {
-      pushError(-100, "Command error");
-      isQuery = false;
-      return false;
-    }
-    return true;
-  };
-  auto noQuery = [this, &cmd, &isQuery]()
-  {
-    if (cmd.query)
-    {
-      pushError(-100, "Command error");
-      isQuery = false;
-      return false;
-    }
-    return true;
-  };
 
-  // IEEE 488.2 common commands
   if (head.startsWith('*'))
-  {
-    if (depth != 1)
-      return undefined();
-    if (head == "*IDN")
-      return queryOnly() ? QString("QtDMM,%1,0,%2").arg(m_model.isEmpty() ? QString("no meter") : m_model,
-                                                         QString::fromLatin1(APP_VERSION)) : QString();
-    if (head == "*RST" || head == "*CLS")
-    {
-      if (noQuery())
-        m_errors.clear();
-      return {};
-    }
-    if (head == "*OPC")
-      return cmd.query ? QString("1") : QString();
-    if (head == "*WAI")
-      return noQuery() ? QString() : QString();
-    if (head == "*TST")
-      return queryOnly() ? QString("0") : QString();
-    if (head == "*STB")
-      return queryOnly() ? QString::number(statusByte()) : QString();
-    if (head == "*ESR" || head == "*ESE" || head == "*SRE")
-    {
-      if (!cmd.query && (head == "*ESE" || head == "*SRE"))
-        return {};
-      return queryOnly() ? QString("0") : QString();
-    }
-    return undefined();
-  }
+    return handleCommon(cmd, isQuery);
 
-  // readings: READ? FETCh? MEASure? [SENSe:]DATA? VALue1?/VALue2?  - a
-  // numeric suffix picks the main (1) or second (2) value
+  // readings: READ? FETCh? MEASure? [SENSe:]DATA? VALue1?/VALue2?, also
+  // MEASure:VOLTage:DC? and the like; UNIT? and CONFigure?
   const bool isRead = matches(head, "READ") || matches(head, "FETCh") || matches(head, "MEASure")
                       || matches(head, "VALue") || matches(head, "DATA")
                       || (matches(head, "SENSe") && depth == 2 && matches(cmd.path[1], "DATA"));
-  if (isRead && depth <= 2)
+  if (isRead || ((matches(head, "UNIT") || matches(head, "CONFigure")) && depth == 1))
   {
-    if (!queryOnly())
-      return {};
-    // MEASure:VOLTage:DC? style sub-functions are accepted and ignored:
-    // the meter decides what it measures
-    const int channel = cmd.suffix.last() != 1 ? cmd.suffix.last() : cmd.suffix.first();
-    const Reading *r = reading(channel);
-    if (!r)
-    {
-      isQuery = false;
-      return {};
-    }
-    const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    if (!r->valid || !m_connected || now - r->msecs > kStaleMs)
-    {
-      pushError(-230, "Data corrupt or stale");
-      return kNotANumber;
-    }
-    if (r->overload)
-      return number(std::signbit(r->value) ? -INFINITY : INFINITY);   // -OL: a negative NaN
-    return number(r->value);
-  }
-  if (matches(head, "MEASure") && depth > 2)
-  {
-    // MEASure:VOLTage:DC? etc.
-    if (!queryOnly())
-      return {};
-    const Reading *r = reading(cmd.suffix.first());
-    if (!r)
-    {
-      isQuery = false;
-      return {};
-    }
-    const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    if (!r->valid || !m_connected || now - r->msecs > kStaleMs)
-    {
-      pushError(-230, "Data corrupt or stale");
-      return kNotANumber;
-    }
-    return r->overload ? number(std::signbit(r->value) ? -INFINITY : INFINITY) : number(r->value);
-  }
-
-  if (matches(head, "UNIT") && depth == 1)
-  {
-    if (!queryOnly())
-      return {};
-    const Reading *r = reading(cmd.suffix.first());
-    if (!r)
-    {
-      isQuery = false;
-      return {};
-    }
-    return QString("\"%1\"").arg(r->unit);
-  }
-
-  if (matches(head, "CONFigure") && depth == 1)
-  {
-    if (!queryOnly())
-      return {};
-    const Reading *r = reading(cmd.suffix.first());
-    if (!r)
-    {
-      isQuery = false;
-      return {};
-    }
-    QString range = r->range.toUpper() == "AUTO" ? QString("AUTO") : r->range;
-    if (range.isEmpty() || range.toUpper() == "MANU")
-      range = "MANUAL";
-    return QString("\"%1 %2\"").arg(function(*r), range);
+    if (isRead && depth > 2 && !matches(head, "MEASure"))
+      return refuse(isQuery, -113, "Undefined header");
+    return handleReading(cmd, isQuery);
   }
 
   // recorder and connection
   if (matches(head, "INITiate") && depth <= 2)
   {
-    if (noQuery())
+    if (commandOnly(cmd, isQuery))
       Q_EMIT startRecording();
     return {};
   }
   if (matches(head, "ABORt") && depth == 1)
   {
-    if (noQuery())
+    if (commandOnly(cmd, isQuery))
       Q_EMIT stopRecording();
     return {};
   }
@@ -712,15 +608,15 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
     const QString what = cmd.path[2];
     if (matches(what, "CLEar"))
     {
-      if (noQuery())
+      if (commandOnly(cmd, isQuery))
         Q_EMIT resetMinMaxRequested();
       return {};
     }
     const bool min = matches(what, "MINimum"), max = matches(what, "MAXimum");
     const bool mean = matches(what, "AVERage"), count = matches(what, "COUNt");
     if (!min && !max && !mean && !count)
-      return undefined();
-    if (!queryOnly())
+      return refuse(isQuery, -113, "Undefined header");
+    if (!queryOnly(cmd, isQuery))
       return {};
     const Stats s = m_sources.stats ? m_sources.stats() : Stats();
     if (count)
@@ -732,63 +628,136 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
 
   if (matches(head, "QTDMM"))
     return handleQtdmm(cmd, isQuery);
-
-  // STATus
   if (matches(head, "STATus") && depth >= 2)
-  {
-    if (!queryOnly())
-      return {};
-    const bool cond = depth == 2 || (depth == 3 && (matches(cmd.path[2], "CONDition") || matches(cmd.path[2], "EVENt")));
-    if (!cond)
-      return undefined();
-    if (matches(cmd.path[1], "QUEStionable"))
-    {
-      // bit 0 overload, bit 1 hold, bit 2 meter not connected, bit 3 no
-      // current reading; an old reading's overload or hold is gone
-      int bits = 0;
-      const Reading &r = m_readings[0];
-      const qint64 now = QDateTime::currentMSecsSinceEpoch();
-      const bool current = r.valid && now - r.msecs <= kStaleMs;
-      if (current && r.overload) bits |= 1;
-      if (current && r.hold) bits |= 2;
-      if (!m_connected) bits |= 4;
-      if (!current) bits |= 8;
-      return QString::number(bits);
-    }
-    if (matches(cmd.path[1], "OPERation"))
-    {
-      // SCPI bit 4 = measuring: the recorder runs; bit 9 (QtDMM's own) an
-      // alarm is raised, acknowledged or not
-      int bits = m_recording ? 16 : 0;
-      if (m_sources.alarms)
-        for (const AlarmState &a : m_sources.alarms())
-          if (a.level >= AlarmState::Raised)
-            bits |= 512;
-      return QString::number(bits);
-    }
-    return undefined();
-  }
-
-  // SYSTem
+    return handleStatus(cmd, isQuery);
   if (matches(head, "SYSTem") && depth >= 2)
-  {
-    if (matches(cmd.path[1], "ERRor"))
-    {
-      if (!queryOnly())
-        return {};
-      if (depth == 3 && matches(cmd.path[2], "COUNt"))
-        return QString::number(m_errors.size());
-      if (depth == 3 && !matches(cmd.path[2], "NEXT"))
-        return undefined();
-      if (m_errors.isEmpty())
-        return "0,\"No error\"";
-      const auto e = m_errors.takeFirst();
-      return QString("%1,\"%2\"").arg(e.first).arg(e.second);
-    }
-    if (matches(cmd.path[1], "VERSion") && depth == 2)
-      return queryOnly() ? QString("1999.0") : QString();
-    return undefined();
-  }
+    return handleSystem(cmd, isQuery);
+  return refuse(isQuery, -113, "Undefined header");
+}
 
-  return undefined();
+// IEEE 488.2 common commands
+QString ScpiServer::handleCommon(const Command &cmd, bool &isQuery)
+{
+  const QString head = cmd.path.first();
+  if (cmd.path.size() != 1)
+    return refuse(isQuery, -113, "Undefined header");
+  if (head == "*IDN")
+    return queryOnly(cmd, isQuery) ? QString("QtDMM,%1,0,%2").arg(m_model.isEmpty() ? QString("no meter") : m_model,
+                                                                  QString::fromLatin1(APP_VERSION)) : QString();
+  if (head == "*RST" || head == "*CLS")
+  {
+    if (commandOnly(cmd, isQuery))
+      m_errors.clear();
+    return {};
+  }
+  if (head == "*OPC")
+    return cmd.query ? QString("1") : QString();
+  if (head == "*WAI")
+  {
+    commandOnly(cmd, isQuery);
+    return {};
+  }
+  if (head == "*TST")
+    return queryOnly(cmd, isQuery) ? QString("0") : QString();
+  if (head == "*STB")
+    return queryOnly(cmd, isQuery) ? QString::number(statusByte()) : QString();
+  if (head == "*ESR" || head == "*ESE" || head == "*SRE")
+  {
+    if (!cmd.query && (head == "*ESE" || head == "*SRE"))
+      return {};
+    return queryOnly(cmd, isQuery) ? QString("0") : QString();
+  }
+  return refuse(isQuery, -113, "Undefined header");
+}
+
+// READ? and its kin, UNIT?, CONFigure?: a numeric suffix picks the main (1)
+// or the second (2) value. MEASure:VOLTage:DC? style sub-functions are
+// accepted and ignored: the meter decides what it measures
+QString ScpiServer::handleReading(const Command &cmd, bool &isQuery)
+{
+  if (!queryOnly(cmd, isQuery))
+    return {};
+  const QString head = cmd.path.first();
+  const int channel = cmd.path.size() <= 2 && cmd.suffix.last() != 1 ? cmd.suffix.last() : cmd.suffix.first();
+  const Reading *r = reading(channel);
+  if (!r)
+  {
+    isQuery = false;
+    return {};
+  }
+  if (matches(head, "UNIT"))
+    return QString("\"%1\"").arg(r->unit);
+  if (matches(head, "CONFigure"))
+  {
+    QString range = r->range.toUpper() == "AUTO" ? QString("AUTO") : r->range;
+    if (range.isEmpty() || range.toUpper() == "MANU")
+      range = "MANUAL";
+    return QString("\"%1 %2\"").arg(function(*r), range);
+  }
+  const qint64 now = QDateTime::currentMSecsSinceEpoch();
+  if (!r->valid || !m_connected || now - r->msecs > kStaleMs)
+  {
+    pushError(-230, "Data corrupt or stale");
+    return kNotANumber;
+  }
+  if (r->overload)
+    return number(std::signbit(r->value) ? -INFINITY : INFINITY);   // -OL: a negative NaN
+  return number(r->value);
+}
+
+QString ScpiServer::handleStatus(const Command &cmd, bool &isQuery)
+{
+  const int depth = cmd.path.size();
+  if (!queryOnly(cmd, isQuery))
+    return {};
+  const bool cond = depth == 2 || (depth == 3 && (matches(cmd.path[2], "CONDition") || matches(cmd.path[2], "EVENt")));
+  if (!cond)
+    return refuse(isQuery, -113, "Undefined header");
+  if (matches(cmd.path[1], "QUEStionable"))
+  {
+    // bit 0 overload, bit 1 hold, bit 2 meter not connected, bit 3 no
+    // current reading; an old reading's overload or hold is gone
+    int bits = 0;
+    const Reading &r = m_readings[0];
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const bool current = r.valid && now - r.msecs <= kStaleMs;
+    if (current && r.overload) bits |= 1;
+    if (current && r.hold) bits |= 2;
+    if (!m_connected) bits |= 4;
+    if (!current) bits |= 8;
+    return QString::number(bits);
+  }
+  if (matches(cmd.path[1], "OPERation"))
+  {
+    // SCPI bit 4 = measuring: the recorder runs; bit 9 (QtDMM's own) an
+    // alarm is raised, acknowledged or not
+    int bits = m_recording ? 16 : 0;
+    if (m_sources.alarms)
+      for (const AlarmState &a : m_sources.alarms())
+        if (a.level >= AlarmState::Raised)
+          bits |= 512;
+    return QString::number(bits);
+  }
+  return refuse(isQuery, -113, "Undefined header");
+}
+
+QString ScpiServer::handleSystem(const Command &cmd, bool &isQuery)
+{
+  const int depth = cmd.path.size();
+  if (matches(cmd.path[1], "ERRor"))
+  {
+    if (!queryOnly(cmd, isQuery))
+      return {};
+    if (depth == 3 && matches(cmd.path[2], "COUNt"))
+      return QString::number(m_errors.size());
+    if (depth == 3 && !matches(cmd.path[2], "NEXT"))
+      return refuse(isQuery, -113, "Undefined header");
+    if (m_errors.isEmpty())
+      return "0,\"No error\"";
+    const auto e = m_errors.takeFirst();
+    return QString("%1,\"%2\"").arg(e.first).arg(e.second);
+  }
+  if (matches(cmd.path[1], "VERSion") && depth == 2)
+    return queryOnly(cmd, isQuery) ? QString("1999.0") : QString();
+  return refuse(isQuery, -113, "Undefined header");
 }
