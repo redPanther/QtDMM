@@ -336,7 +336,11 @@ int main(int argc, char **argv)
   srv.setRpcbind({}, 1);   // nothing answers on port 1
   int links = 0;
   QObject::connect(&srv, &Vxi11Server::linksChanged, [&links](int n) { links = n; });
-  check(srv.start(QHostAddress::LocalHost, Vxi11Server::RpcbindMode::Auto, 0, 0, 0), "start, own portmapper: " + srv.error());
+  const bool started = srv.start(QHostAddress::LocalHost, Vxi11Server::RpcbindMode::Auto, 0, 0, 0);
+  check(started, "start, own portmapper: " + srv.error());   // error() after start(): MSVC
+                                                             // evaluates arguments right to left
+  if (!started)
+    return 1;   // everything below needs the server
   check(!srv.usesSystemRpcbind() && srv.portmapperPort() != 0, "an own portmapper");
   check(srv.address() == QHostAddress(QHostAddress::LocalHost), "localhost only");
   const quint16 pmap = srv.portmapperPort();
@@ -461,7 +465,8 @@ int main(int argc, char **argv)
 
     Vxi11Server sys(ep);
     sys.setRpcbind({ path }, 1);
-    check(sys.start(QHostAddress::LocalHost, Vxi11Server::RpcbindMode::Auto), "start with the system rpcbind: " + sys.error());
+    const bool sysStarted = sys.start(QHostAddress::LocalHost, Vxi11Server::RpcbindMode::Auto);
+    check(sysStarted, "start with the system rpcbind: " + sys.error());
     check(sys.usesSystemRpcbind(), "uses it");
     check(fake.port(kCore) == sys.corePort() && fake.port(kAbort) != 0, "core and abort registered");
     sys.stop();
@@ -469,7 +474,8 @@ int main(int argc, char **argv)
 
     // an entry left behind by a crashed run: taken over
     fake.put(kCore, 1);
-    check(sys.start(QHostAddress::LocalHost, Vxi11Server::RpcbindMode::System), "stale entry replaced: " + sys.error());
+    const bool replaced = sys.start(QHostAddress::LocalHost, Vxi11Server::RpcbindMode::System);
+    check(replaced, "stale entry replaced: " + sys.error());
     check(fake.port(kCore) == sys.corePort(), "now ours");
     sys.stop();
 

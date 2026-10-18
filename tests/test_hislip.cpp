@@ -166,7 +166,8 @@ int main(int argc, char **argv)
   // --- 1. listens where it is told, the next port when one is taken ---
   QTcpServer blocker;
   check(blocker.listen(QHostAddress::LocalHost, 0), "a port to block");
-  check(server.start(QHostAddress::LocalHost, blocker.serverPort(), 3), "start: " + server.error());
+  const bool started = server.start(QHostAddress::LocalHost, blocker.serverPort(), 3);
+  check(started, "start: " + server.error());   // error() after start()
   check(server.port() == blocker.serverPort() + 1 || server.port() > blocker.serverPort(),
         QString("next free port: %1 after %2").arg(server.port()).arg(blocker.serverPort()));
   check(server.address() == QHostAddress::LocalHost, "localhost only");
@@ -328,7 +329,8 @@ int main(int argc, char **argv)
     check(waitFor([&] { return server.sessionCount() == 0; }), "all closed after the dialog");
 
     // the same over SCPI raw
-    check(scpi.start(QHostAddress::LocalHost, 0), "raw: " + scpi.errorString());
+    const bool rawStarted = scpi.start(QHostAddress::LocalHost, 0);
+    check(rawStarted, "raw: " + scpi.errorString());
     auto *raw = new QTcpSocket;
     raw->connectToHost(QHostAddress::LocalHost, scpi.port());
     check(waitFor([&] { return raw->state() == QAbstractSocket::ConnectedState; }), "raw connected");

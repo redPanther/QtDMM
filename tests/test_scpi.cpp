@@ -265,7 +265,8 @@ int main(int argc, char **argv)
   // --- 5. over TCP ---
   // a port the system picks: a fixed one (and the next) may be in use on the
   // build machine - a client's ephemeral port, another job
-  check(s.start(QHostAddress::LocalHost, 0), "listens on localhost " + s.errorString());
+  const bool listening = s.start(QHostAddress::LocalHost, 0);
+  check(listening, "listens on localhost " + s.errorString());
   ScpiServer second;
   check(second.start(QHostAddress::LocalHost, s.port()) && second.port() > s.port() && second.port() < s.port() + 10,
         QString("second instance moves to a later port: %1 after %2").arg(second.port()).arg(s.port()));
