@@ -90,6 +90,7 @@
   VA). A voltage no longer gets an integral in V·s, unless it is the value of the integration curve. With the
   main value hidden, the reference line, the min/max band and the cursors' level lines follow the value on the
   left axis instead of going away
+- Poincaré plot: in a wide window the title of the y axis stands at its labels, not at the left edge of the window
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

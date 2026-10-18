@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // PoincareSeries on its own: the pairs, SD1 and SD2, gaps, port changes,
-// capacity, lag and the axis.
-#include <QCoreApplication>
+// capacity, lag and the axis; the plot's labels.
+#include <QApplication>
 #include <QDebug>
+#include <QImage>
+#include <QTest>
 #include <cmath>
 
 #include "core/poincare.h"
 #include "core/readingadapter.h"
+#include "ui/views/poincareplot.h"
 #include "testutil.h"
 
 static bool near(double a, double b)
@@ -37,7 +40,9 @@ static QString pairsText(const PoincareSeries &s)
 
 int main(int argc, char **argv)
 {
-  QCoreApplication app(argc, argv);
+  if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
+    qputenv("QT_QPA_PLATFORM", "offscreen");
+  QApplication app(argc, argv);
 
   // --- 1. pairs and the spread: 1 2 3 2 1 gives (1,2) (2,3) (3,2) (2,1);
   //        across the diagonal +-1/sqrt 2, along it +-1/sqrt 2 around the
@@ -159,6 +164,29 @@ int main(int argc, char **argv)
     check(d.lo <= 1 && d.hi >= 3 && near(d.step, 0.5), QString("axis 1..3: step %1").arg(d.step));
     z.clear();
     check(z.resolution() == 0, "clear: no resolution");
+  }
+
+  // --- 6. the plot in a wide window: the square sits in the middle, the y
+  //        title at its labels, not at the left edge of the window ---
+  {
+    PoincarePlot plot;
+    plot.resize(1000, 300);
+    plot.setThemeColors(QBrush(Qt::black), QColor(Qt::black), QColor(Qt::red), QColor(Qt::black));
+    for (int i = 0; i < 20; ++i)
+      plot.addReading(reading(23.1 + (i % 2) * 0.1, i % 2 ? "23.2" : "23.1", "°C"));
+    QTest::qWait(600);   // the plot repaints on its timer
+    const QImage image = plot.grab().toImage();
+    int leftmost = image.width();
+    for (int x = 0; x < image.width() && leftmost == image.width(); ++x)
+      for (int y = 0; y < image.height(); ++y)
+        if (QColor(image.pixel(x, y)).red() > 128)
+        {
+          leftmost = x;
+          break;
+        }
+    // the square plot is about 250 px wide in the middle: its labels start
+    // well right of 200
+    check(leftmost > 200 && leftmost < 500, QString("wide plot: the labels start at x %1").arg(leftmost));
   }
 
   if (failed)
