@@ -31,6 +31,7 @@
 #include <QPdfWriter>
 
 #include "ui/views/graphwidget.h"
+#include "core/nicestep.h"
 
 #include <climits>
 #include "ui/views/graphflags.h"

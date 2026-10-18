@@ -5,7 +5,6 @@
 #include "device/transports/buffereddevice.h"
 
 #include <QStringList>
-#include <QThread>
 
 #include "device/dmmdecoder.h"
 #include "device/transports/hidreader.h"

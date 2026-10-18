@@ -55,6 +55,10 @@ private:
 class HidReaderThread
 {
 public:
+  HidReaderThread() = default;
+  ~HidReaderThread() { stop(); }
+  Q_DISABLE_COPY(HidReaderThread)
+
   /// Runs the read loop for @p handle (owned by the reader from now on) and
   /// queues its reports and its read error to @p device.
   template <class Device>

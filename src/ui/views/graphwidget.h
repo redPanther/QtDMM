@@ -33,7 +33,6 @@
 #include <QValueAxis>
 #include <QGraphicsLineItem>
 
-#include "core/nicestep.h"
 #include "ui/views/gapline.h"
 #include "recording/recordingstore.h"
 
@@ -209,9 +208,6 @@ public:
   static ColorVariant variantFromName(const QString &name);
   /// The variant's name in the menus ("Scope blue").
   static QString   variantTitle(ColorVariant variant);
-  /// The smallest step of the 1-2-5 series (..., 0.5, 1, 2, 5, 10, ...) that
-  /// is at least @p v (core/nicestep.h); the division of the scope variants.
-  static double    niceStep(double v) { return ::niceStep(v); }
   /// The smallest time step (..., 1, 2, 5, 10, 15, 30 s, 1, 2, 5, 10, 15,
   /// 30 min, 1, 2, 3, 6, 12 h, days) that is at least @p v seconds: the
   /// x division. Public for the tests.

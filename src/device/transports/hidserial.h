@@ -3,7 +3,6 @@
 #include "device/transports/buffereddevice.h"
 
 #include <QtCore>
-#include <QThread>
 
 #include "device/transports/hidreader.h"
 #include "device/dmmdecoder.h"
@@ -82,7 +81,6 @@ public:
   /// never carries data means the meter is not sending (UNI-T: RS232 button).
   bool dataSeen() const { return m_dataSeen; }
   void close() override;
-
 
 Q_SIGNALS:
   /// The cable is gone: the read loop ended with an error while the device

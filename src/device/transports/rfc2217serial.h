@@ -26,16 +26,13 @@ public:
                                QObject *parent = nullptr);
   ~RFC2217SerialDevice();
 
-
   /// False when the address could not be parsed (errorString() says so);
   /// otherwise the device counts as open while the TCP connection comes up.
   bool open(OpenMode mode) override;
   void close() override;
 
-
 Q_SIGNALS:
   void finished();
-
 
 protected:
   qint64 writeData(const char *data, qint64 len) override;
