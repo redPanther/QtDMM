@@ -24,7 +24,7 @@ public:
     explicit Transport(QObject *parent = Q_NULLPTR) : QObject(parent) {}
     /// Creates the device object for @p type (closing any previous one). The
     /// port is not opened yet; call port()->open() and then init().
-    bool create(const DmmDecoder::DMMInfo spec, PortType type, QString device);
+    bool create(const DmmDecoder::DMMInfo &spec, PortType type, QString device);
     /// The instance coordinator a CalcDevice reads its inputs from.
     void setStateManager(SharedStateManager *state) { m_state = state; }
     /// Closes and deletes the current device, if any.

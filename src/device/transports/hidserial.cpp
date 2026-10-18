@@ -161,7 +161,7 @@ QByteArray HIDSerialDevice::cp2110ConfigReport(int baud, int bits, int parity, i
   return r;
 }
 
-HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo info, QString device, QObject *p)
+HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *p)
   : QIODevice(p)
   , m_dmmInfo(info)
 {

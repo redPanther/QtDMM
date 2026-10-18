@@ -12,7 +12,7 @@
 
 #include <QSerialPortInfo>
 
-bool Transport::create(const DmmDecoder::DMMInfo spec, PortType t, QString device)
+bool Transport::create(const DmmDecoder::DMMInfo &spec, PortType t, QString device)
 {
   close();
 

@@ -84,7 +84,7 @@ public:
   /// The meter description; passed on to the port device and the reader.
   /// With DMMInfo::externalSetup the port is used as is and left open on
   /// close(), for setups where another tool configures it.
-  void    setDmmInfo(const DmmDecoder::DMMInfo info)  {  m_dmmInfo = info; }
+  void    setDmmInfo(const DmmDecoder::DMMInfo &info)  {  m_dmmInfo = info; }
   const DmmDecoder::DMMInfo &dmmInfo() const  {  return m_dmmInfo; }
   /// The last message emitted through error().
   QString errorString() const  { return m_error; }

@@ -14,7 +14,7 @@
 class SerialDevice : public QSerialPort {
     Q_OBJECT
 public:
-    explicit SerialDevice(const DmmDecoder::DMMInfo info, QString device, QObject *p = Q_NULLPTR) : QSerialPort(p), m_dmmInfo(info) {
+    explicit SerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *p = Q_NULLPTR) : QSerialPort(p), m_dmmInfo(info) {
         setPortName(device);
     };
 

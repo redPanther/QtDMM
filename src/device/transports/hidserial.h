@@ -44,7 +44,7 @@ public:
   /// @param device an entry from availablePorts(): "HID 0xvvvv:0xpppp path"
   ///               (the vid:pid selects the Chip; a bare path means CH9325)
   /// @param p      parent object
-  explicit HIDSerialDevice(const DmmDecoder::DMMInfo info, QString device, QObject *p = Q_NULLPTR);
+  explicit HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *p = Q_NULLPTR);
  ~HIDSerialDevice();
 
   /// Chip for a port entry / vid:pid; unknown ids are treated as CH9325.
