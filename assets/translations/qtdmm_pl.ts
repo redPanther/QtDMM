@@ -2774,21 +2774,28 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
 <context>
     <name>LcdWidget</name>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="581"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="582"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="607"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="691"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="707"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="582"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="609"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="696"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="712"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="706"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="582"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="711"/>
         <source>MIN</source>
         <translation>MIN</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="583"/>
+        <source>AVG</source>
+        <translation>AVG</translation>
     </message>
 </context>
 <context>
@@ -5741,32 +5748,32 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <translation>na tym komputerze nie działa rpcbind</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="118"/>
+        <location filename="../../src/service/vxi11server.cpp" line="122"/>
         <source>port %1 is in use by another program</source>
         <translation>port %1 jest używany przez inny program</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="119"/>
+        <location filename="../../src/service/vxi11server.cpp" line="123"/>
         <source>port %1 is not allowed for this program (a privileged port: see the handbook, SCPI server, VXI-11)</source>
         <translation>port %1 nie jest dozwolony dla tego programu (port uprzywilejowany: zob. podręcznik, Serwer SCPI, VXI-11)</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="126"/>
+        <location filename="../../src/service/vxi11server.cpp" line="132"/>
         <source>UDP port %1: %2</source>
         <translation>port UDP %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="151"/>
+        <location filename="../../src/service/vxi11server.cpp" line="159"/>
         <source>another program or QtDMM instance offers VXI-11 already (port %1); there can be only one per computer</source>
         <translation>inny program lub inna instancja QtDMM już oferuje VXI-11 (port %1); na komputerze może być tylko jeden</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="164"/>
+        <location filename="../../src/service/vxi11server.cpp" line="172"/>
         <source>rpcbind refused the registration over TCP; it takes it over its Unix socket (/run/rpcbind.sock), which is missing</source>
         <translation>rpcbind odrzucił rejestrację przez TCP; przyjmuje ją przez swoje gniazdo Unix (/run/rpcbind.sock), którego brakuje</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="166"/>
+        <location filename="../../src/service/vxi11server.cpp" line="174"/>
         <source>rpcbind refused the registration</source>
         <translation>rpcbind odrzucił rejestrację</translation>
     </message>

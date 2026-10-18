@@ -184,10 +184,10 @@ int main(int argc, char **argv)
     }
     // iENV: a display without a number is no reading (R11-06), "OL" an
     // overload; not in any capture yet, so synthetic frames
-    auto ienv = [](const char *display)
+    auto ienv = [](const char *display, char status = 0)
     {
       QByteArray f = QByteArray::fromHex("aabb10013a");
-      f.append(display, 9).append(QByteArray::fromHex("3b3000"));
+      f.append(display, 9).append(QByteArray::fromHex("3b30")).append(status);
       unsigned sum = 0;
       for (char ch : std::as_const(f))
         sum += static_cast<unsigned char>(ch);
@@ -213,6 +213,21 @@ int main(int argc, char **argv)
         qWarning() << "iENV: OL is no overload";
         ++problems;
       }
+      // the status byte's MAX, MIN and AVG reach the reading's flags (the
+      // display and the keys light them)
+      auto ienvFlags = [&](char status) -> quint32
+      {
+        const auto r = decoder->decode(ienv("   158LUX", status), 0);
+        ReadingAdapter adapter;
+        return r ? adapter.adapt(*r, 0).first().sample.flags : 0xFFFFFFFF;
+      };
+      const quint32 modes = SampleFlag::Max | SampleFlag::Min | SampleFlag::Avg;
+      if ((ienvFlags(0x08) & modes) != SampleFlag::Max || (ienvFlags(0x04) & modes) != SampleFlag::Min
+          || (ienvFlags(0x02) & modes) != SampleFlag::Avg || (ienvFlags(0) & modes))
+      {
+        qWarning() << "iENV: MAX, MIN or AVG of the status byte not in the reading";
+        ++problems;
+      }
       // the unit key steps from the unit the last frame told: lx -> fc
       if (decoder->keyRequest("unit") != DecoderUniTiENV::commandFrame(0x3C))
       {
@@ -222,7 +237,7 @@ int main(int argc, char **argv)
       // the keypads of UNI-T's app per meter
       struct Pad { const char *model; const char *has; const char *lacks; };
       const Pad pads[] = {
-        { "UT333BT", "hold max min unit unit2", "avg weighting" },
+        { "UT333BT", "hold max min unit2", "avg unit weighting" },
         { "UT353BT *", "hold max min unit weighting", "avg unit2" },
         { "UT363BT *", "hold max avg unit unit2", "min weighting" },
         { "UT383BT *", "hold max min unit", "avg unit2 weighting" },

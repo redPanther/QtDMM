@@ -162,10 +162,11 @@ the same commands.
 
 The UNI-T iENV meters (UT333BT, UT353BT, UT363BT, UT383BT) have HOLD, MAX
 and MIN (the UT363BT AVG instead of MIN), as UNI-T's app offers them, and
-UNIT for the next unit of the main value (lx/fc, dBA/dBC, %RH/%, m/s, km/h,
-ft/min, knots, mph). The UT333BT and UT363BT also have °C/°F, the UT353BT
-FAST/SLOW. UNIT and °C/°F work once the first reading has told the unit.
-HOLD is tried on the UT333BT.
+UNIT for the next unit of the main value (lx/fc, dBA/dBC, m/s, km/h,
+ft/min, knots, mph; not on the UT333BT). The UT333BT and UT363BT also have
+°C/°F, the UT353BT FAST/SLOW. UNIT and °C/°F work once the first reading
+has told the unit. The display shows MAX, MIN and AVG as the meter
+reports them. The keys are tried on the UT333BT.
 
 The small triangle in the display's top right corner,
 or **Hide controls** in its right-click menu, folds the row away.
