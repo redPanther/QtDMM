@@ -101,8 +101,11 @@ jobs:
                        --json tagName,isPrerelease --jq '.[] | "\(.tagName),\(.isPrerelease)"'); do
           tag=${row%,*} pre=${row#*,}
           name="QtDMM-${tag}-x86_64.flatpak"
-          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' \
-            | grep -qx "$name" || continue
+          # a failed request stops the run: skipping the release would put an
+          # older one into the repository
+          assets=$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name') \
+            || { echo "::error::cannot read the files of release $tag"; exit 1; }
+          printf '%s\n' "$assets" | grep -Fqx "$name" || continue
           if [ "$pre" = true ]; then
             [ "$beta" = - ] || continue   # only the newest pre-release
             gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern "$name" --dir bundles
@@ -122,6 +125,7 @@ jobs:
         sudo apt install -y flatpak ostree
         tools/build-flatpak-repo.sh "$stable" "$beta" site/repos/flatpak "$key" \
           "https://qtdmm.github.io/QtDMM/repos/flatpak"
+        [ "$stable" != - ] || sed -i '/data-stable/d' site/repos/index.html
         [ "$beta" != - ] || sed -i '/data-beta/d' site/repos/index.html
         rm -f site/repos/pending.html
 

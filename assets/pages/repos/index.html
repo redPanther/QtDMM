@@ -22,11 +22,11 @@
     QtDMM key; the KDE runtime it needs comes from Flathub. Once added,
     <code>flatpak update</code> brings each new release.</p>
   <p>Add the repository and install QtDMM:</p>
-  <pre>flatpak remote-add --user --if-not-exists qtdmm https://qtdmm.github.io/QtDMM/repos/flatpak/qtdmm.flatpakrepo
-flatpak install --user qtdmm io.github.qtdmm.qtdmm//stable</pre>
-  <p>Or in one step, with a software centre that opens
-    <a href="flatpak/io.github.qtdmm.qtdmm.flatpakref">io.github.qtdmm.qtdmm.flatpakref</a>.</p>
-  <!-- one line: pages.yml drops it while there is no release candidate -->
+  <pre>flatpak remote-add --user --if-not-exists qtdmm https://qtdmm.github.io/QtDMM/repos/flatpak/qtdmm.flatpakrepo</pre>
+  <!-- one line each: pages.yml drops the stable lines while no release has
+       a bundle, the beta line while there is no newer release candidate -->
+  <pre data-stable>flatpak install --user qtdmm io.github.qtdmm.qtdmm//stable</pre>
+  <p data-stable>Or in one step, with a software centre that opens <a href="flatpak/io.github.qtdmm.qtdmm.flatpakref">io.github.qtdmm.qtdmm.flatpakref</a>.</p>
   <p data-beta>Release candidates are on the branch <code>beta</code> (<a href="flatpak/io.github.qtdmm.qtdmm.beta.flatpakref">flatpakref</a>): <code>flatpak install --user qtdmm io.github.qtdmm.qtdmm//beta</code></p>
   <p>Meters on USB HID (UNI-T UT803, UT61E with the HID cable, ...) need the udev
     rule of QtDMM on the computer, as without Flatpak: see INSTALL.</p>
