@@ -68,6 +68,9 @@
   Poincaré plot choose theirs under Value; kept with the window layout. The recording stays the main value's.
   An alarm can watch another value than the main one (Settings, Alarms, Value), its thresholds in that value's
   unit; the graph draws the thresholds of the main value's alarms
+- SCPI server: the meter's values as channels - READ? (@2), FETCh? (@1:3), (@1,3) and the like for READ?, FETCh?,
+  MEASure?, DATA?, VALue?, UNIT? and CONFigure?, several answered in one line; READ3? alike. QTDMM:CHANnel:CATalog?
+  lists them. qtdmm-mcp: reading and watch take a channel, the tool channels lists them; reading2 is gone
 - Graph: smaller points on the curves (5 px, large 8 px instead of 7 and 11)
 - Flatpak: each release carries QtDMM-<version>-x86_64.flatpak (KDE runtime 6.11, hidapi inside): serial, USB/HID
   and Bluetooth meters, the SCPI server and several instances. HID meters still need the udev rule on the computer

@@ -57,13 +57,13 @@ QT_QPA_PLATFORM=offscreen QTDMM_IPC_KEY=mcptest qtdmm --config-dir /tmp/qtdmm-te
 | Tool | SCPI | Answer |
 |---|---|---|
 | `identify` | `*IDN?` | `QtDMM,<meter>,0,<version>` |
-| `reading` | `READ?`, `UNIT?`, `CONFigure?` | value in base units, unit, function; `overload` (`-overload` for -OL) or `no reading` instead of the value |
-| `reading2` | `READ2?`, `UNIT2?`, `CONFigure2?` | the same for the second value; a meter without one answers `no reading` and leaves `-230` in the error queue |
+| `reading` | `READ? (@n)`, `UNIT? (@n)`, `CONFigure? (@n)` | value in base units, unit, function of `channel` (1 the main value, the default); `overload` (`-overload` for -OL) or `no reading` instead of the value; a channel the meter has not is an error with the server's `-222` |
+| `channels` | `QTDMM:CHANnel:CATalog?` | the meter's values as channels: number, what it measures (`voltage.dc`, `temperature` ...), unit; empty before the first reading |
 | `status` | `STATus:QUEStionable?`, `STATus:OPERation?`, `*STB?` | the registers and their bits: overload, hold, not connected, no reading, recording, alarm |
 | `errors` | `SYSTem:ERRor?` | the error queue, emptied; it is shared by all clients of the instance |
 | `screenshot` | `HCOPy:SDUMp:DATA?` | the window as PNG image |
-| `watch` | `READ?` | `count` readings with time stamps, one every `interval` seconds (at most 300 and 120 s) |
-| `min_max` | `CALCulate:AVERage:…?` | minimum, maximum, mean and number of readings since the last reset, and the unit |
+| `watch` | `READ? (@n)` | `count` readings of `channel` with time stamps, one every `interval` seconds (at most 300 and 120 s) |
+| `min_max` | `CALCulate:AVERage:…?` | minimum, maximum, mean and number of readings since the last reset of the display's primary value, and the unit |
 | `recording` | `QTDMM:RECord?` | `live`, `recording`, `view` or `idle`, the seconds it spans, readings, unit |
 | `recording_data` | `QTDMM:RECord:DATA?` | the last `count` readings of the graph (at most 10000): seconds since the start and value, `overload` or `gap` |
 | `alarms` | `QTDMM:ALARm:LIST?` | each alarm with its state: `off`, `pending`, `raised`, `acknowledged` |

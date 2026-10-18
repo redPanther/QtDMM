@@ -79,6 +79,8 @@ public:
   /// The meter's display count (DMMInfo::display), for the range and the
   /// bar graph of the readings.
   void        setDisplayCounts(int counts) { m_adapter.setCounts(counts); }
+  /// The values the meter has (Device page): the SCPI channels.
+  void        setNumValues(int count);
   /// Readings are published to the other instances through @p mgr.
   void        setStateManager(SharedStateManager *mgr);
   /// This instance's id (--config-id), part of the mDNS name.

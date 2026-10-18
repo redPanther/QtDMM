@@ -71,16 +71,17 @@ command after `;` continues at the level of the one before
 |---|---|
 | `*IDN?` | `QtDMM,<meter>,0,<version>` |
 | `READ?` `FETCh?` `MEASure?` `MEASure:VOLTage:DC?` `[SENSe:]DATA?` `VALue1?` | the reading in SI base units as `+1.234500E+00`; `9.9E+37` for overload, `9.91E+37` (not a number) when nothing arrived in the last 5 s |
-| `READ2?` `FETCh2?` `VALue2?` | the meter's second value (Victron, Fluke 45), same rules |
-| `UNIT?` `UNIT2?` | the base unit, `"V"` |
-| `CONFigure?` `CONFigure2?` | function and range, `"VOLT:DC AUTO"` - functions `VOLT:DC`, `VOLT:AC`, `CURR:DC`, `CURR:AC`, `RES`, `CONT`, `CAP`, `FREQ`, `TEMP`, `DIOD`, `PER`, `POW` |
+| `READ? (@2)` `FETCh? (@1:3)` `READ? (@1,3)` | the meter's other values as channels, 1 the main value: one (`(@2)`), a list or a range; several answer in the list's order, separated by commas: `+8.0E+02,+2.25E+01,+4.5E+01`. The channels are the values on the meter's Device page; a channel it has not gives error -222, a broken list -104 |
+| `READ2?` `FETCh2?` `VALue2?` | short for `(@2)` (Victron, Fluke 45), same rules; `READ3?` ... alike |
+| `UNIT?` `UNIT2?` `UNIT? (@1:3)` | the base unit, `"V"` |
+| `CONFigure?` `CONFigure2?` `CONFigure? (@2)` | function and range, `"VOLT:DC AUTO"` - functions `VOLT:DC`, `VOLT:AC`, `CURR:DC`, `CURR:AC`, `RES`, `CONT`, `CAP`, `FREQ`, `TEMP`, `DIOD`, `PER`, `POW` |
 | `STATus:QUEStionable?` | bit 0 overload, bit 1 hold, bit 2 meter not connected (also while QtDMM reconnects it), bit 3 no current reading |
 | `STATus:OPERation?` | 16 while the recorder runs, plus 512 while an alarm is raised (acknowledged or not) |
 | `INITiate` / `ABORt` | starts / stops the recorder; while it records, or over a recording shown and not saved yet, `INITiate` is ignored with error -213 *Init ignored* |
 | `INPut ON|OFF`, `INPut?` | connects / disconnects the meter, asks whether it is; the connection starts after the command, so `INPut ON;INPut?` still answers 0 |
 | `HCOPy:SDUMp:DATA?` | a screenshot of the QtDMM window as PNG (IEEE 488.2 block), like a bench instrument's screen dump; `HCOPy:SDUMp:DATA:FORMat PNG\|BMP\|JPG` chooses the format |
 | `SYSTem:ERRor?` `SYSTem:ERRor:COUNt?` | the error queue: `0,"No error"`, `-113,"Undefined header"`, `-230,"Data corrupt or stale"`, ... |
-| `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` `…:COUNt?` | the min/max memory of the main value as the displays show it: minimum, maximum, mean and number of readings since the last reset (overloads not counted); `9.91E+37` while it is empty |
+| `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` `…:COUNt?` | the min/max memory as the display shows it, of its primary value (the main value at first): minimum, maximum, mean and number of readings since the last reset (overloads not counted); `9.91E+37` while it is empty |
 | `CALCulate:AVERage:CLEar` | resets min/max, like F4 |
 | `*RST` `*CLS` `*OPC?` `*TST?` `*ESR?` `*STB?` `SYSTem:VERSion?` | the usual IEEE 488.2 replies |
 
@@ -98,6 +99,7 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | `QTDMM:ALARm:ACKnowledge` | acknowledges the alarms, as the banner's button |
 | `QTDMM:MARK "text"` | a mark at the newest reading, in the graph and the readings table (`SCPI` without text) |
 | `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV meters UT333BT, UT353BT, UT363BT, UT383BT), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
+| `QTDMM:CHANnel:CATalog?` | the channels of `READ? (@n)`: number, what it measures and unit - `1,"carbon_dioxide","ppm",2,"temperature","°C"`; empty strings before a channel's first reading |
 | `QTDMM:INSTances?` | the running instances with their last reading: `"default",+1.234000E+00,"V","psu",9.91E+37,""` |
 
 ```

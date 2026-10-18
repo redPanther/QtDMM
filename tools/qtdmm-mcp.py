@@ -73,6 +73,22 @@ class Scpi:
         line, self.buf = self.buf.split(b"\n", 1)
         return line.decode(errors="replace").strip()
 
+    def channel(self, queries, channel):
+        """The answers of queries ("READ?", "UNIT?") for one channel; a channel the meter has not
+        becomes a ToolError with the server's error (a refused query answers nothing, *OPC? does)."""
+        ch = f" (@{int(channel)})"
+        answers = self.query(";".join(q + ch for q in queries) + ";*OPC?").split(";")
+        if len(answers) != len(queries) + 1:
+            # the queue may hold older errors: the newest is this query's
+            last = None
+            for _ in range(50):
+                e = self.query("SYSTem:ERRor?")
+                if e.startswith("0,"):
+                    break
+                last = e
+            raise ToolError(f"Channel {channel}: {last}")
+        return answers[:-1]
+
     def block(self, cmd):
         """An IEEE 488.2 definite length block: #<n><length><data>."""
         self.sock.sendall(cmd.encode() + b"\n")
@@ -129,19 +145,22 @@ def identify() -> str:
 
 
 @mcp.tool()
-def reading() -> dict:
-    """The current main reading in SI base units, with unit and function (CONFigure?)."""
+def reading(channel: int = 1) -> dict:
+    """The current reading of a channel in SI base units, with unit and function (CONFigure?).
+    Channel 1 is the main value, 2 and on the meter's other values (see channels())."""
     with Scpi() as s:
-        return {"value": value(s.query("READ?")), "unit": s.query("UNIT?").strip('"'),
-                "function": s.query("CONFigure?").strip('"')}
+        v, unit, function = s.channel(["READ?", "UNIT?", "CONFigure?"], channel)
+    return {"channel": int(channel), "value": value(v), "unit": unit.strip('"'), "function": function.strip('"')}
 
 
 @mcp.tool()
-def reading2() -> dict:
-    """The meter's second value (Victron, Fluke 45), with unit and function."""
+def channels() -> list[dict]:
+    """The meter's values as channels for reading() and watch() (QTDMM:CHANnel:CATalog?): what each
+    measures and its unit, empty before its first reading."""
     with Scpi() as s:
-        return {"value": value(s.query("READ2?")), "unit": s.query("UNIT2?").strip('"'),
-                "function": s.query("CONFigure2?").strip('"')}
+        items = split_list(s.query("QTDMM:CHANnel:CATalog?"))
+    return [{"channel": int(items[i]), "measures": items[i + 1], "unit": items[i + 2]}
+            for i in range(0, len(items) - 2, 3)]
 
 
 @mcp.tool()
@@ -177,24 +196,25 @@ def screenshot() -> Image:
 
 
 @mcp.tool()
-def watch(count: int = 10, interval: float = 1.0) -> list[dict]:
-    """Collects count readings, one every interval seconds (at most 300 readings and 120 s)."""
+def watch(count: int = 10, interval: float = 1.0, channel: int = 1) -> list[dict]:
+    """Collects count readings of a channel (1 the main value), one every interval seconds
+    (at most 300 readings and 120 s)."""
     count = max(1, min(count, 300))
     interval = max(0.1, min(interval, 120.0 / count))
     out = []
     with Scpi() as s:
-        unit = s.query("UNIT?").strip('"')
+        unit = s.channel(["UNIT?"], channel)[0].strip('"')
         for i in range(count):
             if i:
                 time.sleep(interval)
             out.append({"time": datetime.now().isoformat(timespec="milliseconds"),
-                        "value": value(s.query("READ?")), "unit": unit})
+                        "value": value(s.channel(["READ?"], channel)[0]), "unit": unit})
     return out
 
 
 @mcp.tool()
 def min_max() -> dict:
-    """The min/max memory of the main value as the displays show it (CALCulate:AVERage):
+    """The min/max memory as the display shows it, of its primary value (CALCulate:AVERage):
     minimum, maximum, mean and number of readings since the last reset, in SI base units."""
     with Scpi() as s:
         count = int(s.query("CALCulate:AVERage:COUNt?"))

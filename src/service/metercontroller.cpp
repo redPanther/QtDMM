@@ -308,6 +308,11 @@ bool MeterController::mayStartRecording(QString *why) const
   return reason.isEmpty();
 }
 
+void MeterController::setNumValues(int count)
+{
+  m_scpi->setChannelCount(count);
+}
+
 void MeterController::setMinMaxValue(int id)
 {
   if (id == m_minMaxId)
