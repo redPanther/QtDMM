@@ -278,7 +278,7 @@ bool RecordingFile::write(const Recording &recording, const QString &path, QStri
     if (state == CellState::None)
       return QString(";;");
     QString prefix;
-    const QString value = state == CellState::Ok ? SiPrefix::format(v, &prefix) : QString("nan");
+    const QString value = state == CellState::Ok ? SiPrefix::format(v, unit, &prefix) : QString("nan");
     return QString("%1;%2;%3").arg(value, prefix + unit, QLatin1String(stateText(state)));
   };
   for (int i = 0; i < recording.values.size(); ++i)

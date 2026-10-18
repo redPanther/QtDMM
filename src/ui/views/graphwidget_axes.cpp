@@ -143,8 +143,8 @@ void GraphWidget::updateXLabels()
 QString GraphWidget::yPrefix() const
 {
   const QString base = leftUnit();
-  // units that take no prefix: °C, %, none
-  if (base.isEmpty() || base.startsWith(QChar(0x00b0)) || base == QLatin1String("%"))
+  // units that take no prefix: °C, %, ppm, none ...
+  if (!SiPrefix::takesPrefix(base))
     return QString();
   // by the axis, not by the reading: a meter that changes range (V, mV, µV)
   // turned the whole axis to mV with labels like 1.6e+04; 350 mV on an axis

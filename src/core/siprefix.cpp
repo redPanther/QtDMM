@@ -48,14 +48,19 @@ double factor(const QString &prefix)
   return 1.0;
 }
 
-Split split(const QString &unit)
+// units of their own that start with a prefix letter: "ppm" (CO2 sensors)
+// is not pico-"pm", "min" (APPA) not milli-"in", "fc" (foot-candle,
+// luxmeters) not femto-"c", "m/s" (anemometers) not milli-"/s"
+const QStringList &wholeUnits()
 {
-  // units of their own that start with a prefix letter: "ppm" (CO2 sensors)
-  // is not pico-"pm", "min" (APPA) not milli-"in", "fc" (foot-candle,
-  // luxmeters) not femto-"c", "m/s" (anemometers) not milli-"/s"
   static const QStringList kWhole = { "ppm", "fc", "min", "mol", "dB", "dBm", "dBV", "cosphi", "hFE", "HFE", "m/s",
                                       "%RH", "dBA", "dBC" };
-  if (kWhole.contains(unit))
+  return kWhole;
+}
+
+Split split(const QString &unit)
+{
+  if (wholeUnits().contains(unit))
     return {QString(), unit};
   if (unit.size() > 1 && isPrefix(unit.left(1)))
     return {unit.left(1), unit.mid(1)};
@@ -87,6 +92,27 @@ double scale(double value, QString *prefixOut)
 QString format(double value, QString *prefixOut)
 {
   return QString::number(scale(value, prefixOut), 'g', 12);
+}
+
+bool takesPrefix(const QString &baseUnit)
+{
+  // "C" and "dF" are the decoders' °C and °F
+  return !baseUnit.isEmpty() && !baseUnit.startsWith(QChar(0x00b0)) && baseUnit != QLatin1String("%")
+         && baseUnit != QLatin1String("C") && baseUnit != QLatin1String("dF") && !wholeUnits().contains(baseUnit);
+}
+
+double scale(double value, const QString &baseUnit, QString *prefixOut)
+{
+  if (takesPrefix(baseUnit))
+    return scale(value, prefixOut);
+  if (prefixOut)
+    prefixOut->clear();
+  return value;
+}
+
+QString format(double value, const QString &baseUnit, QString *prefixOut)
+{
+  return QString::number(scale(value, baseUnit, prefixOut), 'g', 12);
 }
 
 QString withoutLeadingZeros(const QString &text)

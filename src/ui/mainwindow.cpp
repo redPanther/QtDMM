@@ -1359,7 +1359,7 @@ void MainWindow::updateInstances()
       if (r.valid)
       {
         QString prefix;
-        const QString value = SiPrefix::format(r.value, &prefix);
+        const QString value = SiPrefix::format(r.value, r.unit, &prefix);
         row.value = QString("%1 %2%3 %4").arg(value.left(8), prefix, r.unit,
                                               couplingText(PortKey::fromString(r.port).defining)).trimmed();
       }

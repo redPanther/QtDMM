@@ -84,7 +84,7 @@ QString GraphWidget::timeCursorText() const
     if (!std::isfinite(v))
       return QStringLiteral("--");
     QString prefix;
-    const double x = SiPrefix::scale(v, &prefix);
+    const double x = SiPrefix::scale(v, unit, &prefix);
     return QString("%1 %2%3").arg(QString::number(x, 'g', 4), prefix, unit).trimmed();
   };
   // the other values drawn, at the cursor: the series of each that holds there
@@ -286,8 +286,8 @@ void GraphWidget::updateReferenceLine()
   m_referenceLine->setLine(plot.left(), y, plot.right(), y);
   // as the y labels: 4 digits with the prefix that suits the value
   QString prefix;
-  const double v = SiPrefix::scale(m_reference, &prefix);
   const QString base = m_store->unit();
+  const double v = SiPrefix::scale(m_reference, base, &prefix);
   QString what;
   switch (m_referenceKind)
   {

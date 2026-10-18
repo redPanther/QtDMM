@@ -33,6 +33,16 @@ namespace SiPrefix
   /// scale() rendered as text with up to 12 significant digits.
   QString format(double value, QString *prefixOut = nullptr);
 
+  /// Whether a value in @p baseUnit gets an SI prefix: not without a unit,
+  /// not °C/°F ("C", "dF" from the decoders) or %, nor the units of their
+  /// own that split() keeps whole (ppm, %RH, dB, m/s, cosphi ...) - 1200 ppm,
+  /// not 1.2 kppm.
+  bool takesPrefix(const QString &baseUnit);
+  /// scale() and format() for a value in @p baseUnit: one that takes no
+  /// prefix stays as it is, with an empty prefix.
+  double scale(double value, const QString &baseUnit, QString *prefixOut);
+  QString format(double value, const QString &baseUnit, QString *prefixOut);
+
   /// A unit as the displays show it: "kOhm" -> "kΩ", "dF" -> "°F",
   /// "C" -> "°C", "cosphi" -> "cosφ"; others unchanged.
   QString displayText(const QString &unit);
