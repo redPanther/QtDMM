@@ -306,7 +306,8 @@ Q_SIGNALS:
   /// A reading was stored in extra(@p index) (its last point).
   void        extraAppended(int index);
   /// The extra() series changed other than by a reading at the end: one
-  /// began, or older points went.
+  /// began or went on again, or older points went (appended(true) says that
+  /// when the main series lost points too).
   void        extrasChanged();
   void        runningChanged(bool running);
   /// View, Live or Record now.
@@ -339,10 +340,12 @@ private:
   qint64      elapsed() const { return m_monotonic() - m_t0; }
   /// Adds a point with the integral up to it.
   void        appendPoint(RawPoint p);
+  /// A gap in the other values not heard of for the stale limit at @p now.
+  void        closeSilentExtras(qint64 now);
   /// appendPoint(), then the oldest points beyond the limits go; the signals.
   void        append(const RawPoint &p);
   /// Drops what is older than the store keeps; true when anything of the
-  /// main series went (the other series say so with extrasChanged()).
+  /// main series went (the other series alone say so with extrasChanged()).
   bool        trim();
   bool        trimMain();
   /// The start triggers on a new main value.

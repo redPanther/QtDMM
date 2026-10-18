@@ -216,6 +216,74 @@ int main(int argc, char **argv)
             .arg(store.extraCount() ? store.extra(0).count() : 0).arg(store.extraCount() ? store.extra(0).first().t : -1));
   }
 
+  // --- 1e. the other values over time: one that stops coming is held only
+  //         up to the stale limit; nothing after the recording length; a
+  //         display switched back and forth goes on in its series ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.start();
+    for (qint64 t = 0; t <= 2000; t += 100)
+    {
+      store.setReading(clock.at(t, reading(0.001, "1.000", "DC")));
+      store.setReading(clock.at(t + 10, other(1, 50, "50.00", "Hz")));
+    }
+    // the second display's frames end without an "off" (iDMM bit 7), the
+    // main value goes on: a gap at the stale limit; the integral counts the
+    // last value up to it, as for the main value, then stays
+    for (qint64 t = 2100; t <= 8000; t += 100)
+      store.setReading(clock.at(t, reading(0.001, "1.000", "DC")));
+    const RecordingSeries &hz = store.extra(0);
+    check(store.extraCount() == 1 && hz.last().gap() && hz.last().quality == Quality::Stale && hz.last().t == 2010 + 3000,
+          QString("silent value: last point t %1 gap %2").arg(hz.last().t).arg(hz.last().gap()));
+    const double integral = hz.at(hz.count() - 2).integral;
+    store.setReading(clock.at(8010, other(1, 50, "50.00", "Hz")));
+    check(store.extraCount() == 1 && !store.extra(0).last().gap()
+            && std::abs(store.extra(0).last().integral - (integral + 50 * 3.0)) < 1e-9,
+          QString("silent value back: same series, integral %1 (was %2)").arg(store.extra(0).last().integral).arg(integral));
+    // only one gap for the silence
+    int gaps = 0;
+    for (int i = 0; i < store.extra(0).count(); ++i)
+      gaps += store.extra(0).at(i).gap();
+    check(gaps == 1, QString("silent value: %1 gaps").arg(gaps));
+
+    // Hz, %, Hz, % ...: two series, the newest last
+    QSignalSpy changed(&store, &RecordingStore::extrasChanged);
+    for (int k = 0; k < 40; ++k)
+    {
+      const qint64 t = 8100 + k * 100;
+      store.setReading(clock.at(t, reading(0.001, "1.000", "DC")));
+      store.setReading(clock.at(t + 10, k % 2 ? other(1, 50, "50.00", "Hz") : other(1, 25, "25.0", "%")));
+    }
+    check(store.extraCount() == 2 && store.extra(1).unit == "Hz" && store.extra(0).unit == "%",
+          QString("Hz/% back and forth: %1 series").arg(store.extraCount()));
+    check(store.extra(1).last().t == 8100 + 39 * 100 + 10 && !store.extra(1).last().gap(),
+          "Hz/% back and forth: the newest series has the newest point");
+    bool ordered = true;
+    for (int i = 0; i < store.extraCount(); ++i)
+      for (int j = 1; j < store.extra(i).count(); ++j)
+        ordered = ordered && store.extra(i).at(j).t >= store.extra(i).at(j - 1).t;
+    check(ordered, "Hz/% back and forth: each series in time order");
+
+    // the recording length: the main value stops it, the other values add
+    // nothing after it
+    RecordingStore len;
+    TestClock c2;
+    c2.attach(len);
+    len.setSampleLength(10);   // 1 s
+    len.start();
+    // the main value every 300 ms: 900, then the other one at 1050, after
+    // the length but before the main value at 1200 stops
+    for (qint64 t = 0; t <= 1500; t += 300)
+    {
+      len.setReading(c2.at(t, reading(0.001, "1.000", "DC")));
+      len.setReading(c2.at(t + 150, other(1, 50, "50.00", "Hz")));
+    }
+    check(!len.isRunning() && len.extraCount() == 1 && len.extra(0).last().t < 1000,
+          QString("length: the other value ends at %1").arg(len.extraCount() ? len.extra(0).last().t : -1));
+  }
+
   // --- 1b. the time starts with the first reading: Live started while the
   //         meter was still connecting, or the graph cleared, begins at 0 ---
   {
