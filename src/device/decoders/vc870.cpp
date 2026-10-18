@@ -1,9 +1,94 @@
 #include "device/decoders/vc870.h"
 
+#include <vector>
+
 static const bool registered = []() {
   DmmDecoder::addConfig({"Voltcraft", "VC 870", "", 9600, FrameFormat::VC870Continuous, 8, 1, 2, 0, 40000, 0, 0, 1});
   return true;
 }();
+
+namespace
+{
+// One range of a function: the factor from the digits to the SI value, where
+// the decimal point goes (0: none, else insertCommaIT()), and the units shown.
+// The second display has a factor and point of its own only where it shows
+// another quantity (power factor and frequency); else it takes the first's.
+struct Range
+{
+  double factor;
+  int dot;
+  const char *unit1;
+  const char *unit2;
+  double factor2 = 0;
+  int dot2 = 0;
+};
+
+// The function (byte 0) and its selection (byte 1), with the ranges by the
+// range code (byte 2, low nibble). A code not listed is a parser error.
+struct Function
+{
+  quint8 code;
+  quint8 select;
+  const char *special;
+  bool showBar;
+  std::vector<Range> ranges;
+};
+
+const Function kFunctions[] = {
+  { 0x30, 0x30, "DC", true, {                 // DCV: 4, 40, 400, 4000 V (1000 V is the maximum)
+      { 1e-4, 2, "V", "V" }, { 1e-3, 3, "V", "V" }, { 1e-2, 4, "V", "V" }, { 1e-1, 5, "V", "V" } } },
+  { 0x30, 0x31, "AC", true, {                 // ACV: 4, 40, 400, 4000 V
+      { 1e-3, 3, "V", "V" }, { 1e-2, 4, "V", "V" }, { 1e-1, 5, "V", "V" }, { 1, 0, "V", "V" } } },
+  { 0x31, 0x30, "DC", true, {                 // DCmV: 400 mV
+      { 1e-5, 4, "mV", "mV" } } },
+  { 0x31, 0x31, "TE", false, {                // degrees Celsius and Fahrenheit ("dF": "F" alone is farad)
+      { 1e-1, 5, "C", "dF" } } },
+  { 0x32, 0x30, "OH", true, {                 // resistance
+      { 1e-2, 4, "Ohm", "Ohm" }, { 1e-1, 2, "kOhm", "kOhm" }, { 1e1, 4, "kOhm", "kOhm" },
+      { 1e2, 5, "kOhm", "kOhm" }, { 1e3, 3, "MOhm", "MOhm" }, { 1e4, 4, "MOhm", "MOhm" } } },
+  { 0x32, 0x31, "OH", false, {                // continuity
+      { 1e-2, 4, "Ohm", "Ohm" } } },
+  { 0x33, 0x30, "CA", false, {                // capacitance
+      { 1e-12, 3, "nF", "nF" }, { 1e-11, 4, "nF", "nF" }, { 1e-10, 2, "uF", "uF" }, { 1e-9, 3, "uF", "uF" },
+      { 1e-8, 4, "uF", "uF" }, { 1e-7, 5, "uF", "uF" }, { 1e-6, 3, "mF", "mF" } } },
+  { 0x34, 0x30, "DI", false, {                // diode
+      { 1e-4, 2, "V", "V" } } },
+  { 0x35, 0x30, "FR", false, {                // frequency, the factor to Hz
+      { 1e-3, 3, "Hz", "Hz" }, { 1e-2, 4, "Hz", "Hz" }, { 1e-1, 2, "kHz", "kHz" }, { 1, 3, "kHz", "kHz" },
+      { 1e1, 4, "kHz", "kHz" }, { 1e2, 2, "MHz", "MHz" }, { 1e3, 3, "MHz", "MHz" }, { 1e4, 4, "MHz", "MHz" } } },
+  { 0x35, 0x31, "", false, {                  // duty cycle
+      { 1e-2, 4, "%", "%" } } },
+  { 0x36, 0x30, "DC", true, {                 // DC µA
+      { 1e-8, 4, "uA", "uA" }, { 1e-7, 5, "uA", "uA" } } },
+  { 0x36, 0x31, "AC", true, {                 // AC µA
+      { 1e-7, 5, "uA", "uA" }, { 1e-6, 0, "uA", "uA" } } },
+  { 0x37, 0x30, "DC", true, {                 // DC mA
+      { 1e-6, 3, "mA", "mA" }, { 1e-5, 4, "mA", "mA" } } },
+  { 0x37, 0x31, "AC", true, {                 // AC mA
+      { 1e-5, 4, "mA", "mA" }, { 1e-4, 5, "mA", "mA" } } },
+  { 0x38, 0x30, "DC", true, {                 // DC A
+      { 1e-3, 3, "A", "A" } } },
+  { 0x38, 0x31, "AC", true, {                 // AC A
+      { 1e-2, 4, "A", "A" } } },
+  { 0x39, 0x30, "AC", true, {                 // active and apparent power: 4000 W / 4000 VA
+      { 1e-1, 5, "W", "VA" } } },
+  { 0x39, 0x31, "AC", true, {                 // power factor and frequency: 40 PF, 4000 Hz
+      { 1e-3, 3, "cosphi", "Hz", 1e-1, 5 } } },
+  { 0x39, 0x32, "AC", true, {                 // effective voltage and current: 4000 V / 4000 A
+      { 1e-3, 5, "V", "A" } } },
+};
+
+const Range *findRange(quint8 code, quint8 select, int range, const Function **function)
+{
+  for (const Function &f : kFunctions)
+    if (f.code == code && f.select == select)
+    {
+      *function = &f;
+      return range < int(f.ranges.size()) ? &f.ranges[size_t(range)] : nullptr;
+    }
+  return nullptr;
+}
+}
 
 bool DecoderVC870::checkFormat(const char* data, size_t idx)
 {
@@ -23,747 +108,49 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC870::decode(const QByteArray &da
   m_result.hold   = false;
   m_result.range  = "";
 
-  QString val1;
-  QString val2;
-  QString special;
-  QString unit1;
-  QString unit2;
   const char *in = data.data();
-
-  // Obtain units and range
-  const uint8_t l_FunctionCode = in[0];
-  const uint8_t l_FunctionSelectCode = in[1];
-  const uint8_t l_FactorIndex = (in[2] & 0x0f); // Main Display Range
-
-  // Per-range factors instead of SI prefix strings; d_val1 = l_Factor * digits
-  // still lands in SI base units as DmmResponse requires. An unknown function
-  // code leaves these at 0.0 but also sets l_bParserError, which is reported.
-  double l_Factor  = 0.0;
-  double l_Factor2 = 0.0;
-  int    l_DotPos  = 0;
-  int    l_DotPos2 = 0;
-  bool   l_bParserError = false;
-  bool   l_bShowBar = true;
-  if (l_FunctionCode == 0x30)
+  const Function *function = nullptr;
+  const Range *range = findRange(quint8(in[0]), quint8(in[1]), in[2] & 0x0f, &function);
+  if (!range)
   {
-    // Measurement mode: DCV / ACV
-    unit1 = "V";
-    unit2 = "V";
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: DCV
-      special = "DC";
-      switch (l_FactorIndex)
-      {
-        case 0: // 4 V
-          l_Factor = 1e-4;
-          l_DotPos = 2;
-          break;
-        case 1:
-          // 40 V
-          l_Factor = 1e-3;
-          l_DotPos = 3;
-          break;
-        case 2:
-          // 400 V
-          l_Factor = 1e-2;
-          l_DotPos = 4;
-          break;
-        case 3:
-          // 4000 V (but 1000 V is the maximum)
-          l_Factor = 1e-1;
-          l_DotPos = 5;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x31)
-    {
-      // Measurement mode: ACV
-      special = "AC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 4 V
-          l_Factor = 1e-3;
-          l_DotPos = 3;
-          break;
-        case 1:
-          // 40 V
-          l_Factor = 1e-2;
-          l_DotPos = 4;
-          break;
-        case 2:
-          // 400 V
-          l_Factor = 1e-1;
-          l_DotPos = 5;
-          break;
-        case 3:
-          // 4000 V (but 1000 V is the maximum)
-          l_Factor = 1;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x31)
-  {
-    // Measurement mode: DCmV / Celsius
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: DCmV
-      special    = "DC";
-      unit1      = "mV";
-      unit2      = "mV";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 400 mV
-          l_Factor = 1e-5;
-          l_DotPos = 4;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x31)
-    {
-      // Measurement mode: degrees celsius and fahrenheit
-      special    = "TE";
-      unit1      = "C";
-      unit2      = "dF";   // Fahrenheit in QtDMM's spelling: "F" alone is farad
-      l_bShowBar = false;
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 4000 degrees C
-          l_Factor = 1e-1;
-          l_DotPos = 5;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x32)
-  {
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: Resistance OHM
-      special = "OH";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 400 Ohm
-          l_Factor = 1e-2;
-          l_DotPos = 4;
-          unit1    = "Ohm";
-          unit2    = "Ohm";
-          break;
-        case 1:
-          // 4 kOhm
-          l_Factor = 1e-1;
-          l_DotPos = 2;
-          unit1    = "kOhm";
-          unit2    = "kOhm";
-          break;
-        case 2:
-          // 40 kOhm
-          l_Factor = 1e1;
-          l_DotPos = 4;
-          unit1    = "kOhm";
-          unit2    = "kOhm";
-          break;
-        case 3:
-          // 400 kOhm
-          l_Factor = 1e2;
-          l_DotPos = 5;
-          unit1    = "kOhm";
-          unit2    = "kOhm";
-          break;
-        case 4:
-          // 4 MOhm
-          l_Factor = 1e3;
-          l_DotPos = 3;
-          unit1    = "MOhm";
-          unit2    = "MOhm";
-          break;
-        case 5:
-          // 40 MOhm
-          l_Factor = 1e4;
-          l_DotPos = 4;
-          unit1    = "MOhm";
-          unit2    = "MOhm";
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x31)
-    {
-      // Measurement mode: Short-circuit test CTN
-      unit1   = "Ohm";
-      unit2   = "Ohm";
-      special = "OH";
-      l_bShowBar = false;
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 400 Ohm
-          l_Factor = 1e-2;
-          l_DotPos = 4;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x33)
-  {
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: Capacitance CAP
-      special = "CA";
-      l_bShowBar = false;
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 40 nF
-          l_Factor = 1e-12;
-          l_DotPos = 3;
-          unit1    = "nF";
-          unit2    = "nF";
-          break;
-        case 1:
-          // 400 nF
-          l_Factor = 1e-11;
-          l_DotPos = 4;
-          unit1    = "nF";
-          unit2    = "nF";
-          break;
-        case 2:
-          // 4 uF
-          l_Factor = 1e-10;
-          l_DotPos = 2;
-          unit1    = "uF";
-          unit2    = "uF";
-          break;
-        case 3:
-          // 40 uF
-          l_Factor = 1e-9;
-          l_DotPos = 3;
-          unit1    = "uF";
-          unit2    = "uF";
-          break;
-        case 4:
-          // 400 uF
-          l_Factor = 1e-8;
-          l_DotPos = 4;
-          unit1    = "uF";
-          unit2    = "uF";
-          break;
-        case 5:
-          // 4000 uF
-          l_Factor = 1e-7;
-          l_DotPos = 5;
-          unit1    = "uF";
-          unit2    = "uF";
-          break;
-        case 6:
-          // 40 mF
-          l_Factor = 1e-6;
-          l_DotPos = 3;
-          unit1    = "mF";
-          unit2    = "mF";
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x34)
-  {
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: Diode DIO
-      unit1   = "V";
-      unit2   = "V";
-      special = "DI";
-      l_bShowBar = false;
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 4 V
-          l_Factor = 1e-4;
-          l_DotPos = 2;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x35)
-  {
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: Frequency
-      special = "FR";
-      l_bShowBar = false;
-
-      // The frequency mode was tested using a "Fluke and Philips" PM5193 programmable synthesizer / function generator (50 MHz)
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // Range 40 Hz: 20 Hz is displayed as "20.000 Hz"
-          l_Factor = 1e-3; // is Hz
-          l_DotPos = 3;
-          unit1    = "Hz";
-          unit2    = "Hz";
-          break;
-        case 1:
-          // Range 400 Hz: 200 Hz is displayed as "200.00 Hz"
-          l_Factor = 1e-2; // is Hz
-          l_DotPos = 4;
-          unit1    = "Hz";
-          unit2    = "Hz";
-          break;
-        case 2:
-          // Range 4 kHz: 2 kHz is displayed as "2.0000 kHz"
-          l_Factor = 1e-1; // is Hz
-          l_DotPos = 2;
-          unit1    = "kHz";
-          unit2    = "kHz";
-          break;
-        case 3:
-          // Range 40 kHz: 20 kHz is displayed as "20.000 kHz"
-          l_Factor = 1; // is Hz
-          l_DotPos = 3;
-          unit1    = "kHz";
-          unit2    = "kHz";
-          break;
-        case 4:
-          // Range 400 kHz: 200 kHz is displayed as "200.00 kHz"
-          l_Factor = 1e1; // is Hz
-          l_DotPos = 4;
-          unit1    = "kHz";
-          unit2    = "kHz";
-          break;
-        case 5:
-          // Range 4 Mhz: 2 MHz is displayed as "2.0000 MHz"
-          l_Factor = 1e2; // is Hz
-          l_DotPos = 2;
-          unit1    = "MHz";
-          unit2    = "MHz";
-          break;
-        case 6:
-          // Range 40 Mhz: 20 MHz is displayed as "20.000 MHz"
-          l_Factor = 1e3; // is Hz
-          l_DotPos = 3;
-          unit1    = "MHz";
-          unit2    = "MHz";
-          break;
-        case 7:
-          // Range 400 Mhz: 50 MHz is displayed as "050.00 MHz"
-          l_Factor = 1e4; // is Hz
-          l_DotPos = 4;
-          unit1    = "MHz";
-          unit2    = "MHz";
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x31)
-    {
-      // Measurement mode: (4~20mA DC)%
-      unit1      = "%";
-      unit2      = "%";
-      special    = "";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 400 % (but 100 % is the maximum)
-          l_Factor = 1e-2;
-          l_DotPos = 4;
-          l_bShowBar = false;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x36)
-  {
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: DCuA
-      unit1   = "uA";
-      unit2   = "uA";
-      special = "DC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 400 uA
-          l_Factor = 1e-8;
-          l_DotPos = 4;
-          break;
-        case 1:
-          // 4000 uA
-          l_Factor = 1e-7;
-          l_DotPos = 5;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x31)
-    {
-      // Measurement mode: ACuA
-      unit1   = "uA";
-      unit2   = "uA";
-      special = "AC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 400 uA
-          l_Factor = 1e-7;
-          l_DotPos = 5;
-          break;
-        case 1:
-          // 4000 uA
-          l_Factor = 1e-6;
-          l_DotPos = 0;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x37)
-  {
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: DCmA
-      unit1   = "mA";
-      unit2   = "mA";
-      special = "DC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 40 mA
-          l_Factor = 1e-6;
-          l_DotPos = 3;
-          break;
-        case 1:
-          // 400 mA
-          l_Factor = 1e-5;
-          l_DotPos = 4;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x31)
-    {
-      // Measurement mode: ACmA
-      unit1   = "mA";
-      unit2   = "mA";
-      special = "AC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 40 mA
-          l_Factor = 1e-5;
-          l_DotPos = 4;
-          break;
-        case 1:
-          // 400 mA
-          l_Factor = 1e-4;
-          l_DotPos = 5;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x38)
-  {
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: DCA
-      unit1   = "A";
-      unit2   = "A";
-      special = "DC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 40 A (but 10 A is the maximum)
-          l_Factor = 1e-3;
-          l_DotPos = 3;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x31)
-    {
-      // Measurement mode: ACA
-      unit1   = "A";
-      unit2   = "A";
-      special = "AC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 400 A (but 10 A is the maximum)
-          l_Factor = 1e-2;
-          l_DotPos = 4;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else if (l_FunctionCode == 0x39)
-  {
-    if (l_FunctionSelectCode == 0x30)
-    {
-      // Measurement mode: Active power + Apparent power
-      unit1   = "W";
-      unit2   = "VA";
-      special = "AC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 4000 W / 4000 VA
-          l_Factor = 1e-1;
-          l_DotPos = 5;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x31)
-    {
-      // Measurement mode: Power factor + Frequency
-      unit1   = "cosphi";
-      unit2   = "Hz";
-      special = "AC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 40 PF
-          l_Factor  = 1e-3;
-          l_DotPos  = 3;
-
-          // 4000 Hz
-          l_Factor2 = 1e-1;
-          l_DotPos2 = 5;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else if (l_FunctionSelectCode == 0x32)
-    {
-      // Measurement mode: Voltage effective value + current effective value
-      unit1   = "V";
-      unit2   = "A";
-      special = "AC";
-      switch (l_FactorIndex)
-      {
-        case 0:
-          // 4000 V / 4000 A
-          l_Factor = 1e-3;
-          l_DotPos = 5;
-          break;
-        default:
-          l_bParserError = true;
-          break;
-      } // switch
-    }
-    else
-    {
-      // Unknown function select code
-      l_bParserError = true;
-    } // else
-  }
-  else
-  {
-    // Unknown function code
-    l_bParserError = true;
-  } // else
-
-  // Obtain value of the primary display
-  double d_val1;
-  if ((in[15] & 0x01) || (in[19] & 0x01))   // vc870_ol1 flag or open_flag
-  {
-    val1   = "0L";
-    d_val1 = 0;
-  }
-  else if (in[19] & 0x04)     // lo_flag
-  {
-    val1   = "L 0";
-    d_val1 = 0;
-  }
-  else if (in[19] & 0x02)     // hi_flag
-  {
-    val1   = "H 1";
-    d_val1 = 0;
-  }
-  else
-  {
-    if (in[15] & 0x04)   // Sign1_flag
-      val1 = " -";
-    else
-      val1 = "  ";
-    // else
-
-    val1 += makeValue(data,3,7);
-    d_val1 = (l_Factor * val1.toDouble());
-    if (l_DotPos)
-    {
-      val1 = insertCommaIT(val1, l_DotPos); // 2 ... 5
-    } // if
-  } // else
-
-  // Obtain value of the secondary display
-  double d_val2;
-  if ((in[17] & 0x08) || (in[19] & 0x01))   // vc870_ol2 flag or open_flag
-  {
-    val2   = "0L";
-    d_val2 = 0;
-  }
-  else if (in[19] & 0x04)     // lo_flag
-  {
-    val2   = "L 0";
-    d_val2 = 0;
-  }
-  else if (in[19] & 0x02)     // hi_flag
-  {
-    val2   = "H 1";
-    d_val2 = 0;
-  }
-  else
-  {
-    if (in[15] & 0x08)   // Sign2_flag
-      val2 = " -";
-    else
-      val2 = "  ";
-    // else
-
-    val2 += makeValue(data,8,12);
-    if (l_Factor2 == 0.0)
-      d_val2 = (l_Factor * val2.toDouble());
-    else
-      d_val2 = (l_Factor2 * val2.toDouble());
-    // else
-
-    if (!l_DotPos2)
-    {
-      val2 = insertCommaIT(val2, l_DotPos);  // 2 ... 5
-    }
-    else
-    {
-      val2 = insertCommaIT(val2, l_DotPos2); // 2 ... 5
-    } // else
-  } // else
-
-  if (!l_bParserError)
-  {
-    // Always update the primary display (ID 0)
-    m_result.special= special;
-    m_result.showBar= l_bShowBar;
-    m_result.dval   = d_val1;
-    m_result.val    = val1;
-    m_result.unit   = unit1;
-    m_result.id     = 0;
-    if (in[20] == 0x31)   // LCD need Dual display
-    {
-      m_result.dval2  = d_val2;
-      m_result.val2   = val2;
-      m_result.unit2  = unit2;
-      m_result.id2    = 1;
-    }
-    else
-    {
-      // Disable the secondary display (ID 1) as it is currently unused
-      m_result.dval2  = 0;
-      m_result.val2   = "";
-      m_result.unit2  = "";
-      m_result.id2    = 1;
-    } // else
-  }
-  else
-  {
-    // Parser error
     m_result.error = tr("Parser errors");
-  } // else
+    return m_result;
+  }
 
+  // the value of a display: OL, open, lo and hi flags, else the digits
+  // with their sign
+  auto display = [&](int first, int last, bool ol, bool negative, double factor, int dot, double *dval)
+  {
+    *dval = 0;
+    if (ol || (in[19] & 0x01))   // overload or open_flag
+      return QString("0L");
+    if (in[19] & 0x04)           // lo_flag
+      return QString("L 0");
+    if (in[19] & 0x02)           // hi_flag
+      return QString("H 1");
+    QString val = (negative ? " -" : "  ") + makeValue(data, first, last);
+    *dval = factor * val.toDouble();
+    return dot ? insertCommaIT(val, dot) : val;
+  };
+
+  double dval1 = 0;
+  double dval2 = 0;
+  const QString val1 = display(3, 7, in[15] & 0x01, in[15] & 0x04, range->factor, range->dot, &dval1);
+  const QString val2 = display(8, 12, in[17] & 0x08, in[15] & 0x08, range->factor2 != 0.0 ? range->factor2 : range->factor,
+                               range->dot2 ? range->dot2 : range->dot, &dval2);
+
+  m_result.special = function->special;
+  m_result.showBar = function->showBar;
+  m_result.dval    = dval1;
+  m_result.val     = val1;
+  m_result.unit    = range->unit1;
+  m_result.id      = 0;
+  m_result.id2     = 1;
+  if (in[20] == 0x31)   // LCD need Dual display
+  {
+    m_result.dval2 = dval2;
+    m_result.val2  = val2;
+    m_result.unit2 = range->unit2;
+  }
   return m_result;
 }
-
