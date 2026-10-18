@@ -89,7 +89,14 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    notes (from CHANGELOG). Publish it. The macOS `.dmg` is only checked by
    CI (bundle contents, architectures, signature, minimum macOS, a start
    with `--version`); test it on a Mac when one is available.
-8. Tell the website: the download page links the new release.
+8. Publishing the release runs the **GitHub Pages** workflow
+   (`.github/workflows/pages.yml`): it rebuilds the signed Flatpak repository
+   at <https://qtdmm.github.io/QtDMM/repos/> from the bundles of the newest
+   release (branch `stable`) and of a newer release candidate (branch
+   `beta`), with `tools/build-flatpak-repo.sh`. It signs with the secret
+   `REPO_GPG_KEY` (an armored secret key without passphrase); without it the
+   page says the repository is not online yet.
+9. Tell the website: the download page links the new release.
 
 A bugfix release `26.1.1` is tagged the same way, on a branch `26.1` created
 from the `26.1` tag when `master` has moved on.
