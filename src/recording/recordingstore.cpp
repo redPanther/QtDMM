@@ -34,13 +34,13 @@ void RecordingStore::setLiveWidth(int seconds)
 {
   m_liveWidthMs = qint64(qMax(1, seconds)) * 1000;
   if (m_state == Live)
-    trim();
+    trimForLimits();
 }
 
 void RecordingStore::setMaxPoints(int points)
 {
   m_maxPoints = qMax(2, points);
-  trim();
+  trimForLimits();
 }
 
 void RecordingStore::setThresholds(double falling, double raising)
@@ -152,7 +152,7 @@ void RecordingStore::setSampleLength(int tenths)
 {
   m_sampleLength = tenths;
   if (m_state == Live)
-    trim();
+    trimForLimits();
 }
 
 int RecordingStore::remainingLength() const
@@ -166,7 +166,7 @@ void RecordingStore::setPreTrigger(int ms)
 {
   m_preMs = qMax(0, ms);
   if (m_state == Live)
-    trim();
+    trimForLimits();
 }
 
 QVector<GridPoint> RecordingStore::grid(int tenths) const
@@ -488,8 +488,11 @@ void RecordingStore::closeSilentExtras(qint64 now)
     const int i = extraIndex(it.key());
     if (i < 0 || m_extra[i].isEmpty() || m_extra[i].last().gap())
       continue;
+    // never after now: a value taken along at the start (appendCurrent())
+    // stands at 0 however old it was
+    const RawPoint &last = m_extra[i].last();
     RawPoint p;
-    p.t = m_extra[i].last().t + m_staleMs;
+    p.t = qMin(last.t + m_staleMs, qMax(last.t, now - m_t0));
     p.value = qQNaN();
     p.quality = Quality::Stale;
     appendExtraPoint(i, p);
@@ -899,6 +902,13 @@ bool RecordingStore::trim()
   if (trimExtras() && !trimmed)
     Q_EMIT extrasChanged();
   return trimmed;
+}
+
+void RecordingStore::trimForLimits()
+{
+  // no appended(true) follows here to say it for the other values
+  if (trim())
+    Q_EMIT extrasChanged();
 }
 
 bool RecordingStore::trimMain()

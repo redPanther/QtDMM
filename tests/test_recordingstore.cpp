@@ -266,6 +266,21 @@ int main(int argc, char **argv)
         ordered = ordered && store.extra(i).at(j).t >= store.extra(i).at(j - 1).t;
     check(ordered, "Hz/% back and forth: each series in time order");
 
+    // a value taken along at the start stands at 0 however old it was: its
+    // gap never lies after now
+    RecordingStore late;
+    TestClock c3;
+    c3.attach(late);
+    late.setReading(c3.at(0, reading(0.001, "1.000", "DC")));
+    late.setReading(c3.at(10, other(1, 50, "50.00", "Hz")));
+    late.setReading(c3.at(2000, reading(0.001, "1.000", "DC")));
+    late.start();
+    for (qint64 t = 2100; t <= 3500; t += 100)
+      late.setReading(c3.at(t, reading(0.001, "1.000", "DC")));
+    check(late.extraCount() == 1 && late.extra(0).last().gap() && late.extra(0).last().t <= late.series().last().t,
+          QString("old value at the start: gap at %1, the recording at %2")
+            .arg(late.extraCount() ? late.extra(0).last().t : -1).arg(late.series().last().t));
+
     // the recording length: the main value stops it, the other values add
     // nothing after it
     RecordingStore len;
