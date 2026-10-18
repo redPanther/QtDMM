@@ -753,6 +753,7 @@ void InstanceWidget::readConfig()
   m_display->setFaceColor(tint);
   m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), devSettings->numValues());
   dmm->setNumValues(devSettings->numValues());
+  m_ctl->setNumValues(devSettings->numValues());
   applyValueChoice();
   m_ctl->setDisplayCounts(devSettings->display());
 

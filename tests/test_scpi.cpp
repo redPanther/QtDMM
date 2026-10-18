@@ -93,6 +93,43 @@ int main(int argc, char **argv)
   s.setReading(0, reading(-2.5e-3, "V"));
   check(ask(s, "READ?") == "-2.500000E-03", "negative, small");
 
+  // --- 2b. channels: a channel list picks the values, several answer in
+  //         its order; the meter's values (setChannelCount) are the channels,
+  //         1 and 2 always; a broken list is -104, a channel it has not -222 ---
+  {
+    ScpiServer c;
+    c.setConnected(true);
+    c.setChannelCount(3);
+    c.setReading(0, reading(800, "ppm", "carbon_dioxide"));
+    c.setReading(1, reading(22.5, "°C", "temperature"));
+    check(ask(c, "READ? (@1)") == "+8.000000E+02" && ask(c, "FETC? (@2)") == "+2.250000E+01",
+          "channels: (@1) (@2) " + ask(c, "FETC? (@2)"));
+    check(ask(c, "FETC? (@3)") == "9.91E+37" && ask(c, "SYST:ERR?").startsWith("-230,"),
+          "channels: 3 there, no reading yet");
+    c.setReading(2, reading(45, "%", "relative_humidity"));
+    check(ask(c, "FETC? (@1:3)") == "+8.000000E+02,+2.250000E+01,+4.500000E+01", "channels: (@1:3) " + ask(c, "FETC? (@1:3)"));
+    check(ask(c, "READ? (@3,1)") == "+4.500000E+01,+8.000000E+02", "channels: (@3,1) in the list's order");
+    check(ask(c, "MEAS:VOLT:DC? (@2)") == "+2.250000E+01" && ask(c, "READ3?") == "+4.500000E+01", "channels: MEAS: and READ3?");
+    check(ask(c, "READ2? (@1)") == "+8.000000E+02", "channels: the list before the suffix");
+    check(ask(c, "UNIT? (@1:3)") == QString::fromUtf8("\"ppm\",\"°C\",\"%\"") && ask(c, "CONF? (@2)") == "\"TEMP AUTO\"",
+          "channels: UNIT? CONF? " + ask(c, "UNIT? (@1:3)"));
+    check(ask(c, "QTDMM:CHAN:CAT?") == QString::fromUtf8("1,\"carbon_dioxide\",\"ppm\",2,\"temperature\",\"°C\",3,\"relative_humidity\",\"%\""),
+          "channels: the catalog " + ask(c, "QTDMM:CHAN:CAT?"));
+    c.process("*CLS");
+    check(ask(c, "READ? (@4)").isEmpty() && ask(c, "SYST:ERR?").startsWith("-222,"), "channels: (@4) the meter has not");
+    for (const char *bad : { "READ? (@", "READ? (@)", "READ? (@3:1)", "READ? (@a)", "READ? (@1,)" })
+    {
+      c.process("*CLS");
+      check(ask(c, bad).isEmpty() && ask(c, "SYST:ERR?").startsWith("-104,"), QString("channels: %1 is -104").arg(bad));
+    }
+    ScpiServer one;
+    one.setChannelCount(1);
+    check(one.channelCount() == 2 && ask(one, "QTDMM:CHAN:CAT?") == "1,\"\",\"\",2,\"\",\"\"",
+          "channels: 1 and 2 always (READ2? as before) " + ask(one, "QTDMM:CHAN:CAT?"));
+    one.setReading(4, reading(1, "V"));
+    check(one.channelCount() == 5, "channels: a value that comes is a channel");
+  }
+
   // --- 3. several commands in one message, the prefix rule ---
   check(ask(s, "*IDN?;READ?;UNIT?") == QString("QtDMM,UNI-T UT61E,0,%1;-2.500000E-03;\"V\"").arg(APP_VERSION),
         "three queries, one line " + ask(s, "*IDN?;READ?;UNIT?"));

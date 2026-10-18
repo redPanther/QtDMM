@@ -5,6 +5,7 @@
 #include <QByteArray>
 #include <QHostAddress>
 #include <QList>
+#include <QMap>
 #include <QObject>
 #include <QString>
 
@@ -61,8 +62,15 @@ public:
 
   /// The meter shown in *IDN? ("UNI-T UT61E"); the manufacturer is QtDMM.
   void setModel(const QString &model) { m_model = model; }
-  /// Reading of value @p id (0 = main, 1 = second) as it arrives.
+  /// Reading of value @p id (0 = main, 1 = second ...) as it arrives:
+  /// channel id + 1 of the queries.
   void setReading(int id, const Reading &reading);
+  /// The values the meter has (its Device page): channels 1..@p count of
+  /// READ? (@<n>) and the like. Channels 1 and 2 are always there (READ2?
+  /// on a meter without a second value answers as stale), and so is one
+  /// that a reading came for.
+  void setChannelCount(int count) { m_channelCount = count; }
+  int  channelCount() const;
   /// The meter sends readings: false while connecting, after a timeout and
   /// while a lost connection is reopened (STAT:QUES? bit 2, INPut?).
   void setConnected(bool on) { m_connected = on; }
@@ -199,7 +207,10 @@ private:
   QString handleQtdmm(const Command &cmd, bool &isQuery);
   QByteArray recordingData(const Command &cmd, bool &isQuery);
   static QString unquote(const QString &arg);
-  const Reading *reading(int channel);
+  /// The channels of a query: its channel list "(@1,3)", "(@1:3)" in the
+  /// arguments, else @p suffix (READ2?). Empty with an error queued when the
+  /// list is broken (-104) or names a channel the meter has not (-222).
+  QList<int> channels(const Command &cmd, int suffix);
 
   QTcpServer *m_server;
   QList<QTcpSocket *> m_clients;
@@ -210,7 +221,8 @@ private:
   QList<QTcpSocket *> m_released;
   QString m_error;
   QString m_model;
-  Reading m_readings[2];
+  QMap<int, Reading> m_readings;   ///< by value id (channel - 1)
+  int m_channelCount = 2;
   bool m_connected = false;
   bool m_recording = false;
   QList<QPair<int, QString>> m_errors;

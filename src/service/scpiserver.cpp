@@ -82,8 +82,14 @@ QHostAddress ScpiServer::address() const
 
 void ScpiServer::setReading(int id, const Reading &reading)
 {
-  if (id >= 0 && id < 2)
+  if (id >= 0)
     m_readings[id] = reading;
+}
+
+int ScpiServer::channelCount() const
+{
+  const int seen = m_readings.isEmpty() ? 0 : m_readings.lastKey() + 1;
+  return qMax(qMax(2, m_channelCount), seen);
 }
 
 void ScpiServer::onNewConnection()
@@ -190,14 +196,48 @@ QString ScpiServer::function(const Reading &r) const
   }
 }
 
-const ScpiServer::Reading *ScpiServer::reading(int channel)
+QList<int> ScpiServer::channels(const Command &cmd, int suffix)
 {
-  if (channel < 1 || channel > 2)
+  const int count = channelCount();
+  const int open = cmd.args.indexOf("(@");
+  if (open < 0)
   {
-    pushError(-114, "Header suffix out of range");
-    return nullptr;
+    if (suffix < 1 || suffix > count)
+    {
+      pushError(-114, "Header suffix out of range");
+      return {};
+    }
+    return { suffix };
   }
-  return &m_readings[channel - 1];
+  // (@1), (@1,3), (@1:3), (@1,2:3)
+  static const QRegularExpression list(R"(^\(@\s*(\d+(?:\s*:\s*\d+)?(?:\s*,\s*\d+(?:\s*:\s*\d+)?)*)\s*\)$)");
+  const int close = cmd.args.indexOf(')', open);
+  const QRegularExpressionMatch m = list.match(close < 0 ? QString() : cmd.args.mid(open, close - open + 1));
+  if (!m.hasMatch())
+  {
+    pushError(-104, "Data type error; a channel list is (@1), (@1,3) or (@1:3)");
+    return {};
+  }
+  QList<int> out;
+  for (const QString &item : m.captured(1).split(','))
+  {
+    const QStringList ends = item.split(':');
+    const int from = ends.first().trimmed().toInt(), to = ends.last().trimmed().toInt();
+    if (from > to)
+    {
+      pushError(-104, "Data type error; a channel range goes up (@1:3)");
+      return {};
+    }
+    for (int c = from; c <= to; ++c)
+      out << c;
+  }
+  for (int c : out)
+    if (c < 1 || c > count)
+    {
+      pushError(-222, QString("Data out of range; channel %1, the meter has %2").arg(c).arg(count));
+      return {};
+    }
+  return out;
 }
 
 void ScpiServer::pushError(int code, const QString &text)
@@ -516,6 +556,23 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     return {};
   }
 
+  // QTDMM:CHANnel:CATalog? - <n>,"<port>","<unit>" for each channel of
+  // READ? (@<n>); empty strings before its first reading
+  if (matches(sub, "CHANnel") && depth == 3)
+  {
+    if (!matches(leaf, "CATalog"))
+      return refuse(isQuery, -113, "Undefined header");
+    if (!queryOnly(cmd, isQuery))
+      return {};
+    QStringList out;
+    for (int c = 1; c <= channelCount(); ++c)
+    {
+      const Reading r = m_readings.value(c - 1);
+      out << QString::number(c) << quoted(r.valid ? r.port.toString() : QString()) << quoted(r.unit);
+    }
+    return out.join(',');
+  }
+
   // QTDMM:INSTances? - "<id>",<value>,"<unit>" for each running instance
   if (matches(sub, "INSTances") && depth == 2)
   {
@@ -670,39 +727,50 @@ QString ScpiServer::handleCommon(const Command &cmd, bool &isQuery)
   return refuse(isQuery, -113, "Undefined header");
 }
 
-// READ? and its kin, UNIT?, CONFigure?: a numeric suffix picks the main (1)
-// or the second (2) value. MEASure:VOLTage:DC? style sub-functions are
-// accepted and ignored: the meter decides what it measures
+// READ? and its kin, UNIT?, CONFigure?: a channel list "(@1:3)" or a numeric
+// suffix (READ2?) picks the value, the main one (1) without; several answer
+// in the order of the list, separated by commas. MEASure:VOLTage:DC? style
+// sub-functions are accepted and ignored: the meter decides what it measures
 QString ScpiServer::handleReading(const Command &cmd, bool &isQuery)
 {
   if (!queryOnly(cmd, isQuery))
     return {};
   const QString head = cmd.path.first();
-  const int channel = cmd.path.size() <= 2 && cmd.suffix.last() != 1 ? cmd.suffix.last() : cmd.suffix.first();
-  const Reading *r = reading(channel);
-  if (!r)
+  const int suffix = cmd.path.size() <= 2 && cmd.suffix.last() != 1 ? cmd.suffix.last() : cmd.suffix.first();
+  const QList<int> list = channels(cmd, suffix);
+  if (list.isEmpty())
   {
     isQuery = false;
     return {};
   }
-  if (matches(head, "UNIT"))
-    return QString("\"%1\"").arg(r->unit);
-  if (matches(head, "CONFigure"))
-  {
-    QString range = r->range.toUpper() == "AUTO" ? QString("AUTO") : r->range;
-    if (range.isEmpty() || range.toUpper() == "MANU")
-      range = "MANUAL";
-    return QString("\"%1 %2\"").arg(function(*r), range);
-  }
   const qint64 now = QDateTime::currentMSecsSinceEpoch();
-  if (!r->valid || !m_connected || now - r->msecs > kStaleMs)
+  bool stale = false;
+  QStringList out;
+  for (int channel : list)
   {
-    pushError(-230, "Data corrupt or stale");
-    return kNotANumber;
+    const Reading r = m_readings.value(channel - 1);
+    if (matches(head, "UNIT"))
+      out << QString("\"%1\"").arg(r.unit);
+    else if (matches(head, "CONFigure"))
+    {
+      QString range = r.range.toUpper() == "AUTO" ? QString("AUTO") : r.range;
+      if (range.isEmpty() || range.toUpper() == "MANU")
+        range = "MANUAL";
+      out << QString("\"%1 %2\"").arg(function(r), range);
+    }
+    else if (!r.valid || !m_connected || now - r.msecs > kStaleMs)
+    {
+      stale = true;
+      out << kNotANumber;
+    }
+    else if (r.overload)
+      out << number(std::signbit(r.value) ? -INFINITY : INFINITY);   // -OL: a negative NaN
+    else
+      out << number(r.value);
   }
-  if (r->overload)
-    return number(std::signbit(r->value) ? -INFINITY : INFINITY);   // -OL: a negative NaN
-  return number(r->value);
+  if (stale)
+    pushError(-230, "Data corrupt or stale");
+  return out.join(',');
 }
 
 QString ScpiServer::handleStatus(const Command &cmd, bool &isQuery)
@@ -718,7 +786,7 @@ QString ScpiServer::handleStatus(const Command &cmd, bool &isQuery)
     // bit 0 overload, bit 1 hold, bit 2 meter not connected, bit 3 no
     // current reading; an old reading's overload or hold is gone
     int bits = 0;
-    const Reading &r = m_readings[0];
+    const Reading r = m_readings.value(0);
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     const bool current = r.valid && now - r.msecs <= kStaleMs;
     if (current && r.overload) bits |= 1;

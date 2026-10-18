@@ -29,9 +29,16 @@ of the meters that have remote keys.
   `VERS?` means `SYST:VERS?`; a header starting with `:` or `*` is absolute.
 - Mnemonics in **long or short form**, case-insensitive: `MEASure?`,
   `MEAS?`, `meas?`. The short form is the upper-case part of the long form.
-- A **numeric suffix** on the last mnemonic selects the value: `READ?` =
-  `READ1?` = main value, `READ2?` = the meter's second value (Victron,
-  Fluke 45). Other suffixes answer `-114,"Header suffix out of range"`.
+- A **channel list** after a reading query selects the meter's values,
+  channel 1 the main value: `READ? (@2)`, `FETC? (@1,3)`, `READ? (@1:3)`,
+  also mixed (`(@1,2:3)`). Several channels answer in the list's order,
+  separated by commas. The channels are the values on the Device page
+  (`ScpiServer::setChannelCount()`), 1 and 2 always, and any value a
+  reading came for; another gives `-222`, a broken list `-104`.
+- A **numeric suffix** on the last mnemonic is short for a single channel:
+  `READ?` = `READ1?` = main value, `READ2?` = the second value (Victron,
+  Fluke 45), `READ3?` ... A suffix beyond the channels answers
+  `-114,"Header suffix out of range"`; a channel list wins over a suffix.
 - Numbers are **NR3** in SI base units: `+1.234500E+00`, six decimals.
   `9.9E+37` is +INF (overload), `-9.9E+37` −INF, `9.91E+37` is NaN (no
   usable reading: not connected, nothing received for 5 s, or no second
@@ -60,8 +67,9 @@ of the meters that have remote keys.
 | `[SENSe:]DATA?` | NR3 | same as `READ?` |
 | `VALue1?`, `VALue2?` | NR3 | Fluke 45 style names for main and second value |
 | `READ2?`, `FETCh2?`, `MEASure2?`, `DATA2?` | NR3 | the second value |
-| `UNIT?`, `UNIT2?` | `"V"`, `"A"`, `"Ohm"`, `"F"`, `"Hz"`, `"C"`, `"dF"`, `"%"`, … | the meter's base unit without SI prefix, spelled as the decoder emits it (`C` and `dF` for the temperature scales) |
-| `CONFigure?`, `CONFigure2?` | `"<function> <range>"` | see below |
+| `READ? (@<list>)` and the others above | NR3`,`NR3… | the channels of the list, in its order |
+| `UNIT?`, `UNIT2?`, `UNIT? (@<list>)` | `"V"`, `"A"`, `"Ohm"`, `"F"`, `"Hz"`, `"C"`, `"dF"`, `"%"`, … | the meter's base unit without SI prefix, spelled as the decoder emits it (`C` and `dF` for the temperature scales) |
+| `CONFigure?`, `CONFigure2?`, `CONFigure? (@<list>)` | `"<function> <range>"` | see below |
 
 `CONFigure?` derives the function from the meter's mode and unit:
 
@@ -118,6 +126,7 @@ qtdmm-mcp tool offers them only with `--allow-control`.
 | `QTDMM:ALARm?` | integer | alarms raised or acknowledged |
 | `QTDMM:ALARm:LIST?` | `"<name>",<state>,…` | `OFF\|PEND\|RAIS\|ACKN` per alarm, `""` when none is set up; quotes in a name doubled |
 | `QTDMM:KEY:CATalog?` | `"<KEY>",…` | upper case, `""` for none |
+| `QTDMM:CHANnel:CATalog?` | `<n>,"<port>","<unit>",…` | the channels of `READ? (@n)`: what each measures (`PortKey`: `voltage.dc`, `temperature`, `carbon_dioxide`) and its unit, empty strings before its first reading |
 | `QTDMM:INSTances?` | `"<id>",<value>,"<unit>",…` | running instances (`SharedStateManager`), `9.91E+37` without a current reading |
 
 What the server does not hold itself it asks for through
@@ -161,9 +170,9 @@ The queue holds 20 entries; when full, the last one becomes
 | `-100` | Command error | a query used as a command (`READ`) or the other way round, an unparsable header |
 | `-109` | Missing parameter | `INPut` without ON/OFF |
 | `-113` | Undefined header | unknown command; the query is skipped in the answer line |
-| `-114` | Header suffix out of range | suffix other than 1 or 2 |
-| `-104` | Data type error | `QTDMM:RECord:DATA? lots` |
-| `-222` | Data out of range | `QTDMM:RECord:DATA? 0` |
+| `-114` | Header suffix out of range | a suffix beyond the channels (`READ5?` on a meter with 3) |
+| `-104` | Data type error | `QTDMM:RECord:DATA? lots`, a broken channel list (`(@`, `(@3:1)`) |
+| `-222` | Data out of range | `QTDMM:RECord:DATA? 0`, `READ? (@4)` on a meter with 3 values |
 | `-224` | Illegal parameter value | `INPut MAYBE`, `QTDMM:KEY "peak"` on a meter without PEAK |
 | `-230` | Data corrupt or stale | a reading query answered `9.91E+37` |
 | `-240` | Hardware error | `HCOPy:SDUMp:DATA?` when no window is there to dump; `QTDMM:KEY` not sent (meter not connected) |
@@ -177,6 +186,8 @@ The queue holds 20 entries; when full, the last one becomes
 *IDN?                        → QtDMM,Uni-Trend UT61E,0,2026.9.22
 READ?;UNIT?;CONF?            → +1.234500E+00;"V";"VOLT:DC AUTO"
 READ2?                       → 9.91E+37            (UT61E has no second value)
+FETC? (@1:3)                 → +8.000000E+02,+2.250000E+01,+4.500000E+01   (TFA AirCO2ntrol)
+QTDMM:CHAN:CAT?              → 1,"carbon_dioxide","ppm",2,"temperature","C",3,"relative_humidity","%"
 SYST:ERR?;VERS?              → -230,"Data corrupt or stale";1999.0
 INIT;STAT:OPER?              → 16
 :ABOR;:STAT:OPER?            → 0
