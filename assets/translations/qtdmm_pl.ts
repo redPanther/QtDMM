@@ -2247,12 +2247,12 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>Eksportuj dane</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="131"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="137"/>
         <source>Import data</source>
         <translation>Importuj dane</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="131"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="137"/>
         <source>CSV (*.csv);;All files (*)</source>
         <translation>CSV (*.csv);;Wszystkie pliki (*)</translation>
     </message>
@@ -2287,55 +2287,55 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>Neutralne</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="187"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="193"/>
         <source>Scalable vector graphics (*.svg)</source>
         <translation>Skalowalna grafika wektorowa (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="187"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="193"/>
         <source>PDF (*.pdf)</source>
         <translation>PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="188"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="194"/>
         <source>PNG image (*.png)</source>
         <translation>Obraz PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="188"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="194"/>
         <source>JPEG image (*.jpg)</source>
         <translation>Obraz JPEG (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="191"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="197"/>
         <source>Export image</source>
         <translation>Eksport obrazu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="241"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="247"/>
         <source>QtDMM recording, %1</source>
         <translation>Zapis QtDMM, %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="242"/>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="258"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="248"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="264"/>
         <source>QtDMM graph</source>
         <translation>Wykres QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="243"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="249"/>
         <source>%1 readings, unit %2</source>
         <translation>%1 odczytów, jednostka %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="247"/>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="267"/>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="282"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="253"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="273"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="288"/>
         <source>Could not write %1</source>
         <translation>Nie można zapisać %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="286"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="292"/>
         <source>Graph written to %1</source>
         <translation>Wykres zapisany do %1</translation>
     </message>
@@ -4668,58 +4668,63 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
 <context>
     <name>RecordingFile</name>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="41"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="125"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="114"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="270"/>
         <source>Cannot open file.</source>
         <translation>Nie można otworzyć pliku.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="49"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="79"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="122"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="206"/>
         <source>Oops! Seems not to be a valid file</source>
         <translation>Ups! To chyba nie jest prawidłowy plik</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="57"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="138"/>
         <source>File contains only header</source>
         <translation>Plik zawiera tylko nagłówek</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="119"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="264"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="304"/>
         <source>Nothing to export.</source>
         <translation>Nic do wyeksportowania.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="157"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="307"/>
         <source>Recording</source>
         <translation>Nagranie</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
         <source>timestamp</source>
         <translation>znacznik czasu</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
         <source>time (s)</source>
         <translation>czas (s)</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
         <source>value</source>
         <translation>wartość</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
         <source>unit</source>
         <translation>jednostka</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
+        <source>status</source>
+        <translation>stan</translation>
     </message>
 </context>
 <context>
     <name>RecordingStore</name>
     <message>
-        <location filename="../../src/recording/recordingstore.cpp" line="772"/>
+        <location filename="../../src/recording/recordingstore.cpp" line="904"/>
         <source>Trigger</source>
         <translation>Wyzwolenie</translation>
     </message>

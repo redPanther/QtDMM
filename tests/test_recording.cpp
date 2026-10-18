@@ -92,10 +92,10 @@ int main(int argc, char **argv)
     QFile f(path);
     check(f.open(QIODevice::ReadOnly | QIODevice::Text), "written file opens");   // Text: the file has \r\n on Windows
     const QStringList lines = QString::fromUtf8(f.readAll()).split('\n', Qt::SkipEmptyParts);
-    check(lines.size() == 5 && lines[0] == "timestamp;time (s);value;unit", "header and four rows");
+    check(lines.size() == 5 && lines[0] == "timestamp;time (s);value;unit;status", "header and four rows");
     check(lines.size() > 2 && lines[2].startsWith("2026-09-21T14:03:05,750;0.5;"), "second row 0.5 s later: " + (lines.size() > 2 ? lines[2] : ""));
-    check(lines.size() > 2 && lines[2].endsWith("kV"), "1234.5 V written with the k prefix: " + (lines.size() > 2 ? lines[2] : ""));
-    check(lines.size() > 3 && lines[3].endsWith(QString::fromUtf8("µV")), "2.5e-6 V written as µV");
+    check(lines.size() > 2 && lines[2].endsWith(";kV;ok"), "1234.5 V written with the k prefix: " + (lines.size() > 2 ? lines[2] : ""));
+    check(lines.size() > 3 && lines[3].endsWith(QString::fromUtf8(";µV;ok")), "2.5e-6 V written as µV");
     const auto back = RecordingFile::read(path, &err);
     check(back.has_value(), "round trip reads: " + err);
     if (back)
@@ -105,6 +105,55 @@ int main(int argc, char **argv)
       for (int i = 0; i < qMin(4, back->values.size()); ++i)
         check(std::fabs(back->values[i] - rec.values[i]) <= 1e-6 * std::fabs(rec.values[i]) + 1e-12,
               QString("round trip value %1: %2 vs %3").arg(i).arg(back->values[i]).arg(rec.values[i]));
+    }
+  }
+
+  // --- 5b. the status: OL, -OL and a gap apart, an old file without it
+  //          reads nan as a gap; a status that does not fit is no file ---
+  {
+    const QString path = tmp.path() + "/status.csv";
+    QFile f(path);
+    check(f.open(QIODevice::WriteOnly | QIODevice::Text), "status file opens");
+    QTextStream(&f) << "timestamp;time (s);value;unit;status;value 2;unit 2;status 2\n"
+                       "2026-01-01T00:00:00,000;0;1;V;ok;;;\n"
+                       "2026-01-01T00:00:01,000;1;nan;V;OL;25;A;ok\n"
+                       "2026-01-01T00:00:02,000;2;nan;V;-OL;nan;A;gap\n"
+                       "2026-01-01T00:00:03,000;3;nan;V;gap;1.5;mA;ok\n";
+    f.close();
+    QString err;
+    const auto rec = RecordingFile::read(path, &err);
+    check(rec && rec->values.size() == 4, "status: reads: " + err);
+    if (rec)
+    {
+      check(rec->stateAt(0) == CellState::Ok && rec->stateAt(1) == CellState::Overload
+              && rec->stateAt(2) == CellState::NegativeOverload && rec->stateAt(3) == CellState::Gap,
+            "status: ok, OL, -OL, gap");
+      check(std::signbit(rec->values[2]) && !std::signbit(rec->values[1]), "status: the NaN of -OL is negative");
+      check(rec->extra.size() == 1 && rec->extra[0].unit == "A" && rec->extra[0].states.size() == 4
+              && rec->extra[0].states[0] == CellState::None && rec->extra[0].states[2] == CellState::Gap,
+            "status: value 2 with its unit, empty in the first row");
+      // another unit in a later row of the column: scaled as the main value is
+      check(rec->extra.size() == 1 && rec->extra[0].values.value(3) == 1.5e-3, "status: a later prefix scaled");
+      const QString out = tmp.path() + "/status_out.csv";
+      check(RecordingFile::write(*rec, out, &err), "status: write: " + err);
+      QFile o(out);
+      check(o.open(QIODevice::ReadOnly | QIODevice::Text), "status: written file opens");
+      const QStringList lines = QString::fromUtf8(o.readAll()).split('\n', Qt::SkipEmptyParts);
+      check(lines.value(3).endsWith(QString::fromUtf8(";nan;V;-OL;nan;A;gap")) && lines.value(1).endsWith(";1;V;ok;;;"),
+            "status: written again: " + lines.join(" | "));
+    }
+    const auto old = RecordingFile::read(writeCsv("old.csv", "2026-01-01T00:00:00,000;0;nan;V\n2026-01-01T00:00:01,000;1;2;V\n"), &err);
+    check(old && old->stateAt(0) == CellState::Gap && old->stateAt(1) == CellState::Ok && old->extra.isEmpty(),
+          "status: an old file, nan a gap");
+    for (const char *bad : { "2026-01-01T00:00:00,000;0;1;V;OL\n", "2026-01-01T00:00:00,000;0;nan;V;ok\n",
+                             "2026-01-01T00:00:00,000;0;1;V;maybe\n", "2026-01-01T00:00:00,000;0;;;\n" })
+    {
+      const QString p = tmp.path() + "/bad_status.csv";
+      QFile b(p);
+      check(b.open(QIODevice::WriteOnly | QIODevice::Text), "bad status file opens");
+      QTextStream(&b) << "timestamp;time (s);value;unit;status\n" << bad;
+      b.close();
+      check(!RecordingFile::read(p, &err), QString("status: rejected: %1").arg(bad));
     }
   }
 

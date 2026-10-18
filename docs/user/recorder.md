@@ -160,8 +160,9 @@ were; the integration curve carries on across a gap.
   right-click menu, **Values**, switches each of them on or off; that is
   kept with the window layout. They are recorded either way. The time cursors show the other values too; the
   reference line, the band, the overview, the statistics between the
-  cursors, the triggers and the export are the main value's; the
-  integration curve can take value 2 (see *Integration* below).
+  cursors and the triggers are the main value's; the integration curve can
+  take value 2 (see *Integration* below). The export has the values that
+  are switched on (see [Export and import](#export-and-import)).
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see
@@ -234,7 +235,7 @@ only; *Default* goes back to the setting.
 
 *Export* (Ctrl+E) writes the recording on the grid of **Sample every** as
 CSV, or - pick the file type in the dialog or just name the file `.xlsx` /
-`.ods` - as an Excel or OpenDocument spreadsheet with the same four columns.
+`.ods` - as an Excel or OpenDocument spreadsheet with the same columns.
 The file type **CSV, every reading** writes each reading at its own time
 instead, a gap as a row of its own; *Import* reads its times back. In the spreadsheet
 the timestamps are date cells (shown with milliseconds) and the values
@@ -245,14 +246,32 @@ reads back (spreadsheets are not imported; save as CSV from there).
 The CSV is semicolon-separated:
 
 ```
-timestamp;time (s);value;unit
-2026-09-19T10:00:00,000;0;12.3;mV
-2026-09-19T10:00:01,000;1;12.4;mV
+timestamp;time (s);value;unit;status
+2026-09-19T10:00:00,000;0;12.3;mV;ok
+2026-09-19T10:00:01,000;1;12.4;mV;ok
+2026-09-19T10:00:02,000;2;nan;mV;OL
 ```
 
 The value is written with an SI prefix and the matching unit, exactly as a
-meter would show it. A [gap](#gaps) is written as `nan` in CSV and as an
-empty cell in a spreadsheet; *Import* reads `nan` back as a gap. *Import* (Ctrl+I) reads such files back, scaling the
-values into base units again, and also accepts the tab-separated format of
-QtDMM versions before 0.9.5. The unit of the first row becomes the graph's
-unit.
+meter would show it. The status says what the value is: `ok`, `OL` or `-OL`
+for an overload, `gap` for a [gap](#gaps). A value that is no number is
+written as `nan` in CSV and as an empty cell in a spreadsheet.
+
+The other values of the meter that the graph shows (right-click menu,
+**Values**) follow, three columns each - `value 2;unit 2;status 2`, then
+`value 3` ... - on the same rows. On the grid each is the mean over the step
+like the main value; with *CSV, every reading* there is a row at every
+reading of any of the values, and each value holds until its next one. Before
+a value began, its cells are empty:
+
+```
+timestamp;time (s);value;unit;status;value 2;unit 2;status 2
+2026-09-19T10:00:00,000;0;12.3;mV;ok;;;
+2026-09-19T10:00:01,000;1;12.4;mV;ok;50.02;Hz;ok
+```
+
+*Import* (Ctrl+I) reads such files back, scaling the values into base units
+again; the other values come back as curves (switch them on under
+**Values**). It also accepts files without the status column (`nan` is a
+gap there) and the tab-separated format of QtDMM versions before 0.9.5. The
+unit of the first row becomes the graph's unit.

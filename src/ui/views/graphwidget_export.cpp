@@ -116,8 +116,14 @@ bool GraphWidget::exportCsvFile(const QString &fileName, bool raw)
 
   m_cfg->setString("QtDMM/LastUsesPath", QDir().absoluteFilePath(fileName));
 
+  // the other values the graph shows (right-click menu, Values), a column
+  // group each
+  QList<int> extras;
+  for (int i = 0; i < m_store->extraCount(); ++i)
+    if (m_shownValues.contains(m_store->extra(i).id))
+      extras << i;
   QString err;
-  if (!m_store->write(fileName, &err, raw))
+  if (!m_store->write(fileName, &err, raw, extras))
   {
     Q_EMIT error(err);
     return false;

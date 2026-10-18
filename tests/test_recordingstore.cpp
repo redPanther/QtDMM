@@ -559,11 +559,11 @@ int main(int argc, char **argv)
     QFile f(raw1);
     check(f.open(QIODevice::ReadOnly | QIODevice::Text), "raw: cannot open file: " + raw1);
     const QString text = QString::fromUtf8(f.readAll());
-    check(text == "timestamp;time (s);value;unit\n"
-                  "2026-10-04T12:00:00,130;0;1.5;V\n"
-                  "2026-10-04T12:00:00,610;0.48;2.5;V\n"
-                  "2026-10-04T12:00:01,090;0.96;nan;V\n"
-                  "2026-10-04T12:00:01,570;1.44;4;mV\n",
+    check(text == "timestamp;time (s);value;unit;status\n"
+                  "2026-10-04T12:00:00,130;0;1.5;V;ok\n"
+                  "2026-10-04T12:00:00,610;0.48;2.5;V;ok\n"
+                  "2026-10-04T12:00:01,090;0.96;nan;V;OL\n"
+                  "2026-10-04T12:00:01,570;1.44;4;mV;ok\n",
           "raw: the file is\n" + text);
 
     const std::optional<Recording> rec = RecordingFile::read(raw1, &err);
@@ -595,6 +595,83 @@ int main(int argc, char **argv)
         same = (std::isnan(out.values[i]) && std::isnan(legacy->values[i])) || out.values[i] == legacy->values[i];
       check(same, "legacy: the export of an old file has its values and gaps");
     }
+  }
+
+  // --- 5a2. the other values in the export: a column group each, on the
+  //          grid and raw; empty before the value began; the status tells
+  //          OL, -OL and a gap apart; import and export again the same ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setUnit("V");
+    store.setSampleTime(10);
+    store.start();
+    Reading negative = reading(0, "-OL", "DC");
+    negative.value = std::copysign(qQNaN(), -1.0);   // as ReadingAdapter makes it
+    store.setReading(clock.at(100, reading(1.0, "1.000", "DC")));
+    store.setReading(clock.at(600, negative));
+    store.setReading(clock.at(1200, reading(2.0, "2.000", "DC")));
+    store.setReading(clock.at(1200, other(1, 50, "50.00", "Hz")));
+    store.setReading(clock.at(1700, reading(2.0, "2.000", "DC")));
+    store.setReading(clock.at(1700, other(1, 0, "OL", "Hz")));
+    clock.now = 2500;
+    store.stop();
+    check(store.extraCount() == 1, QString("extras: one other value, got %1").arg(store.extraCount()));
+    QTemporaryDir dir;
+    auto fileText = [](const QString &path)
+    {
+      QFile f(path);
+      return f.open(QIODevice::ReadOnly | QIODevice::Text) ? QString::fromUtf8(f.readAll()) : QString();
+    };
+    QString err;
+    const QString raw1 = dir.path() + "/raw1.csv", raw2 = dir.path() + "/raw2.csv";
+    check(store.write(raw1, &err, true, { 0 }), "extras raw: write: " + err);
+    const QString raw = fileText(raw1);
+    check(raw == "timestamp;time (s);value;unit;status;value 2;unit 2;status 2\n"
+                 "2026-10-04T12:00:00,100;0;1;V;ok;;;\n"
+                 "2026-10-04T12:00:00,600;0.5;nan;V;-OL;;;\n"
+                 "2026-10-04T12:00:01,200;1.1;2;V;ok;50;Hz;ok\n"
+                 "2026-10-04T12:00:01,700;1.6;2;V;ok;nan;Hz;OL\n",
+          "extras raw: the file is\n" + raw);
+    // the grid (from the first reading): the step that ends before the
+    // value came has none of it; a step with a value and -OL has its mean
+    const QString grid1 = dir.path() + "/grid1.csv", grid2 = dir.path() + "/grid2.csv";
+    check(store.write(grid1, &err, false, { 0 }), "extras grid: write: " + err);
+    const QString grid = fileText(grid1);
+    check(grid == "timestamp;time (s);value;unit;status;value 2;unit 2;status 2\n"
+                  "2026-10-04T12:00:00,100;0;1;V;ok;;;\n"
+                  "2026-10-04T12:00:01,100;1;1;V;ok;;;\n"
+                  "2026-10-04T12:00:02,100;2;2;V;ok;50;Hz;ok\n",
+          "extras grid: the file is\n" + grid);
+    // without the other values: the main value alone, as before
+    const QString main1 = dir.path() + "/main.csv";
+    check(store.write(main1, &err, true) && fileText(main1).startsWith("timestamp;time (s);value;unit;status\n")
+            && !fileText(main1).contains("Hz"),
+          "extras: not asked for, not written");
+
+    const std::optional<Recording> rec = RecordingFile::read(raw1, &err);
+    check(rec && rec->extra.size() == 1 && rec->extra[0].unit == "Hz" && rec->extra[0].states.size() == 4
+            && rec->extra[0].states[0] == CellState::None && rec->extra[0].states[3] == CellState::Overload,
+          "extras raw: read back with its states: " + err);
+    check(rec && rec->states.value(1) == CellState::NegativeOverload && std::signbit(rec->values.value(1)),
+          "extras raw: -OL read back, its NaN negative");
+    RecordingStore back;
+    if (rec)
+      back.load(*rec);
+    check(back.extraCount() == 1 && back.extra(0).count() == 2 && back.extra(0).id == 1 && back.extra(0).first().t == 1100
+            && back.extra(0).last().quality == Quality::Overload,
+          "extras raw: loaded as a series from its first row");
+    check(back.series().at(1).quality == Quality::Overload && std::signbit(back.series().at(1).value),
+          "extras raw: the main value's -OL loaded");
+    check(back.write(raw2, &err, true, { 0 }) && fileText(raw2) == raw, "extras raw: export, import, export the same\n" + fileText(raw2));
+    // the grid file on its own grid exports as it came
+    const std::optional<Recording> g = RecordingFile::read(grid1, &err);
+    RecordingStore backGrid;
+    if (g)
+      backGrid.load(*g);
+    check(g && backGrid.write(grid2, &err, false, { 0 }) && fileText(grid2) == grid,
+          "extras grid: export, import, export the same\n" + fileText(grid2));
   }
 
   // --- 5b. gaps and the integral: over time (V s) for the values above
