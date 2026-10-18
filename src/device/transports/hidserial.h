@@ -90,7 +90,7 @@ Q_SIGNALS:
   void finished();
 
 protected:
-  static bool availablePorts(QStringList &portlist,unsigned short vendor_id, unsigned short product_id);
+  static bool availablePorts(QStringList &portlist,unsigned short vendorId, unsigned short productId);
   /// Sends the chip's line configuration (feature reports); false on failure.
   bool configureCable();
   /// Queued from the reader thread: unpack one report into m_rx.

@@ -134,15 +134,15 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
 {
   setupUi(this);
   setupIcons();
-  m_config_id = parser.value("config-id");
+  m_configId = parser.value("config-id");
 
-  m_stateMgr = new SharedStateManager(m_config_id.isEmpty()?"default":m_config_id,this);
+  m_stateMgr = new SharedStateManager(m_configId.isEmpty()?"default":m_configId,this);
 
   QWidget* spacer = new QWidget();
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   this->toolBarMenu->addWidget(spacer);
   this->toolBarMenu->addAction(this->action_Menu);
-  m_wid = new InstanceWidget(m_config_id, parser.value("config-dir"), this);
+  m_wid = new InstanceWidget(m_configId, parser.value("config-dir"), this);
   m_wid->setFrameShape(QFrame::NoFrame);
   setConsoleLogging(parser.isSet("debug"));
 
@@ -577,7 +577,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
         m_remoteStop = false;
       }
     }
-    else if (state == "RAISE_"+(m_config_id.isEmpty()?"default":m_config_id))
+    else if (state == "RAISE_"+(m_configId.isEmpty()?"default":m_configId))
     {
       bringMainWindowToFront();
       m_stateMgr->writeState("IDLE");
@@ -682,8 +682,8 @@ QMap<QString, QString> MainWindow::placesInUse() const
 void MainWindow::updateWindowTitle()
 {
   QString title = APP_NAME;
-  if (!m_config_id.isEmpty())
-    title += QString(" [%1]").arg(m_config_id);
+  if (!m_configId.isEmpty())
+    title += QString(" [%1]").arg(m_configId);
   setWindowTitle(QString("%1: %2").arg(title, m_wid->dmmTitle()));
 }
 

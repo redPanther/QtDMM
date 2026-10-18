@@ -226,36 +226,36 @@ HIDSerialDevice::~HIDSerialDevice()
 
 bool HIDSerialDevice::availablePorts(QStringList &portlist)
 {
-  qint64 portlist_len = portlist.size();
+  qint64 portlistLen = portlist.size();
   for (const KnownCable &c : kCables)
     HIDSerialDevice::availablePorts(portlist, c.vid, c.pid);
 
-  return portlist.size() > portlist_len;
+  return portlist.size() > portlistLen;
 }
 
-bool HIDSerialDevice::availablePorts(QStringList &portlist,unsigned short vendor_id, unsigned short product_id)
+bool HIDSerialDevice::availablePorts(QStringList &portlist,unsigned short vendorId, unsigned short productId)
 {
-  int dev_cnt;
-  struct hid_device_info *devs, *cur_dev;
+  int devCount;
+  struct hid_device_info *devs, *curDev;
 
 
-  devs = hid_enumerate(vendor_id, product_id); // all chips this SW belongs to...
-  for (dev_cnt = 0, cur_dev = devs; cur_dev != nullptr; cur_dev = cur_dev->next) {
-    dev_cnt++;
+  devs = hid_enumerate(vendorId, productId); // all chips this SW belongs to...
+  for (devCount = 0, curDev = devs; curDev != nullptr; curDev = curDev->next) {
+    devCount++;
   }
 
-  for (cur_dev = devs; cur_dev != nullptr; cur_dev = cur_dev->next) {
+  for (curDev = devs; curDev != nullptr; curDev = curDev->next) {
     // a udev link (/dev/qtdmm/...) stays the same across plugs and restarts
-    const QString path = QString::fromLatin1(cur_dev->path);
+    const QString path = QString::fromLatin1(curDev->path);
     const QString link = HidPath::linkFor(path);
     portlist << QString("HID 0x%1:0x%2 %3")
-    .arg(vendor_id, 4, 16, QLatin1Char('0'))
-    .arg(product_id, 4, 16, QLatin1Char('0'))
+    .arg(vendorId, 4, 16, QLatin1Char('0'))
+    .arg(productId, 4, 16, QLatin1Char('0'))
     .arg(link.isEmpty() ? path : link);
   }
   hid_free_enumeration(devs);
 
-  return (dev_cnt > 0);
+  return (devCount > 0);
 }
 
 bool HIDSerialDevice::open(OpenMode mode)

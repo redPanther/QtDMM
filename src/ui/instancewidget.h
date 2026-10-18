@@ -55,10 +55,10 @@ class InstanceWidget : public QFrame, private Ui::UIInstanceWidget
 {
   Q_OBJECT
 public:
-  /// @param instance_id  name of this instance for multi-instance setups (--config-id)
-  /// @param config_path  directory of the settings file (--config-dir), or empty
+  /// @param instanceId  name of this instance for multi-instance setups (--config-id)
+  /// @param configPath  directory of the settings file (--config-dir), or empty
   /// @param parent       the MainWindow
-  InstanceWidget(QString instance_id, QString config_path, QWidget *parent = nullptr);
+  InstanceWidget(QString instanceId, QString configPath, QWidget *parent = nullptr);
   /// Disconnects, saves the settings and asks about unsaved data. Returns
   /// false when the user cancels; MainWindow then ignores the close event.
   bool        closeWin();

@@ -49,7 +49,7 @@
 
 
 
-InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget *parent) :  QFrame(parent),
+InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *parent) :  QFrame(parent),
   m_display(nullptr),
   m_meter(nullptr)
 {
@@ -58,11 +58,11 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
 
   // the meter session: connection, min/max, alarms, SCPI
   m_ctl = new MeterController(this);
-  m_ctl->setInstanceId(instance_id.isEmpty() ? QString("default") : instance_id);
+  m_ctl->setInstanceId(instanceId.isEmpty() ? QString("default") : instanceId);
 
-  m_instanceId = instance_id;
-  m_configPath = config_path;
-  m_settings  = new Settings(instance_id, config_path, this);
+  m_instanceId = instanceId;
+  m_configPath = configPath;
+  m_settings  = new Settings(instanceId, configPath, this);
   // the integral is over time since 26.2: its scale once per settings file
   GraphWidget::migrateIntegralScale(m_settings);
   // "My devices", one file for all instances next to their settings. What

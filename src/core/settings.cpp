@@ -44,26 +44,26 @@ Settings::~Settings()
   delete m_tmpConfig;
 }
 
-Settings::Settings(const QString &instance_id, const QString &config_path, QObject *parent)
+Settings::Settings(const QString &instanceId, const QString &configPath, QObject *parent)
   : Settings(parent)
 {
   QFileInfo fileInfo(m_qsettings->fileName());
   m_configPath = fileInfo.absolutePath();
   m_configBaseFileName = fileInfo.baseName();
   m_configFileNameSuffix = fileInfo.suffix();
-  m_instanceId = instance_id.isEmpty() ? "default" : instance_id;
+  m_instanceId = instanceId.isEmpty() ? "default" : instanceId;
 
-  if (!instance_id.isEmpty() || !config_path.isEmpty())
+  if (!instanceId.isEmpty() || !configPath.isEmpty())
   {
-    m_configPath = config_path.isEmpty() ? fileInfo.absolutePath() : config_path;
+    m_configPath = configPath.isEmpty() ? fileInfo.absolutePath() : configPath;
     m_configBaseFileName = fileInfo.baseName();
     m_configFileNameSuffix = fileInfo.suffix();
 
-    QString instance_fileName = m_configBaseFileName+(instance_id.isEmpty() ? "" : "_"+instance_id)+"."+m_configFileNameSuffix;
-    instance_fileName.prepend(m_configPath+"/");
+    QString instanceFileName = m_configBaseFileName+(instanceId.isEmpty() ? "" : "_"+instanceId)+"."+m_configFileNameSuffix;
+    instanceFileName.prepend(m_configPath+"/");
 
     delete m_qsettings;
-    m_qsettings = new QSettings(instance_fileName, QSettings::IniFormat, this);
+    m_qsettings = new QSettings(instanceFileName, QSettings::IniFormat, this);
     QFile file(m_qsettings->fileName());
     m_fileExists = file.exists();
     m_filename = m_qsettings->fileName();
@@ -166,12 +166,12 @@ void Settings::sync()
 }
 
 
-void Settings::deleteConfig(QString instance_id)
+void Settings::deleteConfig(QString instanceId)
 {
-  if(instance_id.isEmpty())
+  if(instanceId.isEmpty())
     return;
 
-  QFile configFile(m_configPath+"/"+m_configBaseFileName+"_"+instance_id+"."+m_configFileNameSuffix);
+  QFile configFile(m_configPath+"/"+m_configBaseFileName+"_"+instanceId+"."+m_configFileNameSuffix);
   configFile.remove();
 }
 
@@ -236,9 +236,9 @@ void Settings::setValues(const QVariantMap &keys)
     m_tmpConfig->insert(it.key(), it.value());
 }
 
-QString Settings::copyConfig(const QString &instance_id) const
+QString Settings::copyConfig(const QString &instanceId) const
 {
-  Settings target(instance_id, m_configPath);
+  Settings target(instanceId, m_configPath);
   for (const QString &key : m_qsettings->allKeys())
   {
     const bool meter = isMeterKey(key);
