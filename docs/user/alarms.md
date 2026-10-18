@@ -27,6 +27,12 @@ Thresholds are in the reading's base unit and take SI suffixes (`4.7m`,
 
 An unticked alarm in the list is kept but never fires.
 
+For a meter with more than one value (a second display, or the CO2,
+temperature and humidity of the TFA AirCO2ntrol), **Value** at the top of
+the condition chooses the one the alarm watches - humidity above 60 %, say;
+the thresholds are in its unit. *No readings for a while* is the meter's
+silence and always looks at the main value.
+
 ## Actions
 
 What happens when an alarm raises; tick any of them:
@@ -69,7 +75,7 @@ The status line reports every raise and clear too.
 and the analog meter switch between the alarm's colour and their own once
 a second. It is off by default.
 
-Alarms judge the main reading only. For a condition on several meters -
+An alarm judges one value of one meter. For a condition on several meters -
 power over a limit, say - set up a [calculated value](calculated-values.md)
 and put the alarm on that instance.
 

@@ -264,7 +264,6 @@ void MeterController::publish(const Reading &rd)
       m_baseUnit = baseUnit;
       Q_EMIT baseUnitChanged(baseUnit);
     }
-    m_alarms->feed(dval, overload, now);
 
     // let the other instances see this value (calculated values, P = U * I)
     if (m_stateMgr)
@@ -278,6 +277,12 @@ void MeterController::publish(const Reading &rd)
       m_stateMgr->publishReading(r);
     }
   }
+
+  // the alarms on this value
+  if (!baseUnit.isEmpty())
+    m_valueUnits[id] = baseUnit;
+  m_valueOverload[id] = overload;
+  m_alarms->feed(dval, overload, now, id);
 
   ScpiServer::Reading r;
   r.value = dval;
@@ -321,16 +326,24 @@ void MeterController::forgetUnit()
 {
   m_lastUnit.clear();
   m_baseUnit.clear();
+  m_valueUnits.clear();
   Q_EMIT unitChanged(QString());
   Q_EMIT baseUnitChanged(QString());
 }
 
 // ---------------------------------------------------------------- alarms
 
+QString MeterController::valueUnit(int id) const
+{
+  return id == 0 ? m_baseUnit : m_valueUnits.value(id);
+}
+
 void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
 {
-  const QString shown = m_overload ? QStringLiteral("OL") : EngNumberValidator::engValue(value) + m_baseUnit;
-  const QString text = alarm.message.isEmpty() ? alarm.describe(m_baseUnit) : alarm.message;
+  const QString unit = valueUnit(alarm.value);
+  const bool overload = m_valueOverload.value(alarm.value);
+  const QString shown = overload ? QStringLiteral("OL") : EngNumberValidator::engValue(value) + unit;
+  const QString text = alarm.message.isEmpty() ? alarm.describe(unit) : alarm.message;
   Q_EMIT error(tr("%1: %2 (%3)").arg(Alarm::title(alarm.name), text, shown));
 
   QString why;
@@ -345,7 +358,7 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
   if (!alarm.command.isEmpty())
   {
     QString cmd = alarm.command;
-    cmd.replace("%v", EngNumberValidator::engText(value)).replace("%u", m_baseUnit).replace("%n", alarm.name);
+    cmd.replace("%v", EngNumberValidator::engText(value)).replace("%u", unit).replace("%n", alarm.name);
     QStringList args = QProcess::splitCommand(cmd);
     if (!args.isEmpty())
     {
@@ -411,7 +424,7 @@ void MeterController::updateBanner()
     if (m_alarms->state(i) != AlarmManager::Raised || !list[i].banner)
       continue;
     const Alarm &al = list[i];
-    lines << QString("%1: %2").arg(al.name, al.message.isEmpty() ? al.describe(m_baseUnit) : al.message);
+    lines << QString("%1: %2").arg(al.name, al.message.isEmpty() ? al.describe(valueUnit(al.value)) : al.message);
     if (!color.isValid())
       color = al.color;
   }
