@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include <QCoreApplication>
 #include <QFile>
 #include <QJsonDocument>
@@ -184,10 +186,10 @@ int main(int argc, char **argv)
     }
     // iENV: a display without a number is no reading (R11-06), "OL" an
     // overload; not in any capture yet, so synthetic frames
-    auto ienv = [](const char *display, char status = 0)
+    auto ienv = [](const char *display, char status = 0, char unit = 0x3b, char func = 0x3a)
     {
-      QByteArray f = QByteArray::fromHex("aabb10013a");
-      f.append(display, 9).append(QByteArray::fromHex("3b30")).append(status);
+      QByteArray f = QByteArray::fromHex("aabb1001");
+      f.append(func).append(display, 9).append(unit).append(char(0x30)).append(status);
       unsigned sum = 0;
       for (char ch : std::as_const(f))
         sum += static_cast<unsigned char>(ch);
@@ -228,6 +230,25 @@ int main(int argc, char **argv)
         qWarning() << "iENV: MAX, MIN or AVG of the status byte not in the reading";
         ++problems;
       }
+      // the display is in the base unit, converted to the unit shown: lx to fc,
+      // °C to °F (tried on a UT333BT: its °F key changes only the unit id)
+      const auto fc = decoder->decode(ienv("  1234LUX", 0, 0x3c), 0);
+      if (!fc || fc->unit != "fc" || fc->val != "114.6" || std::fabs(fc->dval - 1234 / 10.7639104) > 1e-9)
+      {
+        qWarning() << "iENV: 1234 lx shown in fc gives" << (fc ? fc->val + " " + fc->unit : QString("nothing"));
+        ++problems;
+      }
+      {
+        auto hum = DmmDecoder::getInstance(FrameFormat::UniTiENV);
+        hum->decode(ienv("  45.2 RH", 0, 0x32, 0x34), 0);
+        const auto t = hum->decode(ienv("  23.4  C", 0, 0x31, 0x30), 0);
+        if (!t || t->val != "45.2" || t->unit2 != "°F" || t->val2 != "74.1" || std::fabs(t->dval2 - 74.12) > 1e-9)
+        {
+          qWarning() << "iENV: 23.4 °C shown in °F gives" << (t ? t->val2 + " " + t->unit2 : QString("nothing"));
+          ++problems;
+        }
+      }
+      decoder->decode(ienv("   158LUX"), 0);   // back to lx
       // the unit key steps from the unit the last frame told: lx -> fc
       if (decoder->keyRequest("unit") != DecoderUniTiENV::commandFrame(0x3C))
       {
