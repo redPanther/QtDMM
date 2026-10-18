@@ -94,9 +94,17 @@ void PoincarePlot::setHold(bool on)
   scheduleUpdate();
 }
 
+void PoincarePlot::setValueId(int id)
+{
+  if (id == m_valueId)
+    return;
+  m_valueId = id;
+  clear();
+}
+
 void PoincarePlot::addReading(const Reading &reading)
 {
-  if (reading.id != 0)
+  if (reading.id != m_valueId)
     return;
   m_series.feed(reading);
   scheduleUpdate();

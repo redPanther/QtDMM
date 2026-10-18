@@ -61,6 +61,9 @@
   status 2), on the grid or at every reading; Import reads them back as curves. Every value has a status
   column: ok, OL, -OL or gap (the value still nan), so an overload and a gap are told apart. Older files
   without it are read as before
+- Meters with more than one value (up to three, as the TFA AirCO2ntrol): the display's right-click menu,
+  Primary value, chooses the one shown big (the min/max memory follows it), the analog meter and the
+  Poincaré plot choose theirs under Value; kept with the window layout. The recording stays the main value's
 - Graph: smaller points on the curves (5 px, large 8 px instead of 7 and 11)
 - Flatpak: each release carries QtDMM-<version>-x86_64.flatpak (KDE runtime 6.11, hidapi inside): serial, USB/HID
   and Bluetooth meters, the SCPI server and several instances. HID meters still need the udev rule on the computer

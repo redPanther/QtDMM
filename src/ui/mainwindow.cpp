@@ -292,6 +292,7 @@ void MainWindow::createViews()
   connect(m_wid->controller(), &MeterController::staleChanged, m_poincare, &PoincarePlot::setStale);
   connect(m_wid, &InstanceWidget::meterChanged, m_poincare, &PoincarePlot::clear);
   m_poincareWin = addView(m_poincare, tr("Poincaré plot"), MdiArranger::Table, "poincare");
+  m_wid->setPoincare(m_poincare);
 
   // right-click on display or meter: the window's menu (also without title bar)
   for (auto [view, win] : { std::pair<QWidget *, QMdiSubWindow *>{m_display, m_displayWin},
@@ -1254,6 +1255,28 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     menu.addSeparator();
     m_poincare->addMenuActions(&menu);
   }
+  // which value of the meter the view shows, when it has more than one
+  if (m_wid->numValues() > 1 && (win == m_displayWin || win == m_meterWin || win == m_poincareWin))
+  {
+    QMenu *values = menu.addMenu(win == m_displayWin ? tr("P&rimary value") : tr("&Value"));
+    const int current = win == m_displayWin ? m_wid->lcdValue() : win == m_meterWin ? m_wid->meterValue()
+                                                                                    : m_wid->poincareValue();
+    for (int id = 0; id < m_wid->numValues(); ++id)
+    {
+      QAction *a = values->addAction(QString("&%1: %2").arg(id + 1).arg(m_wid->valueName(id)));
+      a->setCheckable(true);
+      a->setChecked(id == current);
+      connect(a, &QAction::triggered, this, [this, win, id]
+      {
+        if (win == m_displayWin)
+          m_wid->setLcdValue(id);
+        else if (win == m_meterWin)
+          m_wid->setMeterValue(id);
+        else
+          m_wid->setPoincareValue(id);
+      });
+    }
+  }
   // a way back with the mouse once the toolbar is hidden (and its keys taken away)
   menu.addSeparator();
   menu.addAction(m_toolbars);
@@ -1543,6 +1566,9 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
   m_wid->graph()->setReferenceSetting(get("Windows/graph-reference", QString()).toString());
   m_wid->graph()->setMinimapVisible(get("Windows/graph-minimap", true).toBool());
   m_wid->graph()->setEnvelopeVisible(get("Windows/graph-envelope", false).toBool());
+  m_wid->setLcdValue(get("Windows/lcd-value", 0).toInt());
+  m_wid->setMeterValue(get("Windows/meter-value", 0).toInt());
+  m_wid->setPoincareValue(get("Windows/poincare-value", 0).toInt());
   // the meter's other values shown in the graph: their ids, "1 2"; none at first
   {
     const QStringList shown = get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
@@ -1580,6 +1606,9 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/graph-reference", m_wid->graph()->referenceSetting());
   set("Windows/graph-minimap", m_wid->graph()->minimapVisible());
   set("Windows/graph-envelope", m_wid->graph()->envelopeVisible());
+  set("Windows/lcd-value", m_wid->lcdValue());
+  set("Windows/meter-value", m_wid->meterValue());
+  set("Windows/poincare-value", m_wid->poincareValue());
   QStringList shown;
   for (int id : m_wid->graph()->shownValues())
     shown << QString::number(id);

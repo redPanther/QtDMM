@@ -43,11 +43,15 @@ public:
   bool        ellipse() const { return m_ellipse; }
   void        setHold(bool on);
   bool        hold() const { return m_hold; }
+  /// Which value of the meter it plots (Reading::id; the context menu
+  /// "Value"); another one starts afresh.
+  void        setValueId(int id);
+  int         valueId() const { return m_valueId; }
   /// Writes the plot as PNG, JPEG or SVG (by suffix).
   bool        exportImageFile(const QString &fileName, QSize size = QSize());
 
 public Q_SLOTS:
-  /// A reading from the MeterController; only the main value counts.
+  /// A reading from the MeterController; only the value valueId() counts.
   void        addReading(const Reading &reading);
   /// The main value went stale (true) or is current again.
   void        setStale(bool stale);
@@ -71,6 +75,7 @@ private:
   QString     m_unit;
   double      m_resolution = 0;
   bool        m_hold = false;
+  int         m_valueId = 0;
   bool        m_ellipse = true;
   Settings   *m_cfg = nullptr;
   QTimer      m_repaint;

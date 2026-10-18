@@ -83,6 +83,29 @@ void LcdWidget::setValue(int id, const QString &v)
   fitDigits(v);
 }
 void LcdWidget::setUnit(int id, const QString &v) { m_unit[id] = v; }
+
+void LcdWidget::setPrimary(int id)
+{
+  if (id == m_primary)
+    return;
+  m_primary = id;
+  m_staticDirty = true;
+  update();
+}
+
+int LcdWidget::primaryShown() const
+{
+  return m_primary > 0 && m_primary < m_numValues ? m_primary : 0;
+}
+
+// the big value first, then the others in their order
+int LcdWidget::idAt(int line) const
+{
+  const int primary = primaryShown();
+  if (line == 0)
+    return primary;
+  return line <= primary ? line - 1 : line;
+}
 void LcdWidget::setMode(int id, quint32 flags, Quantity quantity)
 {
   m_flags[id] = flags;
@@ -625,7 +648,8 @@ void LcdWidget::drawFlags(QPainter &p, const Layout &l) const
   const double fontPx = l.flagsPx;   // sized by layout() to fit the width
   const QFontMetricsF fm(sansFont(fontPx));
   const double gap = fontPx * 0.9;
-  const quint32 flags = m_flags[0];
+  const int main = idAt(0);
+  const quint32 flags = m_flags[main];
 
   struct Flag { QString text; bool on; };
   const QStringList &lt = leftFlags();
@@ -642,7 +666,7 @@ void LcdWidget::drawFlags(QPainter &p, const Layout &l) const
     { rt[1], ac && dc },
     { rt[2], dc },
     { rt[3], bool(flags & SampleFlag::Diode) },
-    { rt[4], m_quantity[0] == Quantity::Continuity },
+    { rt[4], m_quantity[main] == Quantity::Continuity },
     { rt[5], m_hold },
   };
 
@@ -673,13 +697,14 @@ void LcdWidget::drawMain(QPainter &p, const Layout &l) const
   const double y = l.main.top() + (l.main.height() - h) / 2.0;
 
   // number left, unit right after it; the whole group is centred
-  const QString unit = m_unit[0];
+  const int id = idAt(0);
+  const QString unit = m_unit[id];
   const QFontMetricsF fm(sansFont(h * 0.62));
   const double unitW = unit.isEmpty() ? 0.0 : fm.horizontalAdvance(unit) + 2;
   const double groupW = numW + h * 0.3 + unitW;
   double x = l.main.left() + qMax(0.0, (l.main.width() - groupW) / 2.0);
 
-  drawNumber(p, QPointF(x, y), h, m_value[0], digits, !m_value[0].isEmpty());
+  drawNumber(p, QPointF(x, y), h, m_value[id], digits, !m_value[id].isEmpty());
   x += numW + h * 0.3;
   drawUnit(p, QPointF(x, y), h, unit);
 }
@@ -723,9 +748,10 @@ void LcdWidget::drawExtra(QPainter &p, const Layout &l) const
   for (int i = 1; i < m_numValues; ++i)
   {
     double x = l.extra.left() + (i - 1) * slot;
-    x += drawNumber(p, QPointF(x, y), h, m_value[i], digits, !m_value[i].isEmpty());
+    const int id = idAt(i);
+    x += drawNumber(p, QPointF(x, y), h, m_value[id], digits, !m_value[id].isEmpty());
     x += h * 0.25;
-    drawUnit(p, QPointF(x, y), h, m_unit[i]);
+    drawUnit(p, QPointF(x, y), h, m_unit[id]);
   }
 }
 
@@ -773,10 +799,11 @@ void LcdWidget::drawBar(QPainter &p, const Layout &l, bool staticPart) const
     return;
   }
 
-  if (!m_paintBar || m_value[0].isEmpty())
+  const QString &shown = m_value[idAt(0)];
+  if (!m_paintBar || shown.isEmpty())
     return;
   QString val;
-  for (QChar ch : m_value[0])
+  for (QChar ch : shown)
     if (ch.isDigit())
       val += ch;
   const double percent = qBound(0.0, val.toDouble() / m_counts, 1.0);
@@ -845,7 +872,9 @@ void LcdWidget::showReading(const Reading &r)
     setAuto(true);
   if (r.range == "MANU")
     setManu(true);
-  setShowBar(r.showBar);
+  // the bar is the big value's (a meter sends it with its main value only)
+  if (r.id == idAt(0))
+    setShowBar(r.showBar);
   setMode(r.id, r.flags, r.port.quantity);
   if (!r.hold)
   {

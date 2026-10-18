@@ -88,6 +88,7 @@ public:
   void setPeak(double value);   ///< MAX box, display units; NaN hides it
   /// Min/max memory as marks on the scale arc (display units; NaN hides one).
   void setMinMax(double minValue, double maxValue);
+  double maxMark() const { return m_markMax; }   ///< NaN = none (for the tests)
   void setScaleMode(ScaleMode mode);
   /// Colours and options; the static layers are re-rendered.
   void setStyle(const AnalogMeterStyle &style);
@@ -100,11 +101,16 @@ public:
   void reset();   ///< peak and Auto-bipolar latch
 
   /// @name Fed by the MeterController
-  /// The main value of a reading (other ids are ignored): full scale from the
-  /// meter's display count and the decimals shown, the dial label from the
-  /// unit and the coupling, overload from letters in the text.
+  /// The value valueId() of a reading (other ids are ignored): full scale
+  /// from the meter's display count and the decimals shown, the dial label
+  /// from the unit and the coupling, overload from letters in the text.
   /// @{
   void setDisplayCounts(int counts) { m_counts = counts; }
+  /// Which value of the meter the needle shows (Reading::id; the context
+  /// menu "Value"); another one starts afresh. The min/max memory is the
+  /// LCD's primary value's: its marks only when @p minMax says it is this one.
+  void setValueId(int id, bool minMax);
+  int  valueId() const { return m_valueId; }
 public Q_SLOTS:
   void showReading(const Reading &reading);
   /// The value is too old to stand for the present (StaleRule): needle
@@ -201,6 +207,8 @@ private:
 
   int m_counts = 4000;
   QString m_unitText;   ///< unit of the last reading, with prefix
+  int    m_valueId = 0;
+  bool   m_minMaxOwn = true;   ///< the min/max memory follows this value (setValueId())
   double m_minBase = std::numeric_limits<double>::quiet_NaN();
   double m_maxBase = std::numeric_limits<double>::quiet_NaN();
   int m_decimals = 0;   ///< most decimals of a reading (not an overload) since reset()

@@ -51,5 +51,10 @@ value counts as gone.
 Two colour schemes are available: a dark studio dial with a white scale and needle, and
 a classic ivory dial with black lettering (the default). Choose one with **Meter style** in the
 meter's right-click menu, or on the *Appearance* settings page.
+
+For a meter with more than one value, **Value** in the right-click menu
+chooses the one the needle shows (kept with the window layout). The min/max
+marks are those of the display's primary value, so they show only when the
+meter shows that value too.
 **Needle inertia** can be switched off to make the needle jump straight to each
 new reading.

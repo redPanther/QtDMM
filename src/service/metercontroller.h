@@ -117,6 +117,10 @@ public:
   void        setScreenshotSource(std::function<QByteArray(const QByteArray &)> source);
 
   /// Min/max memory in SI base units; +-1e20 when empty.
+  /// Which value of the meter the min/max memory follows (Reading::id; the
+  /// main value, 0, at first): the LCD's primary value. Another one clears it.
+  void        setMinMaxValue(int id);
+  int         minMaxValue() const { return m_minMaxId; }
   double      minimum() const { return m_minMax.minimum(); }
   double      maximum() const { return m_minMax.maximum(); }
   /// The text of the current reading's unit ("mV"), and its base unit ("V").
@@ -142,8 +146,9 @@ Q_SIGNALS:
   void        minimumChanged(double value, const QString &text, const QString &unit);
   /// A new maximum, like minimumChanged().
   void        maximumChanged(double value, const QString &text, const QString &unit);
-  /// The min/max memory was cleared: the Reset key, or the main value
-  /// moved to another port (MinMaxMemory) - not a range change (mV -> V).
+  /// The min/max memory was cleared: the Reset key, another value to follow,
+  /// or its value moved to another port (MinMaxMemory) - not a range change
+  /// (mV -> V).
   void        minMaxReset();
   /// The main value's unit changed ("mV" -> "V"); empty after forgetUnit().
   void        unitChanged(const QString &unit);
@@ -220,7 +225,8 @@ private:
   QString             m_instanceId = "default";
   QString             m_model;
 
-  MinMaxMemory m_minMax;   ///< min/max of the main value, SI, per port
+  MinMaxMemory m_minMax;   ///< min/max of value m_minMaxId, SI, per port
+  int         m_minMaxId = 0;
   QString     m_lastUnit;
   QString     m_baseUnit;
   bool        m_overload = false;

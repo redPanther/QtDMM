@@ -29,6 +29,7 @@
 
 #include "ui_uiinstancewidget.h"
 
+#include "core/reading.h"
 #include "ui/dialogs/printdlg.h"
 
 class MeterController;
@@ -36,6 +37,7 @@ class SettingsDialog;
 class LcdWidget;
 class Settings;
 class AnalogMeter;
+class PoincarePlot;
 class ReadingsModel;
 struct Alarm;
 class SharedStateManager;
@@ -73,8 +75,27 @@ public:
   void        setMeterStyle(int style);
   /// The analog meter to feed; created and docked by MainWindow.
   void        setMeter(AnalogMeter *);
+  /// The Poincaré plot (MainWindow owns and feeds it), for its value.
+  void        setPoincare(PoincarePlot *plot);
   /// Table model that gets every reading (MainWindow owns it).
   void        setReadingLog(ReadingsModel *);
+  /// @name Which value of the meter a view shows
+  /// Reading::id, 0 the main value; the windows' context menus ("Primary
+  /// value", "Value"), kept with the window layout. A value the meter does
+  /// not have (numValues()) gives the main value. The LCD's primary value is
+  /// also the one of the min/max memory; the recording stays the main value's.
+  /// @{
+  void        setLcdValue(int id);
+  void        setMeterValue(int id);
+  void        setPoincareValue(int id);
+  int         lcdValue() const { return m_lcdValue; }
+  int         meterValue() const { return m_meterValue; }
+  int         poincareValue() const { return m_poincareValue; }
+  /// The values the meter has (Device page, at most 3 for the choice).
+  int         numValues() const;
+  /// "CO2 (ppm)" from its last reading, "Value 2" before one came.
+  QString     valueName(int id) const;
+  /// @}
   /// The instance coordinator; readings are published through it.
   void        setStateManager(SharedStateManager *);
   /// --debug: pass on to MeterConnection::setConsoleLogging().
@@ -198,6 +219,14 @@ protected:
   /// phase of the blinking).
   void        showAlertColor();
   AnalogMeter   *m_meter;
+  PoincarePlot  *m_poincare = nullptr;
+  int         m_lcdValue = 0;
+  int         m_meterValue = 0;
+  int         m_poincareValue = 0;
+  QMap<int, Reading> m_lastReading;   ///< by id, for valueName()
+  /// The values chosen, as far as the meter has them, to the views and the
+  /// min/max memory.
+  void        applyValueChoice();
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   Settings    *m_settings;
