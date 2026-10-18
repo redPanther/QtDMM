@@ -339,7 +339,7 @@
     </message>
     <message>
         <location filename="../../src/core/alarm.cpp" line="354"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1431"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1493"/>
         <source>Alarm</source>
         <translation>Alarma</translation>
     </message>
@@ -1928,369 +1928,379 @@ y cierre la sesión y vuelva a entrar.</translation>
 <context>
     <name>GraphWidget</name>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="114"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="865"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="116"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="912"/>
         <source>[sec]</source>
         <translation>[s]</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="215"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="230"/>
         <source>All</source>
         <translation>Todo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="215"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="230"/>
         <source>1 min</source>
         <translation>1 min</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="215"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="230"/>
         <source>5 min</source>
         <translation>5 min</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="216"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="231"/>
         <source>30 min</source>
         <translation>30 min</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="226"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="241"/>
         <source>Show the whole recording, growing with it</source>
         <translation>Mostrar toda la grabación; la ventana crece con ella</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="227"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="242"/>
         <source>Show the last %1</source>
         <translation>Mostrar los últimos %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="370"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="412"/>
         <source>QtDMM: %1</source>
         <translation>QtDMM: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="390"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="395"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="432"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="437"/>
         <source>Sampling start:</source>
         <translation>Inicio del muestreo:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="391"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="400"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="433"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="442"/>
         <source>Sampling resolution:</source>
         <translation>Resolución del muestreo:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="403"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="445"/>
         <source>%1 Seconds</source>
         <translation>%1 segundos</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="869"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="916"/>
         <source>[h]</source>
         <translation>[h]</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="874"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="921"/>
         <source>[min]</source>
         <translation>[min]</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1622"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1684"/>
         <source>● REC %1</source>
         <translation>● REC %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1623"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1685"/>
         <source>● REC %1 / %2</source>
         <translation>● REC %1 / %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1632"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1694"/>
         <source>%1 · %2</source>
         <translation>%1 · %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1633"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1695"/>
         <source>Recording of %1 · %2</source>
         <translation>Grabación del %1 · %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1786"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1852"/>
         <source>%1 left</source>
         <translation>quedan %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1790"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1879"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1856"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1945"/>
         <source>Live</source>
         <translation>En vivo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1796"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1862"/>
         <source>Stopped</source>
         <translation>Detenido</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1793"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1859"/>
         <source>Recording</source>
         <translation>Grabación</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="967"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1028"/>
         <source>mean %1  %2 %3</source>
         <translation>media %1  %2 %3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1203"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1264"/>
         <source>mean</source>
         <translation>media</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1204"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1265"/>
         <source>min</source>
         <translation>mín</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1205"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1266"/>
         <source>max</source>
         <translation>máx</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1206"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1267"/>
         <source>alarm</source>
         <translation>alarma</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1616"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1678"/>
         <source>Live paused</source>
         <translation>En vivo en pausa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1865"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1931"/>
         <source>Stop recording</source>
         <translation>Detener grabación</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1872"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1938"/>
         <source>Start recording</source>
         <translation>Iniciar grabación</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1883"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1949"/>
         <source>Clear graph</source>
         <translation>Borrar gráfica</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1889"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1955"/>
         <source>Configure...</source>
         <translation>Configurar…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1893"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1959"/>
         <source>Copy image</source>
         <translation>Copiar imagen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1896"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1962"/>
         <source>Export image...</source>
         <translation>Exportar imagen...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1902"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1968"/>
         <source>Graph &amp;colours</source>
         <translation>&amp;Colores de la gráfica</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1911"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1977"/>
         <source>&amp;Default: %1</source>
         <translation>&amp;Predeterminado: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1917"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="1983"/>
         <source>&amp;Reference line</source>
         <translation>Línea de &amp;referencia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1934"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2000"/>
         <source>At &amp;0</source>
         <translation>En &amp;0</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1935"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2001"/>
         <source>&amp;Mean of the window</source>
         <translation>&amp;Media de la ventana</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1936"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2002"/>
         <source>M&amp;inimum of the window</source>
         <translation>M&amp;ínimo de la ventana</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1937"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2003"/>
         <source>Ma&amp;ximum of the window</source>
         <translation>Má&amp;ximo de la ventana</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1941"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2007"/>
         <source>Alarm threshold %1</source>
         <translation>Umbral de alarma %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1945"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2011"/>
         <source>At %1 (dragged)</source>
         <translation>En %1 (arrastrada)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1948"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2014"/>
         <source>&amp;Off</source>
         <translation>&amp;Apagada</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1949"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2015"/>
         <source>Over&amp;view</source>
         <translation>&amp;Vista general</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1953"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2019"/>
         <source>Min/max &amp;band</source>
         <translation>&amp;Banda mín/máx</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1959"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2030"/>
+        <source>&amp;Values</source>
+        <translation>&amp;Valores</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2033"/>
+        <source>Value %1</source>
+        <translation>Valor %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2043"/>
         <source>Remove time cursors</source>
         <translation>Quitar cursores de tiempo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1966"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2050"/>
         <source>Export data...</source>
         <translation>Exportar datos…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="1970"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2054"/>
         <source>Import data...</source>
         <translation>Importar datos…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2096"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2180"/>
         <source>no value</source>
         <translation>sin valor</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2162"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2246"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2162"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2246"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2162"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2246"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2164"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2248"/>
         <source>CSV, every reading (*.csv)</source>
         <translation>CSV, cada lectura (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2166"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2250"/>
         <source>Export data</source>
         <translation>Exportar datos</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2198"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2282"/>
         <source>Import data</source>
         <translation>Importar datos</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2198"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2282"/>
         <source>CSV (*.csv);;All files (*)</source>
         <translation>CSV (*.csv);;Todos los archivos (*)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2389"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2720"/>
         <source>Scope blue</source>
         <translation>Osciloscopio azul</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2390"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2721"/>
         <source>Phosphor green</source>
         <translation>Fósforo verde</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2391"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2722"/>
         <source>Phosphor amber</source>
         <translation>Fósforo ámbar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2392"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2723"/>
         <source>Chart recorder</source>
         <translation>Registrador de papel</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2393"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2724"/>
         <source>Custom</source>
         <translation>Personalizado</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2394"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="2725"/>
         <source>Neutral</source>
         <translation>Neutro</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2782"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3119"/>
         <source>Scalable vector graphics (*.svg)</source>
         <translation>Gráfico vectorial escalable (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2782"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3119"/>
         <source>PDF (*.pdf)</source>
         <translation>PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2783"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3120"/>
         <source>PNG image (*.png)</source>
         <translation>Imagen PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2783"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3120"/>
         <source>JPEG image (*.jpg)</source>
         <translation>Imagen JPEG (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2786"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3123"/>
         <source>Export image</source>
         <translation>Exportar imagen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2836"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3173"/>
         <source>QtDMM recording, %1</source>
         <translation>Grabación de QtDMM, %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2837"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2853"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3174"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3190"/>
         <source>QtDMM graph</source>
         <translation>Gráfica de QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2838"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3175"/>
         <source>%1 readings, unit %2</source>
         <translation>%1 lecturas, unidad %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2842"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2862"/>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2877"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3179"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3199"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3214"/>
         <source>Could not write %1</source>
         <translation>No se pudo escribir %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="2881"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="3218"/>
         <source>Graph written to %1</source>
         <translation>Gráfica escrita en %1</translation>
     </message>
@@ -3360,48 +3370,48 @@ Elija qué instancia debe grabar.</translation>
         <translation>%1: sin lectura desde hace 3 s</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1541"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1552"/>
         <source>Save workspace</source>
         <translation>Guardar espacio de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1542"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1568"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1553"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1579"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Espacio de trabajo de QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1555"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1566"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Guardar espacio de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1555"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1566"/>
         <source>Could not write %1.</source>
         <translation>No se pudo escribir %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1559"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1570"/>
         <source>Workspace saved to %1</source>
         <translation>Espacio de trabajo guardado en %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1567"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1578"/>
         <source>Load workspace</source>
         <translation>Cargar espacio de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1574"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1585"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Cargar espacio de trabajo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1575"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1586"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 no es un espacio de trabajo de QtDMM.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1599"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1610"/>
         <source>Workspace loaded from %1</source>
         <translation>Espacio de trabajo cargado desde %1</translation>
     </message>
@@ -4673,7 +4683,7 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
 <context>
     <name>RecordingStore</name>
     <message>
-        <location filename="../../src/recording/recordingstore.cpp" line="538"/>
+        <location filename="../../src/recording/recordingstore.cpp" line="713"/>
         <source>Trigger</source>
         <translation>Disparo</translation>
     </message>

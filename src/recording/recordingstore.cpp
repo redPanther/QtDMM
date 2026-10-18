@@ -394,6 +394,8 @@ void RecordingStore::setReading(const Reading &reading)
     {
       m_recordPort = reading.port;
       m_recordBaseUnit = reading.baseUnit;
+      m_series.port = reading.port;
+      m_series.unit = reading.baseUnit;
     }
     else if (reading.port != m_recordPort || reading.baseUnit != m_recordBaseUnit)
     {
@@ -408,6 +410,8 @@ void RecordingStore::setReading(const Reading &reading)
       m_lastValValid = false;
       m_recordPort = reading.port;
       m_recordBaseUnit = reading.baseUnit;
+      m_series.port = reading.port;
+      m_series.unit = reading.baseUnit;
     }
   }
   if (m_state == View)
@@ -771,6 +775,8 @@ void RecordingStore::clear()
 {
   m_series.clear();
   m_extra.clear();
+  m_series.port = PortKey();
+  m_series.unit.clear();
   m_floorMs = 0;
   m_recordPort = PortKey();
   m_recordBaseUnit.clear();

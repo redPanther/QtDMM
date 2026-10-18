@@ -147,6 +147,19 @@ were; the integration curve carries on across a gap.
   four pixels to either side. It shows how much a value scatters around
   the curve, as wide on screen at 1 minute as at 1 hour. It is off at
   first; whether it shows is kept with the window layout.
+- **Other values of the meter:** a meter with a second display (the
+  temperature of a hygrometer or an anemometer, the frequency of a UT61E,
+  the second value of a Victron or a Fluke 45) shows it as another curve,
+  recorded with the main value on the same time axis. Each value has a
+  colour of its own; a legend at the top left names the curves. A value in
+  the main value's unit shares its axis, the first other unit gets an axis
+  on the right with a scale of its own; a value in a third unit is not
+  drawn yet. When the second display changes what it shows (Hz to %), its
+  curve ends and a new one begins; the recording goes on. The right-click
+  menu, **Values**, hides or shows each of them; that is kept with the
+  window layout. The time cursors show the other values too; the
+  reference line, the band, the overview, the statistics between the
+  cursors, the triggers and the export are the main value's.
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see

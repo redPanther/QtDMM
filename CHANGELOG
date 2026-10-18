@@ -52,6 +52,10 @@
   milli-"/s" or unknown
 - Display: MAX, MIN and AVG light when the meter shows its own maximum, minimum or average (UNI-T iENV, APPA);
   the AVG of APPA meters was lost on the way to the keys and the display
+- Graph: a meter's second display is recorded too and drawn as another curve, in a colour of its own, with a
+  legend; a value in another unit than the main one gets an axis on the right. A second display that changes
+  what it shows (Hz to %) begins a new curve without stopping the recording. Values can be hidden (right-click
+  menu, Values); the time cursors show them. The export still has the main value only
 - Flatpak: each release carries QtDMM-<version>-x86_64.flatpak (KDE runtime 6.11, hidapi inside): serial, USB/HID
   and Bluetooth meters, the SCPI server and several instances. HID meters still need the udev rule on the computer
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new

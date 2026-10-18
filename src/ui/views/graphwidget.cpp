@@ -31,6 +31,8 @@
 #include <QPdfWriter>
 
 #include "ui/views/graphwidget.h"
+
+#include <climits>
 #include "ui/views/graphflags.h"
 #include "ui/views/graphminimap.h"
 
@@ -127,9 +129,21 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_yAxis->setLabelsBrush(Qt::transparent);
   m_yAxis->setLabelFormat("%.4g");
   m_defaultAxisLine = m_yAxis->linePenColor();
+  // the right axis for the other values in another unit; hidden until one
+  // comes. Its grid would be a second one: off
+  m_yAxis2 = new QValueAxis();
+  m_chart->addAxis(m_yAxis2, Qt::AlignRight);
+  m_yAxis2->setLabelFormat("%.4g");
+  m_yAxis2->setGridLineVisible(false);
+  m_yAxis2->setMinorGridLineVisible(false);
+  m_yAxis2->setVisible(false);
   m_yTitle = new QGraphicsSimpleTextItem(m_chart);
   m_yTitle->setFont(m_xAxis->titleFont());
   m_yTitle->setBrush(m_xAxis->titleBrush());
+  m_y2Title = new QGraphicsSimpleTextItem(m_chart);
+  m_y2Title->setFont(m_xAxis->titleFont());
+  m_y2Title->setBrush(m_xAxis->titleBrush());
+  m_y2Title->setVisible(false);
   connect(m_chart, &QChart::plotAreaChanged, this, [this](const QRectF &)
   {
     placeYTitle();
@@ -137,6 +151,7 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
     updateXLabels();
     updateYLabels();
     updateStateLabel();
+    updateLegend();
   });
   m_centreTicks = new QGraphicsPathItem(m_chart);
   m_centreTicks->setZValue(5);   // above the grid, below the curves' markers
@@ -245,7 +260,25 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_stateLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
   m_stateLabel->hide();
 
+  m_legend = new QLabel(m_chartView);
+  m_legend->setObjectName("ui_graphLegend");
+  m_legend->setAttribute(Qt::WA_TransparentForMouseEvents);
+  m_legend->setTextFormat(Qt::RichText);
+  m_legend->hide();
+
   connectStore();
+}
+
+// What a curve shows: "Temperature (°C)", or the unit alone
+static QString curveName(const RecordingSeries &s, const QString &unit)
+{
+  const QString u = SiPrefix::displayText(unit);
+  if (s.port.quantity == Quantity::Unknown)
+    return u;
+  QString text = Quantities::name(s.port.quantity);
+  if (s.port.defining & (SampleFlag::AC | SampleFlag::DC))
+    text += ' ' + couplingText(s.port.defining);
+  return u.isEmpty() ? text : QString("%1 (%2)").arg(text, u);
 }
 
 void GraphWidget::connectStore()
@@ -264,6 +297,11 @@ void GraphWidget::connectStore()
   connect(m_store, &RecordingStore::progressChanged, this, &GraphWidget::updateStateLabel);
   connect(m_store, &RecordingStore::loaded, this, &GraphWidget::updateStateLabel);
   connect(m_store, &RecordingStore::cleared, this, &GraphWidget::updateStateLabel);
+  // the meter's other values
+  connect(m_store, &RecordingStore::extraAppended, this, &GraphWidget::onExtraAppended);
+  connect(m_store, &RecordingStore::extrasChanged, this, &GraphWidget::rebuildExtras);
+  connect(m_store, &RecordingStore::cleared, this, &GraphWidget::rebuildExtras);
+  connect(m_store, &RecordingStore::loaded, this, &GraphWidget::rebuildExtras);
 }
 
 void GraphWidget::setStore(RecordingStore *store)
@@ -346,7 +384,11 @@ void GraphWidget::placeTimeBar()
   if (!m_timeBar)
     return;
   m_timeBar->adjustSize();
-  m_timeBar->move(m_chartView->width() - m_timeBar->width() - 6, 3);
+  // with a right axis its title takes the corner: the buttons end at the plot
+  int right = m_chartView->width() - 6;
+  if (m_y2Title && m_y2Title->isVisible())
+    right = qMin(right, m_chartView->mapFromScene(m_chart->plotArea().topRight()).x());
+  m_timeBar->move(right - m_timeBar->width(), 3);
   m_timeBar->raise();
 }
 
@@ -662,7 +704,11 @@ int GraphWidget::bucketStart(int i) const
 // fell silent ends with it.
 int GraphWidget::bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const
 {
-  const RecordingSeries &series = m_store->series();
+  return pointsOf(m_store->series(), first, last, integral, out);
+}
+
+int GraphWidget::pointsOf(const RecordingSeries &series, int first, int last, bool integral, QList<QPointF> &out) const
+{
   auto value = [&](int i)
   {
     const RawPoint &p = series.at(i);
@@ -751,6 +797,7 @@ void GraphWidget::rebuildSeries()
   m_intPoints->replace(withoutGaps(intPoints));
   m_tailDataPts = finiteTail(points, m_tailData);
   m_tailIntPts = finiteTail(intPoints, m_tailInt);
+  rebuildExtras();   // the same buckets
 }
 
 // The newest reading went into the series: a new bucket adds its point, one
@@ -949,12 +996,26 @@ QString GraphWidget::timeCursorText() const
     const double x = SiPrefix::scale(v, &prefix);
     return QString("%1 %2%3").arg(QString::number(x, 'g', 4), prefix, unit).trimmed();
   };
+  // the other values drawn, at the cursor: the series of each that holds there
+  auto others = [&](qint64 t)
+  {
+    QStringList out;
+    for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
+    {
+      const RecordingSeries &s = m_store->extra(i);
+      const int j = s.holding(t);
+      if (!m_extraCurves[size_t(i)].shown || j < 0 || s.at(j).gap())
+        continue;
+      out << withUnit(s.at(j).value, SiPrefix::displayText(s.unit));
+    }
+    return out.isEmpty() ? QString() : QStringLiteral("  ") + out.join(QStringLiteral("  "));
+  };
   QStringList lines;
   for (int i = 0; i < 2; ++i)
     if (m_cursorT[i] >= 0)
-      lines << QString("%1  %2  %3").arg(i ? "B" : "A",
-                                         m_store->startDateTime().addMSecs(m_cursorT[i]).time().toString("HH:mm:ss.zzz"),
-                                         withUnit(valueAt(m_cursorT[i]), base));
+      lines << QString("%1  %2  %3%4").arg(i ? "B" : "A",
+                                           m_store->startDateTime().addMSecs(m_cursorT[i]).time().toString("HH:mm:ss.zzz"),
+                                           withUnit(valueAt(m_cursorT[i]), base), others(m_cursorT[i]));
   if (m_cursorT[0] >= 0 && m_cursorT[1] >= 0)
   {
     const RecordingStore::Stats st = m_store->stats(m_cursorT[0], m_cursorT[1]);
@@ -1320,6 +1381,7 @@ void GraphWidget::updateCentreTicks()
 
 void GraphWidget::updateSeriesAppearance()
 {
+  rebuildExtras();   // their colours and line width
   m_dataLine->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
   m_dataLine->setVisible(m_lineMode != NoLine);
   m_minimap->setCurveColor(dataColor());
@@ -1735,6 +1797,10 @@ void GraphWidget::placeYTitle()
   // the top tick label is centred on the plot's top edge: stay above it
   const double labelHalf = QFontMetricsF(m_yAxis->labelsFont()).height() / 2;
   m_yTitle->setPos(qMax(2.0, plot.left() - text.width() - 4), plot.top() - labelHalf - text.height() - 1);
+  // the right one left-aligned with its axis line
+  if (m_y2Title)
+    m_y2Title->setPos(qMin(plot.right() + 4, m_chart->size().width() - m_y2Title->boundingRect().width() - 2),
+                      plot.top() - labelHalf - m_y2Title->boundingRect().height() - 1);
 }
 
 void GraphWidget::clearSLOT()
@@ -1954,6 +2020,24 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     envelope->setProperty("ID", IDEnvelope);
     envelope->setCheckable(true);
     envelope->setChecked(m_envelopeOn);
+    // the meter's other values: each can be hidden
+    {
+      QMap<int, QString> values;   // id -> name of its newest series
+      for (int i = 0; i < m_store->extraCount(); ++i)
+        values[m_store->extra(i).id] = curveName(m_store->extra(i), m_store->extra(i).unit);
+      if (!values.isEmpty())
+      {
+        QMenu *menu = m_popup->addMenu(tr("&Values"));
+        for (auto it = values.cbegin(); it != values.cend(); ++it)
+        {
+          QAction *a = menu->addAction(it.value().isEmpty() ? tr("Value %1").arg(it.key() + 1) : it.value());
+          a->setProperty("ID", IDValueShown);
+          a->setProperty("value", it.key());
+          a->setCheckable(true);
+          a->setChecked(!m_hiddenValues.contains(it.key()));
+        }
+      }
+    }
     if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
     {
       QAction *a = m_popup->addAction(tr("Remove time cursors"));
@@ -2287,30 +2371,277 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
   updateThresholdLinePositions();
 }
 
-bool GraphWidget::computeMinMax(double val)
+// The auto scale takes @p val in, with a margin; true when it grew.
+static bool growScale(double val, double &min, double &max)
 {
   bool ret = false;
 
-  if (val > m_scaleMax * 0.95)
+  if (val > max * 0.95)
   {
     if (val > 0)
-      m_scaleMax = val * 1.2;
+      max = val * 1.2;
     else
-      m_scaleMax = val / 1.2;
+      max = val / 1.2;
 
     ret = true;
   }
-  if (val < m_scaleMin * 0.95)
+  if (val < min * 0.95)
   {
     if (val > 0)
-      m_scaleMin = val / 1.2;
+      min = val / 1.2;
     else
-      m_scaleMin = val * 1.2;
+      min = val * 1.2;
 
     ret = true;
   }
 
   return ret;
+}
+
+bool GraphWidget::computeMinMax(double val)
+{
+  return growScale(val, m_scaleMin, m_scaleMax);
+}
+
+// The colour of a value of the meter (its id, not its place: a value keeps
+// it when another goes): the next hues of the categorical order after the
+// main curve's blue, stepped for a dark background; the variants with a
+// curve colour of their own bring theirs. Phosphor keeps its one hue and
+// tells the curves apart by dashes (extraPen()).
+QColor GraphWidget::extraColor(int id) const
+{
+  const int slot = qMax(0, id - 1) % 3;
+  switch (m_variant)
+  {
+    case ScopeBlue:     return QColor(QList<const char *>{ "#ff8a5c", "#7dff8a", "#d9a6ff" }[slot]);
+    case PhosphorGreen: return QColor::fromHsv(135, 190, 220);
+    case PhosphorAmber: return QColor::fromHsv(38, 230, 220);
+    case ChartRecorder: return QColor(QList<const char *>{ "#2e7d32", "#7b3fa0", "#b8860b" }[slot]);
+    default: break;
+  }
+  const bool dark = m_xLabelColor.isValid() && m_xLabelColor.lightness() > 128;
+  static const char *light[] = { "#eb6834", "#1baf7a", "#6250d6" };
+  static const char *darkSteps[] = { "#d95926", "#199e70", "#9085e9" };
+  return QColor(dark ? darkSteps[slot] : light[slot]);
+}
+
+void GraphWidget::rebuildExtras()
+{
+  const int n = m_store->extraCount();
+  // the units: the main value's on the left; on the right the unit of the
+  // lowest value in another one (by number, not by which came first), its
+  // newest series
+  const QString main = m_store->unit();
+  m_unit2.clear();
+  int unit2Id = INT_MAX;
+  for (int i = 0; i < n; ++i)
+  {
+    const RecordingSeries &s = m_store->extra(i);
+    if (!m_hiddenValues.contains(s.id) && !s.unit.isEmpty() && s.unit != main && s.id <= unit2Id)
+    {
+      unit2Id = s.id;
+      m_unit2 = s.unit;
+    }
+  }
+
+  while (int(m_extraCurves.size()) < n)
+  {
+    ExtraCurve c;
+    c.series = new QLineSeries();
+    m_chart->addSeries(c.series);
+    c.series->attachAxis(m_xAxis);
+    c.series->attachAxis(m_yAxis);
+    c.line = std::make_unique<GapLine>(c.series);
+    m_extraCurves.push_back(std::move(c));
+  }
+
+  m_scale2Min = 1e40;
+  m_scale2Max = -1e40;
+  bool leftGrew = false;
+  for (int i = 0; i < int(m_extraCurves.size()); ++i)
+  {
+    ExtraCurve &c = m_extraCurves[size_t(i)];
+    c.line->clear();
+    c.tail = 0;
+    if (i >= n)
+    {
+      c.shown = false;
+      c.line->setVisible(false);
+      continue;
+    }
+    const RecordingSeries &s = m_store->extra(i);
+    // a series without a unit yet (only gaps) goes with the main one
+    const bool left = s.unit.isEmpty() || s.unit == main;
+    c.right = !left && s.unit == m_unit2;
+    c.shown = !m_hiddenValues.contains(s.id) && (left || c.right);
+    c.line->setAxes({ m_xAxis, c.right ? m_yAxis2 : m_yAxis });
+    const bool dashed = phosphor();
+    c.line->setPen(QPen(extraColor(s.id), m_lineWidth, dashed ? (s.id % 2 ? Qt::DashLine : Qt::DotLine) : Qt::SolidLine,
+                        Qt::RoundCap, Qt::RoundJoin));
+    c.line->setVisible(c.shown);
+    if (!c.shown)
+      continue;
+    QList<QPointF> points;
+    const int count = s.count();
+    for (int first = 0; first < count;)
+    {
+      const qint64 end = (s.at(first).t / m_bucket + 1) * m_bucket;
+      const int last = qMin(s.lowerBound(end), count) - 1;
+      c.tail = pointsOf(s, first, last, false, points);
+      first = last + 1;
+    }
+    c.line->replace(points);
+    for (const QPointF &p : std::as_const(points))
+      if (std::isfinite(p.y()))
+      {
+        if (c.right)
+          growScale(p.y(), m_scale2Min, m_scale2Max);
+        else if (m_autoScale)
+          leftGrew = computeMinMax(p.y()) || leftGrew;
+      }
+  }
+  if (leftGrew)
+  {
+    setYRange(m_scaleMin, m_scaleMax);
+    updateThresholdLinePositions();
+  }
+  updateRightAxis();
+  updateLegend();
+}
+
+void GraphWidget::onExtraAppended(int i)
+{
+  if (i >= int(m_extraCurves.size()) || bucketSize() != m_bucket)
+  {
+    rebuildExtras();
+    return;
+  }
+  ExtraCurve &c = m_extraCurves[size_t(i)];
+  if (!c.shown)
+    return;
+  const RecordingSeries &s = m_store->extra(i);
+  const int count = s.count();
+  // as appendToSeries(): a new bucket adds its points, one still filling
+  // replaces them
+  const qint64 begin = s.at(count - 1).t / m_bucket * m_bucket;
+  const int first = qMin(count - 1, s.lowerBound(begin));
+  if (first != count - 1)
+    c.line->removeLast(c.tail);
+  QList<QPointF> points;
+  c.tail = pointsOf(s, first, count - 1, false, points);
+  c.line->append(points);
+  const double v = s.last().value;
+  if (!std::isfinite(v))
+    return;
+  if (c.right)
+  {
+    if (growScale(v, m_scale2Min, m_scale2Max))
+      updateRightAxis();
+  }
+  else if (m_autoScale && computeMinMax(v))
+  {
+    setYRange(m_scaleMin, m_scaleMax);
+    updateThresholdLinePositions();
+  }
+}
+
+void GraphWidget::updateRightAxis()
+{
+  const bool on = !m_unit2.isEmpty();
+  m_yAxis2->setVisible(on);
+  m_y2Title->setVisible(on);
+  if (!on)
+  {
+    placeTimeBar();
+    return;
+  }
+  double min = m_scale2Min, max = m_scale2Max;
+  if (m_includeZero)
+  {
+    min = qMin(min, 0.0);
+    max = qMax(max, 0.0);
+  }
+  if (!std::isfinite(min) || !std::isfinite(max) || !(max >= min) || min > 1e39)
+  {
+    min = 0;
+    max = 1;
+  }
+  else if (max == min)
+  {
+    const double half = min == 0 ? 1.0 : std::abs(min) * 0.1;
+    min -= half;
+    max += half;
+  }
+  // its ticks on the left axis' grid lines: the same count, a round step
+  const int ticks = qMax(2, m_yAxis->tickCount());
+  const double step = niceStep((max - min) / (ticks - 1));
+  const double first = std::floor(min / step + 1e-9) * step;
+  double top = first + (ticks - 1) * step;
+  double s = step;
+  while (top < max - s * 1e-9)
+  {
+    s = niceStep(s * 1.01);
+    top = std::floor(min / s + 1e-9) * s + (ticks - 1) * s;
+  }
+  const double from = std::floor(min / s + 1e-9) * s;
+  m_yAxis2->setTickCount(ticks);
+  m_yAxis2->setRange(from, from + (ticks - 1) * s);
+  m_y2Title->setText(QString("[%1]").arg(SiPrefix::displayText(m_unit2)));
+  placeYTitle();
+  placeTimeBar();
+}
+
+QString GraphWidget::legendText() const
+{
+  return m_legend && m_legend->isVisible() ? m_legend->text() : QString();
+}
+
+void GraphWidget::updateLegend()
+{
+  if (!m_legend)
+    return;
+  // one entry per value, its newest series; only with more than the main one
+  QStringList entries;
+  QSet<int> seen;
+  auto entry = [](const QColor &c, const QString &name)
+  {
+    return QString("<span style=\"color:%1\">&#9632;</span>&nbsp;%2").arg(c.name(), name.toHtmlEscaped());
+  };
+  for (int i = m_store->extraCount() - 1; i >= 0; --i)
+  {
+    const RecordingSeries &s = m_store->extra(i);
+    if (seen.contains(s.id) || i >= int(m_extraCurves.size()) || !m_extraCurves[size_t(i)].shown)
+      continue;
+    seen.insert(s.id);
+    entries.prepend(entry(extraColor(s.id), curveName(s, s.unit)));
+  }
+  if (entries.isEmpty())
+  {
+    m_legend->hide();
+    return;
+  }
+  entries.prepend(entry(dataColor(), curveName(m_store->series(), m_store->unit())));
+  const QColor ink = m_xLabelColor.isValid() ? m_xLabelColor : palette().color(QPalette::WindowText);
+  m_legend->setStyleSheet(QString("QLabel { color: %1; background: transparent; }").arg(ink.name()));
+  m_legend->setText(entries.join("&nbsp;&nbsp;&nbsp;"));
+  m_legend->adjustSize();
+  // top left inside the plot, below the state ("LIVE", "REC")
+  const QPoint topLeft = m_chartView->mapFromScene(m_chart->plotArea().topLeft());
+  const int below = m_stateLabel && m_stateLabel->isVisible() ? m_stateLabel->height() : 0;
+  m_legend->move(topLeft.x() + 6, topLeft.y() + 4 + below);
+  m_legend->show();
+  m_legend->raise();
+}
+
+void GraphWidget::setValueHidden(int id, bool hidden)
+{
+  if (hidden == m_hiddenValues.contains(id))
+    return;
+  if (hidden)
+    m_hiddenValues.insert(id);
+  else
+    m_hiddenValues.remove(id);
+  rebuildExtras();
 }
 
 void GraphWidget::setColors(const QColor &bg, const QColor &grid,
@@ -2517,6 +2848,9 @@ void GraphWidget::applyThemeColors()
   updateStateLabel();
   m_chart->setPlotAreaBackgroundBrush(plot);
   m_chart->setPlotAreaBackgroundVisible(plot.style() != Qt::NoBrush);
+  m_yAxis2->setLabelsBrush(labels);
+  m_y2Title->setBrush(labels);
+  m_yAxis2->setLinePen(line);
   for (QValueAxis *axis : { m_xAxis, m_yAxis })
   {
     axis->setGridLinePen(grid);
@@ -2701,6 +3035,9 @@ void GraphWidget::popupSLOT(QAction *action)
       break;
     case IDEnvelope:
       setEnvelopeVisible(action->isChecked());
+      break;
+    case IDValueShown:
+      setValueHidden(action->property("value").toInt(), !action->isChecked());
       break;
   }
 }

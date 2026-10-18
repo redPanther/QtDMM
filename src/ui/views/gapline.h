@@ -28,6 +28,8 @@ public:
 
   void setPen(const QPen &pen);
   void setVisible(bool on);
+  /// Moves every segment onto @p axes (the x axis and one y axis).
+  void setAxes(const QList<QAbstractAxis *> &axes);
 
   /// All points anew.
   void replace(const QList<QPointF> &points);

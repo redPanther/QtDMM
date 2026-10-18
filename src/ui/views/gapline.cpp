@@ -38,6 +38,19 @@ void GapLine::setPen(const QPen &pen)
     s->setPen(pen);
 }
 
+void GapLine::setAxes(const QList<QAbstractAxis *> &axes)
+{
+  for (QLineSeries *s : std::as_const(m_segments))
+  {
+    for (QAbstractAxis *axis : s->attachedAxes())
+      if (!axes.contains(axis))
+        s->detachAxis(axis);
+    for (QAbstractAxis *axis : axes)
+      if (!s->attachedAxes().contains(axis))
+        s->attachAxis(axis);
+  }
+}
+
 void GapLine::setVisible(bool on)
 {
   m_visible = on;
