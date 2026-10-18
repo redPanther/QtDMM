@@ -173,10 +173,11 @@ public:
   const RecordingSeries &series() const { return m_series; }
   /// The readings kept (series().count()).
   int         count() const { return m_series.count(); }
-  /// The series of the meter's other values (Reading::id > 0), in the order
-  /// they began: one per value and port. When a value measures something
-  /// else (a second display from Hz to %), its series ends with a gap and a
-  /// new one begins; the recording goes on. Their readings count from the
+  /// The series of the meter's other values (Reading::id > 0), the one
+  /// used last at the end: one per value and port. When a value measures
+  /// something else (a second display from Hz to %), its series ends with a
+  /// gap and a new one begins, or the one of that port goes on and moves to
+  /// the end; the recording goes on. Their readings count from the
   /// main value's first one; a display that is off is a gap. Their points
   /// carry the integral as the main value's do (the graph may draw it).
   int         extraCount() const { return int(m_extra.size()); }
@@ -306,7 +307,8 @@ Q_SIGNALS:
   /// A reading was stored in extra(@p index) (its last point).
   void        extraAppended(int index);
   /// The extra() series changed other than by a reading at the end: one
-  /// began, or older points went.
+  /// began or went on again, or older points went (appended(true) says that
+  /// when the main series lost points too).
   void        extrasChanged();
   void        runningChanged(bool running);
   /// View, Live or Record now.
@@ -339,11 +341,16 @@ private:
   qint64      elapsed() const { return m_monotonic() - m_t0; }
   /// Adds a point with the integral up to it.
   void        appendPoint(RawPoint p);
+  /// A gap in the other values not heard of for the stale limit at @p now.
+  void        closeSilentExtras(qint64 now);
   /// appendPoint(), then the oldest points beyond the limits go; the signals.
   void        append(const RawPoint &p);
   /// Drops what is older than the store keeps; true when anything of the
-  /// main series went (the other series say so with extrasChanged()).
+  /// main series went (the other series alone say so with extrasChanged()).
   bool        trim();
+  /// trim() for a change of the limits: extrasChanged() also when the main
+  /// series lost points (no reading's appended() says it).
+  void        trimForLimits();
   bool        trimMain();
   /// The start triggers on a new main value.
   bool        trigger(double value);

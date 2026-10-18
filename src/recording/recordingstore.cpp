@@ -34,13 +34,13 @@ void RecordingStore::setLiveWidth(int seconds)
 {
   m_liveWidthMs = qint64(qMax(1, seconds)) * 1000;
   if (m_state == Live)
-    trim();
+    trimForLimits();
 }
 
 void RecordingStore::setMaxPoints(int points)
 {
   m_maxPoints = qMax(2, points);
-  trim();
+  trimForLimits();
 }
 
 void RecordingStore::setThresholds(double falling, double raising)
@@ -152,7 +152,7 @@ void RecordingStore::setSampleLength(int tenths)
 {
   m_sampleLength = tenths;
   if (m_state == Live)
-    trim();
+    trimForLimits();
 }
 
 int RecordingStore::remainingLength() const
@@ -166,7 +166,7 @@ void RecordingStore::setPreTrigger(int ms)
 {
   m_preMs = qMax(0, ms);
   if (m_state == Live)
-    trim();
+    trimForLimits();
 }
 
 QVector<GridPoint> RecordingStore::grid(int tenths) const
@@ -416,6 +416,7 @@ void RecordingStore::setReading(const Reading &reading)
   }
   if (m_state == View)
     return;
+  closeSilentExtras(reading.t);
 
   // the time starts with the first reading, not when the graph was cleared
   // or the meter was still connecting: the curve begins at 0
@@ -474,6 +475,33 @@ void RecordingStore::appendExtraPoint(int i, RawPoint p)
     m_dirty = true;
 }
 
+// A value that stops coming while the main one goes on (a second display
+// whose frames end without an "off") is held up to the stale limit, as the
+// main value is when the meter falls silent (setStale()), no longer.
+void RecordingStore::closeSilentExtras(qint64 now)
+{
+  bool closed = false;
+  for (auto it = m_extraReading.cbegin(); it != m_extraReading.cend(); ++it)
+  {
+    if (now - it->t <= m_staleMs)
+      continue;
+    const int i = extraIndex(it.key());
+    if (i < 0 || m_extra[i].isEmpty() || m_extra[i].last().gap())
+      continue;
+    // never after now: a value taken along at the start (appendCurrent())
+    // stands at 0 however old it was
+    const RawPoint &last = m_extra[i].last();
+    RawPoint p;
+    p.t = qMin(last.t + m_staleMs, qMax(last.t, now - m_t0));
+    p.value = qQNaN();
+    p.quality = Quality::Stale;
+    appendExtraPoint(i, p);
+    closed = true;
+  }
+  if (closed)
+    Q_EMIT extrasChanged();
+}
+
 void RecordingStore::appendExtra(const Reading &reading)
 {
   m_extraReading[reading.id] = reading;
@@ -489,6 +517,9 @@ void RecordingStore::appendExtra(const Reading &reading)
   p.value = off || reading.overload ? qQNaN() : reading.value;
   p.quality = off ? Quality::Stale : reading.overload ? Quality::Overload : Quality::Valid;
   p.flags = reading.flags;
+  // the main value stops the recording at its length; nothing after it
+  if (m_state == Record && m_sampleLength > 0 && p.t >= qint64(m_sampleLength) * 100 + m_preUsed)
+    return;
 
   // what the value measures: another port or unit ends its series and
   // begins a new one (Hz -> %); an overload or a value without a known
@@ -513,9 +544,24 @@ void RecordingStore::appendExtra(const Reading &reading)
   {
     if (off)
       return;   // nothing to end, nothing to begin
-    RecordingSeries s;
-    s.id = reading.id;
-    m_extra.append(s);
+    // back to what the value measured before (Hz, %, Hz ...): that series
+    // goes on after its gap and becomes the newest, so a display switched
+    // back and forth makes no new series each time
+    int earlier = -1;
+    for (int j = int(m_extra.size()) - 1; j >= 0 && says; --j)
+      if (m_extra[j].id == reading.id && m_extra[j].port == reading.port && m_extra[j].unit == reading.baseUnit)
+      {
+        earlier = j;
+        break;
+      }
+    if (earlier >= 0)
+      m_extra.move(earlier, m_extra.size() - 1);
+    else
+    {
+      RecordingSeries s;
+      s.id = reading.id;
+      m_extra.append(s);
+    }
     i = int(m_extra.size()) - 1;
     began = true;
   }
@@ -851,10 +897,18 @@ void RecordingStore::append(const RawPoint &p)
 bool RecordingStore::trim()
 {
   const bool trimmed = trimMain();
-  // the other values keep what the main one keeps
-  if (trimExtras())
+  // the other values keep what the main one keeps; when the main one lost
+  // points too, appended(true) says it for both
+  if (trimExtras() && !trimmed)
     Q_EMIT extrasChanged();
   return trimmed;
+}
+
+void RecordingStore::trimForLimits()
+{
+  // no appended(true) follows here to say it for the other values
+  if (trim())
+    Q_EMIT extrasChanged();
 }
 
 bool RecordingStore::trimMain()

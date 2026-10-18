@@ -95,7 +95,9 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    release (branch `stable`) and of a newer release candidate (branch
    `beta`), with `tools/build-flatpak-repo.sh`. It signs with the secret
    `REPO_GPG_KEY` (an armored secret key without passphrase); without it the
-   page says the repository is not online yet.
+   page says the repository is not online yet. A release published on the
+   release page before its files were there gets its Flatpak bundle into the
+   repository too: the Release workflow starts Pages again after the upload.
 9. Tell the website: the download page links the new release.
 
 A bugfix release `26.1.1` is tagged the same way, on a branch `26.1` created

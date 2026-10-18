@@ -1920,6 +1920,34 @@ int main(int argc, char **argv)
             "integral of value 1 again, on the left");
       graph.setIntegration(false, 1.0, 0.0, 0.0);
     }
+    // value 2 integrated while it is hidden: the integral still on its axis
+    {
+      QChart *chart = graph.findChild<QChartView *>()->chart();
+      auto *intSeries = qobject_cast<QXYSeries *>(chart->series().at(2));
+      graph.setValueShown(1, false);
+      graph.setIntegration(true, 1.0, 0.0, 0.0);
+      graph.setIntegrationValue(1);
+      check(intSeries->attachedAxes().contains(graph.rightAxis()) && graph.rightAxis()->isVisible()
+              && graph.rightAxisTitle() == "[°C]" && graph.rightAxis()->max() >= 30,
+            QString("integral of hidden value 2: on the right %1, axis %2 up to %3")
+              .arg(intSeries->attachedAxes().contains(graph.rightAxis())).arg(graph.rightAxisTitle())
+              .arg(graph.rightAxis()->max()));
+      graph.setIntegrationValue(0);
+      graph.setIntegration(false, 1.0, 0.0, 0.0);
+      graph.setValueShown(1, true);
+    }
+    // the auto scale of the left axis: the other values drawn there count,
+    // also after setScale(); hidden, they no longer do
+    {
+      auto *left = qobject_cast<QValueAxis *>(graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first());
+      graph.setScale(true, false, 0, 0);
+      check(left->min() < 0.5, QString("auto scale with 0.5 V on the left: from %1").arg(left->min()));
+      graph.setValueShown(2, false);
+      check(left->min() > 0.5, QString("0.5 V hidden: the scale from %1").arg(left->min()));
+      graph.setValueShown(2, true);
+      check(left->min() < 0.5, QString("0.5 V shown again: from %1").arg(left->min()));
+    }
+
     // a time cursor shows the other values drawn there
     graph.setTimeCursor(0, 2000);
     check(graph.timeCursorText().contains("°C") && graph.timeCursorText().contains("500 mV")

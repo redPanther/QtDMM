@@ -86,7 +86,9 @@ int main(int argc, char **argv)
 
   // --- 3. P = U * I through the decoder ---
   CalcDevice calc(info, "W u * i", &p);
-  check(calc.open(QIODevice::ReadWrite), "formula opens: " + calc.errorString());
+  const bool opened = calc.open(QIODevice::ReadWrite);
+  check(opened, "formula opens: " + calc.errorString());   // errorString() after open(): MSVC
+                                                          // evaluates arguments right to left
   check(calc.unit() == "W" && calc.formula() == "u * i", "unit and formula split off the device string");
 
   QString status;

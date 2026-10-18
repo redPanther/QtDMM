@@ -69,17 +69,19 @@ const UnitInfo *findUnit(quint8 id)
   return nullptr;
 }
 
-// @p base in the unit @p u, as text with as many digits as the meter's
-// (23.4 °C -> 74.1 °F, 1234 lx -> 114.6 fc)
+// @p base in the unit @p u, as text with the meter's decimals, one more or
+// fewer for each factor of 10 in the scale (23.4 °C -> 74.1 °F, 9.9 °C ->
+// 49.8 °F, 1234 lx -> 114.6 fc, 1.23 m/s -> 242 ft/min)
 QString convertText(double base, const QString &text, const UnitInfo &u, double *value)
 {
   *value = base * u.scale + u.offset;
-  int digits = 0;
-  for (QChar c : text)
-    digits += c.isDigit();
-  const double mag = std::fabs(*value);
-  const int intDigits = mag < 1 ? 1 : int(std::floor(std::log10(mag))) + 1;
-  return QString::number(*value, 'f', std::max(0, digits - intDigits));
+  const qsizetype point = text.indexOf('.');
+  int decimals = 0;
+  if (point >= 0)
+    for (qsizetype i = point + 1; i < text.size() && text[i].isDigit(); ++i)
+      ++decimals;
+  decimals -= int(std::lround(std::log10(u.scale)));
+  return QString::number(*value, 'f', std::max(0, decimals));
 }
 
 const QByteArray kPoll(1, char(0x5E));
