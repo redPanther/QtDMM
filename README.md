@@ -4,10 +4,10 @@
 [![Fedora Copr build status](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/)
 [![License: GPL-3.0-or-later](https://img.shields.io/github/license/qtdmm/QtDMM)](https://github.com/qtdmm/QtDMM/blob/master/LICENSE)
 
-|        Build       | Status |
-| ------------------ | ------ |
-| Fedora Copr master |[![](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/) |
-| Fedora Copr relase |[![](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/) |
+|         Build        | Status |
+| -------------------- | ------ |
+|  Fedora Copr master  |[![](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/) |
+| Fedora Copr release |[![](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/) |
 
 # QtDMM
 
