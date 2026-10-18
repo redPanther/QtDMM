@@ -21,10 +21,10 @@ struct RawPoint
 
 /// The readings of one port of a recording, in time order, with their times.
 ///
-/// The recorder keeps one series per recording today (one recording, one
-/// port); the type is per port so that several ports become a list of
-/// series. Views read it without knowing the graph: count(), at(),
-/// lowerBound(), and the store's signals.
+/// The recorder keeps one series for the main value and one for each other
+/// value of the meter and the port it measures (a second display that goes
+/// from Hz to % begins a new one). Views read it without knowing the graph:
+/// count(), at(), lowerBound(), and the store's signals.
 ///
 /// A value holds from its time until the next point: that is what the meter
 /// showed meanwhile. A gap is a point of its own (NaN): an overload, or the
@@ -34,6 +34,7 @@ class RecordingSeries
 public:
   PortKey port;    ///< what the series measures; invalid until the first value says
   QString unit;    ///< base unit without SI prefix ("V")
+  int     id = 0;  ///< which value of the meter (Reading::id): 0 the main value, 1.. the others
 
   int      count() const { return int(m_points.size()) - m_head; }
   bool     isEmpty() const { return count() == 0; }

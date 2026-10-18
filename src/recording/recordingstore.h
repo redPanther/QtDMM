@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QDateTime>
+#include <QMap>
 #include <QObject>
 #include <QTimer>
 #include <QString>
@@ -48,7 +49,10 @@ struct LoggedReading
 /// decides what goes into them.
 ///
 /// While recording it keeps every main reading (id 0) with its time, as a
-/// RecordingSeries of RawPoint: setReading() from the MeterController. An
+/// RecordingSeries of RawPoint: setReading() from the MeterController. The
+/// other values of the meter (a second display, id > 0) go into series of
+/// their own on the same time axis (extra()); the triggers, the integral,
+/// the length, the marks and the export are the main value's. An
 /// overload is a point without a value, and so is the moment the value went
 /// stale (setStale()). The sample time is no longer the rate it records at
 /// but the grid of the export: grid() gives the time-weighted mean of every
@@ -169,6 +173,13 @@ public:
   const RecordingSeries &series() const { return m_series; }
   /// The readings kept (series().count()).
   int         count() const { return m_series.count(); }
+  /// The series of the meter's other values (Reading::id > 0), in the order
+  /// they began: one per value and port. When a value measures something
+  /// else (a second display from Hz to %), its series ends with a gap and a
+  /// new one begins; the recording goes on. Their readings count from the
+  /// main value's first one; a display that is off is a gap. No integral.
+  int         extraCount() const { return int(m_extra.size()); }
+  const RecordingSeries &extra(int i) const { return m_extra.at(i); }
   /// ms since the start the recording covers: up to now while it runs (and
   /// in Live), up to the stop, or up to the last reading of a loaded one.
   qint64      duration() const;
@@ -291,6 +302,11 @@ Q_SIGNALS:
   void        cleared();
   /// load() replaced the recording.
   void        loaded();
+  /// A reading was stored in extra(@p index) (its last point).
+  void        extraAppended(int index);
+  /// The extra() series changed other than by a reading at the end: one
+  /// began, or older points went.
+  void        extrasChanged();
   void        runningChanged(bool running);
   /// View, Live or Record now.
   void        stateChanged(RecordingStore::State state);
@@ -324,8 +340,10 @@ private:
   void        appendPoint(RawPoint p);
   /// appendPoint(), then the oldest points beyond the limits go; the signals.
   void        append(const RawPoint &p);
-  /// Drops what is older than the store keeps; true when anything went.
+  /// Drops what is older than the store keeps; true when anything of the
+  /// main series went (the other series say so with extrasChanged()).
   bool        trim();
+  bool        trimMain();
   /// The start triggers on a new main value.
   bool        trigger(double value);
   /// Stops at the recording length when @p t (ms since the start) reached it.
@@ -334,10 +352,21 @@ private:
   /// the live window.
   void        begin(qint64 preMs);
   /// The value the meter shows, as the first point at the start (when it
-  /// is not stale).
+  /// is not stale); the other values too.
   void        appendCurrent();
+  /// A reading of another value (id > 0) into its series.
+  void        appendExtra(const Reading &reading);
+  /// Appends @p p to extra(@p i), at the earliest at its last point.
+  void        appendExtraPoint(int i, RawPoint p);
+  /// The newest series of value @p id, -1 when there is none.
+  int         extraIndex(int id) const;
+  /// Drops the extra points older than the main series keeps, and series
+  /// that ended before it; true when anything went.
+  bool        trimExtras();
 
   RecordingSeries m_series;
+  QList<RecordingSeries> m_extra;   ///< the other values, extra()
+  QMap<int, Reading> m_extraReading; ///< the newest reading of each other value
   qint64      m_t0 = 0;           ///< the monotonic clock at the start
   qint64      m_stopT = -1;       ///< ms since the start when it stopped; -1 = running or never ran
   qint64      m_liveWidthMs = 600 * 1000;
