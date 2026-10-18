@@ -22,8 +22,7 @@ bool DecoderBrymenBM25x::checkFormat(const char *data, size_t idx)
 {
   // the last byte is tagged 0xE.; the 0x02 fourteen bytes earlier confirms
   // the alignment (the tag sequence 1..14 is verified in decode())
-  const size_t start = (idx + FIFO_LENGTH - 14) % FIFO_LENGTH;
-  return (static_cast<unsigned char>(data[idx]) & 0xf0) == 0xe0 && data[start] == 0x02;
+  return (ringByte(data, idx, 0) & 0xf0) == 0xe0 && ringByte(data, idx, 14) == 0x02;
 }
 
 QChar DecoderBrymenBM25x::digit(const unsigned char *buf, int num)

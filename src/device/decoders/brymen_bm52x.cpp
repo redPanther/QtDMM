@@ -35,7 +35,7 @@ QByteArray DecoderBrymenBM52x::pollRequest() const
 bool DecoderBrymenBM52x::checkFormat(const char *data, size_t idx)
 {
   for (int back = 4; back <= 7; back++)
-    if (static_cast<unsigned char>(data[(idx + FIFO_LENGTH - back) % FIFO_LENGTH]) != modelId())
+    if (ringByte(data, idx, back) != modelId())
       return false;
   return true;
 }

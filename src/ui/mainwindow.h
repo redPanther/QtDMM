@@ -64,9 +64,13 @@ class MainWindow : public QMainWindow, private Ui::UIMainWindow
 public:
   /// @param parser the processed command line (--debug, --config-dir, --config-id)
   /// @param parent parent widget, normally none
-  MainWindow(QCommandLineParser &parser, QWidget *parent = Q_NULLPTR);
+  MainWindow(QCommandLineParser &parser, QWidget *parent = nullptr);
   /// --debug: frame dump and the qtdmm.hid logging category.
   void      setConsoleLogging(bool);
+
+public Q_SLOTS:
+  /// Writes a state string for the other instances (InstanceWidget::sendState()).
+  void      sendStateSLOT(const QString &);
 
 protected Q_SLOTS:
   /// Recording state changed; enables/disables Start/Stop.
@@ -76,8 +80,6 @@ protected Q_SLOTS:
   /// Start action: records locally and tells the other instances.
   void      startSLOT();
   void      stopSLOT();
-  /// Writes a state string for the other instances.
-  void      sendStateSLOT(const QString &);
   void      on_action_About_triggered();
   void      on_action_Help_triggered();
   /// Shows the popup menu (the window has no menu bar).
@@ -214,7 +216,7 @@ protected:
   QMenu      *m_menu;
   HelpDlg    *m_helpDlg;
   SharedStateManager* m_stateMgr;
-  QString     m_config_id;
+  QString     m_configId;
   bool        m_localRecord;
   bool        m_remoteStop = false;   ///< stopping on another instance's STOP
   QString     m_ownRecord;   ///< the RECORD_ this window sent ("All instances"): asked about already

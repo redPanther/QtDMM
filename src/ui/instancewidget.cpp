@@ -29,6 +29,7 @@
 
 #include "ui/dialogs/recordlengthdlg.h"
 #include "ui/instancewidget.h"
+#include "ui/mainwindow.h"
 #include "device/transports/serial.h"
 #include "core/devicelibrary.h"
 #include "device/dmmdecoder.h"
@@ -48,7 +49,7 @@
 
 
 
-InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget *parent) :  QFrame(parent),
+InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *parent) :  QFrame(parent),
   m_display(nullptr),
   m_meter(nullptr)
 {
@@ -57,11 +58,11 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
 
   // the meter session: connection, min/max, alarms, SCPI
   m_ctl = new MeterController(this);
-  m_ctl->setInstanceId(instance_id.isEmpty() ? QString("default") : instance_id);
+  m_ctl->setInstanceId(instanceId.isEmpty() ? QString("default") : instanceId);
 
-  m_instanceId = instance_id;
-  m_configPath = config_path;
-  m_settings  = new Settings(instance_id, config_path, this);
+  m_instanceId = instanceId;
+  m_configPath = configPath;
+  m_settings  = new Settings(instanceId, configPath, this);
   // the integral is over time since 26.2: its scale once per settings file
   GraphWidget::migrateIntegralScale(m_settings);
   // "My devices", one file for all instances next to their settings. What
@@ -88,15 +89,17 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   m_printDlg = new qtdmm::PrintDlg(this);
   m_printDlg->hide();
 
-  connect(this, SIGNAL(sendState(const QString &)), parent, SLOT(sendStateSLOT(const QString &)));
+  // to the other instances; emitted below already, so connected here
+  if (auto *win = qobject_cast<MainWindow *>(parent))
+    connect(this, &InstanceWidget::sendState, win, &MainWindow::sendStateSLOT);
   connect(m_ctl, &MeterController::error, this, &InstanceWidget::error);
   connect(m_ctl, &MeterController::info, this, &InstanceWidget::info);
   // the recorder belongs to the controller; the graph shows it
   ui_graph->setStore(m_ctl->recorder());
   connect(m_ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
-  connect(ui_graph, SIGNAL(info(const QString &)), this, SIGNAL(info(const QString &)));
-  connect(ui_graph, SIGNAL(error(const QString &)), this, SIGNAL(error(const QString &)));
-  connect(ui_graph, SIGNAL(running(bool)), this, SLOT(runningSLOT(bool)));
+  connect(ui_graph, &GraphWidget::info, this, &InstanceWidget::info);
+  connect(ui_graph, &GraphWidget::error, this, &InstanceWidget::error);
+  connect(ui_graph, &GraphWidget::running, this, &InstanceWidget::runningSLOT);
   connect(ui_graph, &GraphWidget::stateChanged, this, &InstanceWidget::recorderState);
   connect(ui_graph, &GraphWidget::liveRequested, this, &InstanceWidget::liveSLOT);
   // the graph runs from the start: Live, until a recording
@@ -105,9 +108,9 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   // dialog has no meter page, a meter is changed through takeOver()
   connect(m_configDlg, &SettingsDialog::accepted, this, [this]() { applySLOT(); });
   connect(m_configDlg, &SettingsDialog::applied, this, [this]() { applySLOT(); });
-  connect(m_configDlg, SIGNAL(zoomed()), this, SLOT(zoomedSLOT()));
+  connect(m_configDlg, &SettingsDialog::zoomed, this, &InstanceWidget::zoomedSLOT);
   connect(ui_graph, &GraphWidget::windowRequested, m_configDlg, &SettingsDialog::setWindowSecondsSLOT);
-  connect(ui_graph, SIGNAL(sampleTime(int)), m_configDlg, SLOT(setSampleTimeSLOT(int)));
+  connect(ui_graph, &GraphWidget::sampleTime, m_configDlg, &SettingsDialog::setSampleTimeSLOT);
   // this graph's own colours from its context menu (empty = the default
   // from the settings page, applied in readConfig())
   connect(ui_graph, &GraphWidget::colorVariantChanged, this, [this](int v)
@@ -117,15 +120,14 @@ InstanceWidget::InstanceWidget(QString instance_id, QString config_path, QWidget
   });
   connect(ui_graph, &GraphWidget::configure, this, [this] { openConfig(SettingsDialog::Graph); });
   connect(ui_graph, &GraphWidget::clearRequested, this, &InstanceWidget::clearSLOT);
-  connect(ui_graph, SIGNAL(exportData()), this, SLOT(exportSLOT()));
-  connect(ui_graph, SIGNAL(importData()), this, SLOT(importSLOT()));
+  connect(ui_graph, &GraphWidget::exportData, this, &InstanceWidget::exportSLOT);
+  connect(ui_graph, &GraphWidget::importData, this, &InstanceWidget::importSLOT);
 
-  connect(ui_graph, SIGNAL(connectDMM(bool)), this, SIGNAL(connectDMM(bool)));
+  connect(ui_graph, &GraphWidget::connectDMM, this, &InstanceWidget::connectDMM);
 
-  connect(ui_graph, SIGNAL(zoomOut(double)), m_configDlg, SLOT(zoomOutSLOT(double)));
-  connect(ui_graph, SIGNAL(zoomIn(double)), m_configDlg, SLOT(zoomInSLOT(double)));
-  connect(ui_graph, SIGNAL(thresholdChanged(GraphWidget::CursorMode, double)),
-          m_configDlg, SLOT(thresholdChangedSLOT(GraphWidget::CursorMode, double)));
+  connect(ui_graph, &GraphWidget::zoomOut, m_configDlg, &SettingsDialog::zoomOutSLOT);
+  connect(ui_graph, &GraphWidget::zoomIn, m_configDlg, &SettingsDialog::zoomInSLOT);
+  connect(ui_graph, &GraphWidget::thresholdChanged, m_configDlg, &SettingsDialog::thresholdChangedSLOT);
 
   ui_graph->setSettings(m_settings);
 
@@ -612,10 +614,7 @@ void InstanceWidget::readConfig()
 
     dmm->setDmmInfo(m_configDlg->dmmInfo());
     dmm->setDevice(m_configDlg->device());
-    dmm->setSpeed(m_configDlg->speed());
     dmm->setFormat(m_configDlg->format());
-    dmm->setPortSettings(static_cast<QSerialPort::DataBits>(m_configDlg->bits()), static_cast<QSerialPort::StopBits>(m_configDlg->stopBits()),
-                         m_configDlg->parity(), m_configDlg->externalSetup(), m_configDlg->rts(), m_configDlg->dtr() );
   }
 
   // the sample time first: setGraphSize() counts the window in samples, and

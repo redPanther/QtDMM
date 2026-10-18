@@ -72,7 +72,7 @@ public:
     NumItems,
   };
 
-  SettingsDialog(Settings* settings, QWidget *parent = Q_NULLPTR);
+  SettingsDialog(Settings* settings, QWidget *parent = nullptr);
 
   /// The main window's actions for the page Keyboard.
   void                  setShortcuts(ShortcutRegistry *registry);
@@ -82,16 +82,9 @@ public:
   /// the assistant and the sidebar set it up.
   /// @{
   QString               device() const;
-  int                   speed() const;
   FrameFormat::DataFormat format() const;
-  QSerialPort::Parity   parity() const;
-  bool                  externalSetup() const;
   int                   display() const;
-  int                   bits() const;
-  int                   stopBits() const;
   int                   numValues() const;
-  bool                  rts() const;
-  bool                  dtr() const;
   DmmDecoder::DMMInfo    dmmInfo() const;
   QString               dmmName() const;
   /// @}
@@ -155,7 +148,6 @@ public:
   /// @{
   bool                  useTextLabel() const;
   QString               iconSet() const;
-  int                   currentTipId() const;
   bool                  showDisplay() const;
   QColor                displayBgColor() const;
   bool                  showMinMax() const;
@@ -210,7 +202,6 @@ public Q_SLOTS:
   void                  setSampleTimeSLOT(int);
   /// A time button of the graph: the visible window, applied like a zoom.
   void                  setWindowSecondsSLOT(int seconds);
-  void                  setCurrentTipSLOT(int);
   void                  zoomInSLOT(double);
   void                  zoomOutSLOT(double);
   /// A threshold cursor was dragged in the graph; updates the spin box.

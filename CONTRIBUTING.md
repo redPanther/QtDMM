@@ -96,6 +96,7 @@ the sources, so it starts with every string of the current version.
    describes how a protocol, a meter and a cable chip are added, and which
    files are generated (`tests/generate_docs.py`,
    `tests/generate_fixtures.py`); ctest fails when they are out of date.
+   Write the code as described in [Coding style](docs/dev/coding-style.md).
 4. Update the user documentation in `docs/user/` in the same pull request
    when the change is visible to users, and add a line to `CHANGELOG`.
 5. Open the pull request against `master` and say what it changes and why.

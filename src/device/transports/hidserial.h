@@ -1,8 +1,8 @@
 #pragma once
 
+#include "device/transports/buffereddevice.h"
+
 #include <QtCore>
-#include <QIODevice>
-#include <QThread>
 
 #include "device/transports/hidreader.h"
 #include "device/dmmdecoder.h"
@@ -34,7 +34,7 @@
 /// readData()/bytesAvailable() with readyRead(). The line configuration
 /// (feature reports) is sent in the constructor, so a cable that refuses it
 /// fails open() at once.
-class HIDSerialDevice : public QIODevice {
+class HIDSerialDevice : public BufferedDevice {
     Q_OBJECT
 public:
   /// The cable chip, which decides the report layout.
@@ -44,7 +44,7 @@ public:
   /// @param device an entry from availablePorts(): "HID 0xvvvv:0xpppp path"
   ///               (the vid:pid selects the Chip; a bare path means CH9325)
   /// @param p      parent object
-  explicit HIDSerialDevice(const DmmDecoder::DMMInfo info, QString device, QObject *p = Q_NULLPTR);
+  explicit HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *p = nullptr);
  ~HIDSerialDevice();
 
   /// Chip for a port entry / vid:pid; unknown ids are treated as CH9325.
@@ -82,18 +82,13 @@ public:
   bool dataSeen() const { return m_dataSeen; }
   void close() override;
 
-  /// Bytes waiting for readData(). Must stay const: QIODevice's version
-  /// is const and virtual, so a non-const one would hide instead of override
-  /// it and FrameReader (holding a QIODevice*) would get the base version.
-  qint64 bytesAvailable() const override;
-
 Q_SIGNALS:
   /// The cable is gone: the read loop ended with an error while the device
   /// was open. MeterConnection reopens it later.
   void finished();
 
 protected:
-  static bool availablePorts(QStringList &portlist,unsigned short vendor_id, unsigned short product_id);
+  static bool availablePorts(QStringList &portlist,unsigned short vendorId, unsigned short productId);
   /// Sends the chip's line configuration (feature reports); false on failure.
   bool configureCable();
   /// Queued from the reader thread: unpack one report into m_rx.
@@ -108,10 +103,8 @@ protected:
   QString m_openError;   ///< why the cable could not be opened (errorString() after open())
   int m_reportsSeen = 0;
   bool m_dataSeen = false;
-  hid_device *m_handle = Q_NULLPTR;   ///< owned by the reader once it runs
-  QThread *m_thread = Q_NULLPTR;
-  HidReader *m_reader = Q_NULLPTR;
-  QByteArray m_rx;                    ///< UART bytes received, main thread only
+  hid_device *m_handle = nullptr;   ///< owned by the reader once it runs
+  HidReaderThread m_reader;
 
   qint64 readData(char *data, qint64 maxSize)  override;
   qint64 writeData(const char *data, qint64 len) override;

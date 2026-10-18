@@ -176,11 +176,6 @@ bool MeterController::connectMeter(bool on)
   return ok;
 }
 
-bool MeterController::isConnected() const
-{
-  return m_dmm->isOpen();
-}
-
 bool MeterController::pressKey(const QString &key)
 {
   return m_dmm->sendKey(key);

@@ -47,39 +47,30 @@ bool MdnsResponder::start(const QString &service, const QString &instance, quint
 {
   prepare(service, instance, port, txt);   // names first, then the sockets
 
-  for (const QNetworkInterface &iface : QNetworkInterface::allInterfaces())
+  for (const auto &[iface, entry] : MdnsMessage::multicastInterfaces())
   {
-    const auto flags = iface.flags();
-    if (!(flags & QNetworkInterface::IsUp) || !(flags & QNetworkInterface::IsRunning)
-        || (flags & QNetworkInterface::IsLoopBack) || !(flags & QNetworkInterface::CanMulticast))
-      continue;
-    for (const QNetworkAddressEntry &entry : iface.addressEntries())
+    auto *s = new QUdpSocket(this);
+    // the port is shared with Avahi / Bonjour / other instances
+    if (!s->bind(QHostAddress::AnyIPv4, kMdnsPort, QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint))
     {
-      if (entry.ip().protocol() != QAbstractSocket::IPv4Protocol)
-        continue;
-      auto *s = new QUdpSocket(this);
-      // the port is shared with Avahi / Bonjour / other instances
-      if (!s->bind(QHostAddress::AnyIPv4, kMdnsPort, QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint))
-      {
-        qCWarning(lcMdns) << "cannot bind 5353 on" << iface.humanReadableName() << s->errorString();
-        delete s;
-        continue;
-      }
-      s->setMulticastInterface(iface);
-      if (!s->joinMulticastGroup(kMdnsGroup, iface))
-      {
-        qCWarning(lcMdns) << "cannot join" << iface.humanReadableName() << s->errorString();
-        delete s;
-        continue;
-      }
-      connect(s, &QUdpSocket::readyRead, this, &MdnsResponder::onReadyRead);
-      m_sockets << Endpoint{s, entry.ip(), entry.prefixLength()};
-      // unsolicited announcement (RFC 6762 8.3), twice
-      const QByteArray a = announcement(entry.ip(), 120);
-      s->writeDatagram(a, kMdnsGroup, kMdnsPort);
-      s->writeDatagram(a, kMdnsGroup, kMdnsPort);
-      qCDebug(lcMdns) << "announcing" << instanceName() << "on" << iface.humanReadableName() << entry.ip().toString();
+      qCWarning(lcMdns) << "cannot bind 5353 on" << iface.humanReadableName() << s->errorString();
+      delete s;
+      continue;
     }
+    s->setMulticastInterface(iface);
+    if (!s->joinMulticastGroup(kMdnsGroup, iface))
+    {
+      qCWarning(lcMdns) << "cannot join" << iface.humanReadableName() << s->errorString();
+      delete s;
+      continue;
+    }
+    connect(s, &QUdpSocket::readyRead, this, &MdnsResponder::onReadyRead);
+    m_sockets << Endpoint{s, entry.ip(), entry.prefixLength()};
+    // unsolicited announcement (RFC 6762 8.3), twice
+    const QByteArray a = announcement(entry.ip(), 120);
+    s->writeDatagram(a, kMdnsGroup, kMdnsPort);
+    s->writeDatagram(a, kMdnsGroup, kMdnsPort);
+    qCDebug(lcMdns) << "announcing" << instanceName() << "on" << iface.humanReadableName() << entry.ip().toString();
   }
   return !m_sockets.isEmpty();
 }

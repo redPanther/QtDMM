@@ -13,7 +13,7 @@ static const bool registered = []() {
 
 bool DecoderMastechMS6514::checkFormat(const char *data, size_t idx)
 {
-  auto at = [&](int back) { return static_cast<unsigned char>(data[(idx + FIFO_LENGTH - back) % FIFO_LENGTH]); };
+  auto at = [&](int back) { return ringByte(data, idx, back); };
   return at(0) == 0x0a && at(1) == 0x0d && at(17) == 0x65 && at(16) == 0x14;
 }
 

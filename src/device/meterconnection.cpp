@@ -105,37 +105,18 @@ QString serialPermissionHintForDevice(const QString &device)
 
 MeterConnection::MeterConnection(QObject *parent)
   : QObject(parent),
-    m_speed(600),
-    m_parity(QSerialPort::NoParity),
-    m_stopBits(QSerialPort::OneStop),
-    m_dataBits(QSerialPort::Data7),
     m_device(""),
     m_consoleLogging(false),
-    m_externalSetup(false),
-    m_dtr(false),
-    m_rts(false),
     m_delayTimer(0),
-    m_decoder(Q_NULLPTR)
+    m_decoder(nullptr)
 {
   m_portHandler  = new Transport(this);
   m_readerThread = new FrameReader(this);
 
-  connect(m_readerThread, SIGNAL(readEvent(const QByteArray &, int)),
-          this, SLOT(readEventSLOT(const QByteArray &, int)));
+  connect(m_readerThread, &FrameReader::readEvent, this, &MeterConnection::readEventSLOT);
 
   m_readerThread->start();
 
-}
-
-void MeterConnection::setPortSettings(QSerialPort::DataBits bits, QSerialPort::StopBits stopBits,
-                          QSerialPort::Parity parity, bool externalSetup, bool rts, bool dtr)
-{
-  m_externalSetup = externalSetup;
-  m_parity  = parity;
-  m_stopBits = stopBits;
-  m_dataBits = bits;
-  m_dtr = dtr;
-  m_rts = rts;
 }
 
 void MeterConnection::setFormat(FrameFormat::DataFormat format)
@@ -147,11 +128,6 @@ void MeterConnection::setFormat(FrameFormat::DataFormat format)
 bool MeterConnection::isOpen() const
 {
   return m_portHandler->isOpen();
-}
-
-void MeterConnection::setSpeed(int speed)
-{
-  m_speed = speed;
 }
 
 
@@ -178,7 +154,7 @@ void MeterConnection::setStateManager(SharedStateManager *state)
 
 void MeterConnection::initDecoder( FrameFormat::DataFormat df)
 {
-  if (m_decoder == Q_NULLPTR || m_decoder->getType() != df)
+  if (m_decoder == nullptr || m_decoder->getType() != df)
   {
     m_decoder = DmmDecoder::getInstance(df);
     m_readerThread->setDecoder(m_decoder);
@@ -262,7 +238,7 @@ bool MeterConnection::openPort()
     return false;
   }
 
-  if (!m_externalSetup)
+  if (!m_dmmInfo.externalSetup)
   {
     if (!m_portHandler->init())
     {
@@ -343,8 +319,8 @@ QString MeterConnection::timeoutMessage() const
 
 void MeterConnection::closePort()
 {
-  m_readerThread->setHandle(Q_NULLPTR);
-  if (m_portHandler->port() && !m_externalSetup)
+  m_readerThread->setHandle(nullptr);
+  if (m_portHandler->port() && !m_dmmInfo.externalSetup)
     m_portHandler->close();
 }
 
@@ -449,7 +425,7 @@ void MeterConnection::readEventSLOT(const QByteArray &data, int id)
       fprintf(stdout, "%02X ", data[i] & 0x0ff);
     fprintf(stdout, "\r\n");
   }
-  if (m_decoder == Q_NULLPTR)
+  if (m_decoder == nullptr)
     return;
 
   m_lastFrame.restart();

@@ -460,25 +460,6 @@ void DeviceSettings::sectionTitle(QGroupBox *group)
   group->installEventFilter(new SectionFollower(group, label));
 }
 
-void DeviceSettings::factoryDefaults()
-{
-  port->setCurrentIndex(0);
-  baudRate->setCurrentIndex(0);
-  bitsCombo->setCurrentIndex(2);
-  stopBitsCombo->setCurrentIndex(1);
-  parityCombo->setCurrentIndex(0);
-  displayCombo->setCurrentIndex(1);
-  ui_externalSetup->setChecked(false);
-
-  selectFormat(FrameFormat::Metex14);
-  ui_numValues->setValue(1);
-  ui_vendor->setCurrentIndex(0);
-  ui_model->clear();
-  m_currentVendorModels.clear();
-
-  enterManualMode();
-}
-
 QVariantMap DeviceSettings::keys() const
 {
   QVariantMap keys;

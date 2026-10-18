@@ -161,8 +161,8 @@ QByteArray HIDSerialDevice::cp2110ConfigReport(int baud, int bits, int parity, i
   return r;
 }
 
-HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo info, QString device, QObject *p)
-  : QIODevice(p)
+HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *p)
+  : BufferedDevice(p)
   , m_dmmInfo(info)
 {
   if (device.isNull())
@@ -206,24 +206,13 @@ HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo info, QString device,
   {
     m_openError = tr("Cannot set up the cable at %1.").arg(path);
     hid_close(m_handle);
-    m_handle = Q_NULLPTR;
+    m_handle = nullptr;
     return;
   }
   m_isOpen = true;
 
-  // The blocking read loop runs in its own thread; this object stays in the
-  // caller's thread, so readData()/bytesAvailable()/deleteLater() are plain
-  // single-threaded code and the reports arrive as queued signals.
-  m_thread = new QThread(this);
-  m_reader = new HidReader(m_handle);
-  m_reader->moveToThread(m_thread);
-  connect(m_thread, &QThread::started, m_reader, &HidReader::run);
-  connect(m_reader, &HidReader::report, this, &HIDSerialDevice::onReport);
-  connect(m_reader, &HidReader::readError, this, &HIDSerialDevice::onReadError);
-  // direct: the thread object lives here, and stopReader() blocks this
-  // thread's event loop while it waits for the quit
-  connect(m_reader, &HidReader::finished, m_thread, &QThread::quit, Qt::DirectConnection);
-  m_thread->start();
+  // the blocking read loop runs in its own thread (HidReaderThread)
+  m_reader.start(m_handle, this, &HIDSerialDevice::onReport, &HIDSerialDevice::onReadError);
 }
 
 // ---------------------------------------------------------------------------
@@ -237,36 +226,36 @@ HIDSerialDevice::~HIDSerialDevice()
 
 bool HIDSerialDevice::availablePorts(QStringList &portlist)
 {
-  qint64 portlist_len = portlist.size();
+  qint64 portlistLen = portlist.size();
   for (const KnownCable &c : kCables)
     HIDSerialDevice::availablePorts(portlist, c.vid, c.pid);
 
-  return portlist.size() > portlist_len;
+  return portlist.size() > portlistLen;
 }
 
-bool HIDSerialDevice::availablePorts(QStringList &portlist,unsigned short vendor_id, unsigned short product_id)
+bool HIDSerialDevice::availablePorts(QStringList &portlist,unsigned short vendorId, unsigned short productId)
 {
-  int dev_cnt;
-  struct hid_device_info *devs, *cur_dev;
+  int devCount;
+  struct hid_device_info *devs, *curDev;
 
 
-  devs = hid_enumerate(vendor_id, product_id); // all chips this SW belongs to...
-  for (dev_cnt = 0, cur_dev = devs; cur_dev != Q_NULLPTR; cur_dev = cur_dev->next) {
-    dev_cnt++;
+  devs = hid_enumerate(vendorId, productId); // all chips this SW belongs to...
+  for (devCount = 0, curDev = devs; curDev != nullptr; curDev = curDev->next) {
+    devCount++;
   }
 
-  for (cur_dev = devs; cur_dev != Q_NULLPTR; cur_dev = cur_dev->next) {
+  for (curDev = devs; curDev != nullptr; curDev = curDev->next) {
     // a udev link (/dev/qtdmm/...) stays the same across plugs and restarts
-    const QString path = QString::fromLatin1(cur_dev->path);
+    const QString path = QString::fromLatin1(curDev->path);
     const QString link = HidPath::linkFor(path);
     portlist << QString("HID 0x%1:0x%2 %3")
-    .arg(vendor_id, 4, 16, QLatin1Char('0'))
-    .arg(product_id, 4, 16, QLatin1Char('0'))
+    .arg(vendorId, 4, 16, QLatin1Char('0'))
+    .arg(productId, 4, 16, QLatin1Char('0'))
     .arg(link.isEmpty() ? path : link);
   }
   hid_free_enumeration(devs);
 
-  return (dev_cnt > 0);
+  return (devCount > 0);
 }
 
 bool HIDSerialDevice::open(OpenMode mode)
@@ -292,28 +281,8 @@ void HIDSerialDevice::close()
 
 void HIDSerialDevice::stopReader()
 {
-  if (!m_thread)
-    return;
-  if (m_reader)
-    m_reader->stop();
-  m_thread->quit();   // in case the loop already ended
-  if (m_thread->isRunning() && !m_thread->wait(2000))
-  {
-    // hid_read_timeout() did not return - should not happen; better a
-    // leaked thread than a crash in it
-    qWarning() << "HID: reader thread did not stop";
-    m_thread->setParent(nullptr);
-  }
-  else
-  {
-    // the thread is done, so its object can be deleted from here (a
-    // deleteLater() would never run: no event loop is left in that thread)
-    delete m_reader;
-    delete m_thread;
-  }
-  m_thread = Q_NULLPTR;
-  m_reader = Q_NULLPTR;
-  m_handle = Q_NULLPTR;   // closed by the reader
+  m_reader.stop();
+  m_handle = nullptr;   // closed by the reader
 }
 
 bool HIDSerialDevice::configureCable()
@@ -393,20 +362,11 @@ void HIDSerialDevice::onReadError(const QString &what)
   Q_EMIT finished();
 }
 
-qint64 HIDSerialDevice::bytesAvailable() const
-{
-  return QIODevice::bytesAvailable() + m_rx.size();
-}
-
-
 qint64 HIDSerialDevice::readData(char *data, qint64 maxSize)
 {
   if (!m_isOpen)
     return -1;
-  const qint64 len = qMin(maxSize, qint64(m_rx.size()));
-  memcpy(data, m_rx.constData(), len);
-  m_rx.remove(0, len);
-  return len;
+  return BufferedDevice::readData(data, maxSize);
 }
 
 

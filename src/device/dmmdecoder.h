@@ -96,6 +96,24 @@ public:
   /// at index @p len, ends with a complete frame (typically checked on the
   /// terminator and the high nibbles of the VC820-style byte counters).
   virtual bool                       checkFormat(const char* data, size_t len) = 0; // TBD use qbytearray or similar instead for data
+  /// For checkFormat(): the byte @p back places before the newest one in the
+  /// reader's ring buffer; back 0 is data[idx], the byte just received.
+  static unsigned char               ringByte(const char *data, size_t idx, int back)
+  {
+    return static_cast<unsigned char>(data[(idx + FIFO_LENGTH - back) % FIFO_LENGTH]);
+  }
+  /// Appends the 16-bit sum of all bytes of @p frame, high byte first (the
+  /// UNI-T Bluetooth frames).
+  static void                        appendSum16(QByteArray &frame);
+  /// True when the last two of the @p n bytes of @p f are the 16-bit sum of
+  /// the others, high byte first.
+  static bool                        sum16Valid(const unsigned char *f, int n);
+  /// For checkFormat(): the last @p n bytes of the ring buffer, oldest first.
+  static void                        lastBytes(const char *data, size_t idx, int n, unsigned char *out)
+  {
+    for (int i = 0; i < n; ++i)
+      out[i] = ringByte(data, idx, n - 1 - i);
+  }
   /// Bytes to send to the meter to make it emit a frame; empty for meters
   /// that stream on their own. FrameReader writes it once per read cycle.
   virtual QByteArray pollRequest() const { return QByteArray(); }
@@ -157,6 +175,12 @@ protected:
   QString insertCommaIT(const QString &val, int pos);
   /// Scale factor for an SI prefix ("k" -> 1e3). Unknown prefixes yield 1.0.
   static double prefixFactor(const QString &prefix);
+  /// m_result.val and .unit from @p number in E notation ("+12.345E+6") and
+  /// its @p value: with the meter's digits ("12.345", "M" + unit) when the
+  /// exponent is a multiple of three from @p lowestExponent (at least -12) up
+  /// to 9, otherwise as SiPrefix::format() puts it (the SCPI-like answers of
+  /// the Fluke meters).
+  void setFromENotation(const QString &number, double value, const QString &unit, int lowestExponent);
   /// Finishes m_result from the raw digit string in m_result.val: inserts
   /// the decimal point at @p commaPos, sets unit to prefix+baseUnit and dval
   /// to the value scaled by the prefix. See the DmmResponse contract.
@@ -166,8 +190,6 @@ protected:
   /// Copies the ASCII digits data[first..last] into a string, with an
   /// optional leading minus.
   QString makeValue(const QByteArray &data, int first, int last, bool neg=false);
-  /// One-line dump of m_result for --debug output.
-  QString toString() const;
 
   static std::vector<DMMInfo> *m_configurations;
   DmmResponse m_result;

@@ -37,7 +37,7 @@ class GuiPrefs : public SettingsPage
 {
   Q_OBJECT
 public:
-  GuiPrefs(QWidget *parent = Q_NULLPTR);
+  GuiPrefs(QWidget *parent = nullptr);
   ~GuiPrefs();
   bool      showBar() const;
   bool      showMinMax() const;

@@ -224,7 +224,6 @@ public:
   qint64      lengthLimit() const;
   /// Recorded data not exported yet; never in Live.
   bool        dirty() const { return m_dirty; }
-  void        setDirty(bool dirty) { m_dirty = dirty; }
   /// Tenths of a second left until the recording length is reached (0 when
   /// not recording).
   int         remainingLength() const;

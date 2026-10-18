@@ -20,6 +20,7 @@
 #include <QXYSeries>
 #include <QScrollBar>
 #include <QToolButton>
+#include "core/nicestep.h"
 #include "core/siprefix.h"
 #include "ui/engnumbervalidator.h"
 #include "core/settings.h"
@@ -1120,8 +1121,8 @@ int main(int argc, char **argv)
   // --- 7c. colour variants: 1-2-5 divisions and 10 x 8 for the scope-like
   //          ones, names round-trip ---
   {
-    check(GraphWidget::niceStep(0.3) == 0.5 && GraphWidget::niceStep(1) == 1 && GraphWidget::niceStep(1.01) == 2
-          && GraphWidget::niceStep(4.9) == 5 && GraphWidget::niceStep(6) == 10 && qFuzzyCompare(GraphWidget::niceStep(0.0021), 0.005),
+    check(niceStep(0.3) == 0.5 && niceStep(1) == 1 && niceStep(1.01) == 2
+          && niceStep(4.9) == 5 && niceStep(6) == 10 && qFuzzyCompare(niceStep(0.0021), 0.005),
           "niceStep follows 1-2-5");
     for (auto v : { GraphWidget::Neutral, GraphWidget::ScopeBlue, GraphWidget::PhosphorGreen, GraphWidget::PhosphorAmber,
                     GraphWidget::ChartRecorder, GraphWidget::Custom })

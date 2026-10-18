@@ -21,8 +21,6 @@ public:
                         QObject *parent = nullptr);
   ~SigrokDevice();
 
-  /// No scan implemented; adds nothing and returns false.
-  static bool availablePorts(QStringList &portlist);
 
   void close() override;
   /// Starts sigrok-cli (DMMInfo::sigrokExe, or "sigrok-cli" from the PATH)
@@ -31,10 +29,10 @@ public:
 
   qint64 bytesAvailable() const override;
 
-signals:
+Q_SIGNALS:
   void finished();
 
-private slots:
+private Q_SLOTS:
   void onProcessReadyRead();
 
 private:

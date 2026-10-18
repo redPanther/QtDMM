@@ -16,16 +16,16 @@ bool DecoderDO3122::checkFormat(const char* data, size_t idx)
   // bytes of the ring
   if (m_type == FrameFormat::DO3122Continuous && idx >= 21)
   {
-    if ((static_cast<uint8_t>(data[(idx - 21 + FIFO_LENGTH) % FIFO_LENGTH]) != 0xAAu)
-        || (static_cast<uint8_t>(data[(idx - 20 + FIFO_LENGTH) % FIFO_LENGTH]) != 0x55u)
-        || (static_cast<uint8_t>(data[(idx - 19 + FIFO_LENGTH) % FIFO_LENGTH]) != 0x52u)
-        || (static_cast<uint8_t>(data[(idx - 18 + FIFO_LENGTH) % FIFO_LENGTH]) != 0x24u)
+    if ((ringByte(data, idx, 21) != 0xAAu)
+        || (ringByte(data, idx, 20) != 0x55u)
+        || (ringByte(data, idx, 19) != 0x52u)
+        || (ringByte(data, idx, 18) != 0x24u)
        )
       return false;
 
-    if (static_cast<uint8_t>(data[(idx - 17 + FIFO_LENGTH) % FIFO_LENGTH]) != 0x01u)
+    if (ringByte(data, idx, 17) != 0x01u)
     {
-      (void)fprintf(stderr, "bad mode %#x\n", static_cast<uint8_t>(data[(idx - 17 + FIFO_LENGTH) % FIFO_LENGTH]));
+      (void)fprintf(stderr, "bad mode %#x\n", ringByte(data, idx, 17));
       return false;
     }
 

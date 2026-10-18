@@ -31,7 +31,7 @@ bool DecoderVC940::checkFormat(const char* data, size_t idx)
   // and UT804.log mention no duplication for the Uni-T models later added to this
   // decoder, so those may be losing every second reading here. Resolving that
   // needs per-device handling, not a change to this guard.
-  return (m_type==FrameFormat::VC940Continuous && idx >= 12 && data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+  return (m_type==FrameFormat::VC940Continuous && idx >= 12 && ringByte(data, idx, 1) == 0x0d && data[idx] == 0x0a);
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &data, int id)

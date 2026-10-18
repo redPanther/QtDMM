@@ -49,15 +49,13 @@ class DeviceSettings : public QWidget, private Ui::UIDeviceSettings
 {
   Q_OBJECT
 public:
-  DeviceSettings(QWidget *parent = Q_NULLPTR);
+  DeviceSettings(QWidget *parent = nullptr);
   ~DeviceSettings();
 
   /// Fills the fields from @p keys; a key missing there gets its default.
   void           load(const QVariantMap &keys);
   /// The fields as meter keys, the counterpart of load().
   QVariantMap    keys() const;
-  /// Resets the fields to the built-in defaults (manual settings).
-  void           factoryDefaults();
   /// The ports offered in the port list (Transport::availablePorts() and the
   /// custom ports); the port of load() is added when missing.
   void           setPorts(const QStringList &ports);
@@ -165,7 +163,7 @@ protected:
   /// Shows the formula group instead of the port/protocol groups, or back.
   void updateCalcMode();
 
-  SharedStateManager *m_state = Q_NULLPTR;
+  SharedStateManager *m_state = nullptr;
   QTimer m_calcHintTimer;
 
 private:

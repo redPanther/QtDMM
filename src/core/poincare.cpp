@@ -4,23 +4,12 @@
 
 #include <cmath>
 
+#include "core/nicestep.h"
 #include "core/siprefix.h"
 
 namespace
 {
 const double kSqrt2 = std::sqrt(2.0);
-
-// 1, 2 or 5 times a power of ten, at least @p v
-double niceStep(double v)
-{
-  if (!(v > 0) || !std::isfinite(v))
-    return 1;
-  const double decade = std::pow(10.0, std::floor(std::log10(v)));
-  for (double m : { 1.0, 2.0, 5.0, 10.0 })
-    if (m * decade >= v * (1 - 1e-12))
-      return m * decade;
-  return 10 * decade;
-}
 
 // one digit of the display text: "1.234" with the prefix "m" is 1e-6
 double digitOf(const Reading &r)

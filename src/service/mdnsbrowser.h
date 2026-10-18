@@ -6,6 +6,7 @@
 #include <QHostAddress>
 #include <QList>
 #include <QMap>
+#include <QNetworkInterface>
 #include <QObject>
 #include <QString>
 
@@ -54,6 +55,15 @@ namespace MdnsMessage
   /// (RFC 6762 10.2). Records are written from their by-type fields; a
   /// ttl of 0 is the goodbye packet.
   QByteArray response(const QList<Record> &answers, const QList<Record> &additional = {});
+
+  /// An IPv4 address of an interface that is up, running, not the loopback
+  /// and can multicast: where the browser and the responder open a socket.
+  struct Interface
+  {
+    QNetworkInterface iface;
+    QNetworkAddressEntry entry;
+  };
+  QList<Interface> multicastInterfaces();
 }
 
 /// Finds services in the local network by mDNS (RFC 6762), the way the

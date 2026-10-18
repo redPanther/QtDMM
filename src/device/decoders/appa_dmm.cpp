@@ -101,7 +101,7 @@ size_t DecoderAppa::getPacketLength()
 bool DecoderAppa::checkFormat(const char *data, size_t idx)
 {
   const int total = 4 + dataLength() + 1;
-  auto at = [&](int back) { return static_cast<unsigned char>(data[(idx + FIFO_LENGTH - back) % FIFO_LENGTH]); };
+  auto at = [&](int back) { return ringByte(data, idx, back); };
   const int start = total - 1;   // bytes back to the first 0x55
   if (at(start) != 0x55 || at(start - 1) != 0x55 || at(start - 2) != command() || at(start - 3) != dataLength())
     return false;

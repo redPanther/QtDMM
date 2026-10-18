@@ -39,7 +39,7 @@ class SettingsPage : public QWidget
 {
   Q_OBJECT
 public:
-  SettingsPage(QWidget *parent = Q_NULLPTR);
+  SettingsPage(QWidget *parent = nullptr);
   /// Category name shown in the dialog's list.
   QString label() const { return m_label; }
   /// One line under the page's title: what the page is for.

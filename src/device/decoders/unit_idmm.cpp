@@ -182,11 +182,7 @@ QByteArray DecoderUniTiDMM::commandFrame(quint8 cmd)
 {
   QByteArray f = QByteArray::fromHex("abcd03");
   f.append(char(cmd));
-  unsigned sum = 0;
-  for (char c : std::as_const(f))
-    sum += static_cast<unsigned char>(c);
-  f.append(char((sum >> 8) & 0xFF));
-  f.append(char(sum & 0xFF));
+  appendSum16(f);
   return f;
 }
 
@@ -230,10 +226,7 @@ bool DecoderUniTiDMM::frameValid(const unsigned char *f)
 {
   if (f[0] != 0xAB || f[1] != 0xCD || f[2] != kFrameLength - 3)
     return false;
-  unsigned sum = 0;
-  for (int i = 0; i < kFrameLength - 2; ++i)
-    sum += f[i];
-  return ((sum >> 8) & 0xFF) == f[kFrameLength - 2] && (sum & 0xFF) == f[kFrameLength - 1];
+  return sum16Valid(f, kFrameLength);
 }
 
 // The last kFrameLength bytes form a frame: header, length and checksum all
@@ -243,9 +236,7 @@ bool DecoderUniTiDMM::frameValid(const unsigned char *f)
 bool DecoderUniTiDMM::checkFormat(const char *data, size_t idx)
 {
   unsigned char f[kFrameLength];
-  const size_t start = (idx + FIFO_LENGTH + 1 - kFrameLength) % FIFO_LENGTH;
-  for (int i = 0; i < kFrameLength; ++i)
-    f[i] = static_cast<unsigned char>(data[(start + i) % FIFO_LENGTH]);
+  lastBytes(data, idx, kFrameLength, f);
   return frameValid(f);
 }
 

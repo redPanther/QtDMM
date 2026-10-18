@@ -30,7 +30,7 @@
 class EngNumberValidator : public QValidator
 {
 public:
-  EngNumberValidator(QObject *parent = Q_NULLPTR);
+  EngNumberValidator(QObject *parent = nullptr);
   QValidator::State	validate(QString &, int &) const Q_DECL_OVERRIDE;
 
   /// "1.5k" -> 1500.0

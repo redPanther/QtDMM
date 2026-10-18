@@ -35,9 +35,9 @@ class Settings : public QObject
 {
   Q_OBJECT
 public:
-  explicit       Settings(QObject *parent = Q_NULLPTR);
+  explicit       Settings(QObject *parent = nullptr);
   /// Settings of one instance; see the class description for the file used.
-  explicit       Settings(const QString &instance_id, const QString &config_path, QObject *parent = Q_NULLPTR);
+  explicit       Settings(const QString &instanceId, const QString &configPath, QObject *parent = nullptr);
   ~Settings();
 
   /// False on the very first start (no settings file yet).
@@ -45,14 +45,14 @@ public:
   const QString &fileName() const { return m_filename; }
 
   /// Removes the settings file of another instance.
-  void           deleteConfig(QString instance_id);
+  void           deleteConfig(QString instanceId);
   /// Renames the settings file of another (stopped) instance; false when
   /// there is none or @p to already has one. "default" is not renamed.
   bool           renameConfig(const QString &from, const QString &to);
   /// Writes this instance's settings as the file of a new instance, without
   /// the meter and its connection (DMM/, Port settings/), the window position
   /// and the SCPI server switch. Returns the file written.
-  QString        copyConfig(const QString &instance_id) const;
+  QString        copyConfig(const QString &instanceId) const;
 
   /// The ports set up by hand on the former page "Special ports"
   /// (custom_device0..9, "<type> <address>"): still offered, no new ones.

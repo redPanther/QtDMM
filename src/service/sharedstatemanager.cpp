@@ -289,7 +289,6 @@ void SharedStateManager::checkForChanges()
 
     if (currentState != m_lastState)
     {
-      //qInfo() << currentState << QJsonDocument(data).toJson(QJsonDocument::Compact);
       m_lastState = currentState;
       if (currentState.startsWith("UPDATE_INSTANCES"))
         Q_EMIT instancesChanged(m_instances);

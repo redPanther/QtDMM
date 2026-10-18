@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
-#include <QIODevice>
+#include "device/transports/buffereddevice.h"
+
 #include <QStringList>
 #include "device/dmmdecoder.h"
 
@@ -19,7 +20,7 @@ class QBluetoothDeviceInfo;
 /// "CB:09:E4:16:33:DB 2ac4... SOC V". finished() reports a lost adapter or a
 /// wrong key; silence is left to MeterConnection's watchdog. Built only with
 /// QTDMM_WITH_BLE (Qt6::Bluetooth).
-class BleAdvertisementDevice : public QIODevice
+class BleAdvertisementDevice : public BufferedDevice
 {
   Q_OBJECT
 public:
@@ -28,7 +29,6 @@ public:
 
   bool open(OpenMode mode) override;
   void close() override;
-  qint64 bytesAvailable() const override;
   bool isSequential() const override { return true; }
 
   /// Names of Victron devices seen in a short scan, as "<address> <name>";
@@ -42,14 +42,12 @@ Q_SIGNALS:
 
 private:
   void onDevice(const QBluetoothDeviceInfo &info);
-  qint64 readData(char *data, qint64 maxSize) override;
   qint64 writeData(const char *data, qint64 len) override;
 
   QString m_address;
   QByteArray m_key;
   QString m_mainField, m_secondField;
   QBluetoothDeviceDiscoveryAgent *m_agent = nullptr;
-  QByteArray m_rx;
   int m_lastIv = -1;
   int m_keyMismatches = 0;
 };

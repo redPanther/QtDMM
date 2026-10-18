@@ -47,3 +47,40 @@ private:
   hid_device *m_handle;
   std::atomic<bool> m_stop{false};
 };
+
+/// The thread of a HidReader, for HIDSerialDevice and HidHoltekDevice. The
+/// device stays in the caller's thread, so its readData()/bytesAvailable()/
+/// deleteLater() are plain single-threaded code and the reports arrive as
+/// queued signals.
+class HidReaderThread
+{
+public:
+  HidReaderThread() = default;
+  ~HidReaderThread() { stop(); }
+  Q_DISABLE_COPY(HidReaderThread)
+
+  /// Runs the read loop for @p handle (owned by the reader from now on) and
+  /// queues its reports and its read error to @p device.
+  template <class Device>
+  void start(hid_device *handle, Device *device, void (Device::*onReport)(const QByteArray &),
+             void (Device::*onReadError)(const QString &))
+  {
+    m_thread = new QThread(device);
+    m_reader = new HidReader(handle);
+    m_reader->moveToThread(m_thread);
+    QObject::connect(m_thread, &QThread::started, m_reader, &HidReader::run);
+    QObject::connect(m_reader, &HidReader::report, device, onReport);
+    QObject::connect(m_reader, &HidReader::readError, device, onReadError);
+    // direct: the thread object lives in the device's thread, and stop()
+    // blocks that thread's event loop while it waits for the quit
+    QObject::connect(m_reader, &HidReader::finished, m_thread, &QThread::quit, Qt::DirectConnection);
+    m_thread->start();
+  }
+  /// Stops the reader and waits for it; the reader closes the handle.
+  /// Nothing to do when not started.
+  void stop();
+
+private:
+  QThread *m_thread = nullptr;
+  HidReader *m_reader = nullptr;
+};

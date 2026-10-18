@@ -12,7 +12,7 @@
 
 #include <QSerialPortInfo>
 
-bool Transport::create(const DmmDecoder::DMMInfo spec, PortType t, QString device)
+bool Transport::create(const DmmDecoder::DMMInfo &spec, PortType t, QString device)
 {
   close();
 
@@ -42,7 +42,7 @@ void Transport::close()
   // forget the port before closing it: close() may emit signals whose
   // handlers ask port() and must not see the dying device
   QIODevice *port = m_port;
-  m_port   = Q_NULLPTR;
+  m_port   = nullptr;
   m_type   = PortType::None;
   m_device = "";
   port->close();
@@ -92,8 +92,6 @@ QStringList Transport::availablePorts()
   SerialDevice::availablePorts(portlist);
   HIDSerialDevice::availablePorts(portlist);
   HidHoltekDevice::availablePorts(portlist);
-  RFC2217SerialDevice::availablePorts(portlist);
-  SigrokDevice::availablePorts(portlist);
 
   return portlist;
 }

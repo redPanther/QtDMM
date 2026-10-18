@@ -31,6 +31,7 @@
 #include <QPdfWriter>
 
 #include "ui/views/graphwidget.h"
+#include "core/nicestep.h"
 
 #include <climits>
 #include "ui/views/graphflags.h"
@@ -52,7 +53,7 @@ static QString durationText(qint64 seconds)
   return d ? QString("%1 d %2").arg(d).arg(text) : text;
 }
 
-GraphWidget::GraphWidget(QWidget *parent): GraphWidget(parent, Q_NULLPTR)
+GraphWidget::GraphWidget(QWidget *parent): GraphWidget(parent, nullptr)
 {
 }
 GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
@@ -220,7 +221,7 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_chartView->installEventFilter(this);
 
   m_popup = new QMenu(this);
-  connect(m_popup, SIGNAL(triggered(QAction *)), this, SLOT(popupSLOT(QAction *)));
+  connect(m_popup, &QMenu::triggered, this, &GraphWidget::popupSLOT);
 
   // time buttons top right, as in the UI demo: the visible window at a click
   m_timeBar = new QWidget(m_chartView);
@@ -443,8 +444,6 @@ void GraphWidget::print(QPrinter *prt, const QString &title, const QString &comm
   p.drawText(maxWidth + 10, tRect.height() + 10 + tHeight,
              w - maxWidth - 10, tHeight, Qt::AlignLeft | Qt::AlignVCenter,
              tr("%1 Seconds").arg(m_store->sampleTime() / 10.0));
-
-  //p.setFont( QFont( "Helvetica", 10 ));
 
   QRect cRect = p.boundingRect(0, 0, w, h, Qt::AlignTop | Qt::AlignLeft | Qt::TextWordWrap, comment);
 
@@ -702,11 +701,6 @@ int GraphWidget::bucketStart(int i) const
 // Readings without a value (NaN: overload, stale) do not count; a bucket of
 // nothing else is one NaN point, the gap, and one that ends where the meter
 // fell silent ends with it.
-int GraphWidget::bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const
-{
-  return pointsOf(m_store->series(), first, last, integral, out);
-}
-
 int GraphWidget::pointsOf(const RecordingSeries &series, int first, int last, bool integral, QList<QPointF> &out) const
 {
   auto value = [&](int i)
@@ -785,9 +779,9 @@ void GraphWidget::rebuildSeries()
     // the readings of this bucket
     const qint64 end = (series.at(first).t / m_bucket + 1) * m_bucket;
     const int last = qMin(series.lowerBound(end), count) - 1;
-    m_tailData = bucketPoints(first, last, false, points);
+    m_tailData = pointsOf(m_store->series(), first, last, false, points);
     if (m_intValueId == 0)
-      m_tailInt = bucketPoints(first, last, true, intPoints);
+      m_tailInt = pointsOf(m_store->series(), first, last, true, intPoints);
     first = last + 1;
   }
 
@@ -821,7 +815,7 @@ void GraphWidget::appendToSeries()
     }
   }
   QList<QPointF> points;
-  m_tailData = bucketPoints(first, count - 1, false, points);
+  m_tailData = pointsOf(m_store->series(), first, count - 1, false, points);
   m_dataLine->append(points);
   m_curvePts.append(points);
   const QList<QPointF> dataPts = withoutGaps(points);
@@ -1313,17 +1307,6 @@ void GraphWidget::updateReferenceLine()
   m_referenceLabel->setPos(plot.right() - r.width() - 3, top);
 }
 
-double GraphWidget::niceStep(double v)
-{
-  if (!(v > 0) || !std::isfinite(v))
-    return 1;
-  double decade = std::pow(10.0, std::floor(std::log10(v)));
-  for (double m : { 1.0, 2.0, 5.0, 10.0 })
-    if (m * decade >= v * (1 - 1e-12))
-      return m * decade;
-  return 10 * decade;
-}
-
 bool GraphWidget::divisions() const
 {
   return m_variant == ScopeBlue || phosphor() || m_variant == ChartRecorder;
@@ -1760,6 +1743,33 @@ void GraphWidget::updateStateLabel()
   m_stateLabel->raise();
 }
 
+// The auto scale takes @p val in, with a margin; true when it grew.
+static bool growScale(double val, double &min, double &max)
+{
+  bool ret = false;
+
+  if (val > max * 0.95)
+  {
+    if (val > 0)
+      max = val * 1.2;
+    else
+      max = val / 1.2;
+
+    ret = true;
+  }
+  if (val < min * 0.95)
+  {
+    if (val > 0)
+      min = val / 1.2;
+    else
+      min = val * 1.2;
+
+    ret = true;
+  }
+
+  return ret;
+}
+
 void GraphWidget::onAppended(bool shifted)
 {
   const RawPoint &p = m_store->series().last();
@@ -1783,7 +1793,7 @@ void GraphWidget::onAppended(bool shifted)
     updateMarkPositions();
   }
 
-  const bool resFlag = m_autoScale && computeMinMax(p.value);
+  const bool resFlag = m_autoScale && growScale(p.value, m_scaleMin, m_scaleMax);
 
   if (shifted || bucketSize() != m_bucket)
     rebuildSeries();
@@ -1965,43 +1975,26 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
   else if (ev->button() == Qt::RightButton)
   {
     m_popup->clear();
+    // an entry of the menu; popupSLOT() acts on its "ID"
+    auto item = [this](const QString &text, int id)
+    {
+      QAction *a = m_popup->addAction(text);
+      a->setProperty("ID", id);
+      return a;
+    };
 
     if (m_store->isRunning())
-    {
-      QAction *action = new QAction(tr("Stop recording"), m_popup);
-      action->setProperty("ID", IDStopRecorder);
-      m_popup->addAction(action);
-      //m_popup->insertItem( tr("Stop recorder"), IDStopRecorder );
-    }
+      item(tr("Stop recording"), IDStopRecorder);
     else
-    {
-      QAction *action = new QAction(tr("Start recording"), m_popup);
-      action->setProperty("ID", IDStartRecorder);
-      m_popup->addAction(action);
-      //m_popup->insertItem( tr("Start recorder"), IDStartRecorder );
-    }
+      item(tr("Start recording"), IDStartRecorder);
     if (m_store->state() == RecordingStore::View)
-    {
-      QAction *action = new QAction(tr("Live"), m_popup);
-      action->setProperty("ID", IDLive);
-      m_popup->addAction(action);
-    }
-    QAction *action = new QAction(tr("Clear graph"), m_popup);
-    action->setProperty("ID", IDClearGraph);
-    m_popup->addAction(action);
-    //m_popup->insertItem( tr("Clear graph"), IDClearGraph );
+      item(tr("Live"), IDLive);
+    item(tr("Clear graph"), IDClearGraph);
     m_popup->addSeparator();
 
-    action = new QAction(tr("Configure..."), m_popup);
-    action->setProperty("ID", IDConfigure);
-    m_popup->addAction(action);
-    //m_popup->insertItem( tr("Configure..."), IDConfigure );
-    action = new QAction(tr("Copy image"), m_popup);
-    action->setProperty("ID", IDCopyImage);
-    m_popup->addAction(action);
-    action = new QAction(tr("Export image..."), m_popup);
-    action->setProperty("ID", IDExportImage);
-    m_popup->addAction(action);
+    item(tr("Configure..."), IDConfigure);
+    item(tr("Copy image"), IDCopyImage);
+    item(tr("Export image..."), IDExportImage);
 
     // this graph's colours: the default from the settings page, or one of
     // the variants for this graph only
@@ -2052,12 +2045,10 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     }
     reference->addSeparator();
     refEntry(tr("&Off"), RefOff);
-    QAction *overview = m_popup->addAction(tr("Over&view"));
-    overview->setProperty("ID", IDMinimap);
+    QAction *overview = item(tr("Over&view"), IDMinimap);
     overview->setCheckable(true);
     overview->setChecked(m_minimapOn);
-    QAction *envelope = m_popup->addAction(tr("Min/max &band"));
-    envelope->setProperty("ID", IDEnvelope);
+    QAction *envelope = item(tr("Min/max &band"), IDEnvelope);
     envelope->setCheckable(true);
     envelope->setChecked(m_envelopeOn);
     // the meter's other values: each can be hidden
@@ -2079,22 +2070,13 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
       }
     }
     if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
-    {
-      QAction *a = m_popup->addAction(tr("Remove time cursors"));
-      a->setProperty("ID", IDClearCursors);
-    }
+      item(tr("Remove time cursors"), IDClearCursors);
 
     if (!m_store->isRunning())
     {
       m_popup->addSeparator();
-      QAction *action = new QAction(tr("Export data..."), m_popup);
-      action->setProperty("ID", IDExportData);
-      m_popup->addAction(action);
-      //m_popup->insertItem( tr("Export data..."), IDExportData );
-      action = new QAction(tr("Import data..."), m_popup);
-      action->setProperty("ID", IDImportData);
-      m_popup->addAction(action);
-      //m_popup->insertItem( tr("Import data..."), IDImportData );
+      item(tr("Export data..."), IDExportData);
+      item(tr("Import data..."), IDImportData);
     }
 
     m_popup->popup(globalPos);
@@ -2402,7 +2384,7 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
 
 
     for (int i = 0; i < m_store->count(); i++)
-      computeMinMax(m_store->series().at(i).value);
+      growScale(m_store->series().at(i).value, m_scaleMin, m_scaleMax);
     // the other values drawn on the left axis
     for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
     {
@@ -2412,44 +2394,12 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
       const RecordingSeries &x = m_store->extra(i);
       for (int j = 0; j < x.count(); ++j)
         if (std::isfinite(x.at(j).value))
-          computeMinMax(x.at(j).value);
+          growScale(x.at(j).value, m_scaleMin, m_scaleMax);
     }
   }
 
   setYRange(m_scaleMin, m_scaleMax);
   updateThresholdLinePositions();
-}
-
-// The auto scale takes @p val in, with a margin; true when it grew.
-static bool growScale(double val, double &min, double &max)
-{
-  bool ret = false;
-
-  if (val > max * 0.95)
-  {
-    if (val > 0)
-      max = val * 1.2;
-    else
-      max = val / 1.2;
-
-    ret = true;
-  }
-  if (val < min * 0.95)
-  {
-    if (val > 0)
-      min = val / 1.2;
-    else
-      min = val * 1.2;
-
-    ret = true;
-  }
-
-  return ret;
-}
-
-bool GraphWidget::computeMinMax(double val)
-{
-  return growScale(val, m_scaleMin, m_scaleMax);
 }
 
 // The colour of a value of the meter (its id, not its place: a value keeps
@@ -2554,7 +2504,7 @@ void GraphWidget::rebuildExtras()
         if (c.right)
           growScale(p.y(), m_scale2Min, m_scale2Max);
         else if (m_autoScale)
-          leftGrew = computeMinMax(p.y()) || leftGrew;
+          leftGrew = growScale(p.y(), m_scaleMin, m_scaleMax) || leftGrew;
       }
   }
   if (leftGrew)
@@ -2649,7 +2599,7 @@ void GraphWidget::onExtraAppended(int i)
     if (growScale(v, m_scale2Min, m_scale2Max))
       updateRightAxis();
   }
-  else if (m_autoScale && computeMinMax(v))
+  else if (m_autoScale && growScale(v, m_scaleMin, m_scaleMax))
   {
     setYRange(m_scaleMin, m_scaleMax);
     updateThresholdLinePositions();

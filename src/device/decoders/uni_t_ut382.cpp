@@ -42,7 +42,7 @@ int segmentDigit(unsigned char code)
 bool DecoderUniTUT382::checkFormat(const char *data, size_t idx)
 {
   // the newest byte is the one after CR LF; 30 bytes 0x3? before them
-  auto at = [&](int back) { return static_cast<unsigned char>(data[(idx + FIFO_LENGTH - back) % FIFO_LENGTH]); };
+  auto at = [&](int back) { return ringByte(data, idx, back); };
   if (at(1) != 0x0a || at(2) != 0x0d)
     return false;
   for (int back = 3; back < 33; ++back)

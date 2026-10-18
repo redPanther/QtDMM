@@ -21,7 +21,7 @@ bool DecoderCyrusTekES51986::checkFormat(const char* data, size_t idx)
   // the second copy at idx == 21 matches. That yields one reading per
   // measurement instead of two identical ones. Do not "simplify" this to
   // getPacketLength() - unlike vc940, this protocol duplicates its frames.
-  return (m_type == FrameFormat::CyrustekES51986 && idx >= 12 && data[(idx-1+FIFO_LENGTH)%FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+  return (m_type == FrameFormat::CyrustekES51986 && idx >= 12 && ringByte(data, idx, 1) == 0x0d && data[idx] == 0x0a);
 }
 
 size_t DecoderCyrusTekES51986::getPacketLength()

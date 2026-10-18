@@ -157,7 +157,7 @@ public:
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
-  GraphWidget(QWidget *parent = Q_NULLPTR);
+  GraphWidget(QWidget *parent = nullptr);
   ~GraphWidget();
   /// The window from the settings, in seconds (also how wide Live is
   /// without a recording length). A window other than the last one ends
@@ -208,9 +208,6 @@ public:
   static ColorVariant variantFromName(const QString &name);
   /// The variant's name in the menus ("Scope blue").
   static QString   variantTitle(ColorVariant variant);
-  /// The smallest step of the 1-2-5 series (..., 0.5, 1, 2, 5, 10, ...) that
-  /// is at least @p v; the division of the scope variants. Public for the tests.
-  static double    niceStep(double v);
   /// The smallest time step (..., 1, 2, 5, 10, 15, 30 s, 1, 2, 5, 10, 15,
   /// 30 min, 1, 2, 3, 6, 12 h, days) that is at least @p v seconds: the
   /// x division. Public for the tests.
@@ -417,7 +414,7 @@ protected:
   bool             m_minimapOn = true;
   bool             m_envelopeOn = false;
   QGraphicsPathItem *m_envelope = nullptr;
-  /// The curve's points (bucketPoints(), gaps as NaN) for the band
+  /// The curve's points (pointsOf(), gaps as NaN) for the band
   QList<QPointF>   m_curvePts;
   void             updateEnvelope();
   bool             m_liveHold = false;   ///< Live, the window held at m_holdStart
@@ -480,7 +477,6 @@ protected:
   qint64           windowStart() const;
   qint64           bucketSize() const;
   int              bucketStart(int i) const;
-  int              bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const;
   static QList<QPointF> withoutGaps(const QList<QPointF> &points);
   static int       finiteTail(const QList<QPointF> &points, int tail);
   void             appendToSeries();
@@ -561,7 +557,8 @@ protected:
   void             updateLegend();
   /// The right axis from m_scale2Min/Max, with the left axis' tick count.
   void             updateRightAxis();
-  /// bucketPoints() of any series of the store.
+  /// The drawn points of readings first..last of @p series, thinned per bucket
+  /// (see the comment at the definition); returns the number of points.
   int              pointsOf(const RecordingSeries &series, int first, int last, bool integral, QList<QPointF> &out) const;
   QValueAxis      *m_xAxis;
   QValueAxis      *m_yAxis;
@@ -676,13 +673,12 @@ protected:
   bool             handleChartKey(QKeyEvent *);
 
   void             emitInfo();
-  bool             computeMinMax(double);
   void             rebuildSeries();
   void             updateXAxisRange();
   void             updateSeriesAppearance();
   void             updateThresholdLinesVisibility();
   void             updateThresholdLinePositions();
-  QString          formatEngineeringValue(double value, QString *unit = Q_NULLPTR) const;
+  QString          formatEngineeringValue(double value, QString *unit = nullptr) const;
 
 private:
   Qt::PenStyle     penStyle(LineMode);

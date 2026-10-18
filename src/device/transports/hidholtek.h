@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
-#include <QIODevice>
+#include "device/transports/buffereddevice.h"
+
 #include <QStringList>
-#include <QThread>
 
 #include "device/dmmdecoder.h"
 #include "device/transports/hidreader.h"
@@ -35,7 +35,7 @@
 ///
 /// A HidReader thread does the blocking hidapi reads, as for HIDSerialDevice.
 /// Port string: "HIDHOLTEK 0x04d9:0xa052 <path>" (availablePorts()).
-class HidHoltekDevice : public QIODevice
+class HidHoltekDevice : public BufferedDevice
 {
   Q_OBJECT
 public:
@@ -59,7 +59,7 @@ public:
 
   /// @param info   the meter (unused so far; the sensor has no line settings)
   /// @param device an entry from availablePorts(), or a bare HID path
-  explicit HidHoltekDevice(const DmmDecoder::DMMInfo &info, const QString &device, QObject *parent = Q_NULLPTR);
+  explicit HidHoltekDevice(const DmmDecoder::DMMInfo &info, const QString &device, QObject *parent = nullptr);
   ~HidHoltekDevice() override;
 
   /// Appends the sensors found via hidapi, as "HIDHOLTEK 0xvvvv:0xpppp path".
@@ -77,7 +77,6 @@ public:
   /// reports the reason (errorString()) instead of waiting for frames.
   bool open(OpenMode mode) override;
   void close() override;
-  qint64 bytesAvailable() const override;
   bool isSequential() const override { return true; }
 
 Q_SIGNALS:
@@ -96,10 +95,8 @@ private:
 
   bool m_isOpen = false;
   QString m_openError;
-  hid_device *m_handle = Q_NULLPTR;   ///< owned by the reader once it runs
-  QThread *m_thread = Q_NULLPTR;
-  HidReader *m_reader = Q_NULLPTR;
-  QByteArray m_rx;                    ///< text lines not yet read, main thread only
+  hid_device *m_handle = nullptr;   ///< owned by the reader once it runs
+  HidReaderThread m_reader;
   /// The set being collected: latest raw value per quantity.
   quint16 m_co2 = 0, m_temperature = 0, m_humidity = 0;
   bool m_haveCo2 = false, m_haveTemperature = false, m_haveHumidity = false;

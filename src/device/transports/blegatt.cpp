@@ -68,7 +68,7 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
 }
 
 BleGattDevice::BleGattDevice(const DmmDecoder::DMMInfo &info, const QString &device, QObject *parent)
-  : QIODevice(parent)
+  : BufferedDevice(parent)
   , m_address(device.simplified().section(' ', 0, 0).toUpper())
   , m_profile(profile(info.protocol))
 {
@@ -313,19 +313,6 @@ void BleGattDevice::setReady()
   if (!m_profile->hello.isEmpty())
     sendCommand(m_profile->hello);
   sendPoll();   // the reader's poll from before is still waiting
-}
-
-qint64 BleGattDevice::bytesAvailable() const
-{
-  return m_rx.size() + QIODevice::bytesAvailable();
-}
-
-qint64 BleGattDevice::readData(char *data, qint64 maxSize)
-{
-  const qint64 len = qMin(maxSize, qint64(m_rx.size()));
-  memcpy(data, m_rx.constData(), len);
-  m_rx.remove(0, len);
-  return len;
 }
 
 qint64 BleGattDevice::writeData(const char *data, qint64 len)

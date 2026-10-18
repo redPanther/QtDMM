@@ -31,7 +31,7 @@ ColorButton::ColorButton(QWidget *parent) : QPushButton(parent)
   m_color = QColor(255, 255, 255);
   setAutoDefault(false);
 
-  connect(this, SIGNAL(clicked()), this, SLOT(clickedSLOT()));
+  connect(this, &QPushButton::clicked, this, &ColorButton::clickedSLOT);
 }
 
 QColor ColorButton::color() const

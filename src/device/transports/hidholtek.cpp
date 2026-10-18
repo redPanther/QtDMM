@@ -4,7 +4,7 @@
 #include "device/transports/hidpath.h"
 
 HidHoltekDevice::HidHoltekDevice(const DmmDecoder::DMMInfo & /*info*/, const QString &device, QObject *p)
-  : QIODevice(p)
+  : BufferedDevice(p)
 {
   if (device.isNull())
     return;
@@ -42,23 +42,13 @@ HidHoltekDevice::HidHoltekDevice(const DmmDecoder::DMMInfo & /*info*/, const QSt
     m_openError = tr("Cannot initialise the sensor: %1").arg(QString::fromWCharArray(hid_error(m_handle)));
     qWarning() << "HID:" << m_openError;
     hid_close(m_handle);
-    m_handle = Q_NULLPTR;
+    m_handle = nullptr;
     return;
   }
   m_isOpen = true;
 
-  // The blocking read loop runs in its own thread, exactly as for
-  // HIDSerialDevice: this object stays in the caller's thread, the reports
-  // arrive as queued signals.
-  m_thread = new QThread(this);
-  m_reader = new HidReader(m_handle);
-  m_reader->moveToThread(m_thread);
-  connect(m_thread, &QThread::started, m_reader, &HidReader::run);
-  connect(m_reader, &HidReader::report, this, &HidHoltekDevice::onReport);
-  connect(m_reader, &HidReader::readError, this, &HidHoltekDevice::onReadError);
-  // direct: stopReader() blocks this thread's event loop while it waits for the quit
-  connect(m_reader, &HidReader::finished, m_thread, &QThread::quit, Qt::DirectConnection);
-  m_thread->start();
+  // the blocking read loop runs in its own thread
+  m_reader.start(m_handle, this, &HidHoltekDevice::onReport, &HidHoltekDevice::onReadError);
 }
 
 HidHoltekDevice::~HidHoltekDevice()
@@ -133,26 +123,8 @@ void HidHoltekDevice::close()
 
 void HidHoltekDevice::stopReader()
 {
-  if (!m_thread)
-    return;
-  if (m_reader)
-    m_reader->stop();
-  m_thread->quit();   // in case the loop already ended
-  if (m_thread->isRunning() && !m_thread->wait(2000))
-  {
-    // hid_read_timeout() did not return - should not happen; better a
-    // leaked thread than a crash in it
-    qWarning() << "HID: reader thread did not stop";
-    m_thread->setParent(nullptr);
-  }
-  else
-  {
-    delete m_reader;
-    delete m_thread;
-  }
-  m_thread = Q_NULLPTR;
-  m_reader = Q_NULLPTR;
-  m_handle = Q_NULLPTR;   // closed by the reader
+  m_reader.stop();
+  m_handle = nullptr;   // closed by the reader
 }
 
 void HidHoltekDevice::onReport(const QByteArray &raw)
@@ -198,19 +170,11 @@ void HidHoltekDevice::onReadError(const QString &what)
   Q_EMIT finished();
 }
 
-qint64 HidHoltekDevice::bytesAvailable() const
-{
-  return QIODevice::bytesAvailable() + m_rx.size();
-}
-
 qint64 HidHoltekDevice::readData(char *data, qint64 maxSize)
 {
   if (!m_isOpen)
     return -1;
-  const qint64 len = qMin(maxSize, qint64(m_rx.size()));
-  memcpy(data, m_rx.constData(), len);
-  m_rx.remove(0, len);
-  return len;
+  return BufferedDevice::readData(data, maxSize);
 }
 
 qint64 HidHoltekDevice::writeData(const char * /*data*/, qint64 len)

@@ -30,6 +30,11 @@ Documentation for people working on QtDMM itself. Planned pages:
 None of these pages exist yet. The architecture is documented in the code
 itself, see below.
 
+## Coding style
+
+[Coding style](coding-style.md): layout, names, Qt idioms and structure
+rules for the sources, and how existing code is brought in line.
+
 ## Versions and releases
 
 [Versions and releases](releasing.md): the version scheme YY.N (26.1,

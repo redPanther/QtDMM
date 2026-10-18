@@ -26,7 +26,6 @@
 #include <QtSerialPort>
 
 #include <stdio.h>
-#include <iostream>
 
 #include "device/framereader.h"
 
@@ -40,9 +39,9 @@ FrameReader::FrameReader(QObject *receiver) :
   m_sendRequest(true),
   m_id(0),
   m_numValues(1),
-  m_decoder(Q_NULLPTR)
+  m_decoder(nullptr)
 {
-  m_port = Q_NULLPTR;
+  m_port = nullptr;
 }
 
 
@@ -52,7 +51,7 @@ void FrameReader::setHandle(QIODevice *handle)
   // every reconnect (socketNotifierSLOT would run once per connect), and a
   // still-open old port could fire readyRead after m_port was set to null.
   if (m_port)
-    disconnect(m_port, Q_NULLPTR, this, Q_NULLPTR);
+    disconnect(m_port, nullptr, this, nullptr);
 
   m_port = handle;
 
@@ -60,8 +59,8 @@ void FrameReader::setHandle(QIODevice *handle)
 
   if (m_port)
   {
-    connect(m_port, SIGNAL(readyRead()), this, SLOT(socketNotifierSLOT()));
-    connect(m_port, SIGNAL(aboutToClose()), this, SLOT(socketClose()));
+    connect(m_port, &QIODevice::readyRead, this, &FrameReader::socketNotifierSLOT);
+    connect(m_port, &QIODevice::aboutToClose, this, &FrameReader::socketClose);
   }
 }
 
@@ -74,7 +73,7 @@ void FrameReader::socketClose()
 void FrameReader::start()
 {
   QTimer *timer = new QTimer(this);
-  connect(timer, SIGNAL(timeout()), this, SLOT(timer()));
+  connect(timer, &QTimer::timeout, this, &FrameReader::timer);
   timer->start(1000);
 }
 void FrameReader::timer()
@@ -88,7 +87,6 @@ void FrameReader::timer()
 
 void FrameReader::startRead()
 {
-  //std::cerr << "start read" << std::endl;
   m_readValue = true;
   m_sendRequest = true;
 }
@@ -99,13 +97,13 @@ void FrameReader::socketNotifierSLOT()
   int r;
   char byte;
 
-  const int64_t packetLength = (m_decoder == Q_NULLPTR) ? 0 : m_decoder->getPacketLength();
+  const int64_t packetLength = (m_decoder == nullptr) ? 0 : m_decoder->getPacketLength();
 
   while ((r = m_port->read( &byte, 1)) > 0)
   {
     m_fifo[m_length] = byte;
 
-    if (m_decoder != Q_NULLPTR && m_decoder->checkFormat(m_fifo,m_length))
+    if (m_decoder != nullptr && m_decoder->checkFormat(m_fifo,m_length))
     {
       // A fixed-length protocol takes the last packetLength bytes; a
       // variable-length one (packetLength 0, the Fluke QM lines) everything
@@ -143,7 +141,7 @@ void FrameReader::socketNotifierSLOT()
 void FrameReader::sendReadRequest()
 {
   // asked only when it is sent: a decoder may count its requests
-  if (m_decoder == Q_NULLPTR || !m_sendRequest)
+  if (m_decoder == nullptr || !m_sendRequest)
     return;
   const QByteArray request = m_decoder->pollRequest();
   if (request.isEmpty())
