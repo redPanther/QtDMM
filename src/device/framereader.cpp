@@ -59,8 +59,8 @@ void FrameReader::setHandle(QIODevice *handle)
 
   if (m_port)
   {
-    connect(m_port, SIGNAL(readyRead()), this, SLOT(socketNotifierSLOT()));
-    connect(m_port, SIGNAL(aboutToClose()), this, SLOT(socketClose()));
+    connect(m_port, &QIODevice::readyRead, this, &FrameReader::socketNotifierSLOT);
+    connect(m_port, &QIODevice::aboutToClose, this, &FrameReader::socketClose);
   }
 }
 
@@ -73,7 +73,7 @@ void FrameReader::socketClose()
 void FrameReader::start()
 {
   QTimer *timer = new QTimer(this);
-  connect(timer, SIGNAL(timeout()), this, SLOT(timer()));
+  connect(timer, &QTimer::timeout, this, &FrameReader::timer);
   timer->start(1000);
 }
 void FrameReader::timer()

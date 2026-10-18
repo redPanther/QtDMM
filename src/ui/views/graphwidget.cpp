@@ -220,7 +220,7 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_chartView->installEventFilter(this);
 
   m_popup = new QMenu(this);
-  connect(m_popup, SIGNAL(triggered(QAction *)), this, SLOT(popupSLOT(QAction *)));
+  connect(m_popup, &QMenu::triggered, this, &GraphWidget::popupSLOT);
 
   // time buttons top right, as in the UI demo: the visible window at a click
   m_timeBar = new QWidget(m_chartView);

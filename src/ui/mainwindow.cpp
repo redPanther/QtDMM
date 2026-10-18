@@ -451,7 +451,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   createExtraActions();
   createShortcuts({ loadWs, saveWs });
 
-  connect(m_wid, SIGNAL(running(bool)), this, SLOT(runningSLOT(bool)));
+  connect(m_wid, &InstanceWidget::running, this, &MainWindow::runningSLOT);
   connect(m_wid, &InstanceWidget::recorderState, this, &MainWindow::updateRecorderActions);
 
   connectSLOT(false);
@@ -501,12 +501,12 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     m_error->setText(firstLine);
     m_error->setToolTip(text.contains('\n') ? text : QString());
   });
-  connect(m_wid, SIGNAL(info(const QString &)), m_info, SLOT(setText(const QString &)));
-  connect(m_wid, SIGNAL(useTextLabel(bool)), this, SLOT(setUseTextLabel(bool)));
+  connect(m_wid, &InstanceWidget::info, m_info, &QLabel::setText);
+  connect(m_wid, &InstanceWidget::useTextLabel, this, &MainWindow::setUseTextLabel);
   connect(m_wid, &InstanceWidget::iconSet, this, [](const QString &set)
           { Designs::setIconSet(Designs::iconSetFromName(set)); });
-  connect(m_wid, SIGNAL(setConnect(bool)), this, SLOT(setConnectSLOT(bool)));
-  connect(m_wid, SIGNAL(connectDMM(bool)), action_Connect, SLOT(setChecked(bool)));
+  connect(m_wid, &InstanceWidget::setConnect, this, &MainWindow::setConnectSLOT);
+  connect(m_wid, &InstanceWidget::connectDMM, action_Connect, &QAction::setChecked);
   connect(m_wid, &InstanceWidget::showDisplay, this, &MainWindow::showDisplaySLOT);
 
   QRect winRect = m_wid->winRect();
@@ -566,7 +566,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
         m_info->setText(tr("Another instance: %1").arg(why));
         return;
       }
-      QMetaObject::invokeMethod(m_wid, "startSLOT", Qt::DirectConnection);
+      m_wid->startSLOT();
       m_localRecord = false;
     }
     else if (state.startsWith("STOP_"))
@@ -715,12 +715,12 @@ void MainWindow::setUseTextLabel(bool on)
 
 void MainWindow::createActions()
 {
-  connect(action_Connect, SIGNAL(triggered(bool)), m_wid, SLOT(connectSLOT(bool)));
+  connect(action_Connect, &QAction::triggered, m_wid, &InstanceWidget::connectSLOT);
   // toggled, not triggered: a connection made by the program (Add device, the
   // sidebar, the start, SCPI) sets the check mark only - Record stayed off
   connect(action_Connect, &QAction::toggled, this, &MainWindow::connectSLOT);
-  connect(action_Reset, SIGNAL(triggered()), m_wid, SLOT(resetSLOT()));
-  connect(action_Start, SIGNAL(triggered()), this, SLOT(startSLOT()));
+  connect(action_Reset, &QAction::triggered, m_wid, &InstanceWidget::resetSLOT);
+  connect(action_Start, &QAction::triggered, this, &MainWindow::startSLOT);
   // one button for both: a grey dot starts, the red square stops
   connect(action_Record, &QAction::triggered, this, &MainWindow::toggleRecordingSLOT);
   connect(action_Live, &QAction::triggered, this, [this]
@@ -736,13 +736,13 @@ void MainWindow::createActions()
     else if (action_Start->isEnabled())
       action_Start->trigger();
   });
-  connect(action_Stop, SIGNAL(triggered()), m_wid, SLOT(stopSLOT()));
-  connect(action_Stop, SIGNAL(triggered()), this, SLOT(stopSLOT()));
-  connect(action_Clear, SIGNAL(triggered()), m_wid, SLOT(clearSLOT()));
-  connect(action_Print, SIGNAL(triggered()), m_wid, SLOT(printSLOT()));
-  connect(action_Import, SIGNAL(triggered()), m_wid, SLOT(importSLOT()));
-  connect(action_Export, SIGNAL(triggered()), m_wid, SLOT(exportSLOT()));
-  connect(action_Configure, SIGNAL(triggered()), m_wid, SLOT(configSLOT()));
+  connect(action_Stop, &QAction::triggered, m_wid, &InstanceWidget::stopSLOT);
+  connect(action_Stop, &QAction::triggered, this, &MainWindow::stopSLOT);
+  connect(action_Clear, &QAction::triggered, m_wid, &InstanceWidget::clearSLOT);
+  connect(action_Print, &QAction::triggered, m_wid, &InstanceWidget::printSLOT);
+  connect(action_Import, &QAction::triggered, m_wid, &InstanceWidget::importSLOT);
+  connect(action_Export, &QAction::triggered, m_wid, &InstanceWidget::exportSLOT);
+  connect(action_Configure, &QAction::triggered, m_wid, &InstanceWidget::configSLOT);
   // Shift+F8: the settings of the device in use, as its context menu in the sidebar
   connect(action_ConfigureDMM, &QAction::triggered, this, [this]
   {
@@ -751,10 +751,10 @@ void MainWindow::createActions()
     else
       addDevice();
   });
-  connect(actionConfigureRecorder, SIGNAL(triggered()), m_wid, SLOT(configRecorderSLOT()));
-  connect(action_Quit, SIGNAL(triggered()), this, SLOT(storeDisplaySLOT()));
-  connect(action_Quit, SIGNAL(triggered()), m_wid, SLOT(quitSLOT()));
-  connect(action_Direct_help, SIGNAL(triggered()), m_wid, SLOT(helpSLOT()));
+  connect(actionConfigureRecorder, &QAction::triggered, m_wid, &InstanceWidget::configRecorderSLOT);
+  connect(action_Quit, &QAction::triggered, this, &MainWindow::storeDisplaySLOT);
+  connect(action_Quit, &QAction::triggered, m_wid, &InstanceWidget::quitSLOT);
+  connect(action_Direct_help, &QAction::triggered, m_wid, &InstanceWidget::helpSLOT);
 
 
   connect(m_stateMgr, &SharedStateManager::instancesChanged, this, &MainWindow::updateInstances);
@@ -900,7 +900,7 @@ void MainWindow::startSLOT()
     return;
   if (m_stateMgr->instances().count()<=1)
   {
-    QMetaObject::invokeMethod(m_wid, "startSLOT", Qt::DirectConnection);
+    m_wid->startSLOT();
     m_localRecord = true;
   }
   else
@@ -918,7 +918,7 @@ void MainWindow::startSLOT()
     switch (question.exec())
     {
       case QMessageBox::Yes:
-        QMetaObject::invokeMethod(m_wid, "startSLOT", Qt::DirectConnection);
+        m_wid->startSLOT();
         m_localRecord = true;
         return;
       case QMessageBox::No:

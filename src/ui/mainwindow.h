@@ -68,6 +68,10 @@ public:
   /// --debug: frame dump and the qtdmm.hid logging category.
   void      setConsoleLogging(bool);
 
+public Q_SLOTS:
+  /// Writes a state string for the other instances (InstanceWidget::sendState()).
+  void      sendStateSLOT(const QString &);
+
 protected Q_SLOTS:
   /// Recording state changed; enables/disables Start/Stop.
   void      runningSLOT(bool);
@@ -76,8 +80,6 @@ protected Q_SLOTS:
   /// Start action: records locally and tells the other instances.
   void      startSLOT();
   void      stopSLOT();
-  /// Writes a state string for the other instances.
-  void      sendStateSLOT(const QString &);
   void      on_action_About_triggered();
   void      on_action_Help_triggered();
   /// Shows the popup menu (the window has no menu bar).

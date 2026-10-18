@@ -113,8 +113,7 @@ MeterConnection::MeterConnection(QObject *parent)
   m_portHandler  = new Transport(this);
   m_readerThread = new FrameReader(this);
 
-  connect(m_readerThread, SIGNAL(readEvent(const QByteArray &, int)),
-          this, SLOT(readEventSLOT(const QByteArray &, int)));
+  connect(m_readerThread, &FrameReader::readEvent, this, &MeterConnection::readEventSLOT);
 
   m_readerThread->start();
 
