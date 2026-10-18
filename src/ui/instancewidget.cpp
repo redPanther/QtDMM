@@ -376,6 +376,10 @@ void InstanceWidget::openConfig(int page)
   // recording)
   if (page >= 0)
     m_configDlg->showPage(SettingsDialog::PageType(page));
+  // the alarm thresholds are in the reading's base unit; before the first
+  // reading the page keeps the one it had
+  if (!m_ctl->baseUnit().isEmpty())
+    m_configDlg->setAlarmUnit(m_ctl->baseUnit());
   m_configDlg->show();
   m_configDlg->raise();
 }
