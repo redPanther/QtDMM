@@ -1490,16 +1490,19 @@ void GraphWidget::updateThresholdLinePositions()
 {
   QRectF plot = m_chart->plotArea();
 
-  auto positionLine = [&](QGraphicsLineItem *item, double value)
+  // the trigger compares the main value; the integration threshold is on
+  // the axis of the value integrated
+  auto positionLine = [&](QGraphicsLineItem *item, double value, QLineSeries *on)
   {
     if (!item->isVisible())
       return;
-    double y = m_chart->mapToPosition(QPointF(m_xAxis->min(), value), m_dataSeries).y();
+    double y = m_chart->mapToPosition(QPointF(m_xAxis->min(), value), on).y();
     item->setLine(plot.left(), y, plot.right(), y);
   };
 
-  positionLine(m_triggerLine, mode() == Raising ? m_store->raisingThreshold() : m_store->fallingThreshold());
-  positionLine(m_integrationLine, m_store->integrationThreshold());
+  positionLine(m_triggerLine, mode() == Raising ? m_store->raisingThreshold() : m_store->fallingThreshold(),
+               m_dataSeries);
+  positionLine(m_integrationLine, m_store->integrationThreshold(), m_intLine->first());
   updateMarkPositions();
 }
 
@@ -2128,7 +2131,7 @@ void GraphWidget::handleChartMouseMove(QMouseEvent *ev)
   if (m_mouseDown && m_cursorMode != NoCursor)
   {
     QPointF scenePos = m_chartView->mapToScene(pos);
-    double value = m_chart->mapToValue(scenePos, m_dataSeries).y();
+    double value = m_chart->mapToValue(scenePos, m_cursorMode == Integration ? m_intLine->first() : m_dataSeries).y();
 
     switch (m_cursorMode)
     {
@@ -2400,8 +2403,17 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
 
     for (int i = 0; i < m_store->count(); i++)
       computeMinMax(m_store->series().at(i).value);
-
-
+    // the other values drawn on the left axis
+    for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
+    {
+      const ExtraCurve &c = m_extraCurves[size_t(i)];
+      if (!c.shown || c.right)
+        continue;
+      const RecordingSeries &x = m_store->extra(i);
+      for (int j = 0; j < x.count(); ++j)
+        if (std::isfinite(x.at(j).value))
+          computeMinMax(x.at(j).value);
+    }
   }
 
   setYRange(m_scaleMin, m_scaleMax);
@@ -2467,14 +2479,15 @@ void GraphWidget::rebuildExtras()
   const int n = m_store->extraCount();
   // the units: the main value's on the left; on the right the unit of the
   // lowest value in another one (by number, not by which came first), its
-  // newest series
+  // newest series. The integrated value has its axis also while it is hidden
   const QString main = m_store->unit();
   m_unit2.clear();
   int unit2Id = INT_MAX;
   for (int i = 0; i < n; ++i)
   {
     const RecordingSeries &s = m_store->extra(i);
-    if (m_shownValues.contains(s.id) && !s.unit.isEmpty() && s.unit != main && s.id <= unit2Id)
+    const bool onAxis = m_shownValues.contains(s.id) || (m_intValueId > 0 && s.id == m_intValueId);
+    if (onAxis && !s.unit.isEmpty() && s.unit != main && s.id <= unit2Id)
     {
       unit2Id = s.id;
       m_unit2 = s.unit;
@@ -2517,7 +2530,14 @@ void GraphWidget::rebuildExtras()
                         Qt::RoundCap, Qt::RoundJoin));
     c.line->setVisible(c.shown);
     if (!c.shown)
+    {
+      // the right axis also scales a hidden value integrated there
+      if (c.right && s.id == m_intValueId)
+        for (int j = 0; j < s.count(); ++j)
+          if (std::isfinite(s.at(j).value))
+            growScale(s.at(j).value, m_scale2Min, m_scale2Max);
       continue;
+    }
     QList<QPointF> points;
     const int count = s.count();
     for (int first = 0; first < count;)
@@ -2577,13 +2597,19 @@ void GraphWidget::rebuildOtherIntegral()
   const QList<QPointF> pts = withoutGaps(points);
   m_intPoints->replace(pts);
   m_tailIntPts = finiteTail(points, m_tailInt);
+  updateThresholdLinePositions();   // the integration threshold on that axis
 }
 
 void GraphWidget::onExtraAppended(int i)
 {
-  if (i >= int(m_extraCurves.size()) || bucketSize() != m_bucket)
+  if (i >= int(m_extraCurves.size()))
   {
     rebuildExtras();
+    return;
+  }
+  if (bucketSize() != m_bucket)
+  {
+    rebuildSeries();   // sets the bucket, then rebuildExtras()
     return;
   }
   ExtraCurve &c = m_extraCurves[size_t(i)];
@@ -2604,7 +2630,12 @@ void GraphWidget::onExtraAppended(int i)
     appendIntegral(s, first, count - 1);
   }
   if (!c.shown)
+  {
+    const double v = s.last().value;
+    if (c.right && s.id == m_intValueId && std::isfinite(v) && growScale(v, m_scale2Min, m_scale2Max))
+      updateRightAxis();
     return;
+  }
   if (first != count - 1)
     c.line->removeLast(c.tail);
   QList<QPointF> points;
@@ -2669,6 +2700,8 @@ void GraphWidget::updateRightAxis()
   m_y2Title->setText(QString("[%1]").arg(SiPrefix::displayText(m_unit2)));
   placeYTitle();
   placeTimeBar();
+  if (m_intValueId > 0)
+    updateThresholdLinePositions();
 }
 
 QString GraphWidget::legendText() const
@@ -2722,6 +2755,9 @@ void GraphWidget::setValueShown(int id, bool shown)
   else
     m_shownValues.remove(id);
   rebuildExtras();
+  // hidden, a value no longer widens the scale
+  if (m_autoScale)
+    setScale(true, m_includeZero, m_scaleMin, m_scaleMax);
 }
 
 QList<int> GraphWidget::shownValues() const
