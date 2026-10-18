@@ -105,6 +105,9 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
   // the recorder belongs to the controller; the graph shows it
   ui_graph->setStore(m_ctl->recorder());
   connect(m_ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
+  // the alarm thresholds are in the reading's base unit, also while the
+  // (modeless) dialog is open
+  connect(m_ctl, &MeterController::baseUnitChanged, m_configDlg->alarmPage(), &AlarmPrefs::setUnit);
   connect(ui_graph, &GraphWidget::info, this, &InstanceWidget::info);
   connect(ui_graph, &GraphWidget::error, this, &InstanceWidget::error);
   connect(ui_graph, &GraphWidget::running, this, &InstanceWidget::runningSLOT);
@@ -368,10 +371,6 @@ void InstanceWidget::openConfig(int page)
   // recording)
   if (page >= 0)
     m_configDlg->showPage(SettingsDialog::PageType(page));
-  // the alarm thresholds are in the reading's base unit; before the first
-  // reading the page keeps the one it had
-  if (!m_ctl->baseUnit().isEmpty())
-    m_configDlg->alarmPage()->setUnit(m_ctl->baseUnit());
   m_configDlg->show();
   m_configDlg->raise();
 }
@@ -440,7 +439,7 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   // the window starts without the last value of the one before
   m_ctl->resetMinMax();
   m_ctl->recorder()->forgetReading();
-  ui_graph->setUnit(QString());   // the axis title comes with the first reading
+  m_ctl->forgetUnit();   // the axis title and the alarm unit come with the first reading
   ui_graph->liveSLOT();
   Q_EMIT meterChanged();
 

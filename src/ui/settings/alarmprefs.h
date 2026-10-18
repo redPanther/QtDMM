@@ -19,7 +19,8 @@ public:
   QList<Alarm> alarms() const { return m_alarms; }
   /// The display and the analog meter blink while they show an alarm's colour (Alarms/blink).
   bool blink() const;
-  /// Base unit of the current reading, shown next to the thresholds.
+  /// Base unit of the current reading, shown next to the thresholds; empty
+  /// before the first reading (the labels go without a unit).
   void setUnit(const QString &unit);
 
 public Q_SLOTS:
@@ -35,7 +36,7 @@ private:
   void toggle(int row, bool on);
 
   QList<Alarm> m_alarms;
-  QString m_unit = "V";
+  QString m_unit;
   QListWidget *m_list;
   QLabel *m_empty;   ///< the hint in the empty list
   QPushButton *m_edit, *m_remove;
