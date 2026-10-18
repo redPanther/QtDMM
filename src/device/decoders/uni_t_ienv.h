@@ -25,8 +25,8 @@
 /// plus the temperature as second value (val2 / id2 = 1).
 ///
 /// Keys are SET frames "AA BB 04 30 <id> sum": HOLD 0x42, MAX 0x3F, MIN
-/// 0x40, AVG 0x41; "select1" steps the main value's unit, "select2" the
-/// temperature's (sound meter: Fast/Slow) from the last unit id seen.
+/// 0x40, AVG 0x41, Fast 0x43, Slow 0x44 ("weighting"); "unit" steps the main
+/// value's unit, "unit2" the temperature's, from the last unit id seen.
 ///
 /// Sources (no code taken): the UT383BT frames of ha-ut383bt-lux-meter
 /// (MIT, from an Android btsnoop capture of UNI-T's app), ut383bt-lux-ble-
@@ -42,6 +42,7 @@ public:
   std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) override;
   QByteArray pollRequest() const override;
   QByteArray keyRequest(const QString &key) const override;
+  bool hasKey(const QString &key, const QString &model) const override;
   bool checkFormat(const char *data, size_t idx) override;
   size_t getPacketLength() override { return kFrameLength; }
 

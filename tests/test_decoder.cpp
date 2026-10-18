@@ -10,6 +10,7 @@
 #include "device/devicetype.h"
 #include "device/dmmdecoder.h"
 #include "device/protocols.h"
+#include "device/decoders/uni_t_ienv.h"
 #include "core/readingadapter.h"
 
 QByteArray parseHexStringToByteArray(const QString &hexString)
@@ -211,6 +212,35 @@ int main(int argc, char **argv)
       {
         qWarning() << "iENV: OL is no overload";
         ++problems;
+      }
+      // the unit key steps from the unit the last frame told: lx -> fc
+      if (decoder->keyRequest("unit") != DecoderUniTiENV::commandFrame(0x3C))
+      {
+        qWarning() << "iENV: UNIT after a lux frame does not select fc";
+        ++problems;
+      }
+      // the keypads of UNI-T's app per meter
+      struct Pad { const char *model; const char *has; const char *lacks; };
+      const Pad pads[] = {
+        { "UT333BT", "hold max min unit unit2", "avg weighting" },
+        { "UT353BT *", "hold max min unit weighting", "avg unit2" },
+        { "UT363BT *", "hold max avg unit unit2", "min weighting" },
+        { "UT383BT *", "hold max min unit", "avg unit2 weighting" },
+      };
+      for (const Pad &pad : pads)
+      {
+        for (const QString &k : QString(pad.has).split(' '))
+          if (!decoder->hasKey(k, pad.model))
+          {
+            qWarning() << "iENV:" << pad.model << "lacks the key" << k;
+            ++problems;
+          }
+        for (const QString &k : QString(pad.lacks).split(' '))
+          if (decoder->hasKey(k, pad.model))
+          {
+            qWarning() << "iENV:" << pad.model << "has the key" << k;
+            ++problems;
+          }
       }
     }
     if (problems == 0)

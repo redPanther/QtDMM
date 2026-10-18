@@ -158,7 +158,16 @@ left by holding the key down (about a second). Over Bluetooth the keys
 work once the link is up, about five seconds after connecting (see
 [Bluetooth](bluetooth.md)); before that the status bar says the key did
 not reach the meter. Tried on the UT60BT; the UT61B+/D+/E+ and UT161 use
-the same commands. The small triangle in the display's top right corner,
+the same commands.
+
+The UNI-T iENV meters (UT333BT, UT353BT, UT363BT, UT383BT) have HOLD, MAX
+and MIN (the UT363BT AVG instead of MIN), as UNI-T's app offers them, and
+UNIT for the next unit of the main value (lx/fc, dBA/dBC, %RH/%, m/s, km/h,
+ft/min, knots, mph). The UT333BT and UT363BT also have °C/°F, the UT353BT
+FAST/SLOW. UNIT and °C/°F work once the first reading has told the unit.
+HOLD is tried on the UT333BT.
+
+The small triangle in the display's top right corner,
 or **Hide controls** in its right-click menu, folds the row away.
 
 ## Window layout

@@ -81,14 +81,14 @@ QByteArray DecoderUniTiENV::commandFrame(quint8 payload)
 }
 
 // HOLD is confirmed on a UT333BT. MAX/MIN/AVG are the protocol's ids; what
-// repeated presses of MAX/MIN do is UNVERIFIED (the status byte shows it).
-// select1 steps the main value's unit, select2 the temperature's or, on the
-// sound meter, the time weighting. Nothing is sent before a frame has told
-// the current unit.
+// repeated presses do is UNVERIFIED (the status byte shows it). "unit" steps
+// the main value's unit, "unit2" the temperature's, "weighting" the sound
+// meter's Fast/Slow. A unit key sends nothing before a frame has told the
+// current unit.
 QByteArray DecoderUniTiENV::keyRequest(const QString &key) const
 {
   static const QHash<QString, quint8> codes = {
-    { "hold", 0x42 }, { "minmax", 0x3F }, { "minmax_off", 0x40 },
+    { "hold", 0x42 }, { "max", 0x3F }, { "min", 0x40 }, { "avg", 0x41 },
   };
   const auto it = codes.constFind(key);
   if (it != codes.constEnd())
@@ -99,25 +99,39 @@ QByteArray DecoderUniTiENV::keyRequest(const QString &key) const
     return u ? commandFrame(u->next) : QByteArray();
   };
 
-  if (key == "select1")
+  if (key == "unit")
     return stepUnit(m_mainUnit);
-  if (key == "select2")
-  {
-    if (m_tempUnitByte)
-      return stepUnit(m_tempUnitByte);
-    if (m_weighting == kModeSlow)
-      return commandFrame(0x43); // Fast
-    if (m_weighting == kModeFast)
-      return commandFrame(0x44); // Slow
-  }
-  if (key == "rel")
-    return commandFrame(0x41); // AVG, the nearest of the meters' own keys
+  if (key == "unit2")
+    return stepUnit(m_tempUnitByte);
+  if (key == "weighting")
+    return commandFrame(m_weighting == kModeFast ? 0x44 : 0x43); // Slow after Fast, else Fast
   return QByteArray();
+}
+
+// The keys of UNI-T's app per meter: it sends HOLD, MAX and MIN, on the
+// UT363BT HOLD, MAX and AVG (its other mode buttons send nothing). Fast/Slow
+// only on the sound meter, a temperature unit only on the two-channel meters.
+bool DecoderUniTiENV::hasKey(const QString &key, const QString &model) const
+{
+  const bool wind = model.contains("UT363BT");
+  if (key == "hold" || key == "max" || key == "unit")
+    return true;
+  if (key == "min")
+    return !wind;
+  if (key == "avg")
+    return wind;
+  if (key == "unit2")
+    return wind || model.contains("UT333BT");
+  if (key == "weighting")
+    return model.contains("UT353BT");
+  return false;
 }
 
 bool DecoderUniTiENV::frameValid(const unsigned char *f)
 {
-  if (f[0] != 0xAA || f[1] != 0xBB || f[2] != kFrameLength - 3)
+  // type 0x01 live data, 0x05 "broadcast data" read alike by UNI-T's app; the
+  // 26-byte device id frame (type 0x00) has another length
+  if (f[0] != 0xAA || f[1] != 0xBB || f[2] != kFrameLength - 3 || (f[3] != 0x01 && f[3] != 0x05))
     return false;
   unsigned sum = 0;
   for (int i = 0; i < kFrameLength - 2; ++i)
@@ -229,6 +243,8 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray 
   // status byte: bit0 HOLD, bit1 AVG, bit2 MIN, bit3 MAX (HOLD confirmed on
   // a UT333BT, the others from the vendor app)
   m_result.hold = f[16] & 0x01;
+  if (f[16] & 0x02)
+    m_result.states |= SampleFlag::Avg;
   if (f[16] & 0x08)
     m_result.states |= SampleFlag::Max;
   if (f[16] & 0x04)

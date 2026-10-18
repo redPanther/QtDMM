@@ -101,13 +101,24 @@ public:
   virtual QByteArray pollRequest() const { return QByteArray(); }
   /// Bytes that press the meter's key @p key once (ControlBar's names:
   /// "select1", "select2", "range", "auto", "hold", "rel", "minmax",
-  /// "minmax_off", "peak", "peak_off", "lamp"); empty when the meter has no
-  /// such key or cannot be remote-controlled.
+  /// "minmax_off", "peak", "peak_off", "max", "min", "avg", "unit", "unit2",
+  /// "weighting", "lamp"); empty when the meter has no such key, cannot be
+  /// remote-controlled or the key needs a reading first.
   virtual QByteArray keyRequest(const QString &key) const { Q_UNUSED(key); return QByteArray(); }
+  /// True when the meter @p model (DMMInfo::model) has the key @p key. By
+  /// default every key keyRequest() knows; a decoder for several meters with
+  /// different keypads, or one whose keys need a reading first (a unit key
+  /// steps from the unit shown), tells it by the model.
+  virtual bool hasKey(const QString &key, const QString &model) const
+  {
+    Q_UNUSED(model);
+    return !keyRequest(key).isEmpty();
+  }
   /// Every key name keyRequest() may know, in the order of the meters' keypads.
   static QStringList keyNames()
   {
-    return { "select1", "select2", "range", "auto", "hold", "rel", "minmax", "minmax_off", "peak", "peak_off", "lamp" };
+    return { "select1", "select2", "range", "auto", "hold", "rel", "minmax", "minmax_off", "peak", "peak_off",
+             "max", "min", "avg", "unit", "unit2", "weighting", "lamp" };
   }
   /// Decodes one frame (getPacketLength() bytes, or a variable-length one
   /// with its terminator). @p id tells which of

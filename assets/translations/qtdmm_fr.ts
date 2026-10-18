@@ -114,188 +114,188 @@
         <translation>No&amp;m :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="242"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="252"/>
         <source>as the current device</source>
         <translation>comme appareil actuel</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="243"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="253"/>
         <source>The device takes the place of the one in this window</source>
         <translation>L&apos;appareil prend la place de celui de cette fenêtre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="244"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="254"/>
         <source>The device takes the place of %1 in this window</source>
         <translation>L&apos;appareil prend la place de %1 dans cette fenêtre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="597"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="607"/>
         <source>Simulated meter</source>
         <translation>Appareil simulé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="616"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="626"/>
         <source>simulated in QtDMM</source>
         <translation>simulé dans QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="618"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="628"/>
         <source>calculated in QtDMM: %1</source>
         <translation>calculé dans QtDMM : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="621"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="631"/>
         <source>Bluetooth LE, %1</source>
         <translation>Bluetooth LE, %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="623"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="633"/>
         <source>sigrok-cli, %1</source>
         <translation>sigrok-cli, %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="628"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="638"/>
         <source>USB-HID %1</source>
         <translation>USB-HID %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="639"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="649"/>
         <source>Manual settings</source>
         <translation>Réglages manuels</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="643"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="653"/>
         <source>Name</source>
         <translation>Nom</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="644"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="654"/>
         <source>Model</source>
         <translation>Modèle</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="645"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="655"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="647"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="657"/>
         <source>Protocol</source>
         <translation>Protocole</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="649"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="659"/>
         <source>Connection</source>
         <translation>Connexion</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="185"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="195"/>
         <source>with the settings of this one</source>
         <translation>avec les réglages de celle-ci</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="185"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="195"/>
         <source>In a ne&amp;w window</source>
         <translation>Dans une nou&amp;velle fenêtre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="186"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="196"/>
         <source>A new window of its own for the device; this one keeps its meter</source>
         <translation>Une nouvelle fenêtre à lui ; celle-ci garde son multimètre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="199"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="209"/>
         <source>&lt; &amp;Back</source>
         <translation>&lt; &amp;Précédent</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="200"/>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="584"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="210"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="594"/>
         <source>&amp;Next &gt;</source>
         <translation>&amp;Suivant &gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="242"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="252"/>
         <source>In &amp;this window</source>
         <translation>Dans ce&amp;tte fenêtre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="294"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="304"/>
         <source>Bluetooth address, e.g. AA:BB:CC:DD:EE:FF</source>
         <translation>Adresse Bluetooth, p. ex. AA:BB:CC:DD:EE:FF</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="295"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="305"/>
         <source>host:port, e.g. 192.168.1.20:4711</source>
         <translation>hôte:port, p. ex. 192.168.1.20:4711</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="296"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="306"/>
         <source>e.g. /dev/ttyUSB0 or COM3</source>
         <translation>p. ex. /dev/ttyUSB0 ou COM3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="371"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="381"/>
         <source>Already in My devices: %1</source>
         <translation>Déjà dans Mes appareils : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="429"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="439"/>
         <source>This is &quot;%1&quot; of My devices: the next page changes it, no second entry.</source>
         <translation>C&apos;est « %1 » de Mes appareils : la page suivante le modifie, sans seconde entrée.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="434"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="444"/>
         <source>Searching ...</source>
         <translation>Recherche ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="437"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="447"/>
         <source>Nothing found. Is the meter&apos;s Bluetooth on and no other program connected to it? Or type its address.</source>
         <translation>Rien trouvé. Le Bluetooth du multimètre est-il activé et aucun autre programme n&apos;y est-il connecté ? Ou saisissez son adresse.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="440"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="450"/>
         <source>No bridge found. Is qtdmm-bridge running with --mdns in this network? Or type host:port of the bridge or another RFC 2217 server.</source>
         <translation>Aucun pont trouvé. qtdmm-bridge tourne-t-il avec --mdns sur ce réseau ? Ou saisissez hôte:port du pont ou d’un autre serveur RFC 2217.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="442"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="452"/>
         <source>Nothing found. Is the meter switched on and its cable plugged in? Or type the port.</source>
         <translation>Rien trouvé. Le multimètre est-il allumé et son câble branché ? Ou saisissez le port.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="444"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="454"/>
         <source>Choose where the meter is, or type the port.</source>
         <translation>Choisissez où se trouve le multimètre, ou saisissez le port.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="565"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="575"/>
         <source>How is the meter connected?</source>
         <translation>Comment le multimètre est-il connecté ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="566"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="576"/>
         <source>Where is it connected?</source>
         <translation>Où est-il connecté ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="567"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="577"/>
         <source>Which meter is it?</source>
         <translation>Quel multimètre est-ce ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="568"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="578"/>
         <source>Where should it go?</source>
         <translation>Où doit-il aller ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="584"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="594"/>
         <source>A&amp;dd</source>
         <translation>A&amp;jouter</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="596"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="606"/>
         <source>Meter</source>
         <translation>Multimètre</translation>
     </message>
@@ -862,12 +862,12 @@
         <translation>Gamme automatique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="57"/>
+        <location filename="../../src/ui/controlbar.cpp" line="65"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="57"/>
+        <location filename="../../src/ui/controlbar.cpp" line="65"/>
         <source>Freeze the display</source>
         <translation>Figer l&apos;affichage</translation>
     </message>
@@ -943,16 +943,76 @@
     </message>
     <message>
         <location filename="../../src/ui/controlbar.cpp" line="56"/>
+        <source>MAX</source>
+        <translation>MAX</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="56"/>
+        <source>The meter shows its maximum</source>
+        <translation>L&apos;appareil affiche son maximum</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="57"/>
+        <source>MIN</source>
+        <translation>MIN</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="57"/>
+        <source>The meter shows its minimum</source>
+        <translation>L&apos;appareil affiche son minimum</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="58"/>
+        <source>AVG</source>
+        <translation>AVG</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="58"/>
+        <source>The meter shows its average</source>
+        <translation>L&apos;appareil affiche sa moyenne</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="59"/>
+        <source>UNIT</source>
+        <translation>UNIT</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="59"/>
+        <source>The next unit of the main value (lx/fc, dBA/dBC, %RH/%, m/s ... mph)</source>
+        <translation>L&apos;unité suivante de la valeur principale (lx/fc, dBA/dBC, %RH/%, m/s ... mph)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="61"/>
+        <source>°C/°F</source>
+        <translation>°C/°F</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="61"/>
+        <source>The unit of the temperature</source>
+        <translation>L&apos;unité de la température</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="62"/>
+        <source>FAST/SLOW</source>
+        <translation>FAST/SLOW</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="62"/>
+        <source>Fast or slow time weighting</source>
+        <translation>Pondération temporelle rapide ou lente</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/controlbar.cpp" line="64"/>
         <source>LIGHT</source>
         <translation>LIGHT</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="56"/>
+        <location filename="../../src/ui/controlbar.cpp" line="64"/>
         <source>The display backlight</source>
         <translation>Le rétroéclairage de l&apos;afficheur</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="78"/>
+        <location filename="../../src/ui/controlbar.cpp" line="86"/>
         <source>Hold the key to leave it, as on the meter.</source>
         <translation>Maintenez la touche enfoncée pour en sortir, comme sur l&apos;appareil.</translation>
     </message>
@@ -1430,12 +1490,12 @@ puis déconnectez-vous et reconnectez-vous.</translation>
 <context>
     <name>FoldButton</name>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="266"/>
+        <location filename="../../src/ui/controlbar.cpp" line="283"/>
         <source>Show controls</source>
         <translation>Afficher les commandes</translation>
     </message>
     <message>
-        <location filename="../../src/ui/controlbar.cpp" line="266"/>
+        <location filename="../../src/ui/controlbar.cpp" line="283"/>
         <source>Hide controls</source>
         <translation>Masquer les commandes</translation>
     </message>

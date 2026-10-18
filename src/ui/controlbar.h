@@ -16,9 +16,9 @@ struct Reading;
 /// LIGHT and HOLD on the right - that wrap to a second row when the window
 /// is narrow; a group without a key of the meter is hidden.
 ///
-/// HOLD, AUTO, REL, MIN/MAX and PEAK show the meter's state as the readings
-/// report it, not the last click; RANGE, SELECT, Hz/% and LIGHT are plain
-/// keys. MIN/MAX and PEAK are left as on the meter: by holding the key
+/// HOLD, AUTO, REL, MIN/MAX, PEAK, MAX, MIN and AVG show the meter's state as
+/// the readings report it, not the last click; RANGE, SELECT, Hz/%, UNIT,
+/// °C/°F, FAST/SLOW and LIGHT are plain keys. MIN/MAX and PEAK are left as on the meter: by holding the key
 /// (keyPressed("minmax_off")). The UT202BT's A~ and NCV/PEAK keys held send
 /// another key (inrush, peak capture: "fn_a_long", "fn_ncv_long"). The keys are enabled while the meter is
 /// connected; setProtocol() hides those the meter does not have (PEAK on
@@ -33,9 +33,9 @@ public:
   static bool supported(const DmmDecoder::DMMInfo &info);
 
   void setConnected(bool connected);
-  /// Shows the keys the decoder of @p format can press
-  /// (DmmDecoder::keyRequest()).
-  void setProtocol(FrameFormat::DataFormat format);
+  /// Shows the keys the meter @p model has, read by the decoder of @p format
+  /// (DmmDecoder::hasKey()).
+  void setProtocol(FrameFormat::DataFormat format, const QString &model);
   /// Holding MIN/MAX or PEAK this long leaves it (ms).
   static constexpr int kLongPressMs = 700;
 
@@ -50,7 +50,8 @@ public Q_SLOTS:
 
 Q_SIGNALS:
   /// "select1", "select2", "range", "auto", "hold", "rel", "minmax",
-  /// "minmax_off", "peak", "peak_off", "lamp" (DmmDecoder::keyRequest()).
+  /// "minmax_off", "peak", "peak_off", "max", "min", "avg", "unit", "unit2",
+  /// "weighting", "lamp" (DmmDecoder::keyRequest()).
   void keyPressed(const QString &key);
 
 protected:
@@ -64,6 +65,9 @@ private:
   QToolButton *m_rel = nullptr;
   QToolButton *m_minmax = nullptr;
   QToolButton *m_peak = nullptr;
+  QToolButton *m_max = nullptr;
+  QToolButton *m_min = nullptr;
+  QToolButton *m_avg = nullptr;
   /// Places the groups in rows for @p width; returns the height used.
   int layoutGroups(int width, bool apply) const;
 };

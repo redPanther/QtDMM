@@ -310,7 +310,8 @@ if args.allow_control:
     @mcp.tool()
     def press_key(key: str) -> str:
         """Presses a key of the meter (QTDMM:KEY), one of those the tool keys lists: "hold", "range",
-        "select1", ... Only UNI-T Bluetooth meters (UT60BT, UT61B+/D+/E+, UT161) have keys."""
+        "select1", "max", "unit", ... Only UNI-T Bluetooth meters (UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV
+        meters UT333BT, UT353BT, UT363BT, UT383BT) have keys."""
         return command('QTDMM:KEY "' + key.replace('"', '""') + '"')
 
 
