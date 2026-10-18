@@ -5,13 +5,16 @@ sdk: org.kde.Sdk
 command: qtdmm
 
 finish-args:
+  # serial ports (/dev/ttyUSB*, /dev/ttyACM*) and HID meters (/dev/hidraw*);
+  # access to hidraw still needs the udev rule on the host
   - --device=all
+  # SCPI server, HiSLIP, VXI-11, mDNS, sigrok-free bench meters over LAN
   - --share=network
+  # instances find each other through shared memory; X11 shared memory
   - --share=ipc
   - --socket=fallback-x11
   - --socket=wayland
-  - --socket=pulseaudio
-  - --allow=bluetooth
+  # Bluetooth LE meters (UT60BT, UNI-T iENV, Victron) through BlueZ
   - --system-talk-name=org.bluez
 
 modules:
@@ -19,25 +22,38 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
-      - -DCMAKE_INSTALL_PREFIX=/app
       - -DCMAKE_INSTALL_LIBDIR=lib
-      - -DHIDAPI_INSTALL_TARGETS=ON
       - -DHIDAPI_WITH_HIDRAW=ON
       - -DHIDAPI_WITH_LIBUSB=OFF
+    cleanup:
+      - /include
+      - /lib/cmake
+      - /lib/pkgconfig
+      - /share/doc
     sources:
       - type: git
         url: https://github.com/libusb/hidapi.git
-        branch: master
+        tag: hidapi-0.14.0
+        commit: d3013f0af3f4029d82872c1a9487ea461a56dee4
 
   - name: qtdmm
     buildsystem: cmake-ninja
-    build-options:
-      env:
-        PKG_CONFIG_PATH: /app/lib64/pkgconfig:/app/lib/pkgconfig
+    builddir: true
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
-      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DBUILD_TESTING=OFF
     sources:
-      - type: git
-        url: https://github.com/qtdmm/QtDMM.git
-        branch: master
+      # the working tree, with its .git for the version (git describe); a
+      # release build uses the tag instead:
+      #   type: git, url: https://github.com/qtdmm/QtDMM.git, tag: <version>, commit: <hash>
+      - type: dir
+        path: ../..
+        skip:
+          - build
+          - bin
+          - packages
+          - site
+          - Testing
+          - builddir
+          - repo
+          - .flatpak-builder
