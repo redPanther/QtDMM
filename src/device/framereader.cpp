@@ -26,7 +26,6 @@
 #include <QtSerialPort>
 
 #include <stdio.h>
-#include <iostream>
 
 #include "device/framereader.h"
 
@@ -88,7 +87,6 @@ void FrameReader::timer()
 
 void FrameReader::startRead()
 {
-  //std::cerr << "start read" << std::endl;
   m_readValue = true;
   m_sendRequest = true;
 }

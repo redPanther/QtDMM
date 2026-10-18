@@ -444,8 +444,6 @@ void GraphWidget::print(QPrinter *prt, const QString &title, const QString &comm
              w - maxWidth - 10, tHeight, Qt::AlignLeft | Qt::AlignVCenter,
              tr("%1 Seconds").arg(m_store->sampleTime() / 10.0));
 
-  //p.setFont( QFont( "Helvetica", 10 ));
-
   QRect cRect = p.boundingRect(0, 0, w, h, Qt::AlignTop | Qt::AlignLeft | Qt::TextWordWrap, comment);
 
   p.drawText(0, tRect.height() + 20 + 2 * tHeight, w, cRect.height(),
@@ -1965,43 +1963,26 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
   else if (ev->button() == Qt::RightButton)
   {
     m_popup->clear();
+    // an entry of the menu; popupSLOT() acts on its "ID"
+    auto item = [this](const QString &text, int id)
+    {
+      QAction *a = m_popup->addAction(text);
+      a->setProperty("ID", id);
+      return a;
+    };
 
     if (m_store->isRunning())
-    {
-      QAction *action = new QAction(tr("Stop recording"), m_popup);
-      action->setProperty("ID", IDStopRecorder);
-      m_popup->addAction(action);
-      //m_popup->insertItem( tr("Stop recorder"), IDStopRecorder );
-    }
+      item(tr("Stop recording"), IDStopRecorder);
     else
-    {
-      QAction *action = new QAction(tr("Start recording"), m_popup);
-      action->setProperty("ID", IDStartRecorder);
-      m_popup->addAction(action);
-      //m_popup->insertItem( tr("Start recorder"), IDStartRecorder );
-    }
+      item(tr("Start recording"), IDStartRecorder);
     if (m_store->state() == RecordingStore::View)
-    {
-      QAction *action = new QAction(tr("Live"), m_popup);
-      action->setProperty("ID", IDLive);
-      m_popup->addAction(action);
-    }
-    QAction *action = new QAction(tr("Clear graph"), m_popup);
-    action->setProperty("ID", IDClearGraph);
-    m_popup->addAction(action);
-    //m_popup->insertItem( tr("Clear graph"), IDClearGraph );
+      item(tr("Live"), IDLive);
+    item(tr("Clear graph"), IDClearGraph);
     m_popup->addSeparator();
 
-    action = new QAction(tr("Configure..."), m_popup);
-    action->setProperty("ID", IDConfigure);
-    m_popup->addAction(action);
-    //m_popup->insertItem( tr("Configure..."), IDConfigure );
-    action = new QAction(tr("Copy image"), m_popup);
-    action->setProperty("ID", IDCopyImage);
-    m_popup->addAction(action);
-    action = new QAction(tr("Export image..."), m_popup);
-    action->setProperty("ID", IDExportImage);
-    m_popup->addAction(action);
+    item(tr("Configure..."), IDConfigure);
+    item(tr("Copy image"), IDCopyImage);
+    item(tr("Export image..."), IDExportImage);
 
     // this graph's colours: the default from the settings page, or one of
     // the variants for this graph only
@@ -2052,12 +2033,10 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     }
     reference->addSeparator();
     refEntry(tr("&Off"), RefOff);
-    QAction *overview = m_popup->addAction(tr("Over&view"));
-    overview->setProperty("ID", IDMinimap);
+    QAction *overview = item(tr("Over&view"), IDMinimap);
     overview->setCheckable(true);
     overview->setChecked(m_minimapOn);
-    QAction *envelope = m_popup->addAction(tr("Min/max &band"));
-    envelope->setProperty("ID", IDEnvelope);
+    QAction *envelope = item(tr("Min/max &band"), IDEnvelope);
     envelope->setCheckable(true);
     envelope->setChecked(m_envelopeOn);
     // the meter's other values: each can be hidden
@@ -2079,22 +2058,13 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
       }
     }
     if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
-    {
-      QAction *a = m_popup->addAction(tr("Remove time cursors"));
-      a->setProperty("ID", IDClearCursors);
-    }
+      item(tr("Remove time cursors"), IDClearCursors);
 
     if (!m_store->isRunning())
     {
       m_popup->addSeparator();
-      QAction *action = new QAction(tr("Export data..."), m_popup);
-      action->setProperty("ID", IDExportData);
-      m_popup->addAction(action);
-      //m_popup->insertItem( tr("Export data..."), IDExportData );
-      action = new QAction(tr("Import data..."), m_popup);
-      action->setProperty("ID", IDImportData);
-      m_popup->addAction(action);
-      //m_popup->insertItem( tr("Import data..."), IDImportData );
+      item(tr("Export data..."), IDExportData);
+      item(tr("Import data..."), IDImportData);
     }
 
     m_popup->popup(globalPos);

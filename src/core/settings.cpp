@@ -67,7 +67,6 @@ Settings::Settings(const QString &instance_id, const QString &config_path, QObje
     QFile file(m_qsettings->fileName());
     m_fileExists = file.exists();
     m_filename = m_qsettings->fileName();
-    //qInfo() << "config file: " << m_qsettings->fileName();
   }
 }
 
@@ -76,7 +75,6 @@ QStringList Settings::getConfigInstances()
   QDir dir(m_configPath);
   if (!dir.exists())
     return {};
-  //qInfo() << m_configPath << m_configBaseFileName << m_configFileNameSuffix;
   QString pattern = QString("%1*%2")
                       .arg(m_configBaseFileName)
                       .arg(m_configFileNameSuffix.isEmpty() ? "" : "." + m_configFileNameSuffix);
@@ -103,9 +101,6 @@ QStringList Settings::getConfigInstances()
     result.removeAll("default");
     result.prepend("default");
   }
-
-  //for (auto item : result)
-  //  qInfo() << item;
 
   return result;
 }
