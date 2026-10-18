@@ -312,6 +312,11 @@ public:
   /// Integration curve: shown, scale factor, threshold (values at or below
   /// it reset the sum) and offset.
   void             setIntegration(bool, double, double, double);
+  /// Which value of the meter the integration curve integrates: 0 the main
+  /// value, 1 the second display (Graph/int-value). Without that value the
+  /// curve is not drawn; it goes on the axis its value is on.
+  void             setIntegrationValue(int id);
+  int              integrationValue() const { return m_intValueId; }
   void             setSettings(Settings *settings) { m_cfg = settings; }
   /// Since 26.2 the integral is one over time (unit x s), no longer the sum
   /// of the samples. Once per settings file Graph/int-scale is divided by
@@ -477,6 +482,7 @@ protected:
   static QList<QPointF> withoutGaps(const QList<QPointF> &points);
   static int       finiteTail(const QList<QPointF> &points, int tail);
   void             appendToSeries();
+  void             appendIntegral(const RecordingSeries &series, int first, int last);
   void             onAppended(bool shifted);
   void             onCleared();
   void             onStateChanged();
@@ -542,10 +548,14 @@ protected:
   double           m_scale2Min = 1e40;
   double           m_scale2Max = -1e40;
   QSet<int>        m_hiddenValues;       ///< the meter's values the user hid
+  int              m_intValueId = 0;     ///< setIntegrationValue()
   QLabel          *m_legend = nullptr;
   QColor           extraColor(int i) const;
   void             rebuildExtras();
   void             onExtraAppended(int i);
+  void             rebuildOtherIntegral();
+  /// The integration curve (line and points) on @p axis.
+  void             integralOnAxis(QAbstractAxis *axis);
   void             updateLegend();
   /// The right axis from m_scale2Min/Max, with the left axis' tick count.
   void             updateRightAxis();

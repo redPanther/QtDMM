@@ -159,7 +159,8 @@ were; the integration curve carries on across a gap.
   menu, **Values**, hides or shows each of them; that is kept with the
   window layout. The time cursors show the other values too; the
   reference line, the band, the overview, the statistics between the
-  cursors, the triggers and the export are the main value's.
+  cursors, the triggers and the export are the main value's; the
+  integration curve can take value 2 (see *Integration* below).
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
   keyboard: Ctrl++ / Ctrl+- zoom, Ctrl+0 shows the whole recording, after a
   click into the graph also `+`, `-`, `0`, the arrow keys, Home and End (see
@@ -199,7 +200,11 @@ were; the integration curve carries on across a gap.
   energy over time. Each reading counts for the time it was shown. For
   ampere-hours or watt-hours set the scale to 1/3600, `0.000277778`. A
   scale set before version 26.2, when the curve was the sum of the samples,
-  is converted once, so the curve looks as before.
+  is converted once, so the curve looks as before. **Apply to** chooses the value
+  it integrates: value 1, the main display, or value 2, the second display
+  of a meter that has one (a current on a Victron, for instance); it then
+  goes on that value's axis. Without a second display there is no curve
+  for value 2.
 - **Print** (Ctrl+P) prints the graph with a title and comment.
 
 ## Colours

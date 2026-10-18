@@ -453,9 +453,22 @@ int RecordingStore::extraIndex(int id) const
 void RecordingStore::appendExtraPoint(int i, RawPoint p)
 {
   RecordingSeries &s = m_extra[i];
+  // the integral as for the main value (appendPoint()): the graph can draw
+  // it for a value other than the main one
+  double run = s.runningIntegral;
   if (!s.isEmpty())
-    p.t = qMax(p.t, s.last().t);
-  p.integral = qQNaN();
+  {
+    const RawPoint &prev = s.last();
+    p.t = qMax(p.t, prev.t);
+    if (!prev.gap() && prev.value > m_integrationThreshold)
+      run += prev.value * double(p.t - prev.t) / 1000.0;
+  }
+  else
+    run = 0;
+  if (!p.gap() && p.value <= m_integrationThreshold)
+    run = 0;
+  s.runningIntegral = run;
+  p.integral = p.gap() ? qQNaN() : run;
   s.append(p);
   if (m_state == Record)
     m_dirty = true;

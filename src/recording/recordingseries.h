@@ -35,6 +35,7 @@ public:
   PortKey port;    ///< what the series measures; invalid until the first value says
   QString unit;    ///< base unit without SI prefix ("V")
   int     id = 0;  ///< which value of the meter (Reading::id): 0 the main value, 1.. the others
+  double  runningIntegral = 0;   ///< the integral up to the last point, carried over gaps (the store's)
 
   int      count() const { return int(m_points.size()) - m_head; }
   bool     isEmpty() const { return count() == 0; }

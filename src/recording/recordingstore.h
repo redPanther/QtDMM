@@ -51,8 +51,8 @@ struct LoggedReading
 /// While recording it keeps every main reading (id 0) with its time, as a
 /// RecordingSeries of RawPoint: setReading() from the MeterController. The
 /// other values of the meter (a second display, id > 0) go into series of
-/// their own on the same time axis (extra()); the triggers, the integral,
-/// the length, the marks and the export are the main value's. An
+/// their own on the same time axis (extra()), with their integral too; the
+/// triggers, the length, the marks and the export are the main value's. An
 /// overload is a point without a value, and so is the moment the value went
 /// stale (setStale()). The sample time is no longer the rate it records at
 /// but the grid of the export: grid() gives the time-weighted mean of every
@@ -177,7 +177,8 @@ public:
   /// they began: one per value and port. When a value measures something
   /// else (a second display from Hz to %), its series ends with a gap and a
   /// new one begins; the recording goes on. Their readings count from the
-  /// main value's first one; a display that is off is a gap. No integral.
+  /// main value's first one; a display that is off is a gap. Their points
+  /// carry the integral as the main value's do (the graph may draw it).
   int         extraCount() const { return int(m_extra.size()); }
   const RecordingSeries &extra(int i) const { return m_extra.at(i); }
   /// ms since the start the recording covers: up to now while it runs (and

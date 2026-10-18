@@ -122,6 +122,7 @@ public:
   double                intThreshold() const;
   double                intOffset() const;
   bool                  showIntegration() const;
+  int                   intValue() const;
   /// @}
 
   /// @name Recording page

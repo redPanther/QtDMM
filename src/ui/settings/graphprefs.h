@@ -66,6 +66,8 @@ public:
   /// @name Integration curve
   /// @{
   bool          showIntegration() const;
+  /// Which value the curve integrates: 0 the main value, 1 the second display.
+  int           intValue() const;
   QColor        intColor() const;
   QColor        intThresholdColor() const;
   int           intLineWidth() const;
@@ -105,6 +107,7 @@ private:
   QComboBox    *sizeUnit;
 
   QCheckBox    *ui_showInt;
+  QComboBox    *ui_intValue;
   QList<QWidget *> m_intRows;
   ColorButton  *ui_intColor, *ui_intThresholdColor;
   QComboBox    *ui_intLineMode, *ui_intPointMode;

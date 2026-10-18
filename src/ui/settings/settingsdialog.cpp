@@ -596,6 +596,11 @@ bool SettingsDialog::showIntegration() const
   return m_graph->showIntegration();
 }
 
+int SettingsDialog::intValue() const
+{
+  return m_graph->intValue();
+}
+
 QColor SettingsDialog::intColor() const
 {
   return m_graph->intColor();

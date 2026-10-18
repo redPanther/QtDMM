@@ -122,12 +122,15 @@ int main(int argc, char **argv)
     check(store.count() == 1 && store.extraCount() == 1, QString("other value: %1 series").arg(store.extraCount()));
     const RecordingSeries &hz = store.extra(0);
     check(hz.id == 1 && hz.unit == "Hz" && hz.port.quantity == Quantity::Frequency && hz.count() == 1
-            && hz.last().t == 10 && hz.last().value == 50 && std::isnan(hz.last().integral),
+            && hz.last().t == 10 && hz.last().value == 50 && hz.last().integral == 0,
           QString("other value: id %1 unit %2 t %3").arg(hz.id).arg(hz.unit).arg(hz.count() ? hz.last().t : -1));
     check(began.count() == 1 && added.count() == 0, "other value: a series began");
     store.setReading(clock.at(500, other(1, 51, "51.00", "Hz")));
     check(store.extra(0).count() == 2 && added.count() == 1 && added.last().at(0).toInt() == 0,
           "other value: the next reading appended");
+    // its integral over time, as the main value's: 50 Hz for 0.24 s
+    check(std::abs(store.extra(0).last().integral - 12) < 1e-9,
+          QString("other value: integral %1, expected 12").arg(store.extra(0).last().integral));
 
     // Hz -> %: the series ends with a gap, a new one begins, still recording
     store.setReading(clock.at(700, other(1, 25, "25.0", "%")));

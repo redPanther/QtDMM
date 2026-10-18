@@ -1891,6 +1891,29 @@ int main(int argc, char **argv)
           QString("°C goes on: %1 -> %2 points, axis up to %3").arg(before).arg(graph.extraCurve(celsius)->count())
             .arg(graph.rightAxis()->max()));
 
+    // the integration curve of value 2: its series' integral, on its axis
+    {
+      auto *intSeries = qobject_cast<QXYSeries *>(graph.findChild<QChartView *>()->chart()->series().at(2));
+      graph.setIntegration(true, 1.0, 0.0, 0.0);
+      graph.setIntegrationValue(1);
+      const RecordingSeries &c = store->extra(celsius);
+      check(intSeries->count() > 5 && intSeries->attachedAxes().contains(graph.rightAxis())
+              && std::abs(intSeries->points().last().y() - c.last().integral) < 1e-6,
+            QString("integral of value 2: %1 points, last %2, the store's %3")
+              .arg(intSeries->count()).arg(intSeries->count() ? intSeries->points().last().y() : 0).arg(c.last().integral));
+      const double before = c.last().integral;
+      feed.value(1.0);
+      feed.other(1, 30, "°C", Quantity::Temperature);
+      check(store->extra(celsius).last().integral > before
+              && std::abs(intSeries->points().last().y() - store->extra(celsius).last().integral) < 1e-6,
+            "integral of value 2 goes on with its readings");
+      graph.setIntegrationValue(0);
+      check(intSeries->attachedAxes().contains(graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical).first())
+              && !intSeries->attachedAxes().contains(graph.rightAxis())
+              && std::abs(intSeries->points().last().y() - store->series().last().integral) < 1e-6,
+            "integral of value 1 again, on the left");
+      graph.setIntegration(false, 1.0, 0.0, 0.0);
+    }
     // a time cursor shows the other values drawn there
     graph.setTimeCursor(0, 2000);
     check(graph.timeCursorText().contains("°C") && graph.timeCursorText().contains("500 mV")
