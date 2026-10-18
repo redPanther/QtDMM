@@ -885,6 +885,12 @@ int main(int argc, char **argv)
     graph.startSLOT();
     feed.value(4700);   // ohms now; the prefix by the axis
     check(yTitle(graph) == "[kOhm]", "unit: a new recording is in kOhm as the meter shows, got " + yTitle(graph));
+    // a unit of its own takes no prefix: 1500 ppm, not 1.5 kppm
+    graph.setUnit("ppm");
+    graph.startSLOT();
+    for (int i = 0; i < 5; ++i)
+      feed.value(1500 + i);
+    check(yTitle(graph) == "[ppm]", "unit: ppm without a prefix, got " + yTitle(graph));
   }
 
   // --- 5n2. the y labels in the meter's prefix: 350 mV, not 0.35 V ---

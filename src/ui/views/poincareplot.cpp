@@ -16,15 +16,6 @@
 #include "core/settings.h"
 #include "core/siprefix.h"
 
-namespace
-{
-// units that take no SI prefix on the axis
-bool plainUnit(const QString &unit)
-{
-  return unit.isEmpty() || unit.startsWith(QChar(0x00b0)) || unit == QLatin1String("%");
-}
-}
-
 PoincarePlot::PoincarePlot(QWidget *parent) :
   QWidget(parent)
 {
@@ -257,8 +248,7 @@ void PoincarePlot::render(QPainter &p, const QRect &area)
 
   // the axis labels with one SI prefix for all of them
   QString prefix;
-  if (!plainUnit(m_unit))
-    SiPrefix::scale(qMax(std::abs(lo), std::abs(hi)), &prefix);
+  SiPrefix::scale(qMax(std::abs(lo), std::abs(hi)), m_unit, &prefix);
   const double factor = SiPrefix::factor(prefix);
   const int decimals = qMax(0, int(-std::floor(std::log10(step / factor) + 1e-9)));
   const QString unit = prefix + m_unit;
@@ -330,11 +320,9 @@ void PoincarePlot::render(QPainter &p, const QRect &area)
   // the numbers in the corner
   auto valueText = [&](double v)
   {
-    if (plainUnit(m_unit))
-      return QString("%1 %2").arg(QString::number(v, 'g', 4), m_unit).trimmed();
     QString pre;
-    const double scaled = SiPrefix::scale(v, &pre);
-    return QString("%1 %2%3").arg(QString::number(scaled, 'g', 4), pre, m_unit);
+    const double scaled = SiPrefix::scale(v, m_unit, &pre);
+    return QString("%1 %2%3").arg(QString::number(scaled, 'g', 4), pre, m_unit).trimmed();
   };
   QStringList lines;
   if (std::isfinite(m_stats.sd1))

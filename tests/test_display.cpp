@@ -59,6 +59,20 @@ int main(int argc, char **argv)
           QString("%1 stays whole").arg(whole));
   check(SiPrefix::split("mV").prefix == "m" && SiPrefix::split("kOhm").baseUnit == "Ohm", "mV, kOhm split");
 
+  // ... and take no prefix, nor do °C/°F, % and no unit: 1200 ppm, not 1.2 kppm
+  for (const char *plain : { "ppm", "%RH", "m/s", "dBA", "cosphi", "%", "C", "dF", "°C", "" })
+  {
+    QString prefix = "x";
+    const double v = SiPrefix::scale(1200.0, QString::fromUtf8(plain), &prefix);
+    check(!SiPrefix::takesPrefix(QString::fromUtf8(plain)) && v == 1200.0 && prefix.isEmpty(),
+          QString("%1 takes no prefix").arg(plain));
+  }
+  {
+    QString prefix;
+    check(SiPrefix::takesPrefix("V") && SiPrefix::format(1200.0, "V", &prefix) == "1.2" && prefix == "k", "1200 V is 1.2 kV");
+    check(SiPrefix::format(1234.5, "ppm", &prefix) == "1234.5" && prefix.isEmpty(), "1234.5 ppm stays");
+  }
+
   // --- 1c. leading zeros go, as on the meter (table, analog meter) ---
   check(SiPrefix::withoutLeadingZeros("000.00") == "0.00", "000.00 -> 0.00");
   check(SiPrefix::withoutLeadingZeros("-029.30") == "-29.30", "-029.30 -> -29.30");

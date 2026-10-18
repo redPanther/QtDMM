@@ -392,7 +392,7 @@ void GraphWidget::handleChartWheel(QWheelEvent *ev)
 QString GraphWidget::formatEngineeringValue(double value, QString *unit) const
 {
   QString prefix;
-  const QString text = SiPrefix::format(value, &prefix);
+  const QString text = SiPrefix::format(value, m_store->unit(), &prefix);
   if (unit)
     *unit = prefix + m_store->unit();
   return text;

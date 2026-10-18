@@ -276,7 +276,7 @@ void ReadingsWidget::updateStats()
   auto fmt = [&](double v)
   {
     QString prefix;
-    return QString::number(SiPrefix::scale(v, &prefix), 'g', 5) + nbsp + prefix + s.unit;
+    return QString::number(SiPrefix::scale(v, s.unit, &prefix), 'g', 5) + nbsp + prefix + s.unit;
   };
   auto entry = [&](const QString &e) { return QString(e).replace(' ', nbsp); };
   QStringList entries { entry(tr("%n reading(s)", "", s.count)) };
