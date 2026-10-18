@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "device/decoders/uni_t_ienv.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include <QHash>
 #include <QRegularExpression>
 
@@ -35,18 +38,26 @@ constexpr quint8 kModeFast = 0x34;
 // is what a unit key selects (a ring, so the wind speed's five units can be
 // stepped through). "FC", "dBC" and the wind units are the vendor app's, not
 // captured.
+//
+// The display text is in the base unit (°C, m/s, lx) whatever unit the meter
+// shows: the unit id only tells which one it shows, the value has to be
+// converted (scale, then offset), as UNI-T's app does. Tried with °F on a
+// UT333BT; the wind and light units follow the app (its mph factor is a
+// little off, the exact one is used here).
 struct UnitInfo
 {
   quint8 id;
   const char *name;
   quint8 next;
+  double scale = 1;
+  double offset = 0;
 };
 const UnitInfo kUnits[] = {
-  { 0x30, "°C",     0x31 }, { 0x31, "°F",  0x30 },
+  { 0x30, "°C",     0x31 }, { 0x31, "°F",  0x30, 1.8, 32 },
   { 0x32, "%RH",    0x33 }, { 0x33, "%",   0x32 },
-  { 0x34, "m/s",    0x35 }, { 0x35, "km/h", 0x36 }, { 0x36, "ft/min", 0x37 },
-  { 0x37, "knots",  0x38 }, { 0x38, "mph", 0x34 },
-  { 0x3B, "lx",     0x3C }, { 0x3C, "fc",  0x3B },
+  { 0x34, "m/s",    0x35 }, { 0x35, "km/h", 0x36, 3.6 }, { 0x36, "ft/min", 0x37, 60 / 0.3048 },
+  { 0x37, "knots",  0x38, 3600 / 1852.0 }, { 0x38, "mph", 0x34, 3600 / 1609.344 },
+  { 0x3B, "lx",     0x3C }, { 0x3C, "fc",  0x3B, 1 / 10.7639104 },
   { 0x3D, "dBA",    0x3E }, { 0x3E, "dBC", 0x3D },
 };
 
@@ -56,6 +67,19 @@ const UnitInfo *findUnit(quint8 id)
     if (u.id == id)
       return &u;
   return nullptr;
+}
+
+// @p base in the unit @p u, as text with as many digits as the meter's
+// (23.4 °C -> 74.1 °F, 1234 lx -> 114.6 fc)
+QString convertText(double base, const QString &text, const UnitInfo &u, double *value)
+{
+  *value = base * u.scale + u.offset;
+  int digits = 0;
+  for (QChar c : text)
+    digits += c.isDigit();
+  const double mag = std::fabs(*value);
+  const int intDigits = mag < 1 ? 1 : int(std::floor(std::log10(mag))) + 1;
+  return QString::number(*value, 'f', std::max(0, digits - intDigits));
 }
 
 const QByteArray kPoll(1, char(0x5E));
@@ -215,18 +239,23 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray 
   if (!ok && !text.contains(letters))
     return std::nullopt;
 
-  // the unit from the unit id; an id not listed falls back to the meter's own
-  // unit word (frame bytes 11..13)
+  // the unit from the unit id, the value converted from the base unit; an id
+  // not listed falls back to the meter's own unit word (frame bytes 11..13)
   QString unit;
+  double value = shown;
   if (const UnitInfo *u = findUnit(unitId))
+  {
     unit = QString::fromUtf8(u->name);
+    if (ok && (u->scale != 1 || u->offset != 0))
+      text = convertText(shown, text, *u, &value);
+  }
   else
     unit = QString::fromLatin1(reinterpret_cast<const char *>(f + 11), 3).trimmed();
 
   if (temp)
   {
     m_tempVal = text;
-    m_tempD = ok ? shown : 0;
+    m_tempD = ok ? value : 0;
     m_tempUnit = unit;
     m_haveTemp = true;
     if (!m_haveMain)
@@ -240,7 +269,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray 
   }
 
   m_result.val = text;
-  m_result.dval = ok ? shown : 0;
+  m_result.dval = ok ? value : 0;
   m_result.unit = unit;
 
   // status byte: bit0 HOLD, bit1 AVG, bit2 MIN, bit3 MAX (HOLD confirmed on

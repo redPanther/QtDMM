@@ -16,7 +16,9 @@
 /// (UT333BT / UT363BT, the second value). The display is the value with sign
 /// and decimal point. Frame byte 14 is the unit id (0x30 C, 0x31 F, 0x32
 /// %RH, 0x33 %, 0x34..0x38 m/s km/h ft/min knots mph, 0x3B lx, 0x3C fc,
-/// 0x3D dBA, 0x3E dBC), the id space the SET commands use too. Status byte
+/// 0x3D dBA, 0x3E dBC), the id space the SET commands use too. The display
+/// stays in the base unit (°C, m/s, lx): the decoder converts it to the unit
+/// shown. Status byte
 /// 16: bit0 HOLD, bit1 AVG, bit2 MIN, bit3 MAX. The checksum is the 16-bit BE
 /// sum of bytes 0..16, as in the iDMM frame.
 ///

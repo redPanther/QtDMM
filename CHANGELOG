@@ -43,6 +43,15 @@
   open that port (QtDMM never asks for extra rights; the handbook says how); --vxi11-rpc picks it for one run,
   --vxi11-portmapper-port puts an own one on another port (for tests).
   Sidebar Services row VXI-11, mDNS _vxi-11._tcp. Only one program per computer can offer VXI-11
+- UNI-T meters over Bluetooth LE: the UT202BT clamp meter, with its V~, A~ (held: inrush), Ω and NCV/PEAK keys
+  under the display; the iENV meters UT333BT (humidity + temperature, tried), UT353BT (sound level), UT363BT
+  (wind speed + temperature) and UT383BT (light). Their keys under the display: HOLD, MAX and MIN (UT363BT: AVG),
+  the unit of the main value, °C/°F, FAST/SLOW, as each meter has them; the meter sends its value in °C, m/s
+  and lx, QtDMM shows it in the unit set on the meter. The models not tried yet are marked with *
+- New units: m/s (wind speed), %RH (relative humidity), dBA and dBC (sound level), no longer read as
+  milli-"/s" or unknown
+- Display: MAX, MIN and AVG light when the meter shows its own maximum, minimum or average (UNI-T iENV, APPA);
+  the AVG of APPA meters was lost on the way to the keys and the display
 - Flatpak: each release carries QtDMM-<version>-x86_64.flatpak (KDE runtime 6.11, hidapi inside): serial, USB/HID
   and Bluetooth meters, the SCPI server and several instances. HID meters still need the udev rule on the computer
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
