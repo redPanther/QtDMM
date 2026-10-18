@@ -10,10 +10,9 @@ on:
   push:
     tags: [ '[0-9][0-9].[1-9]*' ]
 
+# the builds only read; the job that makes the release has more
 permissions:
-  contents: write
-  # to start the Pages workflow again (see the end)
-  actions: write
+  contents: read
 
 jobs:
   linux:
@@ -36,6 +35,10 @@ jobs:
     needs: [ linux, windows, macos, flatpak ]
     if: ${{ !cancelled() && needs.linux.result == 'success' && needs.windows.result == 'success' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # to start the Pages workflow again (see the end)
+      actions: write
     steps:
     # all of the history: the tarball's .archive-version is git describe
     - uses: actions/checkout@v4
