@@ -85,19 +85,25 @@ void RFC2217SerialDevice::close()
   QIODevice::close();
 }
 
+// 0xff is the telnet IAC: in the data stream and in an option's data it
+// goes doubled
+static void appendEscaped(QByteArray &out, QByteArrayView data)
+{
+  out.reserve(out.size() + data.size() + 4);
+  for (char c : data)
+  {
+    out.append(c);
+    if (quint8(c) == 0xFF)
+      out.append(c);
+  }
+}
+
 qint64 RFC2217SerialDevice::writeData(const char *data, qint64 len)
 {
   if (!m_socket || !m_socket->isOpen())
     return -1;
-  // 0xff is the telnet IAC and has to be doubled in the data stream
   QByteArray escaped;
-  escaped.reserve(int(len) + 4);
-  for (qint64 i = 0; i < len; ++i)
-  {
-    escaped.append(data[i]);
-    if (quint8(data[i]) == 0xFF)
-      escaped.append(char(0xFF));
-  }
+  appendEscaped(escaped, QByteArrayView(data, len));
   return m_socket->write(escaped) < 0 ? -1 : len;
 }
 
@@ -113,7 +119,7 @@ void RFC2217SerialDevice::onReadyRead()
 // A binary protocol's 0xff bytes arrive as IAC IAC.
 void RFC2217SerialDevice::filterTelnet(const QByteArray &raw)
 {
-  const quint8 IAC = 0xFF, SB = 0xFA, SE = 0xF0, WILL = 0xFB, DONT = 0xFE;
+  const quint8 IAC = 0xFF, SB = 0xFA, WILL = 0xFB, DONT = 0xFE;
   for (char c : raw)
   {
     const quint8 b = quint8(c);
@@ -136,7 +142,8 @@ void RFC2217SerialDevice::filterTelnet(const QByteArray &raw)
         if (b == IAC) m_telnet = TelnetState::SubIac;
         break;
       case TelnetState::SubIac:
-        m_telnet = (b == SE || b != IAC) ? TelnetState::Data : TelnetState::Sub;
+        // IAC IAC is a 0xff of the option's data; IAC SE (or anything else) ends it
+        m_telnet = b == IAC ? TelnetState::Sub : TelnetState::Data;
         break;
     }
   }
@@ -177,7 +184,7 @@ void RFC2217SerialDevice::sendRFC2217Negotiation()
   sendPortOption(5, QByteArray(1, char(m_dmmInfo.rts ? 0x0b : 0x0c))); // RTS ON/OFF
 }
 
-// Sende IAC SB 0x2C <option> <data...> IAC SE
+// Sends IAC SB 0x2C <option> <data...> IAC SE
 void RFC2217SerialDevice::sendPortOption(quint8 option, const QByteArray &data)
 {
   if (!m_socket || !m_socket->isOpen()) return;
@@ -187,14 +194,7 @@ void RFC2217SerialDevice::sendPortOption(quint8 option, const QByteArray &data)
   pkt.append(char(0xFA)); // SB
   pkt.append(char(0x2C)); // COM-PORT-OPTION
   pkt.append(char(option));
-  pkt.append(data);
-
-  // Telnet IAC im Payload doppeln (escaping)
-  for (int i = 4; i < pkt.size(); ++i)
-  {
-    if ((quint8)pkt[i] == 0xFF)
-      pkt.insert(i++, static_cast<char>(0xFF));
-  }
+  appendEscaped(pkt, data);
 
   pkt.append(char(0xFF)); // IAC
   pkt.append(char(0xF0)); // SE
