@@ -185,6 +185,43 @@ int main(int argc, char **argv)
           "round-trip: re-exporting a re-imported file produced different CSV content");
   }
 
+  // --- 3a. the export has the other values the graph shows, a column
+  //         group each; an import brings them back as series ---
+  {
+    Settings cfg("export-values", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.setUnit("V");
+    Feed feed(graph);
+    graph.startSLOT();
+    // the first one comes before the main value: no time axis yet, dropped
+    for (int i = 0; i < 20; ++i)
+    {
+      feed.other(1, 50 + i, "Hz", Quantity::Frequency);
+      feed.value(1.0 + i * 0.1);
+    }
+    auto exported = [&](const QString &name)
+    {
+      const QString path = tmpDir.path() + "/" + name;
+      QFile f(path);
+      return graph.exportCsvFile(path, true) && f.open(QIODevice::ReadOnly | QIODevice::Text)
+               ? QString::fromUtf8(f.readAll()).split('\n', Qt::SkipEmptyParts)
+               : QStringList();
+    };
+    const QStringList hidden = exported("values_hidden.csv");
+    check(hidden.value(0) == "timestamp;time (s);value;unit;status", "export: a hidden value is not exported, " + hidden.value(0));
+    graph.setValueShown(1, true);
+    const QStringList shown = exported("values_shown.csv");
+    check(shown.value(0) == "timestamp;time (s);value;unit;status;value 2;unit 2;status 2" && shown.size() == 21
+            && shown.value(1).endsWith(";1;V;ok;;;") && shown.value(2).endsWith(";51;Hz;ok"),
+          "export: the value shown in a column group of its own, " + shown.value(0) + " | " + shown.value(1) + " | " + shown.value(2));
+    GraphWidget back(nullptr, &cfg);
+    back.resize(800, 500);
+    check(back.importCsvFile(tmpDir.path() + "/values_shown.csv") && back.store()->extraCount() == 1
+            && back.store()->extra(0).unit == "Hz" && back.store()->extra(0).count() == 19,
+          "import: value 2 comes back as a series");
+  }
+
   // --- 3b. time buttons (All / 1 min / 5 min / 30 min) top right ---
   {
     GraphWidget graph(nullptr, &settings);

@@ -237,13 +237,18 @@ public:
   /// The values for the CSV/spreadsheet export: the grid of the sample time,
   /// or with @p raw every reading at its time (a gap a NaN of its own),
   /// starting at the first.
-  Recording   toRecording(bool raw = false) const;
+  /// With @p extras (indices of extra()) the other values too, a column
+  /// group each on the same rows: on the grid their mean over the step, raw
+  /// a row at every reading of any of them, each value holding until its
+  /// next. Before a value began its cells are empty (CellState::None).
+  Recording   toRecording(bool raw = false, const QList<int> &extras = {}) const;
   /// Writes the recording (CSV, .xlsx or .ods by suffix), on the grid or
   /// with @p raw every reading; clears dirty(). In Live: the live window up
   /// to now.
-  bool        write(const QString &path, QString *error = nullptr, bool raw = false);
+  bool        write(const QString &path, QString *error = nullptr, bool raw = false, const QList<int> &extras = {});
   /// Replaces the recording by @p rec: start, sample time and values, each
-  /// at its time; the store is in View then. A recording on the grid of its
+  /// at its time, and its other values as extra() (value 2 is id 1 ...);
+  /// the store is in View then. A recording on the grid of its
   /// sample time stays one: it exports as it came.
   void        load(const Recording &rec);
   /// @}
@@ -373,6 +378,11 @@ private:
   /// Drops the extra points older than the main series keeps, and series
   /// that ended before it; true when anything went.
   bool        trimExtras();
+  /// grid() of @p series.
+  QVector<GridPoint> gridOf(const RecordingSeries &series, int tenths) const;
+  /// An overload has no value: NaN, with the sign of -OL that the
+  /// ReadingAdapter put on @p value.
+  static double overloadValue(double value) { return std::copysign(qQNaN(), value); }
 
   RecordingSeries m_series;
   QList<RecordingSeries> m_extra;   ///< the other values, extra()

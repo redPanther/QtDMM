@@ -2247,12 +2247,12 @@ puis déconnectez-vous et reconnectez-vous.</translation>
         <translation>Exporter les données</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="131"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="137"/>
         <source>Import data</source>
         <translation>Importer les données</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="131"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="137"/>
         <source>CSV (*.csv);;All files (*)</source>
         <translation>CSV (*.csv);;Tous les fichiers (*)</translation>
     </message>
@@ -2287,55 +2287,55 @@ puis déconnectez-vous et reconnectez-vous.</translation>
         <translation>Neutre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="187"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="193"/>
         <source>Scalable vector graphics (*.svg)</source>
         <translation>Graphique vectoriel évolutif (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="187"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="193"/>
         <source>PDF (*.pdf)</source>
         <translation>PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="188"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="194"/>
         <source>PNG image (*.png)</source>
         <translation>Image PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="188"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="194"/>
         <source>JPEG image (*.jpg)</source>
         <translation>Image JPEG (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="191"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="197"/>
         <source>Export image</source>
         <translation>Exporter l&apos;image</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="241"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="247"/>
         <source>QtDMM recording, %1</source>
         <translation>Enregistrement QtDMM, %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="242"/>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="258"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="248"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="264"/>
         <source>QtDMM graph</source>
         <translation>Graphique QtDMM</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="243"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="249"/>
         <source>%1 readings, unit %2</source>
         <translation>%1 mesures, unité %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="247"/>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="267"/>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="282"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="253"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="273"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="288"/>
         <source>Could not write %1</source>
         <translation>Impossible d&apos;écrire %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_export.cpp" line="286"/>
+        <location filename="../../src/ui/views/graphwidget_export.cpp" line="292"/>
         <source>Graph written to %1</source>
         <translation>Graphique écrit dans %1</translation>
     </message>
@@ -4667,58 +4667,63 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
 <context>
     <name>RecordingFile</name>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="41"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="125"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="114"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="270"/>
         <source>Cannot open file.</source>
         <translation>Impossible d&apos;ouvrir le fichier.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="49"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="79"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="122"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="206"/>
         <source>Oops! Seems not to be a valid file</source>
         <translation>Oups ! Ce fichier ne semble pas valide</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="57"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="138"/>
         <source>File contains only header</source>
         <translation>Le fichier ne contient que l&apos;en-tête</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="119"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="154"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="264"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="304"/>
         <source>Nothing to export.</source>
         <translation>Rien à exporter.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="157"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="307"/>
         <source>Recording</source>
         <translation>Enregistrement</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
         <source>timestamp</source>
         <translation>horodatage</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
         <source>time (s)</source>
         <translation>temps (s)</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
         <source>value</source>
         <translation>valeur</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="158"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
         <source>unit</source>
         <translation>unité</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording/recordingfile.cpp" line="308"/>
+        <source>status</source>
+        <translation>état</translation>
     </message>
 </context>
 <context>
     <name>RecordingStore</name>
     <message>
-        <location filename="../../src/recording/recordingstore.cpp" line="772"/>
+        <location filename="../../src/recording/recordingstore.cpp" line="904"/>
         <source>Trigger</source>
         <translation>Déclenchement</translation>
     </message>

@@ -171,8 +171,13 @@ void RecordingStore::setPreTrigger(int ms)
 
 QVector<GridPoint> RecordingStore::grid(int tenths) const
 {
+  return gridOf(m_series, tenths);
+}
+
+QVector<GridPoint> RecordingStore::gridOf(const RecordingSeries &series, int tenths) const
+{
   QVector<GridPoint> out;
-  const int n = m_series.count();
+  const int n = series.count();
   // a loaded file on this grid: its rows are the steps already (each one the
   // mean over the step before it), holding them on would shift them by one
   if (m_loadedGrid > 0 && m_loadedGrid == tenths)
@@ -180,7 +185,7 @@ QVector<GridPoint> RecordingStore::grid(int tenths) const
     out.reserve(n);
     for (int i = 0; i < n; ++i)
     {
-      const RawPoint &p = m_series.at(i);
+      const RawPoint &p = series.at(i);
       out.append({ p.t, p.value, p.integral, p.quality });
     }
     return out;
@@ -205,16 +210,16 @@ QVector<GridPoint> RecordingStore::grid(int tenths) const
   // at t counts from t on), the first one at the start
   auto before = [&](qint64 t)
   {
-    const int j = m_series.lowerBound(t);
-    return j > 0 ? j - 1 : j < n && m_series.at(j).t == t ? j : -1;
+    const int j = series.lowerBound(t);
+    return j > 0 ? j - 1 : j < n && series.at(j).t == t ? j : -1;
   };
   // the integral at time t: the last point's, plus its value since then
   auto integralAt = [&](qint64 t)
   {
     const int j = before(t);
-    if (j < 0 || m_series.at(j).gap())
+    if (j < 0 || series.at(j).gap())
       return qQNaN();
-    const RawPoint &p = m_series.at(j);
+    const RawPoint &p = series.at(j);
     return p.value > m_integrationThreshold ? p.integral + p.value * double(t - p.t) / 1000.0 : p.integral;
   };
 
@@ -227,8 +232,8 @@ QVector<GridPoint> RecordingStore::grid(int tenths) const
     {
       // the first step is the value at the start
       const int j = before(0);
-      g.value = j < 0 ? qQNaN() : m_series.at(j).value;
-      g.quality = j < 0 ? Quality::Stale : m_series.at(j).quality;
+      g.value = j < 0 ? qQNaN() : series.at(j).value;
+      g.quality = j < 0 ? Quality::Stale : series.at(j).quality;
     }
     else
     {
@@ -236,28 +241,33 @@ QVector<GridPoint> RecordingStore::grid(int tenths) const
       const qint64 a = g.t - step, b = g.t;
       double sum = 0, held = 0;
       Quality q = Quality::Valid;
-      int j = m_series.holding(a);
+      double overload = qQNaN();   // the last one in the step, with its sign
+      int j = series.holding(a);
       if (j < 0)
       {
         q = Quality::Stale;   // before the first reading: no value
         j = 0;
       }
-      for (; j < n && m_series.at(j).t < b; ++j)
+      for (; j < n && series.at(j).t < b; ++j)
       {
-        const RawPoint &p = m_series.at(j);
-        const qint64 until = j + 1 < n ? m_series.at(j + 1).t : qMax(end, p.t);
+        const RawPoint &p = series.at(j);
+        const qint64 until = j + 1 < n ? series.at(j + 1).t : qMax(end, p.t);
         const qint64 from = qMax(p.t, a), to = qMin(until, b);
         if (to <= from)
           continue;
         if (p.gap())
+        {
           q = worse(q, p.quality == Quality::Overload ? Quality::Overload : Quality::Stale);
+          if (p.quality == Quality::Overload)
+            overload = p.value;
+        }
         else
         {
           sum += p.value * double(to - from);
           held += double(to - from);
         }
       }
-      g.value = held > 0 ? sum / held : qQNaN();
+      g.value = held > 0 ? sum / held : q == Quality::Overload ? overload : qQNaN();
       // no value without a reason: the main value went stale
       g.quality = held > 0 || q != Quality::Valid ? q : Quality::Stale;
     }
@@ -266,38 +276,119 @@ QVector<GridPoint> RecordingStore::grid(int tenths) const
   return out;
 }
 
-Recording RecordingStore::toRecording(bool raw) const
+namespace
+{
+// what the file says of a point: a number, OL or -OL (the NaN's sign), or a gap
+CellState cellState(double value, Quality quality)
+{
+  if (std::isfinite(value))
+    return CellState::Ok;
+  if (quality == Quality::Overload)
+    return std::signbit(value) ? CellState::NegativeOverload : CellState::Overload;
+  return CellState::Gap;
+}
+}
+
+Recording RecordingStore::toRecording(bool raw, const QList<int> &extras) const
 {
   Recording rec;
   rec.sampleTimeTenths = m_sampleTime;
   rec.unit = m_unit;
+  QList<const RecordingSeries *> others;
+  for (int e : extras)
+    if (e >= 0 && e < m_extra.size() && !m_extra[e].isEmpty())
+      others << &m_extra[e];
+  rec.extra.resize(others.size());
+  for (int c = 0; c < others.size(); ++c)
+    rec.extra[c].unit = others[c]->unit;
   if (raw)
   {
-    // from the reading that holds at the origin on
+    // from the reading that holds at the origin on, a row at every reading
+    // of any of the values; each value holds until its next one
     const int n = m_series.count();
     const int first = qMax(0, m_series.holding(origin()));
     const qint64 t0 = first < n ? m_series.at(first).t : 0;
     rec.start = m_start.addMSecs(t0);
-    rec.values.reserve(n - first);
-    rec.times.reserve(n - first);
+    if (n == 0)
+      return rec;
+    QVector<qint64> times;
+    times.reserve(n - first);
     for (int i = first; i < n; ++i)
+      times << m_series.at(i).t;
+    for (const RecordingSeries *s : std::as_const(others))
     {
-      rec.values << m_series.at(i).value;
-      rec.times << m_series.at(i).t - t0;
+      QVector<qint64> merged;
+      merged.reserve(times.size() + s->count());
+      int i = 0, j = qMax(0, s->lowerBound(t0));
+      while (i < times.size() || j < s->count())
+      {
+        const qint64 t = j >= s->count() || (i < times.size() && times[i] <= s->at(j).t) ? times[i] : s->at(j).t;
+        merged << t;
+        while (i < times.size() && times[i] == t)
+          ++i;
+        while (j < s->count() && s->at(j).t == t)
+          ++j;
+      }
+      times = merged;
+    }
+    rec.values.reserve(times.size());
+    rec.states.reserve(times.size());
+    rec.times.reserve(times.size());
+    for (qint64 t : std::as_const(times))
+    {
+      // the last of the readings at this time
+      const RawPoint &p = m_series.at(qMax(0, m_series.holding(t)));
+      rec.values << p.value;
+      rec.states << cellState(p.value, p.quality);
+      rec.times << t - t0;
+      for (int c = 0; c < others.size(); ++c)
+      {
+        const int j = others[c]->holding(t);
+        rec.extra[c].values << (j < 0 ? qQNaN() : others[c]->at(j).value);
+        rec.extra[c].states << (j < 0 ? CellState::None : cellState(others[c]->at(j).value, others[c]->at(j).quality));
+      }
     }
     return rec;
   }
   const QVector<GridPoint> steps = grid(m_sampleTime);
   rec.start = m_start.addMSecs(steps.isEmpty() ? 0 : steps.first().t);
   rec.values.reserve(steps.size());
+  rec.states.reserve(steps.size());
   for (const GridPoint &g : steps)
+  {
     rec.values << g.value;
+    rec.states << cellState(g.value, g.quality);
+  }
+  // the other values on the same steps; a step before one began (all of it
+  // before its first reading) has none, nor has a row a loaded file had
+  // without it (gridOf() gives its rows as they were)
+  const bool asLoaded = m_loadedGrid > 0 && m_loadedGrid == m_sampleTime;
+  for (int c = 0; c < others.size(); ++c)
+  {
+    const RecordingSeries &s = *others[c];
+    const QVector<GridPoint> own = gridOf(s, m_sampleTime);
+    RecordingColumn &col = rec.extra[c];
+    col.values.reserve(steps.size());
+    col.states.reserve(steps.size());
+    int j = 0;
+    for (const GridPoint &g : steps)
+    {
+      while (j < own.size() && own[j].t < g.t)
+        ++j;
+      // the step ends at g.t: one that ends when the value comes has none
+      // of it (but the first, the value at the start)
+      const bool begun = asLoaded || s.first().t < g.t || s.first().t == 0;
+      const bool there = begun && j < own.size() && own[j].t == g.t;
+      col.values << (there ? own[j].value : qQNaN());
+      col.states << (there ? cellState(own[j].value, own[j].quality) : CellState::None);
+    }
+  }
   return rec;
 }
 
-bool RecordingStore::write(const QString &path, QString *error, bool raw)
+bool RecordingStore::write(const QString &path, QString *error, bool raw, const QList<int> &extras)
 {
-  if (!RecordingFile::writeAny(toRecording(raw), path, error))
+  if (!RecordingFile::writeAny(toRecording(raw, extras), path, error))
     return false;
   m_dirty = false;
   return true;
@@ -318,13 +409,40 @@ void RecordingStore::load(const Recording &rec)
   m_series.reserve(int(rec.values.size()));
   m_marks.clear();
   const bool onGrid = rec.onGrid();
+  auto quality = [](CellState state)
+  {
+    return state == CellState::Ok ? Quality::Valid
+           : state == CellState::Overload || state == CellState::NegativeOverload ? Quality::Overload
+                                                                                  : Quality::Stale;
+  };
   for (int i = 0; i < rec.values.size(); i++)
   {
     RawPoint p;
     p.t = onGrid ? qint64(i) * m_sampleTime * 100 : rec.timeAt(i);
     p.value = rec.values[i];
-    p.quality = std::isfinite(p.value) ? Quality::Valid : Quality::Stale;
+    p.quality = quality(rec.stateAt(i));
     appendPoint(p);
+  }
+  // the other values, a series each (value 2 is id 1 ...), a point in every
+  // row they are in
+  for (int c = 0; c < rec.extra.size(); ++c)
+  {
+    const RecordingColumn &col = rec.extra[c];
+    RecordingSeries s;
+    s.id = c + 1;
+    s.unit = col.unit;
+    m_extra << s;
+    for (int i = 0; i < rec.values.size() && i < col.states.size(); i++)
+      if (col.states[i] != CellState::None)
+      {
+        RawPoint p;
+        p.t = onGrid ? qint64(i) * m_sampleTime * 100 : rec.timeAt(i);
+        p.value = col.values.value(i, qQNaN());
+        p.quality = quality(col.states[i]);
+        appendExtraPoint(int(m_extra.size()) - 1, p);
+      }
+    if (m_extra.last().isEmpty())
+      m_extra.removeLast();
   }
   // a file on its own grid: each row is already the mean over the step
   // before it
@@ -380,7 +498,8 @@ void RecordingStore::setReading(const Reading &reading)
   }
   m_reading = reading;
   m_haveReading = true;
-  const double value = reading.overload ? qQNaN() : reading.value;
+  // an overload's NaN keeps the sign of -OL (ReadingAdapter), for the export
+  const double value = reading.overload ? overloadValue(reading.value) : reading.value;
 
   // one recording, one quantity: the first value says which; another port
   // (V DC -> Ohm, DC -> AC) or another unit (°C -> °F) stops it. A prefix
@@ -514,7 +633,7 @@ void RecordingStore::appendExtra(const Reading &reading)
   const bool off = reading.text.isEmpty();
   RawPoint p;
   p.t = qMax<qint64>(0, reading.t - m_t0);
-  p.value = off || reading.overload ? qQNaN() : reading.value;
+  p.value = off ? qQNaN() : reading.overload ? overloadValue(reading.value) : reading.value;
   p.quality = off ? Quality::Stale : reading.overload ? Quality::Overload : Quality::Valid;
   p.flags = reading.flags;
   // the main value stops the recording at its length; nothing after it
@@ -787,7 +906,7 @@ void RecordingStore::appendCurrent()
   if (!m_haveReading || m_monotonic() - m_reading.t > m_staleMs)
     return;
   RawPoint p;
-  p.value = m_reading.overload ? qQNaN() : m_reading.value;
+  p.value = m_reading.overload ? overloadValue(m_reading.value) : m_reading.value;
   p.quality = m_reading.overload ? Quality::Overload : Quality::Valid;
   p.flags = m_reading.flags;
   append(p);
