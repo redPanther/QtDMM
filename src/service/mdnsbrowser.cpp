@@ -251,6 +251,22 @@ void appendRecord(QByteArray &d, const MdnsMessage::Record &r)
 }
 }
 
+QList<MdnsMessage::Interface> MdnsMessage::multicastInterfaces()
+{
+  QList<Interface> result;
+  for (const QNetworkInterface &iface : QNetworkInterface::allInterfaces())
+  {
+    const auto flags = iface.flags();
+    if (!(flags & QNetworkInterface::IsUp) || !(flags & QNetworkInterface::IsRunning)
+        || (flags & QNetworkInterface::IsLoopBack) || !(flags & QNetworkInterface::CanMulticast))
+      continue;
+    for (const QNetworkAddressEntry &entry : iface.addressEntries())
+      if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol)
+        result.append({ iface, entry });
+  }
+  return result;
+}
+
 QByteArray MdnsMessage::response(const QList<Record> &answers, const QList<Record> &additional)
 {
   QByteArray d;
@@ -296,29 +312,20 @@ void MdnsBrowser::browse(const QString &service, int ms)
   // that interface as source, answers (unicast or multicast) come back
   // on it
   const QByteArray q = MdnsMessage::query(m_service);
-  for (const QNetworkInterface &iface : QNetworkInterface::allInterfaces())
+  for (const auto &[iface, entry] : MdnsMessage::multicastInterfaces())
   {
-    const auto flags = iface.flags();
-    if (!(flags & QNetworkInterface::IsUp) || !(flags & QNetworkInterface::IsRunning)
-        || (flags & QNetworkInterface::IsLoopBack) || !(flags & QNetworkInterface::CanMulticast))
-      continue;
-    for (const QNetworkAddressEntry &entry : iface.addressEntries())
+    auto *s = new QUdpSocket(this);
+    if (!s->bind(entry.ip(), 0, QUdpSocket::ShareAddress))
     {
-      if (entry.ip().protocol() != QAbstractSocket::IPv4Protocol)
-        continue;
-      auto *s = new QUdpSocket(this);
-      if (!s->bind(entry.ip(), 0, QUdpSocket::ShareAddress))
-      {
-        delete s;
-        continue;
-      }
-      s->setMulticastInterface(iface);
-      s->joinMulticastGroup(kMdnsGroup, iface);
-      connect(s, &QUdpSocket::readyRead, this, &MdnsBrowser::onReadyRead);
-      s->writeDatagram(q, kMdnsGroup, kMdnsPort);
-      m_sockets << s;
-      qCDebug(lcMdns) << "query on" << iface.humanReadableName() << entry.ip().toString();
+      delete s;
+      continue;
     }
+    s->setMulticastInterface(iface);
+    s->joinMulticastGroup(kMdnsGroup, iface);
+    connect(s, &QUdpSocket::readyRead, this, &MdnsBrowser::onReadyRead);
+    s->writeDatagram(q, kMdnsGroup, kMdnsPort);
+    m_sockets << s;
+    qCDebug(lcMdns) << "query on" << iface.humanReadableName() << entry.ip().toString();
   }
   if (m_sockets.isEmpty())
   {

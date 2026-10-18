@@ -60,9 +60,23 @@
 
 namespace
 {
+// An icon drawn by its paint(): the pixmap is the same drawing.
+class PaintedIconEngine : public QIconEngine
+{
+public:
+  QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override
+  {
+    QPixmap pm(size);
+    pm.fill(Qt::transparent);
+    QPainter painter(&pm);
+    paint(&painter, QRect(QPoint(0, 0), size), mode, state);
+    return pm;
+  }
+};
+
 // The Record button's symbol, drawn at any size: a grey dot to start, a red
 // square while it records
-class RecordIconEngine : public QIconEngine
+class RecordIconEngine : public PaintedIconEngine
 {
 public:
   explicit RecordIconEngine(bool stop) : m_stop(stop) {}
@@ -85,14 +99,6 @@ public:
       painter->drawEllipse(r);
     painter->restore();
   }
-  QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override
-  {
-    QPixmap pm(size);
-    pm.fill(Qt::transparent);
-    QPainter painter(&pm);
-    paint(&painter, QRect(QPoint(0, 0), size), mode, state);
-    return pm;
-  }
   QIconEngine *clone() const override { return new RecordIconEngine(m_stop); }
 
 private:
@@ -101,7 +107,7 @@ private:
 
 /// A theme symbol with a "+" in its lower right corner (Add device: the
 /// meter and "add"), looked up when painted, so it follows the symbol set.
-class PlusIconEngine : public QIconEngine
+class PlusIconEngine : public PaintedIconEngine
 {
 public:
   explicit PlusIconEngine(const QString &name) : m_name(name) {}
@@ -111,14 +117,6 @@ public:
     const int side = qMax(6, int(qMin(rect.width(), rect.height()) * 0.55));
     const QRect corner(rect.right() + 1 - side, rect.bottom() + 1 - side, side, side);
     QIcon::fromTheme("list-add").paint(painter, corner, Qt::AlignCenter, mode, state);
-  }
-  QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override
-  {
-    QPixmap pm(size);
-    pm.fill(Qt::transparent);
-    QPainter painter(&pm);
-    paint(&painter, QRect(QPoint(0, 0), size), mode, state);
-    return pm;
   }
   QIconEngine *clone() const override { return new PlusIconEngine(m_name); }
 

@@ -219,26 +219,6 @@ bool DecoderFlukeQM::decode28x(const QStringList &fields)
 
   // Keep the meter's digits: "-0.023E-3" is "-0.023 mV", not "-23 µV". The
   // exponent is a multiple of three whenever the meter uses a prefixed range.
-  const int e = number.indexOf('E', 0, Qt::CaseInsensitive);
-  int exponent = 0;
-  bool expOk = e >= 0;
-  if (expOk)
-    exponent = number.mid(e + 1).toInt(&expOk);
-  static const QMap<int, QString> prefixes = {
-    { -12, "p" }, { -9, "n" }, { -6, "µ" }, { -3, "m" }, { 0, "" }, { 3, "k" }, { 6, "M" }, { 9, "G" } };
-  if (expOk && prefixes.contains(exponent))
-  {
-    QString mantissa = number.left(e);
-    if (mantissa.startsWith('+'))
-      mantissa.remove(0, 1);
-    m_result.val = mantissa;
-    m_result.unit = prefixes.value(exponent) + unit;
-  }
-  else
-  {
-    QString prefix;
-    m_result.val = SiPrefix::format(value, &prefix);
-    m_result.unit = prefix + unit;
-  }
+  setFromENotation(number, value, unit, -12);
   return true;
 }

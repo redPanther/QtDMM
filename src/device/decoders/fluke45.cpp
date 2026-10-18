@@ -95,28 +95,14 @@ std::optional<DmmDecoder::DmmResponse> DecoderFluke45::decode(const QByteArray &
     return std::nullopt;
   m_result.dval = value;
 
-  // "+12.345E+6" is shown as "12.345 MOhm": keep the meter's digits when the
-  // exponent is a multiple of three, otherwise let SiPrefix pick the prefix.
-  const int e = number.indexOf('E', 0, Qt::CaseInsensitive);
-  int exponent = 0;
-  bool expOk = e >= 0;
-  if (expOk)
-    exponent = number.mid(e + 1).toInt(&expOk);
-  static const QMap<int, QString> prefixes = {
-    { -9, "n" }, { -6, "µ" }, { -3, "m" }, { 0, "" }, { 3, "k" }, { 6, "M" }, { 9, "G" } };
-  if (expOk && prefixes.contains(exponent) && !unit.startsWith("dB"))
-  {
-    QString mantissa = number.left(e);
-    if (mantissa.startsWith('+'))
-      mantissa.remove(0, 1);
-    m_result.val = mantissa;
-    m_result.unit = prefixes.value(exponent) + unit;
-  }
-  else
+  // "+12.345E+6" is shown as "12.345 MOhm"; dB without a prefix
+  if (unit.startsWith("dB"))
   {
     QString prefix;
     m_result.val = SiPrefix::format(value, &prefix);
     m_result.unit = prefix + unit;
   }
+  else
+    setFromENotation(number, value, unit, -9);
   return m_result;
 }

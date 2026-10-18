@@ -86,6 +86,31 @@ double DmmDecoder::prefixFactor(const QString &prefix)
   return SiPrefix::factor(prefix);
 }
 
+void DmmDecoder::setFromENotation(const QString &number, double value, const QString &unit, int lowestExponent)
+{
+  const int e = number.indexOf('E', 0, Qt::CaseInsensitive);
+  int exponent = 0;
+  bool expOk = e >= 0;
+  if (expOk)
+    exponent = number.mid(e + 1).toInt(&expOk);
+  static const QMap<int, QString> prefixes = {
+    { -12, "p" }, { -9, "n" }, { -6, "µ" }, { -3, "m" }, { 0, "" }, { 3, "k" }, { 6, "M" }, { 9, "G" } };
+  if (expOk && exponent >= lowestExponent && prefixes.contains(exponent))
+  {
+    QString mantissa = number.left(e);
+    if (mantissa.startsWith('+'))
+      mantissa.remove(0, 1);
+    m_result.val = mantissa;
+    m_result.unit = prefixes.value(exponent) + unit;
+  }
+  else
+  {
+    QString prefix;
+    m_result.val = SiPrefix::format(value, &prefix);
+    m_result.unit = prefix + unit;
+  }
+}
+
 void DmmDecoder::formatResultValue(int commaPos, const QString& prefix, const QString& baseUnit)
 {
   m_result.val = insertCommaIT(m_result.val, commaPos);

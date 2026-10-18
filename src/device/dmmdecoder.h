@@ -175,6 +175,12 @@ protected:
   QString insertCommaIT(const QString &val, int pos);
   /// Scale factor for an SI prefix ("k" -> 1e3). Unknown prefixes yield 1.0.
   static double prefixFactor(const QString &prefix);
+  /// m_result.val and .unit from @p number in E notation ("+12.345E+6") and
+  /// its @p value: with the meter's digits ("12.345", "M" + unit) when the
+  /// exponent is a multiple of three from @p lowestExponent (at least -12) up
+  /// to 9, otherwise as SiPrefix::format() puts it (the SCPI-like answers of
+  /// the Fluke meters).
+  void setFromENotation(const QString &number, double value, const QString &unit, int lowestExponent);
   /// Finishes m_result from the raw digit string in m_result.val: inserts
   /// the decimal point at @p commaPos, sets unit to prefix+baseUnit and dval
   /// to the value scaled by the prefix. See the DmmResponse contract.

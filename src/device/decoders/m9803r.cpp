@@ -121,7 +121,8 @@ std::optional<DmmDecoder::DmmResponse> DecoderM9803R::decode(const QByteArray &d
 
   switch (data[5])
   {
-    case 0x00:
+    case 0x00:   // DC V
+    case 0x01:   // AC V
       switch (data[6])
       {
         case 0x00:
@@ -144,34 +145,10 @@ std::optional<DmmDecoder::DmmResponse> DecoderM9803R::decode(const QByteArray &d
           m_result.unit = "V";
           break;
       }
-      m_result.special = "DC";
+      m_result.special = data[5] == 0x00 ? "DC" : "AC";
       break;
-    case 0x01:
-      switch (data[6])
-      {
-        case 0x00:
-          m_result.unit = "mV";
-          val = insertCommaIT(val, 3);
-          break;
-        case 0x01:
-          m_result.unit = "V";
-          val = insertCommaIT(val, 1);
-          break;
-        case 0x02:
-          m_result.unit = "V";
-          val = insertCommaIT(val, 2);
-          break;
-        case 0x03:
-          m_result.unit = "V";
-          val = insertCommaIT(val, 3);
-          break;
-        case 0x04:
-          m_result.unit = "V";
-          break;
-      }
-      m_result.special = "AC";
-      break;
-    case 0x02:
+    case 0x02:   // DC mA
+    case 0x03:   // AC mA
       switch (data[6])
       {
         case 0x00:
@@ -187,25 +164,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderM9803R::decode(const QByteArray &d
           val = insertCommaIT(val, 3);
           break;
       }
-      m_result.special = "DC";
-      break;
-    case 0x03:
-      switch (data[6])
-      {
-        case 0x00:
-          m_result.unit = "mA";
-          val = insertCommaIT(val, 1);
-          break;
-        case 0x01:
-          m_result.unit = "mA";
-          val = insertCommaIT(val, 2);
-          break;
-        case 0x02:
-          m_result.unit = "mA";
-          val = insertCommaIT(val, 3);
-          break;
-      }
-      m_result.special = "AC";
+      m_result.special = data[5] == 0x02 ? "DC" : "AC";
       break;
     case 0x04:
       switch (data[6])
