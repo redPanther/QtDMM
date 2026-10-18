@@ -417,7 +417,7 @@ protected:
   bool             m_minimapOn = true;
   bool             m_envelopeOn = false;
   QGraphicsPathItem *m_envelope = nullptr;
-  /// The curve's points (bucketPoints(), gaps as NaN) for the band
+  /// The curve's points (pointsOf(), gaps as NaN) for the band
   QList<QPointF>   m_curvePts;
   void             updateEnvelope();
   bool             m_liveHold = false;   ///< Live, the window held at m_holdStart
@@ -480,7 +480,6 @@ protected:
   qint64           windowStart() const;
   qint64           bucketSize() const;
   int              bucketStart(int i) const;
-  int              bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const;
   static QList<QPointF> withoutGaps(const QList<QPointF> &points);
   static int       finiteTail(const QList<QPointF> &points, int tail);
   void             appendToSeries();
@@ -561,7 +560,8 @@ protected:
   void             updateLegend();
   /// The right axis from m_scale2Min/Max, with the left axis' tick count.
   void             updateRightAxis();
-  /// bucketPoints() of any series of the store.
+  /// The drawn points of readings first..last of @p series, thinned per bucket
+  /// (see the comment at the definition); returns the number of points.
   int              pointsOf(const RecordingSeries &series, int first, int last, bool integral, QList<QPointF> &out) const;
   QValueAxis      *m_xAxis;
   QValueAxis      *m_yAxis;
@@ -676,7 +676,6 @@ protected:
   bool             handleChartKey(QKeyEvent *);
 
   void             emitInfo();
-  bool             computeMinMax(double);
   void             rebuildSeries();
   void             updateXAxisRange();
   void             updateSeriesAppearance();

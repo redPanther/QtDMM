@@ -700,11 +700,6 @@ int GraphWidget::bucketStart(int i) const
 // Readings without a value (NaN: overload, stale) do not count; a bucket of
 // nothing else is one NaN point, the gap, and one that ends where the meter
 // fell silent ends with it.
-int GraphWidget::bucketPoints(int first, int last, bool integral, QList<QPointF> &out) const
-{
-  return pointsOf(m_store->series(), first, last, integral, out);
-}
-
 int GraphWidget::pointsOf(const RecordingSeries &series, int first, int last, bool integral, QList<QPointF> &out) const
 {
   auto value = [&](int i)
@@ -783,9 +778,9 @@ void GraphWidget::rebuildSeries()
     // the readings of this bucket
     const qint64 end = (series.at(first).t / m_bucket + 1) * m_bucket;
     const int last = qMin(series.lowerBound(end), count) - 1;
-    m_tailData = bucketPoints(first, last, false, points);
+    m_tailData = pointsOf(m_store->series(), first, last, false, points);
     if (m_intValueId == 0)
-      m_tailInt = bucketPoints(first, last, true, intPoints);
+      m_tailInt = pointsOf(m_store->series(), first, last, true, intPoints);
     first = last + 1;
   }
 
@@ -819,7 +814,7 @@ void GraphWidget::appendToSeries()
     }
   }
   QList<QPointF> points;
-  m_tailData = bucketPoints(first, count - 1, false, points);
+  m_tailData = pointsOf(m_store->series(), first, count - 1, false, points);
   m_dataLine->append(points);
   m_curvePts.append(points);
   const QList<QPointF> dataPts = withoutGaps(points);
@@ -1758,6 +1753,33 @@ void GraphWidget::updateStateLabel()
   m_stateLabel->raise();
 }
 
+// The auto scale takes @p val in, with a margin; true when it grew.
+static bool growScale(double val, double &min, double &max)
+{
+  bool ret = false;
+
+  if (val > max * 0.95)
+  {
+    if (val > 0)
+      max = val * 1.2;
+    else
+      max = val / 1.2;
+
+    ret = true;
+  }
+  if (val < min * 0.95)
+  {
+    if (val > 0)
+      min = val / 1.2;
+    else
+      min = val * 1.2;
+
+    ret = true;
+  }
+
+  return ret;
+}
+
 void GraphWidget::onAppended(bool shifted)
 {
   const RawPoint &p = m_store->series().last();
@@ -1781,7 +1803,7 @@ void GraphWidget::onAppended(bool shifted)
     updateMarkPositions();
   }
 
-  const bool resFlag = m_autoScale && computeMinMax(p.value);
+  const bool resFlag = m_autoScale && growScale(p.value, m_scaleMin, m_scaleMax);
 
   if (shifted || bucketSize() != m_bucket)
     rebuildSeries();
@@ -2372,7 +2394,7 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
 
 
     for (int i = 0; i < m_store->count(); i++)
-      computeMinMax(m_store->series().at(i).value);
+      growScale(m_store->series().at(i).value, m_scaleMin, m_scaleMax);
     // the other values drawn on the left axis
     for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
     {
@@ -2382,44 +2404,12 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
       const RecordingSeries &x = m_store->extra(i);
       for (int j = 0; j < x.count(); ++j)
         if (std::isfinite(x.at(j).value))
-          computeMinMax(x.at(j).value);
+          growScale(x.at(j).value, m_scaleMin, m_scaleMax);
     }
   }
 
   setYRange(m_scaleMin, m_scaleMax);
   updateThresholdLinePositions();
-}
-
-// The auto scale takes @p val in, with a margin; true when it grew.
-static bool growScale(double val, double &min, double &max)
-{
-  bool ret = false;
-
-  if (val > max * 0.95)
-  {
-    if (val > 0)
-      max = val * 1.2;
-    else
-      max = val / 1.2;
-
-    ret = true;
-  }
-  if (val < min * 0.95)
-  {
-    if (val > 0)
-      min = val / 1.2;
-    else
-      min = val * 1.2;
-
-    ret = true;
-  }
-
-  return ret;
-}
-
-bool GraphWidget::computeMinMax(double val)
-{
-  return growScale(val, m_scaleMin, m_scaleMax);
 }
 
 // The colour of a value of the meter (its id, not its place: a value keeps
@@ -2524,7 +2514,7 @@ void GraphWidget::rebuildExtras()
         if (c.right)
           growScale(p.y(), m_scale2Min, m_scale2Max);
         else if (m_autoScale)
-          leftGrew = computeMinMax(p.y()) || leftGrew;
+          leftGrew = growScale(p.y(), m_scaleMin, m_scaleMax) || leftGrew;
       }
   }
   if (leftGrew)
@@ -2619,7 +2609,7 @@ void GraphWidget::onExtraAppended(int i)
     if (growScale(v, m_scale2Min, m_scale2Max))
       updateRightAxis();
   }
-  else if (m_autoScale && computeMinMax(v))
+  else if (m_autoScale && growScale(v, m_scaleMin, m_scaleMax))
   {
     setYRange(m_scaleMin, m_scaleMax);
     updateThresholdLinePositions();
