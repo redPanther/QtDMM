@@ -161,13 +161,14 @@ were; the integration curve carries on across a gap.
   as before: the right-click menu, **Values**, switches each of them on or
   off - the main value too. Without it the left axis takes the unit of the
   next value shown (the temperature of a CO2 meter, say), and the reference
-  line, the band, the trigger line and the cursors' level lines, which
-  belong to the main value, go with it. Every change sets the axes and
+  line, the band and the cursors' level lines follow it: they are of the
+  value on the left axis. The trigger line belongs to the main value and
+  goes with it. Every change sets the axes and
   scales afresh from the curves shown; the recording stays as it is, and
   the main value is still recorded and exported. The choice is kept with
-  the window layout. They are recorded either way. The time cursors show the other values too; the
-  reference line, the band, the overview, the statistics between the
-  cursors and the triggers are the main value's; the integration curve can
+  the window layout. They are recorded either way. The time cursors show
+  every value drawn, with a line of statistics each; the overview and the
+  triggers are the main value's; the integration curve can
   take value 2 (see *Integration* below). The export has the values that
   are switched on (see [Export and import](#export-and-import)).
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
@@ -197,11 +198,14 @@ were; the integration curve carries on across a gap.
 - **Time cursors:** a click into the graph sets cursor **A**, Shift+click
   cursor **B**; drag them to move them, Esc or **Remove time cursors** in
   the right-click menu takes them away. Top right the graph shows the time
-  and value at each cursor and, with both, the time between them, the
-  change of the value (Δ), the mean and the integral: in Ah for a current,
-  Wh for a power, else the unit times seconds - the charge a battery took
-  between two points, for instance. A dashed line across the graph at the
-  value under each cursor shows the change as the distance between them;
+  and the values drawn at each cursor and, with both, the time between them
+  and a line for each value: its change (Δ), its mean and for a current or
+  a power its integral, in Ah, Wh or VAh - the charge a battery took
+  between two points, for instance. The value of the integration curve
+  gets its integral too, in its unit times seconds (V·s). When a value
+  changed what it measures in between (Hz to %), the line is of what it
+  measures at the later cursor. A dashed line across the graph at the
+  value of the left axis under each cursor shows the change as the distance between them;
   the cursors' names hang as flags under the graph, at the time labels.
 - **Integration** (**Settings → Graph → Integration curve**) draws a second curve: the
   integral over time of the readings above a threshold, in the unit times

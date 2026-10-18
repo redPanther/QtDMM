@@ -45,13 +45,42 @@ void GraphWidget::hideCrosshair()
     m_cursorLabel->hide();
 }
 
-double GraphWidget::valueAt(qint64 t) const
+double GraphWidget::valueAt(const RecordingSeries *series, qint64 t) const
 {
-  const RecordingSeries &series = m_store->series();
-  const int i = series.holding(t);
-  if (i < 0 || t > m_store->duration() || series.at(i).gap())
+  const int i = series ? series->holding(t) : -1;
+  if (i < 0 || t > m_store->duration() || series->at(i).gap())
     return std::nan("");
-  return series.at(i).value;
+  return series->at(i).value;
+}
+
+int GraphWidget::drawnExtra(int id, qint64 t, bool leftOnly) const
+{
+  // the series whose reading holds at t is the one with the latest reading
+  // up to t: one that went on after another (moved to the end) has an older
+  // one, its gap where the other began
+  int best = -1;
+  qint64 bestT = -1;
+  for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
+  {
+    const RecordingSeries &s = m_store->extra(i);
+    const ExtraCurve &c = m_extraCurves[size_t(i)];
+    const int j = s.id == id && c.shown && !(leftOnly && c.right) ? s.holding(t) : -1;
+    if (j >= 0 && s.at(j).t >= bestT)
+    {
+      best = i;
+      bestT = s.at(j).t;
+    }
+  }
+  return best;
+}
+
+const RecordingSeries *GraphWidget::referenceSeries(qint64 t) const
+{
+  const int id = referenceId();
+  if (id == 0)
+    return &m_store->series();
+  const int i = id > 0 ? drawnExtra(id, t, true) : -1;
+  return i < 0 ? nullptr : &m_store->extra(i);
 }
 
 void GraphWidget::setTimeCursor(int which, qint64 t)
@@ -78,7 +107,6 @@ static QString spanText(qint64 ms)
 
 QString GraphWidget::timeCursorText() const
 {
-  const QString base = m_store->unit();
   auto withUnit = [](double v, const QString &unit)
   {
     if (!std::isfinite(v))
@@ -87,36 +115,48 @@ QString GraphWidget::timeCursorText() const
     const double x = SiPrefix::scale(v, unit, &prefix);
     return QString("%1 %2%3").arg(QString::number(x, 'g', 4), prefix, unit).trimmed();
   };
-  // the other values drawn, at the cursor: the series of each that holds there
-  auto others = [&](qint64 t)
+  // the values drawn, the main one first: of each the series that holds at
+  // the time
+  auto drawn = [&](qint64 t)
   {
-    QStringList out;
-    for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
-    {
-      const RecordingSeries &s = m_store->extra(i);
-      const int j = s.holding(t);
-      if (!m_extraCurves[size_t(i)].shown || j < 0 || s.at(j).gap())
-        continue;
-      out << withUnit(s.at(j).value, SiPrefix::displayText(s.unit));
-    }
-    return out.isEmpty() ? QString() : QStringLiteral("  ") + out.join(QStringLiteral("  "));
+    QList<std::pair<int, const RecordingSeries *>> out;
+    if (m_mainShown)
+      out << std::pair{ 0, &m_store->series() };
+    for (int id : shownValues())
+      if (const int i = drawnExtra(id, t, false); i >= 0)
+        out << std::pair{ id, &m_store->extra(i) };
+    return out;
   };
+  auto unitOf = [&](const RecordingSeries *s) { return s == &m_store->series() ? m_store->unit() : SiPrefix::displayText(s->unit); };
   QStringList lines;
   for (int i = 0; i < 2; ++i)
     if (m_cursorT[i] >= 0)
-      lines << QString("%1  %2  %3%4").arg(i ? "B" : "A",
-                                           m_store->startDateTime().addMSecs(m_cursorT[i]).time().toString("HH:mm:ss.zzz"),
-                                           withUnit(valueAt(m_cursorT[i]), base), others(m_cursorT[i]));
-  if (m_cursorT[0] >= 0 && m_cursorT[1] >= 0)
+    {
+      QString line = QString("%1  %2").arg(i ? "B" : "A", m_store->startDateTime().addMSecs(m_cursorT[i]).time().toString("HH:mm:ss.zzz"));
+      for (const auto &[id, s] : drawn(m_cursorT[i]))
+        line += QStringLiteral("  ") + withUnit(valueAt(s, m_cursorT[i]), unitOf(s));
+      lines << line;
+    }
+  if (m_cursorT[0] < 0 || m_cursorT[1] < 0)
+    return lines.join('\n');
+  lines << QString("%1 %2").arg(QChar(0x0394) + QStringLiteral("t"), spanText(std::abs(m_cursorT[1] - m_cursorT[0])));
+  // a line per value, its series the one at the later cursor
+  for (const auto &[id, s] : drawn(qMax(m_cursorT[0], m_cursorT[1])))
   {
-    const RecordingStore::Stats st = m_store->stats(m_cursorT[0], m_cursorT[1]);
-    lines << QString("%1 %2  %3 %4").arg(QChar(0x0394) + QStringLiteral("t"), spanText(std::abs(m_cursorT[1] - m_cursorT[0])),
-                                         QChar(0x0394), withUnit(valueAt(m_cursorT[1]) - valueAt(m_cursorT[0]), base));
-    // the integral in hours for a current or a power (Ah, Wh), else x s
-    const bool hours = base == QLatin1String("A") || base == QLatin1String("W");
-    const QString integral = hours ? withUnit(st.integral / 3600, base + "h")
-                                   : withUnit(st.integral, base.isEmpty() ? QStringLiteral("s") : base + QStringLiteral("·s"));
-    lines << tr("mean %1  %2 %3").arg(withUnit(st.mean, base), QChar(0x222b), st.count ? integral : QStringLiteral("--"));
+    const QString base = unitOf(s);
+    const RecordingStore::Stats st = m_store->statsOf(*s, m_cursorT[0], m_cursorT[1]);
+    QString line = QString("%1 %2  ").arg(QChar(0x0394), withUnit(valueAt(s, m_cursorT[1]) - valueAt(s, m_cursorT[0]), base))
+                   + tr("mean %1").arg(withUnit(st.mean, base));
+    // the integral: in hours for a current or a power (Ah, Wh, VAh), x s
+    // for the value of the integration curve, else none
+    const bool hours = base == QLatin1String("A") || base == QLatin1String("W") || base == QLatin1String("VA");
+    if (hours || (m_showIntegration && id == m_intValueId))
+    {
+      const QString integral = hours ? withUnit(st.integral / 3600, base + "h")
+                                     : withUnit(st.integral, base.isEmpty() ? QStringLiteral("s") : base + QStringLiteral("·s"));
+      line += QString("  %1 %2").arg(QChar(0x222b), st.count ? integral : QStringLiteral("--"));
+    }
+    lines << line;
   }
   return lines.join('\n');
 }
@@ -135,7 +175,7 @@ void GraphWidget::updateTimeCursors()
     m_cursorLine[i]->setVisible(shown);
     m_cursorName[i]->setVisible(false);   // placed below, with the other flag
     // the level: only for a value inside the scale (none in a gap)
-    const double v = shown && m_mainShown ? valueAt(m_cursorT[i]) : qQNaN();
+    const double v = shown ? valueAt(referenceSeries(m_cursorT[i]), m_cursorT[i]) : qQNaN();
     const bool level = std::isfinite(v) && yMax > yMin && v >= yMin && v <= yMax;
     m_cursorLevel[i]->setVisible(level);
     if (level)
@@ -167,7 +207,7 @@ double GraphWidget::referenceY() const
 {
   const double min = m_yAxis->min(), max = m_yAxis->max();
   const QRectF plot = m_chart->plotArea();
-  if (m_referenceKind == RefOff || !m_mainShown || !(m_reference > min && m_reference < max) || plot.height() <= 0)
+  if (m_referenceKind == RefOff || referenceId() < 0 || !(m_reference > min && m_reference < max) || plot.height() <= 0)
     return std::nan("");
   return plot.bottom() - (m_reference - min) / (max - min) * plot.height();
 }
@@ -179,7 +219,10 @@ bool GraphWidget::referenceShown() const
 
 RecordingStore::Stats GraphWidget::windowStats() const
 {
-  return m_store->stats(qRound64(m_xAxis->min() * 1000), qRound64(m_xAxis->max() * 1000));
+  // the reference's series at the end of the window
+  const qint64 from = qRound64(m_xAxis->min() * 1000), to = qRound64(m_xAxis->max() * 1000);
+  const RecordingSeries *series = referenceSeries(qMin(to, m_store->duration()));
+  return series ? m_store->statsOf(*series, from, to) : RecordingStore::Stats();
 }
 
 void GraphWidget::setReference(ReferenceKind kind, double value)
@@ -251,7 +294,8 @@ void GraphWidget::dragReference(double y)
   const RecordingStore::Stats st = windowStats();
   if (st.count > 0)
     snaps << std::pair{ RefMean, st.mean } << std::pair{ RefMin, st.min } << std::pair{ RefMax, st.max };
-  for (double a : m_alarmThresholds)
+  // the alarms drawn are the main value's
+  for (double a : referenceId() == 0 ? m_alarmThresholds : QList<double>())
     snaps << std::pair{ RefAlarm, a };
   for (const auto &[kind, v] : snaps)
     if (std::abs(sceneY(v) - y) <= 6)
@@ -286,7 +330,7 @@ void GraphWidget::updateReferenceLine()
   m_referenceLine->setLine(plot.left(), y, plot.right(), y);
   // as the y labels: 4 digits with the prefix that suits the value
   QString prefix;
-  const QString base = m_store->unit();
+  const QString base = leftUnit();
   const double v = SiPrefix::scale(m_reference, base, &prefix);
   QString what;
   switch (m_referenceKind)

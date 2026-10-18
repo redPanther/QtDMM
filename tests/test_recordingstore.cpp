@@ -121,6 +121,12 @@ int main(int argc, char **argv)
     // its integral over time, as the main value's: 50 Hz for 0.24 s
     check(std::abs(store.extra(0).last().integral - 12) < 1e-9,
           QString("other value: integral %1, expected 12").arg(store.extra(0).last().integral));
+    // its stats as the main value's: up to now, nothing before its first reading
+    {
+      const RecordingStore::Stats st = store.statsOf(store.extra(0), 0, 250);
+      check(st.count == 1 && st.mean == 50 && std::abs(st.integral - 12) < 1e-9 && st.covered == 240,
+            QString("other value: stats %1 readings, mean %2, %3 ms").arg(st.count).arg(st.mean).arg(st.covered));
+    }
 
     // Hz -> %: the series ends with a gap, a new one begins, still recording
     store.setReading(clock.at(700, other(1, 25, "25.0", "%")));

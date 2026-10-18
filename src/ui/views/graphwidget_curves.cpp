@@ -52,7 +52,8 @@ void GraphWidget::updateEnvelope()
   const QRectF plot = m_chart->plotArea();
   const double x0 = m_xAxis->min(), x1 = m_xAxis->max();
   const double y0 = m_yAxis->min(), y1 = m_yAxis->max();
-  if (!m_envelopeOn || !m_mainShown || m_curvePts.isEmpty() || plot.width() < 2 || plot.height() <= 0 || !(x1 > x0) || !(y1 > y0))
+  const QList<QPointF> pts = m_envelopeOn ? referencePoints() : QList<QPointF>();
+  if (pts.isEmpty() || plot.width() < 2 || plot.height() <= 0 || !(x1 > x0) || !(y1 > y0))
   {
     m_envelope->setVisible(false);
     return;
@@ -76,13 +77,12 @@ void GraphWidget::updateEnvelope()
   };
   auto columnOf = [&](double x) { return qBound(0, int((x - from) / perColumn), columns - 1); };
   // the point before the window too: its line runs into it
-  auto it = std::lower_bound(m_curvePts.cbegin(), m_curvePts.cend(), from,
-                             [](const QPointF &p, double x) { return p.x() < x; });
-  if (it != m_curvePts.cbegin())
+  auto it = std::lower_bound(pts.cbegin(), pts.cend(), from, [](const QPointF &p, double x) { return p.x() < x; });
+  if (it != pts.cbegin())
     --it;
   int run = 0;
   const QPointF *prev = nullptr;
-  for (; it != m_curvePts.cend(); ++it)
+  for (; it != pts.cend(); ++it)
   {
     if (std::isnan(it->y()))
     {
@@ -452,6 +452,7 @@ void GraphWidget::rebuildExtras()
   {
     ExtraCurve &c = m_extraCurves[size_t(i)];
     c.line->clear();
+    c.points.clear();
     c.tail = 0;
     if (i >= n)
     {
@@ -488,6 +489,7 @@ void GraphWidget::rebuildExtras()
       first = last + 1;
     }
     c.line->replace(points);
+    c.points = points;
     for (const QPointF &p : std::as_const(points))
       if (std::isfinite(p.y()))
       {
@@ -571,23 +573,36 @@ void GraphWidget::onExtraAppended(int i)
     return;
   }
   if (first != count - 1)
+  {
     c.line->removeLast(c.tail);
+    c.points.resize(qMax<qsizetype>(0, c.points.size() - c.tail));
+  }
   QList<QPointF> points;
   c.tail = pointsOf(s, first, count - 1, false, points);
   c.line->append(points);
+  c.points.append(points);
   const double v = s.last().value;
-  if (!std::isfinite(v))
-    return;
-  if (c.right)
+  bool grew = false;
+  if (std::isfinite(v) && c.right)
   {
     if (growScale(v, m_scale2Min, m_scale2Max))
       updateRightAxis();
   }
-  else if (m_autoScale && growScale(v, m_scaleMin, m_scaleMax))
+  else if (std::isfinite(v) && m_autoScale && growScale(v, m_scaleMin, m_scaleMax))
   {
     setYRange(m_scaleMin, m_scaleMax);
     updateThresholdLinePositions();
+    grew = true;   // the reference line and the band with it
   }
+  // what follows the value of the left axis, as onAppended() for the main one
+  if (s.id == referenceId() && !c.right && !grew)
+  {
+    if (m_referenceKind == RefMean || m_referenceKind == RefMin || m_referenceKind == RefMax)
+      updateReferenceLine();
+    updateEnvelope();
+  }
+  if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
+    updateTimeCursors();
 }
 
 QString GraphWidget::legendText() const
@@ -667,23 +682,55 @@ void GraphWidget::setValueShown(int id, bool shown)
   updateTimeCursors();
 }
 
-QString GraphWidget::leftUnit() const
+int GraphWidget::referenceId() const
 {
   if (m_mainShown)
-    return m_store->unit();
-  int lowest = INT_MAX;
-  QString unit;
+    return 0;
+  int lowest = -1;
   for (int i = 0; i < m_store->extraCount(); ++i)
   {
     const RecordingSeries &s = m_store->extra(i);
-    // the newest series of a value has the say (i goes up)
-    if (m_shownValues.contains(s.id) && !s.unit.isEmpty() && s.id <= lowest)
-    {
+    if (m_shownValues.contains(s.id) && !s.unit.isEmpty() && (lowest < 0 || s.id < lowest))
       lowest = s.id;
-      unit = s.unit;
-    }
   }
-  return unit.isEmpty() ? m_store->unit() : unit;
+  return lowest;
+}
+
+QString GraphWidget::leftUnit() const
+{
+  // the newest series of the value has the say
+  const int id = referenceId();
+  for (int i = m_store->extraCount() - 1; id > 0 && i >= 0; --i)
+    if (m_store->extra(i).id == id && !m_store->extra(i).unit.isEmpty())
+      return m_store->extra(i).unit;
+  return m_store->unit();
+}
+
+QList<QPointF> GraphWidget::referencePoints() const
+{
+  const int id = referenceId();
+  if (id == 0)
+    return m_curvePts;
+  // the curves of the value on the left (Hz, then % again: two), in time,
+  // a gap between them
+  QList<const QList<QPointF> *> parts;
+  for (int i = 0; id > 0 && i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
+  {
+    const ExtraCurve &c = m_extraCurves[size_t(i)];
+    if (m_store->extra(i).id == id && c.shown && !c.right && !c.points.isEmpty())
+      parts << &c.points;
+  }
+  if (parts.size() == 1)
+    return *parts.first();
+  std::sort(parts.begin(), parts.end(), [](auto a, auto b) { return a->first().x() < b->first().x(); });
+  QList<QPointF> out;
+  for (const QList<QPointF> *p : std::as_const(parts))
+  {
+    if (!out.isEmpty())
+      out << QPointF(p->first().x(), qQNaN());
+    out += *p;
+  }
+  return out;
 }
 
 QList<int> GraphWidget::shownValues() const

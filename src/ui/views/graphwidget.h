@@ -219,7 +219,7 @@ public:
   /// Where the line is now, in base units; NaN when the mean, minimum or
   /// maximum has no reading in the window.
   double           referenceValue() const { return m_reference; }
-  /// Whether the line is drawn: in the scale, and the main value shown.
+  /// Whether the line is drawn: in the scale, and its value (referenceId()) shown.
   bool             referenceShown() const;
   /// The reference as kept per window (Windows/graph-reference, the
   /// workspace): "" for 0, "mean", "min", "max", "alarm <value>", "<value>",
@@ -304,9 +304,12 @@ public:
   QList<int>       shownValues() const;
   bool             mainShown() const { return m_mainShown; }
   /// The unit of the left axis: the main value's, or while it is hidden
-  /// the one of the lowest value shown. The reference line, the band, the
-  /// trigger line and the cursor levels are the main value's: hidden with it.
+  /// the one of the lowest value shown (its newest series).
   QString          leftUnit() const;
+  /// The value of the left axis, which the reference line, the band and the
+  /// cursor levels are of: 0 (the main one), while it is hidden the lowest
+  /// value shown, -1 with none. The trigger line stays the main value's.
+  int              referenceId() const;
   /// @}
   /// @{
   /// Live, but the window held where the overview put it.
@@ -555,6 +558,7 @@ protected:
     int  tail = 0;                   ///< points the newest bucket gave (see m_tailData)
     bool right = false;              ///< on the right axis
     bool shown = false;              ///< drawn: an axis has its unit, not hidden
+    QList<QPointF> points;           ///< as drawn, for the band (m_curvePts)
   };
   std::vector<ExtraCurve> m_extraCurves;
   QValueAxis      *m_yAxis2 = nullptr;   ///< the right axis: the first unit other than the main one
@@ -639,8 +643,16 @@ protected:
   bool             m_pressShift = false;
   /// Places the lines and the text anew.
   void             updateTimeCursors();
-  /// The reading's value that holds at @p t; NaN in a gap or outside.
-  double           valueAt(qint64 t) const;
+  /// The value of @p series that holds at @p t; NaN in a gap, outside or
+  /// without a series.
+  double           valueAt(const RecordingSeries *series, qint64 t) const;
+  /// The series of value @p id (> 0) drawn that holds at @p t (Hz, then %:
+  /// the one of the time), with @p leftOnly one on the left axis; -1 with none.
+  int              drawnExtra(int id, qint64 t, bool leftOnly) const;
+  /// The series of referenceId() at @p t, nullptr with none.
+  const RecordingSeries *referenceSeries(qint64 t) const;
+  /// The points of referenceId()'s curve as drawn, for the band.
+  QList<QPointF>   referencePoints() const;
   /// @}
   QColor           m_defaultAxisLine;   ///< the chart's own axis line colour
   void             applyThemeColors();

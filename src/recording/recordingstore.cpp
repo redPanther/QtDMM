@@ -58,13 +58,13 @@ qint64 RecordingStore::duration() const
   return m_series.isEmpty() ? 0 : m_series.last().t;
 }
 
-RecordingStore::Stats RecordingStore::stats(qint64 from, qint64 to) const
+RecordingStore::Stats RecordingStore::statsOf(const RecordingSeries &series, qint64 from, qint64 to) const
 {
   Stats st;
   if (from > to)
     std::swap(from, to);
   to = qMin(to, duration());
-  const int n = m_series.count();
+  const int n = series.count();
   // a loaded file ends at its last reading, which then holds for no time:
   // it still counts (count, min, max). A file on its own grid has each row
   // as the mean over the step before it, so a row weighs that step, and the
@@ -72,9 +72,9 @@ RecordingStore::Stats RecordingStore::stats(qint64 from, qint64 to) const
   const bool loaded = m_state == View && m_stopT < 0;
   const qint64 step = loaded ? qint64(m_loadedGrid) * 100 : 0;
   double sum = 0;
-  for (int i = qMax(0, m_series.holding(from)); i < n; ++i)
+  for (int i = qMax(0, series.holding(from)); i < n; ++i)
   {
-    const RawPoint &p = m_series.at(i);
+    const RawPoint &p = series.at(i);
     qint64 begin = 0;
     qint64 end = 0;
     bool counts = false;
@@ -91,7 +91,7 @@ RecordingStore::Stats RecordingStore::stats(qint64 from, qint64 to) const
       if (p.t >= to && !(loaded && i == n - 1 && p.t == to))
         break;
       begin = qMax(from, p.t);
-      end = qMin(to, i + 1 < n ? m_series.at(i + 1).t : duration());
+      end = qMin(to, i + 1 < n ? series.at(i + 1).t : duration());
       counts = loaded && i == n - 1 && p.t >= from;
     }
     if (p.gap() || (end <= begin && !counts))
