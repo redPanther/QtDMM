@@ -71,6 +71,16 @@ int main(int argc, char **argv)
   send("INIT");
   check(recordings == QList<bool>{ true }, "INIT after the start ran: checked anew");
 
+  // another meter: the graph axis and the alarm page drop the unit, and the
+  // next reading announces its own, even when it is the same
+  QStringList units;
+  QStringList baseUnits;
+  QObject::connect(&ctl, &MeterController::unitChanged, [&](const QString &u) { units << u; });
+  QObject::connect(&ctl, &MeterController::baseUnitChanged, [&](const QString &u) { baseUnits << u; });
+  ctl.forgetUnit();
+  check(units == QStringList{ QString() } && baseUnits == QStringList{ QString() }, "forgetUnit() announces no unit");
+  check(ctl.unit().isEmpty() && ctl.baseUnit().isEmpty(), "forgetUnit() forgets the unit");
+
   if (failed)
   {
     qWarning() << failed << "MeterController check(s) failed";

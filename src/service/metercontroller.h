@@ -127,6 +127,10 @@ public:
 public Q_SLOTS:
   /// Clears the min/max memory.
   void        resetMinMax();
+  /// Another meter was taken over: the unit of the last reading is
+  /// forgotten (empty until the next one), so that the next reading
+  /// announces its unit even when it is the same.
+  void        forgetUnit();
   /// The user acknowledged the alarm banner.
   void        acknowledgeAlarms();
 
@@ -141,8 +145,10 @@ Q_SIGNALS:
   /// The min/max memory was cleared: the Reset key, or the main value
   /// moved to another port (MinMaxMemory) - not a range change (mV -> V).
   void        minMaxReset();
-  /// The main value's unit changed ("mV" -> "V").
+  /// The main value's unit changed ("mV" -> "V"); empty after forgetUnit().
   void        unitChanged(const QString &unit);
+  /// The main value's base unit changed ("V" -> "A"); empty after forgetUnit().
+  void        baseUnitChanged(const QString &baseUnit);
   /// The main value went stale (StaleRule) or is current again; the views
   /// fade it. Only on a change.
   void        staleChanged(bool stale);

@@ -207,7 +207,8 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QString &unit, QWidget *parent)
   cf->addRow(m_aLabel, m_a);
   m_b = new QLineEdit(EngNumberValidator::engText(alarm.b), cond);
   m_b->setValidator(validator);
-  m_bLabel = new QLabel(tr("&Upper bound (%1):").arg(unit), cond);
+  // before the first reading the unit is not known: no unit rather than a guessed one
+  m_bLabel = new QLabel(unit.isEmpty() ? tr("&Upper bound:") : tr("&Upper bound (%1):").arg(unit), cond);
   m_bLabel->setBuddy(m_b);
   cf->addRow(m_bLabel, m_b);
   m_seconds = new QLineEdit(QString::number(alarm.seconds), cond);
@@ -327,7 +328,10 @@ void AlarmDlg::updateFields()
   const auto c = Alarm::Condition(m_condition->currentData().toInt());
   const bool range = c == Alarm::Outside || c == Alarm::Inside;
   const bool value = c == Alarm::Below || c == Alarm::Above || range;
-  m_aLabel->setText(range ? tr("&Lower bound (%1):").arg(m_unit) : tr("&Threshold (%1):").arg(m_unit));
+  if (m_unit.isEmpty())
+    m_aLabel->setText(range ? tr("&Lower bound:") : tr("&Threshold:"));
+  else
+    m_aLabel->setText(range ? tr("&Lower bound (%1):").arg(m_unit) : tr("&Threshold (%1):").arg(m_unit));
   m_aLabel->setBuddy(m_a);
   m_a->setEnabled(value);
   m_aLabel->setEnabled(value);

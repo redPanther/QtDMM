@@ -256,7 +256,11 @@ void MeterController::publish(const Reading &rd)
   {
     m_stale.arrived(m_clock.elapsed());
     m_overload = overload;
-    m_baseUnit = baseUnit;
+    if (m_baseUnit != baseUnit)
+    {
+      m_baseUnit = baseUnit;
+      Q_EMIT baseUnitChanged(baseUnit);
+    }
     m_alarms->feed(dval, overload, now);
 
     // let the other instances see this value (calculated values, P = U * I)
@@ -300,6 +304,14 @@ void MeterController::resetMinMax()
 {
   m_minMax.clear();
   Q_EMIT minMaxReset();
+}
+
+void MeterController::forgetUnit()
+{
+  m_lastUnit.clear();
+  m_baseUnit.clear();
+  Q_EMIT unitChanged(QString());
+  Q_EMIT baseUnitChanged(QString());
 }
 
 // ---------------------------------------------------------------- alarms
