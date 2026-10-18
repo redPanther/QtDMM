@@ -12,6 +12,8 @@ on:
 
 permissions:
   contents: write
+  # to start the Pages workflow again (see the end)
+  actions: write
 
 jobs:
   linux:
@@ -82,6 +84,12 @@ jobs:
             [ "$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease)" = true ] \
               || echo "::warning::$TAG has a suffix but the release is not marked as a pre-release" ;;
           esac
+          # a release published before its files were here started Pages
+          # without the Flatpak bundle, and an upload starts nothing: build
+          # the Flatpak repository again now
+          if [ "$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = false ]; then
+            gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref master
+          fi
         else
           pre=""
           case "$TAG" in *-*) pre="--prerelease" ;; esac
