@@ -112,20 +112,28 @@ bool Vxi11Server::start(const QHostAddress &address, RpcbindMode mode, quint16 c
     m_pmap.clear();
     for (const Reg &reg : std::as_const(m_regs))
       m_pmap.registerProgram(reg.prog, reg.vers, reg.port);
-    if (!m_pmapTcp.listen(address, portmapperPort))
+    // TCP and UDP on the same port. With port 0 the system picks a free TCP port, which may be
+    // taken for UDP (seen on Windows): then another one is tried.
+    for (int attempt = 0;; ++attempt)
     {
-      m_error = m_pmapTcp.serverError() == QAbstractSocket::AddressInUseError
-                  ? tr("port %1 is in use by another program").arg(portmapperPort)
-                  : tr("port %1 is not allowed for this program (a privileged port: see the handbook, "
-                       "SCPI server, VXI-11)").arg(portmapperPort);
-      stop();
-      return false;
-    }
-    if (!m_pmapUdp.bind(address, m_pmapTcp.port()))   // the same port, also when 0 picked one
-    {
-      m_error = tr("UDP port %1: %2").arg(portmapperPort).arg(m_pmapUdp.errorString());
-      stop();
-      return false;
+      if (!m_pmapTcp.listen(address, portmapperPort))
+      {
+        m_error = m_pmapTcp.serverError() == QAbstractSocket::AddressInUseError
+                    ? tr("port %1 is in use by another program").arg(portmapperPort)
+                    : tr("port %1 is not allowed for this program (a privileged port: see the handbook, "
+                         "SCPI server, VXI-11)").arg(portmapperPort);
+        stop();
+        return false;
+      }
+      if (m_pmapUdp.bind(address, m_pmapTcp.port()))
+        break;
+      if (portmapperPort != 0 || attempt == 9)
+      {
+        m_error = tr("UDP port %1: %2").arg(m_pmapTcp.port()).arg(m_pmapUdp.errorString());
+        stop();
+        return false;
+      }
+      m_pmapTcp.close();
     }
     m_pmapPort = m_pmapTcp.port();
     qCDebug(lcVxi11) << "own portmapper on port" << m_pmapPort << ", core port" << m_coreSrv.port();
