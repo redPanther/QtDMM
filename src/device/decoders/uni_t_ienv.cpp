@@ -111,11 +111,14 @@ QByteArray DecoderUniTiENV::keyRequest(const QString &key) const
 // The keys of UNI-T's app per meter: it sends HOLD, MAX and MIN, on the
 // UT363BT HOLD, MAX and AVG (its other mode buttons send nothing). Fast/Slow
 // only on the sound meter, a temperature unit only on the two-channel meters.
+// The UT333BT has no unit key for the humidity (%RH only; tried).
 bool DecoderUniTiENV::hasKey(const QString &key, const QString &model) const
 {
   const bool wind = model.contains("UT363BT");
-  if (key == "hold" || key == "max" || key == "unit")
+  if (key == "hold" || key == "max")
     return true;
+  if (key == "unit")
+    return !model.contains("UT333BT");
   if (key == "min")
     return !wind;
   if (key == "avg")

@@ -562,7 +562,7 @@ LcdWidget::Layout LcdWidget::layout() const
   l.smallH = sh;
   l.minMaxBlockW = minMaxBlockWidth(sh);
 
-  // annunciators: AUTO left, AC + DC, diode, continuity and HOLD right, all
+  // annunciators: AUTO, MAX, MIN, AVG left, AC + DC, diode, continuity and HOLD right, all
   // present as ghosts - shrink the font until the row holds them
   // (font sizes are whole pixels, so one proportional step may still be a
   // little too wide - repeat until it fits)
@@ -577,8 +577,10 @@ namespace
 {
 const QStringList &leftFlags()
 {
-  // manual range is AUTO off, as on the meters
-  static const QStringList l = { LcdWidget::tr("AUTO") };
+  // manual range is AUTO off, as on the meters; MAX, MIN and AVG: the
+  // meter shows its own maximum, minimum or average (its MAX/MIN keys)
+  static const QStringList l = { LcdWidget::tr("AUTO"), LcdWidget::tr("MAX"), LcdWidget::tr("MIN"),
+                                 LcdWidget::tr("AVG") };
   return l;
 }
 const QStringList &rightFlags()
@@ -631,6 +633,9 @@ void LcdWidget::drawFlags(QPainter &p, const Layout &l) const
   const bool ac = flags & SampleFlag::AC, dc = flags & SampleFlag::DC;
   const Flag left[] = {
     { lt[0], m_auto },
+    { lt[1], bool(flags & SampleFlag::Max) },
+    { lt[2], bool(flags & SampleFlag::Min) },
+    { lt[3], bool(flags & SampleFlag::Avg) },
   };
   const Flag right[] = {
     { rt[0], ac },

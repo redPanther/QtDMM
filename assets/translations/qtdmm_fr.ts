@@ -2774,21 +2774,28 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
 <context>
     <name>LcdWidget</name>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="581"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="582"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="607"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="691"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="707"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="582"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="609"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="696"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="712"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="706"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="582"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="711"/>
         <source>MIN</source>
         <translation>MIN</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="583"/>
+        <source>AVG</source>
+        <translation>AVG</translation>
     </message>
 </context>
 <context>
@@ -5740,32 +5747,32 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
         <translation>aucun rpcbind ne tourne sur cet ordinateur</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="118"/>
+        <location filename="../../src/service/vxi11server.cpp" line="122"/>
         <source>port %1 is in use by another program</source>
         <translation>le port %1 est utilisé par un autre programme</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="119"/>
+        <location filename="../../src/service/vxi11server.cpp" line="123"/>
         <source>port %1 is not allowed for this program (a privileged port: see the handbook, SCPI server, VXI-11)</source>
         <translation>le port %1 n&apos;est pas autorisé pour ce programme (un port privilégié : voir le manuel, Serveur SCPI, VXI-11)</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="126"/>
+        <location filename="../../src/service/vxi11server.cpp" line="132"/>
         <source>UDP port %1: %2</source>
         <translation>port UDP %1 : %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="151"/>
+        <location filename="../../src/service/vxi11server.cpp" line="159"/>
         <source>another program or QtDMM instance offers VXI-11 already (port %1); there can be only one per computer</source>
         <translation>un autre programme ou une autre instance de QtDMM offre déjà VXI-11 (port %1) ; il ne peut y en avoir qu&apos;un par ordinateur</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="164"/>
+        <location filename="../../src/service/vxi11server.cpp" line="172"/>
         <source>rpcbind refused the registration over TCP; it takes it over its Unix socket (/run/rpcbind.sock), which is missing</source>
         <translation>rpcbind a refusé l&apos;enregistrement par TCP ; il l&apos;accepte par son socket Unix (/run/rpcbind.sock), qui manque</translation>
     </message>
     <message>
-        <location filename="../../src/service/vxi11server.cpp" line="166"/>
+        <location filename="../../src/service/vxi11server.cpp" line="174"/>
         <source>rpcbind refused the registration</source>
         <translation>rpcbind a refusé l&apos;enregistrement</translation>
     </message>

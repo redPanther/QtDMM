@@ -273,11 +273,18 @@ int main(int argc, char **argv)
     check(acdc > ac + dc - none + 5, QString("AC+DC lights the plus: %1 > %2 + %3 - %4").arg(acdc).arg(ac).arg(dc).arg(none));
     check(lit(0, true, false) > none + 20, "HOLD lights its symbol");
     check(lit(0, false, true) > none + 20, "AUTO lights");
+    // the meter's own MAX, MIN and AVG (UNI-T iENV, APPA)
+    const int max = lit(SampleFlag::Max, false, false);
+    const int min = lit(SampleFlag::Min, false, false);
+    const int avg = lit(SampleFlag::Avg, false, false);
+    check(max > none + 20 && min > none + 20 && avg > none + 20, "MAX, MIN and AVG light");
+    check(lit(SampleFlag::Max | SampleFlag::Min, false, false) > max + 20, "MAX and MIN light both");
+    lit(0, false, true);
     f.setManu(true);
     check(darkPixels(render(f, QSize(520, 200))) == none, "manual range: AUTO off, nothing else lit");
     if (!dump.isEmpty())
     {
-      f.setMode(0, SampleFlag::AC | SampleFlag::DC);
+      f.setMode(0, SampleFlag::AC | SampleFlag::DC | SampleFlag::Max);
       f.setHold(true);
       f.setAuto(true);
       render(f, QSize(520, 200)).save(QDir(dump).filePath("display_flags.png"));
