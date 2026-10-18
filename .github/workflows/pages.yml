@@ -3,7 +3,9 @@ name: GitHub Pages
 # Builds the whole site https://qtdmm.github.io/QtDMM/ and publishes it:
 #   /         landing page (assets/pages)
 #   /api/     Doxygen developer documentation, built from master
-#   /repos/   own package repositories (placeholder until 26.3)
+#   /repos/   own package repositories: the signed Flatpak repository, made
+#             from the newest release bundles (a page saying "not online yet"
+#             while there is no signing key or no release with a bundle)
 #   404.html  sends old links to API pages (/QtDMM/classFoo.html) to api/
 # Every deployment replaces the whole site, so everything is built here in one
 # job, on every merge and on every published release. Pages must be set to
@@ -19,6 +21,7 @@ on:
       - "Doxyfile"
       - "assets/pages/**"
       - "assets/icons/app/qtdmm.svg"
+      - "tools/build-flatpak-repo.sh"
       - ".github/workflows/pages.yml"
   release:
     types: [ published ]
@@ -63,6 +66,55 @@ jobs:
         cp -r assets/pages/. site/
         cp assets/icons/app/qtdmm.svg site/
         cp -r build/doxygen/html site/api
+
+    # stable: the newest release with a Flatpak bundle; beta: the newest
+    # pre-release with one, when it is newer than that release. Signed with
+    # the repository key (secret REPO_GPG_KEY, an armored secret key without
+    # passphrase); without it the step leaves the "not online yet" page
+    - name: Flatpak repository
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO_GPG_KEY: ${{ secrets.REPO_GPG_KEY }}
+      run: |
+        if [ -z "$REPO_GPG_KEY" ]; then
+          echo "::notice::no REPO_GPG_KEY: no Flatpak repository on the site"
+          mv site/repos/pending.html site/repos/index.html
+          exit 0
+        fi
+        mkdir -p bundles
+        stable=- beta=-
+        for row in $(gh release list --repo "$GITHUB_REPOSITORY" --exclude-drafts --limit 30 \
+                       --json tagName,isPrerelease --jq '.[] | "\(.tagName),\(.isPrerelease)"'); do
+          tag=${row%,*} pre=${row#*,}
+          name="QtDMM-${tag}-x86_64.flatpak"
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' \
+            | grep -qx "$name" || continue
+          if [ "$pre" = true ]; then
+            [ "$beta" = - ] || continue   # only the newest pre-release
+            gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern "$name" --dir bundles
+            beta="bundles/$name"
+          else
+            gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern "$name" --dir bundles
+            stable="bundles/$name"
+            break
+          fi
+        done
+        if [ "$stable" = - ] && [ "$beta" = - ]; then
+          echo "::notice::no release has a Flatpak bundle yet"
+          mv site/repos/pending.html site/repos/index.html
+          exit 0
+        fi
+        sudo apt update
+        sudo apt install -y flatpak ostree
+        export GNUPGHOME=$(mktemp -d)
+        echo "$REPO_GPG_KEY" | gpg --batch --import
+        key=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr/ { print $10; exit }')
+        tools/build-flatpak-repo.sh "$stable" "$beta" site/repos/flatpak "$key" \
+          "https://qtdmm.github.io/QtDMM/repos/flatpak"
+        cp site/repos/flatpak/qtdmm.gpg site/repos/qtdmm.gpg
+        [ "$beta" != - ] || sed -i '/data-beta/d' site/repos/index.html
+        rm -f site/repos/pending.html
+        rm -rf "$GNUPGHOME"
 
     - uses: actions/upload-pages-artifact@v3
       with:

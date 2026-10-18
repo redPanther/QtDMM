@@ -13,15 +13,33 @@
     <img src="../qtdmm.svg" alt="">
     <div>
       <h1>Package repositories</h1>
-      <p>Signed apt and Flatpak repositories of QtDMM</p>
+      <p>The signed Flatpak repository of QtDMM</p>
     </div>
   </header>
 
-  <p>The repositories are not online yet. They are planned for QtDMM 26.3
-    and will be rebuilt here from the files of each release.</p>
-  <p>Until then, get QtDMM from the
-    <a href="https://github.com/qtdmm/QtDMM/releases">releases on GitHub</a>
-    or from <a href="https://qtdmm.de/">qtdmm.de</a>.</p>
+  <h2>Flatpak</h2>
+  <p>For any Linux with Flatpak (x86_64). QtDMM comes from here, signed with the
+    QtDMM key; the KDE runtime it needs comes from Flathub. Once added,
+    <code>flatpak update</code> brings each new release.</p>
+  <p>Add the repository and install QtDMM:</p>
+  <pre>flatpak remote-add --user --if-not-exists qtdmm https://qtdmm.github.io/QtDMM/repos/flatpak/qtdmm.flatpakrepo
+flatpak install --user qtdmm io.github.qtdmm.qtdmm//stable</pre>
+  <p>Or in one step, with a software centre that opens
+    <a href="flatpak/io.github.qtdmm.qtdmm.flatpakref">io.github.qtdmm.qtdmm.flatpakref</a>.</p>
+  <!-- one line: pages.yml drops it while there is no release candidate -->
+  <p data-beta>Release candidates are on the branch <code>beta</code> (<a href="flatpak/io.github.qtdmm.qtdmm.beta.flatpakref">flatpakref</a>): <code>flatpak install --user qtdmm io.github.qtdmm.qtdmm//beta</code></p>
+  <p>Meters on USB HID (UNI-T UT803, UT61E with the HID cable, ...) need the udev
+    rule of QtDMM on the computer, as without Flatpak: see INSTALL.</p>
+
+  <h2>The key</h2>
+  <p>The repository is signed with the QtDMM repository key:
+    <a href="qtdmm.gpg">qtdmm.gpg</a>. <code>qtdmm.flatpakrepo</code> carries
+    it already; Flatpak refuses anything not signed with it.</p>
+
+  <h2>apt</h2>
+  <p>An apt repository for Debian and Ubuntu is planned for later. Until then,
+    get the AppImage or the Flatpak from the
+    <a href="https://github.com/qtdmm/QtDMM/releases">releases on GitHub</a>.</p>
 
   <footer><a href="../">QtDMM on GitHub Pages</a></footer>
 </main>
