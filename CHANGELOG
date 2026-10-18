@@ -55,12 +55,17 @@
 - Graph: a meter's second display is recorded too and drawn as another curve, in a colour of its own, with a
   legend; a value in another unit than the main one gets an axis on the right. A second display that changes
   what it shows (Hz to %) begins a new curve without stopping the recording. They are off at first and switched
-  on in the right-click menu, Values (recorded either way); the time cursors show them. The integration curve can integrate value 2 instead of the main
+  on in the right-click menu, Values (recorded either way), where the main value can be switched off too: the
+  left axis then takes the unit of the next value shown. At most two units at a time, an axis each; a value
+  in a third unit waits until another goes off. The time cursors show them. The integration curve can integrate value 2 instead of the main
   value (Settings, Graph, Integration curve, Apply to)
 - Export: the other values the graph shows go into the file too, three columns each (value 2, unit 2,
   status 2), on the grid or at every reading; Import reads them back as curves. Every value has a status
   column: ok, OL, -OL or gap (the value still nan), so an overload and a gap are told apart. Older files
   without it are read as before
+- Meters with more than one value (up to three, as the TFA AirCO2ntrol): the display's right-click menu,
+  Primary value, chooses the one shown big (the min/max memory follows it), the analog meter and the
+  Poincaré plot choose theirs under Value; kept with the window layout. The recording stays the main value's
 - Graph: smaller points on the curves (5 px, large 8 px instead of 7 and 11)
 - Flatpak: each release carries QtDMM-<version>-x86_64.flatpak (KDE runtime 6.11, hidapi inside): serial, USB/HID
   and Bluetooth meters, the SCPI server and several instances. HID meters still need the udev rule on the computer

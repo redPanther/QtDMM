@@ -2060,6 +2060,55 @@ int main(int argc, char **argv)
     check(points && points->count() == line->count(), "record: the points go on with the line");
   }
 
+  // --- 7l3. three values in three units (CO2, °C, %RH): at most two at a
+  //          time, the main value can be hidden - the left axis takes the
+  //          unit of the lowest value shown; its lines go with it ---
+  {
+    Settings cfg("threevalues", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    graph.setUnit("ppm");
+    Feed feed(graph);
+    graph.liveSLOT();
+    graph.setReference(GraphWidget::RefValue, 420);
+    for (int i = 0; i < 40; ++i)
+    {
+      feed.value(400 + i);
+      feed.other(1, 22 + i * 0.01, "°C", Quantity::Temperature);
+      feed.other(2, 45, "%", Quantity::RelativeHumidity);
+    }
+    QTest::qWait(20);
+    graph.setValueShown(1, true);
+    graph.setValueShown(2, true);
+    int celsius = -1, percent = -1;
+    for (int i = 0; i < graph.store()->extraCount(); ++i)
+      (graph.store()->extra(i).id == 1 ? celsius : percent) = i;
+    check(celsius >= 0 && percent >= 0 && graph.extraCurveShown(celsius) && !graph.extraCurveShown(percent),
+          "three units: ppm and °C drawn, % waits for an axis");
+    graph.setValueShown(0, false);
+    check(!graph.mainShown() && graph.leftUnit() == "°C" && graph.leftAxisTitle() == "[°C]",
+          "main hidden: the left axis is °C, got " + graph.leftAxisTitle());
+    check(graph.extraCurveShown(celsius) && !graph.extraCurveOnRight(celsius) && graph.extraCurveShown(percent)
+            && graph.extraCurveOnRight(percent) && graph.rightAxisTitle() == "[%]",
+          "main hidden: °C left, % right, got " + graph.rightAxisTitle());
+    QValueAxis *left = nullptr;
+    for (QAbstractAxis *a : graph.findChild<QChartView *>()->chart()->axes(Qt::Vertical))
+      if (a != graph.rightAxis())
+        left = qobject_cast<QValueAxis *>(a);
+    check(left && left->min() <= 22.0 && left->max() >= 22.39 && left->max() < 100,
+          QString("main hidden: the left scale is the temperature's, %1..%2").arg(left ? left->min() : 0).arg(left ? left->max() : 0));
+    check(!graph.legendText().contains("ppm") && graph.legendText().contains("°C"), "main hidden: not in the legend");
+    check(!graph.referenceShown(), "main hidden: its reference line too");
+    feed.value(600);   // the main value goes on: not on the left axis now
+    check(left && left->max() < 100, "main hidden: its readings do not widen the scale");
+    graph.setValueShown(0, true);
+    check(graph.leftAxisTitle() == "[ppm]" && !graph.extraCurveShown(percent) && left && left->max() >= 600
+            && graph.referenceShown(),
+          "main back: ppm left again, % waits, the scale has its values, got " + graph.leftAxisTitle());
+  }
+
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
   //         back. engValue() emits "µ" while value() used to recognise only
   //         "u", so micro thresholds silently lost their factor. ---

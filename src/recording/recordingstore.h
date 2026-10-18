@@ -253,6 +253,9 @@ public:
   void        load(const Recording &rec);
   /// @}
 
+  /// What a value measures, for the UI: "Voltage DC (V)", "Temperature (°F)".
+  static QString describe(const PortKey &port, const QString &baseUnit);
+
   /// @name The readings series
   /// @{
   int         readingCount() const { return m_readings.size(); }
@@ -343,7 +346,6 @@ Q_SIGNALS:
   void        readingMarked(int row);
 
 private:
-  static QString describe(const PortKey &port, const QString &baseUnit);
   /// ms since the start of the recording, now.
   qint64      elapsed() const { return m_monotonic() - m_t0; }
   /// Adds a point with the integral up to it.

@@ -142,7 +142,7 @@ void GraphWidget::updateXLabels()
 
 QString GraphWidget::yPrefix() const
 {
-  const QString base = m_store->unit();
+  const QString base = leftUnit();
   // units that take no prefix: °C, %, none
   if (base.isEmpty() || base.startsWith(QChar(0x00b0)) || base == QLatin1String("%"))
     return QString();
@@ -150,7 +150,7 @@ QString GraphWidget::yPrefix() const
   // turned the whole axis to mV with labels like 1.6e+04; 350 mV on an axis
   // up to 0.4 V are still mV. Without readings yet the axis says nothing:
   // the meter's prefix
-  if (m_store->count() == 0 && !m_liveBase.isEmpty() && m_liveBase == base)
+  if (m_mainShown && m_store->count() == 0 && !m_liveBase.isEmpty() && m_liveBase == base)
     return m_livePrefix;
   QString prefix;
   SiPrefix::scale(qMax(std::abs(m_yAxis->min()), std::abs(m_yAxis->max())), &prefix);
@@ -314,7 +314,7 @@ void GraphWidget::setUnit(const QString &unit)
 // unit when the meter changes to another one).
 void GraphWidget::showUnit()
 {
-  const QString base = m_store->unit();
+  const QString base = leftUnit();
   m_yTitle->setText(base.isEmpty() ? QString() : QString("[%1%2]").arg(m_yPrefix, base));
   // room above the plot for the title
   const int h = base.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
@@ -360,7 +360,7 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
       m_scaleMax = -1e40;
     }
 
-    for (int i = 0; i < m_store->count(); i++)
+    for (int i = 0; m_mainShown && i < m_store->count(); i++)
       growScale(m_store->series().at(i).value, m_scaleMin, m_scaleMax);
     // the other values drawn on the left axis
     for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)

@@ -153,12 +153,19 @@ were; the integration curve carries on across a gap.
   recorded with the main value on the same time axis. Each value has a
   colour of its own; a legend at the top left names the curves. A value in
   the main value's unit shares its axis, the first other unit gets an axis
-  on the right with a scale of its own; a value in a third unit is not
-  drawn yet. When the second display changes what it shows (Hz to %), its
-  curve ends and a new one begins; the recording goes on. The other values
-  are off at first, so the graph shows the main value as before: the
-  right-click menu, **Values**, switches each of them on or off; that is
-  kept with the window layout. They are recorded either way. The time cursors show the other values too; the
+  on the right with a scale of its own. At most two units are drawn at a
+  time: in **Values** a value in a third unit is greyed out until a value in
+  one of the other two goes off. When the second display changes what it
+  shows (Hz to %), its curve ends and a new one begins; the recording goes
+  on. The other values are off at first, so the graph shows the main value
+  as before: the right-click menu, **Values**, switches each of them on or
+  off - the main value too. Without it the left axis takes the unit of the
+  next value shown (the temperature of a CO2 meter, say), and the reference
+  line, the band, the trigger line and the cursors' level lines, which
+  belong to the main value, go with it. Every change sets the axes and
+  scales afresh from the curves shown; the recording stays as it is, and
+  the main value is still recorded and exported. The choice is kept with
+  the window layout. They are recorded either way. The time cursors show the other values too; the
   reference line, the band, the overview, the statistics between the
   cursors and the triggers are the main value's; the integration curve can
   take value 2 (see *Integration* below). The export has the values that

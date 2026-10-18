@@ -52,7 +52,7 @@ void GraphWidget::updateEnvelope()
   const QRectF plot = m_chart->plotArea();
   const double x0 = m_xAxis->min(), x1 = m_xAxis->max();
   const double y0 = m_yAxis->min(), y1 = m_yAxis->max();
-  if (!m_envelopeOn || m_curvePts.isEmpty() || plot.width() < 2 || plot.height() <= 0 || !(x1 > x0) || !(y1 > y0))
+  if (!m_envelopeOn || !m_mainShown || m_curvePts.isEmpty() || plot.width() < 2 || plot.height() <= 0 || !(x1 > x0) || !(y1 > y0))
   {
     m_envelope->setVisible(false);
     return;
@@ -395,7 +395,7 @@ void GraphWidget::onAppended(bool shifted)
     updateMarkPositions();
   }
 
-  const bool resFlag = m_autoScale && growScale(p.value, m_scaleMin, m_scaleMax);
+  const bool resFlag = m_autoScale && m_mainShown && growScale(p.value, m_scaleMin, m_scaleMax);
 
   if (shifted || bucketSize() != m_bucket)
     rebuildSeries();
@@ -420,7 +420,7 @@ void GraphWidget::rebuildExtras()
   // the units: the main value's on the left; on the right the unit of the
   // lowest value in another one (by number, not by which came first), its
   // newest series. The integrated value has its axis also while it is hidden
-  const QString main = m_store->unit();
+  const QString main = leftUnit();
   m_unit2.clear();
   int unit2Id = INT_MAX;
   for (int i = 0; i < n; ++i)
@@ -614,12 +614,19 @@ void GraphWidget::updateLegend()
     seen.insert(s.id);
     entries.prepend(entry(extraColor(s.id), curveName(s, s.unit)));
   }
+  // the main value alone needs none; without it, the axis does not say which
+  if (entries.isEmpty() && m_mainShown)
+  {
+    m_legend->hide();
+    return;
+  }
+  if (m_mainShown)
+    entries.prepend(entry(dataColor(), curveName(m_store->series(), m_store->unit())));
   if (entries.isEmpty())
   {
     m_legend->hide();
     return;
   }
-  entries.prepend(entry(dataColor(), curveName(m_store->series(), m_store->unit())));
   const QColor ink = m_xLabelColor.isValid() ? m_xLabelColor : palette().color(QPalette::WindowText);
   m_legend->setStyleSheet(QString("QLabel { color: %1; background: transparent; }").arg(ink.name()));
   m_legend->setText(entries.join("&nbsp;&nbsp;&nbsp;"));
@@ -634,16 +641,49 @@ void GraphWidget::updateLegend()
 
 void GraphWidget::setValueShown(int id, bool shown)
 {
-  if (shown == m_shownValues.contains(id))
+  if (id == 0)
+  {
+    if (shown == m_mainShown)
+      return;
+    m_mainShown = shown;
+  }
+  else if (shown == m_shownValues.contains(id))
     return;
-  if (shown)
+  else if (shown)
     m_shownValues.insert(id);
   else
     m_shownValues.remove(id);
-  rebuildExtras();
-  // hidden, a value no longer widens the scale
+  // the view afresh: the left unit may be another one now
+  m_scale2Min = 1e40;
+  m_scale2Max = -1e40;
+  updateSeriesAppearance();   // the curves, then rebuildExtras()
+  showUnit();
   if (m_autoScale)
     setScale(true, m_includeZero, m_scaleMin, m_scaleMax);
+  updateYLabels();
+  updateThresholdLinesVisibility();
+  updateReferenceLine();
+  updateEnvelope();
+  updateTimeCursors();
+}
+
+QString GraphWidget::leftUnit() const
+{
+  if (m_mainShown)
+    return m_store->unit();
+  int lowest = INT_MAX;
+  QString unit;
+  for (int i = 0; i < m_store->extraCount(); ++i)
+  {
+    const RecordingSeries &s = m_store->extra(i);
+    // the newest series of a value has the say (i goes up)
+    if (m_shownValues.contains(s.id) && !s.unit.isEmpty() && s.id <= lowest)
+    {
+      lowest = s.id;
+      unit = s.unit;
+    }
+  }
+  return unit.isEmpty() ? m_store->unit() : unit;
 }
 
 QList<int> GraphWidget::shownValues() const

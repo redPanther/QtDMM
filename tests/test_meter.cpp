@@ -138,6 +138,30 @@ int main(int argc, char **argv)
   }
   check(std::isnan(AnalogMeter::fullScaleFromReading("3.856", 0)), "no counts, no scale");
 
+  // --- 2a. the value shown: another id is ignored until chosen; the
+  //         min/max marks only while the memory follows this value ---
+  {
+    ReadingAdapter adapter;
+    auto reading = [&](int id, const QString &text, const QString &unit, const QString &special)
+    {
+      return ReadingAdapter::reading(adapter.adaptValue(text.toDouble(), text, unit, special, "AUTO", false, true, false, id, 0));
+    };
+    AnalogMeter m;
+    m.setDisplayCounts(4000);
+    m.showReading(reading(0, "734", "ppm", ""));
+    m.showReading(reading(1, "22.5", "C", "TE"));
+    check(near(m.fullScale(), 4000.0), QString("value 1: the ppm scale, got %1").arg(m.fullScale()));
+    m.setValueId(1, false);
+    m.showReading(reading(0, "734", "ppm", ""));
+    m.showReading(reading(1, "22.5", "C", "TE"));
+    check(m.valueId() == 1 && near(m.fullScale(), 50.0), QString("value 2: the temperature's scale, got %1").arg(m.fullScale()));
+    m.showMaximum(1000.0, "1000", "ppm");
+    check(std::isnan(m.maxMark()), "value 2: the memory of value 1 is no mark here");
+    m.setValueId(1, true);
+    m.showMaximum(30.0, "30.0", "C");
+    check(near(m.maxMark(), 30.0), QString("value 2 with its memory: the mark, got %1").arg(m.maxMark()));
+  }
+
   // --- 2b. scale step: 1-2-5, labels do not touch, 0 is a major tick ---
   {
     const double radius = 220.0;   // px from the pivot to the labels

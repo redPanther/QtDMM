@@ -50,6 +50,8 @@ Right-click into the plot:
   collected, and the next update after releasing it shows them.
 - **Clear** - starts afresh.
 - **Save image...** - the plot as PNG or SVG.
+- **Value** - for a meter with more than one value, the one plotted; another
+  one starts afresh. Kept with the window layout.
 
 Distance, points and the ellipse are kept with the other settings of this
 instance.

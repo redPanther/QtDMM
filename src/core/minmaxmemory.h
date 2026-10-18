@@ -6,7 +6,7 @@
 
 #include <cmath>
 
-/// The min/max memory of the main value, in SI base units, so it carries
+/// The min/max memory of one value (the main one, or the LCD's primary), in SI base units, so it carries
 /// across range changes (mV <-> V, kΩ <-> MΩ). It starts afresh only when
 /// the port changes - another function (V DC -> Ω), another coupling
 /// (DC -> AC -> AC+DC), another quantity - or the unit at the same port

@@ -148,6 +148,14 @@ yellow-green of most meters), *Backlight blue* (light segments on blue, the defa
 *Amber*, *High contrast* (black on white) or *Custom*, the tint from the
 *Appearance* page. Changing that tint switches the display to *Custom*.
 
+**Primary value** in the same menu, for a meter with more than one value (a
+second display, or the CO2, temperature and humidity of the TFA
+AirCO2ntrol): the value shown big; the others follow on the small line in
+their order. The min/max memory follows it too. It only changes the display:
+the graph's recording, its triggers and the export stay with the main value
+(value 1). It is kept with the window layout; a meter without that value
+shows its main value.
+
 For meters whose keys QtDMM knows (the UNI-T UT60BT, UT61B+/D+/E+ and
 UT161), a row of the meter's keys sits under the display: SELECT (yellow),
 RANGE and AUTO, REL, LIGHT and HOLD (blue, on the right as on the meter);

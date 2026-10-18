@@ -219,6 +219,8 @@ public:
   /// Where the line is now, in base units; NaN when the mean, minimum or
   /// maximum has no reading in the window.
   double           referenceValue() const { return m_reference; }
+  /// Whether the line is drawn: in the scale, and the main value shown.
+  bool             referenceShown() const;
   /// The reference as kept per window (Windows/graph-reference, the
   /// workspace): "" for 0, "mean", "min", "max", "alarm <value>", "<value>",
   /// "off".
@@ -287,12 +289,24 @@ public:
   bool             extraCurveShown(int i) const { return m_extraCurves[size_t(i)].shown; }
   bool             extraCurveOnRight(int i) const { return m_extraCurves[size_t(i)].right; }
   QValueAxis      *rightAxis() const { return m_yAxis2; }
+  /// The left axis' title, "[mV]".
+  QString          leftAxisTitle() const { return m_yTitle->text(); }
   /// Its title, "[°C]" (empty while it is hidden).
   QString          rightAxisTitle() const { return m_y2Title->isVisible() ? m_y2Title->text() : QString(); }
   /// The legend's text, empty while there is only the main value.
   QString          legendText() const;
+  /// Value @p id on or off (0 the main value, also from the menu Values).
+  /// Each change sets the view afresh: axes, scales and prefixes from the
+  /// curves shown; the recording is not touched. At most two units are
+  /// drawn: a value in a third one waits until another goes off.
   void             setValueShown(int id, bool shown);
+  /// The other values shown (ids > 0).
   QList<int>       shownValues() const;
+  bool             mainShown() const { return m_mainShown; }
+  /// The unit of the left axis: the main value's, or while it is hidden
+  /// the one of the lowest value shown. The reference line, the band, the
+  /// trigger line and the cursor levels are the main value's: hidden with it.
+  QString          leftUnit() const;
   /// @}
   /// @{
   /// Live, but the window held where the overview put it.
@@ -549,6 +563,7 @@ protected:
   double           m_scale2Min = 1e40;
   double           m_scale2Max = -1e40;
   QSet<int>        m_shownValues;        ///< the meter's other values switched on
+  bool             m_mainShown = true;   ///< the main value's curve, setValueShown(0)
   int              m_intValueId = 0;     ///< setIntegrationValue()
   QLabel          *m_legend = nullptr;
   QColor           extraColor(int i) const;

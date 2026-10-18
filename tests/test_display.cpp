@@ -281,6 +281,25 @@ int main(int argc, char **argv)
     }
   }
 
+  // --- the primary value: shown big, the others follow on the small line
+  //     in their order; one the meter does not have gives the main value ---
+  {
+    LcdWidget f;
+    f.setDisplayMode(4000, true, true, 3);
+    f.setValue(0, "734");
+    f.setValue(1, "22.50");
+    f.setValue(2, "45.10");
+    auto lines = [&] { return QStringList{ f.lineValue(0), f.lineValue(1), f.lineValue(2) }.join(' '); };
+    check(lines() == "734 22.50 45.10", "primary: the main value at first, got " + lines());
+    f.setPrimary(2);
+    check(f.primaryShown() == 2 && lines() == "45.10 734 22.50", "primary 3: big, then 1 and 2, got " + lines());
+    f.setPrimary(1);
+    check(lines() == "22.50 734 45.10", "primary 2: big, then 1 and 3, got " + lines());
+    f.setDisplayMode(4000, true, true, 1);
+    check(f.primaryShown() == 0 && f.lineValue(0) == "734", "primary: a meter with one value shows its main value");
+    check(f.primary() == 1, "primary: the choice stays for a meter that has it");
+  }
+
   // --- an alarm's colour over the variant, and back ---
   {
     LcdWidget f;

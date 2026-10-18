@@ -49,6 +49,8 @@
 #include "service/metercontroller.h"
 #include "ui/views/lcdwidget.h"
 #include "ui/views/analogmeter.h"
+#include "ui/views/poincareplot.h"
+#include "recording/recordingstore.h"
 #include "recording/readingsmodel.h"
 #include "core/alarm.h"
 #include "core/siprefix.h"
@@ -105,6 +107,12 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
   // the recorder belongs to the controller; the graph shows it
   ui_graph->setStore(m_ctl->recorder());
   connect(m_ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
+  // what each value measures, for the views' choice of value
+  connect(m_ctl, &MeterController::reading, this, [this](const Reading &r)
+  {
+    if (!r.text.isEmpty() && !r.overload && r.port.quantity != Quantity::Unknown)
+      m_lastReading[r.id] = r;
+  });
   // the alarm thresholds are in the reading's base unit, also while the
   // (modeless) dialog is open
   connect(m_ctl, &MeterController::baseUnitChanged, m_configDlg->alarmPage(), &AlarmPrefs::setUnit);
@@ -240,6 +248,58 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
   connect(m_ctl, &MeterController::minimumChanged, meter, &AnalogMeter::showMinimum);
   connect(m_ctl, &MeterController::maximumChanged, meter, &AnalogMeter::showMaximum);
   connect(m_ctl, &MeterController::minMaxReset, meter, &AnalogMeter::clearMinMax);
+  applyValueChoice();
+}
+
+void InstanceWidget::setPoincare(PoincarePlot *plot)
+{
+  m_poincare = plot;
+  applyValueChoice();
+}
+
+void InstanceWidget::setLcdValue(int id)
+{
+  m_lcdValue = qBound(0, id, 2);
+  applyValueChoice();
+}
+
+void InstanceWidget::setMeterValue(int id)
+{
+  m_meterValue = qBound(0, id, 2);
+  applyValueChoice();
+}
+
+void InstanceWidget::setPoincareValue(int id)
+{
+  m_poincareValue = qBound(0, id, 2);
+  applyValueChoice();
+}
+
+int InstanceWidget::numValues() const
+{
+  return qBound(1, m_configDlg->meterSettings()->numValues(), 3);
+}
+
+QString InstanceWidget::valueName(int id) const
+{
+  const auto it = m_lastReading.constFind(id);
+  if (it == m_lastReading.cend())
+    return tr("Value %1").arg(id + 1);
+  return RecordingStore::describe(it->port, it->baseUnit);
+}
+
+void InstanceWidget::applyValueChoice()
+{
+  const int n = numValues();
+  auto has = [n](int id) { return id < n ? id : 0; };
+  const int lcd = has(m_lcdValue);
+  if (m_display)
+    m_display->setPrimary(m_lcdValue);
+  m_ctl->setMinMaxValue(lcd);
+  if (m_meter)
+    m_meter->setValueId(has(m_meterValue), has(m_meterValue) == lcd);
+  if (m_poincare)
+    m_poincare->setValueId(has(m_poincareValue));
 }
 
 void InstanceWidget::setReadingLog(ReadingsModel *log)
@@ -440,6 +500,7 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   m_ctl->resetMinMax();
   m_ctl->recorder()->forgetReading();
   m_ctl->forgetUnit();   // the axis title and the alarm unit come with the first reading
+  m_lastReading.clear();   // and what the values measure
   ui_graph->liveSLOT();
   Q_EMIT meterChanged();
 
@@ -671,6 +732,7 @@ void InstanceWidget::readConfig()
   m_display->setFaceColor(tint);
   m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), devSettings->numValues());
   dmm->setNumValues(devSettings->numValues());
+  applyValueChoice();
   m_ctl->setDisplayCounts(devSettings->display());
 
   if (m_meter)

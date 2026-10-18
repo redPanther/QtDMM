@@ -63,6 +63,16 @@ public:
   /// secondary values of multi-line meters.
   void setValue(int id, const QString &);
   void setUnit(int id, const QString &);
+  /// The value shown big (context menu "Primary value", kept with the
+  /// window layout); the others follow on the small line in their order.
+  /// One the meter does not have (numValues of setDisplayMode()) gives the
+  /// main value. Only the display: the recording stays the main value's.
+  void setPrimary(int id);
+  int  primary() const { return m_primary; }
+  /// The value shown big now: primary(), or 0 when the meter lacks it.
+  int  primaryShown() const;
+  /// The text on line @p line (0 the big value, 1.. the small line; for the tests).
+  QString lineValue(int line) const { return m_value[idAt(line)]; }
   /// The annunciators of value @p id: AC, DC and diode from @p flags
   /// (SampleFlag), the continuity buzzer from @p quantity.
   void setMode(int id, quint32 flags, Quantity quantity = Quantity::Unknown);
@@ -151,6 +161,8 @@ protected:
 
 private:
   int numDigits() const;
+  /// The value id on line @p line: 0 the big one, 1.. the small line.
+  int idAt(int line) const;
   // remembers a value with more digits than the display count
   void fitDigits(const QString &value);
   void renderStatic();
@@ -186,6 +198,7 @@ private:
   bool m_showBar = true;
   bool m_paintBar = false;
   int m_numValues = 1;
+  int m_primary = 0;   ///< setPrimary()
   bool m_hold = false;
   bool m_auto = false;
   bool m_stale = false;

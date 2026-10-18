@@ -135,7 +135,7 @@ void GraphWidget::updateTimeCursors()
     m_cursorLine[i]->setVisible(shown);
     m_cursorName[i]->setVisible(false);   // placed below, with the other flag
     // the level: only for a value inside the scale (none in a gap)
-    const double v = shown ? valueAt(m_cursorT[i]) : qQNaN();
+    const double v = shown && m_mainShown ? valueAt(m_cursorT[i]) : qQNaN();
     const bool level = std::isfinite(v) && yMax > yMin && v >= yMin && v <= yMax;
     m_cursorLevel[i]->setVisible(level);
     if (level)
@@ -167,9 +167,14 @@ double GraphWidget::referenceY() const
 {
   const double min = m_yAxis->min(), max = m_yAxis->max();
   const QRectF plot = m_chart->plotArea();
-  if (m_referenceKind == RefOff || !(m_reference > min && m_reference < max) || plot.height() <= 0)
+  if (m_referenceKind == RefOff || !m_mainShown || !(m_reference > min && m_reference < max) || plot.height() <= 0)
     return std::nan("");
   return plot.bottom() - (m_reference - min) / (max - min) * plot.height();
+}
+
+bool GraphWidget::referenceShown() const
+{
+  return std::isfinite(referenceY());
 }
 
 RecordingStore::Stats GraphWidget::windowStats() const
@@ -303,8 +308,9 @@ void GraphWidget::updateReferenceLine()
 
 void GraphWidget::updateThresholdLinesVisibility()
 {
-  m_triggerLine->setVisible(mode() == Raising || mode() == Falling);
-  m_integrationLine->setVisible(m_showIntegration);
+  // the trigger compares the main value: on its axis, hidden with it
+  m_triggerLine->setVisible((mode() == Raising || mode() == Falling) && m_mainShown);
+  m_integrationLine->setVisible(m_showIntegration && (m_intValueId != 0 || m_mainShown));
 
   updateThresholdLinePositions();
 }

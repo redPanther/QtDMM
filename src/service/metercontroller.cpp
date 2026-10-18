@@ -229,8 +229,8 @@ void MeterController::publish(const Reading &rd)
     return;
   }
 
-  // min/max follow the main value; a held display is the old reading
-  // again, so it does not count
+  // min/max follow their value (setMinMaxValue()); a held display is the
+  // old reading again, so it does not count
   bool newMin = false;
   bool newMax = false;
   if (id == 0 && !hold)
@@ -238,6 +238,9 @@ void MeterController::publish(const Reading &rd)
     if (m_lastUnit != unit)
       Q_EMIT unitChanged(unit);
     m_lastUnit = unit;
+  }
+  if (id == m_minMaxId && !hold)
+  {
     // kept across a range change (mV -> V), afresh on another port
     const MinMaxMemory::Result mm = m_minMax.feed(rd);
     if (mm.reset)
@@ -298,6 +301,14 @@ bool MeterController::mayStartRecording(QString *why) const
   if (why)
     *why = reason;
   return reason.isEmpty();
+}
+
+void MeterController::setMinMaxValue(int id)
+{
+  if (id == m_minMaxId)
+    return;
+  m_minMaxId = id;
+  resetMinMax();
 }
 
 void MeterController::resetMinMax()
