@@ -261,11 +261,13 @@ void PoincarePlot::render(QPainter &p, const QRect &area)
     p.drawLine(QPointF(plot.left(), py(v)), QPointF(plot.right(), py(v)));
   }
   p.setPen(labels);
+  int widest = 0;   // of the y labels: the y title goes left of them
   for (double v = lo; v <= hi + step * 1e-9; v += step)
   {
     // no "-0" from the sum of the steps
     const QString text = QString::number(std::abs(v) < step * 1e-6 ? 0.0 : v / factor, 'f', decimals);
     const int w = fm.horizontalAdvance(text);
+    widest = qMax(widest, w);
     if (v + step <= hi + step * 1e-9)   // the last x label would sit under the corner
       p.drawText(QPointF(px(v) - w / 2.0, plot.bottom() + fm.ascent() + 3), text);
     p.drawText(QPointF(plot.left() - w - 4, py(v) + fm.ascent() / 2.0 - 1), text);
@@ -276,7 +278,9 @@ void PoincarePlot::render(QPainter &p, const QRect &area)
   p.drawText(QPointF(plot.center().x() - fm.horizontalAdvance(xTitle) / 2.0, plot.bottom() + 2 * fm.height() + 4),
              xTitle);
   p.save();
-  p.translate(area.left() + fm.ascent() + 1, plot.center().y() + fm.horizontalAdvance(yTitle) / 2.0);
+  // at the labels, not at the edge of the window: the square plot sits in the middle of a wide one
+  const int titleX = qMax(area.left() + fm.ascent() + 1, plot.left() - widest - 8 - fm.descent());
+  p.translate(titleX, plot.center().y() + fm.horizontalAdvance(yTitle) / 2.0);
   p.rotate(-90);
   p.drawText(QPointF(0, 0), yTitle);
   p.restore();
