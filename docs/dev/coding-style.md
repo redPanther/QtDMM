@@ -98,7 +98,7 @@ camelCase throughout, no snake_case.
 ## Tests
 
 - One test program per subject under `tests/`, registered in `cmake/ctest.cmake`.
-- The shared helpers (`check()`, `waitFor()`) come from one header once it exists (review R13-12); until then each test keeps its own.
+- `check()`, the failure count and `waitFor()` come from `tests/testutil.h`; a test does not define its own.
 - A test reads a result in a statement of its own before using it in a message: `const bool ok = s.start(); check(ok, "start: " + s.error());`. The order in which function arguments are evaluated is unspecified (MSVC evaluates right to left).
 - Tests use a temporary settings directory, never the user's configuration, and network ports chosen by the system (port 0), not fixed ones.
 

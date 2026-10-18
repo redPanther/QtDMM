@@ -12,17 +12,7 @@
 #include <QTemporaryDir>
 
 #include "device/discovery/discovery.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static bool finishes(Discoverer &d, int ms)
 {

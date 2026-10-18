@@ -11,31 +11,7 @@
 
 #include "service/hislipserver.h"
 #include "service/scpiserver.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
-
-// client and server share the thread: wait with the event loop running
-static bool waitFor(const std::function<bool()> &cond, int ms = 2000)
-{
-  QElapsedTimer t;
-  t.start();
-  while (!cond())
-  {
-    if (t.elapsed() > ms)
-      return false;
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
-  }
-  return true;
-}
+#include "testutil.h"
 
 // message types used here (IVI-6.1)
 enum : quint8

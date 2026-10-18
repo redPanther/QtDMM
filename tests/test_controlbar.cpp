@@ -12,17 +12,7 @@
 
 #include "core/reading.h"
 #include "ui/controlbar.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static QToolButton *key(ControlBar &bar, const QString &name)
 {

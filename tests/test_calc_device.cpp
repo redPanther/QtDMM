@@ -10,17 +10,7 @@
 #include "service/sharedstatemanager.h"
 #include "device/transports/calc.h"
 #include "device/dmmdecoder.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static SharedStateManager::Reading reading(double value, const QString &unit, qint64 now, bool valid = true)
 {

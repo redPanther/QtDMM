@@ -9,17 +9,7 @@
 
 #include "core/poincare.h"
 #include "core/readingadapter.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static bool near(double a, double b)
 {

@@ -11,17 +11,7 @@
 #include <QtNetwork>
 
 #include "device/meterconnection.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
+#include "testutil.h"
 
 // Sigrok-style frame: 30 bytes, LF terminated, "<special> <value> <unit> <range>"
 static QByteArray frame(const QString &value)
@@ -29,15 +19,6 @@ static QByteArray frame(const QString &value)
   QByteArray line = QString("DC %1 V AUTO").arg(value).toLatin1();
   line.prepend(QByteArray(29 - line.size(), ' '));
   return line + "\n";
-}
-
-static bool waitFor(const std::function<bool()> &cond, int ms)
-{
-  QElapsedTimer t;
-  t.start();
-  while (!cond() && t.elapsed() < ms)
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
-  return cond();
 }
 
 static const char *name(MeterConnection::LinkState s)

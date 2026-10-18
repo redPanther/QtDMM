@@ -11,17 +11,7 @@
 #include "recording/readingsmodel.h"
 #include "core/reading.h"
 #include "recording/recordingstore.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
+#include "testutil.h"
 
 static ReadingsModel::Entry entry(double dval, const QString &val, const QString &unit, int secs, int id = 0)
 {

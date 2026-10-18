@@ -20,17 +20,7 @@
 #include "ui/settings/graphprefs.h"
 #include "ui/settings/guiprefs.h"
 #include "ui/settings/recorderprefs.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 template <typename T> static T *child(QWidget &page, const char *name)
 {

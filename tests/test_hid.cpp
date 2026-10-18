@@ -12,17 +12,7 @@
 #include "device/transports/hidserial.h"
 #include "device/transports/hidpath.h"
 #include "device/transports/hidholtek.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 int main(int argc, char **argv)
 {

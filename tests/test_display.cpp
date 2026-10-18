@@ -7,17 +7,7 @@
 
 #include "ui/views/lcdwidget.h"
 #include "core/siprefix.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static QImage render(LcdWidget &w, const QSize &size)
 {

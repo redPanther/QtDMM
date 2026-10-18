@@ -10,30 +10,7 @@
 #include <QtNetwork>
 
 #include "service/metercontroller.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
-
-static bool waitFor(const std::function<bool()> &cond, int ms = 2000)
-{
-  QElapsedTimer t;
-  t.start();
-  while (!cond())
-  {
-    if (t.elapsed() > ms)
-      return false;
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
-  }
-  return true;
-}
+#include "testutil.h"
 
 // lets the queued work run
 static void settle(int ms = 200)

@@ -9,17 +9,7 @@
 #include <QtNetwork>
 
 #include "device/transports/rfc2217serial.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
+#include "testutil.h"
 
 static QByteArray sub(quint8 cmd, const QByteArray &payload)
 {
