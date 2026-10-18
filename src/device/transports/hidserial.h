@@ -109,8 +109,7 @@ protected:
   int m_reportsSeen = 0;
   bool m_dataSeen = false;
   hid_device *m_handle = nullptr;   ///< owned by the reader once it runs
-  QThread *m_thread = nullptr;
-  HidReader *m_reader = nullptr;
+  HidReaderThread m_reader;
   QByteArray m_rx;                    ///< UART bytes received, main thread only
 
   qint64 readData(char *data, qint64 maxSize)  override;

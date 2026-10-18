@@ -211,19 +211,8 @@ HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device
   }
   m_isOpen = true;
 
-  // The blocking read loop runs in its own thread; this object stays in the
-  // caller's thread, so readData()/bytesAvailable()/deleteLater() are plain
-  // single-threaded code and the reports arrive as queued signals.
-  m_thread = new QThread(this);
-  m_reader = new HidReader(m_handle);
-  m_reader->moveToThread(m_thread);
-  connect(m_thread, &QThread::started, m_reader, &HidReader::run);
-  connect(m_reader, &HidReader::report, this, &HIDSerialDevice::onReport);
-  connect(m_reader, &HidReader::readError, this, &HIDSerialDevice::onReadError);
-  // direct: the thread object lives here, and stopReader() blocks this
-  // thread's event loop while it waits for the quit
-  connect(m_reader, &HidReader::finished, m_thread, &QThread::quit, Qt::DirectConnection);
-  m_thread->start();
+  // the blocking read loop runs in its own thread (HidReaderThread)
+  m_reader.start(m_handle, this, &HIDSerialDevice::onReport, &HIDSerialDevice::onReadError);
 }
 
 // ---------------------------------------------------------------------------
@@ -292,27 +281,7 @@ void HIDSerialDevice::close()
 
 void HIDSerialDevice::stopReader()
 {
-  if (!m_thread)
-    return;
-  if (m_reader)
-    m_reader->stop();
-  m_thread->quit();   // in case the loop already ended
-  if (m_thread->isRunning() && !m_thread->wait(2000))
-  {
-    // hid_read_timeout() did not return - should not happen; better a
-    // leaked thread than a crash in it
-    qWarning() << "HID: reader thread did not stop";
-    m_thread->setParent(nullptr);
-  }
-  else
-  {
-    // the thread is done, so its object can be deleted from here (a
-    // deleteLater() would never run: no event loop is left in that thread)
-    delete m_reader;
-    delete m_thread;
-  }
-  m_thread = nullptr;
-  m_reader = nullptr;
+  m_reader.stop();
   m_handle = nullptr;   // closed by the reader
 }
 

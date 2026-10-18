@@ -47,18 +47,8 @@ HidHoltekDevice::HidHoltekDevice(const DmmDecoder::DMMInfo & /*info*/, const QSt
   }
   m_isOpen = true;
 
-  // The blocking read loop runs in its own thread, exactly as for
-  // HIDSerialDevice: this object stays in the caller's thread, the reports
-  // arrive as queued signals.
-  m_thread = new QThread(this);
-  m_reader = new HidReader(m_handle);
-  m_reader->moveToThread(m_thread);
-  connect(m_thread, &QThread::started, m_reader, &HidReader::run);
-  connect(m_reader, &HidReader::report, this, &HidHoltekDevice::onReport);
-  connect(m_reader, &HidReader::readError, this, &HidHoltekDevice::onReadError);
-  // direct: stopReader() blocks this thread's event loop while it waits for the quit
-  connect(m_reader, &HidReader::finished, m_thread, &QThread::quit, Qt::DirectConnection);
-  m_thread->start();
+  // the blocking read loop runs in its own thread
+  m_reader.start(m_handle, this, &HidHoltekDevice::onReport, &HidHoltekDevice::onReadError);
 }
 
 HidHoltekDevice::~HidHoltekDevice()
@@ -133,25 +123,7 @@ void HidHoltekDevice::close()
 
 void HidHoltekDevice::stopReader()
 {
-  if (!m_thread)
-    return;
-  if (m_reader)
-    m_reader->stop();
-  m_thread->quit();   // in case the loop already ended
-  if (m_thread->isRunning() && !m_thread->wait(2000))
-  {
-    // hid_read_timeout() did not return - should not happen; better a
-    // leaked thread than a crash in it
-    qWarning() << "HID: reader thread did not stop";
-    m_thread->setParent(nullptr);
-  }
-  else
-  {
-    delete m_reader;
-    delete m_thread;
-  }
-  m_thread = nullptr;
-  m_reader = nullptr;
+  m_reader.stop();
   m_handle = nullptr;   // closed by the reader
 }
 

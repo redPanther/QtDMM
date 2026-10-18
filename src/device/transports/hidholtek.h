@@ -97,8 +97,7 @@ private:
   bool m_isOpen = false;
   QString m_openError;
   hid_device *m_handle = nullptr;   ///< owned by the reader once it runs
-  QThread *m_thread = nullptr;
-  HidReader *m_reader = nullptr;
+  HidReaderThread m_reader;
   QByteArray m_rx;                    ///< text lines not yet read, main thread only
   /// The set being collected: latest raw value per quantity.
   quint16 m_co2 = 0, m_temperature = 0, m_humidity = 0;
