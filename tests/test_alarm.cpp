@@ -8,17 +8,7 @@
 
 #include "core/alarm.h"
 #include "ui/engnumbervalidator.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
+#include "testutil.h"
 
 struct Log
 {

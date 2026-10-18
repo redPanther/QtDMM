@@ -11,17 +11,7 @@
 #include <QElapsedTimer>
 
 #include "ui/dialogs/helpdlg.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static QString readResource(const QString &path)
 {

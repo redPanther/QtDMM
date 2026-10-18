@@ -12,18 +12,9 @@
 #include <QTemporaryDir>
 
 #include "ui/designs.h"
+#include "testutil.h"
 
 #if !defined(Q_OS_WIN) && !defined(Q_OS_MACOS)
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
 #endif
 
 int main(int argc, char **argv)

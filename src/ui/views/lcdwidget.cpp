@@ -789,14 +789,9 @@ void LcdWidget::drawBar(QPainter &p, const Layout &l, bool staticPart) const
 
 void LcdWidget::renderStatic()
 {
-  const qreal dpr = devicePixelRatioF();
-  m_static = QPixmap(size() * dpr);
-  m_static.setDevicePixelRatio(dpr);
-  m_static.fill(Qt::transparent);
-
+  m_static = PanelFrame::staticPixmap(this);
   QPainter p(&m_static);
-  p.setRenderHint(QPainter::Antialiasing);
-  p.setRenderHint(QPainter::TextAntialiasing);
+  PanelFrame::smooth(p);
   const Layout l = layout();
 
   PanelFrame::Colors c;
@@ -825,8 +820,7 @@ void LcdWidget::paintEvent(QPaintEvent *)
     renderStatic();
 
   QPainter p(this);
-  p.setRenderHint(QPainter::Antialiasing);
-  p.setRenderHint(QPainter::TextAntialiasing);
+  PanelFrame::smooth(p);
   p.drawPixmap(0, 0, m_static);
 
   const Layout l = layout();

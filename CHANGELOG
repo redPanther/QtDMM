@@ -63,6 +63,8 @@
 - Graph: switching to another device in the sidebar starts with an empty graph. Before, the last reading of the
   device before stayed in it with its second display: the axis kept that scale and prefix (k%RH after a CO2
   meter), the right axis and the legend kept its temperature. The Poincaré plot starts anew too
+- Alarms: the settings page labels the thresholds with the unit of the reading (A, Ohm, ppm ...); it always
+  said V
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

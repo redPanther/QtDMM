@@ -14,17 +14,7 @@
 
 #include "ui/settings/keyboardprefs.h"
 #include "ui/shortcuts.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static QAction *action(QWidget &w, const char *id, const QString &text, const QKeySequence &key)
 {

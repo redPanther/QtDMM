@@ -19,17 +19,7 @@
 #include "core/readingadapter.h"
 #include "core/stalerule.h"
 #include "recording/recordingstore.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static QString readFile(const QString &path)
 {

@@ -14,17 +14,7 @@
 
 #include "core/readingadapter.h"
 #include "recording/recordingstore.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 // A reading as the MeterController makes it: through ReadingAdapter
 static Reading reading(double value, const QString &text, const QString &special, bool hold = false,

@@ -110,6 +110,18 @@ protected Q_SLOTS:
   void      updateLed();
 
 protected:
+  /// @name Parts of the constructor, in this order
+  /// @{
+  void      createViews();
+  void      createSidebar();
+  void      fillViewToolbar();
+  QList<QAction *> createArrangeMenu();
+  void      createDesignMenu();
+  void      createStatusBar();
+  void      placeWindow();
+  void      connectInstances();
+  /// @}
+
   InstanceWidget    *m_wid;
   LcdWidget *m_display;
   AnalogMeter   *m_meter;
@@ -228,7 +240,7 @@ protected:
   /// The commands with a key for the page Keyboard (ShortcutRegistry);
   /// the user's keys applied, the tooltips name them: "Record (Space)".
   /// @p workspace: the menu's Load/Save workspace.
-  void        createShortcuts(std::initializer_list<QAction *> workspace);
+  void        createShortcuts(const QList<QAction *> &workspace);
   /// Adds @p view as an MDI window with @p title (@p role: MdiArranger::Role;
   /// @p name identifies it in the settings).
   QMdiSubWindow *addView(QWidget *view, const QString &title, int role, const QString &name);

@@ -37,6 +37,14 @@
 #include "ui/controlbar.h"
 #include "ui/views/graphwidget.h"
 #include "ui/settings/settingsdialog.h"
+#include "ui/devicesettings.h"
+#include "ui/settings/alarmprefs.h"
+#include "ui/settings/generalprefs.h"
+#include "ui/settings/graphprefs.h"
+#include "ui/settings/guiprefs.h"
+#include "ui/settings/keyboardprefs.h"
+#include "ui/settings/recorderprefs.h"
+#include "ui/settings/scpiprefs.h"
 #include "device/meterconnection.h"
 #include "service/metercontroller.h"
 #include "ui/views/lcdwidget.h"
@@ -164,7 +172,7 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
     if (graph)
       ui_graph->addMark(color, name);
   });
-  m_ctl->setAlarms(m_configDlg->alarms());
+  m_ctl->setAlarms(m_configDlg->alarmPage()->alarms());
 
   // SCPI server: the meter as a network instrument (applyScpi() starts it)
   connect(m_ctl, &MeterController::connectRequested, this, [this](bool on)
@@ -182,7 +190,7 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
   });
   connect(m_ctl, &MeterController::scpiStatusChanged, this, [this](const QString &detail)
   {
-    m_configDlg->setScpiStatus(detail);
+    m_configDlg->scpiPage()->setStatus(detail);
     Q_EMIT servicesChanged();
   });
   // HCOPy:SDUMp:DATA? - the main window as the "instrument screen"
@@ -256,7 +264,7 @@ bool InstanceWidget::closeWin()
 
 bool InstanceWidget::keepUnsavedData(const QString &text, const QString &discard)
 {
-  if (!ui_graph->dirty() || !m_configDlg->alertUnsavedData())
+  if (!ui_graph->dirty() || !m_configDlg->generalPage()->alertUnsavedData())
     return true;
 
   QMessageBox question;
@@ -296,21 +304,6 @@ bool InstanceWidget::keepUnsavedData(const QString &text, const QString &discard
   return true;
 }
 
-QRect InstanceWidget::winRect() const
-{
-  return m_configDlg->winRect();
-}
-
-bool InstanceWidget::saveWindowPosition() const
-{
-  return m_configDlg->saveWindowPosition();
-}
-
-bool InstanceWidget::saveWindowSize() const
-{
-  return m_configDlg->saveWindowSize();
-}
-
 QRect InstanceWidget::parentRect() const
 {
   // the main window: InstanceWidget itself sits inside an MDI window now
@@ -346,7 +339,6 @@ void InstanceWidget::connectPort(bool on)
   else if (!on)
     m_ctl->connectMeter(false);
 
-  m_configDlg->connectSLOT(on);
   ui_graph->connectSLOT(on);
 }
 
@@ -376,6 +368,10 @@ void InstanceWidget::openConfig(int page)
   // recording)
   if (page >= 0)
     m_configDlg->showPage(SettingsDialog::PageType(page));
+  // the alarm thresholds are in the reading's base unit; before the first
+  // reading the page keeps the one it had
+  if (!m_ctl->baseUnit().isEmpty())
+    m_configDlg->alarmPage()->setUnit(m_ctl->baseUnit());
   m_configDlg->show();
   m_configDlg->raise();
 }
@@ -494,20 +490,20 @@ void InstanceWidget::configScpiSLOT()
 void InstanceWidget::applySLOT()
 {
   readConfig();
-  m_ctl->setAlarms(m_configDlg->alarms());
-  m_alertBlink = m_configDlg->alarmBlink();
+  m_ctl->setAlarms(m_configDlg->alarmPage()->alarms());
+  m_alertBlink = m_configDlg->alarmPage()->blink();
   showAlertColor();
-  ui_graph->setAlertUnsaved(m_configDlg->alertUnsavedData());
-  m_ctl->setModel(m_configDlg->dmmName());
+  ui_graph->setAlertUnsaved(m_configDlg->generalPage()->alertUnsavedData());
+  m_ctl->setModel(m_configDlg->meterSettings()->dmmName());
   ScpiConfig scpi;
-  scpi.enabled = m_configDlg->scpiEnabled();
-  scpi.allInterfaces = m_configDlg->scpiAllInterfaces();
-  scpi.port = quint16(m_configDlg->scpiPort());
-  scpi.mdns = m_configDlg->scpiMdns();
-  scpi.hislip = m_configDlg->scpiHislip();
-  scpi.hislipPort = quint16(m_configDlg->scpiHislipPort());
-  scpi.vxi11 = m_configDlg->scpiVxi11();
-  scpi.vxi11Rpc = Vxi11Server::modeFromName(m_configDlg->scpiVxi11Rpc());
+  scpi.enabled = m_configDlg->scpiPage()->enabled();
+  scpi.allInterfaces = m_configDlg->scpiPage()->allInterfaces();
+  scpi.port = quint16(m_configDlg->scpiPage()->port());
+  scpi.mdns = m_configDlg->scpiPage()->mdns();
+  scpi.hislip = m_configDlg->scpiPage()->hislip();
+  scpi.hislipPort = quint16(m_configDlg->scpiPage()->hislipPort());
+  scpi.vxi11 = m_configDlg->scpiPage()->vxi11();
+  scpi.vxi11Rpc = Vxi11Server::modeFromName(m_configDlg->scpiPage()->vxi11Rpc());
   m_ctl->applyScpi(scpi);
   syncDevice();
   Q_EMIT configChanged();
@@ -515,7 +511,7 @@ void InstanceWidget::applySLOT()
 
 void InstanceWidget::zoomedSLOT()
 {
-  ui_graph->setGraphSize(m_configDlg->windowSeconds());
+  ui_graph->setGraphSize(m_configDlg->graphPage()->windowSeconds());
 }
 
 void InstanceWidget::exportSLOT()
@@ -576,15 +572,15 @@ bool InstanceWidget::askRecordingLength()
 {
   // a start the settings set up waits in Live; this one starts now
   QString hint;
-  if (m_configDlg->sampleMode() == GraphWidget::Time)
-    hint = tr("It starts now. A recording at %1 starts by itself from Live.").arg(m_configDlg->startTime().toString());
-  else if (m_configDlg->sampleMode() == GraphWidget::Raising || m_configDlg->sampleMode() == GraphWidget::Falling)
+  if (m_configDlg->recorderPage()->sampleMode() == GraphWidget::Time)
+    hint = tr("It starts now. A recording at %1 starts by itself from Live.").arg(m_configDlg->recorderPage()->startTime().toString());
+  else if (m_configDlg->recorderPage()->sampleMode() == GraphWidget::Raising || m_configDlg->recorderPage()->sampleMode() == GraphWidget::Falling)
     hint = tr("It starts now. A recording at the threshold starts by itself from Live.");
-  RecordLengthDlg dlg(m_configDlg->recordingLengthValue(), m_configDlg->recordingLengthUnit(), hint, this);
+  RecordLengthDlg dlg(m_configDlg->recorderPage()->lengthValue(), m_configDlg->recorderPage()->lengthUnit(), hint, this);
   if (dlg.exec() != QDialog::Accepted)
     return false;
   m_configDlg->setRecordingLength(dlg.value(), dlg.unit());
-  ui_graph->setSampleLength(m_configDlg->sampleLength());
+  ui_graph->setSampleLength(m_configDlg->recorderPage()->sampleLength());
   return true;
 }
 
@@ -602,14 +598,18 @@ void InstanceWidget::readConfig()
 {
   MeterConnection *dmm = m_ctl->dmm();
   bool reopen = false;
+  const DeviceSettings *devSettings = m_configDlg->meterSettings();
+  const GraphPrefs *graph = m_configDlg->graphPage();
+  const RecorderPrefs *recorder = m_configDlg->recorderPage();
+  const GuiPrefs *gui = m_configDlg->guiPage();
 
   // the port only when the meter changed: a reopen costs a Bluetooth meter
   // seconds, and the readings and a recording a gap
-  QVariantMap meter = m_settings->meterKeys();
-  meter.insert("sigrok", m_configDlg->dmmInfo().sigrokExe);
-  if (!dmm->isOpen() || meter != m_appliedMeter)
+  QVariantMap keys = m_settings->meterKeys();
+  keys.insert("sigrok", m_configDlg->dmmInfo().sigrokExe);
+  if (!dmm->isOpen() || keys != m_appliedMeter)
   {
-    m_appliedMeter = meter;
+    m_appliedMeter = keys;
     if (dmm->isOpen())
     {
       dmm->close();
@@ -617,28 +617,27 @@ void InstanceWidget::readConfig()
     }
 
     dmm->setDmmInfo(m_configDlg->dmmInfo());
-    dmm->setDevice(m_configDlg->device());
-    dmm->setFormat(m_configDlg->format());
+    dmm->setDevice(devSettings->device());
+    dmm->setFormat(devSettings->format());
   }
 
   // the sample time first: setGraphSize() counts the window in samples, and
   // the x axis converts them back with the sample time
-  ui_graph->setSampleTime(m_configDlg->sampleStep());
-  ui_graph->setSampleLength(m_configDlg->sampleLength());
-  ui_graph->store()->setPreTrigger(m_configDlg->preTrigger());
-  ui_graph->setGraphSize(m_configDlg->windowSeconds());
-  ui_graph->setStartTime(m_configDlg->startTime());
-  ui_graph->setMode(m_configDlg->sampleMode());
+  ui_graph->setSampleTime(recorder->sampleStep());
+  ui_graph->setSampleLength(recorder->sampleLength());
+  ui_graph->store()->setPreTrigger(recorder->preTrigger());
+  ui_graph->setGraphSize(graph->windowSeconds());
+  ui_graph->setStartTime(recorder->startTime());
+  ui_graph->setMode(recorder->sampleMode());
 
-  ui_graph->setCrosshair(m_configDlg->crosshair());
+  ui_graph->setCrosshair(graph->crosshair());
 
-  ui_graph->setThresholds(m_configDlg->fallingThreshold(),
-                          m_configDlg->raisingThreshold());
+  ui_graph->setThresholds(recorder->fallingThreshold(), recorder->raisingThreshold());
 
   // the reference line snaps to the alarms' thresholds
   {
     QList<double> thresholds;
-    for (const Alarm &a : m_configDlg->alarms())
+    for (const Alarm &a : m_configDlg->alarmPage()->alarms())
     {
       if (!a.enabled || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
         continue;
@@ -648,67 +647,57 @@ void InstanceWidget::readConfig()
     }
     ui_graph->setAlarmThresholds(thresholds);
   }
-  ui_graph->setScale(m_configDlg->automaticScale(),
-                     m_configDlg->includeZero(),
-                     m_configDlg->scaleMin(),
-                     m_configDlg->scaleMax());
+  ui_graph->setScale(graph->automaticScale(), graph->includeZero(), graph->scaleMin(), graph->scaleMax());
 
   {
     const QString own = m_settings->getString("Windows/graph-variant");
-    ui_graph->setColorVariant(GraphWidget::variantFromName(m_configDlg->graphVariant()),
+    ui_graph->setColorVariant(GraphWidget::variantFromName(graph->variant()),
                               own.isEmpty() ? -1 : int(GraphWidget::variantFromName(own)));
   }
-  ui_graph->setColors(m_configDlg->bgColor(),
-                      m_configDlg->gridColor(),
-                      m_configDlg->dataColor(),
-                      m_configDlg->cursorColor(),
-                      m_configDlg->startColor(),
-                      m_configDlg->intColor(),
-                      m_configDlg->intThresholdColor());
+  ui_graph->setColors(graph->bgColor(),
+                      graph->gridColor(),
+                      graph->dataColor(),
+                      graph->cursorColor(),
+                      graph->startColor(),
+                      graph->intColor(),
+                      graph->intThresholdColor());
 
-  ui_graph->setLineStyle(m_configDlg->lineMode(),
-                         m_configDlg->pointMode(),
-                         m_configDlg->intLineMode(),
-                         m_configDlg->intPointMode());
+  ui_graph->setLineStyle(graph->lineMode(), graph->pointMode(), graph->intLineMode(), graph->intPointMode());
 
   // a tint changed on the Appearance page is meant to be seen: Custom
-  const QColor tint = m_configDlg->displayBgColor();
+  const QColor tint = gui->displayBgColor();
   if (m_lcdTint.isValid() && tint != m_lcdTint && m_display->lcdVariant() != LcdWidget::Custom)
     setLcdVariant(LcdWidget::Custom);
   m_lcdTint = tint;
   m_display->setFaceColor(tint);
-  m_display->setDisplayMode(m_configDlg->display(), m_configDlg->showMinMax(),
-                            m_configDlg->showBar(), m_configDlg->numValues());
-  dmm->setNumValues(m_configDlg->numValues());
-  m_ctl->setDisplayCounts(m_configDlg->display());
+  m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), devSettings->numValues());
+  dmm->setNumValues(devSettings->numValues());
+  m_ctl->setDisplayCounts(devSettings->display());
 
   if (m_meter)
   {
-    m_meter->setDisplayCounts(m_configDlg->display());
+    m_meter->setDisplayCounts(devSettings->display());
     applyMeterStyle();
     m_meter->setScaleMode(static_cast<AnalogMeter::ScaleMode>(
-      m_configDlg->meterScaleMode() == 1 ? AnalogMeter::Unipolar :
-      m_configDlg->meterScaleMode() == 2 ? AnalogMeter::Bipolar : AnalogMeter::Auto));
+      gui->meterScaleMode() == 1 ? AnalogMeter::Unipolar :
+      gui->meterScaleMode() == 2 ? AnalogMeter::Bipolar : AnalogMeter::Auto));
   }
 
-  ui_graph->setLine(m_configDlg->lineWidth(), m_configDlg->intLineWidth());
+  ui_graph->setLine(graph->lineWidth(), graph->intLineWidth());
 
-  ui_graph->setIntegration(m_configDlg->showIntegration(),
-                           m_configDlg->intScale(),
-                           m_configDlg->intThreshold(),
-                           m_configDlg->intOffset());
-  ui_graph->setIntegrationValue(m_configDlg->intValue());
+  ui_graph->setIntegration(graph->showIntegration(), graph->intScale(), graph->intThreshold(), graph->intOffset());
+  ui_graph->setIntegrationValue(graph->intValue());
 
-  if (m_configDlg->sampleMode() == GraphWidget::Time)
-    Q_EMIT info(tr("Automatic start at %1").arg(m_configDlg->startTime().toString()));
-  else if (m_configDlg->sampleMode() == GraphWidget::Raising)
-    Q_EMIT info(tr("Raising threshold %1").arg(m_configDlg->raisingThreshold()));
-  else if (m_configDlg->sampleMode() == GraphWidget::Falling)
-    Q_EMIT info(tr("Falling threshold %1").arg(m_configDlg->fallingThreshold()));
-  Q_EMIT useTextLabel(m_configDlg->useTextLabel());
-  Q_EMIT iconSet(m_configDlg->iconSet());
+  if (recorder->sampleMode() == GraphWidget::Time)
+    Q_EMIT info(tr("Automatic start at %1").arg(recorder->startTime().toString()));
+  else if (recorder->sampleMode() == GraphWidget::Raising)
+    Q_EMIT info(tr("Raising threshold %1").arg(recorder->raisingThreshold()));
+  else if (recorder->sampleMode() == GraphWidget::Falling)
+    Q_EMIT info(tr("Falling threshold %1").arg(recorder->fallingThreshold()));
+  Q_EMIT useTextLabel(gui->useTextLabel());
+  Q_EMIT iconSet(gui->iconSet());
   Q_EMIT remoteControl(ControlBar::supported(m_configDlg->dmmInfo()));
-  Q_EMIT showDisplay(m_configDlg->showDisplay());
+  Q_EMIT showDisplay(gui->showDisplay());
 
   if (reopen)
     dmm->open();
@@ -734,7 +723,7 @@ bool InstanceWidget::dmmConfigured() const
 QString InstanceWidget::portName() const
 {
   // a Bluetooth port string carries the encryption key: never show it
-  const QString device = m_configDlg->device().simplified();
+  const QString device = m_configDlg->meterSettings()->device().simplified();
   const QString type = device.section(' ', 0, 0).toLower();
   if (type == "ble" || type == "blegatt")
     return "BLE " + device.section(' ', 1, 1);
@@ -749,20 +738,10 @@ QString InstanceWidget::dmmTitle() const
 {
   if (!dmmConfigured())
     return tr("no meter configured");
-  const QString model = m_configDlg->dmmName().trimmed();
+  const QString model = m_configDlg->meterSettings()->dmmName().trimmed();
   if (!model.isEmpty())
     return model;
-  return m_configDlg->device().trimmed();
-}
-
-void InstanceWidget::setShortcuts(ShortcutRegistry *registry)
-{
-  m_configDlg->setShortcuts(registry);
-}
-
-void InstanceWidget::setShowDisplay(bool show)
-{
-  m_configDlg->setShowDisplay(show);
+  return m_configDlg->meterSettings()->device().trimmed();
 }
 
 // ---------------------------------------------------------------- alarms
@@ -809,23 +788,18 @@ void InstanceWidget::showAlertColor()
 
 void InstanceWidget::setMeterStyle(int style)
 {
-  m_configDlg->setMeterStyle(style);
+  m_configDlg->guiPage()->setMeterStyle(style);
   m_settings->setInt("Meter/style", style);
   applyMeterStyle();
-}
-
-int InstanceWidget::meterStyle() const
-{
-  return m_configDlg->meterStyle();
 }
 
 void InstanceWidget::applyMeterStyle()
 {
   if (!m_meter)
     return;
-  AnalogMeterStyle style = m_configDlg->meterStyle() == 1 ? AnalogMeterStyle::ivory() : AnalogMeterStyle::dark();
-  style.ballistics = m_configDlg->meterBallistics();
-  style.redZoneFrom = m_configDlg->meterRedZone() / 100.0;
+  AnalogMeterStyle style = m_configDlg->guiPage()->meterStyle() == 1 ? AnalogMeterStyle::ivory() : AnalogMeterStyle::dark();
+  style.ballistics = m_configDlg->guiPage()->meterBallistics();
+  style.redZoneFrom = m_configDlg->guiPage()->meterRedZone() / 100.0;
   m_meter->setStyle(style);
 }
 

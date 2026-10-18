@@ -14,17 +14,7 @@
 #include "ui/views/analogmeter.h"
 #include "core/readingadapter.h"
 #include <limits>
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static bool near(double a, double b, double eps = 1e-6)
 {

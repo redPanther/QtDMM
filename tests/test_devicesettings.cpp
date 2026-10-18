@@ -9,17 +9,7 @@
 
 #include "ui/devicesettings.h"
 #include "device/dmmdecoder.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
+#include "testutil.h"
 
 static bool shown(DeviceSettings &w, const char *name)
 {

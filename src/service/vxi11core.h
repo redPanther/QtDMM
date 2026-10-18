@@ -48,6 +48,10 @@ private:
   };
 
   // A lid counts only on the connection that created it (the abort channel is the exception).
+  /// The procedures with more to do than an answer (call() has the rest).
+  RpcStatus createLink(XdrReader &a, XdrWriter &r, quint64 conn);
+  RpcStatus deviceWrite(XdrReader &a, XdrWriter &r, quint64 conn);
+  RpcStatus deviceRead(XdrReader &a, XdrWriter &r, quint64 conn);
   bool owns(qint32 lid, quint64 conn) const;
   qint32 checkAccess(qint32 lid, quint64 conn) const;
 

@@ -94,120 +94,11 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
   switch (proc)
   {
     case 10: // create_link(clientId, lockDevice, lock_timeout, device)
-    {
-      a.u32();
-      const bool lock = a.u32() != 0;
-      a.u32();
-      const QByteArray dev = a.opaque();
-      if (!a.ok())
-        return RpcStatus::GarbageArgs;
-      qCDebug(lcVxi11) << "create_link, device" << dev;
-      if (lock && m_lockOwner != -1)
-      {
-        r.i32(kErrLocked);
-        r.i32(0);
-        r.u32(0);
-        r.u32(0);
-        return RpcStatus::Success;
-      }
-      if (m_links.size() >= kMaxLinks)
-      {
-        r.i32(kErrOutOfResources);
-        r.i32(0);
-        r.u32(0);
-        r.u32(0);
-        return RpcStatus::Success;
-      }
-      lid = m_nextLid++;
-      Link link;
-      link.conn = conn;
-      m_links.insert(lid, link);
-      if (lock)
-        m_lockOwner = lid;
-      if (m_linksChanged)
-        m_linksChanged();
-      r.i32(kErrNone);
-      r.i32(lid);
-      r.u32(m_abortPort);
-      r.u32(kMaxRecvSize);
-      return RpcStatus::Success;
-    }
-
+      return createLink(a, r, conn);
     case 11: // device_write(lid, io_timeout, lock_timeout, flags, data)
-    {
-      lid = a.i32();
-      a.u32();
-      a.u32();
-      const quint32 flags = a.u32();
-      const QByteArray data = a.opaque();
-      if (!a.ok())
-        return RpcStatus::GarbageArgs;
-      const qint32 err = checkAccess(lid, conn);
-      if (err)
-      {
-        r.i32(err);
-        r.u32(0);
-        return RpcStatus::Success;
-      }
-      Link &l = m_links[lid];
-      if (l.discard || l.in.size() + data.size() > kMaxMessage)
-      {
-        // too big: the rest of this message is dropped too, not run as a command of its own
-        l.in.clear();
-        l.discard = !(flags & kFlagEnd);
-        r.i32(kErrIo);
-        r.u32(0);
-        return RpcStatus::Success;
-      }
-      l.in += data;
-      if (flags & kFlagEnd)
-      {
-        const QByteArray message = l.in;
-        l.in.clear();
-        const QList<QByteArray> responses = m_ep.run(message);
-        // run() may have re-entered us (device cleared, link destroyed): look the link up again
-        auto it = m_links.find(lid);
-        if (it != m_links.end())
-          it->out += responses;
-      }
-      r.i32(kErrNone);
-      r.u32(quint32(data.size()));
-      return RpcStatus::Success;
-    }
-
+      return deviceWrite(a, r, conn);
     case 12: // device_read(lid, requestSize, io_timeout, lock_timeout, flags, termChar)
-    {
-      lid = a.i32();
-      const quint32 requestSize = a.u32();
-      a.u32();
-      a.u32();
-      a.u32();
-      a.u32();
-      if (!a.ok())
-        return RpcStatus::GarbageArgs;
-      qint32 err = checkAccess(lid, conn);
-      if (!err && m_links[lid].out.isEmpty())
-        err = kErrTimeout; // nothing to read -> I/O timeout
-      if (err)
-      {
-        r.i32(err);
-        r.u32(0);
-        r.opaque({});
-        return RpcStatus::Success;
-      }
-      // Always one response message per read; a big one (screen dump) is handed out in pieces
-      QByteArray &msg = m_links[lid].out.first();
-      const qsizetype n = requestSize > 0 ? qMin<qsizetype>(requestSize, msg.size()) : msg.size();
-      const QByteArray chunk = msg.left(n);
-      msg.remove(0, n);
-      const bool done = msg.isEmpty();
-      if (done)
-        m_links[lid].out.removeFirst();
-      r.i32(kErrNone);
-      r.u32(done ? kReasonEnd : kReasonReqCnt);
-      r.opaque(chunk);
-      return RpcStatus::Success;
-    }
+      return deviceRead(a, r, conn);
 
     case 13: // device_readstb
     {
@@ -316,6 +207,115 @@ RpcStatus Vxi11Core::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64 conn
     default:
       return RpcStatus::ProcUnavail;
   }
+}
+
+RpcStatus Vxi11Core::createLink(XdrReader &a, XdrWriter &r, quint64 conn)
+{
+  a.u32();
+  const bool lock = a.u32() != 0;
+  a.u32();
+  const QByteArray dev = a.opaque();
+  if (!a.ok())
+    return RpcStatus::GarbageArgs;
+  qCDebug(lcVxi11) << "create_link, device" << dev;
+  const qint32 err = lock && m_lockOwner != -1 ? kErrLocked : m_links.size() >= kMaxLinks ? kErrOutOfResources : kErrNone;
+  if (err)
+  {
+    r.i32(err);
+    r.i32(0);
+    r.u32(0);
+    r.u32(0);
+    return RpcStatus::Success;
+  }
+  const qint32 lid = m_nextLid++;
+  Link link;
+  link.conn = conn;
+  m_links.insert(lid, link);
+  if (lock)
+    m_lockOwner = lid;
+  if (m_linksChanged)
+    m_linksChanged();
+  r.i32(kErrNone);
+  r.i32(lid);
+  r.u32(m_abortPort);
+  r.u32(kMaxRecvSize);
+  return RpcStatus::Success;
+}
+
+RpcStatus Vxi11Core::deviceWrite(XdrReader &a, XdrWriter &r, quint64 conn)
+{
+  const qint32 lid = a.i32();
+  a.u32();
+  a.u32();
+  const quint32 flags = a.u32();
+  const QByteArray data = a.opaque();
+  if (!a.ok())
+    return RpcStatus::GarbageArgs;
+  const qint32 err = checkAccess(lid, conn);
+  if (err)
+  {
+    r.i32(err);
+    r.u32(0);
+    return RpcStatus::Success;
+  }
+  Link &l = m_links[lid];
+  if (l.discard || l.in.size() + data.size() > kMaxMessage)
+  {
+    // too big: the rest of this message is dropped too, not run as a command of its own
+    l.in.clear();
+    l.discard = !(flags & kFlagEnd);
+    r.i32(kErrIo);
+    r.u32(0);
+    return RpcStatus::Success;
+  }
+  l.in += data;
+  if (flags & kFlagEnd)
+  {
+    const QByteArray message = l.in;
+    l.in.clear();
+    const QList<QByteArray> responses = m_ep.run(message);
+    // run() may have re-entered us (device cleared, link destroyed): look the link up again
+    auto it = m_links.find(lid);
+    if (it != m_links.end())
+      it->out += responses;
+  }
+  r.i32(kErrNone);
+  r.u32(quint32(data.size()));
+  return RpcStatus::Success;
+}
+
+RpcStatus Vxi11Core::deviceRead(XdrReader &a, XdrWriter &r, quint64 conn)
+{
+  const qint32 lid = a.i32();
+  const quint32 requestSize = a.u32();
+  a.u32();
+  a.u32();
+  a.u32();
+  a.u32();
+  if (!a.ok())
+    return RpcStatus::GarbageArgs;
+  qint32 err = checkAccess(lid, conn);
+  if (!err && m_links[lid].out.isEmpty())
+    err = kErrTimeout; // nothing to read -> I/O timeout
+  if (err)
+  {
+    r.i32(err);
+    r.u32(0);
+    r.opaque({});
+    return RpcStatus::Success;
+  }
+  // Always one response message per read; a big one (screen dump) is handed out in pieces
+  QByteArray &msg = m_links[lid].out.first();
+  const qsizetype n = requestSize > 0 ? qMin<qsizetype>(requestSize, msg.size()) : msg.size();
+  const QByteArray chunk = msg.left(n);
+  msg.remove(0, n);
+  const bool done = msg.isEmpty();
+  if (done)
+    m_links[lid].out.removeFirst();
+  r.i32(kErrNone);
+  r.u32(done ? kReasonEnd : kReasonReqCnt);
+  r.opaque(chunk);
+  return RpcStatus::Success;
 }
 
 RpcStatus Vxi11Abort::call(quint32 proc, XdrReader &a, XdrWriter &r, quint64)

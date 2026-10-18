@@ -14,17 +14,7 @@
 #include "ui/devicesettings.h"
 #include "ui/devicesidebar.h"
 #include "ui/dialogs/devicesettingsdlg.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
+#include "testutil.h"
 
 int main(int argc, char **argv)
 {

@@ -24,20 +24,7 @@
 #include "core/siprefix.h"
 #include "ui/engnumbervalidator.h"
 #include "core/settings.h"
-
-static int failed = 0;
-
-static void fail(const QString &what)
-{
-  qWarning() << "FAILED:" << what;
-  failed++;
-}
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-    fail(what);
-}
+#include "testutil.h"
 
 // The lines of a path at least @p length long, horizontal (their y) or
 // vertical (their x): phosphor's lines, not its ticks

@@ -10,17 +10,7 @@
 
 #include "recording/spreadsheet.h"
 #include "3rdparty/miniz/miniz.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
+#include "testutil.h"
 
 static QStringList zipEntries(const QString &path, QMap<QString, QByteArray> *contents = nullptr, bool *firstStored = nullptr)
 {

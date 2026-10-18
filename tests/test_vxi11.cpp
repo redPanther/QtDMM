@@ -12,30 +12,7 @@
 
 #include "service/oncrpc.h"
 #include "service/vxi11server.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
-
-static bool waitFor(const std::function<bool()> &cond, int ms = 2000)
-{
-  QElapsedTimer t;
-  t.start();
-  while (!cond())
-  {
-    if (t.elapsed() > ms)
-      return false;
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
-  }
-  return true;
-}
+#include "testutil.h"
 
 constexpr quint32 kCore = 0x0607AF;
 constexpr quint32 kAbort = 0x0607B0;

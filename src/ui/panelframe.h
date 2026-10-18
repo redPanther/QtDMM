@@ -20,8 +20,10 @@
 #pragma once
 
 #include <QColor>
-#include <QRectF>
+#include <QPixmap>
 #include <QPointF>
+#include <QRectF>
+#include <QWidget>
 
 class QPainter;
 
@@ -59,4 +61,11 @@ namespace PanelFrame
 
   /// Clip path of the face (rounded), for drawing that must stay inside.
   void clipToFace(QPainter &p, const QRectF &face);
+
+  /// A transparent pixmap of @p widget's size at its device pixel ratio: the
+  /// part of the instrument that is drawn once (renderStatic()).
+  QPixmap staticPixmap(const QWidget *widget);
+
+  /// Antialiased lines and text, as the instruments draw.
+  void smooth(QPainter &p);
 }

@@ -13,17 +13,7 @@
 #include "core/devicelibrary.h"
 #include "core/instances.h"
 #include "core/settings.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAIL:" << what;
-    ++failed;
-  }
-}
+#include "testutil.h"
 
 int main(int argc, char **argv)
 {

@@ -6,17 +6,7 @@
 #include <cmath>
 
 #include "core/minmaxmemory.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static Reading reading(double value, const char *port, const char *baseUnit, bool overload = false)
 {

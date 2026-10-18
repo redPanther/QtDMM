@@ -108,3 +108,18 @@ void paint(QPainter &p, const QRectF &bezel, const Colors &c, const QPointF &glo
 }
 
 }
+
+QPixmap PanelFrame::staticPixmap(const QWidget *widget)
+{
+  const qreal dpr = widget->devicePixelRatioF();
+  QPixmap pixmap(widget->size() * dpr);
+  pixmap.setDevicePixelRatio(dpr);
+  pixmap.fill(Qt::transparent);
+  return pixmap;
+}
+
+void PanelFrame::smooth(QPainter &p)
+{
+  p.setRenderHint(QPainter::Antialiasing);
+  p.setRenderHint(QPainter::TextAntialiasing);
+}

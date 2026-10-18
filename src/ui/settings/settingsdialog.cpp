@@ -21,7 +21,6 @@
 // Copyright (c) 2002 Matthias Toussaint
 //======================================================================
 
-
 #include <QtWidgets>
 #include <QtPrintSupport>
 
@@ -38,7 +37,6 @@
 #include "core/settings.h"
 
 #include <iostream>
-
 
 SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   : QDialog(parent)
@@ -278,21 +276,6 @@ void SettingsDialog::setRecordingLength(int value, int unit)
   m_settings->save();
 }
 
-int SettingsDialog::recordingLengthValue() const
-{
-  return m_recorder->lengthValue();
-}
-
-int SettingsDialog::recordingLengthUnit() const
-{
-  return m_recorder->lengthUnit();
-}
-
-void SettingsDialog::connectSLOT(bool /*connected*/)
-{
-
-}
-
 QRect SettingsDialog::winRect() const
 {
   QRect rect(m_settings->getInt("Position/x"),
@@ -416,40 +399,6 @@ void SettingsDialog::thresholdChangedSLOT(GraphWidget::CursorMode mode, double v
 /////////////////////////////////////////////////////////////////
 // RECORDER
 //
-GraphWidget::SampleMode SettingsDialog::sampleMode() const
-{
-  return m_recorder->sampleMode();
-}
-
-int SettingsDialog::sampleStep() const
-{
-  return m_recorder->sampleStep();
-}
-
-int SettingsDialog::sampleLength() const
-{
-  return m_recorder->sampleLength();
-}
-
-int SettingsDialog::preTrigger() const
-{
-  return m_recorder->preTrigger();
-}
-
-double SettingsDialog::fallingThreshold() const
-{
-  return m_recorder->fallingThreshold();
-}
-
-double SettingsDialog::raisingThreshold() const
-{
-  return m_recorder->raisingThreshold();
-}
-
-QTime SettingsDialog::startTime() const
-{
-  return m_recorder->startTime();
-}
 
 /////////////////////////////////////////////////////////////////
 // EXECUTE
@@ -457,163 +406,14 @@ QTime SettingsDialog::startTime() const
 /////////////////////////////////////////////////////////////////
 // General, Appearance
 //
-bool SettingsDialog::showBar() const
-{
-  return m_gui->showBar();
-}
-
-bool SettingsDialog::showMinMax() const
-{
-  return m_gui->showMinMax();
-}
-
-bool SettingsDialog::alertUnsavedData() const
-{
-  return m_general->alertUnsavedData();
-}
-
-bool SettingsDialog::useTextLabel() const
-{
-  return m_gui->useTextLabel();
-}
-
-QString SettingsDialog::iconSet() const
-{
-  return m_gui->iconSet();
-}
-
-QColor SettingsDialog::displayBgColor() const
-{
-  return m_gui->displayBgColor();
-}
-
-bool SettingsDialog::saveWindowPosition() const
-{
-  return m_general->saveWindowPosition();
-}
-
-bool SettingsDialog::saveWindowSize() const
-{
-  return m_general->saveWindowSize();
-}
-
-
-bool SettingsDialog::showDisplay() const
-{
-  return m_gui->showDisplay();
-}
-
-int SettingsDialog::meterScaleMode() const
-{
-  return m_gui->meterScaleMode();
-}
-
-void SettingsDialog::setMeterStyle(int style)
-{
-  m_gui->setMeterStyle(style);
-}
-
-int SettingsDialog::meterStyle() const
-{
-  return m_gui->meterStyle();
-}
-
-bool SettingsDialog::meterBallistics() const
-{
-  return m_gui->meterBallistics();
-}
-
-int SettingsDialog::meterRedZone() const
-{
-  return m_gui->meterRedZone();
-}
-
-void SettingsDialog::setShowDisplay(bool show)
-{
-  m_gui->setShowDisplay(show);
-}
 
 /////////////////////////////////////////////////////////////////
 // SCALE
 //
-bool SettingsDialog::automaticScale() const
-{
-  return m_graph->automaticScale();
-}
-
-bool SettingsDialog::includeZero() const
-{
-  return m_graph->includeZero();
-}
-
-double SettingsDialog::scaleMin() const
-{
-  return m_graph->scaleMin();
-}
-
-double SettingsDialog::scaleMax() const
-{
-  return m_graph->scaleMax();
-}
-
-int SettingsDialog::windowSeconds() const
-{
-  return m_graph->windowSeconds();
-}
-
 
 /////////////////////////////////////////////////////////////////
 // INTEGRATION
 //
-double SettingsDialog::intScale() const
-{
-  return m_graph->intScale();
-}
-
-double SettingsDialog::intThreshold() const
-{
-  return m_graph->intThreshold();
-}
-
-double SettingsDialog::intOffset() const
-{
-  return m_graph->intOffset();
-}
-
-bool SettingsDialog::showIntegration() const
-{
-  return m_graph->showIntegration();
-}
-
-int SettingsDialog::intValue() const
-{
-  return m_graph->intValue();
-}
-
-QColor SettingsDialog::intColor() const
-{
-  return m_graph->intColor();
-}
-
-QColor SettingsDialog::intThresholdColor() const
-{
-  return m_graph->intThresholdColor();
-}
-
-int SettingsDialog::intLineWidth() const
-{
-  return m_graph->intLineWidth();
-}
-
-int SettingsDialog::intLineMode() const
-{
-  return m_graph->intLineMode();
-}
-
-int SettingsDialog::intPointMode() const
-{
-  return m_graph->intPointMode();
-}
 
 /////////////////////////////////////////////////////////////////
 // DMM
@@ -628,114 +428,7 @@ DmmDecoder::DMMInfo SettingsDialog::dmmInfo() const
   return info;
 }
 
-int SettingsDialog::numValues() const
-{
-  return m_meter->numValues();
-}
-
-FrameFormat::DataFormat SettingsDialog::format() const
-{
-  return m_meter->format();
-}
-
-int SettingsDialog::display() const
-{
-  return m_meter->display();
-}
-
-QString SettingsDialog::dmmName() const
-{
-  return m_meter->dmmName();
-}
-
-QString SettingsDialog::device() const
-{
-  return m_meter->device();
-}
-
 /////////////////////////////////////////////////////////////////
 // GRAPH
 //
-bool SettingsDialog::crosshair() const
-{
-  return m_graph->crosshair();
-}
 
-QString SettingsDialog::graphVariant() const
-{
-  return m_graph->variant();
-}
-
-QColor SettingsDialog::bgColor() const
-{
-  return m_graph->bgColor();
-}
-
-QColor SettingsDialog::gridColor() const
-{
-  return m_graph->gridColor();
-}
-
-QColor SettingsDialog::dataColor() const
-{
-  return m_graph->dataColor();
-}
-
-QColor SettingsDialog::startColor() const
-{
-  return m_graph->startColor();
-}
-
-QColor SettingsDialog::cursorColor() const
-{
-  return m_graph->cursorColor();
-}
-
-int SettingsDialog::lineWidth() const
-{
-  return m_graph->lineWidth();
-}
-
-int SettingsDialog::lineMode() const
-{
-  return m_graph->lineMode();
-}
-
-int SettingsDialog::pointMode() const
-{
-  return m_graph->pointMode();
-}
-
-bool SettingsDialog::alarmBlink() const
-{
-  return m_alarms->blink();
-}
-
-QList<Alarm> SettingsDialog::alarms() const
-{
-  return m_alarms->alarms();
-}
-
-void SettingsDialog::setAlarmUnit(const QString &unit)
-{
-  m_alarms->setUnit(unit);
-}
-
-void SettingsDialog::setShortcuts(ShortcutRegistry *registry)
-{
-  m_keyboard->setRegistry(registry);
-}
-
-bool SettingsDialog::scpiEnabled() const { return m_scpi->enabled(); }
-int SettingsDialog::scpiPort() const { return m_scpi->port(); }
-bool SettingsDialog::scpiAllInterfaces() const { return m_scpi->allInterfaces(); }
-bool SettingsDialog::scpiMdns() const { return m_scpi->mdns(); }
-bool SettingsDialog::scpiHislip() const { return m_scpi->hislip(); }
-bool SettingsDialog::scpiVxi11() const { return m_scpi->vxi11(); }
-QString SettingsDialog::scpiVxi11Rpc() const { return m_scpi->vxi11Rpc(); }
-int SettingsDialog::scpiHislipPort() const { return m_scpi->hislipPort(); }
-
-void SettingsDialog::setScpiStatus(const QString &text)
-{
-  m_scpi->setStatus(text);
-}

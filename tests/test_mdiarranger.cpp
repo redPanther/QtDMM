@@ -12,17 +12,7 @@
 #include <QTest>
 
 #include "ui/mdiarranger.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 using R = MdiArranger::Role;
 

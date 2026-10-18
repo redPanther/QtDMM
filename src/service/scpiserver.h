@@ -184,6 +184,15 @@ private:
   void release(QTcpSocket *socket);
   QByteArray handle(const Command &cmd, bool &isQuery);
   QString handleText(const Command &cmd, bool &isQuery);
+  QString handleCommon(const Command &cmd, bool &isQuery);
+  QString handleReading(const Command &cmd, bool &isQuery);
+  QString handleStatus(const Command &cmd, bool &isQuery);
+  QString handleSystem(const Command &cmd, bool &isQuery);
+  /// A refused command: @p code queued, nothing to answer (isQuery false).
+  QString refuse(bool &isQuery, int code, const QString &text);
+  /// False and -100 queued when @p cmd is not a query, resp. is one.
+  bool queryOnly(const Command &cmd, bool &isQuery);
+  bool commandOnly(const Command &cmd, bool &isQuery);
   static bool matches(const QString &mnemonic, const char *longForm);
   static QString number(double v);
   QString function(const Reading &r) const;

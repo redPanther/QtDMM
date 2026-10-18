@@ -4,17 +4,7 @@
 #include <cmath>
 
 #include "core/calcexpr.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static void expectValue(const QString &text, double expected, const QMap<QString, double> &vars = {})
 {

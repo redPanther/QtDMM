@@ -11,17 +11,7 @@
 
 #include "core/readingadapter.h"
 #include "core/stalerule.h"
-
-static int failed = 0;
-
-static void check(bool cond, const QString &what)
-{
-  if (!cond)
-  {
-    qWarning() << "FAILED:" << what;
-    failed++;
-  }
-}
+#include "testutil.h"
 
 static PortSample one(ReadingAdapter &a, const QString &text, const QString &unit, const QString &special,
                       const QString &range = "AUTO", bool showBar = true, int id = 0)
