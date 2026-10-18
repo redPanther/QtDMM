@@ -74,114 +74,34 @@ public:
 
   SettingsDialog(Settings* settings, QWidget *parent = nullptr);
 
-  /// The main window's actions for the page Keyboard.
-  void                  setShortcuts(ShortcutRegistry *registry);
-
-  /// @name The meter of this instance
-  /// From its settings keys (DMM/, Port settings/); it has no page here:
-  /// the assistant and the sidebar set it up.
+  /// @name The pages
+  /// What the instance reads from the settings comes from the pages
+  /// directly; the dialog adds only what is not a page's.
   /// @{
-  QString               device() const;
-  FrameFormat::DataFormat format() const;
-  int                   display() const;
-  int                   numValues() const;
-  DmmDecoder::DMMInfo    dmmInfo() const;
-  QString               dmmName() const;
+  GeneralPrefs         *generalPage() const { return m_general; }
+  GuiPrefs             *guiPage() const { return m_gui; }   ///< "Appearance"
+  GraphPrefs           *graphPage() const { return m_graph; }
+  RecorderPrefs        *recorderPage() const { return m_recorder; }
+  AlarmPrefs           *alarmPage() const { return m_alarms; }
+  ScpiPrefs            *scpiPage() const { return m_scpi; }
+  KeyboardPrefs        *keyboardPage() const { return m_keyboard; }
+  /// Not shown: the meter of this instance from its settings keys (DMM/,
+  /// Port settings/); the assistant and the sidebar set it up.
+  DeviceSettings       *meterSettings() const { return m_meter; }
   /// @}
 
-  /// @name Graph, scale and integration pages
-  /// @{
-  int                   windowSeconds() const;
-  double                scaleMin() const;
-  double                scaleMax() const;
-  bool                  automaticScale() const;
-  bool                  includeZero() const;
-  QString               graphVariant() const;   ///< GraphPrefs::variant()
-  QColor                bgColor() const;
-  QColor                gridColor() const;
-  QColor                dataColor() const;
-  QColor                cursorColor() const;
-  QColor                startColor() const;
-  QColor                intColor() const;
-  QColor                intThresholdColor() const;
-  int                   lineWidth() const;
-  int                   intLineWidth() const;
-  int                   lineMode() const;
-  int                   pointMode() const;
-  int                   intLineMode() const;
-  int                   intPointMode() const;
-  bool                  crosshair() const;
-  double                intScale() const;
-  double                intThreshold() const;
-  double                intOffset() const;
-  bool                  showIntegration() const;
-  int                   intValue() const;
-  /// @}
+  /// The meter's description, with the sigrok program and the "external
+  /// setup" check box.
+  DmmDecoder::DMMInfo   dmmInfo() const;
 
-  /// @name Recording page
-  /// @{
-  QTime                 startTime() const;
-  GraphWidget::SampleMode  sampleMode() const;
-  int                   sampleStep() const;
-  int                   sampleLength() const;
   /// The recording length as asked when Record is pressed (RecordLengthDlg):
-  /// a value, 0 = until stopped, and its unit (0 s, 1 min, 2 h, 3 d). Set
-  /// stores it at once.
-  int                   recordingLengthValue() const;
-  int                   recordingLengthUnit() const;
+  /// a value, 0 = until stopped, and its unit (0 s, 1 min, 2 h, 3 d). Stored
+  /// at once.
   void                  setRecordingLength(int value, int unit);
-  int                   preTrigger() const;
-  double                raisingThreshold() const;
-  double                fallingThreshold() const;
-  /// @}
 
-  /// @name General page (at program exit)
-  /// @{
+  /// The window at program exit (General page).
   void                  setWinRect(const QRect &);
   QRect                 winRect() const;
-  bool                  saveWindowPosition() const;
-  bool                  saveWindowSize() const;
-  bool                  alertUnsavedData() const;
-  /// @}
-
-  /// @name Appearance page (symbols, LCD display, analog meter, tips)
-  /// @{
-  bool                  useTextLabel() const;
-  QString               iconSet() const;
-  bool                  showDisplay() const;
-  QColor                displayBgColor() const;
-  bool                  showMinMax() const;
-  bool                  showBar() const;
-  /// AnalogMeter::ScaleMode as int.
-  int                   meterScaleMode() const;
-  /// 0 dark studio, 1 classic ivory (AnalogMeterStyle::dark()/ivory()).
-  int                   meterStyle() const;
-  void                  setMeterStyle(int style);
-  bool                  meterBallistics() const;
-  /// Start of the red zone in percent of full scale.
-  int                   meterRedZone() const;
-  /// The display shown or not (Appearance, Show), kept from the window.
-  void                  setShowDisplay(bool show);
-  /// @}
-
-  /// The alarms as applied (Alarms page).
-  QList<Alarm>          alarms() const;
-  bool                  alarmBlink() const;   ///< AlarmPrefs::blink()
-  /// Base unit of the reading, for the alarm page's threshold labels.
-  void                  setAlarmUnit(const QString &unit);
-
-  /// @name SCPI server page
-  /// @{
-  bool                  scpiEnabled() const;
-  int                   scpiPort() const;
-  bool                  scpiAllInterfaces() const;
-  bool                  scpiMdns() const;
-  bool                  scpiHislip() const;
-  bool                  scpiVxi11() const;
-  QString               scpiVxi11Rpc() const;   ///< "auto", "system", "own"
-  int                   scpiHislipPort() const;
-  void                  setScpiStatus(const QString &text);
-  /// @}
 
   /// Printer settings are kept in the Settings too.
   void                  writePrinter(QPrinter *);
@@ -191,10 +111,7 @@ public:
   /// The meter is read from the settings again (another device was taken over).
   void                  reloadMeter();
 
-
 public Q_SLOTS:
-  /// Connected state (nothing to do now that the meter has no page).
-  void                  connectSLOT(bool);
   /// OK or Apply: applies all pages and saves.
   void                  on_ui_buttonBox_accepted();
   void                  on_ui_buttonBox_rejected();

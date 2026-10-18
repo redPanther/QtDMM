@@ -33,7 +33,6 @@
 
 class MeterController;
 class SettingsDialog;
-class ShortcutRegistry;
 class LcdWidget;
 class Settings;
 class AnalogMeter;
@@ -62,20 +61,16 @@ public:
   /// Disconnects, saves the settings and asks about unsaved data. Returns
   /// false when the user cancels; MainWindow then ignores the close event.
   bool        closeWin();
-  /// Window geometry stored in the settings.
-  QRect       winRect() const;
-  bool        saveWindowPosition() const;
-  bool        saveWindowSize() const;
+  /// The settings dialog: its pages hold what MainWindow reads (the window
+  /// at exit, the analog meter's style, the shown display, the keys).
+  SettingsDialog *settingsDialog() const { return m_configDlg; }
   /// The LCD panel to feed; created and docked by MainWindow.
   void        setDisplay(LcdWidget *);
-  /// The main window's commands for the settings page Keyboard.
-  void        setShortcuts(ShortcutRegistry *registry);
   /// The LCD's colours (LcdWidget::LcdVariant), stored as Display/lcd.
   void        setLcdVariant(int variant);
   /// The analog meter's style from its context menu (0 dark, 1 ivory):
   /// shown at once, saved, and the Appearance page follows.
   void        setMeterStyle(int style);
-  int         meterStyle() const;
   /// The analog meter to feed; created and docked by MainWindow.
   void        setMeter(AnalogMeter *);
   /// Table model that gets every reading (MainWindow owns it).
@@ -84,8 +79,6 @@ public:
   void        setStateManager(SharedStateManager *);
   /// --debug: pass on to MeterConnection::setConsoleLogging().
   void        setConsoleLogging(bool);
-  /// Stores whether the display is shown in the settings.
-  void        setShowDisplay(bool show);
   /// The recorder graph (for the zoom/pan shortcuts in MainWindow).
   GraphWidget   *graph() const { return ui_graph; }
   /// False until a device has been chosen once (sidebar, Add device); a fresh

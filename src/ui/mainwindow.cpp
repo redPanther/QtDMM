@@ -43,6 +43,10 @@
 #include "ui/views/graphwidget.h"
 #include "ui/views/lcdwidget.h"
 #include "ui/views/poincareplot.h"
+#include "ui/settings/settingsdialog.h"
+#include "ui/settings/generalprefs.h"
+#include "ui/settings/guiprefs.h"
+#include "ui/settings/keyboardprefs.h"
 #include "ui/views/analogmeter.h"
 #include "ui/views/readingswidget.h"
 #include "core/settings.h"
@@ -508,7 +512,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   connect(m_wid, &InstanceWidget::connectDMM, action_Connect, &QAction::setChecked);
   connect(m_wid, &InstanceWidget::showDisplay, this, &MainWindow::showDisplaySLOT);
 
-  QRect winRect = m_wid->winRect();
+  QRect winRect = m_wid->settingsDialog()->winRect();
 
   m_wid->applySLOT();
   // the layout of the windows; the dock state of versions before the MDI
@@ -519,7 +523,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   // winRect() falls back to 500 x 350: only a stored width means a stored
   // geometry; a first start lets the window manager place the window
   const bool stored = m_wid->settings()->getInt("Position/width", 0) > 0;
-  if (stored && m_wid->saveWindowPosition())
+  if (stored && m_wid->settingsDialog()->generalPage()->saveWindowPosition())
     move(winRect.x(), winRect.y());
   // the views shown at the start count as grown for; the table column gets
   // the width the window has for it
@@ -530,7 +534,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     m_grown.insert(m_controls);
   if (m_grown.contains(m_readingsWin) || m_grown.contains(m_poincareWin))
     m_arranger->setTableWidth(growthFor(m_readingsWin).width());
-  if (stored && m_wid->saveWindowSize())
+  if (stored && m_wid->settingsDialog()->generalPage()->saveWindowSize())
   {
     resize(winRect.width(), winRect.height());
     m_userSized = m_wid->settings()->getBool("Windows/user-sized", false);
@@ -841,7 +845,7 @@ void MainWindow::createShortcuts(std::initializer_list<QAction *> workspace)
   m_shortcuts->load();
   // Record names its key in a tooltip of its own
   connect(m_shortcuts, &ShortcutRegistry::changed, this, &MainWindow::updateRecorderActions);
-  m_wid->setShortcuts(m_shortcuts);
+  m_wid->settingsDialog()->keyboardPage()->setRegistry(m_shortcuts);
 }
 
 void MainWindow::toggleRecordingSLOT()
@@ -1066,7 +1070,7 @@ void MainWindow::closeEvent(QCloseEvent *ev)
   // the settings dialog saves "Show display" as well: without auto-save it
   // keeps the start layout's
   if (!m_autoSaveLayout->isChecked())
-    m_wid->setShowDisplay(m_startDisplay);
+    m_wid->settingsDialog()->guiPage()->setShowDisplay(m_startDisplay);
   // dock layout (meter position, floating state, size) and toolbar layout
   saveWindows();
   m_wid->settings()->setInt("ReadingLog/max-rows", m_readings->maxRows());
@@ -1197,7 +1201,7 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     {
       QAction *a = style->addAction(text);
       a->setCheckable(true);
-      a->setChecked(m_wid->meterStyle() == s);
+      a->setChecked(m_wid->settingsDialog()->guiPage()->meterStyle() == s);
       connect(a, &QAction::triggered, this, [this, s = s] { m_wid->setMeterStyle(s); });
     }
   }
@@ -1788,7 +1792,7 @@ void MainWindow::setDesign(int design)
 
 void MainWindow::storeDisplaySLOT()
 {
-  m_wid->setShowDisplay(m_displayAction->isChecked());
+  m_wid->settingsDialog()->guiPage()->setShowDisplay(m_displayAction->isChecked());
 }
 
 void MainWindow::setConnectSLOT(bool on)
