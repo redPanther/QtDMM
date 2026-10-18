@@ -43,6 +43,8 @@
   open that port (QtDMM never asks for extra rights; the handbook says how); --vxi11-rpc picks it for one run,
   --vxi11-portmapper-port puts an own one on another port (for tests).
   Sidebar Services row VXI-11, mDNS _vxi-11._tcp. Only one program per computer can offer VXI-11
+- Flatpak: each release carries QtDMM-<version>-x86_64.flatpak (KDE runtime 6.11, hidapi inside): serial, USB/HID
+  and Bluetooth meters, the SCPI server and several instances. HID meters still need the udev rule on the computer
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell
