@@ -92,8 +92,6 @@ QStringList Transport::availablePorts()
   SerialDevice::availablePorts(portlist);
   HIDSerialDevice::availablePorts(portlist);
   HidHoltekDevice::availablePorts(portlist);
-  RFC2217SerialDevice::availablePorts(portlist);
-  SigrokDevice::availablePorts(portlist);
 
   return portlist;
 }

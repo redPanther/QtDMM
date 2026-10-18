@@ -37,14 +37,6 @@ RFC2217SerialDevice::~RFC2217SerialDevice()
   close();
 }
 
-bool RFC2217SerialDevice::availablePorts(QStringList &list)
-{
-  Q_UNUSED(list)
-  //list << "RFC2217 192.168.178.138:4000";
-  //list << "RFC2217 127.0.0.1:4000";
-  return false;
-}
-
 
 void RFC2217SerialDevice::onConnected()
 {

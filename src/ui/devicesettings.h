@@ -56,8 +56,6 @@ public:
   void           load(const QVariantMap &keys);
   /// The fields as meter keys, the counterpart of load().
   QVariantMap    keys() const;
-  /// Resets the fields to the built-in defaults (manual settings).
-  void           factoryDefaults();
   /// The ports offered in the port list (Transport::availablePorts() and the
   /// custom ports); the port of load() is added when missing.
   void           setPorts(const QStringList &ports);

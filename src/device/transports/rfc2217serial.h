@@ -25,9 +25,6 @@ public:
                                QObject *parent = nullptr);
   ~RFC2217SerialDevice();
 
-  /// Nothing can be enumerated on the network; adds nothing and returns false.
-  /// The user types the address into the port field.
-  static bool availablePorts(QStringList &portlist);
 
   /// False when the address could not be parsed (errorString() says so);
   /// otherwise the device counts as open while the TCP connection comes up.

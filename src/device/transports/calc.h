@@ -35,8 +35,6 @@ public:
   explicit CalcDevice(const DmmDecoder::DMMInfo &info, const QString &device,
                       SharedStateManager *state, QObject *parent = nullptr);
 
-  /// Nothing to enumerate; adds nothing and returns false.
-  static bool availablePorts(QStringList &portlist);
 
   /// Parses the formula; fails (see errorString()) when it does not parse
   /// or the unit is missing.

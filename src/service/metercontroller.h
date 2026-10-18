@@ -91,7 +91,6 @@ public:
   /// Connects (true) or disconnects the meter. False when the port could
   /// not be opened.
   bool        connectMeter(bool on);
-  bool        isConnected() const;
   /// Presses the meter's key @p key (ControlBar); false when it could not be
   /// sent (no such key, not connected).
   bool        pressKey(const QString &key);

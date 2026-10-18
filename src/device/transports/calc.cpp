@@ -41,12 +41,6 @@ CalcDevice::CalcDevice(const DmmDecoder::DMMInfo &info, const QString &device,
   connect(&m_timer, &QTimer::timeout, this, &CalcDevice::tick);
 }
 
-bool CalcDevice::availablePorts(QStringList &portlist)
-{
-  Q_UNUSED(portlist);
-  return false;
-}
-
 bool CalcDevice::open(OpenMode mode)
 {
   if (m_unit.isEmpty())

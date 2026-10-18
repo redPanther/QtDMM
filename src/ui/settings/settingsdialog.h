@@ -148,7 +148,6 @@ public:
   /// @{
   bool                  useTextLabel() const;
   QString               iconSet() const;
-  int                   currentTipId() const;
   bool                  showDisplay() const;
   QColor                displayBgColor() const;
   bool                  showMinMax() const;
@@ -203,7 +202,6 @@ public Q_SLOTS:
   void                  setSampleTimeSLOT(int);
   /// A time button of the graph: the visible window, applied like a zoom.
   void                  setWindowSecondsSLOT(int seconds);
-  void                  setCurrentTipSLOT(int);
   void                  zoomInSLOT(double);
   void                  zoomOutSLOT(double);
   /// A threshold cursor was dragged in the graph; updates the spin box.

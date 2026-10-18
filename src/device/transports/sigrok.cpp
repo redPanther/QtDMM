@@ -109,14 +109,6 @@ void SigrokDevice::close()
     QIODevice::close();
 }
 
-bool SigrokDevice::availablePorts(QStringList &list)
-{
-  Q_UNUSED(list);
-  // use sigrok scan
-  //list << "SIGROK uni-t-ut61e-ser:conn=/dev/ttyUSB0";
-  return false;
-}
-
 
 void SigrokDevice::onProcessReadyRead() {
   m_buffer.append(m_process->readAllStandardOutput());

@@ -166,8 +166,6 @@ protected:
   /// Copies the ASCII digits data[first..last] into a string, with an
   /// optional leading minus.
   QString makeValue(const QByteArray &data, int first, int last, bool neg=false);
-  /// One-line dump of m_result for --debug output.
-  QString toString() const;
 
   static std::vector<DMMInfo> *m_configurations;
   DmmResponse m_result;

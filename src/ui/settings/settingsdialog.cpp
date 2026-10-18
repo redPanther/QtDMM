@@ -325,17 +325,6 @@ void SettingsDialog::on_ui_buttonBox_rejected()
   hide();
 }
 
-void SettingsDialog::setCurrentTipSLOT(int id)
-{
-  m_settings->setInt("QtDMM/tip-id", id);
-  m_settings->save();
-}
-
-int SettingsDialog::currentTipId() const
-{
-  return m_settings->getInt("QtDMM/tip-id");
-}
-
 void SettingsDialog::on_ui_buttonBox_accepted()
 {
   m_settings->setInt("Custom colors/count", QColorDialog::customCount());

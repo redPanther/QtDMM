@@ -87,18 +87,6 @@ QString DmmDecoder::makeValue(const QByteArray &data, int first, int last, bool 
   return val;
 }
 
-QString DmmDecoder::toString() const {
-  return QString("id=%1: %2 %3 (%4) [%5] range=%6 hold=%7 bar=%8")
-                   .arg(m_result.id)
-                   .arg(m_result.val)
-                   .arg(m_result.unit)
-                   .arg(m_result.dval)
-                   .arg(m_result.special)
-                   .arg(m_result.range)
-                   .arg(m_result.hold)
-                   .arg(m_result.showBar);
-}
-
 // getInstance(): see protocols.cpp, the table has the factories
 
 
