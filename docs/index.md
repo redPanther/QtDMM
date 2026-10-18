@@ -5,7 +5,7 @@
 |        Build       | Status |
 | ------------------ | ------ |
 | Fedora Copr master |[![](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/) |
-
+| Fedora Copr relase |[![](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/) |
 
 # QtDMM
 
