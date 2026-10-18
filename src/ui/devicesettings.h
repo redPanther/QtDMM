@@ -49,7 +49,7 @@ class DeviceSettings : public QWidget, private Ui::UIDeviceSettings
 {
   Q_OBJECT
 public:
-  DeviceSettings(QWidget *parent = Q_NULLPTR);
+  DeviceSettings(QWidget *parent = nullptr);
   ~DeviceSettings();
 
   /// Fills the fields from @p keys; a key missing there gets its default.
@@ -163,7 +163,7 @@ protected:
   /// Shows the formula group instead of the port/protocol groups, or back.
   void updateCalcMode();
 
-  SharedStateManager *m_state = Q_NULLPTR;
+  SharedStateManager *m_state = nullptr;
   QTimer m_calcHintTimer;
 
 private:

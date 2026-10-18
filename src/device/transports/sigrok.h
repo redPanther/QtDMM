@@ -29,10 +29,10 @@ public:
 
   qint64 bytesAvailable() const override;
 
-signals:
+Q_SIGNALS:
   void finished();
 
-private slots:
+private Q_SLOTS:
   void onProcessReadyRead();
 
 private:

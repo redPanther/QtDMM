@@ -204,7 +204,7 @@ void SettingsDialog::reloadMeter()
 
 void SettingsDialog::showPage(SettingsDialog::PageType page)
 {
-  SettingsPage *wid = Q_NULLPTR;
+  SettingsPage *wid = nullptr;
   for (int entry = 0; entry < ui_list->count(); entry++)
   {
     SettingsPageItem *item = dynamic_cast<SettingsPageItem *>(ui_list->item(entry));

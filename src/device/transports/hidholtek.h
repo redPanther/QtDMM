@@ -59,7 +59,7 @@ public:
 
   /// @param info   the meter (unused so far; the sensor has no line settings)
   /// @param device an entry from availablePorts(), or a bare HID path
-  explicit HidHoltekDevice(const DmmDecoder::DMMInfo &info, const QString &device, QObject *parent = Q_NULLPTR);
+  explicit HidHoltekDevice(const DmmDecoder::DMMInfo &info, const QString &device, QObject *parent = nullptr);
   ~HidHoltekDevice() override;
 
   /// Appends the sensors found via hidapi, as "HIDHOLTEK 0xvvvv:0xpppp path".
@@ -96,9 +96,9 @@ private:
 
   bool m_isOpen = false;
   QString m_openError;
-  hid_device *m_handle = Q_NULLPTR;   ///< owned by the reader once it runs
-  QThread *m_thread = Q_NULLPTR;
-  HidReader *m_reader = Q_NULLPTR;
+  hid_device *m_handle = nullptr;   ///< owned by the reader once it runs
+  QThread *m_thread = nullptr;
+  HidReader *m_reader = nullptr;
   QByteArray m_rx;                    ///< text lines not yet read, main thread only
   /// The set being collected: latest raw value per quantity.
   quint16 m_co2 = 0, m_temperature = 0, m_humidity = 0;

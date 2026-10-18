@@ -13,7 +13,7 @@ class HelpDlg : public QDialog, private Ui::UIHelpDlg
 {
   Q_OBJECT
 public:
-  explicit HelpDlg(Settings *settings, QWidget *parent = Q_NULLPTR);
+  explicit HelpDlg(Settings *settings, QWidget *parent = nullptr);
 
   /// Shows a page by its path below :/Help/, e.g. "recorder.md".
   void showPage(const QString &page);

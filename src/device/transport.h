@@ -21,7 +21,7 @@ public:
     /// The kinds of port; the settings file stores them by name (str2portType()).
     enum class PortType { None, Serial, Hid, HidHoltek, Sigrok, RFC2217, Calc, Ble, BleGatt };
 
-    explicit Transport(QObject *parent = Q_NULLPTR) : QObject(parent) {}
+    explicit Transport(QObject *parent = nullptr) : QObject(parent) {}
     /// Creates the device object for @p type (closing any previous one). The
     /// port is not opened yet; call port()->open() and then init().
     bool create(const DmmDecoder::DMMInfo &spec, PortType type, QString device);
@@ -41,13 +41,13 @@ public:
     int         error();
     /// Applies the DMMInfo line settings (baud, parity, DTR/RTS) after open().
     bool        init();
-    bool        isOpen() const { return m_port != Q_NULLPTR && m_port->isOpen(); };
+    bool        isOpen() const { return m_port != nullptr && m_port->isOpen(); };
 
     /// "serial", "hid", "hidholtek", "sigrok", "rfc2217", "calc" or "ble" (case-insensitive) to PortType.
     static PortType str2portType(const QString str);
 private:
-    QIODevice *m_port   = Q_NULLPTR;
+    QIODevice *m_port   = nullptr;
     PortType   m_type   = PortType::None;
     QString    m_device;
-    SharedStateManager *m_state = Q_NULLPTR;
+    SharedStateManager *m_state = nullptr;
 };

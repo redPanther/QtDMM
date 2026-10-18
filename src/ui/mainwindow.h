@@ -64,7 +64,7 @@ class MainWindow : public QMainWindow, private Ui::UIMainWindow
 public:
   /// @param parser the processed command line (--debug, --config-dir, --config-id)
   /// @param parent parent widget, normally none
-  MainWindow(QCommandLineParser &parser, QWidget *parent = Q_NULLPTR);
+  MainWindow(QCommandLineParser &parser, QWidget *parent = nullptr);
   /// --debug: frame dump and the qtdmm.hid logging category.
   void      setConsoleLogging(bool);
 

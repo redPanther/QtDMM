@@ -206,7 +206,7 @@ HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device
   {
     m_openError = tr("Cannot set up the cable at %1.").arg(path);
     hid_close(m_handle);
-    m_handle = Q_NULLPTR;
+    m_handle = nullptr;
     return;
   }
   m_isOpen = true;
@@ -251,11 +251,11 @@ bool HIDSerialDevice::availablePorts(QStringList &portlist,unsigned short vendor
 
 
   devs = hid_enumerate(vendor_id, product_id); // all chips this SW belongs to...
-  for (dev_cnt = 0, cur_dev = devs; cur_dev != Q_NULLPTR; cur_dev = cur_dev->next) {
+  for (dev_cnt = 0, cur_dev = devs; cur_dev != nullptr; cur_dev = cur_dev->next) {
     dev_cnt++;
   }
 
-  for (cur_dev = devs; cur_dev != Q_NULLPTR; cur_dev = cur_dev->next) {
+  for (cur_dev = devs; cur_dev != nullptr; cur_dev = cur_dev->next) {
     // a udev link (/dev/qtdmm/...) stays the same across plugs and restarts
     const QString path = QString::fromLatin1(cur_dev->path);
     const QString link = HidPath::linkFor(path);
@@ -311,9 +311,9 @@ void HIDSerialDevice::stopReader()
     delete m_reader;
     delete m_thread;
   }
-  m_thread = Q_NULLPTR;
-  m_reader = Q_NULLPTR;
-  m_handle = Q_NULLPTR;   // closed by the reader
+  m_thread = nullptr;
+  m_reader = nullptr;
+  m_handle = nullptr;   // closed by the reader
 }
 
 bool HIDSerialDevice::configureCable()

@@ -59,7 +59,7 @@ public:
   /// are re-published only once a second, so an idle meter costs nothing.
   void publishReading(const Reading &reading);
 
-signals:
+Q_SIGNALS:
   /// The shared state string changed to @p newState.
   void stateChanged(const QString &newState);
   void instanceIdAlreadyInUse();

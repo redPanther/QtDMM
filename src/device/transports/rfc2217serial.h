@@ -33,7 +33,7 @@ public:
 
   qint64 bytesAvailable() const override;
 
-signals:
+Q_SIGNALS:
   void finished();
 
 
@@ -41,7 +41,7 @@ protected:
   qint64 readData(char *data, qint64 maxSize) override;
   qint64 writeData(const char *data, qint64 len) override;
 
-private slots:
+private Q_SLOTS:
   void onReadyRead();
   void onConnected();
   void onDisconnected();

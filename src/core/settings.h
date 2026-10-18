@@ -35,9 +35,9 @@ class Settings : public QObject
 {
   Q_OBJECT
 public:
-  explicit       Settings(QObject *parent = Q_NULLPTR);
+  explicit       Settings(QObject *parent = nullptr);
   /// Settings of one instance; see the class description for the file used.
-  explicit       Settings(const QString &instance_id, const QString &config_path, QObject *parent = Q_NULLPTR);
+  explicit       Settings(const QString &instance_id, const QString &config_path, QObject *parent = nullptr);
   ~Settings();
 
   /// False on the very first start (no settings file yet).

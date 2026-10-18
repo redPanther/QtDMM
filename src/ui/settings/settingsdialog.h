@@ -72,7 +72,7 @@ public:
     NumItems,
   };
 
-  SettingsDialog(Settings* settings, QWidget *parent = Q_NULLPTR);
+  SettingsDialog(Settings* settings, QWidget *parent = nullptr);
 
   /// The main window's actions for the page Keyboard.
   void                  setShortcuts(ShortcutRegistry *registry);

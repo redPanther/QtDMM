@@ -52,7 +52,7 @@ static QString durationText(qint64 seconds)
   return d ? QString("%1 d %2").arg(d).arg(text) : text;
 }
 
-GraphWidget::GraphWidget(QWidget *parent): GraphWidget(parent, Q_NULLPTR)
+GraphWidget::GraphWidget(QWidget *parent): GraphWidget(parent, nullptr)
 {
 }
 GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :

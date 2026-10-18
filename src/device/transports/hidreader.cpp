@@ -26,6 +26,6 @@ void HidReader::run()
       Q_EMIT report(QByteArray(reinterpret_cast<const char *>(buf), res));
   }
   hid_close(m_handle);
-  m_handle = Q_NULLPTR;
+  m_handle = nullptr;
   Q_EMIT finished();
 }

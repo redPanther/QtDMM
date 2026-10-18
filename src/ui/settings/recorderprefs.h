@@ -44,7 +44,7 @@ class RecorderPrefs : public SettingsPage
 {
   Q_OBJECT
 public:
-  RecorderPrefs(QWidget *parent = Q_NULLPTR);
+  RecorderPrefs(QWidget *parent = nullptr);
   ~RecorderPrefs();
   GraphWidget::SampleMode sampleMode() const;
   int         sampleStep() const;

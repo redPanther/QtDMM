@@ -130,8 +130,8 @@ private:
 MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   : QMainWindow(parent)
   , m_running(false)
-  , m_menu(Q_NULLPTR)
-  , m_helpDlg(Q_NULLPTR)
+  , m_menu(nullptr)
+  , m_helpDlg(nullptr)
   , m_localRecord(true)
 {
   setupUi(this);

@@ -108,7 +108,7 @@ MeterConnection::MeterConnection(QObject *parent)
     m_device(""),
     m_consoleLogging(false),
     m_delayTimer(0),
-    m_decoder(Q_NULLPTR)
+    m_decoder(nullptr)
 {
   m_portHandler  = new Transport(this);
   m_readerThread = new FrameReader(this);
@@ -154,7 +154,7 @@ void MeterConnection::setStateManager(SharedStateManager *state)
 
 void MeterConnection::initDecoder( FrameFormat::DataFormat df)
 {
-  if (m_decoder == Q_NULLPTR || m_decoder->getType() != df)
+  if (m_decoder == nullptr || m_decoder->getType() != df)
   {
     m_decoder = DmmDecoder::getInstance(df);
     m_readerThread->setDecoder(m_decoder);
@@ -319,7 +319,7 @@ QString MeterConnection::timeoutMessage() const
 
 void MeterConnection::closePort()
 {
-  m_readerThread->setHandle(Q_NULLPTR);
+  m_readerThread->setHandle(nullptr);
   if (m_portHandler->port() && !m_dmmInfo.externalSetup)
     m_portHandler->close();
 }
@@ -425,7 +425,7 @@ void MeterConnection::readEventSLOT(const QByteArray &data, int id)
       fprintf(stdout, "%02X ", data[i] & 0x0ff);
     fprintf(stdout, "\r\n");
   }
-  if (m_decoder == Q_NULLPTR)
+  if (m_decoder == nullptr)
     return;
 
   m_lastFrame.restart();

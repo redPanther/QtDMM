@@ -40,7 +40,7 @@ class GraphPrefs : public SettingsPage
 {
   Q_OBJECT
 public:
-  GraphPrefs(QWidget *parent = Q_NULLPTR);
+  GraphPrefs(QWidget *parent = nullptr);
   ~GraphPrefs();
   /// The graphs' default colours, a GraphWidget::variantName().
   QString       variant() const;

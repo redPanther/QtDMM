@@ -158,7 +158,7 @@ public:
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
-  GraphWidget(QWidget *parent = Q_NULLPTR);
+  GraphWidget(QWidget *parent = nullptr);
   ~GraphWidget();
   /// The window from the settings, in seconds (also how wide Live is
   /// without a recording length). A window other than the last one ends
@@ -682,7 +682,7 @@ protected:
   void             updateSeriesAppearance();
   void             updateThresholdLinesVisibility();
   void             updateThresholdLinePositions();
-  QString          formatEngineeringValue(double value, QString *unit = Q_NULLPTR) const;
+  QString          formatEngineeringValue(double value, QString *unit = nullptr) const;
 
 private:
   Qt::PenStyle     penStyle(LineMode);

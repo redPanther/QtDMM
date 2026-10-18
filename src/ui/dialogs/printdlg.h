@@ -36,7 +36,7 @@ namespace qtdmm
   {
     Q_OBJECT
   public:
-    PrintDlg(QWidget *parent = Q_NULLPTR);
+    PrintDlg(QWidget *parent = nullptr);
     void		setPrinter(QPrinter *prt);
     QString	title() const
     {

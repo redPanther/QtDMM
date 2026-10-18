@@ -44,7 +44,7 @@ public:
   /// @param device an entry from availablePorts(): "HID 0xvvvv:0xpppp path"
   ///               (the vid:pid selects the Chip; a bare path means CH9325)
   /// @param p      parent object
-  explicit HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *p = Q_NULLPTR);
+  explicit HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *p = nullptr);
  ~HIDSerialDevice();
 
   /// Chip for a port entry / vid:pid; unknown ids are treated as CH9325.
@@ -108,9 +108,9 @@ protected:
   QString m_openError;   ///< why the cable could not be opened (errorString() after open())
   int m_reportsSeen = 0;
   bool m_dataSeen = false;
-  hid_device *m_handle = Q_NULLPTR;   ///< owned by the reader once it runs
-  QThread *m_thread = Q_NULLPTR;
-  HidReader *m_reader = Q_NULLPTR;
+  hid_device *m_handle = nullptr;   ///< owned by the reader once it runs
+  QThread *m_thread = nullptr;
+  HidReader *m_reader = nullptr;
   QByteArray m_rx;                    ///< UART bytes received, main thread only
 
   qint64 readData(char *data, qint64 maxSize)  override;

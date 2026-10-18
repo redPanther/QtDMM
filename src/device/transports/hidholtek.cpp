@@ -42,7 +42,7 @@ HidHoltekDevice::HidHoltekDevice(const DmmDecoder::DMMInfo & /*info*/, const QSt
     m_openError = tr("Cannot initialise the sensor: %1").arg(QString::fromWCharArray(hid_error(m_handle)));
     qWarning() << "HID:" << m_openError;
     hid_close(m_handle);
-    m_handle = Q_NULLPTR;
+    m_handle = nullptr;
     return;
   }
   m_isOpen = true;
@@ -150,9 +150,9 @@ void HidHoltekDevice::stopReader()
     delete m_reader;
     delete m_thread;
   }
-  m_thread = Q_NULLPTR;
-  m_reader = Q_NULLPTR;
-  m_handle = Q_NULLPTR;   // closed by the reader
+  m_thread = nullptr;
+  m_reader = nullptr;
+  m_handle = nullptr;   // closed by the reader
 }
 
 void HidHoltekDevice::onReport(const QByteArray &raw)

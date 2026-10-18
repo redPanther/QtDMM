@@ -42,7 +42,7 @@ void Transport::close()
   // forget the port before closing it: close() may emit signals whose
   // handlers ask port() and must not see the dying device
   QIODevice *port = m_port;
-  m_port   = Q_NULLPTR;
+  m_port   = nullptr;
   m_type   = PortType::None;
   m_device = "";
   port->close();

@@ -49,7 +49,7 @@ void RFC2217SerialDevice::onDisconnected()
   // Has to go through the base class: Transport::isOpen() asks QIODevice, so
   // without this a dropped connection still looked open to the rest of the app.
   QIODevice::close();
-  emit finished();
+  Q_EMIT finished();
 }
 
 void RFC2217SerialDevice::onError(QAbstractSocket::SocketError err)
@@ -60,7 +60,7 @@ void RFC2217SerialDevice::onError(QAbstractSocket::SocketError err)
   setErrorString(m_socket ? m_socket->errorString() : tr("socket error"));
   qWarning() << "RFC2217:" << errorString();
   QIODevice::close();
-  emit finished();
+  Q_EMIT finished();
 }
 
 bool RFC2217SerialDevice::open(OpenMode mode)
@@ -118,7 +118,7 @@ void RFC2217SerialDevice::onReadyRead()
 {
   filterTelnet(m_socket->readAll());
   if (!m_inputBuffer.isEmpty())
-    emit readyRead();
+    Q_EMIT readyRead();
 }
 
 // The server answers every COM-PORT-OPTION with IAC SB 44 <cmd+100> ... IAC SE
