@@ -19,7 +19,7 @@ QByteArray DecoderBenetechGM1020::pollRequest() const
 
 bool DecoderBenetechGM1020::checkFormat(const char *data, size_t idx)
 {
-  auto at = [&](int back) { return static_cast<unsigned char>(data[(idx + FIFO_LENGTH - back) % FIFO_LENGTH]); };
+  auto at = [&](int back) { return ringByte(data, idx, back); };
   return at(0) == 0x11 && at(3) == 0x01 && at(6) == 0x22 && at(7) == 0x33;
 }
 

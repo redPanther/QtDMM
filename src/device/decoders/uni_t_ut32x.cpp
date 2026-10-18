@@ -19,7 +19,7 @@ static const bool registered = []() {
 bool DecoderUniTUT32x::checkFormat(const char *data, size_t idx)
 {
   // CR LF at the end, '1' before it, the thermocouple type '0'..'6' at @8
-  auto at = [&](int back) { return data[(idx + FIFO_LENGTH - back) % FIFO_LENGTH]; };
+  auto at = [&](int back) { return ringByte(data, idx, back); };
   return data[idx] == '\n' && at(1) == '\r' && at(2) == '1' && at(10) >= '0' && at(10) <= '6';
 }
 

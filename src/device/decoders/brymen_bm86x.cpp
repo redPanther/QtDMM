@@ -22,7 +22,7 @@ bool DecoderBrymenBM86x::checkFormat(const char *data, size_t idx)
 {
   // bytes 16..19 of the 24-byte packet are 0x86: seven to four before the end
   for (int back = 4; back <= 7; back++)
-    if (static_cast<unsigned char>(data[(idx + FIFO_LENGTH - back) % FIFO_LENGTH]) != 0x86)
+    if (ringByte(data, idx, back) != 0x86)
       return false;
   return true;
 }

@@ -57,11 +57,11 @@ bool DecoderAscii::checkFormat(const char* data, size_t idx)
   {
     // "#VVVVVVUUUU": complete when the '#' is ten bytes back. Only once ten
     // bytes are in: before that the look-back lands on stale bytes of the ring
-    case FrameFormat::PeakTech10: return idx >= 10 && data[(idx-10+FIFO_LENGTH)%FIFO_LENGTH] == '#';
+    case FrameFormat::PeakTech10: return idx >= 10 && ringByte(data, idx, 10) == '#';
     case FrameFormat::Metex14:
     case FrameFormat::Voltcraft14Continuous: return (data[idx] == 0x0d);
     case FrameFormat::Sigrok:                return (data[idx] == 0x0a);
-    case FrameFormat::Voltcraft15Continuous: return (data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+    case FrameFormat::Voltcraft15Continuous: return (ringByte(data, idx, 1) == 0x0d && data[idx] == 0x0a);
     default: return false;
   }
 }

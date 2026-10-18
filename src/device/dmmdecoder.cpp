@@ -59,6 +59,23 @@ QString DmmDecoder::insertCommaIT(const QString &val, int pos)
   return (val.left(pos) + "." + val.mid(pos));
 }
 
+void DmmDecoder::appendSum16(QByteArray &frame)
+{
+  unsigned sum = 0;
+  for (char c : std::as_const(frame))
+    sum += static_cast<unsigned char>(c);
+  frame.append(char((sum >> 8) & 0xFF));
+  frame.append(char(sum & 0xFF));
+}
+
+bool DmmDecoder::sum16Valid(const unsigned char *f, int n)
+{
+  unsigned sum = 0;
+  for (int i = 0; i < n - 2; ++i)
+    sum += f[i];
+  return ((sum >> 8) & 0xFF) == f[n - 2] && (sum & 0xFF) == f[n - 1];
+}
+
 bool DmmDecoder::bit(const QByteArray &data, int byte, int bit) const {
   return data[byte] & (1 << bit);
 }

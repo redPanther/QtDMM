@@ -98,11 +98,7 @@ QByteArray DecoderUniTiENV::commandFrame(quint8 payload)
 {
   QByteArray f = QByteArray::fromHex("aabb0430");
   f.append(char(payload));
-  unsigned sum = 0;
-  for (char c : std::as_const(f))
-    sum += static_cast<unsigned char>(c);
-  f.append(char((sum >> 8) & 0xFF));
-  f.append(char(sum & 0xFF));
+  appendSum16(f);
   return f;
 }
 
@@ -162,10 +158,7 @@ bool DecoderUniTiENV::frameValid(const unsigned char *f)
   // 26-byte device id frame (type 0x00) has another length
   if (f[0] != 0xAA || f[1] != 0xBB || f[2] != kFrameLength - 3 || (f[3] != 0x01 && f[3] != 0x05))
     return false;
-  unsigned sum = 0;
-  for (int i = 0; i < kFrameLength - 2; ++i)
-    sum += f[i];
-  return ((sum >> 8) & 0xFF) == f[kFrameLength - 2] && (sum & 0xFF) == f[kFrameLength - 1];
+  return sum16Valid(f, kFrameLength);
 }
 
 // As the iDMM frame: the last kFrameLength bytes, header, length and
@@ -174,9 +167,7 @@ bool DecoderUniTiENV::frameValid(const unsigned char *f)
 bool DecoderUniTiENV::checkFormat(const char *data, size_t idx)
 {
   unsigned char f[kFrameLength];
-  const size_t start = (idx + FIFO_LENGTH + 1 - kFrameLength) % FIFO_LENGTH;
-  for (int i = 0; i < kFrameLength; ++i)
-    f[i] = static_cast<unsigned char>(data[(start + i) % FIFO_LENGTH]);
+  lastBytes(data, idx, kFrameLength, f);
   return frameValid(f);
 }
 

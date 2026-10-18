@@ -92,7 +92,7 @@ size_t DecoderM9803R::getPacketLength()
 
 bool DecoderM9803R::checkFormat(const char* data, size_t idx)
 {
-  return (m_type==FrameFormat::M9803RContinuous && idx >= 10 && data[(idx - 1 + FIFO_LENGTH) % FIFO_LENGTH] == 0x0d && data[idx] == 0x0a);
+  return (m_type==FrameFormat::M9803RContinuous && idx >= 10 && ringByte(data, idx, 1) == 0x0d && data[idx] == 0x0a);
 }
 
 
