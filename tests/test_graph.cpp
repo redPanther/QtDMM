@@ -7,6 +7,7 @@
 #include <QTemporaryDir>
 #include <QTextStream>
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QFileInfo>
 
 #include "ui/views/graphwidget.h"
@@ -18,6 +19,7 @@
 #include <QValueAxis>
 #include <QGraphicsSimpleTextItem>
 #include <QXYSeries>
+#include <QScatterSeries>
 #include <QScrollBar>
 #include <QToolButton>
 #include "core/nicestep.h"
@@ -706,6 +708,7 @@ int main(int argc, char **argv)
     graph.setSampleTime(1);
     graph.setGraphSize(100);
     graph.setMode(GraphWidget::Manual);
+    graph.setIntegration(true, 1.0, 0.0, 0.0);   // a hidden integral is not drawn
     Feed feed(graph);
     graph.startSLOT();
     for (int i = 0; i < 30; i++)
@@ -726,6 +729,7 @@ int main(int argc, char **argv)
     thin.setSampleTime(1);
     thin.setGraphSize(200);
     thin.setMode(GraphWidget::Manual);
+    thin.setIntegration(true, 1.0, 0.0, 0.0);
     Feed thinFeed(thin);
     thin.startSLOT();
     for (int i = 0; i < 2000; i++)
@@ -1976,6 +1980,47 @@ int main(int argc, char **argv)
     graph.store()->clear();
     feed.value(1.0);
     check(!graph.rightAxis()->isVisible() && graph.legendText().isEmpty(), "cleared: no other curves, no legend");
+  }
+
+  // --- 7m. a recording that grows: the columns are counted anew only when
+  //          they double, not with every few readings (the graph had built
+  //          the whole curve anew once a column grew, ~7.7 ms a reading at
+  //          2000 readings; R12) ---
+  {
+    Settings cfg("record-speed", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    // as the settings start: a solid line, no points, no integral
+    graph.setLineStyle(GraphWidget::Solid, GraphWidget::NoPoint, GraphWidget::NoLine, GraphWidget::Circle);
+    Feed feed(graph);
+    graph.startSLOT();
+    const int rebuilds = graph.rebuilds();
+    QElapsedTimer timer;
+    timer.start();
+    for (int i = 0; i < 2000; ++i)
+      feed.value(1.0 + (i % 10) * 0.01);
+    qInfo() << "record: 2000 readings in" << timer.elapsed() << "ms," << graph.rebuilds() - rebuilds << "rebuilds";
+    check(graph.rebuilds() - rebuilds < 20,
+          QString("record: 2000 readings built the curve anew %1 times").arg(graph.rebuilds() - rebuilds));
+    // hidden points are left empty, and filled once they are switched on
+    const QList<QAbstractSeries *> series = graph.findChild<QChartView *>()->chart()->series();
+    auto *line = qobject_cast<QLineSeries *>(series.first());
+    QScatterSeries *points = nullptr;
+    for (QAbstractSeries *s : series)
+      if (auto *scatter = qobject_cast<QScatterSeries *>(s); scatter && !points)
+        points = scatter;
+    check(points && points->count() == 0, "record: no points while they are hidden");
+    graph.setLineStyle(GraphWidget::Solid, GraphWidget::Circle, GraphWidget::NoLine, GraphWidget::Circle);
+    check(points && points->count() > 0 && points->count() == line->count(),
+          QString("record: the points once switched on, %1 of %2").arg(points ? points->count() : -1)
+            .arg(line->count()));
+    timer.restart();
+    for (int i = 0; i < 500; ++i)
+      feed.value(1.0 + (i % 10) * 0.01);
+    qInfo() << "record: 500 readings with points in" << timer.elapsed() << "ms";
+    check(points && points->count() == line->count(), "record: the points go on with the line");
   }
 
   // --- 8. EngNumberValidator: what engValue() writes, value() must read

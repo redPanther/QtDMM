@@ -67,6 +67,9 @@
 - Alarms: the settings page labels the thresholds with the unit of the reading (A, Ohm, ppm ...); it always
   said V. It follows another device also while the settings are open, and before the first reading the
   thresholds go without a unit
+- Graph: a long recording no longer slows down with every reading. At 2000 readings the graph took ~7 ms for
+  each one (a whole curve built anew every few readings, and the hidden points and integral kept up to date);
+  now ~0.5 ms, ~1.6 ms with points shown
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

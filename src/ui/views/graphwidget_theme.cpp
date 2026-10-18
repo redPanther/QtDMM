@@ -391,11 +391,15 @@ void GraphWidget::applyThemeColors()
 
 void GraphWidget::setLineStyle(int lineMode, int pointMode, int intLineMode, int intPointMode)
 {
+  const bool points = pointsShown(), intPoints = intPointsShown();
   m_lineMode = static_cast<LineMode>(lineMode);
   m_pointMode = static_cast<PointMode>(pointMode);
   m_intLineMode = static_cast<LineMode>(intLineMode);
   m_intPointMode = static_cast<PointMode>(intPointMode);
 
+  // hidden points are not kept up to date
+  if (points != pointsShown() || intPoints != intPointsShown())
+    rebuildSeries();
   updateSeriesAppearance();
 }
 
