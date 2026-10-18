@@ -255,6 +255,19 @@ int main(int argc, char **argv)
           qWarning() << "iENV: 23.4 °C shown in °F gives" << (t ? t->val2 + " " + t->unit2 : QString("nothing"));
           ++problems;
         }
+        // the decimals follow the meter's, not its number of digits
+        const struct { const char *shown; const char *f; } temps[] = {
+          { "   9.9  C", "49.8" }, { "  10.0  C", "50.0" }, { "   0.0  C", "32.0" }, { "  37.8  C", "100.0" },
+        };
+        for (const auto &c : temps)
+        {
+          const auto r = hum->decode(ienv(c.shown, 0, 0x31, 0x30), 1);
+          if (!r || r->val2 != c.f)
+          {
+            qWarning() << "iENV:" << c.shown << "in °F gives" << (r ? r->val2 : QString("nothing")) << "not" << c.f;
+            ++problems;
+          }
+        }
       }
       decoder->decode(ienv("   158LUX"), 0);   // back to lx
       // the unit key steps from the unit the last frame told: lx -> fc
