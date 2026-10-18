@@ -1306,17 +1306,6 @@ void GraphWidget::updateReferenceLine()
   m_referenceLabel->setPos(plot.right() - r.width() - 3, top);
 }
 
-double GraphWidget::niceStep(double v)
-{
-  if (!(v > 0) || !std::isfinite(v))
-    return 1;
-  double decade = std::pow(10.0, std::floor(std::log10(v)));
-  for (double m : { 1.0, 2.0, 5.0, 10.0 })
-    if (m * decade >= v * (1 - 1e-12))
-      return m * decade;
-  return 10 * decade;
-}
-
 bool GraphWidget::divisions() const
 {
   return m_variant == ScopeBlue || phosphor() || m_variant == ChartRecorder;
