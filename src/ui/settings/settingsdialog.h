@@ -82,16 +82,9 @@ public:
   /// the assistant and the sidebar set it up.
   /// @{
   QString               device() const;
-  int                   speed() const;
   FrameFormat::DataFormat format() const;
-  QSerialPort::Parity   parity() const;
-  bool                  externalSetup() const;
   int                   display() const;
-  int                   bits() const;
-  int                   stopBits() const;
   int                   numValues() const;
-  bool                  rts() const;
-  bool                  dtr() const;
   DmmDecoder::DMMInfo    dmmInfo() const;
   QString               dmmName() const;
   /// @}

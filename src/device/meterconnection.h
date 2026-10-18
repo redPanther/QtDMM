@@ -35,8 +35,8 @@ class SharedStateManager;
 
 /// The connection to one multimeter: port, frame reader and decoder.
 ///
-/// InstanceWidget configures it from the settings (setDevice(), setFormat(),
-/// setPortSettings(), ...) and calls open(). From then on every decoded
+/// InstanceWidget configures it from the settings (setDmmInfo(), setDevice(),
+/// setFormat(), ...) and calls open(). From then on every decoded
 /// reading arrives through value() and every change of the connection state
 /// through linkStateChanged() - and, as a human-readable message, through
 /// error(), which the main window shows in its status bar: "Connecting",
@@ -65,8 +65,6 @@ public:
   Q_ENUM(LinkState)
 
   MeterConnection(QObject *parent);
-  /// Baud rate; only used by the serial port types.
-  void    setSpeed(int);
   /// Port to open: a serial device path, an entry from
   /// Transport::availablePorts() or a host:port for RFC2217.
   void    setDevice(const QString &);
@@ -84,6 +82,8 @@ public:
   QStringList keys() const;
   void    setName(const QString &name)  {  m_name = name; }
   /// The meter description; passed on to the port device and the reader.
+  /// With DMMInfo::externalSetup the port is used as is and left open on
+  /// close(), for setups where another tool configures it.
   void    setDmmInfo(const DmmDecoder::DMMInfo info)  {  m_dmmInfo = info; }
   const DmmDecoder::DMMInfo &dmmInfo() const  {  return m_dmmInfo; }
   /// The last message emitted through error().
@@ -102,10 +102,6 @@ public:
   FrameFormat::DataFormat format() const { return m_decoder ? m_decoder->getType() : FrameFormat::Invalid; }
   /// Selects the decoder (see DmmDecoder::getInstance()).
   void    setFormat(FrameFormat::DataFormat);
-  /// Serial line settings. With @p externalSetup the port is used as is and
-  /// left open on close(), for setups where another tool configures it.
-  void    setPortSettings(QSerialPort::DataBits bits, QSerialPort::StopBits stopBits, QSerialPort::Parity parity,
-                                 bool externalSetup, bool rts, bool dtr);
   /// Frames per reading, see FrameReader::setNumValues().
   void    setNumValues(int);
   /// --debug: dump every frame as hex to stdout.
@@ -145,10 +141,6 @@ protected:
   /// The port device reports that it is gone (socket closed, USB unplugged).
   void                  portLost(QIODevice *from, const QString &reason);
   Transport          *m_portHandler;
-  int                   m_speed;
-  QSerialPort::Parity   m_parity;
-  QSerialPort::StopBits m_stopBits;
-  QSerialPort::DataBits m_dataBits;
   QString               m_device;
   /// m_device without secrets (the Bluetooth key), for messages.
   QString               deviceName() const;
@@ -162,9 +154,6 @@ protected:
   QElapsedTimer         m_lastFrame;            ///< since the last complete frame (or open)
   QString               m_name;
   bool                  m_consoleLogging;
-  bool                  m_externalSetup;
-  bool                  m_dtr;
-  bool                  m_rts;
   int                   m_flags;
   int                   m_delayTimer;
   std::shared_ptr<DmmDecoder> m_decoder;

@@ -105,15 +105,8 @@ QString serialPermissionHintForDevice(const QString &device)
 
 MeterConnection::MeterConnection(QObject *parent)
   : QObject(parent),
-    m_speed(600),
-    m_parity(QSerialPort::NoParity),
-    m_stopBits(QSerialPort::OneStop),
-    m_dataBits(QSerialPort::Data7),
     m_device(""),
     m_consoleLogging(false),
-    m_externalSetup(false),
-    m_dtr(false),
-    m_rts(false),
     m_delayTimer(0),
     m_decoder(Q_NULLPTR)
 {
@@ -127,17 +120,6 @@ MeterConnection::MeterConnection(QObject *parent)
 
 }
 
-void MeterConnection::setPortSettings(QSerialPort::DataBits bits, QSerialPort::StopBits stopBits,
-                          QSerialPort::Parity parity, bool externalSetup, bool rts, bool dtr)
-{
-  m_externalSetup = externalSetup;
-  m_parity  = parity;
-  m_stopBits = stopBits;
-  m_dataBits = bits;
-  m_dtr = dtr;
-  m_rts = rts;
-}
-
 void MeterConnection::setFormat(FrameFormat::DataFormat format)
 {
   initDecoder(format);
@@ -147,11 +129,6 @@ void MeterConnection::setFormat(FrameFormat::DataFormat format)
 bool MeterConnection::isOpen() const
 {
   return m_portHandler->isOpen();
-}
-
-void MeterConnection::setSpeed(int speed)
-{
-  m_speed = speed;
 }
 
 
@@ -262,7 +239,7 @@ bool MeterConnection::openPort()
     return false;
   }
 
-  if (!m_externalSetup)
+  if (!m_dmmInfo.externalSetup)
   {
     if (!m_portHandler->init())
     {
@@ -344,7 +321,7 @@ QString MeterConnection::timeoutMessage() const
 void MeterConnection::closePort()
 {
   m_readerThread->setHandle(Q_NULLPTR);
-  if (m_portHandler->port() && !m_externalSetup)
+  if (m_portHandler->port() && !m_dmmInfo.externalSetup)
     m_portHandler->close();
 }
 

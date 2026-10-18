@@ -633,43 +633,10 @@ int SettingsDialog::intPointMode() const
 DmmDecoder::DMMInfo SettingsDialog::dmmInfo() const
 {
   DmmDecoder::DMMInfo info = m_meter->dmmInfo();
+  // the check box, also for a manual setup changed after it was chosen
+  info.externalSetup = m_meter->externalSetup();
   info.sigrokExe = m_settings->getString("Port settings/sigrok_exe", "sigrok-cli");
   return info;
-}
-
-bool SettingsDialog::rts() const
-{
-  return m_meter->rts();
-}
-
-bool SettingsDialog::dtr() const
-{
-  return m_meter->dtr();
-}
-
-QSerialPort::Parity SettingsDialog::parity() const
-{
-  return m_meter->parity();
-}
-
-bool SettingsDialog::externalSetup() const
-{
-  return m_meter->externalSetup();
-}
-
-int SettingsDialog::bits() const
-{
-  return m_meter->bits();
-}
-
-int SettingsDialog::stopBits() const
-{
-  return m_meter->stopBits();
-}
-
-int SettingsDialog::speed() const
-{
-  return m_meter->speed();
 }
 
 int SettingsDialog::numValues() const
