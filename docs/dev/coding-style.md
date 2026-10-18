@@ -8,6 +8,7 @@ C++17 and Qt 6. The build with `-DQTDMM_WERROR=ON` has no warnings, and stays so
 
 - Lower case, no spaces: `graphwidget.cpp`, `recordingstore.h`. Decoders are named after the protocol or chip with underscores between vendor and model: `uni_t_ienv.cpp`, `cyrustek_es51922.cpp`.
 - One class per header and source pair, the file named after the class in lower case.
+- A class too large for one source file spreads its definitions over parts named `<class>_<part>.cpp`, each about one subject (`graphwidget_axes.cpp`, `graphwidget_input.cpp`); the header stays one. Helpers that several parts need go into `<class>_p.h`, which is not part of the interface.
 - Headers use `#pragma once`.
 - A new file starts with:
 

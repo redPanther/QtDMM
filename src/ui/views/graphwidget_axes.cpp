@@ -1,0 +1,428 @@
+//======================================================================
+// File:		graphwidget_axes.cpp (from dmmgraph.cpp)
+// Author:	Matthias Toussaint
+// Created:	Tue Apr 10 17:45:35 CEST 2001
+//----------------------------------------------------------------------
+// This file is part of QtDMM.
+//
+// QtDMM is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// QtDMM is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with QtDMM.  If not, see <http://www.gnu.org/licenses/>.
+//----------------------------------------------------------------------
+// Copyright (c) 2001 Matthias Toussaint
+//======================================================================
+//
+// GraphWidget, part: the axes: time and value labels, the scales, the units and the right axis.
+// The class is in graphwidget.h, its other parts in graphwidget*.cpp.
+
+#include <QtGui>
+#include <QtWidgets>
+#include <cmath>
+
+#include "ui/views/graphwidget.h"
+#include "ui/views/graphwidget_p.h"
+#include "core/nicestep.h"
+#include "core/siprefix.h"
+
+qint64 GraphWidget::windowStart() const
+{
+  // Live: the newest reading at the right edge once the window is full (the
+  // axis ends a sample time short of the window, updateXAxisRange())
+  if (m_store->state() == RecordingStore::Live)
+  {
+    const qint64 window = qint64(qMax(1, m_windowSeconds)) * 1000;
+    const qint64 shortOf = qMin<qint64>(m_store->sampleTime() * 100, window / 10);
+    const qint64 follow = qMax(m_store->origin(), m_store->duration() - window + shortOf);
+    // paused by the overview: where it was put, while the store keeps it
+    return m_liveHold ? qBound(m_store->origin(), m_holdStart, follow) : follow;
+  }
+  // the scroll bar counts tenths of a second from what the store keeps
+  return m_store->origin() + qint64(qMax(0, scrollbar->value())) * 100;
+}
+
+void GraphWidget::updateXAxisRange()
+{
+  // one sample time short of the window, as it always was: no label on the
+  // right edge
+  const double window = qMax(1, m_windowSeconds);
+  double start = windowStart() / 1000.0, end = start + window - qMin(m_store->sampleTime() / 10.0, window / 10);
+  double div = timeStep((end - start) / 6);   // about 5 ticks
+  if (divisions())
+  {
+    // up to 10 divisions of a whole time step over exactly the window:
+    // 600 s are 10 x 1 min, 1 min 6 x 10 s. The axis is not moved onto a
+    // step - that made 1 min 100 s wide and Live jump every 10 s; the grid
+    // lines stay on whole steps and run with the readings
+    div = timeStep(window / 10);
+    end = start + window;
+  }
+  m_xAxis->setRange(start, end);
+  // the ticks on whole steps, counted from the start of the recording
+  m_xStep = div;
+  m_xAxis->setTickType(QValueAxis::TicksDynamic);
+  m_xAxis->setTickAnchor(0);
+  m_xAxis->setTickInterval(div);
+  updateXLabels();
+  updateReferenceLine();   // the window's mean, minimum or maximum
+  updateMinimapView();
+  updateEnvelope();
+}
+
+double GraphWidget::timeStep(double v)
+{
+  if (!(v > 0) || !std::isfinite(v))
+    return 1;
+  static const double steps[] = { 0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800,
+                                  3600, 7200, 10800, 21600, 43200, 86400 };
+  for (double s : steps)
+    if (s >= v * (1 - 1e-12))
+      return s;
+  return niceStep(v / 86400) * 86400;   // days in 1-2-5
+}
+
+// Seconds, minutes or hours, as the step reads best; the title says which.
+void GraphWidget::updateXLabels()
+{
+  if (!m_xAxis || m_xStep <= 0)
+    return;
+  double unit = 1;
+  QString title = tr("[sec]");
+  if (m_xStep >= 3600 && std::fmod(m_xStep, 3600) == 0)
+  {
+    unit = 3600;
+    title = tr("[h]");
+  }
+  else if (m_xStep >= 60 && std::fmod(m_xStep, 60) == 0)
+  {
+    unit = 60;
+    title = tr("[min]");
+  }
+  if (m_xAxis->titleText() != title)
+    m_xAxis->setTitleText(title);
+
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  QList<double> values;
+  if (max > min && plot.width() > 0)
+    for (double v = std::ceil(min / m_xStep - 1e-9) * m_xStep; v <= max + m_xStep * 1e-9 && values.size() < 200; v += m_xStep)
+      values << v;
+  while (m_xLabels.size() < values.size())
+  {
+    auto *item = new QGraphicsSimpleTextItem(m_chart);
+    item->setZValue(m_yTitle->zValue());
+    m_xLabels << item;
+  }
+  const QFont font = m_xAxis->labelsFont();
+  // Qt's labels start below the axis line and its tick marks
+  const double top = plot.bottom() + 6;
+  for (int i = 0; i < m_xLabels.size(); ++i)
+  {
+    QGraphicsSimpleTextItem *item = m_xLabels[i];
+    item->setVisible(i < values.size());
+    if (i >= values.size())
+      continue;
+    const double v = values[i] / unit;
+    item->setText(QString::number(std::abs(v) < 1e-9 ? 0.0 : v, 'g', 6));
+    item->setFont(font);
+    item->setBrush(m_xLabelColor.isValid() ? QBrush(m_xLabelColor) : m_xAxis->titleBrush());
+    const double x = plot.left() + (values[i] - min) / (max - min) * plot.width();
+    item->setPos(x - item->boundingRect().width() / 2, top);
+  }
+  updateTimeCursors();
+}
+
+QString GraphWidget::yPrefix() const
+{
+  const QString base = m_store->unit();
+  // units that take no prefix: °C, %, none
+  if (base.isEmpty() || base.startsWith(QChar(0x00b0)) || base == QLatin1String("%"))
+    return QString();
+  // by the axis, not by the reading: a meter that changes range (V, mV, µV)
+  // turned the whole axis to mV with labels like 1.6e+04; 350 mV on an axis
+  // up to 0.4 V are still mV. Without readings yet the axis says nothing:
+  // the meter's prefix
+  if (m_store->count() == 0 && !m_liveBase.isEmpty() && m_liveBase == base)
+    return m_livePrefix;
+  QString prefix;
+  SiPrefix::scale(qMax(std::abs(m_yAxis->min()), std::abs(m_yAxis->max())), &prefix);
+  return prefix;
+}
+
+void GraphWidget::updateYLabels()
+{
+  if (!m_yAxis)
+    return;
+  const QString prefix = yPrefix();
+  if (prefix != m_yPrefix)
+  {
+    m_yPrefix = prefix;
+    showUnit();
+  }
+  const double factor = SiPrefix::factor(prefix);
+  const QRectF plot = m_chart->plotArea();
+  const double min = m_yAxis->min(), max = m_yAxis->max();
+  const int n = m_yAxis->tickCount();
+  QList<double> values;
+  if (max > min && plot.height() > 0 && n > 1)
+    for (int i = 0; i < n; ++i)
+      values << min + i * (max - min) / (n - 1);
+  while (m_yLabels.size() < values.size())
+  {
+    auto *item = new QGraphicsSimpleTextItem(m_chart);
+    item->setZValue(m_yTitle->zValue());
+    m_yLabels << item;
+  }
+  const QFont font = m_yAxis->labelsFont();
+  const double gap = QFontMetricsF(font).horizontalAdvance(' ') + 2;
+  for (int i = 0; i < m_yLabels.size(); ++i)
+  {
+    QGraphicsSimpleTextItem *item = m_yLabels[i];
+    item->setVisible(i < values.size());
+    if (i >= values.size())
+      continue;
+    // as precise as Qt's invisible labels that keep the room ("%.4g"), and
+    // no "-0"
+    double v = values[i] / factor;
+    if (std::abs(values[i]) < (max - min) * 1e-9)
+      v = 0;
+    item->setText(QString::number(v, 'g', 4));
+    item->setFont(font);
+    item->setBrush(m_xLabelColor.isValid() ? QBrush(m_xLabelColor) : m_yAxis->titleBrush());
+    const QRectF r = item->boundingRect();
+    const double y = plot.bottom() - (values[i] - min) / (max - min) * plot.height();
+    item->setPos(qMax(1.0, plot.left() - r.width() - gap), y - r.height() / 2);
+  }
+  updateReferenceLine();
+  updateEnvelope();
+  updateTimeCursors();   // their levels
+}
+
+bool GraphWidget::divisions() const
+{
+  return m_variant == ScopeBlue || phosphor() || m_variant == ChartRecorder;
+}
+
+void GraphWidget::setYRange(double min, double max)
+{
+  // a range without width - no value yet (the auto scale starts at
+  // +-1e40, or 0..0 with "include zero"), or one value that stays the same
+  // (0 V on a shorted input) - draws no grid and no labels: show 0..1
+  // while there is no value, else a tenth of the value around it (0: +-1)
+  const bool noWidth = !std::isfinite(min) || !std::isfinite(max) || !(max > min);
+  if (noWidth && (m_store->count() == 0 || !std::isfinite(min) || !std::isfinite(max) || min > max))
+  {
+    min = 0;
+    max = 1;
+  }
+  else if (max == min)
+  {
+    const double half = min == 0 ? 1.0 : std::abs(min) * 0.1;
+    min -= half;
+    max += half;
+  }
+  if (divisions() && max > min && std::isfinite(min) && std::isfinite(max))
+  {
+    // 8 divisions of a 1-2-5 step; the range grows to whole steps
+    double div = niceStep((max - min) / 8);
+    double first = std::floor(min / div + 1e-9) * div;
+    while (first + 8 * div < max - div * 1e-9)
+    {
+      div = niceStep(div * 1.01);
+      first = std::floor(min / div + 1e-9) * div;
+    }
+    m_yAxis->setRange(first, first + 8 * div);
+  }
+  else
+    m_yAxis->setRange(min, max);
+  updateCentreTicks();
+  updateYLabels();
+}
+
+void GraphWidget::updateCentreTicks()
+{
+  if (!phosphor())
+  {
+    m_centreTicks->setPath(QPainterPath());
+    return;
+  }
+  // No cross in the middle: it said nothing and looked like a reference.
+  // The horizontal line is the reference line while that is in view, the
+  // vertical one the trigger of a pre-triggered recording; without them
+  // the fine ticks sit on the plot's bottom and left edge.
+  const QRectF pa = m_chart->plotArea();
+  const double ref = referenceY();
+  const bool horizontal = std::isfinite(ref);
+  const double cy = horizontal ? ref : pa.bottom();
+  bool vertical = false;
+  double cx = pa.left();
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  for (const RecordingStore::Mark &m : m_store->marks())
+    if (m.color == RecordingStore::kTriggerColor && max > min && m.t / 1000.0 >= min && m.t / 1000.0 <= max)
+    {
+      cx = pa.left() + (m.t / 1000.0 - min) / (max - min) * pa.width();
+      vertical = true;
+    }
+  QPainterPath path;
+  if (horizontal)
+  {
+    path.moveTo(pa.left(), cy);
+    path.lineTo(pa.right(), cy);
+  }
+  if (vertical)
+  {
+    path.moveTo(cx, pa.top());
+    path.lineTo(cx, pa.bottom());
+  }
+  // on a line both sides, on the edge inwards
+  const double up = 3, down = horizontal ? 3 : 0, right = 3, left = vertical ? 3 : 0;
+  const double dx = pa.width() / 50, dy = pa.height() / 40;   // 10 x 8 divisions, 5 ticks each
+  for (int i = 0; i <= 50; ++i)
+  {
+    path.moveTo(pa.left() + i * dx, cy - up);
+    path.lineTo(pa.left() + i * dx, cy + down);
+  }
+  for (int i = 0; i <= 40; ++i)
+  {
+    path.moveTo(cx - left, pa.top() + i * dy);
+    path.lineTo(cx + right, pa.top() + i * dy);
+  }
+  m_centreTicks->setPath(path);
+}
+
+void GraphWidget::setUnit(const QString &unit)
+{
+  // Values arrive in SI base units (see DmmResponse), so the store keeps the
+  // base unit; the prefix is the y labels' (yPrefix()).
+  const SiPrefix::Split split = SiPrefix::split(unit);
+  m_store->setUnit(split.baseUnit);
+  m_liveBase = split.baseUnit;
+  m_livePrefix = split.prefix == QLatin1String("u") ? QStringLiteral("µ") : split.prefix;
+  showUnit();
+  updateYLabels();
+}
+
+// The axis title: the unit of the recorded values (a recording keeps its
+// unit when the meter changes to another one).
+void GraphWidget::showUnit()
+{
+  const QString base = m_store->unit();
+  m_yTitle->setText(base.isEmpty() ? QString() : QString("[%1%2]").arg(m_yPrefix, base));
+  // room above the plot for the title
+  const int h = base.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
+                                             + QFontMetricsF(m_yAxis->labelsFont()).height() / 2);
+  // and at least as much as the time buttons need, so they sit above the plot
+  const int bar = m_timeBar ? m_timeBar->sizeHint().height() : 0;
+  m_chart->setMargins(QMargins(4, 4 + qMax(h, bar), 4, 4));
+  placeYTitle();
+}
+
+// right-aligned with the axis line, just above the plot area
+void GraphWidget::placeYTitle()
+{
+  const QRectF plot = m_chart->plotArea();
+  const QRectF text = m_yTitle->boundingRect();
+  // the top tick label is centred on the plot's top edge: stay above it
+  const double labelHalf = QFontMetricsF(m_yAxis->labelsFont()).height() / 2;
+  m_yTitle->setPos(qMax(2.0, plot.left() - text.width() - 4), plot.top() - labelHalf - text.height() - 1);
+  // the right one left-aligned with its axis line
+  if (m_y2Title)
+    m_y2Title->setPos(qMin(plot.right() + 4, m_chart->size().width() - m_y2Title->boundingRect().width() - 2),
+                      plot.top() - labelHalf - m_y2Title->boundingRect().height() - 1);
+}
+
+void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double max)
+{
+  m_autoScale = autoScale;
+  m_includeZero = includeZero;
+
+  if (!autoScale)
+  {
+    m_scaleMin = min;
+    m_scaleMax = max;
+
+  }
+  else
+  {
+    if (m_includeZero)
+      m_scaleMin = m_scaleMax = 0;
+    else
+    {
+      m_scaleMin =  1e40;
+      m_scaleMax = -1e40;
+    }
+
+    for (int i = 0; i < m_store->count(); i++)
+      growScale(m_store->series().at(i).value, m_scaleMin, m_scaleMax);
+    // the other values drawn on the left axis
+    for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
+    {
+      const ExtraCurve &c = m_extraCurves[size_t(i)];
+      if (!c.shown || c.right)
+        continue;
+      const RecordingSeries &x = m_store->extra(i);
+      for (int j = 0; j < x.count(); ++j)
+        if (std::isfinite(x.at(j).value))
+          growScale(x.at(j).value, m_scaleMin, m_scaleMax);
+    }
+  }
+
+  setYRange(m_scaleMin, m_scaleMax);
+  updateThresholdLinePositions();
+}
+
+void GraphWidget::updateRightAxis()
+{
+  const bool on = !m_unit2.isEmpty();
+  m_yAxis2->setVisible(on);
+  m_y2Title->setVisible(on);
+  if (!on)
+  {
+    placeTimeBar();
+    return;
+  }
+  double min = m_scale2Min, max = m_scale2Max;
+  if (m_includeZero)
+  {
+    min = qMin(min, 0.0);
+    max = qMax(max, 0.0);
+  }
+  if (!std::isfinite(min) || !std::isfinite(max) || !(max >= min) || min > 1e39)
+  {
+    min = 0;
+    max = 1;
+  }
+  else if (max == min)
+  {
+    const double half = min == 0 ? 1.0 : std::abs(min) * 0.1;
+    min -= half;
+    max += half;
+  }
+  // its ticks on the left axis' grid lines: the same count, a round step
+  const int ticks = qMax(2, m_yAxis->tickCount());
+  const double step = niceStep((max - min) / (ticks - 1));
+  const double first = std::floor(min / step + 1e-9) * step;
+  double top = first + (ticks - 1) * step;
+  double s = step;
+  while (top < max - s * 1e-9)
+  {
+    s = niceStep(s * 1.01);
+    top = std::floor(min / s + 1e-9) * s + (ticks - 1) * s;
+  }
+  const double from = std::floor(min / s + 1e-9) * s;
+  m_yAxis2->setTickCount(ticks);
+  m_yAxis2->setRange(from, from + (ticks - 1) * s);
+  m_y2Title->setText(QString("[%1]").arg(SiPrefix::displayText(m_unit2)));
+  placeYTitle();
+  placeTimeBar();
+  if (m_intValueId > 0)
+    updateThresholdLinePositions();
+}
