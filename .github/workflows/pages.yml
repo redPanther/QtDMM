@@ -67,10 +67,11 @@ jobs:
         cp assets/icons/app/qtdmm.svg site/
         cp -r build/doxygen/html site/api
 
-    # stable: the newest release with a Flatpak bundle; beta: the newest
-    # pre-release with one, when it is newer than that release. Signed with
-    # the repository key (secret REPO_GPG_KEY, an armored secret key without
-    # passphrase); without it the step leaves the "not online yet" page
+    # The repository key (secret REPO_GPG_KEY, an armored secret key without
+    # passphrase) is checked on every run and its public part published as
+    # repos/qtdmm.gpg. stable: the newest release with a Flatpak bundle; beta:
+    # the newest pre-release with one, when it is newer than that release.
+    # Without the key or a bundle the step leaves the "not online yet" page
     - name: Flatpak repository
       env:
         GH_TOKEN: ${{ github.token }}
@@ -81,6 +82,19 @@ jobs:
           mv site/repos/pending.html site/repos/index.html
           exit 0
         fi
+        export GNUPGHOME=$(mktemp -d)
+        trap 'rm -rf "$GNUPGHOME"' EXIT
+        echo "$REPO_GPG_KEY" | gpg --batch --quiet --import
+        key=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr/ { print $10; exit }')
+        [ -n "$key" ] || { echo "::error::REPO_GPG_KEY holds no secret key"; exit 1; }
+        # a passphrase or an expired key would only show when signing
+        echo test | gpg --batch --pinentry-mode error --local-user "$key" --sign > /dev/null \
+          || { echo "::error::the repository key cannot sign (passphrase? expired?)"; exit 1; }
+        expires=$(gpg --list-keys --with-colons "$key" | awk -F: '/^pub/ { print $7; exit }')
+        [ -n "$expires" ] && expires=$(date -u -d "@$expires" +%F) || expires=never
+        echo "repository key $key, expires: $expires"
+        gpg --export "$key" > site/repos/qtdmm.gpg
+
         mkdir -p bundles
         stable=- beta=-
         for row in $(gh release list --repo "$GITHUB_REPOSITORY" --exclude-drafts --limit 30 \
@@ -106,15 +120,10 @@ jobs:
         fi
         sudo apt update
         sudo apt install -y flatpak ostree
-        export GNUPGHOME=$(mktemp -d)
-        echo "$REPO_GPG_KEY" | gpg --batch --import
-        key=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr/ { print $10; exit }')
         tools/build-flatpak-repo.sh "$stable" "$beta" site/repos/flatpak "$key" \
           "https://qtdmm.github.io/QtDMM/repos/flatpak"
-        cp site/repos/flatpak/qtdmm.gpg site/repos/qtdmm.gpg
         [ "$beta" != - ] || sed -i '/data-beta/d' site/repos/index.html
         rm -f site/repos/pending.html
-        rm -rf "$GNUPGHOME"
 
     - uses: actions/upload-pages-artifact@v3
       with:
