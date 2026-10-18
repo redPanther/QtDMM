@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
+#include "device/transports/buffereddevice.h"
+
 #include <QBluetoothUuid>
-#include <QIODevice>
 #include <QLowEnergyCharacteristic>
 #include <QStringList>
 
@@ -35,7 +36,7 @@ class QTimer;
 /// Polled meters answer one request with one frame. The reader asks once a
 /// second; to follow the meter's own update rate the device repeats the last
 /// request as soon as an answer has come in, at most every kRepollMs.
-class BleGattDevice : public QIODevice
+class BleGattDevice : public BufferedDevice
 {
   Q_OBJECT
 public:
@@ -56,7 +57,6 @@ public:
 
   bool open(OpenMode mode) override;
   void close() override;
-  qint64 bytesAvailable() const override;
   bool isSequential() const override { return true; }
 
   /// True once the meter has confirmed the notification subscription and the
@@ -88,7 +88,6 @@ private:
   void onServiceState();
   void setReady();
   void fail(const QString &reason);
-  qint64 readData(char *data, qint64 maxSize) override;
   qint64 writeData(const char *data, qint64 len) override;
 
   QString m_address;
@@ -101,7 +100,6 @@ private:
   QTimer *m_repoll = nullptr;
   QByteArray m_lastPoll;
   void sendPoll();
-  QByteArray m_rx;
   bool m_serviceFound = false;
   bool m_ready = false;
 };

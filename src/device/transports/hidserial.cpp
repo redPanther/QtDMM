@@ -162,7 +162,7 @@ QByteArray HIDSerialDevice::cp2110ConfigReport(int baud, int bits, int parity, i
 }
 
 HIDSerialDevice::HIDSerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *p)
-  : QIODevice(p)
+  : BufferedDevice(p)
   , m_dmmInfo(info)
 {
   if (device.isNull())
@@ -362,20 +362,11 @@ void HIDSerialDevice::onReadError(const QString &what)
   Q_EMIT finished();
 }
 
-qint64 HIDSerialDevice::bytesAvailable() const
-{
-  return QIODevice::bytesAvailable() + m_rx.size();
-}
-
-
 qint64 HIDSerialDevice::readData(char *data, qint64 maxSize)
 {
   if (!m_isOpen)
     return -1;
-  const qint64 len = qMin(maxSize, qint64(m_rx.size()));
-  memcpy(data, m_rx.constData(), len);
-  m_rx.remove(0, len);
-  return len;
+  return BufferedDevice::readData(data, maxSize);
 }
 
 

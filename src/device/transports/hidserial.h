@@ -1,7 +1,8 @@
 #pragma once
 
+#include "device/transports/buffereddevice.h"
+
 #include <QtCore>
-#include <QIODevice>
 #include <QThread>
 
 #include "device/transports/hidreader.h"
@@ -34,7 +35,7 @@
 /// readData()/bytesAvailable() with readyRead(). The line configuration
 /// (feature reports) is sent in the constructor, so a cable that refuses it
 /// fails open() at once.
-class HIDSerialDevice : public QIODevice {
+class HIDSerialDevice : public BufferedDevice {
     Q_OBJECT
 public:
   /// The cable chip, which decides the report layout.
@@ -82,10 +83,6 @@ public:
   bool dataSeen() const { return m_dataSeen; }
   void close() override;
 
-  /// Bytes waiting for readData(). Must stay const: QIODevice's version
-  /// is const and virtual, so a non-const one would hide instead of override
-  /// it and FrameReader (holding a QIODevice*) would get the base version.
-  qint64 bytesAvailable() const override;
 
 Q_SIGNALS:
   /// The cable is gone: the read loop ended with an error while the device
@@ -110,7 +107,6 @@ protected:
   bool m_dataSeen = false;
   hid_device *m_handle = nullptr;   ///< owned by the reader once it runs
   HidReaderThread m_reader;
-  QByteArray m_rx;                    ///< UART bytes received, main thread only
 
   qint64 readData(char *data, qint64 maxSize)  override;
   qint64 writeData(const char *data, qint64 len) override;

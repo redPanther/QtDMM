@@ -18,7 +18,7 @@ static const bool registered = []()
 
 CalcDevice::CalcDevice(const DmmDecoder::DMMInfo &info, const QString &device,
                        SharedStateManager *state, QObject *parent)
-  : QIODevice(parent),
+  : BufferedDevice(parent),
     m_dmmInfo(info),
     m_state(state)
 {
@@ -64,7 +64,7 @@ bool CalcDevice::open(OpenMode mode)
 
   if (!QIODevice::open(mode & ~WriteOnly))
     return false;
-  m_pending.clear();
+  m_rx.clear();
   m_lastStatus.clear();
   m_statusSent = false;
   m_openedMs = QDateTime::currentMSecsSinceEpoch();
@@ -75,14 +75,9 @@ bool CalcDevice::open(OpenMode mode)
 void CalcDevice::close()
 {
   m_timer.stop();
-  m_pending.clear();
+  m_rx.clear();
   if (QIODevice::isOpen())
     QIODevice::close();
-}
-
-qint64 CalcDevice::bytesAvailable() const
-{
-  return m_pending.size() + QIODevice::bytesAvailable();
 }
 
 QByteArray CalcDevice::currentLine(qint64 now, QString *status) const
@@ -179,7 +174,7 @@ QString CalcDevice::formatValue(double value, int counts, QString *prefix)
 void CalcDevice::tick()
 {
   QString message;
-  m_pending = currentLine(QDateTime::currentMSecsSinceEpoch(), &message);
+  m_rx = currentLine(QDateTime::currentMSecsSinceEpoch(), &message);
   if (!m_statusSent || message != m_lastStatus)
   {
     m_statusSent = true;
@@ -187,16 +182,6 @@ void CalcDevice::tick()
     Q_EMIT status(message);
   }
   Q_EMIT readyRead();
-}
-
-qint64 CalcDevice::readData(char *data, qint64 maxSize)
-{
-  const qint64 len = qMin(maxSize, qint64(m_pending.size()));
-  if (len <= 0)
-    return 0;
-  memcpy(data, m_pending.constData(), len);
-  m_pending.remove(0, len);
-  return len;
 }
 
 qint64 CalcDevice::writeData(const char *, qint64)

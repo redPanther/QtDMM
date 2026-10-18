@@ -3,7 +3,7 @@
 #include <QDebug>
 
 RFC2217SerialDevice::RFC2217SerialDevice(const DmmDecoder::DMMInfo &info, QString device, QObject *parent)
-  : QIODevice{parent}
+  : BufferedDevice{parent}
   , m_dmmInfo(info)
 {
   // "host:port"; the last colon separates the port so "[::1]:4000" works too
@@ -85,19 +85,6 @@ void RFC2217SerialDevice::close()
   QIODevice::close();
 }
 
-qint64 RFC2217SerialDevice::bytesAvailable() const
-{
- return m_inputBuffer.size() + QIODevice::bytesAvailable();
-}
-
-qint64 RFC2217SerialDevice::readData(char *data, qint64 maxSize)
-{
-  qint64 bytes = qMin(maxSize, qint64(m_inputBuffer.size()));
-  memcpy(data, m_inputBuffer.constData(), bytes);
-  m_inputBuffer.remove(0, bytes);
-  return bytes;
-}
-
 qint64 RFC2217SerialDevice::writeData(const char *data, qint64 len)
 {
   if (!m_socket || !m_socket->isOpen())
@@ -117,7 +104,7 @@ qint64 RFC2217SerialDevice::writeData(const char *data, qint64 len)
 void RFC2217SerialDevice::onReadyRead()
 {
   filterTelnet(m_socket->readAll());
-  if (!m_inputBuffer.isEmpty())
+  if (!m_rx.isEmpty())
     Q_EMIT readyRead();
 }
 
@@ -134,10 +121,10 @@ void RFC2217SerialDevice::filterTelnet(const QByteArray &raw)
     {
       case TelnetState::Data:
         if (b == IAC) m_telnet = TelnetState::Iac;
-        else m_inputBuffer.append(c);
+        else m_rx.append(c);
         break;
       case TelnetState::Iac:
-        if (b == IAC) { m_inputBuffer.append(c); m_telnet = TelnetState::Data; }
+        if (b == IAC) { m_rx.append(c); m_telnet = TelnetState::Data; }
         else if (b == SB) m_telnet = TelnetState::Sub;
         else if (b >= WILL && b <= DONT) m_telnet = TelnetState::Option;   // one option byte follows
         else m_telnet = TelnetState::Data;                                 // NOP and friends

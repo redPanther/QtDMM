@@ -15,7 +15,7 @@
 Q_LOGGING_CATEGORY(lcBle, "qtdmm.ble", QtWarningMsg)
 
 BleAdvertisementDevice::BleAdvertisementDevice(const DmmDecoder::DMMInfo &, const QString &device, QObject *parent)
-  : QIODevice(parent)
+  : BufferedDevice(parent)
 {
   // "<address> <key> [<main field> <second field>]"
   const QStringList parts = device.simplified().split(' ');
@@ -120,19 +120,6 @@ void BleAdvertisementDevice::onDevice(const QBluetoothDeviceInfo &info)
   qCDebug(lcBle) << VictronBle::modelName(adv->model) << "type" << adv->readoutType << "iv" << adv->iv << plain->toHex();
   m_rx += VictronBle::frame(adv->readoutType, *plain, m_mainField, m_secondField);
   Q_EMIT readyRead();
-}
-
-qint64 BleAdvertisementDevice::bytesAvailable() const
-{
-  return m_rx.size() + QIODevice::bytesAvailable();
-}
-
-qint64 BleAdvertisementDevice::readData(char *data, qint64 maxSize)
-{
-  const qint64 len = qMin(maxSize, qint64(m_rx.size()));
-  memcpy(data, m_rx.constData(), len);
-  m_rx.remove(0, len);
-  return len;
 }
 
 qint64 BleAdvertisementDevice::writeData(const char *, qint64 len)

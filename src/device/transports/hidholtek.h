@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
-#include <QIODevice>
+#include "device/transports/buffereddevice.h"
+
 #include <QStringList>
 #include <QThread>
 
@@ -35,7 +36,7 @@
 ///
 /// A HidReader thread does the blocking hidapi reads, as for HIDSerialDevice.
 /// Port string: "HIDHOLTEK 0x04d9:0xa052 <path>" (availablePorts()).
-class HidHoltekDevice : public QIODevice
+class HidHoltekDevice : public BufferedDevice
 {
   Q_OBJECT
 public:
@@ -77,7 +78,6 @@ public:
   /// reports the reason (errorString()) instead of waiting for frames.
   bool open(OpenMode mode) override;
   void close() override;
-  qint64 bytesAvailable() const override;
   bool isSequential() const override { return true; }
 
 Q_SIGNALS:
@@ -98,7 +98,6 @@ private:
   QString m_openError;
   hid_device *m_handle = nullptr;   ///< owned by the reader once it runs
   HidReaderThread m_reader;
-  QByteArray m_rx;                    ///< text lines not yet read, main thread only
   /// The set being collected: latest raw value per quantity.
   quint16 m_co2 = 0, m_temperature = 0, m_humidity = 0;
   bool m_haveCo2 = false, m_haveTemperature = false, m_haveHumidity = false;

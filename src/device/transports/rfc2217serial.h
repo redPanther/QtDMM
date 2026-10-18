@@ -1,6 +1,7 @@
 #pragma once
 
-#include <QIODevice>
+#include "device/transports/buffereddevice.h"
+
 #include <QTcpSocket>
 #include <QTimer>
 #include <QHostAddress>
@@ -13,7 +14,7 @@
 /// On connect the telnet options are negotiated and the meter's line settings
 /// from the DMMInfo are sent as COM-PORT-OPTION commands. The socket's data
 /// is buffered and handed to FrameReader through the QIODevice interface.
-class RFC2217SerialDevice : public QIODevice
+class RFC2217SerialDevice : public BufferedDevice
 {
   Q_OBJECT
 public:
@@ -31,14 +32,12 @@ public:
   bool open(OpenMode mode) override;
   void close() override;
 
-  qint64 bytesAvailable() const override;
 
 Q_SIGNALS:
   void finished();
 
 
 protected:
-  qint64 readData(char *data, qint64 maxSize) override;
   qint64 writeData(const char *data, qint64 len) override;
 
 private Q_SLOTS:
@@ -61,7 +60,6 @@ private:
   /// from the stream and undoes the IAC IAC escaping; the rest is meter data.
   void filterTelnet(const QByteArray &raw);
 
-  QByteArray m_inputBuffer;
   static constexpr unsigned int m_buflen = 1024;
   /// telnet parser state between socket reads
   enum class TelnetState { Data, Iac, Option, Sub, SubIac } m_telnet = TelnetState::Data;

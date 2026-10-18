@@ -4,7 +4,7 @@
 #include "device/transports/hidpath.h"
 
 HidHoltekDevice::HidHoltekDevice(const DmmDecoder::DMMInfo & /*info*/, const QString &device, QObject *p)
-  : QIODevice(p)
+  : BufferedDevice(p)
 {
   if (device.isNull())
     return;
@@ -170,19 +170,11 @@ void HidHoltekDevice::onReadError(const QString &what)
   Q_EMIT finished();
 }
 
-qint64 HidHoltekDevice::bytesAvailable() const
-{
-  return QIODevice::bytesAvailable() + m_rx.size();
-}
-
 qint64 HidHoltekDevice::readData(char *data, qint64 maxSize)
 {
   if (!m_isOpen)
     return -1;
-  const qint64 len = qMin(maxSize, qint64(m_rx.size()));
-  memcpy(data, m_rx.constData(), len);
-  m_rx.remove(0, len);
-  return len;
+  return BufferedDevice::readData(data, maxSize);
 }
 
 qint64 HidHoltekDevice::writeData(const char * /*data*/, qint64 len)

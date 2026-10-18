@@ -1,6 +1,7 @@
 #pragma once
 
-#include <QIODevice>
+#include "device/transports/buffereddevice.h"
+
 #include <QTimer>
 #include <QMap>
 
@@ -23,7 +24,7 @@ class SharedStateManager;
 /// device with a formula built from a few fields). While an input is missing,
 /// invalid or older than three seconds the line carries "inf", which the
 /// display shows as OL, and status() explains which input is the problem.
-class CalcDevice : public QIODevice
+class CalcDevice : public BufferedDevice
 {
   Q_OBJECT
 public:
@@ -40,7 +41,6 @@ public:
   /// or the unit is missing.
   bool open(OpenMode mode) override;
   void close() override;
-  qint64 bytesAvailable() const override;
   bool isSequential() const override { return true; }
 
   /// The unit given with the device string.
@@ -73,7 +73,6 @@ Q_SIGNALS:
   void status(const QString &message);
 
 protected:
-  qint64 readData(char *data, qint64 maxSize) override;
   qint64 writeData(const char *data, qint64 len) override;
 
 private Q_SLOTS:
@@ -90,7 +89,6 @@ private:
   QString m_source;             ///< formula text from the device string
   std::optional<CalcExpr> m_expr;
   QTimer m_timer;
-  QByteArray m_pending;         ///< the line not yet read by FrameReader
   QString m_lastStatus;
   bool m_statusSent = false;    ///< the first tick always reports
 };
