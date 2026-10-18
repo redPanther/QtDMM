@@ -299,6 +299,27 @@ int main(int argc, char **argv)
           QString("length: the other value ends at %1").arg(len.extraCount() ? len.extra(0).last().t : -1));
   }
 
+  // --- 1f. another meter: live() starts with the value the meter shows,
+  //         but not with the last one of the meter before (switching in
+  //         the sidebar), nor with its other displays ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.live();
+    store.setReading(clock.at(1000, reading(1755, "1755", "")));
+    store.setReading(clock.at(1010, other(1, 20.85, "20.85", "°C")));
+    clock.now = 1500;
+    store.live();
+    check(store.count() == 1 && store.extraCount() == 1, "live(): starts with the value shown and the other display");
+    store.forgetReading();
+    store.live();
+    check(store.count() == 0 && store.extraCount() == 0,
+          QString("another meter: %1 points, %2 other values").arg(store.count()).arg(store.extraCount()));
+    store.setReading(clock.at(2000, reading(0.063, "63.0", "")));
+    check(store.count() == 1 && store.series().at(0).value == 0.063, "another meter: its first reading is the first point");
+  }
+
   // --- 1b. the time starts with the first reading: Live started while the
   //         meter was still connecting, or the graph cleared, begins at 0 ---
   {

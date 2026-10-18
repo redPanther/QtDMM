@@ -440,9 +440,13 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   m_settings->save();
   m_configDlg->reloadMeter();
   applySLOT();
-  // another meter: its own minimum and maximum, even at the same port
+  // another meter: its own minimum and maximum, even at the same port, and
+  // the window starts without the last value of the one before
   m_ctl->resetMinMax();
+  m_ctl->recorder()->forgetReading();
+  ui_graph->setUnit(QString());   // the axis title comes with the first reading
   ui_graph->liveSLOT();
+  Q_EMIT meterChanged();
 
   Q_EMIT setConnect(true);
   Q_EMIT connectDMM(true);

@@ -289,6 +289,9 @@ public Q_SLOTS:
   /// Live: the live window starts anew, empty but for the value the meter
   /// shows. Ends a recording too (the UI does not offer that).
   void        live();
+  /// Another meter: the value shown so far (and the other displays') is
+  /// not this one's, so live() and a recording do not start with it.
+  void        forgetReading();
   /// Discards the recorded readings and marks; a running recording goes on,
   /// and so does Live.
   void        clear();

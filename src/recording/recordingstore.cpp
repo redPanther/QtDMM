@@ -803,6 +803,12 @@ void RecordingStore::appendCurrent()
     }
 }
 
+void RecordingStore::forgetReading()
+{
+  m_haveReading = false;
+  m_extraReading.clear();
+}
+
 void RecordingStore::stop()
 {
   if (m_state != Record)
