@@ -203,7 +203,10 @@ public:
   /// value holds until the next reading, the last one up to duration(); in a
   /// loaded file it holds for no time but counts. A loaded file on its own
   /// grid weighs each row over the step before it.
-  Stats       stats(qint64 from, qint64 to) const;
+  Stats       stats(qint64 from, qint64 to) const { return statsOf(m_series, from, to); }
+  /// stats() of @p series: the main one or one of extra(), on the same time
+  /// axis.
+  Stats       statsOf(const RecordingSeries &series, qint64 from, qint64 to) const;
   /// When the recording started (for an import: the file's first time stamp;
   /// in Live: when the live window started).
   QDateTime   startDateTime() const { return m_start; }

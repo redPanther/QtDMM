@@ -1531,11 +1531,11 @@ int main(int argc, char **argv)
     graph.setTimeCursor(1, 15000);
     const QStringList lines = graph.timeCursorText().split('\n');
     check(lines.size() == 4 && lines[1].endsWith("  4 A"), "time cursors: two lines for A and B, got " + lines.join(" | "));
-    check(lines.size() == 4 && lines[2] == QString::fromUtf8("Δt 10.00 s  Δ 2 A"),
-          "time cursors: 'Δt 10.00 s  Δ 2 A', got " + lines.value(2));
+    check(lines.size() == 4 && lines[2] == QString::fromUtf8("Δt 10.00 s"),
+          "time cursors: 'Δt 10.00 s', got " + lines.value(2));
     // 30 A s = 8.333 mAh
-    check(lines.size() == 4 && lines[3] == QString::fromUtf8("mean 3 A  ∫ 8.333 mAh"),
-          "time cursors: 'mean 3 A  ∫ 8.333 mAh', got " + lines.value(3));
+    check(lines.size() == 4 && lines[3] == QString::fromUtf8("Δ 2 A  mean 3 A  ∫ 8.333 mAh"),
+          "time cursors: 'Δ 2 A  mean 3 A  ∫ 8.333 mAh', got " + lines.value(3));
 
     // a dashed line across the plot at each cursor's value: at 2 A and 4 A,
     // the change their distance
@@ -1599,10 +1599,14 @@ int main(int argc, char **argv)
     mouse(QEvent::MouseMove, xOf(11000), Qt::LeftButton);
     mouse(QEvent::MouseButtonRelease, xOf(11000), Qt::LeftButton);
     check(graph.timeCursor(0) == 5000, "time cursors: a drag is no click");
-    // a voltage: the integral in V s
+    // a voltage: no integral, unless it is the integration curve's (in V s)
     graph.setUnit("V");
-    check(graph.timeCursorText().contains(QString::fromUtf8("V·s")), "time cursors: a voltage integrates to V·s, got "
+    check(!graph.timeCursorText().contains(QChar(0x222b)), "time cursors: a voltage has no integral, got "
           + graph.timeCursorText());
+    graph.setIntegration(true, 1.0, 0.0, 0.0);
+    check(graph.timeCursorText().contains(QString::fromUtf8("V·s")), "time cursors: the integrated voltage in V·s, got "
+          + graph.timeCursorText());
+    graph.setIntegration(false, 1.0, 0.0, 0.0);
     graph.setUnit("A");
 
     QKeyEvent esc(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
@@ -2106,7 +2110,28 @@ int main(int argc, char **argv)
     check(left && left->min() <= 22.0 && left->max() >= 22.39 && left->max() < 100,
           QString("main hidden: the left scale is the temperature's, %1..%2").arg(left ? left->min() : 0).arg(left ? left->max() : 0));
     check(!graph.legendText().contains("ppm") && graph.legendText().contains("°C"), "main hidden: not in the legend");
-    check(!graph.referenceShown(), "main hidden: its reference line too");
+    check(!graph.referenceShown() && graph.referenceId() == 1, "main hidden: 420 is no temperature, no reference line");
+    // the reference line, the band, the cursor levels and the cursor box
+    // follow the value of the left axis
+    graph.setReference(GraphWidget::RefMean);
+    check(graph.referenceShown() && graph.referenceValue() > 22 && graph.referenceValue() < 22.4,
+          QString("main hidden: the mean of the temperature, got %1").arg(graph.referenceValue()));
+    graph.setEnvelopeVisible(true);
+    check(!graph.envelopePath().isEmpty(), "main hidden: the band around the temperature");
+    graph.setEnvelopeVisible(false);
+    graph.setTimeCursor(0, 200);
+    graph.setTimeCursor(1, 3000);
+    {
+      const QStringList lines = graph.timeCursorText().split('\n');
+      check(lines.size() == 5 && lines[3].startsWith(QString::fromUtf8("Δ 0.28 °C  mean 22.")) && lines[3].endsWith("°C")
+              && lines[4] == QString::fromUtf8("Δ 0 %  mean 45 %") && !graph.timeCursorText().contains("ppm"),
+            "main hidden: a line per value, no ppm, no integral: " + lines.join(" | "));
+      int levels = 0;
+      for (QGraphicsItem *item : graph.findChild<QChartView *>()->chart()->childItems())
+        levels += item->data(0).toString() == "cursor-level" && item->isVisible();
+      check(levels == 2, QString("main hidden: the cursor levels on the temperature, got %1").arg(levels));
+    }
+    graph.clearTimeCursors();
     feed.value(600);   // the main value goes on: not on the left axis now
     check(left && left->max() < 100, "main hidden: its readings do not widen the scale");
     graph.setValueShown(0, true);

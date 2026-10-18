@@ -339,7 +339,7 @@
     </message>
     <message>
         <location filename="../../src/core/alarm.cpp" line="364"/>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="362"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="406"/>
         <source>Alarm</source>
         <translation>Alarm</translation>
     </message>
@@ -2092,27 +2092,27 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>Nagrywanie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="119"/>
-        <source>mean %1  %2 %3</source>
-        <translation>średnia %1  %2 %3</translation>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="149"/>
+        <source>mean %1</source>
+        <translation>średnia %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="294"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="338"/>
         <source>mean</source>
         <translation>średnia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="295"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="339"/>
         <source>min</source>
         <translation>min</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="296"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="340"/>
         <source>max</source>
         <translation>maks</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="297"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="341"/>
         <source>alarm</source>
         <translation>alarm</translation>
     </message>
@@ -2720,32 +2720,32 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>Zaczyna się teraz. Rejestracja po przekroczeniu progu zacznie się sama z trybu Na żywo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="774"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="775"/>
         <source>Automatic start at %1</source>
         <translation>Automatyczny start o %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="776"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="777"/>
         <source>Raising threshold %1</source>
         <translation>Próg narastający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="778"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="779"/>
         <source>Falling threshold %1</source>
         <translation>Próg opadający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="813"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="814"/>
         <source>calculated</source>
         <translation>obliczony</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="822"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="823"/>
         <source>no meter configured</source>
         <translation>nie skonfigurowano multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="845"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="846"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarm QtDMM: %1</translation>
     </message>
@@ -3640,99 +3640,99 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>start zignorowany, wyświetlane nagranie nie jest jeszcze zapisane</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="347"/>
+        <location filename="../../src/service/metercontroller.cpp" line="352"/>
         <source>%1: %2 (%3)</source>
         <translation>%1: %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="353"/>
+        <location filename="../../src/service/metercontroller.cpp" line="358"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="369"/>
-        <location filename="../../src/service/metercontroller.cpp" line="394"/>
+        <location filename="../../src/service/metercontroller.cpp" line="374"/>
+        <location filename="../../src/service/metercontroller.cpp" line="399"/>
         <source>%1: could not run %2</source>
         <translation>%1: nie można uruchomić %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="372"/>
+        <location filename="../../src/service/metercontroller.cpp" line="377"/>
         <source>%1: %2 is still running</source>
         <translation>%1: %2 nadal działa</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="545"/>
+        <location filename="../../src/service/metercontroller.cpp" line="550"/>
         <source>SCPI server: %1</source>
         <translation>Serwer SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="558"/>
-        <location filename="../../src/service/metercontroller.cpp" line="582"/>
+        <location filename="../../src/service/metercontroller.cpp" line="563"/>
+        <location filename="../../src/service/metercontroller.cpp" line="587"/>
         <source>the SCPI server is not running</source>
         <translation>serwer SCPI nie jest uruchomiony</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="567"/>
+        <location filename="../../src/service/metercontroller.cpp" line="572"/>
         <source>HiSLIP server: %1</source>
         <translation>Serwer HiSLIP: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="591"/>
+        <location filename="../../src/service/metercontroller.cpp" line="596"/>
         <source>VXI-11 server: %1</source>
         <translation>Serwer VXI-11: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="622"/>
+        <location filename="../../src/service/metercontroller.cpp" line="627"/>
         <source>The server is not running.</source>
         <translation>Serwer nie jest uruchomiony.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="623"/>
+        <location filename="../../src/service/metercontroller.cpp" line="628"/>
         <source>The server could not start: %1.</source>
         <translation>Serwer nie mógł wystartować: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="628"/>
+        <location filename="../../src/service/metercontroller.cpp" line="633"/>
         <source>1 client</source>
         <translation>1 klient</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="628"/>
+        <location filename="../../src/service/metercontroller.cpp" line="633"/>
         <source>%1 clients</source>
         <translation>Klienci: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="629"/>
+        <location filename="../../src/service/metercontroller.cpp" line="634"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>Nasłuchiwanie na %1, port %2, podłączono: %3.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="631"/>
+        <location filename="../../src/service/metercontroller.cpp" line="636"/>
         <source>HiSLIP on port %1: %2.</source>
         <translation>HiSLIP na porcie %1: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="633"/>
+        <location filename="../../src/service/metercontroller.cpp" line="638"/>
         <source>HiSLIP could not start: %1.</source>
         <translation>HiSLIP nie mógł wystartować: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="635"/>
+        <location filename="../../src/service/metercontroller.cpp" line="640"/>
         <source>VXI-11 through the system rpcbind: %1.</source>
         <translation>VXI-11 przez systemowy rpcbind: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="636"/>
+        <location filename="../../src/service/metercontroller.cpp" line="641"/>
         <source>VXI-11 with an own portmapper on port %2: %1.</source>
         <translation>VXI-11 z własnym portmapperem na porcie %2: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="639"/>
+        <location filename="../../src/service/metercontroller.cpp" line="644"/>
         <source>VXI-11 is off: %1.</source>
         <translation>VXI-11 jest wyłączony: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="641"/>
+        <location filename="../../src/service/metercontroller.cpp" line="646"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Ogłaszany jako „%1”.</translation>
     </message>

@@ -86,6 +86,10 @@
   now ~0.5 ms, ~1.6 ms with points shown
 - Units of their own take no SI prefix: the graph's axis, the reference line, the cursors, the Poincaré plot,
   the readings table, the sidebar and the export write 1500 ppm, not 1.5 kppm (also %RH, m/s, dBA, cosφ)
+- Graph: the time cursors show a line of statistics for every value drawn (Δ, mean, the integral for A, W and
+  VA). A voltage no longer gets an integral in V·s, unless it is the value of the integration curve. With the
+  main value hidden, the reference line, the min/max band and the cursors' level lines follow the value on the
+  left axis instead of going away
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell
