@@ -1574,6 +1574,7 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
     const QStringList shown = get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
     for (int id = 1; id <= 3; ++id)
       m_wid->graph()->setValueShown(id, shown.contains(QString::number(id)));
+    m_wid->graph()->setValueShown(0, get("Windows/graph-main-shown", true).toBool());
   }
   // an unchecked action did not toggle: hide its window explicitly
   for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction, m_poincareAction })
@@ -1613,6 +1614,7 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   for (int id : m_wid->graph()->shownValues())
     shown << QString::number(id);
   set("Windows/graph-shown-values", shown.join(' '));
+  set("Windows/graph-main-shown", m_wid->graph()->mainShown());
 }
 
 // A workspace file is an ini file with the same keys as the settings, plus

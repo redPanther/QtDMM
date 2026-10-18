@@ -339,7 +339,7 @@
     </message>
     <message>
         <location filename="../../src/core/alarm.cpp" line="354"/>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="356"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="362"/>
         <source>Alarm</source>
         <translation>Alarme</translation>
     </message>
@@ -2077,22 +2077,22 @@ puis déconnectez-vous et reconnectez-vous.</translation>
         <translation>moyenne %1  %2 %3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="289"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="294"/>
         <source>mean</source>
         <translation>moyenne</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="290"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="295"/>
         <source>min</source>
         <translation>min</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="291"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="296"/>
         <source>max</source>
         <translation>max</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="292"/>
+        <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="297"/>
         <source>alarm</source>
         <translation>alarme</translation>
     </message>
@@ -2192,32 +2192,42 @@ puis déconnectez-vous et reconnectez-vous.</translation>
         <translation>&amp;Bande min/max</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_input.cpp" line="178"/>
+        <location filename="../../src/ui/views/graphwidget_input.cpp" line="190"/>
         <source>&amp;Values</source>
         <translation>&amp;Valeurs</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_input.cpp" line="181"/>
+        <location filename="../../src/ui/views/graphwidget_input.cpp" line="194"/>
         <source>Value %1</source>
         <translation>Valeur %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_input.cpp" line="190"/>
+        <location filename="../../src/ui/views/graphwidget_input.cpp" line="207"/>
+        <source>Two units are shown already: switch off a value in %1 first</source>
+        <translation>Deux unités sont déjà affichées : désactivez d&apos;abord une valeur en %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget_input.cpp" line="207"/>
+        <source> or </source>
+        <translation> ou </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/graphwidget_input.cpp" line="213"/>
         <source>Remove time cursors</source>
         <translation>Retirer les curseurs de temps</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_input.cpp" line="195"/>
+        <location filename="../../src/ui/views/graphwidget_input.cpp" line="218"/>
         <source>Export data...</source>
         <translation>Exporter les données…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_input.cpp" line="196"/>
+        <location filename="../../src/ui/views/graphwidget_input.cpp" line="219"/>
         <source>Import data...</source>
         <translation>Importer des données…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_input.cpp" line="319"/>
+        <location filename="../../src/ui/views/graphwidget_input.cpp" line="342"/>
         <source>no value</source>
         <translation>pas de valeur</translation>
     </message>
@@ -2257,32 +2267,32 @@ puis déconnectez-vous et reconnectez-vous.</translation>
         <translation>CSV (*.csv);;Tous les fichiers (*)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="192"/>
+        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="194"/>
         <source>Scope blue</source>
         <translation>Oscilloscope bleu</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="193"/>
+        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="195"/>
         <source>Phosphor green</source>
         <translation>Phosphore vert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="194"/>
+        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="196"/>
         <source>Phosphor amber</source>
         <translation>Phosphore ambre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="195"/>
+        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="197"/>
         <source>Chart recorder</source>
         <translation>Enregistreur papier</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="196"/>
+        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="198"/>
         <source>Custom</source>
         <translation>Personnalisé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="197"/>
+        <location filename="../../src/ui/views/graphwidget_theme.cpp" line="199"/>
         <source>Neutral</source>
         <translation>Neutre</translation>
     </message>
@@ -3420,48 +3430,48 @@ Choisissez quelle instance doit enregistrer.</translation>
         <translation>%1 : aucune mesure depuis 3 s</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1627"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1629"/>
         <source>Save workspace</source>
         <translation>Enregistrer l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1628"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="1654"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1630"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1656"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Espace de travail QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1641"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1643"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM : Enregistrer l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1641"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1643"/>
         <source>Could not write %1.</source>
         <translation>Impossible d&apos;écrire %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1645"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1647"/>
         <source>Workspace saved to %1</source>
         <translation>Espace de travail enregistré dans %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1653"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1655"/>
         <source>Load workspace</source>
         <translation>Charger l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1660"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1662"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM : Charger l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1661"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1663"/>
         <source>%1 is no QtDMM workspace.</source>
         <translation>%1 n&apos;est pas un espace de travail QtDMM.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1685"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1687"/>
         <source>Workspace loaded from %1</source>
         <translation>Espace de travail chargé depuis %1</translation>
     </message>

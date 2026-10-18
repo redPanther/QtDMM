@@ -36,7 +36,7 @@ void GraphWidget::updateSeriesAppearance()
 {
   rebuildExtras();   // their colours and line width
   m_dataLine->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
-  m_dataLine->setVisible(m_lineMode != NoLine);
+  m_dataLine->setVisible(m_lineMode != NoLine && m_mainShown);
   m_minimap->setCurveColor(dataColor());
   // the band: the curve's colour, faint
   QColor band = dataColor();
@@ -65,12 +65,14 @@ void GraphWidget::updateSeriesAppearance()
   m_dataPoints->setColor(dataColor());
   // Qt Charts rims the markers in white: dense points turn into a white band
   m_dataPoints->setBorderColor(dataColor());
-  m_dataPoints->setVisible(m_pointMode != NoPoint);
+  m_dataPoints->setVisible(m_pointMode != NoPoint && m_mainShown);
 
   // phosphor: one colour, the integration curve dashed when it is a solid line
   const Qt::PenStyle intStyle = phosphor() && m_intLineMode == Solid ? Qt::DashLine : penStyle(m_intLineMode);
   m_intLine->setPen(QPen(intColor(), m_intLineWidth, intStyle, Qt::RoundCap, Qt::RoundJoin));
-  m_intLine->setVisible(m_showIntegration && m_intLineMode != NoLine);
+  // the main value's integral is on its axis: hidden with it
+  const bool integral = m_showIntegration && (m_intValueId != 0 || m_mainShown);
+  m_intLine->setVisible(integral && m_intLineMode != NoLine);
 
   QScatterSeries::MarkerShape intShape = QScatterSeries::MarkerShapeCircle;
   int intSize = 5;
@@ -91,7 +93,7 @@ void GraphWidget::updateSeriesAppearance()
   m_intPoints->setMarkerSize(intSize);
   m_intPoints->setColor(intColor());
   m_intPoints->setBorderColor(intColor());
-  m_intPoints->setVisible(m_showIntegration && m_intPointMode != NoPoint);
+  m_intPoints->setVisible(integral && m_intPointMode != NoPoint);
 }
 
 // The colour of a value of the meter (its id, not its place: a value keeps
