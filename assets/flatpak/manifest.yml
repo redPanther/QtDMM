@@ -1,0 +1,61 @@
+app-id: io.github.qtdmm.qtdmm
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+command: qtdmm
+
+finish-args:
+  # serial ports (/dev/ttyUSB*, /dev/ttyACM*) and HID meters (/dev/hidraw*);
+  # access to hidraw still needs the udev rule on the host
+  - --device=all
+  # SCPI server, HiSLIP, VXI-11, mDNS, sigrok-free bench meters over LAN
+  - --share=network
+  # instances find each other through shared memory; X11 shared memory
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  # Bluetooth LE meters (UT60BT, UNI-T iENV, Victron) through BlueZ
+  - --system-talk-name=org.bluez
+
+modules:
+  - name: hidapi
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_LIBDIR=lib
+      - -DHIDAPI_WITH_HIDRAW=ON
+      - -DHIDAPI_WITH_LIBUSB=OFF
+      # hidapi 0.14 still declares cmake_minimum_required 3.1.3, which CMake >= 4 refuses
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    cleanup:
+      - /include
+      - /lib/cmake
+      - /lib/pkgconfig
+      - /share/doc
+    sources:
+      - type: git
+        url: https://github.com/libusb/hidapi.git
+        tag: hidapi-0.14.0
+        commit: d3013f0af3f4029d82872c1a9487ea461a56dee4
+
+  - name: qtdmm
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TESTING=OFF
+    sources:
+      # the working tree, with its .git for the version (git describe): a
+      # local build, and CI (.github/workflows/flatpak.yml) builds the
+      # checkout of a commit or a version tag the same way
+      - type: dir
+        path: ../..
+        skip:
+          - build
+          - bin
+          - packages
+          - site
+          - Testing
+          - builddir
+          - repo
+          - .flatpak-builder
