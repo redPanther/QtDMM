@@ -159,7 +159,9 @@ int main(int argc, char **argv)
     CalcDevice rnd(info, "V 5 + rand()", &p);
     check(rnd.open(QIODevice::ReadWrite), "rand() opens");
     r = decode(rnd.currentLine(opened, nullptr));
-    check(r && r->main().dval >= 5.0 && r->main().dval < 6.0, "rand() based reading in range");
+    // rand() is below 1, but the line has the meter's digits: 5.9997 comes as 6.000
+    check(r && r->main().dval >= 5.0 && r->main().dval <= 6.0,
+          QString("rand() based reading in range, got %1").arg(r ? r->main().dval : -1));
   }
 
   // --- 5c. several values: a line each, P1 ... P4, value n can use v1 ... v(n-1) ---

@@ -242,9 +242,9 @@ int main(int argc, char **argv)
     QDir(dir.path()).mkpath("dev/serial/by-id");
     const QString tty = dir.path() + "/dev/ttyUSB0";
     QFile f(tty);
-    f.open(QIODevice::WriteOnly);
+    check(f.open(QIODevice::WriteOnly), "ttyUSB0 written");
     f.close();
-    QFile(dir.path() + "/dev/ttyUSB1").open(QIODevice::WriteOnly);
+    check(QFile(dir.path() + "/dev/ttyUSB1").open(QIODevice::WriteOnly), "ttyUSB1 written");
     const QString byId = dir.path() + "/dev/serial/by-id";
     QFile::link("../../ttyUSB1", byId + "/usb-Other_cable-if00-port0");
     QFile::link("../../ttyUSB0", byId + "/usb-WCH.CN_USB_Quad_Serial_0123-if00-port0");

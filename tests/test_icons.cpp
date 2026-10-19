@@ -31,14 +31,14 @@ int main(int argc, char **argv)
   QTemporaryDir tmp;
   QDir(tmp.path()).mkpath("desktop/22");
   QFile index(tmp.filePath("desktop/index.theme"));
-  index.open(QIODevice::WriteOnly);
+  check(index.open(QIODevice::WriteOnly), "index.theme written");
   index.write("[Icon Theme]\nName=desktop\nInherits=hicolor\nDirectories=22\n\n[22]\nSize=22\nType=Fixed\n");
   index.close();
   // hicolor exists on every desktop; without it Qt would take the fallback
   // theme in its place and hide the problem
   QDir(tmp.path()).mkpath("hicolor/22");
   QFile hicolor(tmp.filePath("hicolor/index.theme"));
-  hicolor.open(QIODevice::WriteOnly);
+  check(hicolor.open(QIODevice::WriteOnly), "hicolor.theme written");
   hicolor.write("[Icon Theme]\nName=hicolor\nDirectories=22\n\n[22]\nSize=22\nType=Fixed\n");
   hicolor.close();
   QImage red(22, 22, QImage::Format_ARGB32);
