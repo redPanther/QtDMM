@@ -162,6 +162,39 @@ int main(int argc, char **argv)
     check(r && r->main().dval >= 5.0 && r->main().dval < 6.0, "rand() based reading in range");
   }
 
+  // --- 5c. several values: a line each, P1 ... P4, value n can use v1 ... v(n-1) ---
+  {
+    CalcDevice multi(info, "V/DC 10 + t; A/DC 0.5; W v1 * v2; °C/DC 21", &p);
+    check(multi.open(QIODevice::ReadWrite) && multi.valueCount() == 4, "four values open");
+    check(multi.unit(1) == "A" && multi.unit(3) == "°C" && multi.formula(2) == "v1 * v2", "the values split at ';'");
+    const qint64 opened = QDateTime::currentMSecsSinceEpoch();
+    const QByteArray lines = multi.currentLine(opened + 2000, &status);
+    check(lines.size() == 4 * 30 && status.isEmpty(), QString("four 30-byte lines, got %1 bytes").arg(lines.size()));
+    QList<std::optional<DmmDecoder::DmmResponse>> rs;
+    for (int n = 0; n < 4; ++n)
+      rs << decode(lines.mid(n * 30, 30));
+    check(rs[0] && rs[0]->main().id == 0 && std::fabs(rs[0]->main().dval - 12) < 0.01, "P1: the main value, 12 V");
+    check(rs[1] && rs[1]->main().id == 1 && rs[1]->main().unit == "mA", "P2: value 2, 500 mA");
+    check(rs[2] && rs[2]->main().id == 2 && std::fabs(rs[2]->main().dval - 6) < 0.01 && rs[2]->main().unit == "W",
+          QString("P3: v1 * v2 = 6 W, got %1").arg(rs[2] ? rs[2]->main().dval : -1));
+    check(rs[3] && rs[3]->main().id == 3 && rs[3]->main().unit == "C", "P4: °C");
+
+    // a value can use only those before it
+    CalcDevice later(info, "V v2; A 1", &p);
+    check(!later.open(QIODevice::ReadWrite) && later.errorString().contains("v2"), "v2 in value 1: " + later.errorString());
+    CalcDevice noUnit2(info, "V 1; 2", &p);
+    check(!noUnit2.open(QIODevice::ReadWrite) && noUnit2.errorString().startsWith("Value 2"),
+          "a value without unit says which: " + noUnit2.errorString());
+    // a value without result leaves the ones after it without one, OL
+    CalcDevice waits(info, "V nosuchinstance; W v1 * 2", &p);
+    check(waits.open(QIODevice::ReadWrite), "an input instance missing opens");
+    const QByteArray ol = waits.currentLine(opened, &status);
+    const auto w2 = decode(ol.mid(30, 30));
+    check(w2 && w2->main().val.contains("OL") && status.contains("nosuchinstance"), "missing input: OL after it too");
+    // sigrok channels past four are left out, not mixed into the main value
+    check(!decode(QByteArray(29 - 13, ' ') + "P5: 1.00 V DC\n"), "P5: no value");
+  }
+
   // --- 6. the QIODevice side: tick() offers the line, readData hands it out bytewise ---
   {
     int emitted = 0;

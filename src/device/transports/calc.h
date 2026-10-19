@@ -24,13 +24,19 @@ class SharedStateManager;
 /// device with a formula built from a few fields). While an input is missing,
 /// invalid or older than three seconds the line carries "inf", which the
 /// display shows as OL, and status() explains which input is the problem.
+///
+/// Up to kMaxValues values, separated by ';' ("V 12 + t; A 0.5; W v1 * v2"):
+/// value n can use the ones before it as v1, v2 ...; each tick then gives a
+/// line per value with sigrok-cli's channel in front ("P2: 0.500 A DC
+/// AUTO"), which the decoder makes value n-1 (the main value is P1).
 class CalcDevice : public BufferedDevice
 {
   Q_OBJECT
 public:
   /// @param info   the "QtDMM / Calculated value" entry
   /// @param device "<unit>[/<coupling>] <formula>", e.g. "W u * i" or
-  ///               "V/AC 12 + sin(2*pi*t/5)"; coupling defaults to DC
+  ///               "V/AC 12 + sin(2*pi*t/5)"; coupling defaults to DC.
+  ///               Several values separated by ';'.
   /// @param state  where the other instances' readings come from
   /// @param parent parent object
   explicit CalcDevice(const DmmDecoder::DMMInfo &info, const QString &device,
@@ -43,19 +49,25 @@ public:
   void close() override;
   bool isSequential() const override { return true; }
 
-  /// The unit given with the device string.
-  QString unit() const { return m_unit; }
+  /// The unit given with the device string, of value @p n (0 the main one).
+  QString unit(int n = 0) const { return m_values.value(n).unit; }
   /// "DC" or "AC" as given with the device string.
-  QString coupling() const { return m_special; }
+  QString coupling(int n = 0) const { return m_values.value(n).special; }
   /// The formula as parsed, empty before open().
-  QString formula() const { return m_expr ? m_expr->text() : QString(); }
+  QString formula(int n = 0) const
+  {
+    return n < m_values.size() && m_values[n].expr ? m_values[n].expr->text() : QString();
+  }
+  /// How many values the device string gives.
+  int valueCount() const { return int(m_values.size()); }
 
   /// The result as the meter would show it: scaled into [1, 1000) with an
   /// SI prefix and with as many decimals as fit the model's display count,
   /// like an autoranging meter (40000: 3.9999, 6.624, 123.46). Exposed for tests.
   static QString formatValue(double value, int counts, QString *prefix);
 
-  /// Builds the decoder line for the current inputs; exposed for tests.
+  /// Builds the decoder lines for the current inputs, one per value;
+  /// exposed for tests.
   /// @param now    reference time for the staleness check (ms since epoch)
   ///               and for t (seconds since open())
   /// @param status receives the message status() would carry, empty when fine
@@ -81,13 +93,19 @@ private Q_SLOTS:
 private:
   static constexpr int kLineLength = 30;
 
+  /// One value of the device string.
+  struct Value
+  {
+    QString unit;
+    QString special = QStringLiteral("DC");
+    QString source;             ///< formula text from the device string
+    std::optional<CalcExpr> expr;
+  };
+
   DmmDecoder::DMMInfo m_dmmInfo;
   SharedStateManager *m_state;
-  QString m_unit;
-  QString m_special = QStringLiteral("DC");
+  QVector<Value> m_values;
   qint64 m_openedMs = 0;        ///< when open() was called, for t
-  QString m_source;             ///< formula text from the device string
-  std::optional<CalcExpr> m_expr;
   QTimer m_timer;
   QString m_lastStatus;
   bool m_statusSent = false;    ///< the first tick always reports

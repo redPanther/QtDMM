@@ -50,5 +50,8 @@ that comes with libsigrok, `60-libsigrok.rules`).
   the meter to remote control while it runs.
 - Reading rate is what sigrok-cli delivers, usually a few readings per
   second.
+- A meter with several channels (sigrok-cli prints `P1:`, `P2:` ...): P1 is
+  the main value, P2 to P4 are the meter's other values - the display's
+  small line, the graph, SCPI `READ? (@2)`. Channels after P4 are left out.
 - The status line reports *Lost connection* when sigrok-cli exits (meter
   switched off, cable pulled) and QtDMM tries again every few seconds.
