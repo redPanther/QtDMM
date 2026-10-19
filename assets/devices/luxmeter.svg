@@ -14,6 +14,7 @@
     .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
   <rect class="primary" x="20" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="160" height="352" rx="30"/>
+  <rect class="primary" x="20" y="4" width="160" height="352" rx="30"/>
   <rect class="secondary" x="32" y="16" width="136" height="328" rx="20"/>
   <!-- light sensor dome -->
   <circle class="dark" cx="100" cy="78" r="46"/>

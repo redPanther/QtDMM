@@ -15,11 +15,14 @@
   </style>
   <!-- jaw -->
   <path class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M100 6 a74 74 0 0 1 74 74 v40 h-36 v-40 a38 38 0 0 0 -76 0 v40 h-36 v-40 a74 74 0 0 1 74 -74z"/>
+  <path class="primary" d="M100 6 a74 74 0 0 1 74 74 v40 h-36 v-40 a38 38 0 0 0 -76 0 v40 h-36 v-40 a74 74 0 0 1 74 -74z"/>
   <rect class="dark" x="96" y="2" width="8" height="40"/>
   <!-- trigger -->
   <path class="dark" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M16 160 q-14 30 0 60 h12 v-60z"/>
+  <path class="dark" d="M16 160 q-14 30 0 60 h12 v-60z"/>
   <!-- body -->
   <rect class="primary" x="22" y="116" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="156" height="280" rx="24"/>
+  <rect class="primary" x="22" y="116" width="156" height="280" rx="24"/>
   <rect class="secondary" x="34" y="128" width="132" height="256" rx="14"/>
   <rect class="dark" x="44" y="140" width="112" height="58" rx="6"/>
   <rect class="lcd" x="49" y="145" width="102" height="48" rx="3"/>

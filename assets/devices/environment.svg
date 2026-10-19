@@ -15,6 +15,7 @@
   </style>
   <!-- tabletop unit, slanted front -->
   <path class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M14 250 L36 10 H264 L286 250 Z"/>
+  <path class="primary" d="M14 250 L36 10 H264 L286 250 Z"/>
   <path class="secondary" d="M30 236 L48 24 H252 L270 236 Z"/>
   <rect class="dark" x="70" y="40" width="160" height="96" rx="6"/>
   <rect class="lcd" x="75" y="45" width="150" height="86" rx="3"/>

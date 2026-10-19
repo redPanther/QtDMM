@@ -86,6 +86,14 @@ int main(int argc, char **argv)
           "Victron %: state of charge, no DC");
     check(v.adaptValue(300, "300", "min", "DC", "", false, true, false, 0, 0).port.quantity == Quantity::TimeToGo,
           "Victron min: time to go");
+    // from an hour on shown in h, the value still in min: one unit for graph and min/max
+    const PortSample h = v.adaptValue(90, "1.5", "h", "DC", "", false, true, false, 0, 0);
+    check(h.port.quantity == Quantity::TimeToGo && h.decoderBaseUnit == "min" && h.unit.base == "min"
+            && qFuzzyCompare(h.sample.value, 90.0) && h.decoderUnit == "h",
+          "Victron h: shown in h, minutes for graph and min/max");
+    const PortSample none = v.adaptValue(std::nan(""), "--", "h", "DC", "", false, true, false, 0, 0);
+    check(std::isnan(none.sample.value) && none.port.quantity == Quantity::TimeToGo, "Victron --: no number, a gap");
+    check(one(a, "1.5", "h", "").decoderBaseUnit == "h", "another meter's h stays h");
     check(one(a, "50.0", "%", "DC").port.toString() == "duty_cycle", "a meter's %: duty cycle");
     const PortSample rh = one(a, "45.2", "%RH", "");
     check(rh.port.toString() == "relative_humidity" && rh.unit.base == "%" && std::isnan(rh.sample.range.full),

@@ -235,9 +235,12 @@ void MeterController::publish(const Reading &rd)
   bool newMax = false;
   if (id == 0 && !hold)
   {
-    if (m_lastUnit != unit)
-      Q_EMIT unitChanged(unit);
-    m_lastUnit = unit;
+    // the unit of the value (prefix and base unit), which is the display's
+    // but for Victron's time to go: shown in h from an hour on, its values min
+    const QString valueUnit = rd.prefix + baseUnit;
+    if (m_lastUnit != valueUnit)
+      Q_EMIT unitChanged(valueUnit);
+    m_lastUnit = valueUnit;
   }
   if (!hold && id >= 0 && id < kMaxValues)
     m_valueMinMax[size_t(id)].feed(rd);

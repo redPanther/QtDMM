@@ -1,30 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 324 224" width="324" height="224">
-  <!-- Generic battery monitor (shunt). Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 304 144" width="304" height="144">
+  <!-- Generic battery monitor (shunt), side view: housing = primary, shunt lugs left/right = secondary, brass bolts on top. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
-    .lcd { fill: #C9D3C0; }
-    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
     .light { fill: #E6E8EA; }
     .key { fill: #8A9096; }
+    .brass { fill: #C9A85C; }
     .dark { fill: #1E2124; }
-    .bezel { fill: #2B2E32; }
-    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
-  <!-- busbar -->
-  <rect class="key" x="4" y="76" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="292" height="48" rx="4"/>
-  <circle class="dark" cx="30" cy="100" r="14"/><circle class="light" cx="30" cy="100" r="6"/>
-  <circle class="dark" cx="270" cy="100" r="14"/><circle class="light" cx="270" cy="100" r="6"/>
+  <!-- brass bolts -->
+  <g class="brass" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke"><rect x="66" y="2" width="34" height="30" rx="4"/><rect x="180" y="2" width="34" height="30" rx="4"/></g>
+  <g class="brass"><rect x="66" y="2" width="34" height="30" rx="4"/><rect x="180" y="2" width="34" height="30" rx="4"/></g>
+  <!-- shunt lugs -->
+  <path class="secondary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M4 102 h272 v16 h-272 z"/>
+  <path class="secondary" d="M4 102 h272 v16 h-272 z"/>
   <!-- housing -->
-  <rect class="primary" x="60" y="24" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="180" height="152" rx="14"/>
-  <rect class="secondary" x="72" y="36" width="156" height="128" rx="8"/>
-  <!-- battery symbol -->
-  <rect class="light" x="104" y="64" width="80" height="72" rx="6"/>
-  <rect class="light" x="184" y="86" width="10" height="28" rx="2"/>
-  <rect class="secondary" x="112" y="72" width="64" height="56" rx="3"/>
-  <rect class="primary" x="116" y="76" width="18" height="48"/><rect class="primary" x="138" y="76" width="18" height="48"/>
-  <!-- status led -->
-  <circle cx="214" cy="52" r="5" fill="#3FA34D"/>
+  <path class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M40 118 V36 a8 8 0 0 1 8 -8 H232 a8 8 0 0 1 8 8 V118 Z"/>
+  <path class="primary" d="M40 118 V36 a8 8 0 0 1 8 -8 H232 a8 8 0 0 1 8 8 V118 Z"/>
+  <rect style="fill:#E6E8EA;fill-opacity:0.8" x="54" y="40" width="40" height="6" rx="3"/>
+  <rect style="fill:#E6E8EA;fill-opacity:0.5" x="96" y="56" width="90" height="4" rx="2"/>
+  <!-- QR / label, LEDs, connectors -->
+  <rect class="light" x="114" y="72" width="22" height="22" rx="2"/>
+  <circle cx="150" cy="88" r="4" style="fill:#D9272E"/><circle cx="162" cy="88" r="4" style="fill:#3F8FD8"/>
+  <rect class="light" x="56" y="90" width="26" height="14" rx="2"/>
+  <rect x="196" y="78" width="30" height="28" rx="2" style="fill:#3FA34D"/>
+  <g class="dark"><rect x="201" y="86" width="8" height="8"/><rect x="213" y="86" width="8" height="8"/></g>
 </svg>

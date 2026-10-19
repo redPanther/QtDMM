@@ -1,27 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 324 264" width="324" height="264">
-  <!-- Generic inverter. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 244 344" width="244" height="344">
+  <!-- Generic inverter/charger, front view (wall-mounted): body = primary, accent stripe = secondary. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
-    .lcd { fill: #C9D3C0; }
-    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
     .light { fill: #E6E8EA; }
     .key { fill: #8A9096; }
+    .metal { fill: #B8BDC2; }
     .dark { fill: #1E2124; }
-    .bezel { fill: #2B2E32; }
-    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
-  <rect class="primary" x="10" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="280" height="232" rx="14"/>
-  <rect class="secondary" x="22" y="16" width="256" height="208" rx="8"/>
-  <!-- DC -> AC symbol -->
-  <rect class="light" x="60" y="56" width="180" height="120" rx="10"/>
-  <path class="dline" d="M60 176 L240 56" style="stroke-width:3"/>
-  <g class="dline"><path d="M80 82 h50"/><path d="M80 98 h12 M104 98 h12 M128 98 h2"/></g>
-  <path class="dline" d="M170 146 q12 -22 24 0 t24 0"/>
-  <!-- outlet + terminals -->
-  <circle class="dark" cx="60" cy="200" r="8"/><circle class="dark" cx="84" cy="200" r="8"/>
-  <rect class="dark" x="200" y="190" width="56" height="22" rx="6"/>
-  <circle cx="264" cy="32" r="5" fill="#3FA34D"/>
+  <rect class="dark" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" x="16" y="0" width="188" height="320" rx="6"/>
+  <rect class="dark" x="16" y="0" width="188" height="320" rx="6"/>
+  <rect class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" x="4" y="10" width="212" height="300" rx="14"/>
+  <rect class="primary" x="4" y="10" width="212" height="300" rx="14"/>
+  <rect style="fill:#E6E8EA;fill-opacity:0.35" x="4" y="40" width="212" height="4"/>
+  <rect style="fill:#E6E8EA;fill-opacity:0.7" x="30" y="100" width="60" height="8" rx="4"/>
+  <rect class="secondary" x="4" y="150" width="212" height="14"/>
+  <rect class="light" x="30" y="178" width="70" height="56" rx="3"/>
+  <g class="key"><rect x="36" y="186" width="58" height="5"/><rect x="36" y="198" width="40" height="5"/><rect x="36" y="210" width="50" height="5"/><rect x="36" y="222" width="30" height="5"/></g>
+  <rect class="light" x="120" y="178" width="70" height="56" rx="3"/>
+  <path d="M132 202 h14 M132 212 h4 M140 212 h4" style="fill:none;stroke:#1E2124;stroke-width:4;stroke-linecap:round"/>
+  <path d="M154 208 q6 -12 12 0 t12 0" style="fill:none;stroke:#1E2124;stroke-width:4;stroke-linecap:round"/>
+  <g class="dark"><circle cx="50" cy="292" r="7"/><circle cx="80" cy="292" r="7"/><circle cx="140" cy="292" r="7"/><circle cx="170" cy="292" r="7"/></g>
 </svg>

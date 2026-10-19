@@ -132,12 +132,13 @@ go to the display's second line, the graph and the
 
 | Device | Values |
 |---|---|
-| SmartShunt, BMV-712 | battery voltage (V), battery current (A, negative when discharging), battery power (W, computed), state of charge (%), consumed Ah, time to go (min), aux input (starter or midpoint voltage in V, or temperature in °C - as configured on the device) |
+| SmartShunt, BMV-712 | battery voltage (V), battery current (A, negative when discharging), battery power (W, computed), state of charge (%), consumed Ah, time to go (in min below an hour, in hours with a decimal above - 1.5 h is 90 min; *--* while charging, when there is none), aux input (starter or midpoint voltage in V, or temperature in °C - as configured on the device) |
 | SmartSolar, BlueSolar MPPT | PV power (W), battery voltage (V), battery charging current (A), yield today (Wh), load current (A) |
 | Phoenix Inverter Smart | AC apparent power (VA), battery voltage (V), AC voltage (V), AC current (A) |
 
 The defaults are the first two of each row, no third and fourth value.
-About one reading per second arrives. For more than four of its values at
+About one reading per second arrives. The graph, min/max and the export
+keep the time to go in minutes throughout; while charging it has a gap. For more than four of its values at
 once, run several QtDMM instances on the same device
 ([instances](command-line.md)).
 

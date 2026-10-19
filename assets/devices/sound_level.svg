@@ -16,8 +16,10 @@
   <!-- microphone + windscreen -->
   <rect class="dark" x="88" y="70" width="24" height="40"/>
   <circle class="key" cx="100" cy="46" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" r="40"/>
+  <circle class="key" cx="100" cy="46" r="40"/>
   <g class="dline" style="stroke-width:2;stroke:#6E747A"><path d="M66 36h68M62 52h76M70 22h60M68 68h64M100 6v80M80 10v72M120 10v72"/></g>
   <path class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M60 104 h80 l30 40 v220 a14 14 0 0 1 -14 14 h-112 a14 14 0 0 1 -14 -14 v-220z"/>
+  <path class="primary" d="M60 104 h80 l30 40 v220 a14 14 0 0 1 -14 14 h-112 a14 14 0 0 1 -14 -14 v-220z"/>
   <path class="secondary" d="M66 116 h68 l24 32 v206 a8 8 0 0 1 -8 8 h-100 a8 8 0 0 1 -8 -8 v-206z"/>
   <rect class="dark" x="48" y="160" width="104" height="60" rx="6"/>
   <rect class="lcd" x="53" y="165" width="94" height="50" rx="3"/>

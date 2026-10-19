@@ -130,7 +130,9 @@ public:
   /// The min/max memory of value @p id of its own (SCPI CALCulate:AVERage
   /// (@n)), whatever the display follows; resetMinMax() clears it too.
   const MinMaxMemory &valueMinMax(int id) const { return m_valueMinMax.at(size_t(qBound(0, id, kMaxValues - 1))); }
-  /// The text of the current reading's unit ("mV"), and its base unit ("V").
+  /// The unit of the current reading's value ("mV": prefix and base unit,
+  /// as the display shows it but for Victron's time to go in h), and its
+  /// base unit ("V").
   QString     unit() const { return m_lastUnit; }
   QString     baseUnit() const { return m_baseUnit; }
   /// The base unit of value @p id (Reading::id) from its last reading; the
@@ -160,7 +162,8 @@ Q_SIGNALS:
   /// or its value moved to another port (MinMaxMemory) - not a range change
   /// (mV -> V).
   void        minMaxReset();
-  /// The main value's unit changed ("mV" -> "V"); empty after forgetUnit().
+  /// The unit of the main value changed ("mV" -> "V"), unit(); empty after
+  /// forgetUnit().
   void        unitChanged(const QString &unit);
   /// The main value's base unit changed ("V" -> "A"); empty after forgetUnit().
   void        baseUnitChanged(const QString &baseUnit);

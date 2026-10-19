@@ -158,6 +158,10 @@ PortSample ReadingAdapter::adaptValue(double dval, const QString &text, const QS
   SiPrefix::Split split = SiPrefix::split(unit);
   if (split.prefix == QLatin1String("u"))
     split.prefix = QStringLiteral("µ");
+  // Victron's time to go shows in min below an hour and in h above, its
+  // value always in min (DecoderVictronBLE): one unit for graph and min/max
+  if (m_format == FrameFormat::VictronBLE && split.baseUnit == QLatin1String("h"))
+    split.baseUnit = QStringLiteral("min");
   ps.decoderBaseUnit = split.baseUnit;
 
   const QString mode = modeCode(special);

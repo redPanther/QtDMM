@@ -1,28 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 324 264" width="324" height="264">
-  <!-- Generic solar charge controller. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 324 244" width="324" height="244">
+  <!-- Generic solar charge controller, top view: body = primary, accent stripe = secondary, heatsink behind (fixed dark grey). Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
-    .lcd { fill: #C9D3C0; }
-    .lcdtext { fill: #2A2E2A; font-weight: bold; font-size: 30px; font-family: monospace; }
     .light { fill: #E6E8EA; }
     .key { fill: #8A9096; }
-    .dark { fill: #1E2124; }
-    .bezel { fill: #2B2E32; }
-    .line { fill: none; stroke: #E6E8EA; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
+    .sink { fill: #4A4D52; }
+    .seam { fill: none; stroke: #000000; stroke-opacity: 0.25; stroke-width: 3; }
   </style>
-  <rect class="primary" x="10" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="280" height="232" rx="14"/>
-  <rect class="secondary" x="22" y="16" width="256" height="170" rx="8"/>
-  <!-- cooling fins -->
-  <g class="dark"><rect x="22" y="196" width="256" height="30" rx="4"/></g>
-  <g class="key"><rect x="30" y="200" width="6" height="22"/><rect x="48" y="200" width="6" height="22"/><rect x="66" y="200" width="6" height="22"/><rect x="84" y="200" width="6" height="22"/><rect x="102" y="200" width="6" height="22"/><rect x="120" y="200" width="6" height="22"/><rect x="138" y="200" width="6" height="22"/><rect x="156" y="200" width="6" height="22"/><rect x="174" y="200" width="6" height="22"/><rect x="192" y="200" width="6" height="22"/><rect x="210" y="200" width="6" height="22"/><rect x="228" y="200" width="6" height="22"/><rect x="246" y="200" width="6" height="22"/><rect x="264" y="200" width="6" height="22"/></g>
-  <!-- solar panel symbol -->
-  <path class="light" d="M60 120 L84 40 H164 L188 120 Z"/>
-  <g class="dline" style="stroke-width:3;stroke:#00FFFF"><path d="M72 80 H176 M110 40 L104 120 M138 40 L144 120"/></g>
-  <!-- arrow to battery -->
-  <path class="line" d="M196 80 h24 m-8 -8 l8 8 l-8 8"/>
-  <rect class="light" x="230" y="62" width="34" height="40" rx="4"/><rect class="light" x="240" y="56" width="14" height="8" rx="2"/>
-  <circle cx="44" cy="160" r="6" fill="#3FA34D"/><circle cx="64" cy="160" r="6" fill="#E8B82B"/>
+  <!-- heatsink sticking out left/right (notched) -->
+  <path class="sink" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M4 14 H296 V60 h-6 v8 h6 V150 h-6 v8 h6 V206 H4 V158 h6 v-8 h-6 V68 h6 v-8 h-6 Z"/>
+  <path class="sink" d="M4 14 H296 V60 h-6 v8 h6 V150 h-6 v8 h6 V206 H4 V158 h6 v-8 h-6 V68 h6 v-8 h-6 Z"/>
+  <!-- body -->
+  <rect class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" x="22" y="4" width="256" height="212" rx="18"/>
+  <rect class="primary" x="22" y="4" width="256" height="212" rx="18"/>
+  <path class="seam" d="M58 10 V210 M242 10 V210"/>
+  <!-- logo + text (bars, no lettering) -->
+  <rect class="light" x="72" y="34" width="56" height="10" rx="5"/>
+  <rect class="light" x="72" y="76" width="140" height="8" rx="3"/>
+  <rect class="light" x="72" y="92" width="44" height="14" rx="3"/>
+  <!-- accent stripe -->
+  <rect class="secondary" x="72" y="120" width="156" height="16"/>
+  <!-- terminal panel -->
+  <rect style="fill:#8A9096;fill-opacity:0.6" x="104" y="168" width="92" height="40" rx="12"/>
+  <g class="light"><circle cx="122" cy="188" r="7"/><circle cx="142" cy="188" r="7"/><circle cx="162" cy="188" r="7"/><circle cx="180" cy="188" r="7"/></g>
+  <!-- signal bars + LEDs -->
+  <g class="light"><rect x="250" y="150" width="4" height="10"/><rect x="257" y="142" width="4" height="18"/><rect x="264" y="134" width="4" height="26"/></g>
+  <circle cx="252" cy="172" r="3" style="fill:#B8BDC2"/><circle cx="260" cy="172" r="3" style="fill:#3F8FD8"/><circle cx="268" cy="172" r="3" style="fill:#B8BDC2"/>
 </svg>

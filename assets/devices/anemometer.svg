@@ -15,6 +15,7 @@
   </style>
   <!-- vane wheel -->
   <circle class="dark" cx="100" cy="76" r="70" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke"/>
+  <circle class="dark" cx="100" cy="76" r="70"/>
   <circle class="key" cx="100" cy="76" r="60"/>
   <g class="light">
     <path d="M100 76 L92 22 A56 56 0 0 1 120 24 Z"/><path d="M100 76 L150 60 A56 56 0 0 1 150 92 Z"/>
@@ -24,6 +25,7 @@
   <circle class="dark" cx="100" cy="76" r="10"/>
   <rect class="dark" x="86" y="140" width="28" height="24"/>
   <rect class="primary" x="30" y="158" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="140" height="218" rx="22"/>
+  <rect class="primary" x="30" y="158" width="140" height="218" rx="22"/>
   <rect class="secondary" x="42" y="170" width="116" height="194" rx="14"/>
   <rect class="dark" x="52" y="184" width="96" height="58" rx="6"/>
   <rect class="lcd" x="57" y="189" width="86" height="48" rx="3"/>
