@@ -6,9 +6,9 @@
 #include <QWidget>
 
 #include "device/dmmdecoder.h"
+#include "core/reading.h"   // complete for moc: a slot takes it (GCC 16 -Wsfinae-incomplete)
 
 class QToolButton;
-struct Reading;
 
 /// The meter's keys under the display, for meters QtDMM can remote-control
 /// (the UNI-T iDMM protocol: UT60BT, UT61B+/D+/E+, UT161, UT202BT; the iENV

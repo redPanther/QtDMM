@@ -8,6 +8,7 @@
 #include <QVector>
 
 #include "core/sampletypes.h"
+#include "core/reading.h"   // complete for moc: a slot takes it (GCC 16 -Wsfinae-incomplete)
 
 /// Every reading the meter sent, one row each, as a table model: the raw
 /// protocol of a session next to the recorder's time-gridded graph. A thin
@@ -16,7 +17,6 @@
 /// what the store holds and writes itself as CSV. Without setStore() it uses
 /// a store of its own. No widgets here, so it can be tested; ReadingsWidget
 /// shows it.
-struct Reading;
 class RecordingStore;
 
 class ReadingsModel : public QAbstractTableModel
