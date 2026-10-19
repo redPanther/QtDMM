@@ -29,6 +29,56 @@ static const bool registered = []() {
   DmmDecoder::addConfig({"Iso-Tech", "IDM 503 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
   DmmDecoder::addConfig({"Iso-Tech", "IDM 505 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
   DmmDecoder::addConfig({"CMT", "3503 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  // The same protocol over Bluetooth LE (BleGattDevice, baud 0): the meters of
+  // libsigrok's appa-dmm scan list. None at hand, so "*"; display counts from
+  // the data sheets as far as known (S, 170B clamps, A17N, sFlex, BENNING
+  // CM/MM 10: 6000; 150B, 208B, 506B, MM 12: 50000), the others 6000.
+  DmmDecoder::addConfig({"APPA", "S0 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "S1 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "S2 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "S3 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "155B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "156B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "157B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "158B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "172B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "173B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "175B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "177B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "179B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "A17N *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "sFlex-10A *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "sFlex-18A *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "208B (Bluetooth) *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "506B (Bluetooth) *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"BENNING", "MM 10-1 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"BENNING", "MM 10-PV *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"BENNING", "MM 12 (Bluetooth) *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"BENNING", "CM 9-2 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"BENNING", "CM 10-1 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"BENNING", "CM 10-PV *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"BENNING", "CM 12 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"KPS", "DMM3500BT *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"KPS", "DMM9000BT (Bluetooth) *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"KPS", "DCM7000BT *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"KPS", "DCM8000BT *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Megger", "DCM1500S *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Megger", "DPM1000 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Metravi", "PRO Solar-1 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"RS PRO", "S1 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"RS PRO", "S2 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"RS PRO", "S3 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"RS PRO", "155B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"RS PRO", "156B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"RS PRO", "157B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"RS PRO", "158B *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "7220 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "7221 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "7223 *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "7352B (Bluetooth) *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "MW3516BF *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "MW3526BF *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "MW3536BF *", "", 0, FrameFormat::AppaDmm, 8, 1, 1, 0, 6000, 0, 0, 0, "", "", 2});
   return true;
 }();
 

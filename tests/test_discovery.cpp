@@ -92,6 +92,14 @@ int main(int argc, char **argv)
             && Families::preferByName(victron, "SmartSolar HQ2105").first() == "Victron SmartSolar MPPT"
             && Families::preferByName(victron, "").first() == victron.first(),
           "Victron: the model named like the device first");
+    // the APPA Bluetooth meters advertise "vendor model", written their way
+    const QStringList appa = Families::models(FrameFormat::AppaDmm, false);
+    const auto first = [&](const QString &name) { return Families::preferByName(appa, name).first(); };
+    check(first("APPA S1") == "APPA S1 *" && first("BENNING MM10-1") == "BENNING MM 10-1 *"
+            && first("KPS DMM9000BT") == "KPS DMM9000BT (Bluetooth) *" && first("MEGGER DCM1500S") == "Megger DCM1500S *"
+            && first("RS PRO 157B") == "RS PRO 157B *" && first("APPA 506B") == "APPA 506B (Bluetooth) *",
+          "APPA: the model named like the device first, got " + first("BENNING MM10-1") + " / " + first("KPS DMM9000BT"));
+    check(!appa.contains("APPA 506 *") && appa.contains("APPA S0 *"), "APPA over Bluetooth: only the rows without a baud rate");
   }
 
   // --- 3. access: nothing to say when QtDMM may open it; else why, and

@@ -77,7 +77,9 @@ QString     adapter(quint16 vid, quint16 pid);
 QStringList models(FrameFormat::DataFormat format, bool serial);
 /// The models of @p vendor with a serial protocol.
 QStringList vendorModels(const QString &vendor);
-/// @p models with the one that fits the device's own name first: a
+/// @p models with the one that fits the device's own name first: an
+/// "APPA S1" is the "APPA S1 *", a "BENNING MM10-1" the "BENNING MM 10-1 *"
+/// (spaces, " *" and " (Bluetooth)" aside); otherwise by the first word, a
 /// Victron "SmartShunt HQ2203" is the "Victron SmartShunt".
 QStringList preferByName(QStringList models, const QString &deviceName);
 }

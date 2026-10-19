@@ -5,7 +5,10 @@
 #include "device/dmmdecoder.h"
 
 /// APPA handheld meters and their relatives (BENNING, Sefram, Voltcraft,
-/// ISO-TECH, RS PRO, CMT) over the optical RS-232/USB cable, 9600 8N1.
+/// ISO-TECH, RS PRO, CMT) over the optical RS-232/USB cable, 9600 8N1; the
+/// AppaDmm meters with Bluetooth (S0-S3, 150B, 170B, A17N, sFlex, 208B,
+/// 506B and the BENNING, KPS, MEGGER, METRAVI, RS PRO, Sefram ones) also
+/// over Bluetooth LE (BleGattDevice, rows with baud 0).
 /// Polled; every frame is `55 55 <command> <length> <data> <checksum>`,
 /// the checksum the sum of all bytes before it.
 ///

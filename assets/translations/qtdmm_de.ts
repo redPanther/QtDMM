@@ -710,52 +710,52 @@
 <context>
     <name>BleGattDevice</name>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="86"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="111"/>
         <source>No Bluetooth address configured.</source>
         <translation>Keine Bluetooth-Adresse eingestellt.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="91"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="116"/>
         <source>This meter does not use a Bluetooth LE connection.</source>
         <translation>Dieses Messgerät verwendet keine Bluetooth-LE-Verbindung.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="166"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="191"/>
         <source>The meter %1 closed the Bluetooth connection.</source>
         <translation>Das Messgerät %1 hat die Bluetooth-Verbindung beendet.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="170"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="195"/>
         <source>Bluetooth: %1</source>
         <translation>Bluetooth: %1</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="105"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="130"/>
         <source>No answer from %1 - is the meter on and its Bluetooth switched on?</source>
         <translation>Keine Antwort von %1 - ist das Messgerät an und sein Bluetooth eingeschaltet?</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="231"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="256"/>
         <source>%1 does not offer the expected Bluetooth service - is it the right meter?</source>
         <translation>%1 bietet den erwarteten Bluetooth-Dienst nicht an - ist es das richtige Messgerät?</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="237"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="262"/>
         <source>Could not open the Bluetooth service of %1.</source>
         <translation>Der Bluetooth-Dienst von %1 konnte nicht geöffnet werden.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="259"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="284"/>
         <source>Bluetooth service error %1 on %2.</source>
         <translation>Bluetooth-Dienstfehler %1 bei %2.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="272"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="297"/>
         <source>%1 has no notify characteristic.</source>
         <translation>%1 hat keine Notify-Characteristic.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/blegatt.cpp" line="286"/>
+        <location filename="../../src/device/transports/blegatt.cpp" line="311"/>
         <source>%1 has no writable characteristic.</source>
         <translation>%1 hat keine beschreibbare Characteristic.</translation>
     </message>
@@ -1323,67 +1323,67 @@
 <context>
     <name>DeviceType</name>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="145"/>
+        <location filename="../../src/device/devicetype.cpp" line="165"/>
         <source>Handheld multimeter</source>
         <translation>Hand-Multimeter</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="146"/>
+        <location filename="../../src/device/devicetype.cpp" line="166"/>
         <source>Bench multimeter</source>
         <translation>Tisch-Multimeter</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="147"/>
+        <location filename="../../src/device/devicetype.cpp" line="167"/>
         <source>Clamp meter</source>
         <translation>Zangenmessgerät</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="148"/>
+        <location filename="../../src/device/devicetype.cpp" line="168"/>
         <source>Thermometer</source>
         <translation>Thermometer</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="149"/>
+        <location filename="../../src/device/devicetype.cpp" line="169"/>
         <source>Luxmeter</source>
         <translation>Luxmeter</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="150"/>
+        <location filename="../../src/device/devicetype.cpp" line="170"/>
         <source>Air quality meter</source>
         <translation>Luftqualitätsmesser</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="151"/>
+        <location filename="../../src/device/devicetype.cpp" line="171"/>
         <source>Sound level meter</source>
         <translation>Schallpegelmesser</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="152"/>
+        <location filename="../../src/device/devicetype.cpp" line="172"/>
         <source>Anemometer</source>
         <translation>Anemometer</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="153"/>
+        <location filename="../../src/device/devicetype.cpp" line="173"/>
         <source>Battery monitor</source>
         <translation>Batteriewächter</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="154"/>
+        <location filename="../../src/device/devicetype.cpp" line="174"/>
         <source>Solar charge controller</source>
         <translation>Solarladeregler</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="155"/>
+        <location filename="../../src/device/devicetype.cpp" line="175"/>
         <source>Inverter</source>
         <translation>Wechselrichter</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="156"/>
+        <location filename="../../src/device/devicetype.cpp" line="176"/>
         <source>Virtual meter</source>
         <translation>Virtuelles Messgerät</translation>
     </message>
     <message>
-        <location filename="../../src/device/devicetype.cpp" line="157"/>
+        <location filename="../../src/device/devicetype.cpp" line="177"/>
         <source>Generic</source>
         <translation>Allgemein</translation>
     </message>
@@ -1512,12 +1512,12 @@ und melden Sie sich danach ab und wieder an.</translation>
         <translation>Den Geräteschlüssel finden Sie in der App VictronConnect: Produktinfo, Instant Readout.</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="354"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="351"/>
         <source>Bluetooth meter</source>
         <translation>Bluetooth-Messgerät</translation>
     </message>
     <message>
-        <location filename="../../src/device/discovery/discovery.cpp" line="355"/>
+        <location filename="../../src/device/discovery/discovery.cpp" line="352"/>
         <source>Switch Bluetooth on at the meter.</source>
         <translation>Schalten Sie Bluetooth am Messgerät ein.</translation>
     </message>
@@ -3995,8 +3995,8 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
     </message>
     <message>
         <location filename="../../src/device/protocols.cpp" line="55"/>
-        <source>17 bytes binary, polled (APPA 506/208, BENNING MM 12)</source>
-        <translation>17 Bytes binär, abgefragt (APPA 506/208, BENNING MM 12)</translation>
+        <source>17 bytes binary, polled (APPA 506/208, BENNING MM 12; APPA S, 150B, 170B over Bluetooth LE)</source>
+        <translation>17 Bytes binär, abgefragt (APPA 506/208, BENNING MM 12; APPA S, 150B, 170B über Bluetooth LE)</translation>
     </message>
     <message>
         <location filename="../../src/device/protocols.cpp" line="56"/>

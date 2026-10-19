@@ -103,6 +103,9 @@
   the display's small line, in the graph and the export
 - Readings table and its export: the third and fourth value of a meter are marked 3rd and 4th in the Mode column,
   not 2nd like the second one (the humidity of an AirCO2ntrol was "2nd")
+- APPA over Bluetooth LE (not tried with a real meter yet): the S0-S3, 155B-158B, the 170B clamps, A17N, sFlex,
+  208B and 506B, and the BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram meters built on them; found by the
+  name they advertise, as their Bluetooth service is a common one
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

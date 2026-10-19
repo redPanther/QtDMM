@@ -48,6 +48,10 @@ public:
     QList<QBluetoothUuid> write;   ///< in order of preference
     QStringList namePrefixes;      ///< for scan(): advertised names that belong to it
     QByteArray hello;              ///< written once when ready, before the first poll
+    bool byNameOnly = false;       ///< the service is a common one (0xFFF0 of many BLE
+                                   ///< UART modules): only the name tells the meter
+    /// True when a device seen in a scan, with @p name and @p services, is one of these.
+    bool matches(const QString &name, const QList<QBluetoothUuid> &services) const;
   };
   /// The profile for @p format, or nullopt when it is not a GATT protocol.
   static std::optional<Profile> profile(FrameFormat::DataFormat format);
