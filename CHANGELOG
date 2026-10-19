@@ -119,6 +119,8 @@
 - Device pictures in the makers' colours (a red UNI-T, a yellow Fluke ...) on the last page of Add device and,
   small, before each entry of My devices in the sidebar; with a light outline in a dark design. Building
   needs CMake 3.19 now
+- VXI-11 on Windows: the own portmapper on a free port could fail to start ("The address is protected") when
+  Windows kept the ports in a row for itself; it now takes a port Windows allows for UDP first
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

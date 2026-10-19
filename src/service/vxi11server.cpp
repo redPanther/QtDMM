@@ -112,9 +112,8 @@ bool Vxi11Server::start(const QHostAddress &address, RpcbindMode mode, quint16 c
     m_pmap.clear();
     for (const Reg &reg : std::as_const(m_regs))
       m_pmap.registerProgram(reg.prog, reg.vers, reg.port);
-    // TCP and UDP on the same port. With port 0 the system picks a free TCP port, which may be
-    // taken for UDP (seen on Windows): then another one is tried.
-    for (int attempt = 0;; ++attempt)
+    // TCP and UDP on the same port
+    if (portmapperPort != 0)
     {
       if (!m_pmapTcp.listen(address, portmapperPort))
       {
@@ -125,15 +124,37 @@ bool Vxi11Server::start(const QHostAddress &address, RpcbindMode mode, quint16 c
         stop();
         return false;
       }
-      if (m_pmapUdp.bind(address, m_pmapTcp.port()))
-        break;
-      if (portmapperPort != 0 || attempt == 9)
+      if (!m_pmapUdp.bind(address, portmapperPort))
       {
-        m_error = tr("UDP port %1: %2").arg(m_pmapTcp.port()).arg(m_pmapUdp.errorString());
+        m_error = tr("UDP port %1: %2").arg(portmapperPort).arg(m_pmapUdp.errorString());
         stop();
         return false;
       }
-      m_pmapTcp.close();
+    }
+    else
+    {
+      // a port the system picks for UDP first, then TCP on it: Windows keeps whole blocks of
+      // its dynamic ports for Hyper-V/WinNAT, often for UDP alone, and hands out free TCP
+      // ports in a row - a free TCP port and the next ones may all lie in such a UDP block
+      // ("The address is protected"); a UDP port it picks is never one of them
+      for (int attempt = 0;; ++attempt)
+      {
+        if (!m_pmapUdp.bind(address, 0))
+        {
+          m_error = tr("UDP: %1").arg(m_pmapUdp.errorString());
+          stop();
+          return false;
+        }
+        if (m_pmapTcp.listen(address, m_pmapUdp.port()))
+          break;
+        if (attempt == 19)
+        {
+          m_error = tr("TCP port %1: %2").arg(m_pmapUdp.port()).arg(m_pmapTcp.errorString());
+          stop();
+          return false;
+        }
+        m_pmapUdp.close();
+      }
     }
     m_pmapPort = m_pmapTcp.port();
     qCDebug(lcVxi11) << "own portmapper on port" << m_pmapPort << ", core port" << m_coreSrv.port();

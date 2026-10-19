@@ -101,6 +101,8 @@ public:
   explicit UdpRpcServer(const RpcDispatcher *dispatcher, QObject *parent = nullptr);
   bool bind(const QHostAddress &address, quint16 port);
   void close();
+  /// The port bound to, the one the system picked for port 0.
+  quint16 port() const { return m_socket.localPort(); }
   QString errorString() const { return m_socket.errorString(); }
 
 private:
