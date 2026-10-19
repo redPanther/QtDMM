@@ -33,30 +33,30 @@ std::optional<DmmDecoder::DmmResponse> DecoderTfaAirControl::decode(const QByteA
   switch (address)
   {
     case 0x50:   // CO2
-      m_result.id = 0;
+      m_result.main().id = 0;
       m_result.showBar = true;   // a bar for the main value only
       value = raw;
-      m_result.unit = "ppm";
-      m_result.special = "CO2";
+      m_result.main().unit = "ppm";
+      m_result.main().special = "CO2";
       break;
     case 0x42:   // temperature, 1/16 K
-      m_result.id = 1;
+      m_result.main().id = 1;
       value = std::round((raw / 16.0 - 273.15) * 100.0) / 100.0;
       decimals = 2;
-      m_result.unit = "C";   // shown as degC (SiPrefix::displayText)
-      m_result.special = "TE";
+      m_result.main().unit = "C";   // shown as degC (SiPrefix::displayText)
+      m_result.main().special = "TE";
       break;
     case 0x41:   // relative humidity, 1/100 %
-      m_result.id = 2;
+      m_result.main().id = 2;
       value = std::round(raw / 100.0 * 100.0) / 100.0;
       decimals = 2;
-      m_result.unit = "%";
-      m_result.special = "RH";
+      m_result.main().unit = "%";
+      m_result.main().special = "RH";
       break;
     default:
       return std::nullopt;
   }
-  m_result.dval = value;   // already in base units: no SI prefix involved
-  m_result.val = QString::number(value, 'f', decimals);
+  m_result.main().dval = value;   // already in base units: no SI prefix involved
+  m_result.main().val = QString::number(value, 'f', decimals);
   return m_result;
 }

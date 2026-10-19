@@ -47,8 +47,8 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
   m_result = {};
   // one frame carries both displays: main is id 0, the second id 1 (and
   // numValues 2 in the table, so the display shows it)
-  m_result.id = 0;
-  m_result.id2 = 1;
+  m_result.main().id = 0;
+  DmmChannel &secondValue = m_result.addChannel(1);
   m_result.showBar = true;
 
   // "<type hex><plaintext hex> [<main> <second>]\n", see VictronBle::frame()
@@ -74,15 +74,15 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
   if (!main || !main->valid)
     return std::nullopt;   // unknown field, or no reading for it yet
 
-  m_result.dval = main->dval;
-  m_result.val = main->val;
-  m_result.unit = main->unit;
-  m_result.special = main->special;
+  m_result.main().dval = main->dval;
+  m_result.main().val = main->val;
+  m_result.main().unit = main->unit;
+  m_result.main().special = main->special;
   if (second && second->valid)
   {
-    m_result.dval2 = second->dval;
-    m_result.val2 = second->val;
-    m_result.unit2 = second->unit;
+    secondValue.dval = second->dval;
+    secondValue.val = second->val;
+    secondValue.unit = second->unit;
   }
   return m_result;
 }

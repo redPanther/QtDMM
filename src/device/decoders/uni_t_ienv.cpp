@@ -172,28 +172,27 @@ bool DecoderUniTiENV::checkFormat(const char *data, size_t idx)
 }
 
 // The second display of a two-channel meter: the cached temperature, or
-// id2 = 1 with an empty val2 while none has been seen (the display off, see
-// DmmResponse::id2).
+// channel 1 with an empty val while none has been seen (the display off, see
+// DmmResponse::addChannel()).
 void DecoderUniTiENV::attachTemp(DmmDecoder::DmmResponse &r) const
 {
-  r.id2 = 1;
+  DmmChannel &second = r.addChannel(1);
   if (!m_haveTemp)
     return;
-  r.val2 = m_tempVal;
-  r.dval2 = m_tempD;
-  r.unit2 = m_tempUnit;
-  r.special2.clear();
+  second.val = m_tempVal;
+  second.dval = m_tempD;
+  second.unit = m_tempUnit;
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray &data, int id)
 {
   // every frame is a whole reading, the main value with the temperature as
-  // second value (id2): @p id only counts the frames of the two-value meters
+  // second value (channel 1): @p id only counts the frames of the two-value meters
   // (numValues 2 gives the display its second line). Taken over, every
   // other frame came as the second value, humidity and temperature in turn
   Q_UNUSED(id);
   m_result = {};
-  m_result.id = 0;
+  m_result.main().id = 0;
   m_result.showBar = true;
   if (data.size() < kFrameLength)
     return std::nullopt;
@@ -261,24 +260,24 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray 
     // the main value of the last humidity / wind frame, with the fresh
     // temperature, so every poll answer updates the display
     DmmDecoder::DmmResponse r = m_main;
-    r.id = 0;
+    r.main().id = 0;
     attachTemp(r);
     return r;
   }
 
-  m_result.val = text;
-  m_result.dval = ok ? value : 0;
-  m_result.unit = unit;
+  m_result.main().val = text;
+  m_result.main().dval = ok ? value : 0;
+  m_result.main().unit = unit;
 
   // status byte: bit0 HOLD, bit1 AVG, bit2 MIN, bit3 MAX (HOLD confirmed on
   // a UT333BT, the others from the vendor app)
   m_result.hold = f[16] & 0x01;
   if (f[16] & 0x02)
-    m_result.states |= SampleFlag::Avg;
+    m_result.main().states |= SampleFlag::Avg;
   if (f[16] & 0x08)
-    m_result.states |= SampleFlag::Max;
+    m_result.main().states |= SampleFlag::Max;
   if (f[16] & 0x04)
-    m_result.states |= SampleFlag::Min;
+    m_result.main().states |= SampleFlag::Min;
 
   if (func == kFnSound)
   {

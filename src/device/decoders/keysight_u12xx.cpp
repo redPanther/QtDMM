@@ -206,32 +206,32 @@ std::optional<DmmDecoder::DmmResponse> DecoderKeysightU12xx::decode(const QByteA
     return std::nullopt;
 
   m_result = {};
-  m_result.id = id;
+  m_result.main().id = id;
   m_result.showBar = true;
-  m_result.special = m_function.special;
+  m_result.main().special = m_function.special;
 
   if (value == "+9.90000000E+37" || value == "-9.90000000E+37")
   {
-    m_result.val = value.startsWith('-') ? "-OL" : "OL";
-    m_result.unit = m_function.unit;
-    m_result.dval = 0;
+    m_result.main().val = value.startsWith('-') ? "-OL" : "OL";
+    m_result.main().unit = m_function.unit;
+    m_result.main().dval = 0;
     return m_result;
   }
   bool ok = false;
   const double v = value.toDouble(&ok) * m_function.scale;
   if (!ok)
     return std::nullopt;
-  m_result.dval = v;
+  m_result.main().dval = v;
   // temperatures and percentages without a prefix, a diode in volts as
   // the meter shows it
   if (m_function.unit == "C" || m_function.unit == "dF" || m_function.unit == "%" || m_function.special == "DI")
   {
-    m_result.val = QString::number(v, 'f', m_function.special == "DI" ? 3 : 2);
-    m_result.unit = m_function.unit;
+    m_result.main().val = QString::number(v, 'f', m_function.special == "DI" ? 3 : 2);
+    m_result.main().unit = m_function.unit;
     return m_result;
   }
   QString prefix;
-  m_result.val = SiPrefix::format(v, &prefix);
-  m_result.unit = prefix + m_function.unit;
+  m_result.main().val = SiPrefix::format(v, &prefix);
+  m_result.main().unit = prefix + m_function.unit;
   return m_result;
 }

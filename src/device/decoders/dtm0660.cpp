@@ -34,7 +34,7 @@ bool DecoderDTM0660::checkFormat(const char* data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderDTM0660::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id     = id;
+  m_result.main().id     = id;
   m_result.hold   = false;
   m_result.range  = "";
   m_result.showBar = true;
@@ -45,70 +45,70 @@ std::optional<DmmDecoder::DmmResponse> DecoderDTM0660::decode(const QByteArray &
       ((data[5] & 0x0e) == 0x06) &&
       ((data[6] & 0x0f) == 0x01))
   {
-    m_result.val = " 0L ";
+    m_result.main().val = " 0L ";
   }
   else
   {
-    m_result.val = (data[1] & 0x01) ? " -" : "  ";
+    m_result.main().val = (data[1] & 0x01) ? " -" : "  ";
 
     // create string;
     for (int i=0; i<4; ++i)
     {
-      m_result.val += digit( ((data[1+2*i] & 0x0f) <<4) | (data[2+2*i] & 0x0f));
+      m_result.main().val += digit( ((data[1+2*i] & 0x0f) <<4) | (data[2+2*i] & 0x0f));
     }
   }
 
   // find decimal point position
-  if (data[3] & 0x01)      m_result.val = insertComma( m_result.val, 1 );
-  else if (data[5] & 0x01) m_result.val = insertComma( m_result.val, 2 );
-  else if(data[7] & 0x01)  m_result.val = insertComma( m_result.val, 3 );
+  if (data[3] & 0x01)      m_result.main().val = insertComma( m_result.main().val, 1 );
+  else if (data[5] & 0x01) m_result.main().val = insertComma( m_result.main().val, 2 );
+  else if(data[7] & 0x01)  m_result.main().val = insertComma( m_result.main().val, 3 );
 
-  m_result.dval = m_result.val.toDouble();
+  m_result.main().dval = m_result.main().val.toDouble();
 
   // try to find some special modes
-  if (data[9] & 0x08) m_result.special = "DI";
-  if (data[0] & 0x01) m_result.special = "AC";
-  if (data[0] & 0x02) m_result.special = "DC";
+  if (data[9] & 0x08) m_result.main().special = "DI";
+  if (data[0] & 0x01) m_result.main().special = "AC";
+  if (data[0] & 0x02) m_result.main().special = "DC";
 
   // try to find mode
   if (data[11] & 0x01)
   {
-    m_result.unit    = "F";
-    m_result.special = "CA";
+    m_result.main().unit    = "F";
+    m_result.main().special = "CA";
   }
   else if (data[11] & 0x02)
   {
-    m_result.unit    = "Ohm";
-    m_result.special = "OH";
+    m_result.main().unit    = "Ohm";
+    m_result.main().special = "OH";
   }
   else if (data[12] & 0x08)
   {
-    m_result.unit = "A";
+    m_result.main().unit = "A";
   }
   else if (data[12] & 0x04)
   {
-    m_result.unit    = "Hz";
-    m_result.special = "HZ";
+    m_result.main().unit    = "Hz";
+    m_result.main().special = "HZ";
   }
   else if (data[12] & 0x02)
   {
-    m_result.unit = "V";
+    m_result.main().unit = "V";
   }
   else if (data[10] & 0x02)
   {
-    m_result.unit    = "%";
-    m_result.special = "PC";
+    m_result.main().unit    = "%";
+    m_result.main().special = "PC";
   }
 
   else if (data[13] & 0x02)
   {
-    m_result.unit    = "C";
-    m_result.special = "TE";
+    m_result.main().unit    = "C";
+    m_result.main().special = "TE";
   }
   else if (data[13] & 0x01)
   {
-    m_result.unit    = "F";
-    m_result.special = "TE";
+    m_result.main().unit    = "F";
+    m_result.main().special = "TE";
   }
   else
   {
@@ -118,31 +118,31 @@ std::optional<DmmDecoder::DmmResponse> DecoderDTM0660::decode(const QByteArray &
   // try to find prefix
   //
   // Scales inline rather than via prefixFactor(), but the factors agree with it,
-  // so dval ends up in SI base units as DmmResponse requires.
+  // so dval ends up in SI base units as DmmChannel requires.
   if (data[9] & 0x02)
   {
-    m_result.dval /= 1e9;
-    m_result.unit.prepend( "n" );
+    m_result.main().dval /= 1e9;
+    m_result.main().unit.prepend( "n" );
   }
   else if (data[9] & 0x01)
   {
-    m_result.dval /= 1e6;
-    m_result.unit.prepend( "u" );
+    m_result.main().dval /= 1e6;
+    m_result.main().unit.prepend( "u" );
   }
   else if (data[10] & 0x01)
   {
-    m_result.dval /= 1e3;
-    m_result.unit.prepend( "m" );
+    m_result.main().dval /= 1e3;
+    m_result.main().unit.prepend( "m" );
   }
   else if (data[9] & 0x04)
   {
-    m_result.dval *= 1e3;
-    m_result.unit.prepend( "k" );
+    m_result.main().dval *= 1e3;
+    m_result.main().unit.prepend( "k" );
   }
   else if (data[10] & 0x04)
   {
-    m_result.dval *= 1e6;
-    m_result.unit.prepend( "M" );
+    m_result.main().dval *= 1e6;
+    m_result.main().unit.prepend( "M" );
   }
 
   return m_result;

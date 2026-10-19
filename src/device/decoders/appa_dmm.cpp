@@ -251,42 +251,42 @@ std::optional<DmmDecoder::DmmResponse> DecoderAppa::decode(const QByteArray &fra
   }
 
   m_result = {};
-  m_result.id = 0;
+  m_result.main().id = 0;
   m_result.showBar = true;
   m_result.range = autoRange ? "AUTO" : "MANU";
-  if (!reading(main, &m_result.dval, &m_result.val, &m_result.unit))
+  if (!reading(main, &m_result.main().dval, &m_result.main().val, &m_result.main().unit))
     return std::nullopt;   // "----", "Er", "FUSE" ...: no reading now (OL words are one)
   // the coupling of the function, where the unit has one
-  const QString base = m_result.unit.right(1);
+  const QString base = m_result.main().unit.right(1);
   const QString code = special(function);
   if (code == "AC" || code == "DC" || code == "ACDC")
-    m_result.special = (base == "V" || base == "A" || base == "W") ? code : QString();
+    m_result.main().special = (base == "V" || base == "A" || base == "W") ? code : QString();
   else
-    m_result.special = code;
+    m_result.main().special = code;
   switch (main.content)
   {
-    case 0x0a: case 0x0b: m_result.states |= SampleFlag::Relative; break;
-    case 0x0d: case 0x10: m_result.states |= SampleFlag::Max; break;
-    case 0x0e: case 0x11: m_result.states |= SampleFlag::Min; break;
-    case 0x0f: m_result.states |= SampleFlag::Avg; break;
+    case 0x0a: case 0x0b: m_result.main().states |= SampleFlag::Relative; break;
+    case 0x0d: case 0x10: m_result.main().states |= SampleFlag::Max; break;
+    case 0x0e: case 0x11: m_result.main().states |= SampleFlag::Min; break;
+    case 0x0f: m_result.main().states |= SampleFlag::Avg; break;
     case 0x14: case 0x1a: m_result.hold = true; break;
     default: break;
   }
 
   // the sub display: frequency, the other value, or off (cleared)
-  m_result.id2 = 1;
-  if (reading(sub, &m_result.dval2, &m_result.val2, &m_result.unit2))
+  DmmChannel &second = m_result.addChannel(1);
+  if (reading(sub, &second.dval, &second.val, &second.unit))
   {
-    if (m_result.unit2.endsWith("Hz"))
-      m_result.special2 = "FR";
-    else if (m_result.unit2 == "C" || m_result.unit2 == "dF")
-      m_result.special2 = "TE";
+    if (second.unit.endsWith("Hz"))
+      second.special = "FR";
+    else if (second.unit == "C" || second.unit == "dF")
+      second.special = "TE";
   }
   else
   {
-    m_result.val2.clear();
-    m_result.unit2.clear();
-    m_result.dval2 = 0;
+    second.val.clear();
+    second.unit.clear();
+    second.dval = 0;
   }
   return m_result;
 }

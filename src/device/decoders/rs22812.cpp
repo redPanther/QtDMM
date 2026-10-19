@@ -323,51 +323,51 @@ bool DecoderRS22812::checkFormat(const char* data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderRS22812::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id = id;
+  m_result.main().id = id;
   m_result.range = bit(data,7,0) ? "AUTO":"MANU";
   m_result.hold = bit(data, 7, 4);
   m_result.showBar = true;
-  m_result.special = bit(data, 7, 2) ? "AC" : "DC";
+  m_result.main().special = bit(data, 7, 2) ? "AC" : "DC";
 
   // check for overflow
   if (((data[3] & 0x0f7) == 0x000) &&
       ((data[4] & 0x0f7) == 0x027) &&
       ((data[5] & 0x0f7) == 0x0d7))
   {
-    m_result.val = "  0L  ";
+    m_result.main().val = "  0L  ";
   }
   else
   {
-    m_result.val = bit(data, 7, 3) ? " -" : "  ";
+    m_result.main().val = bit(data, 7, 3) ? " -" : "  ";
 
     for (int i = 0; i < 4; ++i)
     {
-      m_result.val +=  digit (data[6 - i]).value_or("?");
+      m_result.main().val +=  digit (data[6 - i]).value_or("?");
     }
   }
 
   // decimal marker
-  if (data[3] & 0x08)      m_result.val = insertComma(m_result.val, 3);
-  else if (data[4] & 0x08) m_result.val = insertComma(m_result.val, 2);
-  else if (data[5] & 0x08) m_result.val = insertComma(m_result.val, 1);
+  if (data[3] & 0x08)      m_result.main().val = insertComma(m_result.main().val, 3);
+  else if (data[4] & 0x08) m_result.main().val = insertComma(m_result.main().val, 2);
+  else if (data[5] & 0x08) m_result.main().val = insertComma(m_result.main().val, 1);
 
-  m_result.dval = m_result.val.toDouble();
+  m_result.main().dval = m_result.main().val.toDouble();
   QString unit;
 
   // special mode
-  if (bit(data, 7, 6)) m_result.special = "DI";
-  else if (bit(data, 7, 7)) m_result.special = "BUZ";
+  if (bit(data, 7, 6)) m_result.main().special = "DI";
+  else if (bit(data, 7, 7)) m_result.main().special = "BUZ";
 
   // base unit
-  if (bit(data, 1, 3))      {unit = "F";   m_result.special = "CA"; }
+  if (bit(data, 1, 3))      {unit = "F";   m_result.main().special = "CA"; }
   else if (bit(data, 1, 2)) {unit = "A"; }
-  else if (bit(data, 1, 6)) {unit = "Ohm"; m_result.special = "OH"; }
-  else if (bit(data, 1, 7)) {unit = "Hz";  m_result.special = "HZ"; }
+  else if (bit(data, 1, 6)) {unit = "Ohm"; m_result.main().special = "OH"; }
+  else if (bit(data, 1, 7)) {unit = "Hz";  m_result.main().special = "HZ"; }
   else if (bit(data, 1, 1)) { unit = "V"; }
-  else if (bit(data, 2, 3)) {unit = "%";   m_result.special = "PC"; }
+  else if (bit(data, 2, 3)) {unit = "%";   m_result.main().special = "PC"; }
   else if (bit(data, 2, 5)) {unit = "dBm"; }
-  else if (bit(data, 2, 4)) {unit = "s";  m_result.special = "HZ";}
-  else if (bit(data, 2, 2)) {unit = "A";  m_result.special = "HFE"; }
+  else if (bit(data, 2, 4)) {unit = "s";  m_result.main().special = "HZ";}
+  else if (bit(data, 2, 2)) {unit = "A";  m_result.main().special = "HFE"; }
   else { qDebug() << "Unknown unit!"; return std::nullopt;  }
 
   // prefix

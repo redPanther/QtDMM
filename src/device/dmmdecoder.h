@@ -25,7 +25,7 @@ class DmmDecoder : public QObject
   Q_OBJECT
 
 public:
-  /// A single decoded measurement.
+  /// One value of a decoded frame: the main display or a secondary one.
   ///
   /// Contract for the value triple - decoders MUST follow this, because the
   /// display and the recorder consume the two forms differently:
@@ -40,28 +40,46 @@ public:
   ///
   /// Use formatResultValue() to get this right; it inserts the decimal point,
   /// scales dval and assembles unit in one step.
+  ///
+  /// Not to be confused with PortKey::channel, the meter's input: a DmmChannel
+  /// is one of the values it shows, SCPI channel id + 1.
+  struct DmmChannel
+  {
+    int id = 0;         ///< which value this is: 0 = main display, 1.. secondary ones
+    double dval = 0;    ///< value in SI base units, what the graph and recorder use
+    QString val;        ///< value as shown on the meter's display, e.g. "-1.234" or "0.L";
+                        ///< empty for a secondary display that is off, so it is cleared
+    QString unit;       ///< display unit including SI prefix, e.g. "kOhm", "mV"
+    QString special;    ///< coupling/function: "AC", "DC", "ACDC", "DI", "BUZ", ...
+    quint32 states = 0; ///< other annunciators of this value: SampleFlag
+                        ///< Max, Min, Relative, Peak (the meter's own keys)
+  };
+
+  /// A decoded frame: its values (channels[0] the main display) and the
+  /// annunciators that belong to the whole meter.
   class DmmResponse
   {
   public:
-    double dval;      ///< value in SI base units, what the graph and recorder use
-    QString val;      ///< value as shown on the meter's display, e.g. "-1.234" or "0.L"
-    QString unit;     ///< display unit including SI prefix, e.g. "kOhm", "mV"
-    QString special;  ///< coupling/function: "AC", "DC", "ACDC", "DI", "BUZ", ...
+    QVector<DmmChannel> channels{DmmChannel{}}; ///< always at least the main value
     QString range;    ///< "AUTO", "MANU" or empty
-    bool hold;        ///< the meter's HOLD annunciator is on
-    bool showBar;     ///< the meter shows a bar graph for this reading
-    bool lowBat;      ///< low battery indicator
-    int id;           ///< which value this is (0 = main display) for multi-value meters
+    bool hold = false;    ///< the meter's HOLD annunciator is on
+    bool showBar = false; ///< the meter shows a bar graph for this reading
+    bool lowBat = false;  ///< low battery indicator
     QString error;    ///< non-empty when the frame was understood but flagged an error
-    double dval2;     ///< optional second value in the same frame (e.g. frequency)
-    QString val2;     ///< display form of the second value
-    QString unit2;    ///< unit of the second value
-    QString special2; ///< coupling of the second value; empty, not the main value's
-    int id2;          ///< id of the second value, 0 when there is none. A meter
-                      ///< with a secondary display sends id2 = 1 with an empty
-                      ///< val2 when that display is off, so it is cleared
-    quint32 states = 0; ///< other annunciators of the main value: SampleFlag
-                        ///< Max, Min, Relative, Peak (the meter's own keys)
+
+    /// The main value, channels[0]. A meter that sends one frame per value
+    /// (AirCO2ntrol) has only this one and tells which value it is by its id.
+    DmmChannel &main() { return channels[0]; }
+    const DmmChannel &main() const { return channels[0]; }
+    /// Appends a secondary value with @p id; the decoder fills it in. A
+    /// meter with a secondary display adds it with an empty val while the
+    /// display is off, so the views clear it.
+    DmmChannel &addChannel(int id)
+    {
+      channels.append(DmmChannel{});
+      channels.last().id = id;
+      return channels.last();
+    }
   };
 
   /// Describes one supported meter: what the settings page fills in when the
@@ -175,15 +193,15 @@ protected:
   QString insertCommaIT(const QString &val, int pos);
   /// Scale factor for an SI prefix ("k" -> 1e3). Unknown prefixes yield 1.0.
   static double prefixFactor(const QString &prefix);
-  /// m_result.val and .unit from @p number in E notation ("+12.345E+6") and
+  /// m_result.main().val and .unit from @p number in E notation ("+12.345E+6") and
   /// its @p value: with the meter's digits ("12.345", "M" + unit) when the
   /// exponent is a multiple of three from @p lowestExponent (at least -12) up
   /// to 9, otherwise as SiPrefix::format() puts it (the SCPI-like answers of
   /// the Fluke meters).
   void setFromENotation(const QString &number, double value, const QString &unit, int lowestExponent);
-  /// Finishes m_result from the raw digit string in m_result.val: inserts
+  /// Finishes m_result from the raw digit string in m_result.main().val: inserts
   /// the decimal point at @p commaPos, sets unit to prefix+baseUnit and dval
-  /// to the value scaled by the prefix. See the DmmResponse contract.
+  /// to the value scaled by the prefix. See the DmmChannel contract.
   void formatResultValue(int commaPos, const QString& prefix, const QString& baseUnit);
   /// Tests bit @p bit (0 = LSB) of byte @p byte of the frame.
   bool bit(const QByteArray &data, int byte, int bit) const;

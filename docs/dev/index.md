@@ -7,7 +7,7 @@ Documentation for people working on QtDMM itself. Planned pages:
   `tests/data/decoder/` are generated from the protocol specifications.
 - **Architecture** — the path from `Transport` and the `QIODevice` backends
   through `FrameReader` and the `DmmDecoder` subclasses to `MeterConnection`, `InstanceWidget`,
-  `LcdWidget` and `GraphWidget`; the `DmmResponse` value contract; the
+  `LcdWidget` and `GraphWidget`; the `DmmChannel` value contract; the
   `SharedStateManager` used for multiple instances.
 - **Adding a protocol** — the `DmmDecoder` subclass, a value in the
   `FrameFormat::DataFormat` enum (before `EndOfList`), one row in the table in

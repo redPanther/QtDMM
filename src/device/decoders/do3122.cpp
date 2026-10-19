@@ -37,7 +37,7 @@ bool DecoderDO3122::checkFormat(const char* data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderDO3122::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id     = id;
+  m_result.main().id     = id;
   m_result.hold   = false;
   m_result.range  = "";
   m_result.showBar = true;
@@ -135,10 +135,10 @@ std::optional<DmmDecoder::DmmResponse> DecoderDO3122::decode(const QByteArray &d
 
     if (true == convOk)
     {
-      m_result.dval   = d_val;
-      m_result.special= special;
-      m_result.val    = val;
-      m_result.unit  = unit;
+      m_result.main().dval   = d_val;
+      m_result.main().special= special;
+      m_result.main().val    = val;
+      m_result.main().unit  = unit;
     }
     else
       m_result.error = tr("Parser errors");

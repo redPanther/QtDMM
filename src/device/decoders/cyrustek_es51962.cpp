@@ -27,27 +27,27 @@ size_t DecoderCyrusTekES51962::getPacketLength()
 std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51962::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id     = id;
-  m_result.hold   = false;
-  m_result.range  = bit(data,8,1) ? "AUTO" : "MANU";
-  m_result.val    = makeValue(data,1,4,bit(data,6,2));
+  m_result.main().id  = id;
+  m_result.hold       = false;
+  m_result.range      = bit(data,8,1) ? "AUTO" : "MANU";
+  m_result.main().val = makeValue(data,1,4,bit(data,6,2));
   m_result.showBar= true;
-  m_result.special="";
+  m_result.main().special="";
 
   if (bit(data,8,2))
-    m_result.special+= "AC";
+    m_result.main().special+= "AC";
   if (bit(data,8,3))
-    m_result.special+= "DC";
+    m_result.main().special+= "DC";
 
 
   if (!memcmp(data + 1, "4000", 4) || (data[6] & 1) != 0)
-    m_result.val = "  0L";
+    m_result.main().val = "  0L";
 
   // Function
   switch (data[5])
   {
     case 0x31:
-      m_result.unit = "D";
+      m_result.main().unit = "D";
       break;
     case 0x32:
 
@@ -62,7 +62,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51962::decode(const QByt
       }
       break;
     case 0x33:
-      m_result.unit = "kOhm";
+      m_result.main().unit = "kOhm";
       switch (data[0]) // Range
       {
         case '0': formatResultValue(3,"","Ohm"); break;
@@ -74,11 +74,11 @@ std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51962::decode(const QByt
       }
       break;
     case 0x34:
-      m_result.special = "TE";
+      m_result.main().special = "TE";
       formatResultValue(0,"",(data[6] & 8) ? "C" : "dF"); break;
       break;
     case 0x35:
-      m_result.special = "BUZ";
+      m_result.main().special = "BUZ";
       formatResultValue(3,"","Ohm");
       break;
     case 0x36:
@@ -106,7 +106,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51962::decode(const QByt
       }
       break;
     case 0x3b:
-      m_result.unit = "V";
+      m_result.main().unit = "V";
       switch (data[0]) // Range
       {
         case '0': formatResultValue(3,"m","V"); break;

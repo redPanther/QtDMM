@@ -149,16 +149,17 @@ int main(int argc, char **argv)
   // --- the second value: its own port, or a slot of the main one ---
   {
     DmmDecoder::DmmResponse r{};
-    r.dval = 230.1; r.val = "230.1"; r.unit = "V"; r.special = "AC"; r.range = "AUTO"; r.showBar = true;
-    r.dval2 = 50.0; r.val2 = "50.00"; r.unit2 = "Hz"; r.id2 = 1;
+    DmmDecoder::DmmChannel &m = r.main();
+    m.dval = 230.1; m.val = "230.1"; m.unit = "V"; m.special = "AC"; r.range = "AUTO"; r.showBar = true;
+    r.addChannel(1) = { 1, 50.0, "50.00", "Hz", "", 0 };
     QList<PortSample> s = a.adapt(r, 1234);
     check(s.size() == 2 && s[0].port.toString() == "voltage.ac" && s[1].port.toString() == "frequency",
           "V AC + Hz: two ports");
     check(s[1].id == 1 && s[1].sample.wall == 1234, "second value: id 1, the frame's time");
-    r.unit = "C"; r.special = "TE"; r.unit2 = "dF"; r.val2 = "254.1";
+    r.main().unit = "C"; r.main().special = "TE"; r.channels[1].unit = "dF"; r.channels[1].val = "254.1";
     s = a.adapt(r, 0);
     check(s[1].port.toString() == "temperature.sub", "°C + °F: the same quantity, slot sub: " + s[1].port.toString());
-    r.val2.clear(); r.unit2.clear();
+    r.channels[1].val.clear(); r.channels[1].unit.clear();
     s = a.adapt(r, 0);
     check(s.size() == 2 && s[1].sample.text.isEmpty(), "an empty second value comes along, to clear the display");
     r.lowBat = true;

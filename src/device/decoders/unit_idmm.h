@@ -22,14 +22,14 @@
 /// fn selects the function (DCV, OHM, ...), range an ASCII digit that, with
 /// fn, gives unit and prefix; the display string carries sign and decimal
 /// point exactly as on the LCD. Bit 7 of fn marks a frame of the second
-/// display (DmmResponse::id + 1, no flags). Other frames (the 11-byte name
+/// display (DmmChannel::id + 1, no flags). Other frames (the 11-byte name
 /// answer) fail the length/checksum test and are skipped.
 ///
 /// The meter's keys are frames of the same kind, `AB CD 03 <cmd> <16 bit BE
 /// sum>` (keyRequest()): 0x46 RANGE, 0x47 AUTO, 0x48 REL, 0x4A HOLD, 0x4B
 /// LIGHT, 0x4C SELECT; the UT61x+ also 0x41 MAX/MIN, 0x42 leave MAX/MIN,
 /// 0x49 Hz/%, 0x4D PEAK and 0x4E leave PEAK. HOLD, REL, MAX/MIN and PEAK
-/// come back in flags A and C (DmmResponse::states).
+/// come back in flags A and C (DmmChannel::states).
 ///
 /// Spec with vectors in docs/protocols/spec/unit_idmm.yaml. Sources:
 /// ble-multimeter (docs/protocols/uni-t.md, hardware-verified on a UT60BTk)

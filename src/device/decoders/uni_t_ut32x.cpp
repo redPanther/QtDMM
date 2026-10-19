@@ -29,18 +29,18 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTUT32x::decode(const QByteArray
     return std::nullopt;
 
   m_result = {};
-  m_result.id = id;
-  m_result.special = "TE";
+  m_result.main().id = id;
+  m_result.main().special = "TE";
   switch (data[5])
   {
-    case '1': m_result.unit = "C"; break;
-    case '2': m_result.unit = "dF"; break;
-    case '3': m_result.unit = "K"; break;
+    case '1': m_result.main().unit = "C"; break;
+    case '2': m_result.main().unit = "dF"; break;
+    case '3': m_result.main().unit = "K"; break;
     default: return std::nullopt;   // a stored value, or nothing to show
   }
   // which sensor the large display shows: T1-T2 is a difference
   if (data[13] == '2' || data[13] == '3')
-    m_result.states |= SampleFlag::Relative;
+    m_result.main().states |= SampleFlag::Relative;
 
   // ':' blank, ';' minus, ";;;;" no sensor; @0 says where the point is
   QString digits;
@@ -63,15 +63,15 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTUT32x::decode(const QByteArray
   }
   if (dashes == 4)
   {
-    m_result.val = "OPEN";   // no sensor at that input
-    m_result.dval = 0;
+    m_result.main().val = "OPEN";   // no sensor at that input
+    m_result.main().dval = 0;
     return m_result;
   }
   if (dashes > 1 || digits.isEmpty())
     return std::nullopt;
   const int decimals = (data[0] & 0x02) ? 1 : 0;
   const double value = (negative ? -1 : 1) * digits.toInt() / (decimals ? 10.0 : 1.0);
-  m_result.dval = value;
-  m_result.val = QString::number(value, 'f', decimals);
+  m_result.main().dval = value;
+  m_result.main().val = QString::number(value, 'f', decimals);
   return m_result;
 }

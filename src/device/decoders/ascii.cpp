@@ -86,23 +86,23 @@ bool DecoderAscii::decodeSigrok(QString str)
   QStringList list = str.trimmed().split(" ", Qt::SkipEmptyParts);
   if (list.size()<2)
     return false;
-  m_result.val = list[1];
-  if (m_result.val == "inf")
-    m_result.val = " OL ";
-  else if (m_result.val == "-inf")
-    m_result.val = "-OL ";
+  m_result.main().val = list[1];
+  if (m_result.main().val == "inf")
+    m_result.main().val = " OL ";
+  else if (m_result.main().val == "-inf")
+    m_result.main().val = "-OL ";
 
   // libsigrok spells the units the same for every driver; map the ones the
   // other decoders spell differently, so units compare equal across protocols
-  m_result.unit = list.size() > 2 ? list[2] : QString();
+  m_result.main().unit = list.size() > 2 ? list[2] : QString();
   // libsigrok prints a value without unit only for continuity (SR_UNIT_BOOLEAN)
-  if (m_result.unit.isEmpty())
-    m_result.special = "BUZ";
-  m_result.unit.replace(QStringLiteral("Ω"), QStringLiteral("Ohm"));
-  if (m_result.unit == QStringLiteral("°C"))
-    m_result.unit = QStringLiteral("C");
-  else if (m_result.unit == QStringLiteral("°F"))
-    m_result.unit = QStringLiteral("dF");
+  if (m_result.main().unit.isEmpty())
+    m_result.main().special = "BUZ";
+  m_result.main().unit.replace(QStringLiteral("Ω"), QStringLiteral("Ohm"));
+  if (m_result.main().unit == QStringLiteral("°C"))
+    m_result.main().unit = QStringLiteral("C");
+  else if (m_result.main().unit == QStringLiteral("°F"))
+    m_result.main().unit = QStringLiteral("dF");
 
   // all fields: CalcDevice puts the coupling where sigrok has the channel
   // ("DC 6 W AUTO"), and no unit or value is spelled like a flag
@@ -111,9 +111,9 @@ bool DecoderAscii::decodeSigrok(QString str)
   {
     if (item == "HOLD") m_result.hold = true;
     else if (item == "AUTO") m_result.range = "AUTO";
-    else if (item == "DC") m_result.special = "DC";
-    else if (item == "AC") m_result.special = "AC";
-    else if (item == "DIODE") m_result.special = "DI";
+    else if (item == "DC") m_result.main().special = "DC";
+    else if (item == "AC") m_result.main().special = "AC";
+    else if (item == "DIODE") m_result.main().special = "DI";
   }
   return true;
 }
@@ -122,7 +122,7 @@ bool DecoderAscii::decodeSigrok(QString str)
 std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id = id;
+  m_result.main().id = id;
   m_result.range = "";
   m_result.hold = false;
   m_result.showBar = true;
@@ -134,13 +134,13 @@ std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &da
     case FrameFormat::Metex14:
     case FrameFormat::Voltcraft14Continuous:
     case FrameFormat::Voltcraft15Continuous:
-      m_result.val     = str.mid(2, 7).trimmed();
-      m_result.unit    = str.mid(9, 4).trimmed();
-      m_result.special = str.left(3).trimmed();
+      m_result.main().val     = str.mid(2, 7).trimmed();
+      m_result.main().unit    = str.mid(9, 4).trimmed();
+      m_result.main().special = str.left(3).trimmed();
       break;
     case FrameFormat::PeakTech10:
-      m_result.val  = str.mid(1, 6).trimmed();
-      m_result.unit = str.mid(7, 4).trimmed();
+      m_result.main().val  = str.mid(1, 6).trimmed();
+      m_result.main().unit = str.mid(7, 4).trimmed();
       break;
     case FrameFormat::Sigrok:
       if (!decodeSigrok(str))
@@ -150,16 +150,16 @@ std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &da
       return std::nullopt;
   }
 
-  m_result.dval = m_result.val.toDouble();
+  m_result.main().dval = m_result.main().val.toDouble();
 
-  switch (m_result.unit.length())
+  switch (m_result.main().unit.length())
   {
     case 0:
       if (m_type!=FrameFormat::Sigrok) return std::nullopt;
-        formatResultValue(0, "", m_result.unit);
+        formatResultValue(0, "", m_result.main().unit);
         break;
     case 1:
-      formatResultValue(0, "", m_result.unit);
+      formatResultValue(0, "", m_result.main().unit);
       break;
     default:
     {
@@ -167,13 +167,13 @@ std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &da
       // docs/protocols/sources/metex-22t.log, and heha's Metex.cpp lists
       // "pnum KMG" as the prefix alphabet). Normalise it so the value is scaled
       // and the unit matches what LcdWidget knows.
-      QString prefix = m_result.unit.left(1);
+      QString prefix = m_result.main().unit.left(1);
       if (prefix == "K")
         prefix = "k";
       if (unit_prefixes.contains(prefix))
-        formatResultValue(0, prefix, m_result.unit.mid(1));
+        formatResultValue(0, prefix, m_result.main().unit.mid(1));
       else
-        formatResultValue(0, "", m_result.unit);
+        formatResultValue(0, "", m_result.main().unit);
       break;
     }
   }

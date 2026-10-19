@@ -65,7 +65,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM25x::decode(const QByteArr
       return std::nullopt;
 
   m_result = {};
-  m_result.id = id;
+  m_result.main().id = id;
   m_result.showBar = true;
   m_result.hold = (buf[11] & 0x08) != 0;
   m_result.range = (buf[1] & 0x08) ? "AUTO" : "MANU";
@@ -124,19 +124,19 @@ std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM25x::decode(const QByteArr
   else if (buf[14] & 0x02) { unit = "A"; }
   else if (!dc && !ac)     { special = ""; }
 
-  m_result.val = overload ? QStringLiteral(" OL ") : val.trimmed();
-  m_result.special = special;
+  m_result.main().val = overload ? QStringLiteral(" OL ") : val.trimmed();
+  m_result.main().special = special;
   if (numeric)
   {
     // formatResultValue() expects the raw digits and inserts the point
     // itself; the string already carries it, so scale directly
-    m_result.dval = val.toDouble() * prefixFactor(prefix);
-    m_result.unit = prefix + unit;
+    m_result.main().dval = val.toDouble() * prefixFactor(prefix);
+    m_result.main().unit = prefix + unit;
   }
   else
   {
-    m_result.dval = 0.0;
-    m_result.unit = prefix + unit;
+    m_result.main().dval = 0.0;
+    m_result.main().unit = prefix + unit;
   }
   return m_result;
 }

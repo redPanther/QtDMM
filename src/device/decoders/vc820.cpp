@@ -80,8 +80,8 @@ size_t DecoderVC820::getPacketLength()
 std::optional<DmmDecoder::DmmResponse> DecoderVC820::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id     = id;
-  m_result.hold   = (data[11] & 0x01);
+  m_result.main().id = id;
+  m_result.hold      = (data[11] & 0x01);
   m_result.showBar= true;
   m_result.range = (bit(data, 0, 1)? "AUTO" : "MANU");
 
@@ -114,7 +114,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC820::decode(const QByteArray &da
   else if (in[7] & 0x08) val = insertComma(val, 3);
 
   // The prefix has to be known here already: dval is contractually in SI base
-  // units (see DmmResponse), so it must be scaled by the prefix factor.
+  // units (see DmmChannel), so it must be scaled by the prefix factor.
   QString prefix;
   if (in[9] & 0x04)       prefix = "n";
   else if (in[ 9] & 0x08) prefix = "u";
@@ -122,7 +122,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC820::decode(const QByteArray &da
   else if (in[ 9] & 0x02) prefix = "k";
   else if (in[10] & 0x02) prefix = "M";
 
-  m_result.dval  = val.toDouble() * prefixFactor(prefix);
+  m_result.main().dval  = val.toDouble() * prefixFactor(prefix);
 
   // try to find some special modes
   if (in[9] & 0x01)
@@ -170,9 +170,9 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC820::decode(const QByteArray &da
 
   unit.prepend(prefix);
 
-  m_result.special= special;
-  m_result.val    = val;
-  m_result.unit  = unit;
+  m_result.main().special= special;
+  m_result.main().val    = val;
+  m_result.main().unit  = unit;
 
   return m_result;
 }

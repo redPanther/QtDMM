@@ -99,7 +99,7 @@ bool DecoderM9803R::checkFormat(const char* data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderM9803R::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id     = id;
+  m_result.main().id     = id;
   m_result.hold   = false;
   m_result.range  = bit(data,8,2) ? "AUTO" : "MANU";
   m_result.showBar = true;
@@ -126,155 +126,155 @@ std::optional<DmmDecoder::DmmResponse> DecoderM9803R::decode(const QByteArray &d
       switch (data[6])
       {
         case 0x00:
-          m_result.unit = "mV";
+          m_result.main().unit = "mV";
           val = insertCommaIT(val, 3);
           break;
         case 0x01:
-          m_result.unit = "V";
+          m_result.main().unit = "V";
           val = insertCommaIT(val, 1);
           break;
         case 0x02:
-          m_result.unit = "V";
+          m_result.main().unit = "V";
           val = insertCommaIT(val, 2);
           break;
         case 0x03:
-          m_result.unit = "V";
+          m_result.main().unit = "V";
           val = insertCommaIT(val, 3);
           break;
         case 0x04:
-          m_result.unit = "V";
+          m_result.main().unit = "V";
           break;
       }
-      m_result.special = data[5] == 0x00 ? "DC" : "AC";
+      m_result.main().special = data[5] == 0x00 ? "DC" : "AC";
       break;
     case 0x02:   // DC mA
     case 0x03:   // AC mA
       switch (data[6])
       {
         case 0x00:
-          m_result.unit = "mA";
+          m_result.main().unit = "mA";
           val = insertCommaIT(val, 1);
           break;
         case 0x01:
-          m_result.unit = "mA";
+          m_result.main().unit = "mA";
           val = insertCommaIT(val, 2);
           break;
         case 0x02:
-          m_result.unit = "mA";
+          m_result.main().unit = "mA";
           val = insertCommaIT(val, 3);
           break;
       }
-      m_result.special = data[5] == 0x02 ? "DC" : "AC";
+      m_result.main().special = data[5] == 0x02 ? "DC" : "AC";
       break;
     case 0x04:
       switch (data[6])
       {
         case 0x00:
-          m_result.unit = "Ohm";
+          m_result.main().unit = "Ohm";
           val = insertCommaIT(val, 1);
           break;
         case 0x01:
-          m_result.unit = "kOhm";
+          m_result.main().unit = "kOhm";
           val = insertCommaIT(val, 1);
           break;
         case 0x02:
-          m_result.unit = "kOhm";
+          m_result.main().unit = "kOhm";
           val = insertCommaIT(val, 2);
           break;
         case 0x03:
-          m_result.unit = "kOhm";
+          m_result.main().unit = "kOhm";
           val = insertCommaIT(val, 3);
           break;
         case 0x04:
-          m_result.unit = "kOhm";
+          m_result.main().unit = "kOhm";
           break;
         case 0x05:
-          m_result.unit = "MOhm";
+          m_result.main().unit = "MOhm";
           val = insertCommaIT(val, 2);
           break;
       }
-      m_result.special = "OH";
+      m_result.main().special = "OH";
       break;
     case 0x05:
       switch (data[6])
       {
         case 0x00:
-          m_result.unit = "Ohm";
+          m_result.main().unit = "Ohm";
           val = insertCommaIT(val, 3);
           break;
       }
-      m_result.special = "OH";
+      m_result.main().special = "OH";
       break;
     case 0x06:
-      m_result.unit = "V";
+      m_result.main().unit = "V";
       val = insertCommaIT(val, 1);
-      m_result.special = "DI";
+      m_result.main().special = "DI";
       break;
     case 0x08:
-      m_result.unit = "A";
+      m_result.main().unit = "A";
       val = insertCommaIT(val, 2);
-      m_result.special = "DC";
+      m_result.main().special = "DC";
       break;
     case 0x09:
-      m_result.unit = "A";
+      m_result.main().unit = "A";
       val = insertCommaIT(val, 2);
-      m_result.special = "AC";
+      m_result.main().special = "AC";
       break;
     case 0x0A:
       m_result.showBar = false;
       switch (data[6])
       {
         case 0x00:
-          m_result.unit = "kHz";
+          m_result.main().unit = "kHz";
           val = insertCommaIT(val, 1);
           break;
         case 0x01:
-          m_result.unit = "kHz";
+          m_result.main().unit = "kHz";
           val = insertCommaIT(val, 2);
           break;
         case 0x05:
-          m_result.unit = "Hz";
+          m_result.main().unit = "Hz";
           val = insertCommaIT(val, 2);
           break;
         case 0x06:
-          m_result.unit = "Hz";
+          m_result.main().unit = "Hz";
           val = insertCommaIT(val, 3);
           break;
       }
-      m_result.special = "HZ";
+      m_result.main().special = "HZ";
       break;
     case 0x0C:
       switch (data[6])
       {
         case 0x00:
-          m_result.unit = "nF";
+          m_result.main().unit = "nF";
           val = insertCommaIT(val, 1);
           break;
         case 0x01:
-          m_result.unit = "nF";
+          m_result.main().unit = "nF";
           val = insertCommaIT(val, 2);
           break;
         case 0x02:
-          m_result.unit = "nF";
+          m_result.main().unit = "nF";
           val = insertCommaIT(val, 3);
           break;
         case 0x03:
-          m_result.unit = "uF";
+          m_result.main().unit = "uF";
           val = insertCommaIT(val, 1);
           break;
         case 0x04:
-          m_result.unit = "uF";
+          m_result.main().unit = "uF";
           val = insertCommaIT(val, 2);
           break;
       }
-      m_result.special = "CA";
+      m_result.main().special = "CA";
       break;
   }
 
-  m_result.val    = val.trimmed();
+  m_result.main().val    = val.trimmed();
   // the unit strings above carry their SI prefix ("mV", "kOhm"); dval is in
   // base units like every decoder's, so 123.4 mV is 0.1234
-  m_result.dval   = m_result.val.toDouble() * prefixFactor(SiPrefix::split(m_result.unit).prefix);
+  m_result.main().dval   = m_result.main().val.toDouble() * prefixFactor(SiPrefix::split(m_result.main().unit).prefix);
 
   return m_result;
 }

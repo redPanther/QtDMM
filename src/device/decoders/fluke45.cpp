@@ -35,7 +35,7 @@ bool DecoderFluke45::checkFormat(const char *data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderFluke45::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id = id;
+  m_result.main().id = id;
   m_result.showBar = true;
 
   // the last non-empty line; earlier ones are prompts or echoes
@@ -74,7 +74,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderFluke45::decode(const QByteArray &
     return std::nullopt;
 
   QString unit = row->unit;
-  m_result.special = row->special;
+  m_result.main().special = row->special;
   m_result.hold = modifiers & 0x04;      // 1 MN, 2 MX, 4 HOLD, 8 dB, 16 dB power, 32 REL, 64 COMP
   if (modifiers & 0x10)
     unit = "W";       // dB Power: the primary display shows watts
@@ -83,9 +83,9 @@ std::optional<DmmDecoder::DmmResponse> DecoderFluke45::decode(const QByteArray &
 
   if (number == "+1E+9" || number == "-1E+9")
   {
-    m_result.val = number.startsWith('-') ? "-OL" : "OL";
-    m_result.unit = unit;
-    m_result.dval = 0;
+    m_result.main().val = number.startsWith('-') ? "-OL" : "OL";
+    m_result.main().unit = unit;
+    m_result.main().dval = 0;
     return m_result;
   }
 
@@ -93,14 +93,14 @@ std::optional<DmmDecoder::DmmResponse> DecoderFluke45::decode(const QByteArray &
   const double value = number.toDouble(&ok);
   if (!ok)
     return std::nullopt;
-  m_result.dval = value;
+  m_result.main().dval = value;
 
   // "+12.345E+6" is shown as "12.345 MOhm"; dB without a prefix
   if (unit.startsWith("dB"))
   {
     QString prefix;
-    m_result.val = SiPrefix::format(value, &prefix);
-    m_result.unit = prefix + unit;
+    m_result.main().val = SiPrefix::format(value, &prefix);
+    m_result.main().unit = prefix + unit;
   }
   else
     setFromENotation(number, value, unit, -9);

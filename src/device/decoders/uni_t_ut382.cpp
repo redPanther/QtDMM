@@ -78,24 +78,24 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTUT382::decode(const QByteArray
   }
 
   m_result = {};
-  m_result.id = 0;
-  m_result.special = "LUX";
-  m_result.unit = unit;
+  m_result.main().id = 0;
+  m_result.main().special = "LUX";
+  m_result.main().unit = unit;
   m_result.range = (b[10] & 0x02) ? "AUTO" : "MANU";
   m_result.hold = b[11] & 0x10;
   m_result.lowBat = b[9] & 0x10;
   if (b[11] & 0x20)
-    m_result.states |= SampleFlag::Max;
+    m_result.main().states |= SampleFlag::Max;
   if (b[11] & 0x40)
-    m_result.states |= SampleFlag::Min;
+    m_result.main().states |= SampleFlag::Min;
 
   // thousands first: @4 @3 @2 @1
   const int d[4] = { segmentDigit(b[4] & 0x7f), segmentDigit(b[3] & 0x7f), segmentDigit(b[2] & 0x7f),
                      segmentDigit(b[1] & 0x7f) };
   if (d[0] == -1 && d[1] == 0 && d[2] == -2 && d[3] == -1)
   {
-    m_result.val = "OL";
-    m_result.dval = 0;
+    m_result.main().val = "OL";
+    m_result.main().dval = 0;
     return m_result;
   }
   int count = 0;
@@ -114,7 +114,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTUT382::decode(const QByteArray
     value *= 10;
     decimals = std::max(0, decimals - 1);
   }
-  m_result.dval = value;
-  m_result.val = QString::number(value, 'f', decimals);
+  m_result.main().dval = value;
+  m_result.main().val = QString::number(value, 'f', decimals);
   return m_result;
 }

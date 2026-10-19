@@ -12,6 +12,12 @@
 #include "device/victronble.h"
 #include "testutil.h"
 
+// The second value of a frame; a default one (id 0) when it has none.
+static DmmDecoder::DmmChannel second(const DmmDecoder::DmmResponse &r)
+{
+  return r.channels.value(1);
+}
+
 int main(int argc, char **argv)
 {
   QCoreApplication app(argc, argv);
@@ -46,11 +52,11 @@ int main(int argc, char **argv)
     check(r.has_value(), "short battery monitor record still decodes");
     if (r)
     {
-      check(r->val == "12.53" && r->unit == "V", "the voltage that is there is shown: " + r->val);
-      check(r->val2.isEmpty() || r->val2 == "---", "the truncated current is not: '" + r->val2 + "'");
+      check(r->main().val == "12.53" && r->main().unit == "V", "the voltage that is there is shown: " + r->main().val);
+      check(second(*r).val.isEmpty() || second(*r).val == "---", "the truncated current is not: '" + second(*r).val + "'");
     }
     const auto sc = d.decode(VictronBle::frame(VictronBle::SolarCharger, QByteArray::fromHex("0000e504"), "V", "I"), 0);
-    check(sc.has_value() && (sc->val2.isEmpty() || sc->val2 == "---"), "solar charger: truncated current is not shown");
+    check(sc.has_value() && (second(*sc).val.isEmpty() || second(*sc).val == "---"), "solar charger: truncated current is not shown");
   }
 
   // --- 2. key parsing ---
@@ -81,9 +87,9 @@ int main(int argc, char **argv)
         check(r.has_value(), "battery monitor decodes");
         if (r)
         {
-          check(qFuzzyCompare(r->dval, 12.53) && r->val == "12.53" && r->unit == "V" && r->special == "DC",
-                QString("voltage 12.53 V: %1 %2").arg(r->val, r->unit));
-          check(r->id2 == 1 && qFuzzyCompare(r->dval2 + 1, 1.0) && r->unit2 == "A", "current 0 A as second value");
+          check(qFuzzyCompare(r->main().dval, 12.53) && r->main().val == "12.53" && r->main().unit == "V" && r->main().special == "DC",
+                QString("voltage 12.53 V: %1 %2").arg(r->main().val, r->main().unit));
+          check(second(*r).id == 1 && qFuzzyCompare(second(*r).dval + 1, 1.0) && second(*r).unit == "A", "current 0 A as second value");
         }
       }
     }
@@ -103,9 +109,9 @@ int main(int argc, char **argv)
       check(r.has_value(), "solar charger decodes");
       if (r)
       {
-        check(r->dval == 19.0 && r->val == "19" && r->unit == "W", QString("PV power 19 W: %1 %2").arg(r->val, r->unit));
-        check(r->id2 == 1 && qFuzzyCompare(r->dval2, 13.88) && r->val2 == "13.88" && r->unit2 == "V",
-              QString("battery 13.88 V as second value: %1 %2").arg(r->val2, r->unit2));
+        check(r->main().dval == 19.0 && r->main().val == "19" && r->main().unit == "W", QString("PV power 19 W: %1 %2").arg(r->main().val, r->main().unit));
+        check(second(*r).id == 1 && qFuzzyCompare(second(*r).dval, 13.88) && second(*r).val == "13.88" && second(*r).unit == "V",
+              QString("battery 13.88 V as second value: %1 %2").arg(second(*r).val, second(*r).unit));
       }
     }
   }
@@ -126,9 +132,9 @@ int main(int argc, char **argv)
       check(r.has_value(), "inverter decodes");
       if (r)
       {
-        check(r->dval == 6.0 && r->val == "6" && r->unit == "VA" && r->special == "AC",
-              QString("6 VA AC: %1 %2 %3").arg(r->val, r->unit, r->special));
-        check(r->id2 == 1 && qFuzzyCompare(r->dval2, 13.17) && r->unit2 == "V", "battery 13.17 V as second value");
+        check(r->main().dval == 6.0 && r->main().val == "6" && r->main().unit == "VA" && r->main().special == "AC",
+              QString("6 VA AC: %1 %2 %3").arg(r->main().val, r->main().unit, r->main().special));
+        check(second(*r).id == 1 && qFuzzyCompare(second(*r).dval, 13.17) && second(*r).unit == "V", "battery 13.17 V as second value");
       }
     }
   }
@@ -139,11 +145,11 @@ int main(int argc, char **argv)
     const auto parsed = VictronBle::parse(QByteArray::fromHex("100289a302b040af925d09a4d89aa0128bdef48c6298a9"));
     const auto plain = VictronBle::decrypt(*parsed, VictronBle::keyFromHex("aff4d0995b7d1e176c0c33ecb9e70dcd"));
     const auto soc = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, "SOC", "AH"), 0);
-    check(soc && qFuzzyCompare(soc->dval, 50.0) && soc->val == "50.0" && soc->unit == "%",
-          QString("SOC as main value: %1 %2").arg(soc ? soc->val : "-", soc ? soc->unit : "-"));
-    check(soc && soc->id2 == 1 && qFuzzyCompare(soc->dval2, -50.0) && soc->unit2 == "Ah", "consumed Ah as second value");
+    check(soc && qFuzzyCompare(soc->main().dval, 50.0) && soc->main().val == "50.0" && soc->main().unit == "%",
+          QString("SOC as main value: %1 %2").arg(soc ? soc->main().val : "-", soc ? soc->main().unit : "-"));
+    check(soc && second(*soc).id == 1 && qFuzzyCompare(second(*soc).dval, -50.0) && second(*soc).unit == "Ah", "consumed Ah as second value");
     const auto none = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, "P", "-"), 0);
-    check(none && none->id2 == 1 && none->val2.isEmpty() && none->unit == "W" && qFuzzyCompare(none->dval + 1, 1.0), "power main, no second value");
+    check(none && second(*none).id == 1 && second(*none).val.isEmpty() && none->main().unit == "W" && qFuzzyCompare(none->main().dval + 1, 1.0), "power main, no second value");
     check(!decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, "NOPE", "V"), 0).has_value(),
           "unknown field id gives nothing");
     const QList<DecoderVictronBLE::Value> all = DecoderVictronBLE::values(VictronBle::BatteryMonitor, *plain);
