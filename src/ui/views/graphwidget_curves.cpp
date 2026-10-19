@@ -420,17 +420,25 @@ void GraphWidget::rebuildExtras()
   // the units: the main value's on the left; on the right the unit of the
   // lowest value in another one (by number, not by which came first), its
   // newest series. The integrated value has its axis also while it is hidden
+  // A value with the right axis chosen has the say there, in any unit
   const QString main = leftUnit();
   m_unit2.clear();
   int unit2Id = INT_MAX;
+  bool fixed = false;
   for (int i = 0; i < n; ++i)
   {
     const RecordingSeries &s = m_store->extra(i);
     const bool onAxis = m_shownValues.contains(s.id) || (m_intValueId > 0 && s.id == m_intValueId);
-    if (onAxis && !s.unit.isEmpty() && s.unit != main && s.id <= unit2Id)
+    if (!onAxis || s.unit.isEmpty())
+      continue;
+    const bool right = valueAxis(s.id) == AxisRight;
+    if (fixed && !right)
+      continue;
+    if ((right && (!fixed || s.id <= unit2Id)) || (!right && s.unit != main && s.id <= unit2Id))
     {
       unit2Id = s.id;
       m_unit2 = s.unit;
+      fixed = right;
     }
   }
 
@@ -462,9 +470,11 @@ void GraphWidget::rebuildExtras()
     }
     const RecordingSeries &s = m_store->extra(i);
     // a series without a unit yet (only gaps) goes with the main one
-    const bool left = s.unit.isEmpty() || s.unit == main;
-    c.right = !left && s.unit == m_unit2;
-    c.shown = m_shownValues.contains(s.id) && (left || c.right);
+    const ValueAxis axis = valueAxis(s.id);
+    const bool fitsLeft = axis != AxisRight && (s.unit.isEmpty() || s.unit == main);
+    const bool fitsRight = axis != AxisLeft && !s.unit.isEmpty() && s.unit == m_unit2;
+    c.right = fitsRight && (axis == AxisRight || !fitsLeft);
+    c.shown = m_shownValues.contains(s.id) && (fitsLeft || c.right);
     c.line->setAxes({ m_xAxis, c.right ? m_yAxis2 : m_yAxis });
     const bool dashed = phosphor();
     c.line->setPen(QPen(extraColor(s.id), m_lineWidth, dashed ? (s.id % 2 ? Qt::DashLine : Qt::DotLine) : Qt::SolidLine,
@@ -658,16 +668,114 @@ void GraphWidget::setValueShown(int id, bool shown)
 {
   if (id == 0)
   {
+    // back on the left: the others there move over (automatic), those
+    // with the left axis chosen in another unit go off
     if (shown == m_mainShown)
       return;
+    if (shown)
+      makeRoom(0, AxisLeft, true);
     m_mainShown = shown;
   }
   else if (shown == m_shownValues.contains(id))
     return;
   else if (shown)
+  {
+    if (valueAxis(id) != AxisAuto)
+      makeRoom(id, valueAxis(id));
     m_shownValues.insert(id);
+  }
   else
     m_shownValues.remove(id);
+  refreshValues();
+}
+
+void GraphWidget::setValueAxis(int id, ValueAxis axis)
+{
+  if (id <= 0 || axis == valueAxis(id))
+    return;
+  if (axis == AxisAuto)
+    m_valueAxes.remove(id);
+  else
+  {
+    if (m_shownValues.contains(id))
+      makeRoom(id, axis);
+    m_valueAxes[id] = axis;
+  }
+  refreshValues();
+}
+
+QString GraphWidget::valueUnitOf(int id) const
+{
+  if (id <= 0)
+    return m_store->unit();
+  for (int i = m_store->extraCount() - 1; i >= 0; --i)
+    if (m_store->extra(i).id == id && !m_store->extra(i).unit.isEmpty())
+      return m_store->extra(i).unit;
+  return QString();
+}
+
+bool GraphWidget::valueDrawn(int id) const
+{
+  if (id <= 0)
+    return m_mainShown;
+  for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
+    if (m_store->extra(i).id == id && m_extraCurves[size_t(i)].shown)
+      return true;
+  return false;
+}
+
+bool GraphWidget::valueFits(int id) const
+{
+  const QString unit = valueUnitOf(id);
+  if (unit.isEmpty())
+    return true;
+  QSet<QString> units;
+  if (m_mainShown && id != 0 && !m_store->unit().isEmpty())
+    units.insert(m_store->unit());
+  for (int other : m_shownValues)
+    if (other != id && !valueUnitOf(other).isEmpty())
+      units.insert(valueUnitOf(other));
+  return units.contains(unit) || units.size() < 2;
+}
+
+void GraphWidget::makeRoom(int id, ValueAxis axis, bool chosenOnly)
+{
+  const QString unit = valueUnitOf(id);
+  const QString taken = axis == AxisRight ? m_unit2 : leftUnit();
+  if (unit.isEmpty() || taken.isEmpty() || taken == unit)
+    return;
+  // the values drawn on that axis now, in the other unit
+  QStringList names;
+  auto off = [&](int other, const QString &name)
+  {
+    names << name;
+    if (other == 0)
+      m_mainShown = false;
+    else
+      m_shownValues.remove(other);
+  };
+  if (axis == AxisLeft && m_mainShown && id != 0)
+    off(0, curveName(m_store->series(), m_store->unit()));
+  QSet<int> done;
+  for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
+  {
+    const RecordingSeries &s = m_store->extra(i);
+    const ExtraCurve &c = m_extraCurves[size_t(i)];
+    if (s.id != id && !done.contains(s.id) && c.shown && c.right == (axis == AxisRight) && s.unit != unit
+        && (!chosenOnly || valueAxis(s.id) == axis))
+    {
+      done.insert(s.id);
+      off(s.id, curveName(s, s.unit));
+    }
+  }
+  if (!names.isEmpty())
+    Q_EMIT notice(tr("%1 off: the %2 axis shows %3 now")
+                    .arg(names.join(QStringLiteral(", ")), axis == AxisRight ? tr("right") : tr("left"),
+                         SiPrefix::displayText(unit)));
+}
+
+void GraphWidget::refreshValues()
+{
   // the view afresh: the left unit may be another one now
   m_scale2Min = 1e40;
   m_scale2Max = -1e40;
@@ -686,12 +794,21 @@ int GraphWidget::referenceId() const
 {
   if (m_mainShown)
     return 0;
+  // the lowest with the left axis chosen, else the lowest left to the graph;
+  // those on the right are not the left axis'
   int lowest = -1;
+  bool fixed = false;
   for (int i = 0; i < m_store->extraCount(); ++i)
   {
     const RecordingSeries &s = m_store->extra(i);
-    if (m_shownValues.contains(s.id) && !s.unit.isEmpty() && (lowest < 0 || s.id < lowest))
+    const ValueAxis axis = valueAxis(s.id);
+    if (!m_shownValues.contains(s.id) || s.unit.isEmpty() || axis == AxisRight || (fixed && axis != AxisLeft))
+      continue;
+    if (lowest < 0 || s.id < lowest || (axis == AxisLeft && !fixed))
+    {
       lowest = s.id;
+      fixed = axis == AxisLeft;
+    }
   }
   return lowest;
 }

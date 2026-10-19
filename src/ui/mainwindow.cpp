@@ -31,6 +31,7 @@
 #include "ui/dialogs/devicesettingsdlg.h"
 #include "ui/devicesettings.h"
 #include "ui/devicesidebar.h"
+#include "ui/valuemenu.h"
 #include "ui/tilebutton.h"
 #include "ui/dialogs/adddevicedlg.h"
 #include "device/transport.h"
@@ -366,6 +367,12 @@ void MainWindow::createSidebar()
     m_sidebar->setCurrentItem(m_sidebar->deviceItem(m_wid->currentDevice()));
   });
   connect(m_sidebar, &DeviceSidebar::settingsRequested, this, &MainWindow::deviceSettings);
+  connect(m_sidebar, &DeviceSidebar::valueMenuRequested, this, &MainWindow::valueMenu);
+  connect(m_wid->graph(), &GraphWidget::valuesRequested, this, [this] { revealValues(0); });
+  connect(m_wid->graph(), &GraphWidget::notice, this, [this](const QString &text)
+  {
+    statusBar()->showMessage(text, 5000);
+  });
   connect(m_sidebar, &DeviceSidebar::newWindowRequested, this, &MainWindow::openInNewWindow);
   connect(m_sidebar, &DeviceSidebar::instanceRequested, this, &MainWindow::openInstance);
   connect(m_sidebar, &DeviceSidebar::renameInstanceRequested, this, &MainWindow::renameInstance);
@@ -1255,27 +1262,15 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     menu.addSeparator();
     m_poincare->addMenuActions(&menu);
   }
-  // which value of the meter the view shows, when it has more than one
+  // which value of the meter the view shows: in the sidebar
   if (m_wid->numValues() > 1 && (win == m_displayWin || win == m_meterWin || win == m_poincareWin))
   {
-    QMenu *values = menu.addMenu(win == m_displayWin ? tr("P&rimary value") : tr("&Value"));
     const int current = win == m_displayWin ? m_wid->lcdValue() : win == m_meterWin ? m_wid->meterValue()
                                                                                     : m_wid->poincareValue();
-    for (int id = 0; id < m_wid->numValues(); ++id)
+    connect(menu.addAction(tr("&Values... (sidebar)")), &QAction::triggered, this, [this, current]
     {
-      QAction *a = values->addAction(QString("&%1: %2").arg(id + 1).arg(m_wid->valueName(id)));
-      a->setCheckable(true);
-      a->setChecked(id == current);
-      connect(a, &QAction::triggered, this, [this, win, id]
-      {
-        if (win == m_displayWin)
-          m_wid->setLcdValue(id);
-        else if (win == m_meterWin)
-          m_wid->setMeterValue(id);
-        else
-          m_wid->setPoincareValue(id);
-      });
-    }
+      revealValues(current);
+    });
   }
   // a way back with the mouse once the toolbar is hidden (and its keys taken away)
   menu.addSeparator();
@@ -1369,9 +1364,39 @@ void MainWindow::updateInstances()
     }
     else if (!row.running)
       row.value = tr("stopped");
+    // this window's values, with what the graph shows
+    if (id == own)
+      for (int value = 0; value < m_wid->numValues(); ++value)
+      {
+        const QString text = m_wid->valueText(value);
+        const bool drawn = m_wid->graph()->valueDrawn(value);
+        row.values << DeviceSidebar::Value{ value, m_wid->valueName(value), text,
+                                            drawn ? m_wid->graph()->valueColor(value) : QColor() };
+      }
     rows << row;
   }
   m_sidebar->setInstances(rows, own);
+}
+
+void MainWindow::revealValues(int id)
+{
+  showSidebar(true);
+  m_sidebar->revealValues(id);
+}
+
+void MainWindow::valueMenu(int id, const QPoint &globalPos)
+{
+  QMenu menu(this);
+  ValueMenu::fill(&menu, m_wid, id, [this](ValueMenu::View view)
+  {
+    QAction *action = view == ValueMenu::View::Lcd     ? m_displayAction
+                    : view == ValueMenu::View::Meter   ? m_meterAction
+                    : view == ValueMenu::View::Poincare ? m_poincareAction
+                                                        : action_Graph;
+    action->setChecked(true);
+  });
+  menu.exec(globalPos);
+  updateInstances();
 }
 
 void MainWindow::openInstance(const QString &id)
@@ -1569,6 +1594,31 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
   m_wid->setLcdValue(get("Windows/lcd-value", 0).toInt());
   m_wid->setMeterValue(get("Windows/meter-value", 0).toInt());
   m_wid->setPoincareValue(get("Windows/poincare-value", 0).toInt());
+  // the LCD's small line, "1 2"; missing: the first values after the big one
+  {
+    const QString small = get("Windows/lcd-secondary-values", QStringLiteral("-")).toString();
+    std::optional<QList<int>> ids;
+    if (small != QLatin1String("-"))
+    {
+      ids = QList<int>();
+      for (const QString &id : small.split(' ', Qt::SkipEmptyParts))
+        ids->append(id.toInt());
+    }
+    m_wid->setLcdSecondaries(ids);
+  }
+  // the axis of each value in the graph, "1:right 2:left"; missing: automatic
+  {
+    const QStringList axes = get("Windows/graph-value-axes", QString()).toString().split(' ', Qt::SkipEmptyParts);
+    for (int id = 1; id <= 3; ++id)
+    {
+      GraphWidget::ValueAxis axis = GraphWidget::AxisAuto;
+      if (axes.contains(QString("%1:left").arg(id)))
+        axis = GraphWidget::AxisLeft;
+      else if (axes.contains(QString("%1:right").arg(id)))
+        axis = GraphWidget::AxisRight;
+      m_wid->graph()->setValueAxis(id, axis);
+    }
+  }
   // the meter's other values shown in the graph: their ids, "1 2"; none at first
   {
     const QStringList shown = get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
@@ -1615,6 +1665,18 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
     shown << QString::number(id);
   set("Windows/graph-shown-values", shown.join(' '));
   set("Windows/graph-main-shown", m_wid->graph()->mainShown());
+  if (m_wid->lcdSecondariesChosen())
+  {
+    QStringList small;
+    for (int id : m_wid->lcdSecondaries())
+      small << QString::number(id);
+    set("Windows/lcd-secondary-values", small.join(' '));
+  }
+  QStringList axes;
+  for (int id = 1; id <= 3; ++id)
+    if (m_wid->graph()->valueAxis(id) != GraphWidget::AxisAuto)
+      axes << QString("%1:%2").arg(id).arg(m_wid->graph()->valueAxis(id) == GraphWidget::AxisLeft ? "left" : "right");
+  set("Windows/graph-value-axes", axes.join(' '));
 }
 
 // A workspace file is an ini file with the same keys as the settings, plus

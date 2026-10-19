@@ -123,6 +123,11 @@
   Windows kept the ports in a row for itself; it now takes a port Windows allows for UDP first
 - Victron: the time to go shows in minutes below an hour and in hours with a decimal above (1.5 h, not 90 min),
   and "--" while charging instead of nothing (as VictronConnect has it); the graph keeps minutes
+- Meters with more than one value: the sidebar has a row for each value below this window's instance, with its
+  reading and a dot in its curve's colour while the graph shows it. Its right-click menu says which window shows
+  the value: the analog meter, the Poincaré plot, the LCD (main value, or one of two on the small line) and the
+  graph, on the left or right axis or chosen automatically. The value menus of the windows give way to
+  "Values... (sidebar)"
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

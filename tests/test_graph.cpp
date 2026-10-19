@@ -2140,6 +2140,63 @@ int main(int argc, char **argv)
           "main back: ppm left again, % waits, the scale has its values, got " + graph.leftAxisTitle());
   }
 
+  // --- 7l4. an axis chosen per value (the sidebar's value menu): it takes
+  //          that axis for its unit, the other unit's curves there go off ---
+  {
+    Settings cfg("valueaxes", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    graph.setUnit("V");
+    Feed feed(graph);
+    graph.liveSLOT();
+    for (int i = 0; i < 20; ++i)
+    {
+      feed.value(12 + i * 0.01);
+      feed.other(1, -2, "A", Quantity::Current);
+      feed.other(2, 25, "°C", Quantity::Temperature);
+      feed.other(3, 13.1, "V", Quantity::Voltage);
+    }
+    QTest::qWait(20);
+    QSignalSpy notices(&graph, &GraphWidget::notice);
+    check(graph.valueAxis(0) == GraphWidget::AxisLeft && graph.valueAxis(2) == GraphWidget::AxisAuto,
+          "axes: the main value left, the others automatic");
+    graph.setValueShown(1, true);
+    graph.setValueShown(3, true);
+    check(graph.valueDrawn(0) && graph.valueDrawn(1) && graph.valueDrawn(3) && graph.leftAxisTitle() == "[V]"
+            && graph.rightAxisTitle() == "[A]",
+          "axes: two voltages left, the current right, got " + graph.rightAxisTitle());
+    check(!graph.valueFits(2), "axes: a third unit has no axis");
+    // the temperature to the right: the current goes off, with a notice
+    graph.setValueAxis(2, GraphWidget::AxisRight);
+    graph.setValueShown(2, true);
+    check(graph.valueDrawn(2) && !graph.valueDrawn(1) && !graph.shownValues().contains(1)
+            && graph.rightAxisTitle() == QString::fromUtf8("[°C]") && graph.valueDrawn(0) && graph.valueDrawn(3),
+          "axes: °C right, the current off, got " + graph.rightAxisTitle());
+    check(notices.size() == 1 && notices.first().first().toString().contains("right"),
+          "axes: a notice of what went off, got " + (notices.isEmpty() ? QString() : notices.first().first().toString()));
+    // the current to the left: both voltages go off, the left axis is A
+    graph.setValueAxis(1, GraphWidget::AxisLeft);
+    graph.setValueShown(1, true);
+    check(graph.valueDrawn(1) && !graph.mainShown() && !graph.valueDrawn(3) && graph.leftAxisTitle() == "[A]"
+            && graph.valueDrawn(2) && graph.referenceId() == 1,
+          "axes: A left, the voltages off, got " + graph.leftAxisTitle());
+    // the main value back: the current chose the left axis, so it goes off
+    graph.setValueShown(0, true);
+    check(graph.mainShown() && !graph.valueDrawn(1) && graph.leftAxisTitle() == "[V]" && graph.valueDrawn(2),
+          "axes: the main value back, the current off, got " + graph.leftAxisTitle());
+    // the second voltage to the right in the same unit: an axis of its own
+    graph.setValueAxis(3, GraphWidget::AxisRight);
+    graph.setValueShown(3, true);
+    check(graph.valueDrawn(3) && graph.rightAxisTitle() == "[V]" && !graph.valueDrawn(2),
+          "axes: the voltage right, the temperature off, got " + graph.rightAxisTitle());
+    // automatic again: the voltage shares the left axis
+    graph.setValueAxis(3, GraphWidget::AxisAuto);
+    check(graph.valueDrawn(3) && graph.valueAxis(3) == GraphWidget::AxisAuto, "axes: automatic, on the left");
+    check(graph.valueColor(1) != graph.valueColor(0), "axes: a colour per curve");
+  }
+
   // --- 8. EngNumberValidator: what engValue() writes, value() must read
   //         back. engValue() emits "µ" while value() used to recognise only
   //         "u", so micro thresholds silently lost their factor. ---

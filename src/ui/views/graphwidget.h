@@ -153,7 +153,7 @@ public:
     IDClearCursors,
     IDMinimap,
     IDEnvelope,
-    IDValueShown     ///< property "value": the id of the meter's value
+    IDValueShown     ///< "Values... (sidebar)": valuesRequested()
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -295,11 +295,25 @@ public:
   QString          rightAxisTitle() const { return m_y2Title->isVisible() ? m_y2Title->text() : QString(); }
   /// The legend's text, empty while there is only the main value.
   QString          legendText() const;
-  /// Value @p id on or off (0 the main value, also from the menu Values).
+  /// Value @p id on or off (0 the main value; the sidebar's value menu).
   /// Each change sets the view afresh: axes, scales and prefixes from the
   /// curves shown; the recording is not touched. At most two units are
-  /// drawn: a value in a third one waits until another goes off.
+  /// drawn: a value in a third one waits until another goes off, or until
+  /// an axis is chosen for it (setValueAxis()).
   void             setValueShown(int id, bool shown);
+  /// The axis of a value: Auto puts the first unit left, the second right,
+  /// a unit there already on its axis. Left or Right takes that axis for the
+  /// value's unit; the curves of another unit on it go off (notice()). The
+  /// main value is always on the left.
+  enum ValueAxis { AxisAuto, AxisLeft, AxisRight };
+  void             setValueAxis(int id, ValueAxis axis);
+  ValueAxis        valueAxis(int id) const { return id <= 0 ? AxisLeft : m_valueAxes.value(id, AxisAuto); }
+  /// Whether value @p id is drawn: switched on and its unit on an axis.
+  bool             valueDrawn(int id) const;
+  /// The colour of value @p id's curve (also while it is off).
+  QColor           valueColor(int id) const { return id <= 0 ? dataColor() : extraColor(id); }
+  /// Whether showing value @p id needs no axis taken from another unit.
+  bool             valueFits(int id) const;
   /// The other values shown (ids > 0).
   QList<int>       shownValues() const;
   bool             mainShown() const { return m_mainShown; }
@@ -350,6 +364,10 @@ Q_SIGNALS:
   void             running(bool);
   /// The store's state changed (RecordingStore::State).
   void             stateChanged(int state);
+  /// "Values... (sidebar)" in the context menu: the sidebar shows them.
+  void             valuesRequested();
+  /// A short hint for the status bar ("Current off: the left axis shows V now").
+  void             notice(const QString &);
   /// Window/total size changed by zooming (seconds).
   /// Sample time changed by a CSV import (tenths of a second).
   void             sampleTime(int);
@@ -567,6 +585,7 @@ protected:
   double           m_scale2Min = 1e40;
   double           m_scale2Max = -1e40;
   QSet<int>        m_shownValues;        ///< the meter's other values switched on
+  QMap<int, ValueAxis> m_valueAxes;      ///< setValueAxis(), missing: AxisAuto
   bool             m_mainShown = true;   ///< the main value's curve, setValueShown(0)
   int              m_intValueId = 0;     ///< setIntegrationValue()
   QLabel          *m_legend = nullptr;
@@ -592,6 +611,13 @@ protected:
   QColor           m_themeLabels;
   QColor           m_themeData;         ///< proposed curve colour, invalid = none
   QColor           dataColor() const;   ///< the curve colour in use
+  /// The unit of value @p id, its newest series with one; empty before one came.
+  QString          valueUnitOf(int id) const;
+  /// Before value @p id goes onto the axis @p axis: the curves of another
+  /// unit on it go off (@p chosenOnly: those with that axis chosen), with a notice().
+  void             makeRoom(int id, ValueAxis axis, bool chosenOnly = false);
+  /// After a value went on or off or to another axis: the view afresh.
+  void             refreshValues();
   QColor           intColor() const;    ///< the integration curve colour in use
   ColorVariant     m_variant = Neutral;          ///< in use
   ColorVariant     m_defaultVariant = Neutral;   ///< from the settings page

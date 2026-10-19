@@ -244,6 +244,10 @@ protected:
   /// Adds @p view as an MDI window with @p title (@p role: MdiArranger::Role;
   /// @p name identifies it in the settings).
   QMdiSubWindow *addView(QWidget *view, const QString &title, int role, const QString &name);
+  /// The sidebar with the rows of the meter's values, value @p id selected.
+  void        revealValues(int id);
+  /// The context menu of the sidebar's row of value @p id (ValueMenu).
+  void        valueMenu(int id, const QPoint &globalPos);
   /// A checkable action that shows/hides @p win.
   QAction    *windowAction(QMdiSubWindow *win, const QString &text, const char *shortcut,
                            const char *icon, const QString &whatsThis);

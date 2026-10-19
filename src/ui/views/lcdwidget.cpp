@@ -104,13 +104,41 @@ int LcdWidget::primaryShown() const
   return m_primary > 0 && m_primary < m_numValues ? m_primary : 0;
 }
 
-// the big value first, then the others in their order
-int LcdWidget::idAt(int line) const
+void LcdWidget::setSecondaries(const std::optional<QList<int>> &ids)
+{
+  if (m_secondaries == ids)
+    return;
+  m_secondaries = ids;
+  m_staticDirty = true;
+  update();
+}
+
+QList<int> LcdWidget::secondaries() const
 {
   const int primary = primaryShown();
-  if (line == 0)
-    return primary;
-  return line <= primary ? line - 1 : line;
+  QList<int> ids;
+  if (m_secondaries)
+  {
+    for (int id : *m_secondaries)
+      if (id >= 0 && id < m_numValues && id != primary && !ids.contains(id) && ids.size() < kSmallLineValues)
+        ids << id;
+    return ids;
+  }
+  for (int id = 0; id < m_numValues && ids.size() < kSmallLineValues; ++id)
+    if (id != primary)
+      ids << id;
+  return ids;
+}
+
+// the big value first, then the small line, then those not shown
+int LcdWidget::idAt(int line) const
+{
+  QList<int> order = secondaries();
+  order.prepend(primaryShown());
+  for (int id = 0; id < kMaxValues; ++id)
+    if (!order.contains(id))
+      order << id;
+  return order.value(line, 0);
 }
 void LcdWidget::setMode(int id, quint32 flags, Quantity quantity)
 {
@@ -564,7 +592,7 @@ LcdWidget::Layout LcdWidget::layout() const
   const double flagsH = inner.height() * 0.14;
   const double minMaxH = m_showMinMax ? inner.height() * 0.20 : 0.0;
   const double barH = m_showBar ? inner.height() * 0.15 : 0.0;
-  const double extraH = m_numValues > 1 ? inner.height() * 0.20 : 0.0;
+  const double extraH = smallLineValues() > 0 ? inner.height() * 0.20 : 0.0;
   const double mainH = inner.height() - flagsH - minMaxH - barH - extraH;
 
   double y = inner.top();
@@ -752,17 +780,17 @@ void LcdWidget::drawMinMax(QPainter &p, const Layout &l) const
 
 void LcdWidget::drawExtra(QPainter &p, const Layout &l) const
 {
-  if (m_numValues <= 1)
+  const QList<int> ids = secondaries();
+  if (ids.isEmpty())
     return;
   const double h = l.smallH;
   const int digits = numDigits();
   const double y = l.extra.top() + (l.extra.height() - h) / 2.0;
-  const int shown = smallLineValues();
-  const double slot = l.extra.width() / shown;
-  for (int i = 1; i <= shown; ++i)
+  const double slot = l.extra.width() / ids.size();
+  for (int i = 0; i < ids.size(); ++i)
   {
-    double x = l.extra.left() + (i - 1) * slot;
-    const int id = idAt(i);
+    double x = l.extra.left() + i * slot;
+    const int id = ids[i];
     x += drawNumber(p, QPointF(x, y), h, m_value[id], digits, !m_value[id].isEmpty());
     x += h * 0.25;
     drawUnit(p, QPointF(x, y), h, m_unit[id]);

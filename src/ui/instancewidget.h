@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <optional>
+
 
 #include <QtGui>
 #include <QtPrintSupport>
@@ -80,12 +82,19 @@ public:
   /// Table model that gets every reading (MainWindow owns it).
   void        setReadingLog(ReadingsModel *);
   /// @name Which value of the meter a view shows
-  /// Reading::id, 0 the main value; the windows' context menus ("Primary
-  /// value", "Value"), kept with the window layout. A value the meter does
-  /// not have (numValues()) gives the main value. The LCD's primary value is
-  /// also the one of the min/max memory; the recording stays the main value's.
+  /// Reading::id, 0 the main value; the sidebar's value menu (ValueMenu),
+  /// kept with the window layout. A value the meter does not have
+  /// (numValues()) gives the main value. The LCD's primary value is also the
+  /// one of the min/max memory; the recording stays the main value's.
   /// @{
   void        setLcdValue(int id);
+  /// The LCD's small line (LcdWidget::setSecondaries()); std::nullopt: the
+  /// first values after the big one.
+  void        setLcdSecondaries(const std::optional<QList<int>> &ids);
+  /// The values on the LCD's small line now.
+  QList<int>  lcdSecondaries() const;
+  /// Whether the small line was chosen (else it is not saved).
+  bool        lcdSecondariesChosen() const { return m_lcdSecondaries.has_value(); }
   void        setMeterValue(int id);
   void        setPoincareValue(int id);
   int         lcdValue() const { return m_lcdValue; }
@@ -96,6 +105,8 @@ public:
   int         numValues() const;
   /// "CO2 (ppm)" from its last reading, "Value 2" before one came.
   QString     valueName(int id) const;
+  /// Its last reading as shown: "-14.9 A", "OL"; empty before one came.
+  QString     valueText(int id) const { return m_lastText.value(id); }
   /// @}
   /// The instance coordinator; readings are published through it.
   void        setStateManager(SharedStateManager *);
@@ -224,7 +235,9 @@ protected:
   int         m_lcdValue = 0;
   int         m_meterValue = 0;
   int         m_poincareValue = 0;
+  std::optional<QList<int>> m_lcdSecondaries;   ///< setLcdSecondaries()
   QMap<int, Reading> m_lastReading;   ///< by id, for valueName()
+  QMap<int, QString> m_lastText;      ///< by id, for valueText()
   int         m_seenValues = 0;         ///< highest value id read + 1, since the meter was chosen
   /// The number of values (numValues()) to the display and SCPI, then
   /// applyValueChoice().

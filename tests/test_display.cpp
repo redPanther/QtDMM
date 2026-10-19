@@ -323,6 +323,16 @@ int main(int argc, char **argv)
     f.setPrimary(3);
     check(f.primaryShown() == 3 && four() == "1013 734 22.50 45.10",
           "primary 4: big, then 1 and 2 on the small line, got " + four());
+    // the small line chosen: in this order, the big one and missing ones left out
+    f.setSecondaries(QList<int>{ 2, 0 });
+    check(four() == "1013 45.10 734 22.50", "small line 3 and 1, got " + four());
+    f.setSecondaries(QList<int>{ 3, 1 });
+    check(f.secondaries() == QList<int>{ 1 } && f.smallLineValues() == 1, "the big one is not on the small line again");
+    f.setSecondaries(QList<int>());
+    check(f.smallLineValues() == 0 && f.lineValue(0) == "1013", "none chosen: no small line");
+    f.setSecondaries(QList<int>{ 1, 2 });
+    f.setValueCount(2);
+    check(f.secondaries() == QList<int>{ 1 }, "a value the meter lacks is left out, got " + QString::number(f.smallLineValues()));
     f.setValueCount(5);
     f.setPrimary(4);
     check(f.primaryShown() == 0, "at most four values: a fifth is none");

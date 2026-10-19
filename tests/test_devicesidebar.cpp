@@ -145,6 +145,45 @@ int main(int argc, char **argv)
     check(!sidebar.instanceItem("p") && sidebar.instancesNode()->childCount() == 2, "deleted one gone");
   }
 
+  // 7b. this window's values below its instance: a row each with the reading,
+  //     the curve's colour while in the graph, the menu per value
+  {
+    QList<DeviceSidebar::Instance> rows;
+    rows << DeviceSidebar::Instance { "default", "Victron SmartShunt", "13.29 V DC", true, true, {} }
+         << DeviceSidebar::Instance { "u", "Bench", "OL", true, false, {} };
+    const QList<DeviceSidebar::Value> values { { 0, "Voltage DC", "13.29 V", QColor("#3b82f6") },
+                                               { 1, "Current DC", "-14.9 A", QColor() },
+                                               { 2, "Value 3", "", QColor() } };
+    rows[0].values = values;
+    rows[1].values = values;   // another window's: not shown here
+    sidebar.setInstances(rows, "default");
+    QTreeWidgetItem *own = sidebar.instanceItem("default");
+    check(own && own->childCount() == 4 && own->child(0)->text(0) == "Victron SmartShunt",
+          QString("the device, then three values, got %1 rows").arg(own ? own->childCount() : -1));
+    check(sidebar.instanceItem("u")->childCount() == 1, "another window's values are not here");
+    QTreeWidgetItem *current = sidebar.valueItem(1);
+    check(current && current->text(0) == "2  Current DC" && current->text(1) == "-14.9 A", "the row of value 2");
+    check(sidebar.valueItem(0)->toolTip(0).contains("graph") && !current->toolTip(0).contains("graph"),
+          "the graph's values say so");
+    rows[0].values[1].text = "-15.0 A";
+    sidebar.setInstances(rows, "default");
+    check(sidebar.valueItem(1) == current && current->text(1) == "-15.0 A", "the reading in place");
+    own->setExpanded(false);
+    sidebar.setInstances(rows, "default");
+    check(!own->isExpanded(), "folded away it stays so");
+    sidebar.revealValues(2);
+    check(own->isExpanded() && sidebar.currentItem() == sidebar.valueItem(2), "revealed: open, the value selected");
+    int menuFor = -1;
+    QObject::connect(&sidebar, &DeviceSidebar::valueMenuRequested, [&](int id, const QPoint &) { menuFor = id; });
+    const QRect r = sidebar.visualItemRect(current);
+    QContextMenuEvent menu(QContextMenuEvent::Mouse, r.center(), sidebar.viewport()->mapToGlobal(r.center()));
+    QCoreApplication::sendEvent(sidebar.viewport(), &menu);
+    check(menuFor == 1, QString("the menu of value 2, got %1").arg(menuFor));
+    rows[0].values = values.mid(0, 1);
+    sidebar.setInstances(rows, "default");
+    check(own->childCount() == 1 && !sidebar.valueItem(0), "one value: no rows");
+  }
+
   // 8. the services: port or off, the address to copy, settings by a double click
   {
     DeviceSidebar::Service scpi { "scpi", "SCPI", "5025", "localhost:5025", "tip", true, true };

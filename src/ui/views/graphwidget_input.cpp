@@ -168,47 +168,9 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     QAction *envelope = item(tr("Min/max &band"), IDEnvelope);
     envelope->setCheckable(true);
     envelope->setChecked(m_envelopeOn);
-    // the meter's values, the main one too: each can be hidden; at most
-    // two units at a time (an axis each)
-    {
-      QMap<int, QString> values;   // id -> name of its newest series
-      QMap<int, QString> units;    // id -> its unit
-      for (int i = 0; i < m_store->extraCount(); ++i)
-      {
-        values[m_store->extra(i).id] = curveName(m_store->extra(i), m_store->extra(i).unit);
-        units[m_store->extra(i).id] = m_store->extra(i).unit;
-      }
-      if (!values.isEmpty())
-      {
-        values[0] = curveName(m_store->series(), m_store->unit());
-        units[0] = m_store->unit();
-        auto shown = [this](int id) { return id == 0 ? m_mainShown : m_shownValues.contains(id); };
-        QSet<QString> shownUnits;
-        for (auto it = units.cbegin(); it != units.cend(); ++it)
-          if (shown(it.key()) && !it.value().isEmpty())
-            shownUnits.insert(it.value());
-        QMenu *menu = m_popup->addMenu(tr("&Values"));
-        menu->setToolTipsVisible(true);
-        for (auto it = values.cbegin(); it != values.cend(); ++it)
-        {
-          QAction *a = menu->addAction(it.value().isEmpty() ? tr("Value %1").arg(it.key() + 1) : it.value());
-          a->setProperty("ID", IDValueShown);
-          a->setProperty("value", it.key());
-          a->setCheckable(true);
-          a->setChecked(shown(it.key()));
-          const QString unit = units.value(it.key());
-          if (!shown(it.key()) && !unit.isEmpty() && !shownUnits.contains(unit) && shownUnits.size() >= 2)
-          {
-            a->setEnabled(false);
-            QStringList others(shownUnits.cbegin(), shownUnits.cend());
-            std::sort(others.begin(), others.end());
-            for (QString &u : others)
-              u = SiPrefix::displayText(u);
-            a->setToolTip(tr("Two units are shown already: switch off a value in %1 first").arg(others.join(tr(" or "))));
-          }
-        }
-      }
-    }
+    // which values: in the sidebar, under the instance
+    if (m_store->extraCount() > 0)
+      item(tr("&Values... (sidebar)"), IDValueShown);
     if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
       item(tr("Remove time cursors"), IDClearCursors);
 
@@ -452,7 +414,7 @@ void GraphWidget::popupSLOT(QAction *action)
       setEnvelopeVisible(action->isChecked());
       break;
     case IDValueShown:
-      setValueShown(action->property("value").toInt(), action->isChecked());
+      Q_EMIT valuesRequested();
       break;
   }
 }
