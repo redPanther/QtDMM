@@ -10,6 +10,7 @@
 #include <cmath>
 
 class RecordingStore;
+struct RawPoint;
 
 /// The overview strip below the graph: all the store keeps, the window the
 /// graph shows between two brackets.
@@ -58,6 +59,10 @@ public:
   /// drawn in the lettering colour.
   void             setColors(const QBrush &background, const QColor &lettering);
   void             setCurveColor(const QColor &curve);
+  /// The value it draws (Reading::id): 0 the main value, else the store's
+  /// extra() series of that value, one after the other.
+  void             setValue(int id);
+  int              value() const { return m_value; }
 
   /// @name What the strip spans and draws, public for the tests
   /// @{
@@ -101,6 +106,7 @@ private:
   };
 
   RecordingStore  *m_store = nullptr;
+  int              m_value = 0;         ///< setValue()
   QVector<Column>  m_columns;
   qint64           m_firstColumn = 0;   ///< the index of m_columns[0], counted from the start
   qint64           m_columnMs = 1;
@@ -121,6 +127,10 @@ private:
   void             rebuild();
   /// The newest reading went into the store.
   void             onAppended();
+  /// A reading in extra(@p index): into its column when it is of value().
+  void             onExtraAppended(int index);
+  /// A reading into its column, the strip grown or counted anew as needed.
+  void             addLast(const RawPoint &p);
   /// The columns before what the store keeps go.
   void             dropFront();
   /// The pixels within which the right bracket counts as at the end.

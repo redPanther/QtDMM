@@ -276,11 +276,12 @@ public:
   /// A value in the main value's unit shares its axis; the first other unit
   /// gets an axis on the right with a scale of its own; values in a third
   /// unit are not drawn (yet). A legend names the curves. They are off until
-  /// switched on (context menu "Values", kept per window as
+  /// switched on (the sidebar's value menu, kept per window as
   /// Windows/graph-shown-values): the graph shows the main value, as it
   /// always did. The store records them all the same.
-  /// Reference line, band, overview, cursor statistics and triggers stay the
-  /// main value's.
+  /// Reference line, band and cursor levels are of the value of the left
+  /// axis (referenceId()), so is the overview (minimapValue()); the
+  /// triggers stay the main value's.
   /// @{
   int              extraCurveCount() const { return int(m_extraCurves.size()); }
   /// The first segment of the curve of extra(@p i) (for the tests).
@@ -314,6 +315,9 @@ public:
   QColor           valueColor(int id) const { return id <= 0 ? dataColor() : extraColor(id); }
   /// The axis value @p id is drawn on, AxisAuto while it is not drawn.
   ValueAxis        valueSide(int id) const;
+  /// The value the overview draws: the one of the left axis (referenceId()),
+  /// with none there the lowest on the right, with none drawn the main value.
+  int              minimapValue() const;
   /// The other values shown (ids > 0).
   QList<int>       shownValues() const;
   bool             mainShown() const { return m_mainShown; }
@@ -616,6 +620,8 @@ protected:
   void             makeRoom(int id, ValueAxis axis, bool chosenOnly = false);
   /// After a value went on or off or to another axis: the view afresh.
   void             refreshValues();
+  /// The overview draws minimapValue(), in its curve's colour.
+  void             updateMinimapValue();
   QColor           intColor() const;    ///< the integration curve colour in use
   ColorVariant     m_variant = Neutral;          ///< in use
   ColorVariant     m_defaultVariant = Neutral;   ///< from the settings page

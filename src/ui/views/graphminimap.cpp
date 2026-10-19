@@ -27,6 +27,12 @@ void GraphMinimap::setStore(RecordingStore *store)
     connect(m_store, &RecordingStore::cleared, this, &GraphMinimap::rebuild);
     connect(m_store, &RecordingStore::loaded, this, &GraphMinimap::rebuild);
     connect(m_store, &RecordingStore::stateChanged, this, &GraphMinimap::rebuild);
+    connect(m_store, &RecordingStore::extraAppended, this, &GraphMinimap::onExtraAppended);
+    connect(m_store, &RecordingStore::extrasChanged, this, [this]
+    {
+      if (m_value > 0)
+        rebuild();
+    });
     connect(m_store, &RecordingStore::marksChanged, this, qOverload<>(&QWidget::update));
   }
   rebuild();
@@ -53,6 +59,14 @@ void GraphMinimap::setCurveColor(const QColor &curve)
 {
   m_curve = curve;
   update();
+}
+
+void GraphMinimap::setValue(int id)
+{
+  if (id == m_value)
+    return;
+  m_value = id;
+  rebuild();
 }
 
 qint64 GraphMinimap::from() const
@@ -124,15 +138,24 @@ void GraphMinimap::rebuild()
   m_columnMs = neededColumnMs();
   m_columns.clear();
   m_firstColumn = from() / m_columnMs;
-  if (m_store && m_store->count() > 0)
+  // the series of the value: the main one, or those of another value in turn
+  QList<const RecordingSeries *> parts;
+  if (m_store && m_value <= 0)
+    parts << &m_store->series();
+  for (int i = 0; m_store && m_value > 0 && i < m_store->extraCount(); ++i)
+    if (m_store->extra(i).id == m_value)
+      parts << &m_store->extra(i);
+  for (const RecordingSeries *series : std::as_const(parts))
   {
-    const RecordingSeries &series = m_store->series();
-    const qint64 last = qMax(m_firstColumn, series.last().t / m_columnMs);
-    m_columns.resize(int(last - m_firstColumn + 1));
+    if (series->isEmpty())
+      continue;
+    const qint64 last = qMax(m_firstColumn, series->last().t / m_columnMs);
+    if (last - m_firstColumn >= m_columns.size())
+      m_columns.resize(int(last - m_firstColumn + 1));
     // the reading that holds at the start goes into the first column
-    for (int i = qMax(0, series.holding(from())); i < series.count(); ++i)
+    for (int i = qMax(0, series->holding(from())); i < series->count(); ++i)
     {
-      const RawPoint &p = series.at(i);
+      const RawPoint &p = series->at(i);
       addReading(m_columns[int(qMax(m_firstColumn, p.t / m_columnMs) - m_firstColumn)], p);
     }
   }
@@ -143,13 +166,36 @@ void GraphMinimap::onAppended()
 {
   if (!m_store || m_store->count() == 0)
     return;
+  if (m_value > 0)
+  {
+    // another value is drawn: the main series only moves the strip on
+    if (neededColumnMs() != m_columnMs)
+      rebuild();
+    else
+    {
+      dropFront();
+      update();
+    }
+    return;
+  }
+  addLast(m_store->series().last());
+}
+
+void GraphMinimap::onExtraAppended(int index)
+{
+  if (m_store && m_value > 0 && index < m_store->extraCount() && m_store->extra(index).id == m_value)
+    addLast(m_store->extra(index).last());
+}
+
+void GraphMinimap::addLast(const RawPoint &p)
+{
   if (neededColumnMs() != m_columnMs || m_columns.isEmpty())
   {
     rebuild();
     return;
   }
   dropFront();
-  const qint64 k = m_store->series().last().t / m_columnMs;
+  const qint64 k = p.t / m_columnMs;
   if (k < m_firstColumn)
   {
     rebuild();
@@ -158,7 +204,7 @@ void GraphMinimap::onAppended()
   if (k - m_firstColumn >= m_columns.size())
     m_columns.resize(int(k - m_firstColumn + 1));
   // the store only appends: the reading joins its column
-  addReading(m_columns[int(k - m_firstColumn)], m_store->series().last());
+  addReading(m_columns[int(k - m_firstColumn)], p);
   update();
 }
 
