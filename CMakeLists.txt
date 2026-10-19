@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.19)
 
 project(qtdmm VERSION "0.0.0" HOMEPAGE_URL "https://qtdmm.de" LANGUAGES C CXX)
 
@@ -62,16 +62,12 @@ foreach(file_path IN LISTS THEME_FILES)
 endforeach()
 set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
-## pictures of the kinds of instrument (DeviceSymbol), :/devices/<type id>.svg
-## (the tests get them from qtdmm_resources, too)
-file(GLOB DEVICE_SYMBOLS CONFIGURE_DEPENDS assets/devices/*.svg)
-list(SORT DEVICE_SYMBOLS)
-set(DEVICE_RES "    <qresource prefix=\"/devices\">\n")
-foreach(file_path IN LISTS DEVICE_SYMBOLS)
-	get_filename_component(alias "${file_path}" NAME)
-	set(DEVICE_RES "${DEVICE_RES}        <file alias=\"${alias}\">${file_path}</file>\n")
-endforeach()
-set(DEVICE_RES "${DEVICE_RES}    </qresource>\n")
+## pictures of the kinds of instrument (DeviceSymbol) in the manufacturers'
+## colours, made from the templates now: :/devices/<type id>.svg neutral,
+## :/devices/<manufacturer>/<type id>.svg (the tests get them from
+## qtdmm_resources, too)
+include(cmake/device_symbols.cmake)
+qtdmm_device_symbols(DEVICE_RES)
 set(RES_CONTENT "${RES_CONTENT}${DEVICE_RES}")
 
 ## in-app help: the user guide pages, aliased by their path below docs/user so

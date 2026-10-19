@@ -116,6 +116,9 @@
 - Simulated meter: up to four values (Device settings, "Values"), the further ones each with unit, coupling and
   a formula that may use the values before it (v1 * v2). sigrok: a meter's channels P2 to P4 are its second to
   fourth value; they went into the main value by turns
+- Device pictures in the makers' colours (a red UNI-T, a yellow Fluke ...) on the last page of Add device and,
+  small, before each entry of My devices in the sidebar; with a light outline in a dark design. Building
+  needs CMake 3.19 now
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

@@ -30,6 +30,29 @@ Documentation for people working on QtDMM itself. Planned pages:
 None of these pages exist yet. The architecture is documented in the code
 itself, see below.
 
+## Device pictures
+
+The pictures of the kinds of instrument (`DeviceSymbol`: page 4 of Add
+device, the sidebar) are made when CMake runs, by
+`cmake/device_symbols.cmake` - CMake alone, no script. Its inputs:
+
+- `assets/devices/<type>.svg`, one template per `DeviceType` id, with the
+  placeholders `#FF00FF` (primary), `#00FFFF` (secondary) and `#FFFF00` (the
+  outline: dark grey, light in the `_dark` twin for a dark design);
+- `assets/devices/manufacturer-colors.json`: per manufacturer its colours,
+  the vendors of `addConfig()` it stands for (`match`) and the kinds its
+  models are (`types`), optionally other colours for a kind
+  (`device_classes`);
+- `assets/devices/override/<key>_<type>.svg`, a picture of its own for one
+  manufacturer and kind.
+
+Out come `:/devices/<type>.svg` in the neutral colours of `default` and
+`:/devices/<key>/<type>.svg` for each manufacturer and kind, each with
+`_dark`, and `:/devices/vendors.json` (vendor -> key). A model of a vendor
+without colours of its own gets the neutral picture. A new model of a new
+kind, or a new vendor in `match`, needs the JSON adjusted: ctest
+`device_symbols` says what to add.
+
 ## Coding style
 
 [Coding style](coding-style.md): layout, names, Qt idioms and structure

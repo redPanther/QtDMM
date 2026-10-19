@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     for (int t = DeviceType::HandheldDmm; t <= DeviceType::Generic; ++t)
     {
       const auto type = static_cast<DeviceType::Type>(t);
-      check(drawn(DeviceSymbol::pixmap(type, QSize(130, 150))) > 2000, "symbol drawn: " + DeviceType::id(type));
+      check(drawn(DeviceSymbol::pixmap(QString(), type, QSize(130, 150))) > 2000, "symbol drawn: " + DeviceType::id(type));
     }
     check(drawn(DeviceSymbol::unknown(QSize(130, 150))) > 2000, "symbol drawn: unknown");
 

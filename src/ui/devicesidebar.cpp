@@ -14,27 +14,58 @@
 #include <QTimer>
 
 #include "core/devicelibrary.h"
+#include "device/dmmdecoder.h"
+#include "ui/devicesymbol.h"
 
 namespace
 {
 // an instance item: running or not
 constexpr int kRunning = Qt::UserRole + 1;
 
+// a device's picture (DeviceSymbol), kept with its item
+constexpr int kSymbol = Qt::UserRole + 2;
+// the dot, then the picture of a device: every row the same width, so the
+// names line up
+constexpr int kDotSize = 12;
+constexpr int kSymbolSize = 20;
+constexpr int kGap = 4;
+const QSize kIconSize(kDotSize + kGap + kSymbolSize, kSymbolSize);
+
 // the state of the device in use, as the status line's dot: readings
-// coming in or not; the others get an empty one, so the names line up
-QIcon dot(const QColor &color)
+// coming in or not; the others get an empty one. After it the device's
+// picture, for the entries of My devices. Selected the same, not tinted
+QIcon dot(const QColor &color, qreal dpr, const QPixmap &symbol = QPixmap())
 {
-  QPixmap pixmap(12, 12);
+  QPixmap pixmap(kIconSize * dpr);
+  pixmap.setDevicePixelRatio(dpr);
   pixmap.fill(Qt::transparent);
+  QPainter p(&pixmap);
+  p.setRenderHint(QPainter::Antialiasing);
   if (color.isValid())
   {
-    QPainter p(&pixmap);
-    p.setRenderHint(QPainter::Antialiasing);
+    const double top = (kIconSize.height() - kDotSize) / 2.0;
     p.setPen(Qt::NoPen);
     p.setBrush(color);
-    p.drawEllipse(QRectF(1, 1, 10, 10));
+    p.drawEllipse(QRectF(1, top + 1, kDotSize - 2, kDotSize - 2));
   }
-  return QIcon(pixmap);
+  if (!symbol.isNull())
+    p.drawPixmap(QPointF(kDotSize + kGap, 0), symbol);
+  p.end();
+  QIcon icon;
+  icon.addPixmap(pixmap, QIcon::Normal);
+  icon.addPixmap(pixmap, QIcon::Selected);
+  return icon;
+}
+
+// the picture of the model an entry of My devices has; "unknown" for
+// manual settings
+QPixmap symbolOf(const MyDevice &d, qreal dpr)
+{
+  const QSize box(kSymbolSize, kSymbolSize);
+  for (const DmmDecoder::DMMInfo &info : DmmDecoder::getDeviceConfigurations())
+    if (DmmDecoder::sameModel(d.model(), info.name))
+      return DeviceSymbol::pixmap(info.vendor, DeviceType::of(info), box, dpr);
+  return DeviceSymbol::unknown(box, dpr);
 }
 }
 
@@ -50,6 +81,7 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   header()->setSectionResizeMode(0, QHeaderView::Stretch);
   header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
   setRootIsDecorated(true);
+  setIconSize(kIconSize);
   setDragDropMode(QAbstractItemView::InternalMove);
   setSelectionMode(QAbstractItemView::SingleSelection);
   // renamed with F2 (keyPressEvent) or the context menu, not by a click
@@ -211,7 +243,8 @@ void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString
     QFont font = item->font(0);
     font.setBold(instance.id == own);
     item->setFont(0, font);
-    item->setIcon(0, dot(instance.active ? QColor(0x22, 0xaa, 0x22) : instance.running ? grey : QColor()));
+    item->setIcon(0, dot(instance.active ? QColor(0x22, 0xaa, 0x22) : instance.running ? grey : QColor(),
+                         devicePixelRatioF()));
     QTreeWidgetItem *device = item->child(0);
     device->setText(0, instance.device);
     device->setFlags(Qt::ItemIsEnabled);
@@ -251,7 +284,7 @@ void DeviceSidebar::setServices(const QList<Service> &services)
     item->setIcon(0, dot(service.active    ? QColor(0x22, 0xaa, 0x22)
                          : service.failed  ? QColor(0xcc, 0x22, 0x22)
                          : service.running ? QColor(0x1a, 0x5c, 0x1a)
-                                           : QColor()));
+                                           : QColor(), devicePixelRatioF()));
   }
   m_filling = false;
 }
@@ -289,6 +322,7 @@ void DeviceSidebar::fill()
     item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEditable);
     item->setFirstColumnSpanned(true);
     item->setToolTip(0, d.where().isEmpty() ? d.model() : QString("%1 · %2").arg(d.model(), d.where()));
+    item->setData(0, kSymbol, symbolOf(d, devicePixelRatioF()));
     if (d.id == selected)
       setCurrentItem(item);
   }
@@ -298,6 +332,7 @@ void DeviceSidebar::fill()
   m_addItem->setFirstColumnSpanned(true);
   m_addItem->setForeground(0, palette().color(QPalette::Disabled, QPalette::WindowText));
   m_addItem->setToolTip(0, tr("Set up another meter (the assistant)."));
+  m_addItem->setIcon(0, dot(QColor(), devicePixelRatioF()));   // its text where the names are
   m_devices->setExpanded(true);
   updateMarks();
   m_filling = false;
@@ -327,7 +362,8 @@ void DeviceSidebar::updateMarks()
     item->setFont(0, font);
     item->setIcon(0, dot(!current  ? QColor()
                          : m_active ? QColor(0x22, 0xaa, 0x22)
-                                    : palette().color(QPalette::Disabled, QPalette::WindowText)));
+                                    : palette().color(QPalette::Disabled, QPalette::WindowText),
+                         devicePixelRatioF(), item->data(0, kSymbol).value<QPixmap>()));
   }
 }
 

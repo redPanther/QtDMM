@@ -687,7 +687,7 @@ void AddDeviceDlg::updateDeviceInfo()
   const DeviceType::Type type = DeviceType::of(info);
   const qreal dpr = devicePixelRatioF();
   m_symbol->setPixmap(manual ? DeviceSymbol::unknown(kSymbolSize, dpr)
-                             : DeviceSymbol::pixmap(type, kSymbolSize, dpr));
+                             : DeviceSymbol::pixmap(info.vendor, type, kSymbolSize, dpr));
 
   // how it is reached: a Bluetooth address, QtDMM itself, or the port with
   // its serial parameters
