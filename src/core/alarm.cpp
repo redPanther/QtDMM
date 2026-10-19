@@ -1,6 +1,7 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "core/alarm.h"
+#include "core/sampletypes.h"
 
 #include <QCoreApplication>
 #include <QJsonArray>
@@ -74,7 +75,7 @@ Alarm Alarm::fromJson(const QJsonObject &o)
   Alarm al;
   al.name = o["name"].toString();
   al.enabled = o["enabled"].toBool(true);
-  al.value = qBound(0, o["value"].toInt(0), 2);
+  al.value = qBound(0, o["value"].toInt(0), kMaxValues - 1);
   al.condition = conditionFromKey(o["condition"].toString());
   al.a = o["a"].toDouble();
   al.b = o["b"].toDouble();

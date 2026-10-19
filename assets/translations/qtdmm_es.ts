@@ -303,48 +303,48 @@
 <context>
     <name>Alarm</name>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="122"/>
+        <location filename="../../src/core/alarm.cpp" line="123"/>
         <source>below %1</source>
         <translation>por debajo de %1</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="123"/>
+        <location filename="../../src/core/alarm.cpp" line="124"/>
         <source>above %1</source>
         <translation>por encima de %1</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="124"/>
+        <location filename="../../src/core/alarm.cpp" line="125"/>
         <source>outside %1 to %2</source>
         <translation>fuera de %1 a %2</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="125"/>
+        <location filename="../../src/core/alarm.cpp" line="126"/>
         <source>inside %1 to %2</source>
         <translation>dentro de %1 a %2</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="126"/>
+        <location filename="../../src/core/alarm.cpp" line="127"/>
         <source>overload</source>
         <translation>sobrecarga</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="127"/>
+        <location filename="../../src/core/alarm.cpp" line="128"/>
         <source>no readings for %1 s</source>
         <translation>sin lecturas desde hace %1 s</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="130"/>
+        <location filename="../../src/core/alarm.cpp" line="131"/>
         <source>for %1 s</source>
         <translation>durante %1 s</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="364"/>
+        <location filename="../../src/core/alarm.cpp" line="365"/>
         <location filename="../../src/ui/views/graphwidget_overlays.cpp" line="406"/>
         <source>Alarm</source>
         <translation>Alarma</translation>
     </message>
     <message>
-        <location filename="../../src/core/alarm.cpp" line="367"/>
+        <location filename="../../src/core/alarm.cpp" line="368"/>
         <source>Alarm %1</source>
         <translation>Alarma %1</translation>
     </message>
@@ -2625,127 +2625,127 @@ No permission? The sensor needs a udev rule for USB ID %1:%2.</source>
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="343"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="359"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: datos sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="358"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="374"/>
         <source>Export data first</source>
         <translation>Exportar primero</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="334"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="350"/>
         <source>Quit without saving</source>
         <translation>Salir sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="295"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="303"/>
         <source>Value %1</source>
         <translation>Valor %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="334"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="350"/>
         <source>If you quit now it will be lost.</source>
         <translation>Si sale ahora se perderán.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="344"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="360"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. %1&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Datos sin guardar&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Todavía hay mediciones sin guardar en memoria. %1&lt;p&gt;¿Desea exportarlas antes?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="474"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="490"/>
         <source>Switching to %1 clears it.</source>
         <translation>Al cambiar a %1 se borrarán.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="474"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="490"/>
         <source>Switch without saving</source>
         <translation>Cambiar sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="504"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="520"/>
         <source>Recording stopped: switched to %1</source>
         <translation>Grabación detenida: cambiado a %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="604"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="622"/>
         <source>Loading a file replaces it.</source>
         <translation>Cargar un archivo las reemplaza.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="604"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="622"/>
         <source>Load without saving</source>
         <translation>Cargar sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="622"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="640"/>
         <source>Clear deletes it.</source>
         <translation>Vaciar las borra.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="622"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="640"/>
         <source>Clear without saving</source>
         <translation>Vaciar sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="638"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="656"/>
         <source>Live clears it.</source>
         <translation>En vivo las borra.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="638"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="656"/>
         <source>Live without saving</source>
         <translation>En vivo sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="648"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="666"/>
         <source>A new recording clears it.</source>
         <translation>Una grabación nueva las borra.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="648"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="666"/>
         <source>Record without saving</source>
         <translation>Grabar sin guardar</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="656"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="674"/>
         <source>It starts now. A recording at %1 starts by itself from Live.</source>
         <translation>Empieza ahora. Una grabación a las %1 empieza sola desde En vivo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="658"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="676"/>
         <source>It starts now. A recording at the threshold starts by itself from Live.</source>
         <translation>Empieza ahora. Una grabación en el umbral empieza sola desde En vivo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="775"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="792"/>
         <source>Automatic start at %1</source>
         <translation>Inicio automático a las %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="777"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="794"/>
         <source>Raising threshold %1</source>
         <translation>Umbral ascendente %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="779"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="796"/>
         <source>Falling threshold %1</source>
         <translation>Umbral descendente %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="814"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="831"/>
         <source>calculated</source>
         <translation>calculado</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="823"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="840"/>
         <source>no meter configured</source>
         <translation>ningún multímetro configurado</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="846"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="863"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarma de QtDMM: %1</translation>
     </message>
@@ -2854,26 +2854,26 @@ No permission? The sensor needs a udev rule for USB ID %1:%2.</source>
 <context>
     <name>LcdWidget</name>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="605"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="618"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="605"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="632"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="721"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="737"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="618"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="645"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="734"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="750"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="605"/>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="736"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="618"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="749"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/lcdwidget.cpp" line="606"/>
+        <location filename="../../src/ui/views/lcdwidget.cpp" line="619"/>
         <source>AVG</source>
         <translation>AVG</translation>
     </message>

@@ -151,9 +151,10 @@ yellow-green of most meters), *Backlight blue* (light segments on blue, the defa
 *Appearance* page. Changing that tint switches the display to *Custom*.
 
 **Primary value** in the same menu, for a meter with more than one value (a
-second display, or the CO2, temperature and humidity of the TFA
-AirCO2ntrol): the value shown big; the others follow on the small line in
-their order. The min/max memory follows it too. It only changes the display:
+second display, the CO2, temperature and humidity of the TFA AirCO2ntrol,
+or the four values of a Metex M-3850D): the value shown big; the others
+follow on the small line in their order, up to three. A meter set up by
+hand gets as many values as it sends. The min/max memory follows it too. It only changes the display:
 the graph's recording, its triggers and the export stay with the main value
 (value 1). It is kept with the window layout; a meter without that value
 shows its main value.

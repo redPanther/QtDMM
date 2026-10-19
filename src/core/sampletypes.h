@@ -224,6 +224,8 @@ struct Range
 /// Which value of a meter: main display or the n-th display showing the same
 /// quantity again.
 enum class Slot : quint8 { Main, Sub, Sub2, Sub3 };
+/// Values of one meter at most: the main value and three secondary ones (Slot).
+constexpr int kMaxValues = 4;
 
 /// The key of a meter's port: channel, quantity, the defining flags (AC, DC,
 /// RMS, Diode, FourWire) and the slot. Text form "voltage.dc",

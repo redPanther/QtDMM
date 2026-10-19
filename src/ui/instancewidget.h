@@ -91,7 +91,8 @@ public:
   int         lcdValue() const { return m_lcdValue; }
   int         meterValue() const { return m_meterValue; }
   int         poincareValue() const { return m_poincareValue; }
-  /// The values the meter has (DMMInfo::valueCount(), at most 3 for the choice).
+  /// The values the meter has: DMMInfo::valueCount(), or more when more came;
+  /// at most kMaxValues.
   int         numValues() const;
   /// "CO2 (ppm)" from its last reading, "Value 2" before one came.
   QString     valueName(int id) const;
@@ -224,6 +225,10 @@ protected:
   int         m_meterValue = 0;
   int         m_poincareValue = 0;
   QMap<int, Reading> m_lastReading;   ///< by id, for valueName()
+  int         m_seenValues = 0;         ///< highest value id read + 1, since the meter was chosen
+  /// The number of values (numValues()) to the display and SCPI, then
+  /// applyValueChoice().
+  void        applyValueCount();
   /// The values chosen, as far as the meter has them, to the views and the
   /// min/max memory.
   void        applyValueChoice();

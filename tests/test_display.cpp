@@ -312,6 +312,16 @@ int main(int argc, char **argv)
     f.setDisplayMode(4000, true, true, 1);
     check(f.primaryShown() == 0 && f.lineValue(0) == "734", "primary: a meter with one value shows its main value");
     check(f.primary() == 1, "primary: the choice stays for a meter that has it");
+    // four values: three on the small line; the number alone (setValueCount)
+    f.setValueCount(4);
+    f.setValue(3, "1013");
+    auto four = [&] { return QStringList{ f.lineValue(0), f.lineValue(1), f.lineValue(2), f.lineValue(3) }.join(' '); };
+    check(four() == "22.50 734 45.10 1013", "four values, primary 2, got " + four());
+    f.setPrimary(3);
+    check(f.primaryShown() == 3 && four() == "1013 734 22.50 45.10", "primary 4: big, then 1 to 3, got " + four());
+    f.setValueCount(5);
+    f.setPrimary(4);
+    check(f.primaryShown() == 0, "at most four values: a fifth is none");
   }
 
   // --- an alarm's colour over the variant, and back ---
