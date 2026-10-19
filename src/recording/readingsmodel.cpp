@@ -175,7 +175,7 @@ QVariant ReadingsModel::data(const QModelIndex &index, int role) const
       return m_singleDay ? when.toString("HH:mm:ss.zzz") : formatTime(when);
     }
     case Value: return SiPrefix::withoutLeadingZeros(e.text);   // "000.00" -> "0.00", as the meter shows it
-    case Unit:  return e.unit;
+    case Unit:  return SiPrefix::displayText(e.unit);   // "°C", "kΩ" as on the display
     case Mode:  return modeColumn(e.id, e.port, e.flags, true);
     case Range: return e.range;
     case Hold:  return e.hold() ? tr("HOLD") : QString();
