@@ -24,6 +24,7 @@
 #include <QPixmap>
 #include <QTimer>
 #include <limits>
+#include "core/reading.h"   // complete for moc: a slot takes it (GCC 16 -Wsfinae-incomplete)
 
 /// Colour set and options of the analog meter (AnalogMeter).
 struct AnalogMeterStyle
@@ -59,7 +60,6 @@ struct AnalogMeterStyle
 /// The scale is in the unit the multimeter displays (with SI prefix), the
 /// full scale comes from the display count of the meter - see
 /// fullScaleFromReading(). Values are plain doubles in that unit.
-struct Reading;
 
 class AnalogMeter : public QWidget
 {

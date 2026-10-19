@@ -30,6 +30,7 @@
 #include <QPixmap>
 
 #include "core/sampletypes.h"
+#include "core/reading.h"   // complete for moc: a slot takes it (GCC 16 -Wsfinae-incomplete)
 
 /// The digital display: an LCD panel in the same housing as the analog
 /// meter. Seven-segment digits, unit, annunciators (AUTO; AC, "+" for AC+DC,
@@ -37,7 +38,6 @@
 /// bar graph and up to three secondary values are all drawn with QPainter
 /// and scale with the widget.
 /// Unlit segments and annunciators stay faintly visible, like on a real LCD.
-struct Reading;
 
 class LcdWidget : public QWidget
 {
