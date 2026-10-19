@@ -15,6 +15,13 @@
 #include "device/decoders/uni_t_ienv.h"
 #include "core/readingadapter.h"
 
+// The second value of a frame, as the golden data names it (dval2, val2,
+// unit2, id2): a default one (id 0) when the frame has none.
+static DmmDecoder::DmmChannel second(const DmmDecoder::DmmResponse &r)
+{
+  return r.channels.value(1);
+}
+
 QByteArray parseHexStringToByteArray(const QString &hexString)
 {
   QByteArray result;
@@ -118,9 +125,9 @@ int main(int argc, char **argv)
           if (keysight->checkFormat(fifo, length))
           {
             const auto r = keysight->decode(QByteArray(fifo, int(length) + 1), 0);
-            if (r && r->unit == "V" && tick < 12)
+            if (r && r->main().unit == "V" && tick < 12)
               ++volts;
-            else if (r && r->unit == "Ohm" && tick > 12)
+            else if (r && r->main().unit == "Ohm" && tick > 12)
               ++ohms;
             else if (r)
               ++wrong;
@@ -198,7 +205,7 @@ int main(int argc, char **argv)
     {
       auto decoder = DmmDecoder::getInstance(FrameFormat::UniTiENV);
       const auto lux = decoder->decode(ienv("   158LUX"), 0);
-      if (!lux || lux->dval != 158 || lux->unit != "lx")
+      if (!lux || lux->main().dval != 158 || lux->main().unit != "lx")
       {
         qWarning() << "iENV: the synthetic frame of 158 lx does not decode";
         ++problems;
@@ -233,9 +240,9 @@ int main(int argc, char **argv)
       // the display is in the base unit, converted to the unit shown: lx to fc,
       // °C to °F (tried on a UT333BT: its °F key changes only the unit id)
       const auto fc = decoder->decode(ienv("  1234LUX", 0, 0x3c), 0);
-      if (!fc || fc->unit != "fc" || fc->val != "114.6" || std::fabs(fc->dval - 1234 / 10.7639104) > 1e-9)
+      if (!fc || fc->main().unit != "fc" || fc->main().val != "114.6" || std::fabs(fc->main().dval - 1234 / 10.7639104) > 1e-9)
       {
-        qWarning() << "iENV: 1234 lx shown in fc gives" << (fc ? fc->val + " " + fc->unit : QString("nothing"));
+        qWarning() << "iENV: 1234 lx shown in fc gives" << (fc ? fc->main().val + " " + fc->main().unit : QString("nothing"));
         ++problems;
       }
       {
@@ -245,14 +252,14 @@ int main(int argc, char **argv)
         // every other one): each is the main value all the same
         const auto t = hum->decode(ienv("  23.4  C", 0, 0x31, 0x30), 1);
         const auto h = hum->decode(ienv("  45.3 RH", 0, 0x32, 0x34), 1);
-        if (!t || t->id != 0 || !h || h->id != 0 || h->id2 != 1)
+        if (!t || t->main().id != 0 || !h || h->main().id != 0 || second(*h).id != 1)
         {
           qWarning() << "iENV: a frame counted as the second one is not the main value";
           ++problems;
         }
-        if (!t || t->val != "45.2" || t->unit2 != "°F" || t->val2 != "74.1" || std::fabs(t->dval2 - 74.12) > 1e-9)
+        if (!t || t->main().val != "45.2" || second(*t).unit != "°F" || second(*t).val != "74.1" || std::fabs(second(*t).dval - 74.12) > 1e-9)
         {
-          qWarning() << "iENV: 23.4 °C shown in °F gives" << (t ? t->val2 + " " + t->unit2 : QString("nothing"));
+          qWarning() << "iENV: 23.4 °C shown in °F gives" << (t ? second(*t).val + " " + second(*t).unit : QString("nothing"));
           ++problems;
         }
         // the decimals follow the meter's, not its number of digits
@@ -262,9 +269,9 @@ int main(int argc, char **argv)
         for (const auto &c : temps)
         {
           const auto r = hum->decode(ienv(c.shown, 0, 0x31, 0x30), 1);
-          if (!r || r->val2 != c.f)
+          if (!r || second(*r).val != c.f)
           {
-            qWarning() << "iENV:" << c.shown << "in °F gives" << (r ? r->val2 : QString("nothing")) << "not" << c.f;
+            qWarning() << "iENV:" << c.shown << "in °F gives" << (r ? second(*r).val : QString("nothing")) << "not" << c.f;
             ++problems;
           }
         }
@@ -526,22 +533,24 @@ int main(int argc, char **argv)
         qWarning() << "unknown type";
     };
 
-    qInfo() << hexString << ": " << result->dval << result->val << result->unit << result->range << result->special << result->hold
-            << result->showBar << result->id << result->error << result->dval2 << result->val2 << result->unit2 << result->id2;
+    const DmmDecoder::DmmChannel &main = result->main();
+    const DmmDecoder::DmmChannel sub = second(*result);
+    qInfo() << hexString << ": " << main.dval << main.val << main.unit << result->range << main.special << result->hold
+            << result->showBar << main.id << result->error << sub.dval << sub.val << sub.unit << sub.id;
 
-    if (expected.contains("dval"))    check("dval",    result->dval,    expected["dval"]);
-    if (expected.contains("val"))     check("val",     result->val,     expected["val"]);
-    if (expected.contains("unit"))    check("unit",    result->unit,    expected["unit"]);
-    if (expected.contains("range"))   check("range",   result->range,   expected["range"]);
-    if (expected.contains("special")) check("special", result->special, expected["special"]);
-    if (expected.contains("hold"))    check("hold",    result->hold,    expected["hold"]);
-    if (expected.contains("showBar")) check("showBar", result->showBar, expected["showBar"]);
-    if (expected.contains("id"))      check("id",      result->id,      expected["id"]);
-    if (expected.contains("error"))   check("error",   result->error,   expected["error"]);
-    if (expected.contains("dval2"))   check("dval2",   result->dval2,   expected["dval2"]);
-    if (expected.contains("val2"))    check("val2",    result->val2,    expected["val2"]);
-    if (expected.contains("unit2"))   check("unit2",   result->unit2,   expected["unit2"]);
-    if (expected.contains("id2"))     check("id2",     result->id2,     expected["id2"]);
+    if (expected.contains("dval"))    check("dval",    main.dval,         expected["dval"]);
+    if (expected.contains("val"))     check("val",     main.val,          expected["val"]);
+    if (expected.contains("unit"))    check("unit",    main.unit,         expected["unit"]);
+    if (expected.contains("range"))   check("range",   result->range,     expected["range"]);
+    if (expected.contains("special")) check("special", main.special,      expected["special"]);
+    if (expected.contains("hold"))    check("hold",    result->hold,      expected["hold"]);
+    if (expected.contains("showBar")) check("showBar", result->showBar,   expected["showBar"]);
+    if (expected.contains("id"))      check("id",      main.id,           expected["id"]);
+    if (expected.contains("error"))   check("error",   result->error,     expected["error"]);
+    if (expected.contains("dval2"))   check("dval2",   sub.dval,          expected["dval2"]);
+    if (expected.contains("val2"))    check("val2",    sub.val,           expected["val2"]);
+    if (expected.contains("unit2"))   check("unit2",   sub.unit,          expected["unit2"]);
+    if (expected.contains("id2"))     check("id2",     sub.id,            expected["id2"]);
 
     // the golden part (kern_spezifikation §11.2): the port each value lands
     // on behind ReadingAdapter

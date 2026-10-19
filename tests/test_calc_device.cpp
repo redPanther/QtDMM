@@ -86,7 +86,7 @@ int main(int argc, char **argv)
   check(line.size() == 30 && line.endsWith('\n'), "line is 30 bytes ending in LF");
   check(status.contains("'u'") || status.contains("'i'"), "nothing published yet -> waiting message: " + status);
   auto r = decode(line);
-  check(r && r->val.trimmed() == "OL", "no inputs -> OL");
+  check(r && r->main().val.trimmed() == "OL", "no inputs -> OL");
 
   u.publishReading(reading(12.0, "V", now));
   i.publishReading(reading(0.5, "A", now));
@@ -97,25 +97,25 @@ int main(int argc, char **argv)
   check(r.has_value(), "line decodes: " + QString::fromLatin1(line.trimmed()));
   if (r)
   {
-    check(qFuzzyCompare(r->dval, 6.0), QString("dval %1, expected 6").arg(r->dval));
-    check(r->unit == "W", "unit W, got " + r->unit);
-    check(r->special == "DC" && r->range == "AUTO", "coupling DC, range AUTO");
+    check(qFuzzyCompare(r->main().dval, 6.0), QString("dval %1, expected 6").arg(r->main().dval));
+    check(r->main().unit == "W", "unit W, got " + r->main().unit);
+    check(r->main().special == "DC" && r->range == "AUTO", "coupling DC, range AUTO");
   }
 
   // small results get an SI prefix and still decode to base units
   i.publishReading(reading(0.0005, "A", now + 1));
   p.checkForChanges();
   r = decode(calc.currentLine(now, nullptr));
-  check(r && std::fabs(r->dval - 0.006) < 1e-9 && r->unit == "mW", QString("6 mW: dval %1 unit %2").arg(r ? r->dval : -1).arg(r ? r->unit : "-"));
+  check(r && std::fabs(r->main().dval - 0.006) < 1e-9 && r->main().unit == "mW", QString("6 mW: dval %1 unit %2").arg(r ? r->main().dval : -1).arg(r ? r->main().unit : "-"));
 
   // --- 4. stale and invalid inputs ---
   r = decode(calc.currentLine(now + CalcDevice::kStaleMs + 1, &status));
-  check(r && r->val.trimmed() == "OL" && status.contains("No current value"), "stale input -> OL + message: " + status);
+  check(r && r->main().val.trimmed() == "OL" && status.contains("No current value"), "stale input -> OL + message: " + status);
 
   i.publishReading(reading(0, "A", now + 2, false));
   p.checkForChanges();
   r = decode(calc.currentLine(now + 2, &status));
-  check(r && r->val.trimmed() == "OL" && status.contains("'i'") && status.contains("numeric"), "overloaded input -> OL + message: " + status);
+  check(r && r->main().val.trimmed() == "OL" && status.contains("'i'") && status.contains("numeric"), "overloaded input -> OL + message: " + status);
 
   // --- 5. division by zero, and an instance id with a hyphen ---
   i.publishReading(reading(0.0, "A", now + 3, true));
@@ -123,14 +123,14 @@ int main(int argc, char **argv)
   CalcDevice div(info, "Ohm u / i", &p);
   check(div.open(QIODevice::ReadWrite), "u / i opens");
   r = decode(div.currentLine(now + 3, &status));
-  check(r && r->val.trimmed() == "OL" && status.contains("division"), "1/0 -> OL + message: " + status);
+  check(r && r->main().val.trimmed() == "OL" && status.contains("division"), "1/0 -> OL + message: " + status);
 
   odd.publishReading(reading(3.0, "V", now + 3));
   p.checkForChanges();
   CalcDevice alias(info, "V uni_t_803 * 2", &p);
   check(alias.open(QIODevice::ReadWrite), "aliased id opens");
   r = decode(alias.currentLine(now + 3, &status));
-  check(r && qFuzzyCompare(r->dval, 6.0) && status.isEmpty(), "uni-t_803 is reachable as uni_t_803");
+  check(r && qFuzzyCompare(r->main().dval, 6.0) && status.isEmpty(), "uni-t_803 is reachable as uni_t_803");
 
   // --- 5a. rounding to the display's counts, like an autoranging meter ---
   {
@@ -154,12 +154,12 @@ int main(int argc, char **argv)
     // t counts from open(); currentLine() takes the reference time
     const qint64 opened = QDateTime::currentMSecsSinceEpoch();
     r = decode(gen.currentLine(opened + 2500, &status));
-    check(r && status.isEmpty() && r->special == "AC", "AC coupling in the line");
-    check(r && std::fabs(r->dval - 12.5) < 0.01, QString("t = 2.5 s -> 12.5, got %1").arg(r ? r->dval : -1));
+    check(r && status.isEmpty() && r->main().special == "AC", "AC coupling in the line");
+    check(r && std::fabs(r->main().dval - 12.5) < 0.01, QString("t = 2.5 s -> 12.5, got %1").arg(r ? r->main().dval : -1));
     CalcDevice rnd(info, "V 5 + rand()", &p);
     check(rnd.open(QIODevice::ReadWrite), "rand() opens");
     r = decode(rnd.currentLine(opened, nullptr));
-    check(r && r->dval >= 5.0 && r->dval < 6.0, "rand() based reading in range");
+    check(r && r->main().dval >= 5.0 && r->main().dval < 6.0, "rand() based reading in range");
   }
 
   // --- 6. the QIODevice side: tick() offers the line, readData hands it out bytewise ---

@@ -19,12 +19,12 @@ size_t DecoderCyrusTekES51922::getPacketLength()
 std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51922::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id     = id;
+  m_result.main().id     = id;
   m_result.showBar = true;
   m_result.hold   = bit(data,11,1);
   m_result.range  = bit(data,10,1) ? "AUTO":"MANU";
-  m_result.special= bit(data,10,2) ? "AC"  :"DC";
-  m_result.val    = makeValue(data,1,5, bit(data,7,2));
+  m_result.main().special= bit(data,10,2) ? "AC"  :"DC";
+  m_result.main().val    = makeValue(data,1,5, bit(data,7,2));
   bool ul         = bit(data,9,3);
   bool ovl        = bit(data,7,0);
   bool hz         = bit(data,10,0);
@@ -55,7 +55,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51922::decode(const QByt
   {
     // Duty cycle is always shown as 100.0-style, whatever the range code
     // (the table's '%' column reads '100.0*' for every range).
-    if (function == 0x2) m_result.special = "FR";
+    if (function == 0x2) m_result.main().special = "FR";
     formatResultValue(4,"","%");
   }
   else if (hz && function != 0x2)
@@ -77,15 +77,15 @@ std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51922::decode(const QByt
     case 0x1:
       // Diode test reads in volts with a 2.2000-style format: the log shows
       // the display as '.0L V', and heha's ut.cpp uses the V unit code here.
-      m_result.special = "DI";
+      m_result.main().special = "DI";
       formatResultValue(1,"","V");
       break;
     case 0x2:
-      m_result.special = "FR";
+      m_result.main().special = "FR";
       formatFrequency(range);
       break;
     case 0x3:
-      m_result.special = "OH";
+      m_result.main().special = "OH";
       switch (range)
       {
         case 0: formatResultValue(3,"","Ohm");  break;
@@ -97,11 +97,11 @@ std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51922::decode(const QByt
         case 6: formatResultValue(3,"M","Ohm"); break;
       }      break;
     case 0x5:
-      m_result.special = "BUZ";
+      m_result.main().special = "BUZ";
       formatResultValue(3,"","Ohm");
       break;
     case 0x6:
-      m_result.special = "CA";
+      m_result.main().special = "CA";
       switch (range)
       {
         case 0: formatResultValue(2,"n","F"); break;
@@ -135,12 +135,12 @@ std::optional<DmmDecoder::DmmResponse> DecoderCyrusTekES51922::decode(const QByt
   }
 
   if (ul) {
-    m_result.val  = "UL";
-    m_result.dval = 0;
+    m_result.main().val  = "UL";
+    m_result.main().dval = 0;
   }
   if (ovl) {
-    m_result.val  = "OL";
-    m_result.dval = 0;
+    m_result.main().val  = "OL";
+    m_result.main().dval = 0;
   }
   return m_result;
 }

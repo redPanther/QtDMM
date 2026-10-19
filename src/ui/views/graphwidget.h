@@ -171,7 +171,7 @@ public:
   /// recorder). The graph does not take ownership; the store has to outlive it.
   void             setStore(RecordingStore *store);
   /// Unit of the recorded quantity for the axis label; the SI prefix is
-  /// stripped because values arrive in base units (see DmmDecoder::DmmResponse).
+  /// stripped because values arrive in base units (see DmmDecoder::DmmChannel).
   void             setUnit(const QString &);
   /// Sample time in tenths of a second.
   /// The window and the length are kept in seconds: a new sample time

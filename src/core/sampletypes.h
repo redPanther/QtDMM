@@ -230,7 +230,7 @@ enum class Slot : quint8 { Main, Sub, Sub2, Sub3 };
 /// "2:current.ac", "voltage.dc.sub"; the channel is left out when it is 1.
 struct PortKey
 {
-  int      channel = 1;
+  int      channel = 1;   ///< the meter's input (1..); not a DmmDecoder::DmmChannel, one of its values
   Quantity quantity = Quantity::Unknown;
   quint32  defining = 0;
   Slot     slot = Slot::Main;

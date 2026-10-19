@@ -110,11 +110,11 @@ public:
   void    setStateManager(SharedStateManager *state);
 
 Q_SIGNALS:
-  /// One decoded reading; the parameters mirror DmmDecoder::DmmResponse.
-  /// Emitted twice for frames that carry a second value (id2).
   /// The whole decoded frame, for ReadingAdapter (MeterController); value()
   /// is the same split into its values.
   void    response(const DmmDecoder::DmmResponse &response);
+  /// One value of a decoded reading, once per DmmDecoder::DmmChannel of the
+  /// frame; the parameters mirror the channel and the frame's annunciators.
   void    value(double dval, const QString &val, const QString &unit, const QString &special,
                 const QString &range, bool hold, bool showBar, int id);
   /// Connection state as a message for the status bar; despite the name

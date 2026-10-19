@@ -37,12 +37,12 @@ bool DecoderVC940::checkFormat(const char* data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id     = id;
+  m_result.main().id     = id;
   m_result.showBar = true;
   m_result.hold   = false;
   m_result.range  = bit(data,8,0) ? "AUTO":"MANU";
-  m_result.special= bit(data,7,0) ? "AC"  :"DC";
-  m_result.special+= bit(data,7,1) ? "DC" : "";
+  m_result.main().special= bit(data,7,0) ? "AC"  :"DC";
+  m_result.main().special+= bit(data,7,1) ? "DC" : "";
 
   int function = data[6] & 0x0f;
   int range    = data[5] & 0x0f;
@@ -54,21 +54,21 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &da
 
   Q_UNUSED(mode2)
 
-  m_result.val = makeValue(data,0,3, (function != 0xC && neg));
+  m_result.main().val = makeValue(data,0,3, (function != 0xC && neg));
   if (data[4] != 'A')
-    m_result.val += data[4];
+    m_result.main().val += data[4];
 
   switch (function)
   {
     case 0x0:formatResultValue(3,"m","V"); break;
-    case 0x1:formatResultValue(range,"","V");  m_result.special = "DC"; break;
+    case 0x1:formatResultValue(range,"","V");  m_result.main().special = "DC"; break;
     // V AC; byte 7 says whether it is AC+DC (UT71/UT804 "A+D"), keep that
-    case 0x2:formatResultValue(range,"","V");  if (m_result.special != "ACDC") m_result.special = "AC"; break;
+    case 0x2:formatResultValue(range,"","V");  if (m_result.main().special != "ACDC") m_result.main().special = "AC"; break;
     // mV has a single 400.00 range whose code is 0; the code is not the
     // decimal position here as it is for the V ranges.
-    case 0x3:formatResultValue(3,"m","V");     m_result.special = "DC"; break;
+    case 0x3:formatResultValue(3,"m","V");     m_result.main().special = "DC"; break;
     case 0x4:
-      m_result.special = "OH";
+      m_result.main().special = "OH";
       switch (range)
       {
         case 1:formatResultValue(3,"","Ohm");  break;
@@ -80,7 +80,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &da
       }
       break;
     case 0x5:
-      m_result.special = "CA";
+      m_result.main().special = "CA";
       switch (range)
       {
         case 1:formatResultValue(2,"n","F"); break;
@@ -92,7 +92,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &da
         case 7:formatResultValue(2,"m","F"); break;   // 40.00 mF
       }
       break;
-    case 0x6:formatResultValue(4,"","C");  m_result.special = "TE"; break;
+    case 0x6:formatResultValue(4,"","C");  m_result.main().special = "TE"; break;
     case 0x7:
       switch (range)
       {
@@ -109,22 +109,22 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &da
       break;
     case 0x9: formatResultValue(2,"","A"); break;
     case 0xA:
-      m_result.special = "BUZ";
+      m_result.main().special = "BUZ";
       formatResultValue(3,"","Ohm");
       break;
     case 0xB:
-      m_result.special = "DI";
+      m_result.main().special = "DI";
       formatResultValue(1,"","V");
       break;
     case 0xC:
       if (neg)
       {
         formatResultValue(3,"","%");
-        m_result.special = "PC";
+        m_result.main().special = "PC";
       }
       else
       {
-        m_result.special = "FR";
+        m_result.main().special = "FR";
         switch (range)
         {
           case 0:formatResultValue(2,"","Hz"); break;
@@ -139,12 +139,12 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC940::decode(const QByteArray &da
       }
       break;
     case 0xD:
-      m_result.special = "TE";
+      m_result.main().special = "TE";
       formatResultValue(4,"","dF"); break;
     case 0xF:
       // 4-20 mA loop tester, shown in percent (function table in UT71BCDE.log;
       // heha's ut.cpp mode 15). Full scale "100" on five digits -> 100.00.
-      m_result.special = "PC";
+      m_result.main().special = "PC";
       formatResultValue(3,"","%");
       break;
       break;

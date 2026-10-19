@@ -45,17 +45,17 @@ std::optional<DmmDecoder::DmmResponse> DecoderBenetechGM1020::decode(const QByte
   }
 
   m_result = {};
-  m_result.id = 0;
-  m_result.special = "LUX";
-  m_result.unit = "lx";
-  m_result.dval = value;
-  m_result.val = QString::number(value, 'f', decimals);
+  m_result.main().id = 0;
+  m_result.main().special = "LUX";
+  m_result.main().unit = "lx";
+  m_result.main().dval = value;
+  m_result.main().val = QString::number(value, 'f', decimals);
 
   const double temp = ((b[5] << 8) | b[6]) / 10.0;
-  m_result.id2 = 1;
-  m_result.special2 = "TE";
-  m_result.unit2 = "C";
-  m_result.dval2 = temp;
-  m_result.val2 = QString::number(temp, 'f', 1);
+  DmmChannel &second = m_result.addChannel(1);
+  second.special = "TE";
+  second.unit = "C";
+  second.dval = temp;
+  second.val = QString::number(temp, 'f', 1);
   return m_result;
 }

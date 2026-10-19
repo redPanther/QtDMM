@@ -243,7 +243,7 @@ bool DecoderUniTiDMM::checkFormat(const char *data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id = id;
+  m_result.main().id = id;
   m_result.showBar = true;
   if (data.size() < kFrameLength)
     return std::nullopt;
@@ -276,13 +276,13 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
       break;
     }
 
-  m_result.special = *func.special ? QString::fromLatin1(func.special)
+  m_result.main().special = *func.special ? QString::fromLatin1(func.special)
                                    : QString::fromLatin1(flagsC & 0x08 ? "AC" : "DC");
   // UT61E+ DC V position with AC shown alongside: the meter alternates, the
   // AC frames become the second value (display line 2, "2nd" in the table)
   if ((plus && fn == 25 && (flagsC & 0x08)) || second)
-    m_result.id = id + 1;
-  m_result.unit = QString::fromUtf8(prefix) + QString::fromLatin1(func.unit);
+    m_result.main().id = id + 1;
+  m_result.main().unit = QString::fromUtf8(prefix) + QString::fromLatin1(func.unit);
   if (second)
   {
     m_result.showBar = false;
@@ -292,13 +292,13 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
   // the meter's other keys: A bit3 MAX, bit2 MIN, bit0 REL; C bit2/bit1 peak
   // max/min
   if (flagsA & 0x08)
-    m_result.states |= SampleFlag::Max;
+    m_result.main().states |= SampleFlag::Max;
   if (flagsA & 0x04)
-    m_result.states |= SampleFlag::Min;
+    m_result.main().states |= SampleFlag::Min;
   if (flagsA & 0x01)
-    m_result.states |= SampleFlag::Relative;
+    m_result.main().states |= SampleFlag::Relative;
   if (flagsC & 0x06)
-    m_result.states |= SampleFlag::Peak;
+    m_result.main().states |= SampleFlag::Peak;
   m_result.range = (flagsB & 0x04) ? "MANU" : "AUTO";
   return displayed(f, prefix);
 }
@@ -313,8 +313,8 @@ DmmDecoder::DmmResponse DecoderUniTiDMM::displayed(const unsigned char *f, const
   static const QRegularExpression overload("^-?OL$");
   if (overload.match(bare).hasMatch())
   {
-    m_result.val = bare.startsWith('-') ? "-OL" : "OL";
-    m_result.dval = 0;
+    m_result.main().val = bare.startsWith('-') ? "-OL" : "OL";
+    m_result.main().dval = 0;
     return m_result;
   }
   text.remove(' ');
@@ -323,11 +323,11 @@ DmmDecoder::DmmResponse DecoderUniTiDMM::displayed(const unsigned char *f, const
   if (!ok)
   {
     // NCV strength bar ("EF", "----"), no number: show it as it is
-    m_result.val = text;
-    m_result.dval = 0;
+    m_result.main().val = text;
+    m_result.main().dval = 0;
     return m_result;
   }
-  m_result.val = text;
-  m_result.dval = shown * prefixFactor(QString::fromUtf8(prefix));
+  m_result.main().val = text;
+  m_result.main().dval = shown * prefixFactor(QString::fromUtf8(prefix));
   return m_result;
 }

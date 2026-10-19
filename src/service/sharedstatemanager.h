@@ -31,7 +31,7 @@ public:
   /// One instance's main reading as published in the shared state.
   struct Reading
   {
-    double  value = 0;      ///< in SI base units (DmmResponse::dval)
+    double  value = 0;      ///< in SI base units (DmmChannel::dval)
     QString unit;           ///< base unit without prefix, e.g. "V"
     QString port;           ///< the port key's text form: "voltage.dc", "current.ac" (PortKey)
     qint64  msecs = 0;      ///< QDateTime::currentMSecsSinceEpoch() when published

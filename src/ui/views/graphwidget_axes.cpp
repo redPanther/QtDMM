@@ -300,7 +300,7 @@ void GraphWidget::updateCentreTicks()
 
 void GraphWidget::setUnit(const QString &unit)
 {
-  // Values arrive in SI base units (see DmmResponse), so the store keeps the
+  // Values arrive in SI base units (see DmmChannel), so the store keeps the
   // base unit; the prefix is the y labels' (yPrefix()).
   const SiPrefix::Split split = SiPrefix::split(unit);
   m_store->setUnit(split.baseUnit);

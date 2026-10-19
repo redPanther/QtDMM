@@ -104,9 +104,9 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC870::decode(const QByteArray &da
 {
   // Support for the Voltcraft VC870 digital multimeter was contributed by Florian Evers, florian-evers@gmx.de, under the "GPLv3 or later" licence
   m_result = {};
-  m_result.id     = id;
-  m_result.hold   = false;
-  m_result.range  = "";
+  m_result.main().id = id;
+  m_result.hold      = false;
+  m_result.range     = "";
 
   const char *in = data.data();
   const Function *function = nullptr;
@@ -139,18 +139,18 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC870::decode(const QByteArray &da
   const QString val2 = display(8, 12, in[17] & 0x08, in[15] & 0x08, range->factor2 != 0.0 ? range->factor2 : range->factor,
                                range->dot2 ? range->dot2 : range->dot, &dval2);
 
-  m_result.special = function->special;
+  m_result.main().special = function->special;
   m_result.showBar = function->showBar;
-  m_result.dval    = dval1;
-  m_result.val     = val1;
-  m_result.unit    = range->unit1;
-  m_result.id      = 0;
-  m_result.id2     = 1;
+  m_result.main().dval    = dval1;
+  m_result.main().val     = val1;
+  m_result.main().unit    = range->unit1;
+  m_result.main().id      = 0;
+  DmmChannel &second = m_result.addChannel(1);
   if (in[20] == 0x31)   // LCD need Dual display
   {
-    m_result.dval2 = dval2;
-    m_result.val2  = val2;
-    m_result.unit2 = range->unit2;
+    second.dval = dval2;
+    second.val  = val2;
+    second.unit = range->unit2;
   }
   return m_result;
 }

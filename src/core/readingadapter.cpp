@@ -256,11 +256,12 @@ Reading ReadingAdapter::reading(const PortSample &ps)
 QList<PortSample> ReadingAdapter::adapt(const DmmDecoder::DmmResponse &r, qint64 wall)
 {
   QList<PortSample> out;
-  out << adaptValue(r.dval, r.val, r.unit, r.special, r.range, r.hold, r.showBar, r.lowBat, r.id, wall);
-  // MAX/MIN, AVG, REL, PEAK: states of the value, not of the port
-  out.first().sample.flags |= r.states & (SampleFlag::Max | SampleFlag::Min | SampleFlag::Avg | SampleFlag::Relative
-                                          | SampleFlag::Peak);
-  if (r.id2 > 0)
-    out << adaptValue(r.dval2, r.val2, r.unit2, r.special2, r.range, r.hold, r.showBar, r.lowBat, r.id2, wall);
+  for (const DmmDecoder::DmmChannel &c : r.channels)
+  {
+    out << adaptValue(c.dval, c.val, c.unit, c.special, r.range, r.hold, r.showBar, r.lowBat, c.id, wall);
+    // MAX/MIN, AVG, REL, PEAK: states of the value, not of the port
+    out.last().sample.flags |= c.states & (SampleFlag::Max | SampleFlag::Min | SampleFlag::Avg | SampleFlag::Relative
+                                           | SampleFlag::Peak);
+  }
   return out;
 }

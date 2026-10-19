@@ -24,7 +24,7 @@
 ///
 /// The two-channel meters answer one channel per poll. The decoder keeps the
 /// last frame of each channel and sends both on every frame: main value
-/// plus the temperature as second value (val2 / id2 = 1).
+/// plus the temperature as second value (channel 1).
 ///
 /// Keys are SET frames "AA BB 04 30 <id> sum": HOLD 0x42, MAX 0x3F, MIN
 /// 0x40, AVG 0x41, Fast 0x43, Slow 0x44 ("weighting"); "unit" steps the main

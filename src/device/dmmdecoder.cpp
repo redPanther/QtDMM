@@ -100,23 +100,23 @@ void DmmDecoder::setFromENotation(const QString &number, double value, const QSt
     QString mantissa = number.left(e);
     if (mantissa.startsWith('+'))
       mantissa.remove(0, 1);
-    m_result.val = mantissa;
-    m_result.unit = prefixes.value(exponent) + unit;
+    m_result.main().val = mantissa;
+    m_result.main().unit = prefixes.value(exponent) + unit;
   }
   else
   {
     QString prefix;
-    m_result.val = SiPrefix::format(value, &prefix);
-    m_result.unit = prefix + unit;
+    m_result.main().val = SiPrefix::format(value, &prefix);
+    m_result.main().unit = prefix + unit;
   }
 }
 
 void DmmDecoder::formatResultValue(int commaPos, const QString& prefix, const QString& baseUnit)
 {
-  m_result.val = insertCommaIT(m_result.val, commaPos);
-  m_result.dval = m_result.val.toDouble() * prefixFactor(prefix);
+  m_result.main().val = insertCommaIT(m_result.main().val, commaPos);
+  m_result.main().dval = m_result.main().val.toDouble() * prefixFactor(prefix);
 
-  m_result.unit = prefix + baseUnit;
+  m_result.main().unit = prefix + baseUnit;
 }
 
 QString DmmDecoder::makeValue(const QByteArray &data, int first, int last, bool neg)

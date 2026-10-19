@@ -44,8 +44,8 @@ std::optional<DmmDecoder::DmmResponse> DecoderGDM703::decode(const QByteArray &d
   m_result = {};
   // one frame carries both displays: main is id 0, the second id 1 (and
   // numValues 2 in the table, so the display shows it)
-  m_result.id = 0;
-  m_result.id2 = 1;
+  m_result.main().id = 0;
+  DmmChannel &second = m_result.addChannel(1);
   m_result.range = "";
   m_result.hold = false;
   m_result.showBar = true;
@@ -57,24 +57,24 @@ std::optional<DmmDecoder::DmmResponse> DecoderGDM703::decode(const QByteArray &d
   const bool numeric = parseValue(frame.mid(3, 6), frame.mid(9, 4), val, dval, unit);
   if (!numeric)
     val = " OL ";
-  m_result.val = val;
-  m_result.dval = numeric ? dval : 0.0;
-  m_result.unit = unit;
-  if (mode == "AC")       m_result.special = "AC";
-  else if (mode == "DC")  m_result.special = "DC";
-  else if (mode == "OH" || unit.endsWith("Ohm")) m_result.special = "OH";
-  else if (mode == "DI")  m_result.special = "DI";
-  else if (mode == "FR" || unit.endsWith("Hz")) m_result.special = "HZ";
-  else                    m_result.special = mode;
+  m_result.main().val = val;
+  m_result.main().dval = numeric ? dval : 0.0;
+  m_result.main().unit = unit;
+  if (mode == "AC")       m_result.main().special = "AC";
+  else if (mode == "DC")  m_result.main().special = "DC";
+  else if (mode == "OH" || unit.endsWith("Ohm")) m_result.main().special = "OH";
+  else if (mode == "DI")  m_result.main().special = "DI";
+  else if (mode == "FR" || unit.endsWith("Hz")) m_result.main().special = "HZ";
+  else                    m_result.main().special = mode;
 
   // secondary display: 'B', value (6), prefix + unit (4)
   QString val2, unit2;
   double dval2 = 0;
   if (frame[14] == 'B' && parseValue(frame.mid(15, 6), frame.mid(21, 4), val2, dval2, unit2))
   {
-    m_result.dval2 = dval2;
-    m_result.val2 = val2;
-    m_result.unit2 = unit2;
+    second.dval = dval2;
+    second.val = val2;
+    second.unit = unit2;
   }
   return m_result;
 }

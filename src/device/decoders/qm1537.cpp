@@ -45,22 +45,22 @@ bool DecoderQM1537::checkFormat(const char* data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id     = id;
-  m_result.hold   = bit(data,7,1);
-  m_result.range  = bit(data,7,5) ? "AUTO" : "MANU";
+  m_result.main().id = id;
+  m_result.hold      = bit(data,7,1);
+  m_result.range     = bit(data,7,5) ? "AUTO" : "MANU";
   m_result.showBar= bit(data,7,0);
-  m_result.special = (data[7] & 0x08) ? "AC" : "DC";
+  m_result.main().special = (data[7] & 0x08) ? "AC" : "DC";
 
   if (data[0] == '-')
   {
     // A single character: insertCommaIT() below allows for exactly one leading
     // sign/space. The former " -" pushed the decimal point one place left and
     // made every negative reading ten times too small.
-    m_result.val = "-";
+    m_result.main().val = "-";
   }
   else if(data[0] == '+')
   {
-    m_result.val = "";
+    m_result.main().val = "";
   }
   else goto error;
 
@@ -85,18 +85,18 @@ std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &d
       (data[3] == ':') &&
       (data[4] == ';'))
   {
-     m_result.val += "  0L";
+     m_result.main().val += "  0L";
   }
   else
-    m_result.val += makeValue(data,1,4);
+    m_result.main().val += makeValue(data,1,4);
 
   bool doUnits = true;
 
   switch (data[6])
   {
-    case 0x31: m_result.val = insertCommaIT (m_result.val,1); break;
-    case 0x32: m_result.val = insertCommaIT (m_result.val,2); break;
-    case 0x34: m_result.val = insertCommaIT (m_result.val,3); break;
+    case 0x31: m_result.main().val = insertCommaIT (m_result.main().val,1); break;
+    case 0x32: m_result.main().val = insertCommaIT (m_result.main().val,2); break;
+    case 0x34: m_result.main().val = insertCommaIT (m_result.main().val,3); break;
     // default case is no comma/decimal point at all.
   }
 
@@ -104,42 +104,42 @@ std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &d
   if (data[10] & 0x80)
   {
     /* Voltage, including diode test */
-    m_result.unit = "V";
+    m_result.main().unit = "V";
     if (data[9] & 0x04)
     {
       /* Diode test */
-      m_result.special = "DI";
-      m_result.unit = "V";
+      m_result.main().special = "DI";
+      m_result.main().unit = "V";
     }
   }
   else if (data[10] & 0x40)
   {
     /* Current */
-    m_result.unit = "A";
+    m_result.main().unit = "A";
   }
   else if (data[10] & 0x20)
   {
     /* Resistance, including continuity test */
-    m_result.unit = "Ohm";
-    m_result.special = "OH";
+    m_result.main().unit = "Ohm";
+    m_result.main().special = "OH";
   }
   else if (data[10] & 0x08)
   {
     /* Frequency */
-    m_result.unit = "Hz";
-    m_result.special = "HZ";
+    m_result.main().unit = "Hz";
+    m_result.main().special = "HZ";
   }
   else if (data[10 ] & 0x04)
   {
     /* Capacitance */
-    m_result.unit = "F";
-    m_result.special = "CA";
+    m_result.main().unit = "F";
+    m_result.main().special = "CA";
   }
   else if (data[9] & 0x02)
   {
     /* Duty cycle */
-    m_result.unit = "%";
-    m_result.special = "PC";
+    m_result.main().unit = "%";
+    m_result.main().special = "PC";
     doUnits = false;
   }
   else if (data[10] & 0x02)
@@ -147,14 +147,14 @@ std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &d
     /* Temperature, byte 10 bit 1 per docs/protocols/sources/UT61BCD.log
        (UT61B/C only, not the UT61D). "C" and "dF" are the strings LcdWidget
        maps to the degree glyphs. */
-    m_result.unit = "C";
-    m_result.special = "TE";
+    m_result.main().unit = "C";
+    m_result.main().special = "TE";
     doUnits = false;
   }
   else if (data[10] & 0x01)
   {
-    m_result.unit = "dF";
-    m_result.special = "TE";
+    m_result.main().unit = "dF";
+    m_result.main().special = "TE";
     doUnits = false;
   }
 
@@ -168,13 +168,13 @@ std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &d
     else if (data[9] & 0x20) prefix = "k";
     else if (data[9] & 0x10) prefix = "M";
 
-    m_result.unit.prepend(prefix);
+    m_result.main().unit.prepend(prefix);
   }
 
   // Computed only here, because the prefix is not known before the unit switch
   // above (duty cycle takes no prefix at all). dval is contractually in SI base
-  // units - see DmmResponse.
-  m_result.dval = m_result.val.toDouble() * prefixFactor(prefix);
+  // units - see DmmChannel.
+  m_result.main().dval = m_result.main().val.toDouble() * prefixFactor(prefix);
 
  return m_result;
 }

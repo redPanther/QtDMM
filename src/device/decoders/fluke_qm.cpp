@@ -32,7 +32,7 @@ bool DecoderFlukeQM::checkFormat(const char *data, size_t idx)
 std::optional<DmmDecoder::DmmResponse> DecoderFlukeQM::decode(const QByteArray &data, int id)
 {
   m_result = {};
-  m_result.id = id;
+  m_result.main().id = id;
   m_result.showBar = true;
   m_result.range = "AUTO";
 
@@ -146,20 +146,20 @@ bool DecoderFlukeQM::decode18x(const QString &reading)
   if (!unit18x(rest, prefix, unit, special))
     return false;
 
-  m_result.unit = prefix + unit;
-  m_result.special = special;
+  m_result.main().unit = prefix + unit;
+  m_result.main().special = special;
   if (overload)
   {
-    m_result.val = "OL";
-    m_result.dval = 0;
+    m_result.main().val = "OL";
+    m_result.main().dval = 0;
     return true;
   }
   bool ok = false;
   const double value = number.toDouble(&ok);
   if (!ok)
     return false;   // happens while the meter switches functions
-  m_result.val = number.startsWith('+') ? number.mid(1) : number;
-  m_result.dval = value * SiPrefix::factor(prefix);
+  m_result.main().val = number.startsWith('+') ? number.mid(1) : number;
+  m_result.main().dval = value * SiPrefix::factor(prefix);
   return true;
 }
 
@@ -188,24 +188,24 @@ bool DecoderFlukeQM::decode28x(const QStringList &fields)
     return false;   // NONE, or a unit this table does not know
 
   QString unit = row->unit;
-  m_result.special = row->special;
+  m_result.main().special = row->special;
   if (unitToken == "OHM" && (attribute == "OPEN_CIRCUIT" || attribute == "SHORT_CIRCUIT"))
-    m_result.special = "BUZ";
+    m_result.main().special = "BUZ";
   else if (unitToken == "VDC" && attribute == "GOOD_DIODE")
-    m_result.special = "DI";
+    m_result.main().special = "DI";
 
   if (state == "OL" || state == "OL_MINUS")
   {
-    m_result.val = state == "OL" ? "OL" : "-OL";
-    m_result.unit = unit;
-    m_result.dval = 0;
+    m_result.main().val = state == "OL" ? "OL" : "-OL";
+    m_result.main().unit = unit;
+    m_result.main().dval = 0;
     return true;
   }
   if (state == "OPEN_TC")
   {
-    m_result.val = "OPEN";   // no thermocouple
-    m_result.unit = unit;
-    m_result.dval = 0;
+    m_result.main().val = "OPEN";   // no thermocouple
+    m_result.main().unit = unit;
+    m_result.main().dval = 0;
     return true;
   }
   if (state != "NORMAL")
@@ -215,7 +215,7 @@ bool DecoderFlukeQM::decode28x(const QStringList &fields)
   const double value = number.toDouble(&ok);
   if (!ok || !std::isfinite(value))
     return false;
-  m_result.dval = value;
+  m_result.main().dval = value;
 
   // Keep the meter's digits: "-0.023E-3" is "-0.023 mV", not "-23 µV". The
   // exponent is a multiple of three whenever the meter uses a prefixed range.

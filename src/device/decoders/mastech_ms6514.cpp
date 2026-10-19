@@ -56,18 +56,18 @@ std::optional<DmmDecoder::DmmResponse> DecoderMastechMS6514::decode(const QByteA
   };
 
   m_result = {};
-  m_result.id = 0;
-  m_result.special = "TE";
-  m_result.unit = unit;
+  m_result.main().id = 0;
+  m_result.main().special = "TE";
+  m_result.main().unit = unit;
   m_result.hold = b[10] & 0x40;
-  value(0, &m_result.dval, &m_result.val);
+  value(0, &m_result.main().dval, &m_result.main().val);
   // the main display shows T1-T2
   if ((b[11] & 0x03) > 0x01)
-    m_result.states |= SampleFlag::Relative;
+    m_result.main().states |= SampleFlag::Relative;
 
-  m_result.id2 = 1;
-  m_result.unit2 = unit;
-  m_result.special2 = "TE";
-  value(1, &m_result.dval2, &m_result.val2);
+  DmmChannel &second = m_result.addChannel(1);
+  second.unit = unit;
+  second.special = "TE";
+  value(1, &second.dval, &second.val);
   return m_result;
 }

@@ -102,8 +102,8 @@ std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM52x::decode(const QByteArr
   m_result = {};
   // one frame carries both displays: main is id 0, the second id 1 (and
   // numValues 2 in the table, so the display shows it)
-  m_result.id = 0;
-  m_result.id2 = 1;
+  m_result.main().id = 0;
+  DmmChannel &sub = m_result.addChannel(1);
   m_result.showBar = true;
   m_result.hold = (buf[20] & 0x80) != 0;
   m_result.range = (buf[20] & 0x10) ? "AUTO" : "MANU";
@@ -151,10 +151,10 @@ std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM52x::decode(const QByteArr
   const double value = text.toDouble(&ok);
   if (!ok && !overload)
     return std::nullopt;
-  m_result.val = overload ? QStringLiteral(" OL ") : text;
-  m_result.unit = prefix + unit;
-  m_result.special = special;
-  m_result.dval = ok && !overload ? value * prefixFactor(prefix) : 0.0;
+  m_result.main().val = overload ? QStringLiteral(" OL ") : text;
+  m_result.main().unit = prefix + unit;
+  m_result.main().special = special;
+  m_result.main().dval = ok && !overload ? value * prefixFactor(prefix) : 0.0;
 
   // --- secondary display ---
   const QString text2 = digits(&buf[7], 0x20, nullptr);
@@ -179,9 +179,9 @@ std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM52x::decode(const QByteArr
     if (buf[13] & 0x08) prefix2 = "M";
     if (!unit2.isEmpty())
     {
-      m_result.dval2 = value2 * prefixFactor(prefix2);
-      m_result.val2 = text2;
-      m_result.unit2 = prefix2 + unit2;
+      sub.dval = value2 * prefixFactor(prefix2);
+      sub.val = text2;
+      sub.unit = prefix2 + unit2;
     }
   }
   m_result.lowBat = (buf[7] & 0x08) != 0;

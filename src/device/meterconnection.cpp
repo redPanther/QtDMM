@@ -432,9 +432,8 @@ void MeterConnection::readEventSLOT(const QByteArray &data, int id)
   if (auto r = m_decoder->decode(data, id); r)
   {
     Q_EMIT response(*r);
-    Q_EMIT value(r->dval, r->val, r->unit, r->special, r->range, r->hold, r->showBar, r->id);
-    if (r->id2 > 0)
-      Q_EMIT value(r->dval2, r->val2, r->unit2, r->special2, r->range, r->hold, r->showBar, r->id2);
+    for (const DmmDecoder::DmmChannel &c : r->channels)
+      Q_EMIT value(c.dval, c.val, c.unit, c.special, r->range, r->hold, r->showBar, c.id);
     // a calculated value's text comes from CalcDevice::status (which input
     // is missing); only the state is ours
     if (m_portType == Transport::PortType::Calc)
