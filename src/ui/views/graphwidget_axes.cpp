@@ -315,7 +315,8 @@ void GraphWidget::setUnit(const QString &unit)
 void GraphWidget::showUnit()
 {
   const QString base = leftUnit();
-  m_yTitle->setText(base.isEmpty() ? QString() : QString("[%1%2]").arg(m_yPrefix, base));
+  // as the right axis and the display write it: "[°C]", "[kΩ]"
+  m_yTitle->setText(base.isEmpty() ? QString() : QString("[%1]").arg(SiPrefix::displayText(m_yPrefix + base)));
   // room above the plot for the title
   const int h = base.isEmpty() ? 0 : int(m_yTitle->boundingRect().height()
                                              + QFontMetricsF(m_yAxis->labelsFont()).height() / 2);

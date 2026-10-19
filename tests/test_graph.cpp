@@ -884,7 +884,7 @@ int main(int argc, char **argv)
     check(yTitle(graph) == "[mV]" && graph.store()->unit() == "V", "unit: the recorded V stay V, got " + yTitle(graph));
     graph.startSLOT();
     feed.value(4700);   // ohms now; the prefix by the axis
-    check(yTitle(graph) == "[kOhm]", "unit: a new recording is in kOhm as the meter shows, got " + yTitle(graph));
+    check(yTitle(graph) == "[kΩ]", "unit: a new recording is in kΩ as the meter shows, got " + yTitle(graph));
     // a unit of its own takes no prefix: 1500 ppm, not 1.5 kppm
     graph.setUnit("ppm");
     graph.startSLOT();
