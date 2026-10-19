@@ -91,8 +91,8 @@ int main(int argc, char **argv)
     check(h.port.quantity == Quantity::TimeToGo && h.decoderBaseUnit == "min" && h.unit.base == "min"
             && qFuzzyCompare(h.sample.value, 90.0) && h.decoderUnit == "h",
           "Victron h: shown in h, minutes for graph and min/max");
-    const PortSample inf = v.adaptValue(0, "inF", "h", "DC", "", false, true, false, 0, 0);
-    check(inf.sample.quality == Quality::Overload && std::isnan(inf.sample.value), "Victron inF: no number, a gap");
+    const PortSample none = v.adaptValue(std::nan(""), "--", "h", "DC", "", false, true, false, 0, 0);
+    check(std::isnan(none.sample.value) && none.port.quantity == Quantity::TimeToGo, "Victron --: no number, a gap");
     check(one(a, "1.5", "h", "").decoderBaseUnit == "h", "another meter's h stays h");
     check(one(a, "50.0", "%", "DC").port.toString() == "duty_cycle", "a meter's %: duty cycle");
     const PortSample rh = one(a, "45.2", "%RH", "");

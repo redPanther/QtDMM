@@ -181,7 +181,7 @@ int main(int argc, char **argv)
     check(ids(two) == "0:12.53V 1:0.000A", "third and fourth none: two values, got " + ids(two));
   }
 
-  // --- 4d. the time to go: minutes below an hour, decimal hours above, inF
+  // --- 4d. the time to go: minutes below an hour, decimal hours above, --
   //         while charging (0xFFFF); the value always in minutes ---
   {
     auto ttg = [&](const char *hex)
@@ -196,7 +196,7 @@ int main(int argc, char **argv)
     check(ttg("3c00") == "1.0 h 60", "60 min: 1.0 h, got " + ttg("3c00"));
     check(ttg("5a00") == "1.5 h 90", "90 min: 1.5 h, got " + ttg("5a00"));
     check(ttg("7017") == "100.0 h 6000", "6000 min: 100.0 h, no days, got " + ttg("7017"));
-    check(ttg("ffff") == "inF h 0", "charging: inF, got " + ttg("ffff"));
+    check(ttg("ffff") == "-- h nan", "charging: --, no number, got " + ttg("ffff"));
   }
 
   // --- 5. other records and junk ---

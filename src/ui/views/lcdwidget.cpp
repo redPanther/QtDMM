@@ -310,7 +310,6 @@ int LcdWidget::segmentsFor(QChar ch)
     case 'e': return A | F | G | E | D;
     case 'f': return A | F | G | E;
     case 'h': return F | E | G | C;
-    case 'i': return E;
     case 'l': return F | E | D;
     case 'n': return E | G | C;
     case 'o': return G | E | C | D;

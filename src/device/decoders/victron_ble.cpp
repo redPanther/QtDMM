@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "device/decoders/victron_ble.h"
 
+#include <limits>
+
 #include "core/siprefix.h"
 #include "device/victronble.h"
 
@@ -45,13 +47,14 @@ Value invalid(const char *id, const QString &unit, const QString &special)
 // an hour on in hours with a decimal (90 min is 1.5 h), no days. The value
 // stays in minutes, so graph, min/max and the recording keep one unit
 // (ReadingAdapter takes Victron's "h" as min). 0xFFFF, none while charging:
-// "inF", infinite - letters, so no number, a gap in the graph
+// "--" as in VictronConnect, no number, a gap in the graph
 Value timeToGo(quint32 minutes)
 {
   if (minutes == 0xFFFF)
   {
     Value v = value("TTG", 0, 0, "h", "DC");
-    v.val = "inF";
+    v.dval = std::numeric_limits<double>::quiet_NaN();
+    v.val = "--";
     return v;
   }
   Value v = value("TTG", minutes, 0, "min", "DC");
