@@ -81,8 +81,10 @@ command after `;` continues at the level of the one before
 | `INPut ON|OFF`, `INPut?` | connects / disconnects the meter, asks whether it is; the connection starts after the command, so `INPut ON;INPut?` still answers 0 |
 | `HCOPy:SDUMp:DATA?` | a screenshot of the QtDMM window as PNG (IEEE 488.2 block), like a bench instrument's screen dump; `HCOPy:SDUMp:DATA:FORMat PNG\|BMP\|JPG` chooses the format |
 | `SYSTem:ERRor?` `SYSTem:ERRor:COUNt?` | the error queue: `0,"No error"`, `-113,"Undefined header"`, `-230,"Data corrupt or stale"`, ... |
-| `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` `…:COUNt?` | the min/max memory as the display shows it, of its primary value (the main value at first): minimum, maximum, mean and number of readings since the last reset (overloads not counted); `9.91E+37` while it is empty |
-| `CALCulate:AVERage:CLEar` | resets min/max, like F4 |
+| `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` `…:COUNt?` | the min/max memory as the display shows it, of its primary value (the main value at first): minimum, maximum, mean and number of readings since the last reset (overloads and held readings not counted); `9.91E+37` while it is empty |
+| `CALCulate:AVERage:MAXimum? (@2)` `CALCulate2:AVERage:MAXimum?` `…? (@1:3)` | the same for a value of the meter (channels as for `READ?`), its own memory whatever the display shows; several answer separated by commas |
+| `CALCulate:AVERage:CLEar` | resets min/max, like F4: the display's and those of all values |
+| `CALCulate:AVERage:CLEar (@2)` `CALCulate2:AVERage:CLEar` | resets the memory of that value alone |
 | `*RST` `*CLS` `*OPC?` `*TST?` `*ESR?` `*STB?` `SYSTem:VERSion?` | the usual IEEE 488.2 replies |
 
 ### QtDMM's own commands
@@ -93,7 +95,7 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | Command | Answer |
 |---|---|
 | `QTDMM:RECord?` | what the graph does - `LIVE`, `REC` (recording), `VIEW` (a recording that ended, a file) or `IDLE` (nothing yet) - with the seconds it spans, the number of readings and the unit: `REC,42.250,170,"V"` |
-| `QTDMM:RECord:DATA? [<n>\|MAX]` | the last n readings of the graph (100 without n, at most 10000) as CSV in an IEEE 488.2 block: a line `seconds,value`, then one line per reading, seconds since the start; `9.9E+37` for an overload, `nan` for a gap |
+| `QTDMM:RECord:DATA? [<n>\|MAX][,(@list)]` | the last n readings of the graph (100 without n, at most 10000) as CSV in an IEEE 488.2 block: a line `seconds,value`, then one line per reading, seconds since the start; `9.9E+37` for an overload, `nan` for a gap. A channel list picks the value (1 the main value, the default): `QTDMM:RECord:DATA? 500,(@2)`; with several the lines begin with the channel, `channel,seconds,value`, the last n of each, one channel after the other (each value has its own times) |
 | `QTDMM:ALARm?` | the number of alarms raised (acknowledged ones too) |
 | `QTDMM:ALARm:LIST?` | every alarm with its state: `"Over 5 V",RAIS,"Low",OFF` - `OFF`, `PEND` (the condition holds, not yet for its minimum duration), `RAIS`, `ACKN` |
 | `QTDMM:ALARm:ACKnowledge` | acknowledges the alarms, as the banner's button |

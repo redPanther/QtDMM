@@ -107,7 +107,8 @@ The range is `AUTO`, `MANUAL` or the meter's own range text.
 | `ABORt` | stops the recorder |
 | `INPut ON`, `INPut 1`, `INPut:STATe ON` | connects the meter (like the Connect button) |
 | `INPut OFF`, `INPut 0` | disconnects the meter, also one that is lost and being reconnected |
-| `CALCulate:AVERage:CLEar` | resets the min/max memory (F4) |
+| `CALCulate:AVERage:CLEar` | resets the min/max memory (F4), the display's and every value's (`MeterController::valueMinMax()`) |
+| `CALCulate:AVERage:CLEar (@n)` `CALCulate<n>:AVERage:CLEar` | resets the memory of those values alone (`Sources::clearChannelStats`) |
 | `QTDMM:ALARm:ACKnowledge` | acknowledges the raised alarms |
 | `QTDMM:MARK "text"` | a mark at the newest reading, graph and readings table; `SCPI` without text |
 | `QTDMM:KEY "hold"` | presses a key of the meter (`DmmDecoder::keyNames()` the decoder supports); `-241` for a meter without keys, `-224` for a key it lacks, `-240` when not sent |
@@ -119,10 +120,10 @@ qtdmm-mcp tool offers them only with `--allow-control`.
 
 | Command | Answer | Notes |
 |---|---|---|
-| `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` | NR3 | the min/max memory of the main value (`MinMaxMemory`), arithmetic mean; `9.91E+37` while empty |
-| `CALCulate:AVERage:COUNt?` | integer | readings since the last reset, overloads not counted |
+| `CALCulate:AVERage:MINimum?` `…:MAXimum?` `…:AVERage?` | NR3 | the display's min/max memory, of its primary value (`MinMaxMemory`), arithmetic mean; `9.91E+37` while empty. With `(@list)` or `CALCulate<n>`: the memory of each value of its own (`Sources::channelStats`), comma separated |
+| `CALCulate:AVERage:COUNt?` | integer | readings since the last reset, overloads and held readings not counted; per channel as above |
 | `QTDMM:RECord?` | `IDLE\|LIVE\|REC\|VIEW,<s>,<n>,"<unit>"` | `RecordingStore` state; `IDLE` = view with no readings; seconds = `duration()` |
-| `QTDMM:RECord:DATA? [<n>\|MAX]` | definite-length block | CSV `seconds,value`, the last n points (100 default, `ScpiServer::kMaxDataPoints` = 10000 at most, more is cut to it); overload `9.9E+37`, gap `nan`; `-222` for n < 1 or not whole, `-104` for not a number |
+| `QTDMM:RECord:DATA? [<n>\|MAX][,(@list)]` | definite-length block | CSV `seconds,value`, the last n points (100 default, `ScpiServer::kMaxDataPoints` = 10000 at most, more is cut to it); overload `9.9E+37`, gap `nan`; `-222` for n < 1 or not whole or a channel the meter has not, `-104` for not a number. A channel list picks the series (channel 1 the main one, n the last `RecordingStore::extra()` of id n-1); several give `channel,seconds,value`, the last n of each in the list's order |
 | `QTDMM:ALARm?` | integer | alarms raised or acknowledged |
 | `QTDMM:ALARm:LIST?` | `"<name>",<state>,…` | `OFF\|PEND\|RAIS\|ACKN` per alarm, `""` when none is set up; quotes in a name doubled |
 | `QTDMM:KEY:CATalog?` | `"<KEY>",…` | upper case, `""` for none |

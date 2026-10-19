@@ -6,6 +6,7 @@
 #include <QElapsedTimer>
 #include <QObject>
 #include <QString>
+#include <array>
 #include <functional>
 #include <optional>
 
@@ -13,6 +14,7 @@
 #include "core/alarm.h"
 #include "core/readingadapter.h"
 #include "core/reading.h"
+#include "core/sampletypes.h"
 #include "core/stalerule.h"
 #include "service/vxi11server.h"
 
@@ -125,6 +127,9 @@ public:
   int         minMaxValue() const { return m_minMaxId; }
   double      minimum() const { return m_minMax.minimum(); }
   double      maximum() const { return m_minMax.maximum(); }
+  /// The min/max memory of value @p id of its own (SCPI CALCulate:AVERage
+  /// (@n)), whatever the display follows; resetMinMax() clears it too.
+  const MinMaxMemory &valueMinMax(int id) const { return m_valueMinMax.at(size_t(qBound(0, id, kMaxValues - 1))); }
   /// The text of the current reading's unit ("mV"), and its base unit ("V").
   QString     unit() const { return m_lastUnit; }
   QString     baseUnit() const { return m_baseUnit; }
@@ -134,7 +139,7 @@ public:
   bool        overload() const { return m_overload; }
 
 public Q_SLOTS:
-  /// Clears the min/max memory.
+  /// Clears the min/max memory, the display's and those of every value.
   void        resetMinMax();
   /// Another meter was taken over: the unit of the last reading is
   /// forgotten (empty until the next one), so that the next reading
@@ -232,6 +237,7 @@ private:
 
   MinMaxMemory m_minMax;   ///< min/max of value m_minMaxId, SI, per port
   int         m_minMaxId = 0;
+  std::array<MinMaxMemory, kMaxValues> m_valueMinMax;   ///< per value id, valueMinMax()
   QString     m_lastUnit;
   QString     m_baseUnit;
   QMap<int, QString> m_valueUnits;   ///< base unit by value id, valueUnit()

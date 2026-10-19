@@ -9,6 +9,7 @@
 #include <QtCore>
 #include <QtNetwork>
 
+#include "device/meterconnection.h"
 #include "service/metercontroller.h"
 #include "testutil.h"
 
@@ -80,6 +81,43 @@ int main(int argc, char **argv)
   ctl.forgetUnit();
   check(units == QStringList{ QString() } && baseUnits == QStringList{ QString() }, "forgetUnit() announces no unit");
   check(ctl.unit().isEmpty() && ctl.baseUnit().isEmpty(), "forgetUnit() forgets the unit");
+
+  // the min/max memory of each value of its own (CALCulate:AVERage (@n)):
+  // the display follows the second value, the main one keeps its memory
+  {
+    auto *dmm = ctl.findChild<MeterConnection *>();
+    auto frame = [&](double main, double second, bool hold = false)
+    {
+      DmmDecoder::DmmResponse r;
+      r.main().dval = main;
+      r.main().val = QString::number(main);
+      r.main().unit = "V";
+      r.main().special = "DC";
+      r.hold = hold;
+      DmmDecoder::DmmChannel &s = r.addChannel(1);
+      s.dval = second;
+      s.val = QString::number(second);
+      s.unit = "Hz";
+      s.special = "HZ";
+      Q_EMIT dmm->response(r);
+    };
+    send("CALC:AVER:CLE");
+    frame(1, 50);
+    frame(3, 60);
+    frame(9, 99, true);   // held: no new reading
+    ctl.setMinMaxValue(1);
+    frame(2, 55);
+    check(query("CALC:AVER:MIN? (@1:2)") == "+1.000000E+00,+5.000000E+01"
+            && query("CALC:AVER:MAX? (@1,2)") == "+3.000000E+00,+6.000000E+01",
+          "each value its own min/max, the held reading left out");
+    check(query("CALC:AVER:COUN?") == "1" && query("CALC2:AVER:COUN?") == "3",
+          "the display's memory began anew with the second value, the value's own went on");
+    send("CALC:AVER:CLE (@2)");
+    check(query("CALC:AVER:COUN? (@1:2)") == "3,0" && query("CALC:AVER:COUN?") == "1",
+          "CLEar (@2): that value's own memory alone");
+    send("CALC:AVER:CLE");
+    check(query("CALC:AVER:COUN? (@1:2)") == "0,0", "CLEar: all of them");
+  }
 
   if (failed)
   {

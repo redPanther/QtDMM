@@ -239,6 +239,8 @@ void MeterController::publish(const Reading &rd)
       Q_EMIT unitChanged(unit);
     m_lastUnit = unit;
   }
+  if (!hold && id >= 0 && id < kMaxValues)
+    m_valueMinMax[size_t(id)].feed(rd);
   if (id == m_minMaxId && !hold)
   {
     // kept across a range change (mV -> V), afresh on another port
@@ -318,12 +320,16 @@ void MeterController::setMinMaxValue(int id)
   if (id == m_minMaxId)
     return;
   m_minMaxId = id;
-  resetMinMax();
+  // the display's memory follows another value; those of the values go on
+  m_minMax.clear();
+  Q_EMIT minMaxReset();
 }
 
 void MeterController::resetMinMax()
 {
   m_minMax.clear();
+  for (MinMaxMemory &m : m_valueMinMax)
+    m.clear();
   Q_EMIT minMaxReset();
 }
 
@@ -451,17 +457,24 @@ void MeterController::updateBanner()
 void MeterController::installScpiSources()
 {
   ScpiServer::Sources s;
-  s.stats = [this]
+  auto statsOf = [](const MinMaxMemory &m)
   {
     ScpiServer::Stats st;
-    if (!m_minMax.isEmpty())
+    if (!m.isEmpty())
     {
-      st.count = m_minMax.count();
-      st.min = m_minMax.minimum();
-      st.max = m_minMax.maximum();
-      st.mean = m_minMax.mean();
+      st.count = m.count();
+      st.min = m.minimum();
+      st.max = m.maximum();
+      st.mean = m.mean();
     }
     return st;
+  };
+  s.stats = [this, statsOf] { return statsOf(m_minMax); };
+  s.channelStats = [this, statsOf](int channel) { return statsOf(valueMinMax(channel - 1)); };
+  s.clearChannelStats = [this](int channel)
+  {
+    if (channel >= 1 && channel <= kMaxValues)
+      m_valueMinMax[size_t(channel - 1)].clear();
   };
   s.recording = [this]
   {
@@ -477,13 +490,20 @@ void MeterController::installScpiSources()
     r.unit = m_recorder->unit();
     return r;
   };
-  s.recordingData = [this](int count)
+  s.recordingData = [this](int count, int channel)
   {
+    // channel 2 and on: the series of that value used last, as the graph
+    // and the export have it
+    const RecordingSeries *series = channel <= 1 ? &m_recorder->series() : nullptr;
+    for (int i = m_recorder->extraCount() - 1; i >= 0 && !series; --i)
+      if (m_recorder->extra(i).id == channel - 1)
+        series = &m_recorder->extra(i);
     QList<ScpiServer::Point> points;
-    const RecordingSeries &series = m_recorder->series();
-    for (int i = std::max(0, series.count() - count); i < series.count(); ++i)
+    if (!series)
+      return points;
+    for (int i = std::max(0, series->count() - count); i < series->count(); ++i)
     {
-      const RawPoint &p = series.at(i);
+      const RawPoint &p = series->at(i);
       points.append({ p.t / 1000.0, p.value, p.quality == Quality::Overload });
     }
     return points;

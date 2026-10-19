@@ -78,7 +78,7 @@ public:
   bool connected() const { return m_connected; }
   bool recording() const { return m_recording; }
 
-  /// Min/max memory of the main value (CALCulate:AVERage), in SI base units.
+  /// A min/max memory (CALCulate:AVERage), in SI base units.
   struct Stats
   {
     int count = 0;      ///< readings since the last reset; 0: min, max and mean are NaN
@@ -121,10 +121,18 @@ public:
   /// source not set answers as if there were nothing.
   struct Sources
   {
+    /// The display's min/max memory, of its primary value (CALCulate:AVERage
+    /// without a channel).
     std::function<Stats()> stats;
+    /// The min/max memory of @p channel (1 the main value) of its own, since
+    /// the last reset (CALCulate:AVERage (@n), CALCulate2:AVERage).
+    std::function<Stats(int channel)> channelStats;
+    /// Resets the memory of @p channel alone (CALCulate:AVERage:CLEar (@n)).
+    std::function<void(int channel)> clearChannelStats;
     std::function<RecordingState()> recording;
-    /// The last @p count readings of the recording, oldest first.
-    std::function<QList<Point>(int count)> recordingData;
+    /// The last @p count readings of @p channel (1 the main value) in the
+    /// recording, oldest first.
+    std::function<QList<Point>(int count, int channel)> recordingData;
     std::function<QList<AlarmState>()> alarms;
     /// The meter's keys QtDMM can press ("hold", "range", ...), empty for a
     /// meter without.

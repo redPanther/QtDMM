@@ -110,6 +110,9 @@
   ZOYI, BSIDE and ANENG (V05B, ST207, AN9002, AN999S), with the keys of ZOTEK's app. They all advertise as
   "Bluetooth DMM": Add device listens to the meter found and chooses the model its first reading names
 - SCPI: QTDMM:KEY knows the UT202BT's function keys (V~, A~, Ω, NCV/PEAK) as well; they were only under the display
+- SCPI: the min/max memory and the recorded readings of each value of a meter, not only of the display's or
+  the main one: CALCulate:AVERage:MAXimum? (@2) (or CALCulate2:...) and its CLEar, QTDMM:RECord:DATA? 500,(@2);
+  several channels at once. qtdmm-mcp: min_max and recording_data take a channel
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell
