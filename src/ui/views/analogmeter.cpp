@@ -823,7 +823,7 @@ void AnalogMeter::showReading(const Reading &r)
     // counts, so the scale follows the values instead
     if (unit != m_unitText)
       m_rangelessScale = kNaN;
-    if (!r.overload)
+    if (!r.overload && !r.noNumber())
       m_rangelessScale = fullScaleWithoutRange(QString(val).remove(' ').toDouble(), m_rangelessScale);
     if (!std::isnan(m_rangelessScale))
       setFullScale(m_rangelessScale);
@@ -848,7 +848,8 @@ void AnalogMeter::showReading(const Reading &r)
   m_unitText = unit;
   m_neverNegative = neverNegative(unit);
   updatePolarity();
-  const double value = r.overload ? 0.0 : QString(val).remove(' ').toDouble();
+  // no number shown ("----", "FUSE"): the needle rests
+  const double value = r.overload || r.noNumber() ? 0.0 : QString(val).remove(' ').toDouble();
   setReading(value, val, label, r.overload, r.hold);
   applyMinMax();
 }

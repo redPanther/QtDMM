@@ -35,6 +35,9 @@ struct Reading
   Quality quality = Quality::Valid;
   Range   measuringRange;  ///< autorange and full scale (NaN when not known)
 
+  /// The meter shows no number, or a fault word (text): no value, no overload.
+  bool noNumber() const { return quality == Quality::NoValue || quality == Quality::Fault; }
+  bool fault() const { return quality == Quality::Fault; }
   bool temperature() const { return port.quantity == Quantity::Temperature; }
   bool ac() const { return flags & SampleFlag::AC; }
   bool dc() const { return flags & SampleFlag::DC; }

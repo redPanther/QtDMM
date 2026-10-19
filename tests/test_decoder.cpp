@@ -644,6 +644,8 @@ int main(int argc, char **argv)
     if (expected.contains("showBar")) check("showBar", result->showBar,   expected["showBar"]);
     if (expected.contains("id"))      check("id",      main.id,           expected["id"]);
     if (expected.contains("error"))   check("error",   result->error,     expected["error"]);
+    if (expected.contains("noValue")) check("noValue", main.noValue,      expected["noValue"]);
+    if (expected.contains("fault"))   check("fault",   main.fault,        expected["fault"]);
     if (expected.contains("dval2"))   check("dval2",   sub.dval,          expected["dval2"]);
     if (expected.contains("val2"))    check("val2",    sub.val,           expected["val2"]);
     if (expected.contains("unit2"))   check("unit2",   sub.unit,          expected["unit2"]);

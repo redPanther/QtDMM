@@ -40,13 +40,10 @@ vectors:
     bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 04 01 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 2A 20 40 00 00 00 00 80 00 00 00 00 00 00 00 F0
     reading: {value: "OL", unit: "mA", coupling: "DC", range_mode: "auto"}
     expect: {val: "OL"}
-
-skipped:
   - source_line: "DC mA, the word Er (bit 6, word 0) on the main display"
     bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 04 01 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 20 40 00 00 00 00 80 00 00 00 00 00 00 00 C6
-    reason: >-
-      An error word: no reading (an error state is a later step).
+    reading: {value: "Er", unit: "", range_mode: "auto", shown: "fault"}
   - source_line: "DC mA, main display blank (bit 7)"
     bytes: 55 55 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 04 01 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 20 80 00 00 00 00 80 00 00 00 00 00 00 00 06
-    reason: >-
-      Nothing on the display: no reading.
+    reading: {value: "", unit: "", range_mode: "auto", shown: "none"}
+

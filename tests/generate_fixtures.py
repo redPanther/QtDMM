@@ -47,6 +47,9 @@ def split_unit(unit):
 
 def derive_dval(reading):
     value = reading["value"]
+    # no number on the display ("-----", blank) or a fault word ("Er")
+    if reading.get("shown") in ("none", "fault"):
+        return None
     if OVERLOAD.search(value):
         return None
     prefix, _ = split_unit(reading["unit"])
@@ -124,6 +127,13 @@ def build_case(vector, spec):
     if "range_mode" in reading:
         expected["range"] = "AUTO" if reading["range_mode"] == "auto" else "MANU"
     expected["hold"] = "HOLD" in reading.get("flags", [])
+    # the meter shows no number, or a fault word instead (DmmChannel)
+    if reading.get("shown") == "none":
+        expected["val"] = reading["value"]
+        expected["noValue"] = True
+    elif reading.get("shown") == "fault":
+        expected["val"] = reading["value"]
+        expected["fault"] = reading["value"]
     port = derive_port(reading, vector.get("expect"))
     if port is not None:
         expected["port"] = port

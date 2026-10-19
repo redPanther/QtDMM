@@ -323,10 +323,12 @@ std::optional<DmmDecoder::DmmResponse> DecoderZotek::decode(const QByteArray &da
   }
   else if (bare == QLatin1String("EF") || (!minus && bare.count('-') == bare.size()))
   {
+    // the field strength in dashes: words, no number
     main.special = "NCV";
     main.unit.clear();
     main.val = bare;
     main.dval = 0;
+    main.noValue = true;
   }
   else
   {

@@ -245,6 +245,7 @@ private:
   QString     m_baseUnit;
   QMap<int, QString> m_valueUnits;   ///< base unit by value id, valueUnit()
   QMap<int, bool> m_valueOverload;   ///< the last reading of each value was OL
+  QMap<int, QString> m_valueFault;   ///< the fault word each value shows now, empty for none
   bool        m_overload = false;
   QColor      m_alertColor;   ///< the colour last sent with alertColorChanged()
   QElapsedTimer m_clock;   ///< the stale check's time base, monotonic

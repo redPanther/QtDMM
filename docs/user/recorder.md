@@ -116,8 +116,16 @@ Where the meter showed no value, the curve has a gap instead of a line:
   QtDMM learns how often the meter sends and takes a value as gone after
   three of its intervals (at least 1 s, at most 30 s). The digital display
   and the analog meter fade their value at the same time.
+- **No number** - the meter shows dashes or nothing instead of a number
+  (`----` of an APPA, `--` of a Victron's time to go while charging, the
+  field strength of a ZOTEK's NCV). The display shows what the meter shows,
+  the needle rests.
+- **Fault** - the meter shows a fault word instead of a number (`FUSE`,
+  `Er`, `PROBE`, `BATT` of an APPA). The display shows the word, the status
+  line says it, and the graph and the readings table get a red mark where
+  it began.
 
-Hovering over a gap shows "OL" or "no value". In the export, an interval
+Hovering over a gap shows "OL", "fault" or "no value". In the export, an interval
 that holds some values and some gaps is the average of the values there
 were; the integration curve carries on across a gap.
 
@@ -268,7 +276,8 @@ timestamp;time (s);value;unit;status
 
 The value is written with an SI prefix and the matching unit, exactly as a
 meter would show it. The status says what the value is: `ok`, `OL` or `-OL`
-for an overload, `gap` for a [gap](#gaps). A value that is no number is
+for an overload, `gap` for a [gap](#gaps), `none` when the meter showed no
+number and `fault` for a fault word. A value that is no number is
 written as `nan` in CSV and as an empty cell in a spreadsheet.
 
 The other values of the meter that the graph shows (see above) follow, three columns each - `value 2;unit 2;status 2`, then

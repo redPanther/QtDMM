@@ -77,12 +77,11 @@ vectors:
     bytes: 55 55 01 0C 02 81 FF FF FF 0C 80 00 00 70 00 00 33
     reading: {value: "-OL", unit: "V", coupling: "DC", range_mode: "auto"}
     expect: {val: "-OL", special: "DC"}
-
-skipped:
   - source_line: "DC V, the word ----- (0x700014) on the main display"
     bytes: 55 55 01 0C 02 81 14 00 70 08 00 00 00 70 00 00 36
-    reason: >-
-      A dash is "no reading now", not an overload: no reading.
+    reading: {value: "-----", unit: "", range_mode: "auto", shown: "none"}
+
+skipped:
   - source_line: "DC V, the word OL without a unit code"
     bytes: 55 55 01 0C 02 81 2A 00 70 00 00 00 00 70 00 00 44
     reason: >-

@@ -43,6 +43,8 @@ const char *stateText(CellState state)
     case CellState::Overload:         return "OL";
     case CellState::NegativeOverload: return "-OL";
     case CellState::Gap:              return "gap";
+    case CellState::NoValue:          return "none";
+    case CellState::Fault:            return "fault";
     case CellState::None:             break;
   }
   return "";
@@ -50,7 +52,8 @@ const char *stateText(CellState state)
 
 std::optional<CellState> stateFrom(const QString &text)
 {
-  for (CellState s : { CellState::Ok, CellState::Overload, CellState::NegativeOverload, CellState::Gap })
+  for (CellState s : { CellState::Ok, CellState::Overload, CellState::NegativeOverload, CellState::Gap,
+                       CellState::NoValue, CellState::Fault })
     if (text.compare(QLatin1String(stateText(s)), Qt::CaseInsensitive) == 0)
       return s;
   if (text.isEmpty())

@@ -52,8 +52,12 @@ public:
   QList<PortSample> adapt(const DmmDecoder::DmmResponse &response, qint64 wall);
 
   /// One value, the fields as MeterConnection::value() delivers them.
+  /// @p shown is Quality::NoValue or Quality::Fault when the decoder says
+  /// the meter shows no number (DmmChannel::noValue, fault), else Valid:
+  /// then letters in @p text make an overload.
   PortSample adaptValue(double dval, const QString &text, const QString &unit, const QString &special,
-                        const QString &range, bool hold, bool showBar, bool lowBattery, int id, qint64 wall);
+                        const QString &range, bool hold, bool showBar, bool lowBattery, int id, qint64 wall,
+                        Quality shown = Quality::Valid);
 
   /// The Reading the views get for @p ps (kern_spezifikation §10: the
   /// facade until the views take Samples).

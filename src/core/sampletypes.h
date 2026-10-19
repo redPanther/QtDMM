@@ -26,7 +26,9 @@ enum class Quality : quint8
   Valid,      ///< a number the meter showed
   Stale,      ///< no reading arrived for longer than the timeout
   Overload,   ///< the meter showed OL (or the like); the value is not a measurement
-  Inactive    ///< the function is not being measured right now
+  Inactive,   ///< the function is not being measured right now
+  NoValue,    ///< the meter shows no number ("----", blank, "--"): a gap, not an overload
+  Fault       ///< the meter shows a fault word instead ("FUSE", "Er", "PROBE"): a gap, and a message
 };
 
 /// What is measured. The values and their order are libsigrok's sr_mq

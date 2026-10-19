@@ -197,6 +197,17 @@
         "val": "-OL",
         "special": "DC"
       }
+    },
+    {
+      "comment": "[appa_dmm.yaml] 'DC V, the word ----- (0x700014) on the main display'",
+      "hex": "55 55 01 0C 02 81 14 00 70 08 00 00 00 70 00 00 36",
+      "expected": {
+        "unit": "",
+        "range": "AUTO",
+        "hold": false,
+        "val": "-----",
+        "noValue": true
+      }
     }
   ]
 }

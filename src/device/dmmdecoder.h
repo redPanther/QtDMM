@@ -53,6 +53,12 @@ public:
     QString special;    ///< coupling/function: "AC", "DC", "ACDC", "DI", "BUZ", ...
     quint32 states = 0; ///< other annunciators of this value: SampleFlag
                         ///< Max, Min, Relative, Peak (the meter's own keys)
+    /// The meter shows no number for this value ("----", blank, "--"): val
+    /// has what it shows, dval is not used. A gap, not an overload.
+    bool noValue = false;
+    /// The meter shows a fault word instead of a number ("FUSE", "Er",
+    /// "PROBE", "BATT"): the word, also in val. A gap and a message.
+    QString fault;
   };
 
   /// A decoded frame: its values (channels[0] the main display) and the

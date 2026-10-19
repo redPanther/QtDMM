@@ -70,7 +70,7 @@ command after `;` continues at the level of the one before
 | Command | Answer |
 |---|---|
 | `*IDN?` | `QtDMM,<meter>,0,<version>` |
-| `READ?` `FETCh?` `MEASure?` `MEASure:VOLTage:DC?` `[SENSe:]DATA?` `VALue1?` | the reading in SI base units as `+1.234500E+00`; `9.9E+37` for overload, `9.91E+37` (not a number) when nothing arrived in the last 5 s |
+| `READ?` `FETCh?` `MEASure?` `MEASure:VOLTage:DC?` `[SENSe:]DATA?` `VALue1?` | the reading in SI base units as `+1.234500E+00`; `9.9E+37` for overload, `9.91E+37` (not a number) when nothing arrived in the last 5 s, or the meter shows no number (`----`, a fault word such as `FUSE`) |
 | `READ? (@2)` `FETCh? (@1:3)` `READ? (@1,3)` | the meter's other values as channels, 1 the main value: one (`(@2)`), a list or a range; several answer in the list's order, separated by commas: `+8.0E+02,+2.25E+01,+4.5E+01`. The channels are the values on the meter's Device page; a channel it has not gives error -222, a broken list -104 |
 | `READ2?` `FETCh2?` `VALue2?` | short for `(@2)` (Victron, Fluke 45), same rules; `READ3?` ... alike |
 | `UNIT?` `UNIT2?` `UNIT? (@1:3)` | the base unit, `"V"` |

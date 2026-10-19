@@ -118,8 +118,9 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
         applyValueCount();
     }
     m_lastText[r.id] = r.overload ? QStringLiteral("OL")
-                                  : QString("%1 %2").arg(r.text, SiPrefix::displayText(r.unit)).trimmed();
-    if (r.text.isEmpty() || r.overload || r.port.quantity == Quantity::Unknown)
+                       : r.noNumber() ? r.text.trimmed()
+                                      : QString("%1 %2").arg(r.text, SiPrefix::displayText(r.unit)).trimmed();
+    if (r.text.isEmpty() || r.overload || r.noNumber() || r.port.quantity == Quantity::Unknown)
       return;
     const bool news = m_lastReading.value(r.id).baseUnit != r.baseUnit || !m_lastReading.contains(r.id);
     m_lastReading[r.id] = r;

@@ -85,8 +85,9 @@ static const bool registered = []() {
 namespace
 {
 constexpr qint32 kTextCodes = 0x700000;   // a word on the display instead of digits
-// libsigrok's appadmm_wordcode_e: the words that mean an overload. Every
-// other word ("----", blank, "Er", "FUSE", "APO", ...) gives no reading.
+// libsigrok's appadmm_wordcode_e: the words that mean an overload; blank and
+// dashes are no value, "Er", "FUSE", "PROBE" ... a fault (showsWord()). The
+// other words ("APO", menus) give no reading.
 constexpr qint32 kWordSpace = 0x700000;
 constexpr qint32 kWordEr = 0x700010;
 constexpr qint32 kWordOL = 0x70002a;
@@ -192,6 +193,29 @@ QString DecoderAppa::special(int function)
     default:
       return QString();
   }
+}
+
+bool DecoderAppa::showsWord(const Display &d, DmmChannel *c)
+{
+  struct Word { qint32 code; const char *text; bool fault; };
+  static const Word words[] = {
+    { kWordSpace, "", false },        { 0x700014, "-----", false }, { 0x700015, "-", false },
+    { 0x700017, "--", false },        { kWordEr, "Er", true },      { 0x700011, "Er1", true },
+    { 0x700012, "Er2", true },        { 0x700013, "Er3", true },    { 0x70000c, "FUSE", true },
+    { 0x70000d, "PROBE", true },      { 0x700018, "BATT", true },   { 0x700005, "HAZ", true },
+    { 0x700036, "BAD", true },
+  };
+  for (const Word &w : words)
+    if (d.count == w.code)
+    {
+      c->dval = 0;
+      c->val = QString::fromLatin1(w.text);
+      c->unit.clear();
+      c->noValue = !w.fault;
+      c->fault = w.fault ? c->val : QString();
+      return true;
+    }
+  return false;
 }
 
 bool DecoderAppa::reading(const Display &d, double *dval, QString *val, QString *unit)
@@ -304,8 +328,10 @@ std::optional<DmmDecoder::DmmResponse> DecoderAppa::decode(const QByteArray &fra
   m_result.main().id = 0;
   m_result.showBar = true;
   m_result.range = autoRange ? "AUTO" : "MANU";
-  if (!reading(main, &m_result.main().dval, &m_result.main().val, &m_result.main().unit))
-    return std::nullopt;   // "----", "Er", "FUSE" ...: no reading now (OL words are one)
+  // a dash or a fault word is a reading without a value; a menu word none
+  if (!reading(main, &m_result.main().dval, &m_result.main().val, &m_result.main().unit)
+      && !showsWord(main, &m_result.main()))
+    return std::nullopt;
   // the coupling of the function, where the unit has one
   const QString base = m_result.main().unit.right(1);
   const QString code = special(function);
@@ -332,7 +358,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderAppa::decode(const QByteArray &fra
     else if (second.unit == "C" || second.unit == "dF")
       second.special = "TE";
   }
-  else
+  else if (!showsWord(sub, &second))   // blank: the display is off, cleared
   {
     second.val.clear();
     second.unit.clear();

@@ -104,6 +104,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
   m_result.main().val = main->val;
   m_result.main().unit = main->unit;
   m_result.main().special = main->special;
+  m_result.main().noValue = std::isnan(main->dval);   // "--": no number shown
   auto fill = [](DmmChannel &c, const Value *v)
   {
     if (!v || !v->valid)
@@ -111,6 +112,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
     c.dval = v->dval;
     c.val = v->val;
     c.unit = v->unit;
+    c.noValue = std::isnan(v->dval);
   };
   fill(secondValue, second);
   // the third and fourth value only when chosen; the fourth alone brings an
