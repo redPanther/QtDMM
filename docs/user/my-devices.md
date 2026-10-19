@@ -49,10 +49,10 @@ coloured dot shows that the graph draws it, in the colour of its curve, so
 the rows are the graph's legend as well. This is where you say which window
 shows which value - right-click a value:
 
-- **LCD** ▸ **Main value** - shown big; the min/max memory follows it. A
-  value from the small line swaps places with the old main value.
-  **Secondary value** - on the small line below, two at most: a third
-  replaces the older one.
+- **LCD** ▸ **Main value**, **Secondary value left**, **Secondary value
+  right** - the place on the display: big (the min/max memory follows it)
+  or on the small line below it. The value that had the place goes where
+  this one was, or off the display when this one was not on it.
 - **Analog meter** - the value the needle shows (one).
 - **Graph** ▸ **Off**, **Left axis**, **Right axis** - the value's curve
   off or on that axis. A value in the unit the axis has already joins it
@@ -62,9 +62,7 @@ shows which value - right-click a value:
 - **Poincaré plot** - the value the plot takes (one).
 
 A choice opens the window it is for, also when the toolbar is hidden. The
-choices are kept with the window layout. **Values... (sidebar)** in the
-right-click menu of the display, the analog meter, the Poincaré plot and the
-graph opens the sidebar at these rows.
+choices are kept with the window layout.
 
 The context menu of a device:
 

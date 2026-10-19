@@ -152,8 +152,7 @@ public:
     IDReference,     ///< properties "kind" and "value"
     IDClearCursors,
     IDMinimap,
-    IDEnvelope,
-    IDValueShown     ///< "Values... (sidebar)": valuesRequested()
+    IDEnvelope
   };
 
   GraphWidget(QWidget *parent, Settings *settings);
@@ -365,8 +364,6 @@ Q_SIGNALS:
   void             running(bool);
   /// The store's state changed (RecordingStore::State).
   void             stateChanged(int state);
-  /// "Values... (sidebar)" in the context menu: the sidebar shows them.
-  void             valuesRequested();
   /// A short hint for the status bar ("Current off: the left axis shows V now").
   void             notice(const QString &);
   /// Window/total size changed by zooming (seconds).

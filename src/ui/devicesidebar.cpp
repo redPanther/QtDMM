@@ -293,23 +293,6 @@ QTreeWidgetItem *DeviceSidebar::valueItem(int id) const
   return nullptr;
 }
 
-void DeviceSidebar::revealValues(int id)
-{
-  QTreeWidgetItem *own = instanceItem(m_ownInstance);
-  if (!own)
-    return;
-  m_instances->setExpanded(true);
-  own->setExpanded(true);
-  QTreeWidgetItem *item = valueItem(id);
-  if (!item)
-    item = valueItem(0);
-  if (!item)
-    item = own;
-  setCurrentItem(item);
-  scrollToItem(item);
-  setFocus();
-}
-
 void DeviceSidebar::setServices(const QList<Service> &services)
 {
   m_filling = true;

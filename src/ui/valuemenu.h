@@ -11,8 +11,8 @@ class InstanceWidget;
 
 /// The context menu of one of the meter's values (a value row of the
 /// sidebar): which window shows it, and where. One entry per kind of view -
-/// LCD as the main value or on the small line (at most two, a third
-/// replaces the older), Analog meter (one value), Graph shown or not and on
+/// LCD as the main value or on the left or right of the small line (a
+/// choice takes the place, the value there swaps with it), Analog meter (one value), Graph shown or not and on
 /// which axis, Poincaré plot (one value). A choice opens the window it is for.
 ///
 /// It knows only the instance's choice of values (InstanceWidget) and asks

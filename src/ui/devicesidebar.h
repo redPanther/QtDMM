@@ -86,9 +86,6 @@ public:
   void        fillValues(QTreeWidgetItem *parent, int first, const QList<Value> &values);
   /// The row of value @p id of this window's instance, nullptr when there is none.
   QTreeWidgetItem *valueItem(int id) const;
-  /// Shows the values of this window's instance: the sidebar opens it,
-  /// selects the row of value @p id (or the first) and scrolls to it.
-  void        revealValues(int id = 0);
 
   /// The services of this window, in this order.
   void        setServices(const QList<Service> &services);

@@ -168,9 +168,6 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
     QAction *envelope = item(tr("Min/max &band"), IDEnvelope);
     envelope->setCheckable(true);
     envelope->setChecked(m_envelopeOn);
-    // which values: in the sidebar, under the instance
-    if (m_store->extraCount() > 0)
-      item(tr("&Values... (sidebar)"), IDValueShown);
     if (m_cursorT[0] >= 0 || m_cursorT[1] >= 0)
       item(tr("Remove time cursors"), IDClearCursors);
 
@@ -412,9 +409,6 @@ void GraphWidget::popupSLOT(QAction *action)
       break;
     case IDEnvelope:
       setEnvelopeVisible(action->isChecked());
-      break;
-    case IDValueShown:
-      Q_EMIT valuesRequested();
       break;
   }
 }

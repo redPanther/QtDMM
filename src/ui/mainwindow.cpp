@@ -368,7 +368,6 @@ void MainWindow::createSidebar()
   });
   connect(m_sidebar, &DeviceSidebar::settingsRequested, this, &MainWindow::deviceSettings);
   connect(m_sidebar, &DeviceSidebar::valueMenuRequested, this, &MainWindow::valueMenu);
-  connect(m_wid->graph(), &GraphWidget::valuesRequested, this, [this] { revealValues(0); });
   connect(m_wid->graph(), &GraphWidget::notice, this, [this](const QString &text)
   {
     statusBar()->showMessage(text, 5000);
@@ -1262,16 +1261,6 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     menu.addSeparator();
     m_poincare->addMenuActions(&menu);
   }
-  // which value of the meter the view shows: in the sidebar
-  if (m_wid->numValues() > 1 && (win == m_displayWin || win == m_meterWin || win == m_poincareWin))
-  {
-    const int current = win == m_displayWin ? m_wid->lcdValue() : win == m_meterWin ? m_wid->meterValue()
-                                                                                    : m_wid->poincareValue();
-    connect(menu.addAction(tr("&Values... (sidebar)")), &QAction::triggered, this, [this, current]
-    {
-      revealValues(current);
-    });
-  }
   // a way back with the mouse once the toolbar is hidden (and its keys taken away)
   menu.addSeparator();
   menu.addAction(m_toolbars);
@@ -1376,12 +1365,6 @@ void MainWindow::updateInstances()
     rows << row;
   }
   m_sidebar->setInstances(rows, own);
-}
-
-void MainWindow::revealValues(int id)
-{
-  showSidebar(true);
-  m_sidebar->revealValues(id);
 }
 
 void MainWindow::valueMenu(int id, const QPoint &globalPos)

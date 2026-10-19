@@ -7,7 +7,6 @@
 
 #include "ui/instancewidget.h"
 #include "ui/views/graphwidget.h"
-#include "ui/views/lcdwidget.h"
 
 void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::function<void(View)> &show)
 {
@@ -20,39 +19,37 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
     return a;
   };
 
-  // the LCD: big, or on the small line
+  // the LCD: three places, big and the two on the small line. A choice
+  // takes the place; the value there goes where this one was, or off the
+  // display when it had none
   QMenu *lcd = menu->addMenu(tr("&LCD"));
-  const bool primary = wid->lcdValue() == id;
-  QObject::connect(checkable(lcd, tr("&Main value"), primary), &QAction::triggered, menu, [wid, id, show]
+  auto *places = new QActionGroup(lcd);
+  const QList<int> small = wid->lcdSecondaries();
+  const int taken[] = { wid->lcdValue(), int(small.value(0, -1)), int(small.value(1, -1)) };
+  const QString texts[] = { tr("&Main value"), tr("Secondary value &left"), tr("Secondary value &right") };
+  for (int place = 0; place < 3; ++place)
   {
-    // a value from the small line swaps places with the big one
-    const int before = wid->lcdValue();
-    QList<int> small = wid->lcdSecondaries();
-    const qsizetype at = small.indexOf(id);
-    if (at >= 0)
-      small[at] = before;
-    wid->setLcdValue(id);
-    wid->setLcdSecondaries(small);
-    show(View::Lcd);
-  });
-  QAction *secondary = checkable(lcd, tr("&Secondary value"), wid->lcdSecondaries().contains(id));
-  secondary->setEnabled(!primary);
-  if (primary)
-    secondary->setToolTip(tr("It is the main value"));
-  QObject::connect(secondary, &QAction::triggered, menu, [wid, id, show](bool on)
-  {
-    QList<int> small = wid->lcdSecondaries();
-    small.removeAll(id);
-    if (on)
+    QAction *a = checkable(lcd, texts[place], taken[place] == id);
+    places->addAction(a);
+    // a meter with two values has one place on the small line
+    a->setEnabled(place == 0 || place < wid->numValues());
+    QObject::connect(a, &QAction::triggered, menu, [wid, id, place, show]
     {
-      small << id;
-      while (small.size() > LcdWidget::kSmallLineValues)
-        small.removeFirst();   // the older one goes
-    }
-    wid->setLcdSecondaries(small);
-    show(View::Lcd);
-  });
-
+      const QList<int> small = wid->lcdSecondaries();
+      QList<int> now { wid->lcdValue(), int(small.value(0, -1)), int(small.value(1, -1)) };
+      const qsizetype from = now.indexOf(id);
+      if (from >= 0)
+        now[from] = now[place];
+      now[place] = id;
+      QList<int> line;
+      for (int i = 1; i < 3; ++i)
+        if (now[i] >= 0)
+          line << now[i];
+      wid->setLcdValue(now[0]);
+      wid->setLcdSecondaries(line);
+      show(View::Lcd);
+    });
+  }
   QObject::connect(checkable(menu, tr("&Analog meter"), wid->meterValue() == id), &QAction::triggered, menu,
                    [wid, id, show]
   {
