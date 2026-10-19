@@ -406,6 +406,7 @@ int main(int argc, char **argv)
     const struct { const char *model; int frames; int values; } split[] = {
       { "Metex M-3850D", 4, 4 }, { "APPA 506B *", 1, 2 }, { "Voltcraft VC 870", 1, 2 },
       { "TFA Dostmann AIRCO2NTROL Coach", 1, 3 }, { "Victron SmartShunt", 1, 2 }, { "Uni-Trend UT61E", 1, 1 },
+      { "Benetech GM1020 *", 1, 2 }, { "Tenma 72-1016", 1, 1 },
     };
     for (const auto &c : split)
     {
