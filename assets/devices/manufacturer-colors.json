@@ -195,7 +195,7 @@
       "example_device": "SmartShunt",
       "colors": {
         "primary": "#1686C7",
-        "secondary": "#F2C52A"
+        "secondary": "#2A2D30"
       },
       "types": [
         "battery_monitor",
