@@ -12,7 +12,7 @@
 ///   42 <raw>   temperature, id 1:  raw / 16 - 273.15 degC
 ///   41 <raw>   humidity, id 2:     raw / 100 %rH
 ///
-/// The meter is registered with numValues 3, so the display shows all three:
+/// The meter is registered with 3 channels, so the display shows all three:
 /// CO2 as the main value, temperature and humidity below it.
 class DecoderTfaAirControl : public DmmDecoder
 {

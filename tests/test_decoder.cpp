@@ -393,6 +393,37 @@ int main(int argc, char **argv)
       qWarning() << "unknown names must give Invalid / no decoder";
       ++problems;
     }
+    // frames per reading (the frame counter) and values apart: only Metex14
+    // meters send a line per value; the others have all values in one frame
+    // and say how many with channels
+    auto info = [](const QString &name) -> std::optional<DmmDecoder::DMMInfo>
+    {
+      for (const auto &c : DmmDecoder::getDeviceConfigurations())
+        if (DmmDecoder::sameModel(c.name, name))
+          return c;
+      return std::nullopt;
+    };
+    const struct { const char *model; int frames; int values; } split[] = {
+      { "Metex M-3850D", 4, 4 }, { "APPA 506B *", 1, 2 }, { "Voltcraft VC 870", 1, 2 },
+      { "TFA Dostmann AIRCO2NTROL Coach", 1, 3 }, { "Victron SmartShunt", 1, 2 }, { "Uni-Trend UT61E", 1, 1 },
+      { "Benetech GM1020 *", 1, 2 }, { "Tenma 72-1016", 1, 1 },
+    };
+    for (const auto &c : split)
+    {
+      const auto i = info(c.model);
+      if (!i || i->framesPerReading != c.frames || i->valueCount() != c.values)
+      {
+        qWarning() << c.model << "has" << (i ? i->framesPerReading : -1) << "frames per reading and"
+                   << (i ? i->valueCount() : -1) << "values, expected" << c.frames << c.values;
+        ++problems;
+      }
+    }
+    for (const auto &c : DmmDecoder::getDeviceConfigurations())
+      if (c.framesPerReading < 1 || c.framesPerReading > 4 || c.valueCount() < 1 || c.valueCount() > 4)
+      {
+        qWarning() << c.name << "has" << c.framesPerReading << "frames per reading and" << c.valueCount() << "values";
+        ++problems;
+      }
     // a saved model keeps its meter when the "not confirmed" mark goes
     if (!DmmDecoder::sameModel("Brymen BM869s *", "Brymen BM869s")
         || !DmmDecoder::sameModel("Brymen BM869s", "Brymen BM869s *")

@@ -49,6 +49,14 @@ int main(int argc, char **argv)
         "manual: port parameters and protocol shown, with its title");
   check(w.keys().value("DMM/model") == "Manual", "manual: model " + w.keys().value("DMM/model").toString());
   check(w.speed() == 2400, "manual: baud");
+  // the lines per reading: from the table for a model (a setting saved before
+  // 26.3 had the values there), one value per line for manual settings
+  w.load({{"DMM/model", "Manual"}, {"DMM/number-of-values", 4}});
+  check(w.framesPerReading() == 4 && w.valueCount() == 4, "manual: 4 lines, 4 values");
+  w.load({{"DMM/model", "APPA 506B *"}, {"DMM/number-of-values", 2}});
+  check(w.framesPerReading() == 1 && w.valueCount() == 2 && w.keys().value("DMM/number-of-values") == 1,
+        QString("APPA: one frame, two values, got %1/%2").arg(w.framesPerReading()).arg(w.valueCount()));
+  w.load({{"DMM/model", "Manual"}, {"Port settings/device", "/dev/ttyUSB1"}, {"Port settings/baud", "2400"}});
   // a model chosen after manual settings: its fixed parameters go again
   w.findChild<QComboBox *>("ui_vendor")->setCurrentText("Uni-Trend");
   Q_EMIT w.findChild<QComboBox *>("ui_vendor")->activated(w.findChild<QComboBox *>("ui_vendor")->currentIndex());
@@ -90,6 +98,7 @@ int main(int argc, char **argv)
   check(w.isBluetooth() && shown(w, "ui_bleGroup") && !shown(w, "ButtonGroup11"), "Victron: Bluetooth group");
   check(w.keys().value("Port settings/device") == "ble AA:BB:CC:DD:EE:FF", "Victron: place " + w.keys().value("Port settings/device").toString());
   check(w.keys().value("Port settings/ble-key") == "00112233445566778899aabbccddeeff", "Victron: key kept");
+  check(w.framesPerReading() == 1 && w.valueCount() == 2, "Victron: one frame, two values");
   // the chosen values of the stored settings, also when the same model was
   // loaded before (another device taken over, the settings dialog reloaded)
   for (const auto &[main, second] : { std::pair{"I", "SOC"}, std::pair{"SOC", "-"}, std::pair{"P", "V"} })

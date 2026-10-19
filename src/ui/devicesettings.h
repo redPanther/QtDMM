@@ -85,7 +85,12 @@ public:
   QSerialPort::DataBits bits() const;
   QSerialPort::StopBits stopBits() const;
   int            speed() const;
-  int            numValues() const;
+  /// Frames one reading consists of (FrameReader), the "Lines per reading"
+  /// box: from the table for a model, as set for manual settings.
+  int            framesPerReading() const;
+  /// How many values the meter has: DMMInfo::valueCount() of the model, one
+  /// per line for manual settings.
+  int            valueCount() const;
   bool           externalSetup() const;
   bool           rts() const;
   bool           dtr() const;

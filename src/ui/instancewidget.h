@@ -91,7 +91,7 @@ public:
   int         lcdValue() const { return m_lcdValue; }
   int         meterValue() const { return m_meterValue; }
   int         poincareValue() const { return m_poincareValue; }
-  /// The values the meter has (Device page, at most 3 for the choice).
+  /// The values the meter has (DMMInfo::valueCount(), at most 3 for the choice).
   int         numValues() const;
   /// "CO2 (ppm)" from its last reading, "Value 2" before one came.
   QString     valueName(int id) const;

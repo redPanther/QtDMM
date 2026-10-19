@@ -102,8 +102,8 @@ public:
   FrameFormat::DataFormat format() const { return m_decoder ? m_decoder->getType() : FrameFormat::Invalid; }
   /// Selects the decoder (see DmmDecoder::getInstance()).
   void    setFormat(FrameFormat::DataFormat);
-  /// Frames per reading, see FrameReader::setNumValues().
-  void    setNumValues(int);
+  /// Frames per reading, see FrameReader::setFramesPerReading().
+  void    setFramesPerReading(int frames);
   /// --debug: dump every frame as hex to stdout.
   void    setConsoleLogging(bool on) { m_consoleLogging = on; }
   /// Instance coordinator, the input of a calculated value (PortType::Calc).

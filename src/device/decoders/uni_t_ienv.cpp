@@ -13,9 +13,9 @@
 // The display counts are the frame's digits, not a manual's ranges. Only the
 // UT333BT has been tried with QtDMM, so the others keep the "*".
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Uni-Trend", "UT333BT", "", 0, FrameFormat::UniTiENV, 8, 1, 2, 0, 1000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT333BT", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 1000, 0, 0, 0, "", "", 2});
   DmmDecoder::addConfig({"Uni-Trend", "UT353BT *", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 10000, 0, 0, 0});
-  DmmDecoder::addConfig({"Uni-Trend", "UT363BT *", "", 0, FrameFormat::UniTiENV, 8, 1, 2, 0, 10000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT363BT *", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 10000, 0, 0, 0, "", "", 2});
   DmmDecoder::addConfig({"Uni-Trend", "UT383BT *", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 100000, 0, 0, 0});
   return true;
 }();
@@ -187,9 +187,8 @@ void DecoderUniTiENV::attachTemp(DmmDecoder::DmmResponse &r) const
 std::optional<DmmDecoder::DmmResponse> DecoderUniTiENV::decode(const QByteArray &data, int id)
 {
   // every frame is a whole reading, the main value with the temperature as
-  // second value (channel 1): @p id only counts the frames of the two-value meters
-  // (numValues 2 gives the display its second line). Taken over, every
-  // other frame came as the second value, humidity and temperature in turn
+  // second value (channel 1); channels 2 in the table gives the display its
+  // second line. @p id is not used: one frame per reading
   Q_UNUSED(id);
   m_result = {};
   m_result.main().id = 0;

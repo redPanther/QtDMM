@@ -4,9 +4,9 @@
 // Voltcraft GDM 703 family (ablage/CDMM/src/dmmclass.cpp): 9600 8N1, DTR,
 // two values per frame. Marked "*": ported from CDMM without a capture.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Voltcraft", "GDM 703 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "GDM 704 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
-  DmmDecoder::addConfig({"Voltcraft", "GDM 705 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 2, 0, 4000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 703 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 1, 0, 4000, 0, 0, 1, "", "", 2});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 704 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 1, 0, 4000, 0, 0, 1, "", "", 2});
+  DmmDecoder::addConfig({"Voltcraft", "GDM 705 *", "", 9600, FrameFormat::GDM703Continuous, 8, 1, 1, 0, 4000, 0, 0, 1, "", "", 2});
   return true;
 }();
 
@@ -43,7 +43,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderGDM703::decode(const QByteArray &d
 
   m_result = {};
   // one frame carries both displays: main is id 0, the second id 1 (and
-  // numValues 2 in the table, so the display shows it)
+  // channels 2 in the table, so the display shows it)
   m_result.main().id = 0;
   DmmChannel &second = m_result.addChannel(1);
   m_result.range = "";

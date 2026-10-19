@@ -3,7 +3,7 @@
 #include <vector>
 
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Voltcraft", "VC 870", "", 9600, FrameFormat::VC870Continuous, 8, 1, 2, 0, 40000, 0, 0, 1});
+  DmmDecoder::addConfig({"Voltcraft", "VC 870", "", 9600, FrameFormat::VC870Continuous, 8, 1, 1, 0, 40000, 0, 0, 1, "", "", 2});
   return true;
 }();
 

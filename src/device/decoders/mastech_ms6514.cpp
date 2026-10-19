@@ -5,9 +5,9 @@
 #include "core/sampletypes.h"
 
 // libsigrok mastech-ms6514: 9600 8N1; no meter at hand, so "*". Two values
-// (main and auxiliary display), so numValues 2.
+// (main and auxiliary display) in one frame, so channels 2.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"MASTECH", "MS6514 *", "", 9600, FrameFormat::MastechMS6514, 8, 1, 2, 0, 9999, 0, 0, 0});
+  DmmDecoder::addConfig({"MASTECH", "MS6514 *", "", 9600, FrameFormat::MastechMS6514, 8, 1, 1, 0, 9999, 0, 0, 0, "", "", 2});
   return true;
 }();
 

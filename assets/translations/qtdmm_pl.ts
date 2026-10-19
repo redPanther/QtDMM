@@ -1116,98 +1116,98 @@
         <translation>Nie działa żadna inna instancja.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="895"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="900"/>
         <source>none</source>
         <translation>brak</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="959"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="964"/>
         <source>%1 was not found or does not run. Install sigrok-cli, or set its path in the settings, page General.</source>
         <translation>Nie znaleziono %1 lub program nie działa. Zainstaluj sigrok-cli lub podaj jego ścieżkę w ustawieniach, strona Ogólne.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="962"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="967"/>
         <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
         <translation>%1 nie ma sterownika „%2”; zobacz sigrok-cli --list-supported.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="964"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="969"/>
         <source>%1 found.</source>
         <translation>Znaleziono %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="974"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="979"/>
         <source>Running %1 --driver %2 --scan ...</source>
         <translation>Trwa %1 --driver %2 --scan…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="996"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1001"/>
         <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
         <translation>Żaden miernik nie odpowiedział w ciągu 30 s (port szeregowy bez miernika SCPI każe sigrok-cli czekać bez końca).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="998"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1003"/>
         <source>Found: %1</source>
         <translation>Znaleziono: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1000"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1005"/>
         <source>No meter answered.</source>
         <translation>Żaden miernik nie odpowiedział.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1009"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1014"/>
         <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
         <translation>Ten QtDMM zbudowano bez obsługi Bluetooth, więc nie może połączyć się z tym miernikiem.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1016"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1021"/>
         <source>Pick the device or type its Bluetooth address.</source>
         <translation>Wybierz urządzenie lub wpisz jego adres Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1019"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1024"/>
         <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
         <translation>Włącz Bluetooth miernika (pojawi się symbol Bluetooth) przed wyszukiwaniem lub łączeniem.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1024"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1029"/>
         <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
         <translation>Klucz to 32-cyfrowy „klucz szyfrowania&quot;, który VictronConnect pokazuje w Informacjach o produkcie, Natychmiastowy odczyt przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1034"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1039"/>
         <source>Scanning for %1 (6 s)...</source>
         <translation>Wyszukiwanie %1 (6 s)...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1035"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1040"/>
         <source>Scanning for Victron devices (5 s)...</source>
         <translation>Wyszukiwanie urządzeń Victron (5 s)…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1046"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1051"/>
         <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
         <translation>Nie znaleziono miernika. Czy jego Bluetooth jest włączony i żaden inny program nie jest z nim połączony?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1047"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1052"/>
         <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
         <translation>Nie znaleziono urządzenia Victron. Czy Bluetooth jest włączony, a natychmiastowy odczyt włączony w urządzeniu?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1086"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1091"/>
         <source>Load DMM description</source>
         <translation>Wczytaj opis multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1086"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="1112"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1091"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1117"/>
         <source>DMM description (*.cfg)</source>
         <translation>Opis multimetru (*.cfg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1112"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1117"/>
         <source>Save DMM description</source>
         <translation>Zapisz opis multimetru</translation>
     </message>
@@ -3577,7 +3577,7 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>Łączenie z %1 przez Bluetooth ...</translation>
     </message>
     <message>
-        <location filename="../../src/device/meterconnection.cpp" line="446"/>
+        <location filename="../../src/device/meterconnection.cpp" line="445"/>
         <source>Error %1</source>
         <translation>Błąd %1</translation>
     </message>
@@ -3800,32 +3800,32 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>Brak odczytów</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/poincareplot.cpp" line="274"/>
+        <location filename="../../src/ui/views/poincareplot.cpp" line="276"/>
         <source>x(n)</source>
         <translation>x(n)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/poincareplot.cpp" line="275"/>
+        <location filename="../../src/ui/views/poincareplot.cpp" line="277"/>
         <source>x(n+%1)</source>
         <translation>x(n+%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/poincareplot.cpp" line="329"/>
+        <location filename="../../src/ui/views/poincareplot.cpp" line="333"/>
         <source>SD1 %1</source>
         <translation>SD1 %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/poincareplot.cpp" line="329"/>
+        <location filename="../../src/ui/views/poincareplot.cpp" line="333"/>
         <source>SD2 %1</source>
         <translation>SD2 %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/poincareplot.cpp" line="330"/>
+        <location filename="../../src/ui/views/poincareplot.cpp" line="334"/>
         <source>n = %1, k = %2</source>
         <translation>n = %1, k = %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/poincareplot.cpp" line="332"/>
+        <location filename="../../src/ui/views/poincareplot.cpp" line="336"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
@@ -5053,6 +5053,16 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
 &lt;/ul&gt;</translation>
     </message>
     <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="621"/>
+        <source>&amp;Lines per reading:</source>
+        <translation>&amp;Linie na odczyt:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/forms/uidevicesettings.ui" line="631"/>
+        <source>Some meters send one line of data per value, several lines for each reading (Metex M-3850D: four). QtDMM counts the lines and shows each as a value of its own: the first one as the main value, the others below it.</source>
+        <translation>Niektóre mierniki wysyłają jedną linię danych na wartość, kilka linii na odczyt (Metex M-3850D: cztery). QtDMM liczy linie i pokazuje każdą jako osobną wartość: pierwszą jako wartość główną, pozostałe pod nią.</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/forms/uidevicesettings.ui" line="670"/>
         <source>Formula</source>
         <translation>Wzór</translation>
@@ -5276,16 +5286,6 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <location filename="../../src/ui/forms/uidevicesettings.ui" line="607"/>
         <source>Here you may select the Communication type. If you have a not &quot;officially&quot; supported multimeter, just try out the existing protocols. If you are lucky it may work. If you find working settings, send the to me.</source>
         <translation>Wybierz tutaj typ komunikacji. Jeśli Twój multimetr nie jest „oficjalnie” obsługiwany, wypróbuj istniejące protokoły – przy odrobinie szczęścia któryś zadziała. Jeśli znajdziesz działające ustawienia, zgłoś je.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uidevicesettings.ui" line="621"/>
-        <source>&amp;Number of values:</source>
-        <translation>&amp;Liczba wartości:</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/forms/uidevicesettings.ui" line="631"/>
-        <source>Some multimeter send several lines of data containing different measured values. As QtDMM only shows one variable here you can set the number of lines to be ignored for each measurement (That means that QtDMM only uses the first line).</source>
-        <translation>Niektóre multimetry wysyłają kilka linii z różnymi wartościami. Ponieważ QtDMM pokazuje jedną wielkość, podaj tutaj liczbę linii pomijanych na pomiar (QtDMM używa tylko pierwszej linii).</translation>
     </message>
     <message>
         <location filename="../../src/ui/forms/uidevicesettings.ui" line="807"/>

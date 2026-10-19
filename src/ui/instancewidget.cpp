@@ -285,7 +285,7 @@ void InstanceWidget::setPoincareValue(int id)
 
 int InstanceWidget::numValues() const
 {
-  return qBound(1, m_configDlg->meterSettings()->numValues(), 3);
+  return qBound(1, m_configDlg->meterSettings()->valueCount(), 3);
 }
 
 QString InstanceWidget::valueName(int id) const
@@ -751,9 +751,9 @@ void InstanceWidget::readConfig()
     setLcdVariant(LcdWidget::Custom);
   m_lcdTint = tint;
   m_display->setFaceColor(tint);
-  m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), devSettings->numValues());
-  dmm->setNumValues(devSettings->numValues());
-  m_ctl->setNumValues(devSettings->numValues());
+  m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), devSettings->valueCount());
+  dmm->setFramesPerReading(devSettings->framesPerReading());
+  m_ctl->setValueCount(devSettings->valueCount());
   applyValueChoice();
   m_ctl->setDisplayCounts(devSettings->display());
 

@@ -308,7 +308,7 @@ bool MeterController::mayStartRecording(QString *why) const
   return reason.isEmpty();
 }
 
-void MeterController::setNumValues(int count)
+void MeterController::setValueCount(int count)
 {
   m_scpi->setChannelCount(count);
 }

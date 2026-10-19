@@ -5,9 +5,10 @@
 #include "core/sampletypes.h"
 
 // 0.1 ... 409.5 lx with a decimal, up to 40950 lx with x100: 4000 counts.
+// The temperature comes as second value in the same frame: channels 2.
 // Not tried with a real meter, so "*".
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Benetech", "GM1020 *", "", 19200, FrameFormat::BenetechGM1020, 8, 1, 1, 0, 4000, 0, 0, 0});
+  DmmDecoder::addConfig({"Benetech", "GM1020 *", "", 19200, FrameFormat::BenetechGM1020, 8, 1, 1, 0, 4000, 0, 0, 0, "", "", 2});
   return true;
 }();
 
