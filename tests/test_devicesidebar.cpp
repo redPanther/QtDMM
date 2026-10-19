@@ -107,6 +107,7 @@ int main(int argc, char **argv)
     QTreeWidgetItem *p = sidebar.instanceItem("p");
     QTreeWidgetItem *u = sidebar.instanceItem("u");
     check(own && own->font(0).bold() && !p->font(0).bold(), "this window's is bold");
+    check(own && own->isExpanded() && !p->isExpanded() && !u->isExpanded(), "at first only this window's is open");
     check(own && own->text(1) == "12.01 V DC", "the reading");
     check(own && own->child(0)->text(0) == "Bench UT61E", "the device below");
     check(u && u->child(0)->isHidden(), "no device, no line");

@@ -2749,127 +2749,127 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="372"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="373"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM : données non enregistrées</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="387"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="388"/>
         <source>Export data first</source>
         <translation>Exporter d&apos;abord</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="363"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="364"/>
         <source>Quit without saving</source>
         <translation>Quitter sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="316"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="317"/>
         <source>Value %1</source>
         <translation>Valeur %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="363"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="364"/>
         <source>If you quit now it will be lost.</source>
         <translation>Si vous quittez maintenant, elles seront perdues.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="373"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="374"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. %1&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Données non enregistrées&lt;/b&gt;&lt;/font&gt;&lt;p&gt;Des mesures non enregistrées sont encore en mémoire. %1&lt;p&gt;Voulez-vous d&apos;abord les exporter ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="503"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="504"/>
         <source>Switching to %1 clears it.</source>
         <translation>Passer à %1 les efface.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="503"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="504"/>
         <source>Switch without saving</source>
         <translation>Changer sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="533"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="534"/>
         <source>Recording stopped: switched to %1</source>
         <translation>Enregistrement arrêté : passage à %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="636"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="637"/>
         <source>Loading a file replaces it.</source>
         <translation>Charger un fichier les remplace.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="636"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="637"/>
         <source>Load without saving</source>
         <translation>Charger sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="654"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="655"/>
         <source>Clear deletes it.</source>
         <translation>Vider les efface.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="654"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="655"/>
         <source>Clear without saving</source>
         <translation>Vider sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="670"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="671"/>
         <source>Live clears it.</source>
         <translation>Le direct les efface.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="670"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="671"/>
         <source>Live without saving</source>
         <translation>Direct sans enregistrer</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="680"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="681"/>
         <source>A new recording clears it.</source>
         <translation>Un nouvel enregistrement les efface.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="680"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="681"/>
         <source>Record without saving</source>
         <translation>Enregistrer sans sauvegarder</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="688"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="689"/>
         <source>It starts now. A recording at %1 starts by itself from Live.</source>
         <translation>Il démarre maintenant. Un enregistrement à %1 démarre de lui-même depuis le Direct.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="690"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="691"/>
         <source>It starts now. A recording at the threshold starts by itself from Live.</source>
         <translation>Il démarre maintenant. Un enregistrement au seuil démarre de lui-même depuis le Direct.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="806"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="807"/>
         <source>Automatic start at %1</source>
         <translation>Démarrage automatique à %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="808"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="809"/>
         <source>Raising threshold %1</source>
         <translation>Seuil montant %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="810"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="811"/>
         <source>Falling threshold %1</source>
         <translation>Seuil descendant %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="845"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="846"/>
         <source>calculated</source>
         <translation>calculé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="854"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="855"/>
         <source>no meter configured</source>
         <translation>aucun multimètre configuré</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="877"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="878"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarme QtDMM : %1</translation>
     </message>
@@ -5906,67 +5906,67 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
 <context>
     <name>ValueMenu</name>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="23"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="56"/>
         <source>&amp;Analog meter</source>
         <translation>Instrument &amp;analogique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="29"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="101"/>
         <source>&amp;Poincaré plot</source>
         <translation>Diagramme de &amp;Poincaré</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="37"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="24"/>
         <source>&amp;LCD</source>
         <translation>&amp;LCD</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="39"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="26"/>
         <source>&amp;Main value</source>
         <translation>Valeur &amp;principale</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="51"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="38"/>
         <source>&amp;Secondary value</source>
         <translation>Valeur &amp;secondaire</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="54"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="41"/>
         <source>It is the main value</source>
         <translation>C&apos;est la valeur principale</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="71"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="64"/>
         <source>&amp;Graph</source>
         <translation>&amp;Graphique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="73"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="66"/>
         <source>&amp;Show in graph</source>
         <translation>&amp;Afficher dans le graphique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="77"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="70"/>
         <source>Two units are shown already: choose an axis for it</source>
         <translation>Deux unités sont déjà affichées : choisissez un axe pour elle</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="87"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="80"/>
         <source>&amp;Automatic axis</source>
         <translation>Axe a&amp;utomatique</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="88"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="81"/>
         <source>&amp;Left axis</source>
         <translation>Axe &amp;gauche</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="89"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="82"/>
         <source>&amp;Right axis</source>
         <translation>Axe &amp;droit</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="97"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="90"/>
         <source>The main value is on the left axis</source>
         <translation>La valeur principale est sur l&apos;axe gauche</translation>
     </message>

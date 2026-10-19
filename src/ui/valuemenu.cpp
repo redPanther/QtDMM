@@ -20,19 +20,6 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
     return a;
   };
 
-  QObject::connect(checkable(menu, tr("&Analog meter"), wid->meterValue() == id), &QAction::triggered, menu,
-                   [wid, id, show]
-  {
-    wid->setMeterValue(id);
-    show(View::Meter);
-  });
-  QObject::connect(checkable(menu, tr("&Poincaré plot"), wid->poincareValue() == id), &QAction::triggered, menu,
-                   [wid, id, show]
-  {
-    wid->setPoincareValue(id);
-    show(View::Poincare);
-  });
-
   // the LCD: big, or on the small line
   QMenu *lcd = menu->addMenu(tr("&LCD"));
   const bool primary = wid->lcdValue() == id;
@@ -66,6 +53,12 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
     show(View::Lcd);
   });
 
+  QObject::connect(checkable(menu, tr("&Analog meter"), wid->meterValue() == id), &QAction::triggered, menu,
+                   [wid, id, show]
+  {
+    wid->setMeterValue(id);
+    show(View::Meter);
+  });
   // the graph: shown or not, and on which axis
   GraphWidget *graph = wid->graph();
   QMenu *curves = menu->addMenu(tr("&Graph"));
@@ -105,4 +98,10 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
       show(View::Graph);
     });
   }
+  QObject::connect(checkable(menu, tr("&Poincaré plot"), wid->poincareValue() == id), &QAction::triggered, menu,
+                   [wid, id, show]
+  {
+    wid->setPoincareValue(id);
+    show(View::Poincare);
+  });
 }

@@ -37,7 +37,7 @@ a new one with the big **Add device** button.
 Below My devices the node **Instances** lists the QtDMM windows (see
 [Command line](command-line.md)), and **Services** what this window offers
 to other programs: the [SCPI server and HiSLIP](scpi-server.md) with their
-port, or *off*.
+port, or *off*. At the start only this window's instance is unfolded.
 
 ### The meter's values
 
@@ -49,12 +49,11 @@ coloured dot shows that the graph draws it, in the colour of its curve, so
 the rows are the graph's legend as well. This is where you say which window
 shows which value - right-click a value:
 
-- **Analog meter** and **Poincaré plot** - the value the needle shows or the
-  plot takes (one each).
 - **LCD** ▸ **Main value** - shown big; the min/max memory follows it. A
   value from the small line swaps places with the old main value.
   **Secondary value** - on the small line below, two at most: a third
   replaces the older one.
+- **Analog meter** - the value the needle shows (one).
 - **Graph** ▸ **Show in graph** - the value's curve on or off.
   **Automatic axis**, **Left axis**, **Right axis** - where its curve goes.
   The axes follow the units: values in the same unit share an axis (two
@@ -62,6 +61,7 @@ shows which value - right-click a value:
   unit on the left, the second on the right. A chosen axis takes that axis
   for the value's unit; the curves of the other unit on it go off, the
   status line says which. The main value is always on the left.
+- **Poincaré plot** - the value the plot takes (one).
 
 A choice opens the window it is for, also when the toolbar is hidden. The
 choices are kept with the window layout. **Values... (sidebar)** in the

@@ -223,7 +223,7 @@ void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString
       item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
       new QTreeWidgetItem(item);
       item->child(0)->setFirstColumnSpanned(true);   // a long name needs no room for a value
-      item->setExpanded(true);   // once: it may be folded away then, with its values
+      item->setExpanded(instance.id == own);   // once: this window's open, the others folded
       if (instance.id == selected)
         setCurrentItem(item);
     }
