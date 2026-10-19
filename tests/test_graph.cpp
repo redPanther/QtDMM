@@ -2184,6 +2184,17 @@ int main(int argc, char **argv)
     check(graph.valueDrawn(1) && !graph.mainShown() && !graph.valueDrawn(3) && graph.leftAxisTitle() == "[A]"
             && graph.valueDrawn(2) && graph.referenceId() == 1,
           "axes: A left, the voltages off, got " + graph.leftAxisTitle());
+    // the overview draws the value of the left axis, the main one is off
+    {
+      const auto *strip = graph.findChild<GraphMinimap *>();
+      const GraphMinimap::Column *c = strip ? strip->column(graph.store()->extra(0).last().t) : nullptr;
+      check(graph.minimapValue() == 1 && strip && strip->value() == 1 && c && c->any && c->max < 0,
+            QString("axes: the overview has the current, got value %1, max %2")
+              .arg(strip ? strip->value() : -1).arg(c ? c->max : 0));
+      feed.other(1, -3, "A", Quantity::Current);
+      c = strip ? strip->column(graph.store()->extra(0).last().t) : nullptr;
+      check(c && c->min <= -3, "axes: a new current reading joins the overview");
+    }
     // the main value back: the current chose the left axis, so it goes off
     graph.setValueShown(0, true);
     check(graph.mainShown() && !graph.valueDrawn(1) && graph.leftAxisTitle() == "[V]" && graph.valueDrawn(2),

@@ -32,6 +32,7 @@
 
 #include "ui/views/graphwidget.h"
 #include "ui/views/graphwidget_p.h"
+#include "ui/views/graphminimap.h"
 
 QPainterPath GraphWidget::envelopePath() const
 {
@@ -516,6 +517,7 @@ void GraphWidget::rebuildExtras()
   }
   updateRightAxis();
   updateLegend();
+  updateMinimapValue();
   if (m_intValueId != 0)
     rebuildOtherIntegral();
 }
@@ -722,6 +724,27 @@ bool GraphWidget::valueDrawn(int id) const
     if (m_store->extra(i).id == id && m_extraCurves[size_t(i)].shown)
       return true;
   return false;
+}
+
+int GraphWidget::minimapValue() const
+{
+  const int left = referenceId();
+  if (left >= 0)
+    return left;
+  int lowest = -1;
+  for (int i = 0; i < m_store->extraCount() && i < int(m_extraCurves.size()); ++i)
+    if (m_extraCurves[size_t(i)].shown && (lowest < 0 || m_store->extra(i).id < lowest))
+      lowest = m_store->extra(i).id;
+  return qMax(0, lowest);
+}
+
+void GraphWidget::updateMinimapValue()
+{
+  if (!m_minimap)
+    return;
+  const int id = minimapValue();
+  m_minimap->setValue(id);
+  m_minimap->setCurveColor(valueColor(id));
 }
 
 GraphWidget::ValueAxis GraphWidget::valueSide(int id) const

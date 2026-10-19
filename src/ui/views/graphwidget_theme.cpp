@@ -37,7 +37,7 @@ void GraphWidget::updateSeriesAppearance()
   rebuildExtras();   // their colours and line width
   m_dataLine->setPen(QPen(dataColor(), m_lineWidth, penStyle(m_lineMode), Qt::RoundCap, Qt::RoundJoin));
   m_dataLine->setVisible(m_lineMode != NoLine && m_mainShown);
-  m_minimap->setCurveColor(dataColor());
+  updateMinimapValue();
   // the band: the curve's colour, faint
   QColor band = dataColor();
   band.setAlpha(60);
