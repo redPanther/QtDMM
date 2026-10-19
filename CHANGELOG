@@ -96,6 +96,9 @@
   is told by the table apart from that; a meter with both values in one frame no longer counts its frames
 - Benetech GM1020: the temperature shows as second value (it came along, but only SCPI had it). Tenma 72-1016:
   no second value any more; it was the copy of the main value the meter sends with every reading
+- A meter can have four values (the main one and three on the small line of the display): the Metex M-3850D
+  and its relatives show all four lines they send, the views' value menus, the alarms and SCPI (@4) offer the
+  fourth. A meter set up by hand shows as many values as it sends, not only as many as its lines per reading
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

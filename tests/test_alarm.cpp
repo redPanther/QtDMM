@@ -259,7 +259,8 @@ int main(int argc, char **argv)
     al.value = 1;
     check(Alarm::fromJson(al.toJson()).value == 1 && !Alarm().toJson().contains("value"),
           "JSON: the value kept, the main one not written");
-    check(Alarm::fromJson(QJsonObject{ { "value", 7 } }).value == 2, "JSON: a value beyond the third is the third");
+    check(Alarm::fromJson(QJsonObject{ { "value", 3 } }).value == 3, "JSON: the fourth value kept");
+    check(Alarm::fromJson(QJsonObject{ { "value", 7 } }).value == 3, "JSON: a value beyond the fourth is the fourth");
   }
 
   // --- the name in messages: default names already say "Alarm" ---

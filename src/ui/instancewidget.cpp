@@ -110,6 +110,13 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
   // what each value measures, for the views' choice of value
   connect(m_ctl, &MeterController::reading, this, [this](const Reading &r)
   {
+    if (r.id >= m_seenValues)
+    {
+      const int before = numValues();
+      m_seenValues = r.id + 1;
+      if (numValues() != before)
+        applyValueCount();
+    }
     if (r.text.isEmpty() || r.overload || r.port.quantity == Quantity::Unknown)
       return;
     const bool news = m_lastReading.value(r.id).baseUnit != r.baseUnit || !m_lastReading.contains(r.id);
@@ -267,25 +274,26 @@ void InstanceWidget::setPoincare(PoincarePlot *plot)
 
 void InstanceWidget::setLcdValue(int id)
 {
-  m_lcdValue = qBound(0, id, 2);
+  m_lcdValue = qBound(0, id, kMaxValues - 1);
   applyValueChoice();
 }
 
 void InstanceWidget::setMeterValue(int id)
 {
-  m_meterValue = qBound(0, id, 2);
+  m_meterValue = qBound(0, id, kMaxValues - 1);
   applyValueChoice();
 }
 
 void InstanceWidget::setPoincareValue(int id)
 {
-  m_poincareValue = qBound(0, id, 2);
+  m_poincareValue = qBound(0, id, kMaxValues - 1);
   applyValueChoice();
 }
 
 int InstanceWidget::numValues() const
 {
-  return qBound(1, m_configDlg->meterSettings()->valueCount(), 3);
+  // a value the table does not know of counts as well (a meter set up by hand)
+  return qBound(1, qMax(m_configDlg->meterSettings()->valueCount(), m_seenValues), kMaxValues);
 }
 
 QString InstanceWidget::valueName(int id) const
@@ -294,6 +302,14 @@ QString InstanceWidget::valueName(int id) const
   if (it == m_lastReading.cend())
     return tr("Value %1").arg(id + 1);
   return RecordingStore::describe(it->port, it->baseUnit);
+}
+
+void InstanceWidget::applyValueCount()
+{
+  if (m_display)
+    m_display->setValueCount(numValues());
+  m_ctl->setValueCount(numValues());
+  applyValueChoice();
 }
 
 void InstanceWidget::applyValueChoice()
@@ -519,8 +535,10 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   m_ctl->recorder()->forgetReading();
   m_ctl->forgetUnit();   // the axis title and the alarm unit come with the first reading
   m_lastReading.clear();   // and what the values measure
-  for (int id = 1; id <= 2; ++id)
+  m_seenValues = 0;
+  for (int id = 1; id < kMaxValues; ++id)
     m_configDlg->alarmPage()->setValueUnit(id, QString());
+  applyValueCount();
   ui_graph->liveSLOT();
   Q_EMIT meterChanged();
 
@@ -751,10 +769,9 @@ void InstanceWidget::readConfig()
     setLcdVariant(LcdWidget::Custom);
   m_lcdTint = tint;
   m_display->setFaceColor(tint);
-  m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), devSettings->valueCount());
+  m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), numValues());
   dmm->setFramesPerReading(devSettings->framesPerReading());
-  m_ctl->setValueCount(devSettings->valueCount());
-  applyValueChoice();
+  applyValueCount();
   m_ctl->setDisplayCounts(devSettings->display());
 
   if (m_meter)

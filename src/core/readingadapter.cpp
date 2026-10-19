@@ -192,7 +192,7 @@ PortSample ReadingAdapter::adaptValue(double dval, const QString &text, const QS
   if (id == 0)
     m_mainKey = ps.port;
   else if (ps.port == m_mainKey)
-    ps.port.slot = Slot(qBound(1, id, 3));
+    ps.port.slot = Slot(qBound(1, id, kMaxValues - 1));
 
   Sample &s = ps.sample;
   s.t = Sample::now();

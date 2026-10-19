@@ -86,6 +86,8 @@ public:
   /// Layout: digit count from the display counts, which rows to show and how
   /// many secondary values.
   void setDisplayMode(int counts, bool minMax, bool bar, int numValues);
+  /// Only the number of values: the main one and up to three on the small line.
+  void setValueCount(int numValues);
   void setShowBar(bool);   ///< per-reading flag from the decoder
   /// @name Annunciators
   /// @{
@@ -187,10 +189,10 @@ private:
   void applyVariant();
   QColor ghost() const;
 
-  QString m_value[4];
-  QString m_unit[4];
-  quint32  m_flags[4] = {};
-  Quantity m_quantity[4] = { Quantity::Unknown, Quantity::Unknown, Quantity::Unknown, Quantity::Unknown };
+  QString m_value[kMaxValues];
+  QString m_unit[kMaxValues];
+  quint32  m_flags[kMaxValues] = {};
+  Quantity m_quantity[kMaxValues] = { Quantity::Unknown, Quantity::Unknown, Quantity::Unknown, Quantity::Unknown };
   QString m_minValue, m_maxValue, m_minUnit, m_maxUnit;
   int m_counts = 4000;
   int m_seenDigits = 0;   ///< widest value since the display count was set

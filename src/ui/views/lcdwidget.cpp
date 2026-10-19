@@ -79,10 +79,16 @@ QSize LcdWidget::minimumSizeHint() const
 
 void LcdWidget::setValue(int id, const QString &v)
 {
+  if (id < 0 || id >= kMaxValues)
+    return;
   m_value[id] = v;
   fitDigits(v);
 }
-void LcdWidget::setUnit(int id, const QString &v) { m_unit[id] = v; }
+void LcdWidget::setUnit(int id, const QString &v)
+{
+  if (id >= 0 && id < kMaxValues)
+    m_unit[id] = v;
+}
 
 void LcdWidget::setPrimary(int id)
 {
@@ -108,6 +114,8 @@ int LcdWidget::idAt(int line) const
 }
 void LcdWidget::setMode(int id, quint32 flags, Quantity quantity)
 {
+  if (id < 0 || id >= kMaxValues)
+    return;
   m_flags[id] = flags;
   m_quantity[id] = quantity;
 }
@@ -142,7 +150,12 @@ void LcdWidget::setDisplayMode(int counts, bool minMax, bool bar, int numValues)
   m_seenDigits = 0;
   m_showMinMax = minMax;
   m_showBar = bar;
-  m_numValues = qBound(1, numValues, 4);
+  setValueCount(numValues);
+}
+
+void LcdWidget::setValueCount(int numValues)
+{
+  m_numValues = qBound(1, numValues, kMaxValues);
   m_staticDirty = true;
   updateGeometry();
   update();
