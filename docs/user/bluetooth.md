@@ -71,8 +71,9 @@ connection, no pairing - and shows them like a meter's reading:
 
 Each device broadcasts several values; you choose which one QtDMM treats
 as the reading (**Main value**: display, analog meter, recorder) and which
-goes to the display's second line and the [readings table](readings-table.md)
-as a `2nd` row (**Second value**, or none):
+go to the display's second line, the graph and the
+[readings table](readings-table.md) (**Second value**, **Third value**,
+**Fourth value**, each or none):
 
 | Device | Values |
 |---|---|
@@ -80,9 +81,10 @@ as a `2nd` row (**Second value**, or none):
 | SmartSolar, BlueSolar MPPT | PV power (W), battery voltage (V), battery charging current (A), yield today (Wh), load current (A) |
 | Phoenix Inverter Smart | AC apparent power (VA), battery voltage (V), AC voltage (V), AC current (A) |
 
-The defaults are the first two of each row. About one reading per second
-arrives. Run several QtDMM instances on the same device to record more
-than two of its values at once ([instances](command-line.md)).
+The defaults are the first two of each row, no third and fourth value.
+About one reading per second arrives. For more than four of its values at
+once, run several QtDMM instances on the same device
+([instances](command-line.md)).
 
 ### Setting it up
 
@@ -99,8 +101,8 @@ In QtDMM, **Add device**, *Bluetooth*: choose the device found, then vendor
   seconds; their names as in VictronConnect), or type the address.
 - **Key** - the 32-digit key. It is stored in QtDMM's settings file and
   never shown in the status line.
-- **Main value** / **Second value** - which of the device's values to show
-  (table above).
+- **Main value** / **Second value** / **Third value** / **Fourth value** -
+  which of the device's values to show (table above).
 
 Then **Connect** as usual. The status line says *Connected* once the first
 advertisement decrypted. With the wrong key it reports *The encryption key

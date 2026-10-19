@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QByteArray>
+#include <QStringList>
 #include <QString>
 #include <optional>
 
@@ -64,10 +65,10 @@ namespace VictronBle
 
   /// The frame BleAdvertisementDevice hands to the reader, one line: the
   /// readout type and the plaintext as hex, then the ids of the fields
-  /// wanted as main and second value ("-" for none). DecoderVictronBLE
-  /// reads it back.
-  QByteArray frame(quint8 readoutType, const QByteArray &plaintext,
-                   const QString &mainField = QString(), const QString &secondField = QString());
+  /// wanted as main, second, third and fourth value ("-" for none; the
+  /// second "-" when only the main one is given, third and fourth only when
+  /// given). DecoderVictronBLE reads it back.
+  QByteArray frame(quint8 readoutType, const QByteArray &plaintext, const QStringList &fields = {});
 
   /// One value a readout type carries, as the settings offer it.
   struct Field

@@ -91,12 +91,12 @@ QString VictronBle::modelName(quint16 model)
   return names.value(model, QString("0x%1").arg(model, 4, 16, QLatin1Char('0')).toUpper());
 }
 
-QByteArray VictronBle::frame(quint8 readoutType, const QByteArray &plaintext,
-                             const QString &mainField, const QString &secondField)
+QByteArray VictronBle::frame(quint8 readoutType, const QByteArray &plaintext, const QStringList &fields)
 {
   QByteArray line = QByteArray(1, char(readoutType)).toHex() + plaintext.toHex();
-  if (!mainField.isEmpty())
-    line += ' ' + mainField.toLatin1() + ' ' + (secondField.isEmpty() ? QByteArray("-") : secondField.toLatin1());
+  if (!fields.value(0).isEmpty())
+    for (int i = 0; i < qMax(2, int(fields.size())); ++i)
+      line += ' ' + (fields.value(i).isEmpty() ? QByteArray("-") : fields[i].toLatin1());
   return line + '\n';
 }
 

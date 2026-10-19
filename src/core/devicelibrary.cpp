@@ -57,7 +57,7 @@ QVariantMap DeviceLibrary::entryKeys(const QVariantMap &keys)
   const QString type = byModel.isEmpty() ? deviceType(device) : byModel;
   if (type == QLatin1String("ble"))
     wanted << "Port settings/ble-address" << "Port settings/ble-key" << "Port settings/ble-main"
-           << "Port settings/ble-second";
+           << "Port settings/ble-second" << "Port settings/ble-third" << "Port settings/ble-fourth";
   else if (type == QLatin1String("blegatt"))
     wanted << "Port settings/ble-address";
   else if (type == QLatin1String("sigrok"))

@@ -351,6 +351,8 @@ void DeviceSettings::load(const QVariantMap &keys)
   ui_bleMain->setProperty("readoutType", QVariant());
   ui_bleMain->clear();
   ui_bleSecond->clear();
+  ui_bleThird->clear();
+  ui_bleFourth->clear();
   updateBleFields();
   ui_calcUnit->setText        (cfgString("DMM/calc-unit", "W"));
   ui_calcExpression->setText  (cfgString("DMM/calc-expression"));
@@ -480,6 +482,8 @@ QVariantMap DeviceSettings::keys() const
   keys.insert("Port settings/ble-key", isBluetooth() && !isGatt() ? ui_bleKey->text().trimmed() : QString());
   keys.insert("Port settings/ble-main", ui_bleMain->currentData().toString());
   keys.insert("Port settings/ble-second", ui_bleSecond->currentData().toString());
+  keys.insert("Port settings/ble-third", ui_bleThird->currentData().toString());
+  keys.insert("Port settings/ble-fourth", ui_bleFourth->currentData().toString());
   keys.insert("DMM/calc-unit", ui_calcUnit->text().trimmed());
   keys.insert("DMM/calc-expression", ui_calcExpression->text().trimmed());
   keys.insert("DMM/virtual-waveform", ui_virtualSignal->currentIndex());
@@ -604,7 +608,8 @@ void DeviceSettings::updateCalcMode()
   ui_bleGroup->setVisible(ble);
   const bool gatt = isGatt();
   for (QWidget *w : std::initializer_list<QWidget *>{ ui_bleKeyLabel, ui_bleKey, ui_bleMainLabel, ui_bleMain,
-                                                      ui_bleSecondLabel, ui_bleSecond })
+                                                      ui_bleSecondLabel, ui_bleSecond, ui_bleThirdLabel, ui_bleThird,
+                                                      ui_bleFourthLabel, ui_bleFourth })
     w->setVisible(ble && !gatt);
   if (ble)
     updateBleHint();
@@ -845,7 +850,25 @@ int DeviceSettings::framesPerReading() const
 
 int DeviceSettings::valueCount() const
 {
-  return ui_vendor->currentIndex() == 0 ? ui_framesPerReading->value() : m_dmmInfo.valueCount();
+  if (ui_vendor->currentIndex() == 0)
+    return ui_framesPerReading->value();
+  // a Victron: main and second value, and the third and fourth chosen
+  if (isBluetooth() && !isGatt())
+    return m_dmmInfo.valueCount() + bleExtraValues();
+  return m_dmmInfo.valueCount();
+}
+
+QString DeviceSettings::bleField(const QComboBox *combo)
+{
+  const QString id = combo->currentData().toString();
+  return id.isEmpty() ? QString("-") : id;
+}
+
+int DeviceSettings::bleExtraValues() const
+{
+  if (bleField(ui_bleFourth) != "-")
+    return 2;
+  return bleField(ui_bleThird) != "-" ? 1 : 0;
 }
 
 FrameFormat::DataFormat DeviceSettings::format() const
@@ -886,28 +909,40 @@ void DeviceSettings::updateBleFields()
   // before it), so the saved choice is the fallback
   QString main = ui_bleMain->currentData().toString();
   QString second = ui_bleSecond->currentData().toString();
+  QString third = ui_bleThird->currentData().toString();
+  QString fourth = ui_bleFourth->currentData().toString();
   if (main.isEmpty())
   {
     main = m_loaded.value("Port settings/ble-main").toString();
     second = m_loaded.value("Port settings/ble-second").toString();
+    third = m_loaded.value("Port settings/ble-third").toString();
+    fourth = m_loaded.value("Port settings/ble-fourth").toString();
   }
   const QList<VictronBle::Field> fields = VictronBle::fields(type);
   if (ui_bleMain->property("readoutType").toInt() == type && !fields.isEmpty())
     return;
   ui_bleMain->setProperty("readoutType", type);
   ui_bleMain->clear();
-  ui_bleSecond->clear();
-  ui_bleSecond->addItem(tr("none"), "-");
+  QComboBox *const more[] = { ui_bleSecond, ui_bleThird, ui_bleFourth };
+  for (QComboBox *c : more)
+  {
+    c->clear();
+    c->addItem(tr("none"), "-");
+  }
   for (const VictronBle::Field &f : fields)
   {
     const QString label = QCoreApplication::translate("VictronBle", f.label);
     ui_bleMain->addItem(label, QString::fromLatin1(f.id));
-    ui_bleSecond->addItem(label, QString::fromLatin1(f.id));
+    for (QComboBox *c : more)
+      c->addItem(label, QString::fromLatin1(f.id));
   }
   ui_bleMain->setCurrentIndex(qMax(0, ui_bleMain->findData(main)));
-  // "none" (index 0) is a choice too; nothing chosen yet: the model's second value
+  // "none" (index 0) is a choice too; nothing chosen yet: the model's second
+  // value, no third and fourth
   const int secondIndex = ui_bleSecond->findData(second);
   ui_bleSecond->setCurrentIndex(secondIndex >= 0 ? secondIndex : qMin(2, ui_bleSecond->count() - 1));
+  ui_bleThird->setCurrentIndex(qMax(0, ui_bleThird->findData(third)));
+  ui_bleFourth->setCurrentIndex(qMax(0, ui_bleFourth->findData(fourth)));
 }
 
 namespace
@@ -1074,10 +1109,16 @@ QString DeviceSettings::device() const
   if (isGatt())
     return QString("blegatt %1").arg(ui_bleAddress->currentText().section(' ', 0, 0).trimmed());
   if (isBluetooth())
-    return QString("ble %1 %2 %3 %4").arg(ui_bleAddress->currentText().section(' ', 0, 0).trimmed(),
-                                          ui_bleKey->text().simplified().remove(' '),
-                                          ui_bleMain->currentData().toString(),
-                                          ui_bleSecond->currentData().toString());
+  {
+    QString ble = QString("ble %1 %2 %3 %4").arg(ui_bleAddress->currentText().section(' ', 0, 0).trimmed(),
+                                                 ui_bleKey->text().simplified().remove(' '),
+                                                 ui_bleMain->currentData().toString(),
+                                                 ui_bleSecond->currentData().toString());
+    // the third and fourth field only when chosen: the string of before
+    if (bleExtraValues() > 0)
+      ble += QString(" %1 %2").arg(bleField(ui_bleThird), bleField(ui_bleFourth));
+    return ble;
+  }
   if (isCalculated())
     return QString("calc %1 %2").arg(ui_calcUnit->text().trimmed(), ui_calcExpression->text().trimmed());
   if (isVirtual())
