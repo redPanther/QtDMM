@@ -40,6 +40,28 @@ Value invalid(const char *id, const QString &unit, const QString &special)
 {
   return value(id, 0, 0, unit, special, false);
 }
+
+// The time to go as the display shows it: below an hour in minutes, from
+// an hour on in hours with a decimal (90 min is 1.5 h), no days. The value
+// stays in minutes, so graph, min/max and the recording keep one unit
+// (ReadingAdapter takes Victron's "h" as min). 0xFFFF, none while charging:
+// "inF", infinite - letters, so no number, a gap in the graph
+Value timeToGo(quint32 minutes)
+{
+  if (minutes == 0xFFFF)
+  {
+    Value v = value("TTG", 0, 0, "h", "DC");
+    v.val = "inF";
+    return v;
+  }
+  Value v = value("TTG", minutes, 0, "min", "DC");
+  if (minutes >= 60)
+  {
+    v.val = QString::number(minutes / 60.0, 'f', 1);
+    v.unit = "h";
+  }
+  return v;
+}
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArray &data, int /*id*/)
@@ -110,7 +132,7 @@ QList<Value> DecoderVictronBLE::values(quint8 readoutType, const QByteArray &pla
   }
 }
 
-// Remaining time u16 min | voltage s16 /100 V | alarm u16 | aux u16 |
+// Remaining time u16 min (0xFFFF: none, while charging) | voltage s16 /100 V | alarm u16 | aux u16 |
 // aux mode 2 | current s22 /1000 A | consumed Ah u20 /10 | SOC u10 /10 %
 QList<Value> DecoderVictronBLE::batteryMonitor(const QByteArray &plain)
 {
@@ -134,7 +156,7 @@ QList<Value> DecoderVictronBLE::batteryMonitor(const QByteArray &plain)
   v << (vOk && iOk ? value("P", voltage / 100.0 * current / 1000.0, 1, "W", "DC") : invalid("P", "W", "DC"));
   v << (soc != 0x3FF ? value("SOC", soc / 10.0, 1, "%", "DC") : invalid("SOC", "%", "DC"));
   v << (consumed != 0xFFFFF ? value("AH", -(consumed / 10.0), 1, "Ah", "DC") : invalid("AH", "Ah", "DC"));
-  v << (ttg != 0xFFFF ? value("TTG", ttg, 0, "min", "DC") : invalid("TTG", "min", "DC"));
+  v << timeToGo(ttg);
   switch (auxMode)
   {
     case 0: v << value("AUX", qint16(aux) / 100.0, 2, "V", "DC"); break;            // starter battery

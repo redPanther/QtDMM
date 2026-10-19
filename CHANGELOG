@@ -121,6 +121,8 @@
   needs CMake 3.19 now
 - VXI-11 on Windows: the own portmapper on a free port could fail to start ("The address is protected") when
   Windows kept the ports in a row for itself; it now takes a port Windows allows for UDP first
+- Victron: the time to go shows in minutes below an hour and in hours with a decimal above (1.5 h, not 90 min),
+  and "inF" while charging instead of nothing; the graph keeps minutes
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

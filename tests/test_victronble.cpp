@@ -181,6 +181,24 @@ int main(int argc, char **argv)
     check(ids(two) == "0:12.53V 1:0.000A", "third and fourth none: two values, got " + ids(two));
   }
 
+  // --- 4d. the time to go: minutes below an hour, decimal hours above, inF
+  //         while charging (0xFFFF); the value always in minutes ---
+  {
+    auto ttg = [&](const char *hex)
+    {
+      // time to go, 12.53 V, the rest zero
+      const QByteArray plain = QByteArray::fromHex(QByteArray(hex) + "e504" + QByteArray(22, '0'));
+      const auto r = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, plain, {"TTG", "V"}), 0);
+      return r ? QString("%1 %2 %3").arg(r->main().val, r->main().unit).arg(r->main().dval) : QString("none");
+    };
+    check(ttg("2d00") == "45 min 45", "45 min: " + ttg("2d00"));
+    check(ttg("3b00") == "59 min 59", "59 min: " + ttg("3b00"));
+    check(ttg("3c00") == "1.0 h 60", "60 min: 1.0 h, got " + ttg("3c00"));
+    check(ttg("5a00") == "1.5 h 90", "90 min: 1.5 h, got " + ttg("5a00"));
+    check(ttg("7017") == "100.0 h 6000", "6000 min: 100.0 h, no days, got " + ttg("7017"));
+    check(ttg("ffff") == "inF h 0", "charging: inF, got " + ttg("ffff"));
+  }
+
   // --- 5. other records and junk ---
   check(!VictronBle::parse(QByteArray::fromHex("0269b907109a")).has_value(), "non-readout record ignored");
   check(!VictronBle::parse(QByteArray()).has_value(), "empty ignored");
