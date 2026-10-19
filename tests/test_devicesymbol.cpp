@@ -91,7 +91,7 @@ int main(int argc, char **argv)
   {
     const QString path = it.next();
     QFile svg(path);
-    svg.open(QIODevice::ReadOnly);
+    check(svg.open(QIODevice::ReadOnly), path + ": opens");
     const QByteArray data = svg.readAll().toUpper();
     ++files;
     check(QSvgRenderer(path).isValid(), path + ": valid SVG");
