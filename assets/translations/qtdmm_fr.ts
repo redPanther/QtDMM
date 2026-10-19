@@ -4320,105 +4320,115 @@ Puis déconnectez-vous et reconnectez-vous pour que l&apos;appartenance au group
 <context>
     <name>ReadingsModel</name>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="123"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="134"/>
         <source>AC+DC</source>
         <translation>AC+DC</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="120"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="131"/>
         <source>Diode</source>
         <translation>Diode</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="129"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="140"/>
         <source>Continuity</source>
         <translation>Continuité</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="130"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="141"/>
         <source>Resistance</source>
         <translation>Résistance</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="131"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="142"/>
         <source>Capacitance</source>
         <translation>Capacité</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="132"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="143"/>
         <source>Frequency</source>
         <translation>Fréquence</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="133"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="144"/>
         <source>Temperature</source>
         <translation>Température</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="168"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="120"/>
         <source>2nd</source>
         <translation>2e</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="170"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="350"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="120"/>
+        <source>3rd</source>
+        <translation>3e</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording/readingsmodel.cpp" line="120"/>
+        <source>4th</source>
+        <translation>4e</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording/readingsmodel.cpp" line="181"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="361"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="183"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="342"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="194"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="353"/>
         <source>Time</source>
         <translation>Heure</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="184"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="342"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="195"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="353"/>
         <source>Value</source>
         <translation>Valeur</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="185"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="342"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="196"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="353"/>
         <source>Unit</source>
         <translation>Unité</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="186"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="342"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="197"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="353"/>
         <source>Mode</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="187"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="342"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="198"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="353"/>
         <source>Range</source>
         <translation>Gamme</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="188"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="342"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="199"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="353"/>
         <source>Hold</source>
         <translation>Hold</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="314"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="338"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="325"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="349"/>
         <source>Nothing to export.</source>
         <translation>Rien à exporter.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="317"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="328"/>
         <source>Cannot open file.</source>
         <translation>Impossible d&apos;ouvrir le fichier.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="341"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="352"/>
         <source>Readings</source>
         <translation>Mesures</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="342"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="353"/>
         <source>Alarm</source>
         <translation>Alarme</translation>
     </message>

@@ -101,6 +101,8 @@
   fourth. A meter set up by hand shows as many values as it sends, not only as many as its lines per reading
 - Victron: a third and a fourth value besides the main and the second one (device settings, none at first), on
   the display's small line, in the graph and the export
+- Readings table and its export: the third and fourth value of a meter are marked 3rd and 4th in the Mode column,
+  not 2nd like the second one (the humidity of an AirCO2ntrol was "2nd")
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

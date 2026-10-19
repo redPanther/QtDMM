@@ -51,6 +51,9 @@ int main(int argc, char **argv)
   check(log.data(log.index(1, ReadingsModel::Unit)).toString() == "mV", "unit cell");
   check(log.data(log.index(2, ReadingsModel::Value)).toString() == "OL", "overload cell is trimmed");
   check(log.data(log.index(3, ReadingsModel::Mode)).toString().startsWith("2nd"), "secondary value marked");
+  check(ReadingsModel::modeColumn(2, PortKey{}, 0, false) == "3rd" && ReadingsModel::modeColumn(3, PortKey{}, 0, false) == "4th"
+        && ReadingsModel::modeColumn(0, PortKey{}, 0, false).isEmpty(), "the third and fourth value by their place: "
+        + ReadingsModel::modeColumn(2, PortKey{}, 0, false) + "/" + ReadingsModel::modeColumn(3, PortKey{}, 0, false));
   check(log.data(log.index(1, ReadingsModel::Value), ReadingsModel::DvalRole).toDouble() == 0.0122, "dval role");
   check(log.headerData(ReadingsModel::Value, Qt::Horizontal).toString() == "Value", "header");
   {

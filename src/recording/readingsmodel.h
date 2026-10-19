@@ -109,6 +109,10 @@ public:
   /// The Mode column: the decoders' codes as words ("OH" -> "Resistance").
   /// The Mode column: "DC", "AC+DC", "Diode", "Resistance", ...
   static QString modeText(const PortKey &port, quint32 flags);
+  /// The Mode column of value @p id: modeText(), for another value than the
+  /// main one after its place ("2nd AC", "3rd", "4th"); @p translated for
+  /// the table, the export writes the English word.
+  static QString modeColumn(int id, const PortKey &port, quint32 flags, bool translated);
 
 private:
   RecordingStore *m_own;     ///< used until setStore(), and after that store is gone
