@@ -4,9 +4,9 @@ QtDMM reads two kinds of Bluetooth LE meters:
 
 - **UNI-T UT60BT** (and, untested, the UT161B/D/E and the UT61B+/D+/E+
   with the UT-D07B adapter) and, untested, the **APPA** Bluetooth meters
-  and their BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram twins - QtDMM
-  *connects* to the meter and asks it for readings, like a serial meter on
-  a cable.
+  and their BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram twins and the
+  **ZOTEK** meters (ZOYI, BSIDE, ANENG) - QtDMM *connects* to the meter and
+  reads it, like a serial meter on a cable.
 - **Victron** SmartShunt, BMV-712, MPPT chargers and Phoenix inverters - QtDMM
   *listens* to the readings they broadcast, without a connection.
 
@@ -84,6 +84,38 @@ offered.
 Not tried with a real meter yet: the Bluetooth details come from the
 appa-dmm driver of libsigrok (Martin Eitzenberger's branch), the display
 counts from the data sheets. Please report how it works for you.
+
+## ZOTEK, ZOYI, BSIDE and ANENG
+
+ZOTEK makes Bluetooth meters that are sold as ZOYI, ZOTEK, BSIDE and
+ANENG: the **ZT-5B** (ANENG V05B), the **ZT-5BQ** clamp (ANENG ST207), the
+**ZT-300AB** (ANENG AN9002) and the **ZT-5566SE** (ANENG AN999S). Switch
+Bluetooth on at the meter - a short press of the power button on the ZT-5B,
+Power and Hz together on the ZT-5BQ, Hz% held for two seconds on the
+ZT-300AB - until the Bluetooth symbol shows.
+
+They all advertise as *Bluetooth DMM*. **Add device** finds them by that
+name; choose the meter found and QtDMM listens to it for a moment: the
+first reading tells which model it is (*Its first reading says: ...*), and
+page 3 has that model chosen. Without a reading in 15 seconds, choose the
+model yourself.
+
+The meter sends about three readings a second. QtDMM shows value, unit,
+AC/DC, HOLD, REL, MIN/MAX, the low battery symbol and OL; *Auto* (the
+ZT-5B's automatic function before a reading) and the NCV display (*EF*,
+dashes) as the meter shows them. The ZT-5566SE's second display (frequency,
+duty cycle) is the second value.
+
+The keys under the display are those of ZOTEK's app: on the ZT-5B and the
+ZT-5BQ **AUTO**, **CAP**, **Diode**, **NCV**, **Hz**, **°C/°F**, **HOLD** and
+**ZERO** (capacitance only), on the ZT-300AB **MIN/MAX**, on the ZT-5566SE
+**MIN/MAX** and **HOLD**. Each key chooses its function directly.
+
+Not tried with a real meter yet: the protocol comes from the
+[dmm-tools](https://github.com/antoinecellerier/dmm-tools) project, worked
+out from ZOTEK's apps and manuals and checked there on a ZOYI ZT-5B (its
+readings and keys); which model sends which packet layout is inferred
+except for the ZT-5B. Please report how it works for you.
 
 ## Victron Instant Readout
 

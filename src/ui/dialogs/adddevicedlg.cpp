@@ -313,12 +313,15 @@ void AddDeviceDlg::chooseConnection(Connection connection)
 
 AddDeviceDlg::~AddDeviceDlg()
 {
+  stopProbe();
   stopSearch();
 }
 
 void AddDeviceDlg::startSearch()
 {
+  stopProbe();
   stopSearch();
+  m_probed.clear();
   m_found.clear();
   m_cards->clear();
   for (Discoverer *d : m_makeDiscoverers ? m_makeDiscoverers(m_connection) : QList<Discoverer *>())
@@ -403,9 +406,75 @@ QStringList AddDeviceDlg::candidates() const
 
 void AddDeviceDlg::chooseCandidate(const QString &key)
 {
+  for (int i = 0; i < m_found.size(); ++i)
+    if (m_found[i].key == key)
+    {
+      m_port->setText(portText(m_found[i]));
+      if (m_found[i].probe != FrameFormat::Invalid && !m_probed.contains(key))
+        startProbe(i);
+    }
+}
+
+QStringList AddDeviceDlg::candidateModels(const QString &key) const
+{
   for (const Candidate &c : m_found)
     if (c.key == key)
-      m_port->setText(portText(c));
+      return c.models;
+  return {};
+}
+
+void AddDeviceDlg::startProbe(int row)
+{
+  stopProbe();
+  // the scan and a connection get in each other's way
+  stopSearch();
+  const Candidate c = m_found[row];
+  m_probed << c.key;
+  m_probe = new FrameProbe(m_makeProbePort ? m_makeProbePort(c) : nullptr, c.probe, this);
+  m_probe->setObjectName(c.key);
+  m_probeHint = c.hint;
+  m_found[row].hint = tr("Listening to the meter: its first reading tells which model it is ...");
+  connect(m_probe, &FrameProbe::finished, this, [this, key = c.key](const QStringList &models)
+  {
+    for (Candidate &f : m_found)
+    {
+      if (f.key != key)
+        continue;
+      if (models.isEmpty())
+        f.hint = tr("No reading came, so the model is not known: choose it on the next page.");
+      else
+      {
+        // the models it names first, in their order
+        QStringList rest = f.models;
+        for (const QString &m : models)
+          rest.removeAll(m);
+        f.models = models + rest;
+        QStringList names;
+        for (const QString &m : models)
+          names << QString(m).remove(" *");
+        f.hint = tr("Its first reading says: %1.").arg(names.join(tr(" or ")));
+      }
+    }
+    m_probe->deleteLater();
+    m_probe = nullptr;
+    updateHint();
+  });
+  m_probe->start();
+  updateHint();
+}
+
+void AddDeviceDlg::stopProbe()
+{
+  if (!m_probe)
+    return;
+  // ended before it heard anything: as before, listened to again when chosen
+  const QString key = m_probe->objectName();
+  m_probed.removeAll(key);
+  for (Candidate &f : m_found)
+    if (f.key == key)
+      f.hint = m_probeHint;
+  delete m_probe;
+  m_probe = nullptr;
 }
 
 void AddDeviceDlg::setPort(const QString &port)
@@ -456,6 +525,7 @@ void AddDeviceDlg::updateHint()
 
 void AddDeviceDlg::takePort()
 {
+  stopProbe();
   stopSearch();
   const int row = chosenCandidate();
   const QString port = m_port->text().trimmed();
@@ -547,6 +617,7 @@ void AddDeviceDlg::back()
     showPage(PortPage);
   else if (page() == DevicePage || page() == PortPage)
   {
+    stopProbe();
     stopSearch();
     showPage(ConnectionPage);
   }

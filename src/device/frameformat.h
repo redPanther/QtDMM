@@ -78,6 +78,7 @@ public:
     BenetechGM1020,
     UniTUT202BT,
     UniTiENV,
+    ZotekBLE,
     EndOfList              // new stuff always before!
   };
 

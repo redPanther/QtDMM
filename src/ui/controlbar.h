@@ -11,7 +11,8 @@ class QToolButton;
 struct Reading;
 
 /// The meter's keys under the display, for meters QtDMM can remote-control
-/// (the UNI-T iDMM protocol: UT60BT, UT61B+/D+/E+, UT161, UT202BT). Groups
+/// (the UNI-T iDMM protocol: UT60BT, UT61B+/D+/E+, UT161, UT202BT; the iENV
+/// meters; the ZOTEK Bluetooth meters). Groups
 /// from left to right as on the meter's front - function, range, display,
 /// LIGHT and HOLD on the right - that wrap to a second row when the window
 /// is narrow; a group without a key of the meter is hidden.
@@ -49,9 +50,7 @@ public Q_SLOTS:
   void showReading(const Reading &reading);
 
 Q_SIGNALS:
-  /// "select1", "select2", "range", "auto", "hold", "rel", "minmax",
-  /// "minmax_off", "peak", "peak_off", "max", "min", "avg", "unit", "unit2",
-  /// "weighting", "lamp" (DmmDecoder::keyRequest()).
+  /// One of DmmDecoder::keyNames() (DmmDecoder::keyRequest()).
   void keyPressed(const QString &key);
 
 protected:

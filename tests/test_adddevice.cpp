@@ -307,6 +307,92 @@ int main(int argc, char **argv)
           "network typed: " + dlg.keys().value("Port settings/device").toString());
   }
 
+  // 6. a ZOTEK "Bluetooth DMM": all models share the name, the first packet
+  //    tells which one it is (FrameProbe); no packet leaves the order
+  {
+    // a meter that streams one packet once it is opened
+    class FakeMeter : public QIODevice
+    {
+    public:
+      explicit FakeMeter(const QByteArray &data) : m_data(data) {}
+      bool open(OpenMode mode) override
+      {
+        QIODevice::open(mode);
+        if (!m_data.isEmpty())
+          QTimer::singleShot(10, this, [this] { Q_EMIT readyRead(); });
+        return true;
+      }
+      bool isSequential() const override { return true; }
+      qint64 bytesAvailable() const override { return m_data.size() + QIODevice::bytesAvailable(); }
+    protected:
+      qint64 readData(char *data, qint64 max) override
+      {
+        const qint64 n = qMin<qint64>(max, m_data.size());
+        memcpy(data, m_data.constData(), size_t(n));
+        m_data.remove(0, int(n));
+        return n;
+      }
+      qint64 writeData(const char *, qint64 len) override { return len; }
+    private:
+      QByteArray m_data;
+    };
+    const QByteArray type3 = QByteArray::fromHex("1b847041085c7d7f66fa3a");   // ZT-300AB: -12.34 V DC
+    auto zotekFind = []
+    {
+      Candidate c;
+      c.kind = Candidate::Bluetooth;
+      c.key = "AA:BB:CC:DD:EE:03";
+      c.title = "Bluetooth DMM";
+      c.keys.insert("Port settings/ble-address", "AA:BB:CC:DD:EE:03 Bluetooth DMM");
+      c.models = QStringList{ "ZOTEK ZT-5B *", "ZOTEK ZT-5BQ *", "ZOTEK ZT-300AB *", "ANENG AN9002 *" };
+      c.probe = FrameFormat::ZotekBLE;
+      return c;
+    };
+    auto waitFor = [](const std::function<bool()> &done)
+    {
+      QElapsedTimer t;
+      t.start();
+      while (!done() && t.elapsed() < 3000)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+    };
+    {
+      AddDeviceDlg dlg(&library);
+      dlg.setDiscoverers(noSearch);
+      int opened = 0;
+      dlg.setProbePort([&](const Candidate &) { ++opened; return new FakeMeter(type3); });
+      dlg.chooseConnection(AddDeviceDlg::Bluetooth);
+      const Candidate c = zotekFind();
+      dlg.addCandidate(c);
+      dlg.chooseCandidate(c.key);
+      waitFor([&] { return dlg.candidateModels(c.key).value(0) == "ZOTEK ZT-300AB *"; });
+      check(dlg.candidateModels(c.key)
+              == QStringList({ "ZOTEK ZT-300AB *", "ANENG AN9002 *", "ZOTEK ZT-5B *", "ZOTEK ZT-5BQ *" }),
+            "ZOTEK: the type-3 packet puts the ZT-300AB first: " + dlg.candidateModels(c.key).join(", "));
+      dlg.chooseCandidate(c.key);
+      check(opened == 1, "ZOTEK: listened to once");
+      dlg.next();
+      check(dlg.keys().value("DMM/model") == "ZOTEK ZT-300AB *",
+            "ZOTEK: page 3 has the model it named: " + dlg.keys().value("DMM/model").toString());
+    }
+    {
+      AddDeviceDlg dlg(&library);
+      dlg.setDiscoverers(noSearch);
+      FakeMeter *silent = nullptr;
+      QObject *probe = nullptr;
+      dlg.setProbePort([&](const Candidate &) { return silent = new FakeMeter(QByteArray()); });
+      dlg.chooseConnection(AddDeviceDlg::Bluetooth);
+      const Candidate c = zotekFind();
+      dlg.addCandidate(c);
+      dlg.chooseCandidate(c.key);
+      probe = dlg.findChild<FrameProbe *>();
+      check(probe && silent && silent->isOpen(), "ZOTEK: the meter is listened to");
+      dlg.next();   // on before it said anything: the probe ends, the order stays
+      check(!dlg.findChild<FrameProbe *>(), "ZOTEK: the probe ends with Next");
+      check(dlg.keys().value("DMM/model") == "ZOTEK ZT-5B *",
+            "ZOTEK silent: the first model as found: " + dlg.keys().value("DMM/model").toString());
+    }
+  }
+
   if (failed)
     qWarning() << failed << "check(s) failed";
   else

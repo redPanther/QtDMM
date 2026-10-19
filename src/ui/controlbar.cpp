@@ -45,11 +45,17 @@ ControlBar::ControlBar(QWidget *parent) :
         false },
       { "fn_ncv", QT_TR_NOOP("NCV/PEAK"), QT_TR_NOOP("Non-contact voltage; held, peak capture (AC V and AC A)"), false,
         "fn_ncv_long" } },
+    // the ZOTEK meters' function keys, as in ZOTEK's app; NCV is fn_ncv above
+    { { "fn_auto", QT_TR_NOOP("AUTO"), QT_TR_NOOP("Automatic function: the meter picks V, Ω or A by itself"), false },
+      { "fn_cap", QT_TR_NOOP("CAP"), QT_TR_NOOP("Capacitance"), false },
+      { "fn_diode", QT_TR_NOOP("Diode"), QT_TR_NOOP("Diode and continuity"), false },
+      { "fn_hz", QT_TR_NOOP("Hz"), QT_TR_NOOP("Frequency"), false } },
     { { "select1", QT_TR_NOOP("SELECT"), QT_TR_NOOP("The meter's SELECT key (the orange one): the next function on this switch position"), false },
       { "select2", QT_TR_NOOP("Hz/%"), QT_TR_NOOP("Frequency and duty cycle"), false } },
     { { "range", QT_TR_NOOP("RANGE"), QT_TR_NOOP("The next range (switches to manual ranging)"), false },
       { "auto", QT_TR_NOOP("AUTO"), QT_TR_NOOP("Automatic ranging"), true } },
     { { "rel", QT_TR_NOOP("REL"), QT_TR_NOOP("Relative reading: the current value becomes zero"), true },
+      { "zero", QT_TR_NOOP("ZERO"), QT_TR_NOOP("Zero the capacitance reading, with the leads open"), false },
       { "minmax", QT_TR_NOOP("MIN/MAX"), QT_TR_NOOP("The meter's own minimum and maximum"), true },
       { "peak", QT_TR_NOOP("PEAK"), QT_TR_NOOP("Peak minimum and maximum"), true } },
     // the UNI-T iENV meters (UT333BT, UT353BT, UT363BT, UT383BT): a key for each mode
@@ -101,9 +107,12 @@ ControlBar::ControlBar(QWidget *parent) :
         auto *held = new QElapsedTimer;
         connect(b, &QObject::destroyed, b, [held] { delete held; });
         connect(b, &QToolButton::pressed, b, [held] { held->start(); });
-        connect(b, &QToolButton::clicked, this, [this, key, longKey = QString::fromLatin1(k.longKey), held]
+        b->setProperty("longKey", QString::fromLatin1(k.longKey));
+        connect(b, &QToolButton::clicked, this, [this, b, key, longKey = QString::fromLatin1(k.longKey), held]
         {
-          Q_EMIT keyPressed(held->isValid() && held->elapsed() >= kLongPressMs ? longKey : key);
+          // held, where the meter has the long key (setProtocol())
+          const bool isLong = b->property("longOn").toBool() && held->isValid() && held->elapsed() >= kLongPressMs;
+          Q_EMIT keyPressed(isLong ? longKey : key);
         });
       }
       else
@@ -152,7 +161,8 @@ ControlBar::ControlBar(QWidget *parent) :
 bool ControlBar::supported(const DmmDecoder::DMMInfo &info)
 {
   return info.protocol == FrameFormat::UniTiDMM || info.protocol == FrameFormat::UniTUT61Plus
-         || info.protocol == FrameFormat::UniTUT202BT || info.protocol == FrameFormat::UniTiENV;
+         || info.protocol == FrameFormat::UniTUT202BT || info.protocol == FrameFormat::UniTiENV
+         || info.protocol == FrameFormat::ZotekBLE;
 }
 
 void ControlBar::setConnected(bool connected)
@@ -166,6 +176,19 @@ void ControlBar::setProtocol(FrameFormat::DataFormat format, const QString &mode
   const std::shared_ptr<DmmDecoder> decoder = DmmDecoder::getInstance(format);
   for (QToolButton *b : std::as_const(m_keys))
     b->setVisible(decoder && decoder->hasKey(b->property("key").toString(), model));
+  // a key held sends its long key only where the meter has one; NCV held
+  // is the UT202BT's PEAK, a ZOTEK meter's NCV key is NCV alone
+  for (QToolButton *b : std::as_const(m_keys))
+  {
+    const QString longKey = b->property("longKey").toString();
+    const bool longOn = decoder && !longKey.isEmpty() && decoder->hasKey(longKey, model);
+    b->setProperty("longOn", longOn);
+    if (b->property("key").toString() == QLatin1String("fn_ncv"))
+    {
+      b->setText(longOn ? tr("NCV/PEAK") : tr("NCV"));
+      b->setToolTip(longOn ? tr("Non-contact voltage; held, peak capture (AC V and AC A)") : tr("Non-contact voltage"));
+    }
+  }
   // a group without a key of this meter takes no place
   for (QWidget *g : std::as_const(m_groups))
   {

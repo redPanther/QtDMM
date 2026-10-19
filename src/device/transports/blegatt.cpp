@@ -37,6 +37,9 @@ const QBluetoothUuid kIenvWrite(quint16(0xFF01));
 const QBluetoothUuid kFff0Service(quint16(0xFFF0));
 const QBluetoothUuid kFff0Notify(quint16(0xFFF1));
 const QBluetoothUuid kFff0Write(quint16(0xFFF2));
+// ZOTEK's meters (ZOYI, BSIDE, ANENG): the same service, notify and write on
+// 0xFFF4 (dmm-tools, ZOTEK spec §2, after ZOTEK's apps)
+const QBluetoothUuid kFff4(quint16(0xFFF4));
 
 // connecting and finding the characteristics takes a second or two; a
 // meter that is switched off or out of range never answers
@@ -71,12 +74,16 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT202BT" },
                       QByteArray::fromHex("abcd035f01da") };
     case FrameFormat::AppaDmm:
-      // the names the meters advertise, from libsigrok's scan list; Zotek and
+      // the names the meters advertise, from libsigrok's scan list; ZOTEK and
       // OWON meters have the same service, so the name decides
       return Profile{ kFff0Service, kFff0Notify, { kFff0Write },
                       { "APPA ", "BENNING ", "KPS DMM", "KPS DCM", "MEGGER DCM", "MEGGER DPM", "METRAVI PRO",
                         "RS PRO ", "Sefram 72", "Sefram 7352B", "Sefram MW35" },
                       QByteArray(), true };
+    case FrameFormat::ZotekBLE:
+      // every model advertises as "Bluetooth DMM" (ZOTEK's apps also take
+      // "ZY", seen on no meter); the first packet tells which one it is
+      return Profile{ kFff0Service, kFff4, { kFff4 }, { "Bluetooth DMM" }, QByteArray(), true };
     default:
       return std::nullopt;
   }

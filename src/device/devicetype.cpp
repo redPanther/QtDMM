@@ -38,6 +38,7 @@ Type ofProtocol(FrameFormat::DataFormat protocol)
     case FrameFormat::KeysightU12xx:
     case FrameFormat::AppaDmm:
     case FrameFormat::Appa500:
+    case FrameFormat::ZotekBLE:
       return HandheldDmm;
     case FrameFormat::Voltcraft15Continuous:
     case FrameFormat::Sigrok:
@@ -109,6 +110,10 @@ const Exception kExceptions[] = {
   { "Sefram", "MW3516BF", ClampMeter },
   { "Sefram", "MW3526BF", ClampMeter },
   { "Sefram", "MW3536BF", ClampMeter },
+  { "ZOTEK", "ZT-5BQ", ClampMeter },
+  { "ANENG", "ST207", ClampMeter },
+  { "ZOTEK", "ZT-5566SE", BenchDmm },
+  { "ANENG", "AN999S", BenchDmm },
   { "Generic", "DTM0660 4000 count", Generic },
   { "Generic", "DTM0660 6000 count", Generic },
   { "Generic", "DTM0660 8000 count", Generic },

@@ -139,10 +139,8 @@ public:
   /// Bytes to send to the meter to make it emit a frame; empty for meters
   /// that stream on their own. FrameReader writes it once per read cycle.
   virtual QByteArray pollRequest() const { return QByteArray(); }
-  /// Bytes that press the meter's key @p key once (ControlBar's names:
-  /// "select1", "select2", "range", "auto", "hold", "rel", "minmax",
-  /// "minmax_off", "peak", "peak_off", "max", "min", "avg", "unit", "unit2",
-  /// "weighting", "lamp"); empty when the meter has no such key, cannot be
+  /// Bytes that press the meter's key @p key once (ControlBar's names,
+  /// keyNames()); empty when the meter has no such key, cannot be
   /// remote-controlled or the key needs a reading first.
   virtual QByteArray keyRequest(const QString &key) const { Q_UNUSED(key); return QByteArray(); }
   /// True when the meter @p model (DMMInfo::model) has the key @p key. By
@@ -157,9 +155,16 @@ public:
   /// Every key name keyRequest() may know, in the order of the meters' keypads.
   static QStringList keyNames()
   {
-    return { "select1", "select2", "range", "auto", "hold", "rel", "minmax", "minmax_off", "peak", "peak_off",
-             "max", "min", "avg", "unit", "unit2", "weighting", "lamp" };
+    return { "fn_v", "fn_a", "fn_a_long", "fn_ohm", "fn_ncv", "fn_ncv_long", "fn_auto", "fn_cap", "fn_diode",
+             "fn_hz", "select1", "select2", "range", "auto", "hold", "rel", "zero", "minmax", "minmax_off", "peak",
+             "peak_off", "max", "min", "avg", "unit", "unit2", "weighting", "lamp" };
   }
+  /// True when the frames tell the models of the protocol apart (ZotekBLE:
+  /// the layout), so modelsFromFrame() knows which one sent a frame.
+  virtual bool tellsModel() const { return false; }
+  /// The models (DMMInfo::name) a meter that sent @p frame can be; empty
+  /// when the frames do not tell (tellsModel()).
+  virtual QStringList modelsFromFrame(const QByteArray &frame) const { Q_UNUSED(frame); return {}; }
   /// Decodes one frame (getPacketLength() bytes, or a variable-length one
   /// with its terminator). @p id tells which of
   /// DMMInfo::framesPerReading frames this is. Returns nothing when the frame is

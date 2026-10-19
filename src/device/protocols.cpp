@@ -56,6 +56,7 @@ const std::vector<ProtocolInfo> &protocols()
     { FrameFormat::Appa500,               "Appa500",               QT_TRANSLATE_NOOP("Protocols", "59 bytes binary, polled (APPA 503/505, Voltcraft VC-930/950)"), "",                     "",                         make<DecoderAppa> },
     { FrameFormat::UniTUT382,             "UniTUT382",             QT_TRANSLATE_NOOP("Protocols", "33 bytes, continuous, lx or fc (UNI-T UT382 luxmeter)"), "",                          "",                         make<DecoderUniTUT382> },
     { FrameFormat::BenetechGM1020,        "BenetechGM1020",        QT_TRANSLATE_NOOP("Protocols", "8 bytes binary, continuous after a start command, lx and °C (Benetech GM1020)"), "",  "",                         make<DecoderBenetechGM1020> },
+    { FrameFormat::ZotekBLE,              "ZotekBLE",              QT_TRANSLATE_NOOP("Protocols", "10 to 19 bytes, scrambled LCD segments, streamed over Bluetooth LE (ZOTEK, ANENG)"), "", "Bluetooth LE", make<DecoderZotek> },
   };
   return table;
 }
