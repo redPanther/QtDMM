@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <QWidget>
 #include <QColor>
 #include <QPixmap>
@@ -64,10 +66,9 @@ public:
   /// kSmallLineValues values after the big one, the others only as primary.
   void setValue(int id, const QString &);
   void setUnit(int id, const QString &);
-  /// The value shown big (context menu "Primary value", kept with the
-  /// window layout); the others follow on the small line in their order.
-  /// One the meter does not have (numValues of setDisplayMode()) gives the
-  /// main value. Only the display: the recording stays the main value's.
+  /// The value shown big (the sidebar's value menu, kept with the window
+  /// layout). One the meter does not have (numValues of setDisplayMode())
+  /// gives the main value. Only the display: the recording stays the main value's.
   void setPrimary(int id);
   int  primary() const { return m_primary; }
   /// The value shown big now: primary(), or 0 when the meter lacks it.
@@ -92,8 +93,15 @@ public:
   void setValueCount(int numValues);
   /// Values on the small line at most: a third one does not fit beside them.
   static constexpr int kSmallLineValues = 2;
-  /// How many values the small line shows now (lines 1 .. of lineValue()).
-  int  smallLineValues() const { return qBound(0, m_numValues - 1, kSmallLineValues); }
+  /// The values on the small line, in this order (the sidebar's value menu,
+  /// kept with the window layout); the meter's others and the big one are
+  /// left out, at most kSmallLineValues. Unset (std::nullopt) the small
+  /// line shows the first values after the big one.
+  void setSecondaries(const std::optional<QList<int>> &ids);
+  /// The values on the small line now (lines 1 .. of lineValue()).
+  QList<int> secondaries() const;
+  /// How many values the small line shows now.
+  int  smallLineValues() const { return int(secondaries().size()); }
   void setShowBar(bool);   ///< per-reading flag from the decoder
   /// @name Annunciators
   /// @{
@@ -207,6 +215,7 @@ private:
   bool m_paintBar = false;
   int m_numValues = 1;
   int m_primary = 0;   ///< setPrimary()
+  std::optional<QList<int>> m_secondaries;   ///< setSecondaries(), unset: the first ones
   bool m_hold = false;
   bool m_auto = false;
   bool m_stale = false;

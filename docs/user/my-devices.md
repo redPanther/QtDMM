@@ -37,7 +37,32 @@ a new one with the big **Add device** button.
 Below My devices the node **Instances** lists the QtDMM windows (see
 [Command line](command-line.md)), and **Services** what this window offers
 to other programs: the [SCPI server and HiSLIP](scpi-server.md) with their
-port, or *off*.
+port, or *off*. At the start only this window's instance is unfolded.
+
+### The meter's values
+
+For a meter with more than one value (a second display, the CO2,
+temperature and humidity of the TFA AirCO2ntrol, the voltage, current and
+state of charge of a Victron) this window's instance has a row for each
+value below its device: its number, what it measures and its reading. A
+coloured dot shows that the graph draws it, in the colour of its curve, so
+the rows are the graph's legend as well. This is where you say which window
+shows which value - right-click a value:
+
+- **LCD** ▸ **Main value**, **Secondary value left**, **Secondary value
+  right** - the place on the display: big (the min/max memory follows it)
+  or on the small line below it. The value that had the place goes where
+  this one was, or off the display when this one was not on it.
+- **Analog meter** - the value the needle shows (one).
+- **Graph** ▸ **Off**, **Left axis**, **Right axis** - the value's curve
+  off or on that axis. A value in the unit the axis has already joins it
+  (two voltages on the left, a current on the right); one in another unit
+  takes the axis over, and the curves of the old unit there go off - the
+  status line says which. The main value is always on the left.
+- **Poincaré plot** - the value the plot takes (one).
+
+A choice opens the window it is for, also when the toolbar is hidden. The
+choices are kept with the window layout.
 
 The context menu of a device:
 

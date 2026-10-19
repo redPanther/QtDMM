@@ -145,6 +145,8 @@ protected:
   QAction    *m_poincareAction = nullptr;
   QAction    *m_addDeviceAction = nullptr;
   QDockWidget   *m_sidebarDock = nullptr;
+  QElapsedTimer  m_designApplied;          ///< since setDesign(): its own palette change is no switch
+  bool           m_designPending = false;  ///< the desktop switched: setDesign() on its way
   QAction       *m_sidebarAction = nullptr; ///< shows and hides the sidebar
   DeviceSidebar *m_sidebar = nullptr;     ///< "My devices" at the left
   /// "Settings..." of an entry: its meter's settings; the device in use
@@ -244,6 +246,8 @@ protected:
   /// Adds @p view as an MDI window with @p title (@p role: MdiArranger::Role;
   /// @p name identifies it in the settings).
   QMdiSubWindow *addView(QWidget *view, const QString &title, int role, const QString &name);
+  /// The context menu of the sidebar's row of value @p id (ValueMenu).
+  void        valueMenu(int id, const QPoint &globalPos);
   /// A checkable action that shows/hides @p win.
   QAction    *windowAction(QMdiSubWindow *win, const QString &text, const char *shortcut,
                            const char *icon, const QString &whatsThis);

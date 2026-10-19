@@ -16,7 +16,9 @@ class DeviceLibrary;
 /// The node "Instances" lists the instances (MainWindow gives them with
 /// setInstances()) with their reading and, below each, its device; this
 /// window's own is bold. A click brings a running one to the front or starts
-/// a stopped one; a stopped one can be renamed and deleted.
+/// a stopped one; a stopped one can be renamed and deleted. Below this
+/// window's own, for a meter with more than one value, a row for each value
+/// with its reading; its context menu says which window shows it where.
 ///
 /// The node "Services" shows what this window offers to other programs
 /// (setServices()): the SCPI server and HiSLIP, with their port or "off";
@@ -26,6 +28,15 @@ class DeviceSidebar : public QTreeWidget
 {
   Q_OBJECT
 public:
+  /// One of the meter's values, a row below its instance (fillValues()).
+  struct Value
+  {
+    int     id = 0;         ///< Reading::id, 0 the main value
+    QString name;           ///< "Current DC", "Value 2" before a reading
+    QString text;           ///< its reading with the unit, "OL"
+    QColor  color;          ///< its curve's colour while the graph shows it, else invalid
+  };
+
   /// One row of the node "Instances".
   struct Instance
   {
@@ -34,6 +45,7 @@ public:
     QString value;          ///< its reading, "OL", or "stopped"
     bool    running = false;
     bool    active = false; ///< readings come in
+    QList<Value> values;    ///< this window's own only, with more than one
   };
 
   /// One row of the node "Services".
@@ -68,6 +80,13 @@ public:
   /// The item of the instance @p id, nullptr when there is none.
   QTreeWidgetItem *instanceItem(const QString &id) const;
 
+  /// The rows of the meter's values below @p parent, after its first
+  /// @p first children (an instance's device row); none for one value.
+  /// Their context menu is valueMenuRequested().
+  void        fillValues(QTreeWidgetItem *parent, int first, const QList<Value> &values);
+  /// The row of value @p id of this window's instance, nullptr when there is none.
+  QTreeWidgetItem *valueItem(int id) const;
+
   /// The services of this window, in this order.
   void        setServices(const QList<Service> &services);
   /// The node "Services".
@@ -92,6 +111,8 @@ Q_SIGNALS:
   void        addDeviceRequested();
   /// The settings of the services (Settings, SCPI server).
   void        serviceSettingsRequested();
+  /// The context menu of the row of value @p id (MainWindow fills it).
+  void        valueMenuRequested(int id, const QPoint &globalPos);
 
 public Q_SLOTS:
   /// The entries anew from the library.

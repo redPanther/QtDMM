@@ -117,6 +117,8 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
       if (numValues() != before)
         applyValueCount();
     }
+    m_lastText[r.id] = r.overload ? QStringLiteral("OL")
+                                  : QString("%1 %2").arg(r.text, SiPrefix::displayText(r.unit)).trimmed();
     if (r.text.isEmpty() || r.overload || r.port.quantity == Quantity::Unknown)
       return;
     const bool news = m_lastReading.value(r.id).baseUnit != r.baseUnit || !m_lastReading.contains(r.id);
@@ -276,6 +278,18 @@ void InstanceWidget::setLcdValue(int id)
 {
   m_lcdValue = qBound(0, id, kMaxValues - 1);
   applyValueChoice();
+}
+
+void InstanceWidget::setLcdSecondaries(const std::optional<QList<int>> &ids)
+{
+  m_lcdSecondaries = ids;
+  if (m_display)
+    m_display->setSecondaries(ids);
+}
+
+QList<int> InstanceWidget::lcdSecondaries() const
+{
+  return m_display ? m_display->secondaries() : m_lcdSecondaries.value_or(QList<int>());
 }
 
 void InstanceWidget::setMeterValue(int id)
@@ -535,6 +549,7 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   m_ctl->recorder()->forgetReading();
   m_ctl->forgetUnit();   // the axis title and the alarm unit come with the first reading
   m_lastReading.clear();   // and what the values measure
+  m_lastText.clear();
   m_seenValues = 0;
   for (int id = 1; id < kMaxValues; ++id)
     m_configDlg->alarmPage()->setValueUnit(id, QString());

@@ -24,6 +24,8 @@ constexpr int kRunning = Qt::UserRole + 1;
 
 // a device's picture (DeviceSymbol), kept with its item
 constexpr int kSymbol = Qt::UserRole + 2;
+// a value row: the value's Reading::id
+constexpr int kValueId = Qt::UserRole + 3;
 // the dot, then the picture of a device: every row the same width, so the
 // names line up
 constexpr int kDotSize = 12;
@@ -221,6 +223,7 @@ void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString
       item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
       new QTreeWidgetItem(item);
       item->child(0)->setFirstColumnSpanned(true);   // a long name needs no room for a value
+      item->setExpanded(instance.id == own);   // once: this window's open, the others folded
       if (instance.id == selected)
         setCurrentItem(item);
     }
@@ -250,9 +253,44 @@ void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString
     device->setFlags(Qt::ItemIsEnabled);
     device->setForeground(0, grey);
     device->setHidden(instance.device.isEmpty());
-    item->setExpanded(true);
+    fillValues(item, 1, instance.id == own ? instance.values : QList<Value>());
   }
   m_filling = false;
+}
+
+void DeviceSidebar::fillValues(QTreeWidgetItem *parent, int first, const QList<Value> &values)
+{
+  const bool filling = m_filling;
+  m_filling = true;
+  const int rows = values.size() > 1 ? int(values.size()) : 0;
+  while (parent->childCount() > first + rows)
+    delete parent->takeChild(parent->childCount() - 1);
+  for (int i = 0; i < rows; ++i)
+  {
+    const Value &value = values[i];
+    QTreeWidgetItem *item = parent->child(first + i);
+    if (!item)
+    {
+      item = new QTreeWidgetItem(parent);
+      item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+      item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+    }
+    item->setData(0, kValueId, value.id);
+    item->setText(0, QString("%1  %2").arg(value.id + 1).arg(value.name));
+    item->setText(1, value.text);
+    item->setToolTip(0, value.color.isValid() ? tr("%1 - in the graph").arg(value.name) : value.name);
+    item->setIcon(0, dot(value.color, devicePixelRatioF()));
+  }
+  m_filling = filling;
+}
+
+QTreeWidgetItem *DeviceSidebar::valueItem(int id) const
+{
+  const QTreeWidgetItem *own = instanceItem(m_ownInstance);
+  for (int i = 0; own && i < own->childCount(); ++i)
+    if (own->child(i)->data(0, kValueId).isValid() && own->child(i)->data(0, kValueId).toInt() == id)
+      return own->child(i);
+  return nullptr;
 }
 
 void DeviceSidebar::setServices(const QList<Service> &services)
@@ -449,6 +487,11 @@ void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
   {
     if (item->parent() == m_services)
       serviceMenu(item, event->globalPos());
+    return;
+  }
+  if (item && item->data(0, kValueId).isValid())
+  {
+    Q_EMIT valueMenuRequested(item->data(0, kValueId).toInt(), event->globalPos());
     return;
   }
   if (!instanceOf(item).isEmpty())

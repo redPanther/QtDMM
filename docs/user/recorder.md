@@ -154,12 +154,13 @@ were; the integration curve carries on across a gap.
   colour of its own; a legend at the top left names the curves. A value in
   the main value's unit shares its axis, the first other unit gets an axis
   on the right with a scale of its own. At most two units are drawn at a
-  time: in **Values** a value in a third unit is greyed out until a value in
-  one of the other two goes off. When the second display changes what it
-  shows (Hz to %), its curve ends and a new one begins; the recording goes
-  on. The other values are off at first, so the graph shows the main value
-  as before: the right-click menu, **Values**, switches each of them on or
-  off - the main value too. Without it the left axis takes the unit of the
+  time: putting a value in a third unit on an axis switches off the curves
+  of the unit there. When the second display
+  changes what it shows (Hz to %), its curve ends and a new one begins; the
+  recording goes on. The other values are off at first, so the graph shows
+  the main value as before: the menu of a value in the sidebar (**Graph**,
+  see [The meter's values](my-devices.md#the-meters-values)) puts each of
+  them on the left or right axis or switches it off - the main value too. Without it the left axis takes the unit of the
   next value shown (the temperature of a CO2 meter, say), and the reference
   line, the band and the cursors' level lines follow it: they are of the
   value on the left axis. The trigger line belongs to the main value and
@@ -268,8 +269,7 @@ meter would show it. The status says what the value is: `ok`, `OL` or `-OL`
 for an overload, `gap` for a [gap](#gaps). A value that is no number is
 written as `nan` in CSV and as an empty cell in a spreadsheet.
 
-The other values of the meter that the graph shows (right-click menu,
-**Values**) follow, three columns each - `value 2;unit 2;status 2`, then
+The other values of the meter that the graph shows (see above) follow, three columns each - `value 2;unit 2;status 2`, then
 `value 3` ... - on the same rows. On the grid each is the mean over the step
 like the main value; with *CSV, every reading* there is a row at every
 reading of any of the values, and each value holds until its next one. Before
@@ -282,7 +282,7 @@ timestamp;time (s);value;unit;status;value 2;unit 2;status 2
 ```
 
 *Import* (Ctrl+I) reads such files back, scaling the values into base units
-again; the other values come back as curves (switch them on under
-**Values**). It also accepts files without the status column (`nan` is a
+again; the other values come back as curves (switch them on in the
+sidebar). It also accepts files without the status column (`nan` is a
 gap there) and the tab-separated format of QtDMM versions before 0.9.5. The
 unit of the first row becomes the graph's unit.
