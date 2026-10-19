@@ -1,7 +1,5 @@
-<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 360" width="200" height="360">
-  <!-- Generic luxmeter. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -14 228 388" width="228" height="388">
+  <!-- Generic luxmeter. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
@@ -15,7 +13,7 @@
     .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
-  <rect class="primary" x="20" y="4" width="160" height="352" rx="30"/>
+  <rect class="primary" x="20" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="160" height="352" rx="30"/>
   <rect class="secondary" x="32" y="16" width="136" height="328" rx="20"/>
   <!-- light sensor dome -->
   <circle class="dark" cx="100" cy="78" r="46"/>

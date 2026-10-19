@@ -3,30 +3,42 @@
 #include "ui/devicesymbol.h"
 
 #include <QFile>
+#include <QGuiApplication>
+#include <QHash>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QPainter>
+#include <QPalette>
 #include <QSvgRenderer>
 
 namespace DeviceSymbol
 {
 namespace
 {
-QPixmap render(const QString &name, QSize box, qreal dpr, const Colors &colors)
+bool dark(Design design)
 {
-  QFile file(QStringLiteral(":/devices/%1.svg").arg(name));
-  if (!file.open(QIODevice::ReadOnly))
+  if (design == Design::Auto)
+    return QGuiApplication::palette().color(QPalette::Window).lightness() < 128;
+  return design == Design::Dark;
+}
+
+// the first of the names that is there, with the design's suffix
+QString first(const QStringList &names, Design design)
+{
+  const QString suffix = dark(design) ? QStringLiteral("_dark") : QString();
+  for (const QString &name : names)
   {
-    file.setFileName(QStringLiteral(":/devices/unknown.svg"));
-    if (!file.open(QIODevice::ReadOnly))
-      return {};
+    const QString p = QStringLiteral(":/devices/%1%2.svg").arg(name, suffix);
+    if (QFile::exists(p))
+      return p;
   }
-  QByteArray svg = file.readAll();
-  // the placeholders, as the templates write them
-  for (const char *p : { "#FF00FF", "#ff00ff" })
-    svg.replace(p, colors.primary.name().toLatin1());
-  for (const char *p : { "#00FFFF", "#00ffff" })
-    svg.replace(p, colors.secondary.name().toLatin1());
-  QSvgRenderer renderer(svg);
-  if (!renderer.isValid())
+  return {};
+}
+
+QPixmap render(const QString &path, QSize box, qreal dpr)
+{
+  QSvgRenderer renderer(path);
+  if (path.isEmpty() || !renderer.isValid())
     return {};
 
   QPixmap pm(box * dpr);
@@ -43,18 +55,42 @@ QPixmap render(const QString &name, QSize box, qreal dpr, const Colors &colors)
 }
 }
 
-Colors defaultColors()
+QString folder(const QString &vendor)
 {
-  return { QColor("#8A9096"), QColor("#4C4F54") };
+  // vendor -> folder, as the generator wrote it
+  static const QHash<QString, QString> folders = []
+  {
+    QHash<QString, QString> map;
+    QFile file(QStringLiteral(":/devices/vendors.json"));
+    if (file.open(QIODevice::ReadOnly))
+    {
+      const QJsonObject o = QJsonDocument::fromJson(file.readAll()).object();
+      for (auto it = o.begin(); it != o.end(); ++it)
+        map.insert(it.key(), it.value().toString());
+    }
+    return map;
+  }();
+  return folders.value(vendor);
 }
 
-QPixmap pixmap(DeviceType::Type type, QSize box, qreal devicePixelRatio, const Colors &colors)
+QString path(const QString &vendor, DeviceType::Type type, Design design)
 {
-  return render(DeviceType::id(type), box, devicePixelRatio, colors);
+  const QString id = DeviceType::id(type);
+  const QString dir = folder(vendor);
+  QStringList names;
+  if (!dir.isEmpty())
+    names << dir + '/' + id;
+  names << id << QStringLiteral("unknown");
+  return first(names, design);
 }
 
-QPixmap unknown(QSize box, qreal devicePixelRatio, const Colors &colors)
+QPixmap pixmap(const QString &vendor, DeviceType::Type type, QSize box, qreal devicePixelRatio, Design design)
 {
-  return render(QStringLiteral("unknown"), box, devicePixelRatio, colors);
+  return render(path(vendor, type, design), box, devicePixelRatio);
+}
+
+QPixmap unknown(QSize box, qreal devicePixelRatio, Design design)
+{
+  return render(first({ QStringLiteral("unknown") }, design), box, devicePixelRatio);
 }
 }

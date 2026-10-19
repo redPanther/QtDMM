@@ -1,0 +1,743 @@
+{
+  "schema_version": 3,
+  "description": "Proposed QtDMM manufacturer icon colors; illustrative design values, not verified official brand color specifications.",
+  "manufacturers": {
+    "default": {
+      "name": "Generic / unknown",
+      "match": [
+        "Generic",
+        "QtDMM",
+        "sigrok"
+      ],
+      "colors": {
+        "primary": "#8A9096",
+        "secondary": "#4C4F54"
+      }
+    },
+    "uni_t": {
+      "name": "Uni-Trend (UNI-T)",
+      "match": [
+        "Uni-Trend"
+      ],
+      "url": "https://www.uni-trend.com/",
+      "example_device": "UT61E",
+      "colors": {
+        "primary": "#D9272E",
+        "secondary": "#555B61"
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm",
+        "clamp_meter",
+        "thermometer",
+        "luxmeter",
+        "environment",
+        "sound_level"
+      ]
+    },
+    "voltcraft": {
+      "name": "Voltcraft",
+      "match": [
+        "Voltcraft"
+      ],
+      "url": "https://www.voltcraft.com/",
+      "example_device": "VC-870",
+      "colors": {
+        "primary": "#D71920",
+        "secondary": "#30343B"
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm"
+      ]
+    },
+    "agilent": {
+      "name": "Agilent",
+      "match": [
+        "Agilent"
+      ],
+      "url": "https://www.agilent.com/",
+      "example_device": "34405A",
+      "colors": {
+        "primary": "#1684B8",
+        "secondary": "#454B52"
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm"
+      ]
+    },
+    "metex": {
+      "name": "Metex",
+      "match": [
+        "Metex"
+      ],
+      "url": "",
+      "example_device": "M-3360D",
+      "colors": {
+        "primary": "#C52D32",
+        "secondary": "#55585C"
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm"
+      ]
+    },
+    "brymen": {
+      "name": "Brymen",
+      "match": [
+        "Brymen"
+      ],
+      "url": "https://www.brymen.com/",
+      "example_device": "BM869s",
+      "colors": {
+        "primary": "#F2C62C",
+        "secondary": "#555B60"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "appa": {
+      "name": "APPA",
+      "match": [
+        "APPA"
+      ],
+      "url": "https://www.appatech.com/",
+      "example_device": "APPA 208",
+      "colors": {
+        "primary": "#D82D35",
+        "secondary": "#30343B"
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm",
+        "clamp_meter"
+      ]
+    },
+    "peaktech": {
+      "name": "PeakTech",
+      "match": [
+        "PeakTech"
+      ],
+      "url": "https://www.peaktech.de/",
+      "example_device": "2025",
+      "colors": {
+        "primary": "#D82D32",
+        "secondary": "#33373C"
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm"
+      ]
+    },
+    "tenma": {
+      "name": "Tenma",
+      "match": [
+        "Tenma"
+      ],
+      "url": "",
+      "example_device": "72-1016",
+      "colors": {
+        "primary": "#D73532",
+        "secondary": "#34383D"
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm",
+        "thermometer"
+      ]
+    },
+    "fluke": {
+      "name": "Fluke",
+      "match": [
+        "Fluke"
+      ],
+      "url": "https://www.fluke.com/",
+      "example_device": "187",
+      "colors": {
+        "primary": "#FFD000",
+        "secondary": "#263A55"
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm"
+      ]
+    },
+    "keysight": {
+      "name": "Keysight",
+      "match": [
+        "Keysight"
+      ],
+      "url": "https://www.keysight.com/",
+      "example_device": "34465A",
+      "colors": {
+        "primary": "#F1792E",
+        "secondary": "#4C4F54"
+      },
+      "device_classes": {
+        "bench_dmm": {
+          "primary": "#4C4F54",
+          "secondary": "#4C4F54"
+        }
+      },
+      "types": [
+        "handheld_dmm",
+        "bench_dmm"
+      ]
+    },
+    "victron": {
+      "name": "Victron",
+      "match": [
+        "Victron"
+      ],
+      "url": "https://www.victronenergy.com/",
+      "example_device": "SmartShunt",
+      "colors": {
+        "primary": "#1686C7",
+        "secondary": "#F2C52A"
+      },
+      "types": [
+        "battery_monitor",
+        "solar_charger",
+        "inverter"
+      ]
+    },
+    "greenlee": {
+      "name": "Greenlee",
+      "match": [
+        "Greenlee"
+      ],
+      "url": "https://www.greenlee.com/",
+      "example_device": "DM-210A",
+      "colors": {
+        "primary": "#E4A928",
+        "secondary": "#303A32"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "mastech": {
+      "name": "MASTECH",
+      "match": [
+        "MASTECH"
+      ],
+      "url": "https://www.mastech-group.com/",
+      "example_device": "M9803R",
+      "colors": {
+        "primary": "#E33432",
+        "secondary": "#33373D"
+      },
+      "types": [
+        "handheld_dmm",
+        "thermometer"
+      ]
+    },
+    "digitech": {
+      "name": "Digitech",
+      "match": [
+        "Digitech"
+      ],
+      "url": "https://www.jaycar.com.au/",
+      "example_device": "QM1350",
+      "colors": {
+        "primary": "#D52B2E",
+        "secondary": "#454A50"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "digitek": {
+      "name": "Digitek",
+      "match": [
+        "Digitek"
+      ],
+      "url": "",
+      "example_device": "DT4000ZC",
+      "colors": {
+        "primary": "#D72E32",
+        "secondary": "#383C41"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "elma": {
+      "name": "Elma",
+      "match": [
+        "Elma"
+      ],
+      "url": "https://www.elma-instruments.com/",
+      "example_device": "BM525s",
+      "colors": {
+        "primary": "#D52E33",
+        "secondary": "#464B50"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "iso_tech": {
+      "name": "Iso-Tech",
+      "match": [
+        "Iso-Tech"
+      ],
+      "url": "https://www.rs-online.com/",
+      "example_device": "IDM 503",
+      "colors": {
+        "primary": "#E4B52D",
+        "secondary": "#343A40"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "radioshack": {
+      "name": "RadioShack",
+      "match": [
+        "Radioshack"
+      ],
+      "url": "https://www.radioshack.com/",
+      "example_device": "22-805",
+      "colors": {
+        "primary": "#C6282E",
+        "secondary": "#454A50"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "tfa_dostmann": {
+      "name": "TFA Dostmann",
+      "match": [
+        "TFA Dostmann"
+      ],
+      "url": "https://www.tfa-dostmann.de/",
+      "example_device": "AIRCO2NTROL Coach",
+      "colors": {
+        "primary": "#343B43",
+        "secondary": "#4AA5A0"
+      },
+      "types": [
+        "environment"
+      ]
+    },
+    "mcvoice": {
+      "name": "McVoice",
+      "match": [
+        "McVoice"
+      ],
+      "url": "",
+      "example_device": "M-345pro",
+      "colors": {
+        "primary": "#D72D32",
+        "secondary": "#4D5258"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "sefram": {
+      "name": "Sefram",
+      "match": [
+        "Sefram"
+      ],
+      "url": "https://www.sefram.com/",
+      "example_device": "7351",
+      "colors": {
+        "primary": "#E4B52D",
+        "secondary": "#41474D"
+      },
+      "types": [
+        "handheld_dmm",
+        "clamp_meter"
+      ]
+    },
+    "va": {
+      "name": "V&A",
+      "match": [
+        "V&A"
+      ],
+      "url": "",
+      "example_device": "VA18B",
+      "colors": {
+        "primary": "#D82C30",
+        "secondary": "#343A40"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "victor": {
+      "name": "Victor",
+      "match": [
+        "Victor"
+      ],
+      "url": "",
+      "example_device": "Victor 70C",
+      "colors": {
+        "primary": "#D72D32",
+        "secondary": "#4B5056"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "benetech": {
+      "name": "Benetech",
+      "match": [
+        "Benetech"
+      ],
+      "url": "https://www.benetechco.com/",
+      "example_device": "GM1020",
+      "colors": {
+        "primary": "#E0A72B",
+        "secondary": "#343A40"
+      },
+      "types": [
+        "luxmeter"
+      ]
+    },
+    "benning": {
+      "name": "BENNING",
+      "match": [
+        "BENNING"
+      ],
+      "url": "https://www.benning.de/",
+      "example_device": "MM 12",
+      "colors": {
+        "primary": "#E7B82D",
+        "secondary": "#30383D"
+      },
+      "types": [
+        "handheld_dmm",
+        "clamp_meter"
+      ]
+    },
+    "cmt": {
+      "name": "CMT",
+      "match": [
+        "CMT"
+      ],
+      "url": "",
+      "example_device": "3503",
+      "colors": {
+        "primary": "#D62D32",
+        "secondary": "#4A4F54"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "co2meter": {
+      "name": "CO2Meter",
+      "match": [
+        "CO2Meter"
+      ],
+      "url": "https://www.co2meter.com/",
+      "example_device": "CM-INK-1",
+      "colors": {
+        "primary": "#247BB5",
+        "secondary": "#42474D"
+      },
+      "types": [
+        "environment"
+      ]
+    },
+    "duratool": {
+      "name": "Duratool",
+      "match": [
+        "Duratool"
+      ],
+      "url": "",
+      "example_device": "DO3122",
+      "colors": {
+        "primary": "#D52C32",
+        "secondary": "#3D4247"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "elv": {
+      "name": "ELV",
+      "match": [
+        "ELV"
+      ],
+      "url": "https://de.elv.com/",
+      "example_device": "M9803R",
+      "colors": {
+        "primary": "#D52D32",
+        "secondary": "#4A4F54"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "eza": {
+      "name": "EZA",
+      "match": [
+        "EZA"
+      ],
+      "url": "",
+      "example_device": "EZ-735",
+      "colors": {
+        "primary": "#D52D32",
+        "secondary": "#41464B"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "gw_instek": {
+      "name": "GW Instek",
+      "match": [
+        "GW Instek"
+      ],
+      "url": "https://www.gwinstek.com/",
+      "example_device": "GDM-397",
+      "colors": {
+        "primary": "#F28C28",
+        "secondary": "#24282D"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "holdpeak": {
+      "name": "HoldPeak",
+      "match": [
+        "HoldPeak"
+      ],
+      "url": "",
+      "example_device": "HP-90EPC",
+      "colors": {
+        "primary": "#E3B82D",
+        "secondary": "#33383D"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "hp": {
+      "name": "HP",
+      "match": [
+        "HP"
+      ],
+      "url": "https://www.keysight.com/",
+      "example_device": "34401A",
+      "colors": {
+        "primary": "#1684B8",
+        "secondary": "#454B52"
+      },
+      "types": [
+        "bench_dmm"
+      ]
+    },
+    "kps": {
+      "name": "KPS",
+      "match": [
+        "KPS"
+      ],
+      "url": "https://kps-intl.com/",
+      "example_device": "DMM9000BT",
+      "colors": {
+        "primary": "#D82D32",
+        "secondary": "#3D4248"
+      },
+      "types": [
+        "handheld_dmm",
+        "clamp_meter"
+      ]
+    },
+    "metrel": {
+      "name": "Metrel",
+      "match": [
+        "Metrel"
+      ],
+      "url": "https://www.metrel.de/",
+      "example_device": "MD9015",
+      "colors": {
+        "primary": "#D92D33",
+        "secondary": "#343A40"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "pce": {
+      "name": "PCE",
+      "match": [
+        "PCE"
+      ],
+      "url": "https://www.pce-instruments.com/",
+      "example_device": "PCE-DM32",
+      "colors": {
+        "primary": "#D82C32",
+        "secondary": "#4B5055"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "proskit": {
+      "name": "Pro'sKit",
+      "match": [
+        "Pro'sKit"
+      ],
+      "url": "https://www.proskit.com/",
+      "example_device": "MT-1820",
+      "colors": {
+        "primary": "#E8B82B",
+        "secondary": "#30383D"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "sanwa": {
+      "name": "Sanwa",
+      "match": [
+        "Sanwa"
+      ],
+      "url": "https://www.sanwa-meter.co.jp/",
+      "example_device": "PC7000",
+      "colors": {
+        "primary": "#E8B82B",
+        "secondary": "#3B4147"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "siglent": {
+      "name": "Siglent",
+      "match": [
+        "Siglent"
+      ],
+      "url": "https://www.siglent.com/",
+      "example_device": "SDM3055",
+      "colors": {
+        "primary": "#1688C7",
+        "secondary": "#343A40"
+      },
+      "types": [
+        "bench_dmm"
+      ]
+    },
+    "sinometer": {
+      "name": "Sinometer",
+      "match": [
+        "Sinometer"
+      ],
+      "url": "",
+      "example_device": "MAS-343",
+      "colors": {
+        "primary": "#D62D32",
+        "secondary": "#4B5055"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "sparkfun": {
+      "name": "SparkFun",
+      "match": [
+        "SparkFun"
+      ],
+      "url": "https://www.sparkfun.com/",
+      "example_device": "70C",
+      "colors": {
+        "primary": "#E93D35",
+        "secondary": "#292D32"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "tecpel": {
+      "name": "Tecpel",
+      "match": [
+        "Tecpel"
+      ],
+      "url": "https://www.tecpel.com/",
+      "example_device": "DMM-8061",
+      "colors": {
+        "primary": "#D62E32",
+        "secondary": "#484D52"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "tekpower": {
+      "name": "TekPower",
+      "match": [
+        "TekPower"
+      ],
+      "url": "https://www.tekpower.us/",
+      "example_device": "TP4000ZC",
+      "colors": {
+        "primary": "#D72D32",
+        "secondary": "#3A3F44"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "velleman": {
+      "name": "Velleman",
+      "match": [
+        "Velleman"
+      ],
+      "url": "https://www.velleman.eu/",
+      "example_device": "DVM4100",
+      "colors": {
+        "primary": "#D72D32",
+        "secondary": "#454A50"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "vichy": {
+      "name": "Vichy",
+      "match": [
+        "Vichy"
+      ],
+      "url": "https://www.szvichy.com/",
+      "example_device": "VC99",
+      "colors": {
+        "primary": "#D82D32",
+        "secondary": "#484D52"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "wintex": {
+      "name": "Wintex",
+      "match": [
+        "Wintex"
+      ],
+      "url": "",
+      "example_device": "TD2200",
+      "colors": {
+        "primary": "#D62D32",
+        "secondary": "#3F4449"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    }
+  },
+  "notes": [
+    "match: exact manufacturer string as used in QtDMM's device table (addConfig).",
+    "default: used for manufacturers without own entry.",
+    "device_classes: optional per-class override of colors (e.g. bench_dmm, handheld_dmm).",
+    "types: the kinds of instrument the manufacturer's models are (DeviceType ids); a symbol is generated for each (cmake/device_symbols.cmake), test_devicesymbol keeps the list in step with the device table.",
+    "keys: the folder of the generated symbols, :/devices/<key>/<type>.svg - lower case, [a-z0-9_] only."
+  ]
+}

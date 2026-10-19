@@ -1,7 +1,5 @@
-<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" width="200" height="400">
-  <!-- Generic clamp meter. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 232 432" width="232" height="432">
+  <!-- Generic clamp meter. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
@@ -16,12 +14,12 @@
     .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
   <!-- jaw -->
-  <path class="primary" d="M100 6 a74 74 0 0 1 74 74 v40 h-36 v-40 a38 38 0 0 0 -76 0 v40 h-36 v-40 a74 74 0 0 1 74 -74z"/>
+  <path class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M100 6 a74 74 0 0 1 74 74 v40 h-36 v-40 a38 38 0 0 0 -76 0 v40 h-36 v-40 a74 74 0 0 1 74 -74z"/>
   <rect class="dark" x="96" y="2" width="8" height="40"/>
   <!-- trigger -->
-  <path class="dark" d="M16 160 q-14 30 0 60 h12 v-60z"/>
+  <path class="dark" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M16 160 q-14 30 0 60 h12 v-60z"/>
   <!-- body -->
-  <rect class="primary" x="22" y="116" width="156" height="280" rx="24"/>
+  <rect class="primary" x="22" y="116" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="156" height="280" rx="24"/>
   <rect class="secondary" x="34" y="128" width="132" height="256" rx="14"/>
   <rect class="dark" x="44" y="140" width="112" height="58" rx="6"/>
   <rect class="lcd" x="49" y="145" width="102" height="48" rx="3"/>

@@ -2,33 +2,39 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
-#include <QColor>
 #include <QPixmap>
 #include <QSize>
 
 #include "device/devicetype.h"
 
-/// The picture of a kind of instrument: a template from assets/devices
-/// (":/devices/<DeviceType::id()>.svg", "unknown.svg" when there is none),
-/// its two placeholder colours (#FF00FF primary, #00FFFF secondary) replaced,
-/// drawn into a box with its aspect ratio kept. Qt SVG knows no CSS variables,
-/// hence the placeholders. The colours are neutral for now; per-vendor
-/// colours later are only another Colors.
+/// The picture of a kind of instrument in its manufacturer's colours, drawn
+/// into a box with its aspect ratio kept. The pictures are made when CMake
+/// runs (cmake/device_symbols.cmake, from the templates in assets/devices and
+/// manufacturer-colors.json): ":/devices/<manufacturer>/<type>.svg", for a
+/// manufacturer without colours of its own or without that kind the neutral
+/// ":/devices/<type>.svg", and "unknown.svg" when there is no type. Each one
+/// has a "_dark" twin with a light outline for a dark design.
 namespace DeviceSymbol
 {
-struct Colors
+enum class Design
 {
-  QColor primary;
-  QColor secondary;
+  Auto,    ///< from the application's palette: dark when its window colour is
+  Light,
+  Dark
 };
-/// Neutral grey, for every vendor until vendor colours come.
-Colors defaultColors();
 
-/// The template of @p type with @p colors, fitted into @p box (device
-/// independent pixels, for @p devicePixelRatio), centred; transparent around
-/// it. A null pixmap when not even the fallback could be read.
-QPixmap pixmap(DeviceType::Type type, QSize box, qreal devicePixelRatio = 1.0,
-               const Colors &colors = defaultColors());
+/// The picture of @p type for a model of @p vendor (DMMInfo::vendor, as
+/// addConfig has it), fitted into @p box (device independent pixels, for
+/// @p devicePixelRatio), centred; transparent around it. A null pixmap when
+/// not even the fallback could be read.
+QPixmap pixmap(const QString &vendor, DeviceType::Type type, QSize box, qreal devicePixelRatio = 1.0,
+               Design design = Design::Auto);
 /// The same for no known type (manual settings): the fallback "unknown".
-QPixmap unknown(QSize box, qreal devicePixelRatio = 1.0, const Colors &colors = defaultColors());
+QPixmap unknown(QSize box, qreal devicePixelRatio = 1.0, Design design = Design::Auto);
+/// The resource path pixmap() draws: the manufacturer's picture, else the
+/// neutral one, else "unknown" (for the tests).
+QString path(const QString &vendor, DeviceType::Type type, Design design = Design::Light);
+/// The folder of @p vendor's pictures ("uni_t" for "Uni-Trend"), empty for a
+/// vendor without colours of its own.
+QString folder(const QString &vendor);
 }

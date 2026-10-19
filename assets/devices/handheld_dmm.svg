@@ -1,7 +1,5 @@
-<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 360" width="200" height="360">
-  <!-- Generic handheld DMM. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -14 228 388" width="228" height="388">
+  <!-- Generic handheld DMM. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
@@ -12,7 +10,7 @@
     .label { fill: #E6E8EA; font-size: 9px; font-family: sans-serif; text-anchor: middle; }
   </style>
   <!-- holster -->
-  <rect class="primary" x="4" y="4" width="192" height="352" rx="28"/>
+  <rect class="primary" x="4" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="192" height="352" rx="28"/>
   <!-- face -->
   <rect class="secondary" x="18" y="18" width="164" height="324" rx="16"/>
   <!-- LCD -->

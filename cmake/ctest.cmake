@@ -84,6 +84,11 @@ if (BUILD_TESTING)
 	qtdmm_add_test(add_device test_adddevice tests/test_adddevice.cpp)
 	target_link_libraries(test_adddevice PRIVATE qtdmm_resources)
 
+	## the pictures made from the templates and manufacturer-colors.json
+	qtdmm_add_test(device_symbols test_devicesymbol tests/test_devicesymbol.cpp
+	               "${CMAKE_SOURCE_DIR}/assets/devices/manufacturer-colors.json")
+	target_link_libraries(test_devicesymbol PRIVATE qtdmm_resources)
+
 	## the sidebar "Devices": My devices in order, the one in use, click, rename, when it is shown; Settings of an entry; the instances
 	qtdmm_add_test(device_sidebar test_devicesidebar tests/test_devicesidebar.cpp)
 

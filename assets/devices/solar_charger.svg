@@ -1,7 +1,5 @@
-<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 240" width="300" height="240">
-  <!-- Generic solar charge controller. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 324 264" width="324" height="264">
+  <!-- Generic solar charge controller. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
@@ -15,7 +13,7 @@
     .dline { fill: none; stroke: #1E2124; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     .label { fill: #E6E8EA; font-size: 10px; font-family: sans-serif; text-anchor: middle; }
   </style>
-  <rect class="primary" x="10" y="4" width="280" height="232" rx="14"/>
+  <rect class="primary" x="10" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="280" height="232" rx="14"/>
   <rect class="secondary" x="22" y="16" width="256" height="170" rx="8"/>
   <!-- cooling fins -->
   <g class="dark"><rect x="22" y="196" width="256" height="30" rx="4"/></g>

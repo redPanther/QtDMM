@@ -1,7 +1,5 @@
-<!-- SPDX-FileCopyrightText: 2026 The QtDMM developers -->
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
-  <!-- Generic bench DMM. Template: #FF00FF = primary, #00FFFF = secondary (replaced on load). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 432 232" width="432" height="232">
+  <!-- Generic bench DMM. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
@@ -15,10 +13,10 @@
     .label { fill: #E6E8EA; font-size: 8px; font-family: sans-serif; text-anchor: middle; }
   </style>
   <!-- feet -->
-  <rect class="dark" x="24" y="186" width="40" height="10" rx="3"/>
-  <rect class="dark" x="336" y="186" width="40" height="10" rx="3"/>
+  <rect class="dark" x="24" y="186" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="40" height="10" rx="3"/>
+  <rect class="dark" x="336" y="186" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="40" height="10" rx="3"/>
   <!-- case -->
-  <rect class="primary" x="4" y="4" width="392" height="184" rx="10"/>
+  <rect class="primary" x="4" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="392" height="184" rx="10"/>
   <!-- front panel -->
   <rect class="bezel" x="14" y="14" width="372" height="164" rx="6"/>
   <rect class="secondary" x="17" y="17" width="366" height="158" rx="5"/>
