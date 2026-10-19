@@ -28,7 +28,9 @@ not jump while readings come in; a table narrower than that scrolls
 sideways. Copied rows always carry the date.
 
 Meters that send a second value with each reading (a frequency next to the
-voltage, say) get an extra row for it, marked `2nd` in the Mode column.
+voltage, say) get an extra row for it, marked `2nd` in the Mode column; a
+third and fourth value (the humidity of an AirCO2ntrol, the fields chosen
+for a Victron) are marked `3rd` and `4th`.
 
 ## Following, keeping, clearing
 

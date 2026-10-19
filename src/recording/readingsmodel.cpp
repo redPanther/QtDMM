@@ -114,6 +114,17 @@ QString ReadingsModel::formatTime(const QDateTime &when)
   return when.toString("yyyy-MM-dd HH:mm:ss.zzz");
 }
 
+QString ReadingsModel::modeColumn(int id, const PortKey &port, quint32 flags, bool translated)
+{
+  // the other values of the meter by their place: 2nd, 3rd, 4th
+  static const char *const ordinals[] = { QT_TR_NOOP("2nd"), QT_TR_NOOP("3rd"), QT_TR_NOOP("4th") };
+  const QString mode = modeText(port, flags);
+  if (id <= 0)
+    return mode;
+  const char *ordinal = ordinals[qMin(id, kMaxValues - 1) - 1];
+  return ((translated ? tr(ordinal) : QString::fromLatin1(ordinal)) + ' ' + mode).trimmed();
+}
+
 QString ReadingsModel::modeText(const PortKey &port, quint32 flags)
 {
   if (flags & SampleFlag::Diode)
@@ -165,7 +176,7 @@ QVariant ReadingsModel::data(const QModelIndex &index, int role) const
     }
     case Value: return SiPrefix::withoutLeadingZeros(e.text);   // "000.00" -> "0.00", as the meter shows it
     case Unit:  return e.unit;
-    case Mode:  return e.id > 0 ? (tr("2nd") + " " + modeText(e.port, e.flags)).trimmed() : modeText(e.port, e.flags);
+    case Mode:  return modeColumn(e.id, e.port, e.flags, true);
     case Range: return e.range;
     case Hold:  return e.hold() ? tr("HOLD") : QString();
   }
@@ -322,7 +333,7 @@ bool ReadingsModel::write(const QString &path, QString *error) const
     const Entry e = entry(i);
     ts << QString("%1;%2;%3;%4;%5;%6\n")
             .arg(e.when.toString("yyyy-MM-ddTHH:mm:ss,zzz"), SiPrefix::withoutLeadingZeros(e.val), e.unit,
-                 e.id > 0 ? ("2nd " + modeText(e.port, e.flags)).trimmed() : modeText(e.port, e.flags), e.range, e.hold ? "1" : "0");
+                 modeColumn(e.id, e.port, e.flags, false), e.range, e.hold ? "1" : "0");
   }
   return true;
 }
@@ -347,7 +358,7 @@ bool ReadingsModel::writeAny(const QString &path, QString *error) const
     bool numeric = false;
     const double number = val.toDouble(&numeric);
     sheet.addRow({e.when, numeric ? QVariant(number) : QVariant(val), e.unit,
-                  e.id > 0 ? ("2nd " + modeText(e.port, e.flags)).trimmed() : modeText(e.port, e.flags), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName});
+                  modeColumn(e.id, e.port, e.flags, false), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName});
   }
   return sheet.write(path, *format, error);
 }
