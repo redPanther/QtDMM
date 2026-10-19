@@ -63,9 +63,9 @@ QT_QPA_PLATFORM=offscreen QTDMM_IPC_KEY=mcptest qtdmm --config-dir /tmp/qtdmm-te
 | `errors` | `SYSTem:ERRor?` | the error queue, emptied; it is shared by all clients of the instance |
 | `screenshot` | `HCOPy:SDUMp:DATA?` | the window as PNG image |
 | `watch` | `READ? (@n)` | `count` readings of `channel` with time stamps, one every `interval` seconds (at most 300 and 120 s) |
-| `min_max` | `CALCulate:AVERage:…?` | minimum, maximum, mean and number of readings since the last reset of the display's primary value, and the unit |
+| `min_max` | `CALCulate:AVERage:…? [(@n)]` | minimum, maximum, mean and number of readings since the last reset, and the unit: of the display's primary value, or with `channel` that value's own memory |
 | `recording` | `QTDMM:RECord?` | `live`, `recording`, `view` or `idle`, the seconds it spans, readings, unit |
-| `recording_data` | `QTDMM:RECord:DATA?` | the last `count` readings of the graph (at most 10000): seconds since the start and value, `overload` or `gap` |
+| `recording_data` | `QTDMM:RECord:DATA? <n>,(@n)` | the last `count` readings of `channel` in the graph (1 the main value, the default; at most 10000): seconds since the start and value, `overload` or `gap` |
 | `alarms` | `QTDMM:ALARm:LIST?` | each alarm with its state: `off`, `pending`, `raised`, `acknowledged` |
 | `instances` | `QTDMM:INSTances?` | the running instances with their last reading |
 | `keys` | `QTDMM:KEY:CATalog?` | the meter's keys QtDMM can press, empty for most meters |

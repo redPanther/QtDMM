@@ -399,9 +399,12 @@ QByteArray ScpiServer::handle(const Command &cmd, bool &isQuery)
   return handleText(cmd, isQuery).toUtf8();
 }
 
-// QTDMM:RECord:DATA? [<n>|MAX]: the last n readings of the graph (100 when
-// none is given, at most kMaxDataPoints) as CSV in a definite-length block -
-// "seconds,value" lines, an overload 9.9E+37, a gap nan
+// QTDMM:RECord:DATA? [<n>|MAX][,(@list)]: the last n readings of the graph
+// (100 when none is given, at most kMaxDataPoints) as CSV in a
+// definite-length block - "seconds,value" lines, an overload 9.9E+37, a gap
+// nan. A channel list picks the values (1 the main one, the default);
+// several give "channel,seconds,value" lines, the channels one after the
+// other: each value has its own times
 QByteArray ScpiServer::recordingData(const Command &cmd, bool &isQuery)
 {
   isQuery = cmd.query;
@@ -411,8 +414,20 @@ QByteArray ScpiServer::recordingData(const Command &cmd, bool &isQuery)
     isQuery = false;
     return {};
   }
+  const QList<int> list = channels(cmd, 1);
+  if (list.isEmpty())
+  {
+    isQuery = false;
+    return {};
+  }
   int count = 100;
-  const QString arg = cmd.args.trimmed();
+  QString arg = cmd.args;
+  const int open = arg.indexOf("(@");
+  if (open >= 0)
+    arg = arg.left(open).trimmed();
+  if (arg.endsWith(','))
+    arg.chop(1);
+  arg = arg.trimmed();
   if (matches(arg, "MAXimum"))
     count = kMaxDataPoints;
   else if (!arg.isEmpty())
@@ -433,14 +448,18 @@ QByteArray ScpiServer::recordingData(const Command &cmd, bool &isQuery)
     }
     count = int(std::min(n, double(kMaxDataPoints)));
   }
-  QByteArray csv = "seconds,value\n";
+  const bool several = list.size() > 1;
+  QByteArray csv = several ? "channel,seconds,value\n" : "seconds,value\n";
   if (m_sources.recordingData)
-    for (const Point &p : m_sources.recordingData(count))
-    {
-      const QByteArray value = p.overload ? QByteArray(kOverload)
-                               : std::isnan(p.value) ? QByteArray("nan") : number(p.value).toLatin1();
-      csv += QByteArray::number(p.seconds, 'f', 3) + ',' + value + '\n';
-    }
+    for (int channel : list)
+      for (const Point &p : m_sources.recordingData(count, channel))
+      {
+        const QByteArray value = p.overload ? QByteArray(kOverload)
+                                 : std::isnan(p.value) ? QByteArray("nan") : number(p.value).toLatin1();
+        if (several)
+          csv += QByteArray::number(channel) + ',';
+        csv += QByteArray::number(p.seconds, 'f', 3) + ',' + value + '\n';
+      }
   return block(csv);
 }
 
@@ -659,14 +678,32 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
     return {};
   }
 
-  // CALCulate:AVERage: the min/max memory, as on Keysight's bench meters
+  // CALCulate:AVERage: the min/max memory, as on Keysight's bench meters -
+  // the display's; with a channel list or CALCulate2 that of the value of
+  // its own, several channels answer separated by commas
   if (matches(head, "CALCulate") && depth == 3 && matches(cmd.path[1], "AVERage"))
   {
     const QString what = cmd.path[2];
+    const bool perChannel = cmd.args.contains("(@") || cmd.suffix.first() != 1;
+    QList<int> list;
+    if (perChannel)
+    {
+      list = channels(cmd, cmd.suffix.first());
+      if (list.isEmpty())
+      {
+        isQuery = false;
+        return {};
+      }
+    }
     if (matches(what, "CLEar"))
     {
-      if (commandOnly(cmd, isQuery))
+      if (!commandOnly(cmd, isQuery))
+        return {};
+      if (!perChannel)
         Q_EMIT resetMinMaxRequested();
+      else if (m_sources.clearChannelStats)
+        for (int channel : list)
+          m_sources.clearChannelStats(channel);
       return {};
     }
     const bool min = matches(what, "MINimum"), max = matches(what, "MAXimum");
@@ -675,12 +712,20 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
       return refuse(isQuery, -113, "Undefined header");
     if (!queryOnly(cmd, isQuery))
       return {};
-    const Stats s = m_sources.stats ? m_sources.stats() : Stats();
-    if (count)
-      return QString::number(s.count);
-    if (s.count == 0)
-      return kNotANumber;
-    return number(min ? s.min : max ? s.max : s.mean);
+    auto answer = [&](const Stats &s)
+    {
+      if (count)
+        return QString::number(s.count);
+      if (s.count == 0)
+        return QString(kNotANumber);
+      return number(min ? s.min : max ? s.max : s.mean);
+    };
+    if (!perChannel)
+      return answer(m_sources.stats ? m_sources.stats() : Stats());
+    QStringList out;
+    for (int channel : list)
+      out << answer(m_sources.channelStats ? m_sources.channelStats(channel) : Stats());
+    return out.join(',');
   }
 
   if (matches(head, "QTDMM"))

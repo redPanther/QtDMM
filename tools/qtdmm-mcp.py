@@ -213,17 +213,21 @@ def watch(count: int = 10, interval: float = 1.0, channel: int = 1) -> list[dict
 
 
 @mcp.tool()
-def min_max() -> dict:
-    """The min/max memory as the display shows it, of its primary value (CALCulate:AVERage):
-    minimum, maximum, mean and number of readings since the last reset, in SI base units."""
+def min_max(channel: int = 0) -> dict:
+    """The min/max memory (CALCulate:AVERage): minimum, maximum, mean and number of readings since
+    the last reset, in SI base units. Without a channel the display's, of its primary value; with
+    one (1 the main value, see channels()) that value's own, whatever the display follows."""
+    ch = f" (@{int(channel)})" if channel else ""
     with Scpi() as s:
-        count = int(s.query("CALCulate:AVERage:COUNt?"))
-        unit = s.query("UNIT?").strip('"')
+        # through channel(): a channel the meter has not is a ToolError
+        count = int(s.channel(["CALCulate:AVERage:COUNt?"], channel)[0] if channel
+                    else s.query("CALCulate:AVERage:COUNt?"))
+        unit = s.query("UNIT?" + ch).strip('"')
         if not count:
             return {"count": 0, "unit": unit}
-        return {"count": count, "min": value(s.query("CALCulate:AVERage:MINimum?")),
-                "max": value(s.query("CALCulate:AVERage:MAXimum?")),
-                "mean": value(s.query("CALCulate:AVERage:AVERage?")), "unit": unit}
+        return {"count": count, "min": value(s.query("CALCulate:AVERage:MINimum?" + ch)),
+                "max": value(s.query("CALCulate:AVERage:MAXimum?" + ch)),
+                "mean": value(s.query("CALCulate:AVERage:AVERage?" + ch)), "unit": unit}
 
 
 @mcp.tool()
@@ -237,13 +241,17 @@ def recording() -> dict:
 
 
 @mcp.tool()
-def recording_data(count: int = 100) -> dict:
+def recording_data(count: int = 100, channel: int = 1) -> dict:
     """The last count readings of the graph (QTDMM:RECord:DATA?, at most 10000), oldest first:
-    seconds since the start and the value in SI base units, "overload" or "gap"."""
+    seconds since the start and the value in SI base units, "overload" or "gap". Channel 1 is the
+    main value, 2 and on the meter's other values (see channels())."""
     count = max(1, min(count, 10000))
     with Scpi() as s:
-        unit = s.query("QTDMM:RECord?").rsplit(",", 1)[-1].strip('"')
-        csv = s.block(f"QTDMM:RECord:DATA? {count}").decode()
+        if int(channel) == 1:
+            unit = s.query("QTDMM:RECord?").rsplit(",", 1)[-1].strip('"')
+        else:
+            unit = s.channel(["UNIT?"], channel)[0].strip('"')
+        csv = s.block(f"QTDMM:RECord:DATA? {count},(@{int(channel)})").decode()
     points = []
     for line in csv.splitlines()[1:]:
         t, v = line.split(",")

@@ -211,10 +211,24 @@ int main(int argc, char **argv)
       r.unit = "V";
       return r;
     };
+    // per channel: channel 2 min 10, max 20; channel 3 empty; cleared channels counted
+    src.channelStats = [](int channel)
+    {
+      return channel == 1 ? ScpiServer::Stats{ 4, 0.2, 2.0, 1.0 }
+             : channel == 2 ? ScpiServer::Stats{ 2, 10, 20, 15 } : ScpiServer::Stats();
+    };
+    QList<int> cleared;
+    src.clearChannelStats = [&cleared](int channel) { cleared << channel; };
     int asked = 0;
-    src.recordingData = [&asked](int n)
+    QList<int> askedChannels;
+    src.recordingData = [&asked, &askedChannels](int n, int channel)
     {
       asked = n;
+      askedChannels << channel;
+      if (channel == 2)
+        return QList<ScpiServer::Point>{ { 0.25, 22.5, false } };
+      if (channel == 3)
+        return QList<ScpiServer::Point>();
       return QList<ScpiServer::Point>{ { 0, 1.5, false }, { 0.5, std::nan(""), false }, { 1, std::nan(""), true } };
     };
     QList<ScpiServer::AlarmState> alarms = { { "Over \"5\"", ScpiServer::AlarmState::Raised },
@@ -225,6 +239,7 @@ int main(int argc, char **argv)
     src.pressKey = [&pressed](const QString &k) { pressed << k; return k != "range"; };
     src.instances = [] { return QList<ScpiServer::Instance>{ { "u", 12.5, "V", true }, { "i", 0, "", false } }; };
     q.setSources(src);
+    q.setChannelCount(3);
     int clears = 0, acks = 0;
     QStringList marks;
     QObject::connect(&q, &ScpiServer::resetMinMaxRequested, [&] { ++clears; });
@@ -237,6 +252,17 @@ int main(int argc, char **argv)
     check(clears == 1, "CALC:AVER:CLEar resets min/max");
     q.process("CALC:AVER:CLE?");
     check(ask(q, "SYST:ERR?").startsWith("-100,"), "CLEar is no query");
+    // a value's memory of its own: a channel list or CALCulate2
+    check(ask(q, "CALC:AVER:MAX? (@2)") == "+2.000000E+01" && ask(q, "CALC2:AVER:MIN?") == "+1.000000E+01",
+          "CALC per channel " + ask(q, "CALC:AVER:MAX? (@2)"));
+    check(ask(q, "CALC:AVER:MAX? (@1:3)") == "+2.000000E+00,+2.000000E+01,9.91E+37",
+          "CALC (@1:3): channel 1's own memory, an empty one NaN " + ask(q, "CALC:AVER:MAX? (@1:3)"));
+    check(ask(q, "CALC:AVER:COUN? (@1,2)") == "4,2", "COUNt per channel " + ask(q, "CALC:AVER:COUN? (@1,2)"));
+    check(ask(q, "CALC:AVER:MAX? (@5)").isEmpty() && ask(q, "SYST:ERR?").startsWith("-222,"), "CALC (@5): no such channel");
+    q.process("CALC:AVER:CLE (@2,3)");
+    check(cleared == QList<int>({ 2, 3 }) && clears == 1, "CLEar (@2,3) clears those two only");
+    q.process("CALC2:AVER:CLE");
+    check(cleared == QList<int>({ 2, 3, 2 }) && clears == 1, "CALC2:AVER:CLEar");
 
     check(ask(q, "QTDMM:RECord?") == "REC,42.250,170,\"V\"", "QTDMM:RECord? " + ask(q, "QTDMM:REC?"));
     const QByteArray data = q.process("QTDMM:REC:DATA? 500");
@@ -250,6 +276,17 @@ int main(int argc, char **argv)
     check(asked == ScpiServer::kMaxDataPoints, "MAX");
     check(q.process("QTDMM:REC:DATA? 0").isEmpty() && ask(q, "SYST:ERR?").startsWith("-222,"), "0 readings: out of range");
     check(q.process("QTDMM:REC:DATA? lots").isEmpty() && ask(q, "SYST:ERR?").startsWith("-104,"), "not a number");
+    // per channel: one is the same CSV, several add the channel in front
+    askedChannels.clear();
+    check(q.process("QTDMM:REC:DATA? 20,(@2)") == ScpiServer::block("seconds,value\n0.250,+2.250000E+01\n") + '\n'
+          && asked == 20 && askedChannels == QList<int>({ 2 }), "RECord:DATA? (@2)");
+    check(q.process("QTDMM:REC:DATA? (@1:3)")
+            == ScpiServer::block("channel,seconds,value\n1,0.000,+1.500000E+00\n1,0.500,nan\n1,1.000,9.9E+37\n"
+                                 "2,0.250,+2.250000E+01\n") + '\n' && asked == 100,
+          "RECord:DATA? (@1:3), 100 each by default");
+    check(q.process("QTDMM:REC:DATA? MAX, (@2)").size() > 0 && asked == ScpiServer::kMaxDataPoints, "MAX with a channel");
+    check(q.process("QTDMM:REC:DATA? 10,(@7)").isEmpty() && ask(q, "SYST:ERR?").startsWith("-222,"),
+          "RECord:DATA? (@7): no such channel");
 
     check(ask(q, "QTDMM:ALARm?") == "1" && ask(q, "QTDMM:ALAR:LIST?") == "\"Over \"\"5\"\"\",RAIS,\"Low\",OFF",
           "alarms " + ask(q, "QTDMM:ALAR:LIST?"));
