@@ -1,29 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 324 244" width="324" height="244">
-  <!-- Generic battery monitor (shunt): lid on a base plate with mounting ears and a terminal strip. Template: #FF00FF = primary (lid), #00FFFF = secondary (base plate, terminals frame), #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 304 144" width="304" height="144">
+  <!-- Generic battery monitor (shunt), side view: housing = primary, shunt lugs left/right = secondary, brass bolts on top. Template: #FF00FF = primary, #00FFFF = secondary, #FFFF00 = outline (replaced at build time; outline dark grey in light design, light in dark design). -->
   <style>
     .primary { fill: #FF00FF; }
     .secondary { fill: #00FFFF; }
     .light { fill: #E6E8EA; }
     .key { fill: #8A9096; }
+    .brass { fill: #C9A85C; }
     .dark { fill: #1E2124; }
-    .line { fill: none; stroke: #E6E8EA; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
   </style>
-  <!-- busbar behind -->
-  <rect class="key" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" x="-6" y="96" width="312" height="40" rx="4"/>
-  <circle class="dark" cx="10" cy="116" r="11"/><circle class="light" cx="10" cy="116" r="4"/>
-  <circle class="dark" cx="290" cy="116" r="11"/><circle class="light" cx="290" cy="116" r="4"/>
-  <!-- base plate with mounting ears -->
-  <path class="secondary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M4 176 h30 v-10 h232 v10 h30 v22 a6 6 0 0 1 -6 6 h-280 a6 6 0 0 1 -6 -6 z"/>
-  <circle class="key" cx="18" cy="188" r="5"/><circle class="key" cx="282" cy="188" r="5"/>
-  <!-- lid -->
-  <rect class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" x="34" y="20" width="232" height="152" rx="16"/>
-  <rect class="light" x="34" y="44" width="232" height="5" fill-opacity="0.55"/>
-  <!-- glyph -->
-  <rect class="light" x="112" y="64" width="70" height="56" rx="6"/>
-  <rect class="light" x="182" y="80" width="8" height="24" rx="2"/>
-  <rect class="primary" x="120" y="72" width="54" height="40" rx="3"/>
-  <rect class="light" x="124" y="76" width="34" height="32" rx="2"/>
-  <!-- terminal strip -->
-  <rect class="dark" x="50" y="140" width="200" height="24" rx="3"/>
-  <g class="key"><rect x="58" y="146" width="16" height="12" rx="2"/><rect x="82" y="146" width="16" height="12" rx="2"/><rect x="106" y="146" width="16" height="12" rx="2"/><rect x="178" y="146" width="28" height="12" rx="2"/><rect x="214" y="146" width="28" height="12" rx="2"/></g>
+  <!-- brass bolts -->
+  <g class="brass" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke"><rect x="66" y="2" width="34" height="30" rx="4"/><rect x="180" y="2" width="34" height="30" rx="4"/></g>
+  <!-- shunt lugs -->
+  <path class="secondary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M4 102 h272 v16 h-272 z"/>
+  <!-- housing -->
+  <path class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M40 118 V36 a8 8 0 0 1 8 -8 H232 a8 8 0 0 1 8 8 V118 Z"/>
+  <rect style="fill:#E6E8EA;fill-opacity:0.8" x="54" y="40" width="40" height="6" rx="3"/>
+  <rect style="fill:#E6E8EA;fill-opacity:0.5" x="96" y="56" width="90" height="4" rx="2"/>
+  <!-- QR / label, LEDs, connectors -->
+  <rect class="light" x="114" y="72" width="22" height="22" rx="2"/>
+  <circle cx="150" cy="88" r="4" style="fill:#D9272E"/><circle cx="162" cy="88" r="4" style="fill:#3F8FD8"/>
+  <rect class="light" x="56" y="90" width="26" height="14" rx="2"/>
+  <rect x="196" y="78" width="30" height="28" rx="2" style="fill:#3FA34D"/>
+  <g class="dark"><rect x="201" y="86" width="8" height="8"/><rect x="213" y="86" width="8" height="8"/></g>
 </svg>

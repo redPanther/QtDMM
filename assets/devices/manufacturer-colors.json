@@ -195,13 +195,19 @@
       "example_device": "SmartShunt",
       "colors": {
         "primary": "#1686C7",
-        "secondary": "#2A2D30"
+        "secondary": "#F26B21"
       },
       "types": [
         "battery_monitor",
         "solar_charger",
         "inverter"
-      ]
+      ],
+      "device_classes": {
+        "battery_monitor": {
+          "primary": "#1686C7",
+          "secondary": "#2A2D30"
+        }
+      }
     },
     "greenlee": {
       "name": "Greenlee",
