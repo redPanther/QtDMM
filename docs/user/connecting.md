@@ -153,7 +153,8 @@ yellow-green of most meters), *Backlight blue* (light segments on blue, the defa
 **Primary value** in the same menu, for a meter with more than one value (a
 second display, the CO2, temperature and humidity of the TFA AirCO2ntrol,
 or the four values of a Metex M-3850D): the value shown big; the others
-follow on the small line in their order, up to three. A meter set up by
+follow on the small line in their order, two at most - a fourth value is
+on the display only as the primary one. A meter set up by
 hand gets as many values as it sends. The min/max memory follows it too. It only changes the display:
 the graph's recording, its triggers and the export stay with the main value
 (value 1). It is kept with the window layout; a meter without that value

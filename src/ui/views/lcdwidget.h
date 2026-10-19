@@ -60,7 +60,8 @@ public:
   LcdWidget(QWidget *parent = nullptr);
 
   /// Value text as the meter shows it; id 0 is the main display, 1..3 the
-  /// secondary values of multi-line meters.
+  /// secondary values of multi-line meters. The small line shows the first
+  /// kSmallLineValues values after the big one, the others only as primary.
   void setValue(int id, const QString &);
   void setUnit(int id, const QString &);
   /// The value shown big (context menu "Primary value", kept with the
@@ -86,8 +87,13 @@ public:
   /// Layout: digit count from the display counts, which rows to show and how
   /// many secondary values.
   void setDisplayMode(int counts, bool minMax, bool bar, int numValues);
-  /// Only the number of values: the main one and up to three on the small line.
+  /// Only the number of values: the main one and up to three more, of which
+  /// the small line shows kSmallLineValues.
   void setValueCount(int numValues);
+  /// Values on the small line at most: a third one does not fit beside them.
+  static constexpr int kSmallLineValues = 2;
+  /// How many values the small line shows now (lines 1 .. of lineValue()).
+  int  smallLineValues() const { return qBound(0, m_numValues - 1, kSmallLineValues); }
   void setShowBar(bool);   ///< per-reading flag from the decoder
   /// @name Annunciators
   /// @{

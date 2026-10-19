@@ -757,8 +757,9 @@ void LcdWidget::drawExtra(QPainter &p, const Layout &l) const
   const double h = l.smallH;
   const int digits = numDigits();
   const double y = l.extra.top() + (l.extra.height() - h) / 2.0;
-  const double slot = l.extra.width() / (m_numValues - 1);
-  for (int i = 1; i < m_numValues; ++i)
+  const int shown = smallLineValues();
+  const double slot = l.extra.width() / shown;
+  for (int i = 1; i <= shown; ++i)
   {
     double x = l.extra.left() + (i - 1) * slot;
     const int id = idAt(i);
