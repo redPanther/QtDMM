@@ -131,6 +131,10 @@
 - Dark design: empty check boxes have a light edge, in menus too; after the desktop switches between light and
   dark, the design is applied anew (the sidebar's background stayed unpainted)
 - Graph: with the main value switched off, the overview below it shows the value on the left axis, in its colour
+- Meters that show dashes or a fault word instead of a number: "----" (APPA), "--" (Victron's time to go while
+  charging) and ZOTEK's NCV dashes are no value - a gap, not an overload, in the CSV `none`; "FUSE", "Er", "PROBE",
+  "BATT" (APPA) are a fault - the display shows the word, the status line says it, a red mark where it began, in
+  the CSV `fault`. APPA's dashes and fault words gave no reading at all before
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

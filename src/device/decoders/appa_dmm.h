@@ -57,6 +57,11 @@ public:
   /// Value, display text and unit of @p d; an overload word ("OL", "OLA",
   /// "OLV", "OLVA") is an overload, false for any other word.
   static bool reading(const Display &d, double *dval, QString *val, QString *unit);
+  /// A word that is no reading but says why there is none: blank or dashes
+  /// (DmmChannel::noValue) or a fault (DmmChannel::fault: "Er", "FUSE",
+  /// "PROBE", "BATT", "HAZ", "BAD"), its text in val. False for the other
+  /// words (menus, "APO") and for numbers.
+  static bool showsWord(const Display &d, DmmChannel *c);
   /// Coupling or function code ("DC", "AC", "ACDC", "OH", "DI", ...) of
   /// an AppaDmm function code.
   static QString special(int function);

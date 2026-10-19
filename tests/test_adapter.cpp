@@ -174,6 +174,28 @@ int main(int argc, char **argv)
     check(a.adapt(r, 0)[0].sample.flags & SampleFlag::LowBattery, "low battery flag");
   }
 
+  // --- no number shown ("----") or a fault word ("FUSE"): no value, and no
+  //     overload although the text has letters ---
+  {
+    ReadingAdapter a;
+    DmmDecoder::DmmResponse r;
+    r.main().val = "FUSE";
+    r.main().unit = "mA";
+    r.main().special = "DC";
+    r.main().fault = "FUSE";
+    DmmDecoder::DmmChannel &dash = r.addChannel(1);
+    dash.val = "----";
+    dash.unit = "V";
+    dash.noValue = true;
+    const QList<PortSample> s = a.adapt(r, 0);
+    check(s.size() == 2 && s[0].sample.quality == Quality::Fault && std::isnan(s[0].sample.value)
+            && s[1].sample.quality == Quality::NoValue && std::isnan(s[1].sample.value),
+          "a fault word and dashes: no value");
+    const Reading fuse = ReadingAdapter::reading(s[0]);
+    check(!fuse.overload && fuse.noNumber() && fuse.fault() && fuse.text == "FUSE", "FUSE: no overload, a fault");
+    check(one(a, "OL", "V", "DC").sample.quality == Quality::Overload, "OL stays an overload");
+  }
+
   if (failed == 0)
     qInfo() << "All adapter tests passed.";
   else

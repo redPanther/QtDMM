@@ -199,12 +199,14 @@ QVector<GridPoint> RecordingStore::gridOf(const RecordingSeries &series, int ten
     return out;
   out.reserve(int(qMin<qint64>(kLast - kFirst + 1, 10000000)));
 
-  // the worse of two qualities: an overload says more than a gap
+  // the worse of two qualities: an overload says more than a fault, a fault
+  // more than no number shown, that more than a gap
   auto worse = [](Quality a, Quality b)
   {
-    if (a == Quality::Overload || b == Quality::Overload)
-      return Quality::Overload;
-    return a == Quality::Stale || b == Quality::Stale ? Quality::Stale : Quality::Valid;
+    for (Quality q : { Quality::Overload, Quality::Fault, Quality::NoValue, Quality::Stale })
+      if (a == q || b == q)
+        return q;
+    return Quality::Valid;
   };
   // the value at the moment t: the last reading before it (one that comes
   // at t counts from t on), the first one at the start
@@ -257,7 +259,7 @@ QVector<GridPoint> RecordingStore::gridOf(const RecordingSeries &series, int ten
           continue;
         if (p.gap())
         {
-          q = worse(q, p.quality == Quality::Overload ? Quality::Overload : Quality::Stale);
+          q = worse(q, p.quality == Quality::Valid ? Quality::Stale : p.quality);
           if (p.quality == Quality::Overload)
             overload = p.value;
         }
@@ -285,6 +287,10 @@ CellState cellState(double value, Quality quality)
     return CellState::Ok;
   if (quality == Quality::Overload)
     return std::signbit(value) ? CellState::NegativeOverload : CellState::Overload;
+  if (quality == Quality::NoValue)
+    return CellState::NoValue;
+  if (quality == Quality::Fault)
+    return CellState::Fault;
   return CellState::Gap;
 }
 }
@@ -411,9 +417,15 @@ void RecordingStore::load(const Recording &rec)
   const bool onGrid = rec.onGrid();
   auto quality = [](CellState state)
   {
-    return state == CellState::Ok ? Quality::Valid
-           : state == CellState::Overload || state == CellState::NegativeOverload ? Quality::Overload
-                                                                                  : Quality::Stale;
+    switch (state)
+    {
+      case CellState::Ok:               return Quality::Valid;
+      case CellState::Overload:
+      case CellState::NegativeOverload: return Quality::Overload;
+      case CellState::NoValue:          return Quality::NoValue;
+      case CellState::Fault:            return Quality::Fault;
+      default:                          return Quality::Stale;
+    }
   };
   for (int i = 0; i < rec.values.size(); i++)
   {
@@ -503,11 +515,11 @@ void RecordingStore::setReading(const Reading &reading)
 
   // one recording, one quantity: the first value says which; another port
   // (V DC -> Ohm, DC -> AC) or another unit (°C -> °F) stops it. A prefix
-  // (mV -> V) is no change, and an overload or a value without a known
-  // quantity says nothing about the function. Live starts its window anew:
+  // (mV -> V) is no change, and an overload, no number ("----", "FUSE") or a
+  // value without a known quantity says nothing about the function. Live starts its window anew:
   // a trigger compares within one function (0 V, then 1000 Ohm crosses
   // nothing), and the pre-trigger takes no other one into a recording
-  if (m_state != View && !reading.overload && reading.port.quantity != Quantity::Unknown)
+  if (m_state != View && !reading.overload && !reading.noNumber() && reading.port.quantity != Quantity::Unknown)
   {
     if (!m_recordPort.isValid())
     {
@@ -549,7 +561,7 @@ void RecordingStore::setReading(const Reading &reading)
   RawPoint p;
   p.t = qMax<qint64>(0, reading.t - m_t0);
   p.value = value;
-  p.quality = reading.overload ? Quality::Overload : Quality::Valid;
+  p.quality = pointQuality(reading);
   p.flags = reading.flags;
   if (m_state == Live)
   {
@@ -634,7 +646,7 @@ void RecordingStore::appendExtra(const Reading &reading)
   RawPoint p;
   p.t = qMax<qint64>(0, reading.t - m_t0);
   p.value = off ? qQNaN() : reading.overload ? overloadValue(reading.value) : reading.value;
-  p.quality = off ? Quality::Stale : reading.overload ? Quality::Overload : Quality::Valid;
+  p.quality = off ? Quality::Stale : pointQuality(reading);
   p.flags = reading.flags;
   // the main value stops the recording at its length; nothing after it
   if (m_state == Record && m_sampleLength > 0 && p.t >= qint64(m_sampleLength) * 100 + m_preUsed)
@@ -907,7 +919,7 @@ void RecordingStore::appendCurrent()
     return;
   RawPoint p;
   p.value = m_reading.overload ? overloadValue(m_reading.value) : m_reading.value;
-  p.quality = m_reading.overload ? Quality::Overload : Quality::Valid;
+  p.quality = pointQuality(m_reading);
   p.flags = m_reading.flags;
   append(p);
   // and what the other displays show, at the same moment
@@ -1087,7 +1099,7 @@ void RecordingStore::logReading(const Reading &reading)
   LoggedReading row;
   row.when = reading.msecs;
   row.value = reading.value;
-  row.quality = reading.overload ? Quality::Overload : Quality::Valid;
+  row.quality = pointQuality(reading);
   row.flags = reading.flags;
   row.text = reading.text;
   row.unit = reading.unit;

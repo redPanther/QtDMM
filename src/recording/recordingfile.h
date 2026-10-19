@@ -15,6 +15,8 @@ enum class CellState : quint8
   Overload,           ///< the meter showed OL (`OL`)
   NegativeOverload,   ///< the meter showed -OL (`-OL`)
   Gap,                ///< no value: stale, off or ended (`gap`)
+  NoValue,            ///< the meter showed no number, "----" (`none`)
+  Fault,              ///< the meter showed a fault word, "FUSE" (`fault`)
   None                ///< the value is not there yet in this row (empty cells)
 };
 

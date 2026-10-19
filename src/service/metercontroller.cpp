@@ -255,6 +255,17 @@ void MeterController::publish(const Reading &rd)
   }
 
   Q_EMIT reading(rd);
+  // a fault word ("FUSE"): said once when it comes, a mark where it began
+  const QString fault = rd.fault() ? val.trimmed() : QString();
+  if (fault != m_valueFault.value(id))
+  {
+    if (!fault.isEmpty())
+    {
+      Q_EMIT error(tr("The meter shows %1").arg(fault));
+      Q_EMIT markRequested(QColor(0xd3, 0x2f, 0x2f), fault, true, true);
+    }
+    m_valueFault[id] = fault;
+  }
   if (newMax)
     Q_EMIT maximumChanged(m_minMax.maximum(), val, unit);
   if (newMin)
@@ -278,7 +289,7 @@ void MeterController::publish(const Reading &rd)
       r.unit = baseUnit;
       r.port = rd.port.toString();
       r.msecs = now;
-      r.valid = !hold && !overload;
+      r.valid = !hold && !overload && !rd.noNumber();
       m_stateMgr->publishReading(r);
     }
   }
@@ -296,7 +307,7 @@ void MeterController::publish(const Reading &rd)
   r.range = rd.range;
   r.hold = hold;
   r.overload = overload;
-  r.valid = true;
+  r.valid = !rd.noNumber();   // no number shown: no measurement (NaN)
   r.msecs = now;
   m_scpi->setReading(id, r);
 }

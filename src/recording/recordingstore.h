@@ -388,6 +388,12 @@ private:
   /// An overload has no value: NaN, with the sign of -OL that the
   /// ReadingAdapter put on @p value.
   static double overloadValue(double value) { return std::copysign(qQNaN(), value); }
+  /// What a reading is as a point: an overload, no number or a fault word
+  /// shown (both a gap), else a value.
+  static Quality pointQuality(const Reading &r)
+  {
+    return r.overload ? Quality::Overload : r.noNumber() ? r.quality : Quality::Valid;
+  }
 
   RecordingSeries m_series;
   QList<RecordingSeries> m_extra;   ///< the other values, extra()

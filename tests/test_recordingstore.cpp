@@ -27,6 +27,15 @@ static Reading reading(double value, const QString &text, const QString &special
   return r;
 }
 
+// The meter shows no number ("----") or a fault word ("FUSE"): @p shown is
+// Quality::NoValue or Quality::Fault, as DmmChannel says it
+static Reading noNumber(const QString &text, Quality shown)
+{
+  static ReadingAdapter adapter;
+  return ReadingAdapter::reading(adapter.adaptValue(0, text, "", "", "AUTO", false, false, false, 0,
+                                                    QDateTime::currentMSecsSinceEpoch(), shown));
+}
+
 // Another value of the meter (a second display): @p id, in @p unit; an empty
 // @p text is a display that is off
 static Reading other(int id, double value, const QString &text, const QString &unit, const QString &special = "")
@@ -540,6 +549,46 @@ int main(int argc, char **argv)
     check(!store.dirty(), "write: still dirty after writing");
     const Recording back = store.toRecording();
     check(back.unit == "V" && back.values.size() == 1 && back.values.first() == 7, "write: recording content");
+  }
+
+  // --- 5a0. no number shown, a fault word: gaps of their own kind, written
+  //          as none and fault, read back; neither ends the recording ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setUnit("V");
+    store.setSampleTime(10);
+    store.start();
+    store.setReading(clock.at(100, reading(1.5, "1.500", "DC")));
+    store.setReading(clock.at(600, noNumber("----", Quality::NoValue)));
+    store.setReading(clock.at(1100, noNumber("FUSE", Quality::Fault)));
+    store.setReading(clock.at(1600, reading(2.5, "2.500", "DC")));
+    check(store.isRunning() && store.count() == 4, "no number: the recording goes on");
+    check(store.series().at(1).gap() && store.series().at(1).quality == Quality::NoValue
+            && store.series().at(2).quality == Quality::Fault,
+          "no number: gaps with their quality");
+    clock.now = 2000;
+    store.stop();
+    QTemporaryDir dir;
+    QString err;
+    const QString file = dir.path() + "/none.csv";
+    check(store.write(file, &err, true), "no number: write: " + err);
+    QFile f(file);
+    check(f.open(QIODevice::ReadOnly | QIODevice::Text), "no number: cannot open " + file);
+    const QString text = QString::fromUtf8(f.readAll());
+    check(text.contains(";nan;V;none\n") && text.contains(";nan;V;fault\n"), "no number: the file is\n" + text);
+    const std::optional<Recording> rec = RecordingFile::read(file, &err);
+    RecordingStore back;
+    if (rec)
+      back.load(*rec);
+    check(back.count() == 4 && back.series().at(1).quality == Quality::NoValue
+            && back.series().at(2).quality == Quality::Fault,
+          "no number: read back with its kind");
+    const QList<GridPoint> grid = back.grid(5);
+    check(grid.size() == 4 && grid[1].quality == Quality::NoValue && std::isnan(grid[1].value)
+            && grid[2].quality == Quality::Fault && grid[3].value == 2.5,
+          "no number: the grid's steps keep their kind");
   }
 
   // --- 5a. the export of every reading: each at its time, a gap a row of

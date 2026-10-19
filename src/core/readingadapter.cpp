@@ -148,7 +148,8 @@ bool hasRange(Quantity q)
 }
 
 PortSample ReadingAdapter::adaptValue(double dval, const QString &text, const QString &unit, const QString &special,
-                                      const QString &range, bool hold, bool showBar, bool lowBattery, int id, qint64 wall)
+                                      const QString &range, bool hold, bool showBar, bool lowBattery, int id, qint64 wall,
+                                      Quality shown)
 {
   PortSample ps;
   ps.id = id;
@@ -208,7 +209,11 @@ PortSample ReadingAdapter::adaptValue(double dval, const QString &text, const QS
   // decoders mark overload and similar states with letters in the value
   // text ("OL", "-OL", "0.L", "EFLO"); a number never has one
   static const QRegularExpression letters("[A-Za-z]");
-  s.quality = text.contains(letters) ? Quality::Overload : Quality::Valid;
+  s.quality = shown != Quality::Valid ? shown : text.contains(letters) ? Quality::Overload : Quality::Valid;
+  // no number on the display, or a fault word: no value either, but no
+  // overload - the graph has a gap there
+  if (s.quality == Quality::NoValue || s.quality == Quality::Fault)
+    s.value = std::numeric_limits<double>::quiet_NaN();
   // an overload has no value (kern_spezifikation §2.4): whatever number the
   // decoder made of "OL" is not one. The sign of "-OL" stays on the NaN,
   // for SCPI's -9.9E37.
@@ -262,7 +267,8 @@ QList<PortSample> ReadingAdapter::adapt(const DmmDecoder::DmmResponse &r, qint64
   QList<PortSample> out;
   for (const DmmDecoder::DmmChannel &c : r.channels)
   {
-    out << adaptValue(c.dval, c.val, c.unit, c.special, r.range, r.hold, r.showBar, r.lowBat, c.id, wall);
+    const Quality shown = !c.fault.isEmpty() ? Quality::Fault : c.noValue ? Quality::NoValue : Quality::Valid;
+    out << adaptValue(c.dval, c.val, c.unit, c.special, r.range, r.hold, r.showBar, r.lowBat, c.id, wall, shown);
     // MAX/MIN, AVG, REL, PEAK: states of the value, not of the port
     out.last().sample.flags |= c.states & (SampleFlag::Max | SampleFlag::Min | SampleFlag::Avg | SampleFlag::Relative
                                            | SampleFlag::Peak);

@@ -119,6 +119,32 @@ int main(int argc, char **argv)
     check(query("CALC:AVER:COUN? (@1:2)") == "0,0", "CLEar: all of them");
   }
 
+  // a fault word ("FUSE"): said once and marked where it began; no number
+  // shown ("----"): neither
+  {
+    auto *dmm = ctl.findChild<MeterConnection *>();
+    QStringList errors, marks;
+    QObject::connect(&ctl, &MeterController::error, [&](const QString &e) { errors << e; });
+    QObject::connect(&ctl, &MeterController::markRequested,
+                     [&](const QColor &, const QString &name, bool, bool) { marks << name; });
+    auto shown = [&](const QString &text, bool fault)
+    {
+      DmmDecoder::DmmResponse r;
+      r.main().val = text;
+      r.main().unit = "mA";
+      r.main().special = "DC";
+      r.main().noValue = !fault;
+      r.main().fault = fault ? text : QString();
+      Q_EMIT dmm->response(r);
+    };
+    shown("FUSE", true);
+    shown("FUSE", true);
+    check(errors.filter("FUSE").size() == 1 && marks == QStringList{ "FUSE" },
+          QString("FUSE: one message, one mark, got %1 / %2").arg(errors.join('|'), marks.join('|')));
+    shown("----", false);
+    check(errors.filter("----").isEmpty() && marks.size() == 1, "dashes: no message, no mark");
+  }
+
   if (failed)
   {
     qWarning() << failed << "MeterController check(s) failed";
