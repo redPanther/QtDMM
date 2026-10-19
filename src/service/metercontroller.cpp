@@ -657,9 +657,10 @@ void MeterController::updateScpiStatus()
   else if (!m_hislipError.isEmpty())
     text += ' ' + tr("HiSLIP could not start: %1.").arg(m_hislipError);
   if (m_vxi11->isRunning())
-    text += ' ' + (m_vxi11->usesSystemRpcbind() ? tr("VXI-11 through the system rpcbind: %1.")
-                                                : tr("VXI-11 with an own portmapper on port %2: %1."))
-                    .arg(vxi11Resource()).arg(m_vxi11->portmapperPort());
+    text += ' ' + (m_vxi11->usesSystemRpcbind()
+                     ? tr("VXI-11 through the system rpcbind: %1.").arg(vxi11Resource())
+                     : tr("VXI-11 with an own portmapper on port %2: %1.").arg(vxi11Resource())
+                         .arg(m_vxi11->portmapperPort()));
   else if (!m_vxi11Error.isEmpty())
     text += ' ' + tr("VXI-11 is off: %1.").arg(m_vxi11Error);
   if (m_mdns->isActive())
