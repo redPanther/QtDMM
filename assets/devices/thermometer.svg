@@ -16,8 +16,11 @@
   <!-- probe cable + probe -->
   <path d="M100 8 v20" class="dline" style="stroke-width:6"/>
   <rect class="dark" x="40" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="120" height="8" rx="4"/>
+  <rect class="dark" x="40" y="4" width="120" height="8" rx="4"/>
   <rect class="light" x="150" y="2" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="44" height="12" rx="4"/>
+  <rect class="light" x="150" y="2" width="44" height="12" rx="4"/>
   <rect class="primary" x="20" y="28" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="160" height="328" rx="30"/>
+  <rect class="primary" x="20" y="28" width="160" height="328" rx="30"/>
   <rect class="secondary" x="32" y="40" width="136" height="304" rx="20"/>
   <rect class="dark" x="44" y="56" width="112" height="64" rx="6"/>
   <rect class="lcd" x="49" y="61" width="102" height="54" rx="3"/>

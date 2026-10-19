@@ -15,6 +15,7 @@
   </style>
   <!-- plain box + large question mark (virtual has the dashed frame) -->
   <rect class="primary" x="10" y="10" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="180" height="180" rx="24"/>
+  <rect class="primary" x="10" y="10" width="180" height="180" rx="24"/>
   <rect class="secondary" x="26" y="26" width="148" height="148" rx="16"/>
   <circle class="light" cx="100" cy="94" r="46" fill-opacity="0.15"/>
   <text x="100" y="134" text-anchor="middle" style="font-weight: bold; font-size: 110px; font-family: sans-serif;fill:#E6E8EA">?</text>

@@ -16,6 +16,7 @@
   <!-- dashed outline: not a physical device -->
   <rect x="8" y="8" width="184" height="184" rx="24" fill="none" stroke="#FF00FF" stroke-width="6" stroke-dasharray="16 10"/>
   <rect class="secondary" x="24" y="24" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="152" height="152" rx="16"/>
+  <rect class="secondary" x="24" y="24" width="152" height="152" rx="16"/>
   <rect class="dark" x="40" y="44" width="120" height="58" rx="6"/>
   <rect class="lcd" x="45" y="49" width="110" height="48" rx="3"/>
   <text class="lcdtext" style="font-weight:bold;font-family:monospace;font-size:26px" x="100.0" y="82.1" text-anchor="middle">f(x)</text>

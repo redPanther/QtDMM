@@ -11,8 +11,9 @@
   </style>
   <!-- holster -->
   <rect class="primary" x="4" y="4" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" width="192" height="352" rx="28"/>
+  <rect class="primary" x="4" y="4" width="192" height="352" rx="28"/>
   <!-- face -->
-  <rect class="secondary" x="18" y="18" width="164" height="324" rx="16"/>
+  <rect class="secondary" x="28" y="24" width="144" height="312" rx="14"/>
   <!-- LCD -->
   <rect class="dark" x="30" y="32" width="140" height="70" rx="6"/>
   <rect class="lcd" x="35" y="37" width="130" height="60" rx="3"/>

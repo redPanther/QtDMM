@@ -10,8 +10,10 @@
   </style>
   <!-- heatsink sticking out left/right (notched) -->
   <path class="sink" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" d="M4 14 H296 V60 h-6 v8 h6 V150 h-6 v8 h6 V206 H4 V158 h6 v-8 h-6 V68 h6 v-8 h-6 Z"/>
+  <path class="sink" d="M4 14 H296 V60 h-6 v8 h6 V150 h-6 v8 h6 V206 H4 V158 h6 v-8 h-6 V68 h6 v-8 h-6 Z"/>
   <!-- body -->
   <rect class="primary" stroke="#FFFF00" stroke-width="2" vector-effect="non-scaling-stroke" x="22" y="4" width="256" height="212" rx="18"/>
+  <rect class="primary" x="22" y="4" width="256" height="212" rx="18"/>
   <path class="seam" d="M58 10 V210 M242 10 V210"/>
   <!-- logo + text (bars, no lettering) -->
   <rect class="light" x="72" y="34" width="56" height="10" rx="5"/>
