@@ -2479,17 +2479,17 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>Wykres zapisany do %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="768"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="791"/>
         <source>%1 off: the %2 axis shows %3 now</source>
         <translation>%1 wyłączone: oś %2 pokazuje teraz %3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="792"/>
         <source>right</source>
         <translation>prawa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="792"/>
         <source>left</source>
         <translation>lewa</translation>
     </message>

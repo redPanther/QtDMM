@@ -2479,17 +2479,17 @@ und melden Sie sich danach ab und wieder an.</translation>
         <translation>Diagramm nach %1 geschrieben</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="768"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="791"/>
         <source>%1 off: the %2 axis shows %3 now</source>
         <translation>%1 aus: die %2 Achse zeigt jetzt %3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="792"/>
         <source>right</source>
         <translation>rechte</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="792"/>
         <source>left</source>
         <translation>linke</translation>
     </message>

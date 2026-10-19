@@ -2479,17 +2479,17 @@ y cierre la sesión y vuelva a entrar.</translation>
         <translation>Gráfica escrita en %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="768"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="791"/>
         <source>%1 off: the %2 axis shows %3 now</source>
         <translation>%1 desactivado: el eje %2 muestra ahora %3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="792"/>
         <source>right</source>
         <translation>derecho</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="792"/>
         <source>left</source>
         <translation>izquierdo</translation>
     </message>
