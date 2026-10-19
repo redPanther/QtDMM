@@ -30,6 +30,14 @@ const QBluetoothUuid kIenvService(quint16(0xFF12));
 const QBluetoothUuid kIenvNotify(quint16(0xFF02));
 const QBluetoothUuid kIenvWrite(quint16(0xFF01));
 
+// APPA's Bluetooth meters (S0-S3, 150B, 170B, A17N, sFlex, 208B, 506B) and
+// their BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram twins: the 0xFFF0
+// service of many BLE UART modules (libsigrok serial_bt.c,
+// SER_BT_CONN_APPADMM: notify 0xFFF1, write 0xFFF2)
+const QBluetoothUuid kFff0Service(quint16(0xFFF0));
+const QBluetoothUuid kFff0Notify(quint16(0xFFF1));
+const QBluetoothUuid kFff0Write(quint16(0xFFF2));
+
 // connecting and finding the characteristics takes a second or two; a
 // meter that is switched off or out of range never answers
 constexpr int kConnectTimeoutMs = 20000;
@@ -62,9 +70,26 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       // has it
       return Profile{ kIsscService, kIsscNotify, { kIsscWrite, kIsscWriteFallback }, { "UT202BT" },
                       QByteArray::fromHex("abcd035f01da") };
+    case FrameFormat::AppaDmm:
+      // the names the meters advertise, from libsigrok's scan list; Zotek and
+      // OWON meters have the same service, so the name decides
+      return Profile{ kFff0Service, kFff0Notify, { kFff0Write },
+                      { "APPA ", "BENNING ", "KPS DMM", "KPS DCM", "MEGGER DCM", "MEGGER DPM", "METRAVI PRO",
+                        "RS PRO ", "Sefram 72", "Sefram 7352B", "Sefram MW35" },
+                      QByteArray(), true };
     default:
       return std::nullopt;
   }
+}
+
+bool BleGattDevice::Profile::matches(const QString &name, const QList<QBluetoothUuid> &services) const
+{
+  if (!byNameOnly && services.contains(service))
+    return true;
+  for (const QString &prefix : namePrefixes)
+    if (name.startsWith(prefix, Qt::CaseInsensitive))
+      return true;
+  return false;
 }
 
 BleGattDevice::BleGattDevice(const DmmDecoder::DMMInfo &info, const QString &device, QObject *parent)
@@ -356,11 +381,7 @@ QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms)
     const QString address = info.address().toString().toUpper();
     if (seen.contains(address))
       return;
-    bool match = info.serviceUuids().contains(p->service);
-    for (const QString &prefix : p->namePrefixes)
-      if (info.name().startsWith(prefix, Qt::CaseInsensitive))
-        match = true;
-    if (!match)
+    if (!p->matches(info.name(), info.serviceUuids()))
       return;
     seen.insert(address);
     found << address + ' ' + info.name();

@@ -61,6 +61,21 @@ QStringList Families::vendorModels(const QString &vendor)
 
 QStringList Families::preferByName(QStringList models, const QString &deviceName)
 {
+  // the model the device names itself ("BENNING MM10-1" is "BENNING MM 10-1 *",
+  // "KPS DMM9000BT" the "(Bluetooth)" entry), else the first word
+  auto plain = [](QString name)
+  {
+    name.remove(QLatin1String(" (Bluetooth)"));
+    if (name.endsWith(QLatin1String(" *")))
+      name.chop(2);
+    return name.remove(' ').toLower();
+  };
+  for (int i = 0; i < models.size(); ++i)
+    if (!deviceName.isEmpty() && plain(models[i]) == plain(deviceName))
+    {
+      models.move(i, 0);
+      return models;
+    }
   const QString word = deviceName.section(' ', 0, 0);
   if (word.isEmpty())
     return models;
@@ -343,12 +358,10 @@ void BleDiscoverer::start()
         const auto profile = BleGattDevice::profile(FrameFormat::DataFormat(f));
         if (!profile)
           continue;
-        bool match = info.serviceUuids().contains(profile->service);
-        for (const QString &prefix : profile->namePrefixes)
-          match = match || info.name().startsWith(prefix, Qt::CaseInsensitive);
-        if (match)
+        if (profile->matches(info.name(), info.serviceUuids()))
           c.models += Families::models(FrameFormat::DataFormat(f), false);
       }
+      c.models = Families::preferByName(c.models, info.name());
       if (c.models.isEmpty())
         return;
       c.title = info.name().isEmpty() ? QCoreApplication::translate("Discovery", "Bluetooth meter") : info.name();

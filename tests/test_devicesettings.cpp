@@ -9,6 +9,9 @@
 #include <tuple>
 
 #include "ui/devicesettings.h"
+#ifdef QTDMM_WITH_BLE
+#include "device/transports/blegatt.h"
+#endif
 #include "device/dmmdecoder.h"
 #include "testutil.h"
 
@@ -126,6 +129,31 @@ int main(int argc, char **argv)
     check(w.keys().value("Port settings/ble-third") == third && w.keys().value("Port settings/ble-fourth") == fourth,
           "Victron: third and fourth kept");
   }
+
+#ifdef QTDMM_WITH_BLE
+  // 6a. APPA over Bluetooth LE: a GATT meter, the address alone; the same
+  // meter on the optical cable stays a serial one
+  w.load({{"DMM/model", "APPA S1 *"}, {"Port settings/device", "blegatt AA:BB:CC:DD:EE:01"},
+          {"Port settings/ble-address", "AA:BB:CC:DD:EE:01 APPA S1"}});
+  check(w.isGatt() && shown(w, "ui_bleGroup") && !shown(w, "ui_bleKey") && w.device() == "blegatt AA:BB:CC:DD:EE:01",
+        "APPA S1: Bluetooth, address only: " + w.device());
+  check(w.framesPerReading() == 1 && w.valueCount() == 2, "APPA S1: one frame, main and sub display");
+  w.load({{"DMM/model", "APPA 506B *"}, {"Port settings/device", "/dev/ttyUSB0"}});
+  check(!w.isBluetooth() && w.device() == "/dev/ttyUSB0", "APPA 506B on the cable: serial");
+  w.load({{"DMM/model", "APPA 506B (Bluetooth) *"}, {"Port settings/ble-address", "AA:BB:CC:DD:EE:02"}});
+  check(w.isGatt(), "APPA 506B (Bluetooth): GATT");
+  {
+    // the 0xFFF0 service is shared (Zotek, OWON): an APPA by its name only
+    const auto appa = BleGattDevice::profile(FrameFormat::AppaDmm);
+    const QList<QBluetoothUuid> fff0 { QBluetoothUuid(quint16(0xFFF0)) };
+    check(appa && appa->matches("APPA S2", fff0) && appa->matches("BENNING MM10-1", {}) && appa->matches("Sefram 7221", {})
+          && !appa->matches("OWON B41T+", fff0) && !appa->matches("", fff0),
+          "APPA profile: by name, not by the shared service");
+    const auto ut60 = BleGattDevice::profile(FrameFormat::UniTiDMM);
+    check(ut60 && ut60->matches("", { ut60->service }) && ut60->matches("UT60BT", {}), "UT60BT: by service or name");
+    check(!BleGattDevice::profile(FrameFormat::Appa500), "APPA 500 protocol: no Bluetooth");
+  }
+#endif
 
   // 6b. sigrok: the driver of the stored port string, also a typed one
   // (manual settings have no model driver)

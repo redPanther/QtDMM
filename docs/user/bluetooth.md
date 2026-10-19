@@ -3,8 +3,10 @@
 QtDMM reads two kinds of Bluetooth LE meters:
 
 - **UNI-T UT60BT** (and, untested, the UT161B/D/E and the UT61B+/D+/E+
-  with the UT-D07B adapter) - QtDMM *connects* to the meter and asks it for
-  readings, like a serial meter on a cable.
+  with the UT-D07B adapter) and, untested, the **APPA** Bluetooth meters
+  and their BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram twins - QtDMM
+  *connects* to the meter and asks it for readings, like a serial meter on
+  a cable.
 - **Victron** SmartShunt, BMV-712, MPPT chargers and Phoenix inverters - QtDMM
   *listens* to the readings they broadcast, without a connection.
 
@@ -61,6 +63,27 @@ of UNI-T's own app (preserved by the
 [unit_ut61eplus](https://github.com/ljakob/unit_ut61eplus) project) and agree
 with [ut61xpy](https://github.com/olegv142/ut61xpy); the same tables confirm
 what a UT60BT sends. Please report how it works for you.
+
+## APPA and relatives
+
+The APPA meters with Bluetooth - the S0 to S3, the 150B (155B to 158B), the
+170B clamps (172B to 179B), A17N, sFlex-10A/18A, and the 208B and 506B -
+speak over Bluetooth the same protocol as on their optical cable, and so do
+the meters APPA builds for BENNING (MM 10, MM 12, CM 9 to CM 12), KPS,
+MEGGER, METRAVI, RS PRO and Sefram. Choose the vendor and the model - for
+the 208B, 506B, BENNING MM 12, KPS DMM9000BT and Sefram 7352B the entry
+*(Bluetooth)*, the other one is for the cable - and set it up like the
+UT60BT above. The main display is the reading, the sub display the second
+value.
+
+**Scan** and **Add device** know them by the name they advertise ("APPA S1",
+"BENNING MM10-1", ...): their Bluetooth module offers a service many other
+meters have as well, so a meter that advertises another name is not
+offered.
+
+Not tried with a real meter yet: the Bluetooth details come from the
+appa-dmm driver of libsigrok (Martin Eitzenberger's branch), the display
+counts from the data sheets. Please report how it works for you.
 
 ## Victron Instant Readout
 

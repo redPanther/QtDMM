@@ -43,18 +43,43 @@ meter working, please report it on the
 | Agilent | U1271A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | Agilent | U1272A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | Agilent | U1273A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| APPA | 155B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
+| APPA | 156B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
+| APPA | 157B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
+| APPA | 158B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
+| APPA | 172B ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | 173B ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | 175B ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | 177B ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | 179B ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
 | APPA | 208 ¹ | Bench multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 208B (Bluetooth) ¹ | Bench multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | APPA | 208B ¹ | Bench multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | APPA | 501 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 40000 |
 | APPA | 502 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 40000 |
 | APPA | 503 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
 | APPA | 505 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
 | APPA | 506 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| APPA | 506B (Bluetooth) ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | APPA | 506B ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | APPA | 507 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | APPA | 71 ¹ | Handheld multimeter | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
 | APPA | 73 ¹ | Handheld multimeter | ES51986 | `CyrustekES51986` | 19200 7O1 | DTR | 6000 |
+| APPA | A17N ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | S0 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | S1 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | S2 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | S3 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | sFlex-10A ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| APPA | sFlex-18A ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
 | Benetech | GM1020 ¹ | Luxmeter | - | `BenetechGM1020` | 19200 8N1 | - | 4000 |
+| BENNING | CM 10-1 ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| BENNING | CM 10-PV ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| BENNING | CM 12 ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| BENNING | CM 9-2 ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| BENNING | MM 10-1 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| BENNING | MM 10-PV ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| BENNING | MM 12 (Bluetooth) ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | BENNING | MM 12 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | Brymen | BM250 ¹ | Handheld multimeter | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
 | Brymen | BM251 ¹ | Handheld multimeter | Brymen BM25x | `BrymenBM25x` | 9600 8N1 | DTR RTS | 6000 |
@@ -113,6 +138,10 @@ meter working, please report it on the
 | Keysight | U1273AX ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | Keysight | U1281A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
 | Keysight | U1282A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 60000 |
+| KPS | DCM7000BT ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| KPS | DCM8000BT ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| KPS | DMM3500BT ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| KPS | DMM9000BT (Bluetooth) ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | KPS | DMM9000BT ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
 | MASTECH | M9803R | Handheld multimeter | - | `M9803RContinuous` | 9600 7E1 | DTR | 4000 |
 | MASTECH | MAS-343 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
@@ -121,6 +150,8 @@ meter working, please report it on the
 | MASTECH | MS8250B ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | McVoice | M-345pro | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | McVoice | M-980T | Handheld multimeter | - | `M9803RContinuous` | 9600 7N1 | DTR | 4000 |
+| Megger | DCM1500S ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| Megger | DPM1000 ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
 | Metex | M-3360D ¹ | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
 | Metex | M-3640D ¹ | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
 | Metex | M-3660D | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
@@ -137,6 +168,7 @@ meter working, please report it on the
 | Metex | ME-42 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | Metex | Universal System 9140 ¹ | Bench multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
 | Metex | universal system 9160 | Bench multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| Metravi | PRO Solar-1 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
 | Metrel | MD9015 ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | PCE | PCE-DM32 ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | PeakTech | 2025 ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
@@ -153,9 +185,23 @@ meter working, please report it on the
 | Radioshack | 22-805 DMM | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
 | Radioshack | 22-812 | Handheld multimeter | - | `RS22812Continuous` | 4800 8N1 | DTR | 4000 |
 | Radioshack | RS22-168A | Handheld multimeter | Metex KS57C2016 | `Metex14` | 1200 7N2 | DTR | 4000 |
+| RS PRO | 155B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
+| RS PRO | 156B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
+| RS PRO | 157B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
+| RS PRO | 158B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
+| RS PRO | S1 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| RS PRO | S2 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| RS PRO | S3 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
 | Sanwa | PC7000 ¹ | Handheld multimeter | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
+| Sefram | 7220 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| Sefram | 7221 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| Sefram | 7223 ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
 | Sefram | 7351 ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| Sefram | 7352B (Bluetooth) ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | Sefram | 7352B ¹ | Handheld multimeter | - | `AppaDmm` | 9600 8N1 | - | 50000 |
+| Sefram | MW3516BF ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| Sefram | MW3526BF ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
+| Sefram | MW3536BF ¹ | Clamp meter | - | `AppaDmm` | Bluetooth LE | - | 6000 |
 | Siglent | SDM3055 (sigrok) ¹ | Bench multimeter | - | `Sigrok` | sigrok-cli | - | 200000 |
 | sigrok | SCPI DMM (any scpi-dmm model) ¹ | Generic | - | `Sigrok` | sigrok-cli | - | 100000 |
 | Sinometer | MAS-343 | Handheld multimeter | Metex KS57C2016 | `Metex14` | 600 7N2 | DTR | 4000 |
@@ -259,6 +305,6 @@ meter working, please report it on the
 - **Generic DTM0660 4000 count, DTM0660 6000 count, DTM0660 8000 count**: the DTM0660 chip has a UART, but meters built on it (Victor VC921 and similar) ship without an interface: an IR LED with a 100 Ω resistor goes on the chip's TX pin and the RS232 bit in the 24C02 EEPROM has to be set - [eevblog: hacking the Victor VC-921](https://www.eevblog.com/forum/testgear/hacking-the-victor-vc-921/). PeakTech 3415 and Velleman DVM4100 use the same chip but come with a cable and need no change.
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
-227 devices across 48 vendors.
+273 devices across 51 vendors.
 
-By type: Handheld multimeter 177, Bench multimeter 25, Thermometer 6, Air quality meter 5, Generic 4, Luxmeter 3, Battery monitor 2, Solar charge controller 2, Clamp meter 1, Inverter 1, Sound level meter 1.
+By type: Handheld multimeter 203, Bench multimeter 26, Clamp meter 20, Thermometer 6, Air quality meter 5, Generic 4, Luxmeter 3, Battery monitor 2, Solar charge controller 2, Inverter 1, Sound level meter 1.
