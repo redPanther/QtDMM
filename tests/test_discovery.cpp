@@ -109,7 +109,7 @@ int main(int argc, char **argv)
     QTemporaryDir dir;
     const QString path = dir.path() + "/hidraw3";
     QFile f(path);
-    f.open(QIODevice::WriteOnly);
+    check(f.open(QIODevice::WriteOnly), "access: the device file written");
     f.close();
     check(accessProblem(path, true, 0x1a86, 0xe008).problem.isEmpty(), "access: a readable device is fine");
     f.setPermissions(QFileDevice::ReadOther);
