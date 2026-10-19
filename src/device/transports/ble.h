@@ -46,7 +46,7 @@ private:
 
   QString m_address;
   QByteArray m_key;
-  QString m_mainField, m_secondField;
+  QStringList m_fields;   ///< main, second (, third, fourth) value: field ids, "-" for none
   QBluetoothDeviceDiscoveryAgent *m_agent = nullptr;
   int m_lastIv = -1;
   int m_keyMismatches = 0;

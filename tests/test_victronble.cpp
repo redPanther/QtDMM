@@ -55,7 +55,7 @@ int main(int argc, char **argv)
       check(r->main().val == "12.53" && r->main().unit == "V", "the voltage that is there is shown: " + r->main().val);
       check(second(*r).val.isEmpty() || second(*r).val == "---", "the truncated current is not: '" + second(*r).val + "'");
     }
-    const auto sc = d.decode(VictronBle::frame(VictronBle::SolarCharger, QByteArray::fromHex("0000e504"), "V", "I"), 0);
+    const auto sc = d.decode(VictronBle::frame(VictronBle::SolarCharger, QByteArray::fromHex("0000e504"), {"V", "I"}), 0);
     check(sc.has_value() && (second(*sc).val.isEmpty() || second(*sc).val == "---"), "solar charger: truncated current is not shown");
   }
 
@@ -144,13 +144,13 @@ int main(int argc, char **argv)
     // the SmartShunt vector again: 12.53 V, 0 A, SOC 50 %, -50 Ah consumed
     const auto parsed = VictronBle::parse(QByteArray::fromHex("100289a302b040af925d09a4d89aa0128bdef48c6298a9"));
     const auto plain = VictronBle::decrypt(*parsed, VictronBle::keyFromHex("aff4d0995b7d1e176c0c33ecb9e70dcd"));
-    const auto soc = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, "SOC", "AH"), 0);
+    const auto soc = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, {"SOC", "AH"}), 0);
     check(soc && qFuzzyCompare(soc->main().dval, 50.0) && soc->main().val == "50.0" && soc->main().unit == "%",
           QString("SOC as main value: %1 %2").arg(soc ? soc->main().val : "-", soc ? soc->main().unit : "-"));
     check(soc && second(*soc).id == 1 && qFuzzyCompare(second(*soc).dval, -50.0) && second(*soc).unit == "Ah", "consumed Ah as second value");
-    const auto none = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, "P", "-"), 0);
+    const auto none = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, {"P", "-"}), 0);
     check(none && second(*none).id == 1 && second(*none).val.isEmpty() && none->main().unit == "W" && qFuzzyCompare(none->main().dval + 1, 1.0), "power main, no second value");
-    check(!decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, "NOPE", "V"), 0).has_value(),
+    check(!decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, {"NOPE", "V"}), 0).has_value(),
           "unknown field id gives nothing");
     const QList<DecoderVictronBLE::Value> all = DecoderVictronBLE::values(VictronBle::BatteryMonitor, *plain);
     check(all.size() == 7 && all[0].id == "V" && all[6].id == "AUX", "battery monitor has seven fields");
@@ -160,7 +160,25 @@ int main(int argc, char **argv)
           && VictronBle::readoutTypeForModel("SmartSolar MPPT") == VictronBle::SolarCharger
           && VictronBle::readoutTypeForModel("Phoenix Inverter Smart") == VictronBle::Inverter
           && VictronBle::readoutTypeForModel("UT61E") == 0, "readout type from model name");
-    check(VictronBle::frame(2, QByteArray::fromHex("aa"), "V", "") == "02aa V -\n", "frame with fields: " + VictronBle::frame(2, QByteArray::fromHex("aa"), "V", ""));
+    check(VictronBle::frame(2, QByteArray::fromHex("aa"), {"V", ""}) == "02aa V -\n", "frame with fields: " + VictronBle::frame(2, QByteArray::fromHex("aa"), {"V", ""}));
+    check(VictronBle::frame(2, QByteArray::fromHex("aa"), {"V", "I", "-", "SOC"}) == "02aa V I - SOC\n",
+          "frame with four fields: " + VictronBle::frame(2, QByteArray::fromHex("aa"), {"V", "I", "-", "SOC"}));
+    // a third and fourth value, when chosen; the fourth alone keeps its id 3
+    auto ids = [](const std::optional<DmmDecoder::DmmResponse> &r)
+    {
+      QStringList out;
+      for (const DmmDecoder::DmmChannel &c : r ? r->channels : QVector<DmmDecoder::DmmChannel>{})
+        out << QString("%1:%2%3").arg(c.id).arg(c.val, c.unit);
+      return out.join(' ');
+    };
+    const auto four = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, {"V", "I", "SOC", "AH"}), 0);
+    check(ids(four) == "0:12.53V 1:0.000A 2:50.0% 3:-50.0Ah", "four fields: " + ids(four));
+    const auto third = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, {"V", "-", "SOC", "-"}), 0);
+    check(ids(third) == "0:12.53V 1: 2:50.0%", "third field alone: " + ids(third));
+    const auto fourth = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, {"V", "I", "-", "SOC"}), 0);
+    check(ids(fourth) == "0:12.53V 1:0.000A 2: 3:50.0%", "fourth field alone: " + ids(fourth));
+    const auto two = decoder.decode(VictronBle::frame(VictronBle::BatteryMonitor, *plain, {"V", "I", "-", "-"}), 0);
+    check(ids(two) == "0:12.53V 1:0.000A", "third and fourth none: two values, got " + ids(two));
   }
 
   // --- 5. other records and junk ---

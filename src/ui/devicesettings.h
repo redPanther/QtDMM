@@ -142,8 +142,14 @@ protected Q_SLOTS:
   void           updateVirtualFormula();
   /// Validates address and key, explains what is missing.
   void           updateBleHint();
-  /// Fills the main/second value combos with the fields of the chosen model.
+  /// Fills the main/second/third/fourth value combos with the fields of the
+  /// chosen model.
   void           updateBleFields();
+  /// The field id a Victron value combo has chosen, "-" for none.
+  static QString bleField(const QComboBox *combo);
+  /// How many of the third and fourth value are chosen: 2 when the fourth
+  /// is (the third then comes as empty value), 1 for the third alone.
+  int            bleExtraValues() const;
   /// Five-second scan for Victron devices, fills the device combo.
   void           on_ui_bleScan_clicked();
   /// Checks sigrok-cli and the driver, explains what is missing.

@@ -6,6 +6,7 @@
 // group of each kind of meter instead of the port.
 
 #include <QtWidgets>
+#include <tuple>
 
 #include "ui/devicesettings.h"
 #include "device/dmmdecoder.h"
@@ -108,6 +109,22 @@ int main(int argc, char **argv)
             {"Port settings/ble-main", main}, {"Port settings/ble-second", second}});
     const QString fields = w.device().section(' ', 3);
     check(fields == QString("%1 %2").arg(main, second), QString("Victron: values %1 %2, got %3").arg(main, second, fields));
+  }
+  // a third and fourth value: in the port string only when chosen, and the
+  // number of values follows them
+  check(w.valueCount() == 2 && w.keys().value("Port settings/ble-third") == "-", "Victron: no third value at first");
+  for (const auto &[third, fourth, tail, count] : { std::tuple{"SOC", "-", "P V SOC -", 3}, std::tuple{"-", "AH", "P V - AH", 4},
+                                                   std::tuple{"SOC", "AH", "P V SOC AH", 4}, std::tuple{"-", "-", "P V", 2} })
+  {
+    w.load({{"DMM/model", "Victron SmartShunt"}, {"Port settings/device", "ble AA:BB:CC:DD:EE:FF"},
+            {"Port settings/ble-address", "AA:BB:CC:DD:EE:FF"}, {"Port settings/ble-key", "00112233445566778899aabbccddeeff"},
+            {"Port settings/ble-main", "P"}, {"Port settings/ble-second", "V"},
+            {"Port settings/ble-third", third}, {"Port settings/ble-fourth", fourth}});
+    const QString fields = w.device().section(' ', 3);
+    check(fields == tail && w.valueCount() == count,
+          QString("Victron: %1 %2 gives \"%3\" and %4 values").arg(third, fourth, fields).arg(w.valueCount()));
+    check(w.keys().value("Port settings/ble-third") == third && w.keys().value("Port settings/ble-fourth") == fourth,
+          "Victron: third and fourth kept");
   }
 
   // 6b. sigrok: the driver of the stored port string, also a typed one

@@ -825,7 +825,41 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="ui_bleThirdLabel">
+        <property name="text">
+         <string>T&amp;hird value:</string>
+        </property>
+        <property name="buddy">
+         <cstring>ui_bleThird</cstring>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="1" colspan="2">
+       <widget class="QComboBox" name="ui_bleThird">
+        <property name="whatsThis">
+         <string>A third value, on the display's second line after the second one.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="ui_bleFourthLabel">
+        <property name="text">
+         <string>Fourth valu&amp;e:</string>
+        </property>
+        <property name="buddy">
+         <cstring>ui_bleFourth</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="2">
+       <widget class="QComboBox" name="ui_bleFourth">
+        <property name="whatsThis">
+         <string>A fourth value, on the display's second line after the third one.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1" colspan="2">
        <widget class="QLabel" name="ui_bleHint">
         <property name="text">
          <string notr="true"/>

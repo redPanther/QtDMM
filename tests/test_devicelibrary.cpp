@@ -148,6 +148,7 @@ int main(int argc, char **argv)
                                    { "Port settings/ble-address", "18:90:67:00:00:01 UT60BT" },
                                    { "Port settings/ble-key", "0123456789abcdef0123456789abcdef" },
                                    { "Port settings/ble-main", "PV" }, { "Port settings/ble-second", "V" },
+                                   { "Port settings/ble-third", "-" }, { "Port settings/ble-fourth", "I" },
                                    { "Port settings/sigrok-conn", "" }, { "DMM/my-device", "abc" } };
     QStringList serial = DeviceLibrary::entryKeys(snapshot).keys();
     check(serial.join(',') == "DMM/data-format,DMM/display,DMM/dtr,DMM/external-setup,DMM/model,DMM/number-of-values,"
@@ -159,7 +160,8 @@ int main(int argc, char **argv)
     victron.insert("Port settings/device", "ble 18:90:67:00:00:01");
     const QStringList ble = DeviceLibrary::entryKeys(victron).keys();
     check(ble.join(',') == "DMM/data-format,DMM/display,DMM/model,DMM/number-of-values,Port settings/ble-address,"
-                           "Port settings/ble-key,Port settings/ble-main,Port settings/ble-second,Port settings/device",
+                           "Port settings/ble-fourth,Port settings/ble-key,Port settings/ble-main,Port settings/ble-second,"
+                           "Port settings/ble-third,Port settings/device",
           "entry: Victron, got " + ble.join(','));
     QVariantMap gatt = snapshot;
     gatt.insert("DMM/model", "Uni-Trend UT60BT");

@@ -51,7 +51,8 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
   DmmChannel &secondValue = m_result.addChannel(1);
   m_result.showBar = true;
 
-  // "<type hex><plaintext hex> [<main> <second>]\n", see VictronBle::frame()
+  // "<type hex><plaintext hex> [<main> <second> [<third> <fourth>]]\n", see
+  // VictronBle::frame()
   const QList<QByteArray> parts = data.trimmed().split(' ');
   const QByteArray bytes = QByteArray::fromHex(parts.value(0));
   if (bytes.size() < 2)
@@ -66,7 +67,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
     for (const Value &v : all)
       if (!wanted.isEmpty() && v.id == wanted)
         return &v;
-    return wanted.isEmpty() && fallback < all.size() ? &all[fallback] : nullptr;
+    return wanted.isEmpty() && fallback >= 0 && fallback < all.size() ? &all[fallback] : nullptr;
   };
   const Value *main = pick(QString::fromLatin1(parts.value(1)), 0);
   const QString secondId = QString::fromLatin1(parts.value(2));
@@ -78,12 +79,23 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
   m_result.main().val = main->val;
   m_result.main().unit = main->unit;
   m_result.main().special = main->special;
-  if (second && second->valid)
+  auto fill = [](DmmChannel &c, const Value *v)
   {
-    secondValue.dval = second->dval;
-    secondValue.val = second->val;
-    secondValue.unit = second->unit;
-  }
+    if (!v || !v->valid)
+      return;   // none chosen, or no reading for it now: the display cleared
+    c.dval = v->dval;
+    c.val = v->val;
+    c.unit = v->unit;
+  };
+  fill(secondValue, second);
+  // the third and fourth value only when chosen; the fourth alone brings an
+  // empty third, so its id stays 3
+  const QString thirdId = QString::fromLatin1(parts.value(3)), fourthId = QString::fromLatin1(parts.value(4));
+  auto chosen = [](const QString &id) { return !id.isEmpty() && id != "-"; };
+  if (chosen(thirdId) || chosen(fourthId))
+    fill(m_result.addChannel(2), chosen(thirdId) ? pick(thirdId, -1) : nullptr);
+  if (chosen(fourthId))
+    fill(m_result.addChannel(3), pick(fourthId, -1));
   return m_result;
 }
 
