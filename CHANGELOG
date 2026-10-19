@@ -96,9 +96,9 @@
   is told by the table apart from that; a meter with both values in one frame no longer counts its frames
 - Benetech GM1020: the temperature shows as second value (it came along, but only SCPI had it). Tenma 72-1016:
   no second value any more; it was the copy of the main value the meter sends with every reading
-- A meter can have four values (the main one and three on the small line of the display): the Metex M-3850D
-  and its relatives show all four lines they send, the views' value menus, the alarms and SCPI (@4) offer the
-  fourth. A meter set up by hand shows as many values as it sends, not only as many as its lines per reading
+- A meter can have four values (the main one and three more; the display's small line shows two, any of them
+  can be the big one): the Metex M-3850D and its relatives keep all four lines they send, the views' value
+  menus, the alarms and SCPI (@4) offer the fourth. A meter set up by hand shows as many values as it sends, not only as many as its lines per reading
 - Victron: a third and a fourth value besides the main and the second one (device settings, none at first), on
   the display's small line, in the graph and the export
 - Readings table and its export: the third and fourth value of a meter are marked 3rd and 4th in the Mode column,
