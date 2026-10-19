@@ -106,6 +106,10 @@
 - APPA over Bluetooth LE (not tried with a real meter yet): the S0-S3, 155B-158B, the 170B clamps, A17N, sFlex,
   208B and 506B, and the BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram meters built on them; found by the
   name they advertise, as their Bluetooth service is a common one
+- ZOTEK Bluetooth meters (not tried with a real meter yet): ZT-5B, ZT-5BQ, ZT-300AB and ZT-5566SE, sold also as
+  ZOYI, BSIDE and ANENG (V05B, ST207, AN9002, AN999S), with the keys of ZOTEK's app. They all advertise as
+  "Bluetooth DMM": Add device listens to the meter found and chooses the model its first reading names
+- SCPI: QTDMM:KEY knows the UT202BT's function keys (V~, A~, Ω, NCV/PEAK) as well; they were only under the display
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

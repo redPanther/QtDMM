@@ -179,6 +179,11 @@ ft/min, knots, mph; not on the UT333BT). The UT333BT and UT363BT also have
 has told the unit. The display shows MAX, MIN and AVG as the meter
 reports them. The keys are tried on the UT333BT.
 
+The ZOTEK meters (ZOYI, BSIDE, ANENG) have the keys of ZOTEK's app, each
+choosing its function: on the ZT-5B and ZT-5BQ AUTO, CAP, Diode, NCV, Hz,
+°C/°F, HOLD and ZERO (in capacitance), on the ZT-300AB MIN/MAX, on the
+ZT-5566SE MIN/MAX and HOLD ([Bluetooth](bluetooth.md)).
+
 The small triangle in the display's top right corner,
 or **Hide controls** in its right-click menu, folds the row away.
 

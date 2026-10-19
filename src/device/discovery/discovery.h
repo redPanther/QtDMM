@@ -6,10 +6,14 @@
 #include <QStringList>
 #include <QTimer>
 #include <QVariantMap>
+#include <memory>
 
 #include "device/frameformat.h"
 
+class DmmDecoder;
+class FrameReader;
 class MdnsBrowser;
+class QIODevice;
 
 /// One thing a search found: a meter, a cable of a meter family, a serial
 /// port, a bridge - with what is known about which meters it can be.
@@ -38,6 +42,9 @@ struct Candidate
   QString     problem;
   /// How to fix the problem, with the commands.
   QString     fix;
+  /// A protocol whose frames tell the models apart (DmmDecoder::tellsModel()):
+  /// a FrameProbe on it finds out which of models it is. Invalid: none.
+  FrameFormat::DataFormat probe = FrameFormat::Invalid;
 };
 Q_DECLARE_METATYPE(Candidate)
 
@@ -125,6 +132,39 @@ public:
 
 private:
   MdnsBrowser *m_browser = nullptr;
+};
+
+/// Listens to a meter for its first frame and reports the models the frame
+/// names (DmmDecoder::modelsFromFrame()): which of the meters that share a
+/// Bluetooth name it is. Takes the port, opens it and closes it when done.
+class FrameProbe : public QObject
+{
+  Q_OBJECT
+public:
+  FrameProbe(QIODevice *port, FrameFormat::DataFormat format, QObject *parent = nullptr);
+  ~FrameProbe() override;
+  /// Opens the port and listens, at most @p timeoutMs.
+  void        start(int timeoutMs = kTimeoutMs);
+  /// A Bluetooth link takes about five seconds to set up, then the ZOTEK
+  /// meters send three packets a second.
+  static constexpr int kTimeoutMs = 15000;
+  /// The port of a Bluetooth find: a GATT link to its address for its first
+  /// model's protocol; null in a build without Bluetooth.
+  static QIODevice *blePort(const Candidate &candidate);
+
+Q_SIGNALS:
+  /// Once: the models, the likeliest first; empty when no frame came in
+  /// time, the link failed or the frame names none.
+  void        finished(const QStringList &models);
+
+private:
+  void        finish(const QStringList &models);
+
+  QIODevice  *m_port = nullptr;
+  FrameReader *m_reader = nullptr;
+  std::shared_ptr<DmmDecoder> m_decoder;
+  QTimer      m_timeout;
+  bool        m_done = false;
 };
 
 /// Bluetooth LE: one scan for the GATT meters and the Victron devices.

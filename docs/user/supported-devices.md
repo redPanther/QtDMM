@@ -43,6 +43,10 @@ meter working, please report it on the
 | Agilent | U1271A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | Agilent | U1272A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
 | Agilent | U1273A ¹ | Handheld multimeter | - | `KeysightU12xx` | 9600 8N1 | - | 30000 |
+| ANENG | AN9002 ¹ | Handheld multimeter | - | `ZotekBLE` | Bluetooth LE | - | 6000 |
+| ANENG | AN999S ¹ | Bench multimeter | - | `ZotekBLE` | Bluetooth LE | - | 20000 |
+| ANENG | ST207 ¹ | Clamp meter | - | `ZotekBLE` | Bluetooth LE | - | 6000 |
+| ANENG | V05B ¹ | Handheld multimeter | - | `ZotekBLE` | Bluetooth LE | - | 6000 |
 | APPA | 155B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | APPA | 156B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | APPA | 157B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
@@ -297,6 +301,10 @@ meter working, please report it on the
 | Voltcraft | VC 950 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
 | Voltcraft | VC 960 | Handheld multimeter | - | `VC940Continuous` | 2400 7O1 | DTR | 40000 |
 | Wintex | TD2200 | Handheld multimeter | ES51922 | `CyrustekES51922` | 19200 7N1 | DTR | 22000 |
+| ZOTEK | ZT-300AB ¹ | Handheld multimeter | - | `ZotekBLE` | Bluetooth LE | - | 6000 |
+| ZOTEK | ZT-5566SE ¹ | Bench multimeter | - | `ZotekBLE` | Bluetooth LE | - | 20000 |
+| ZOTEK | ZT-5B ¹ | Handheld multimeter | - | `ZotekBLE` | Bluetooth LE | - | 6000 |
+| ZOTEK | ZT-5BQ ¹ | Clamp meter | - | `ZotekBLE` | Bluetooth LE | - | 6000 |
 
 ¹ settings taken from the chip, not yet confirmed on hardware with QtDMM.
 
@@ -305,6 +313,6 @@ meter working, please report it on the
 - **Generic DTM0660 4000 count, DTM0660 6000 count, DTM0660 8000 count**: the DTM0660 chip has a UART, but meters built on it (Victor VC921 and similar) ship without an interface: an IR LED with a 100 Ω resistor goes on the chip's TX pin and the RS232 bit in the 24C02 EEPROM has to be set - [eevblog: hacking the Victor VC-921](https://www.eevblog.com/forum/testgear/hacking-the-victor-vc-921/). PeakTech 3415 and Velleman DVM4100 use the same chip but come with a cable and need no change.
 - **Vichy VC99**: the FS9922-DMM4 chip sends the display at 2400 baud on an unused pin; a wire or IR LED has to be soldered to it and *REL* held to start the output - [Hackaday](https://hackaday.com/2010/11/30/unlocking-rs232-serial-comm-on-a-multimeter/), [David Pilling](https://www.davidpilling.com/wiki/index.php/VC99).
 
-273 devices across 51 vendors.
+281 devices across 53 vendors.
 
-By type: Handheld multimeter 203, Bench multimeter 26, Clamp meter 20, Thermometer 6, Air quality meter 5, Generic 4, Luxmeter 3, Battery monitor 2, Solar charge controller 2, Inverter 1, Sound level meter 1.
+By type: Handheld multimeter 207, Bench multimeter 28, Clamp meter 22, Thermometer 6, Air quality meter 5, Generic 4, Luxmeter 3, Battery monitor 2, Solar charge controller 2, Inverter 1, Sound level meter 1.

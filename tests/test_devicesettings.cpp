@@ -152,6 +152,11 @@ int main(int argc, char **argv)
     const auto ut60 = BleGattDevice::profile(FrameFormat::UniTiDMM);
     check(ut60 && ut60->matches("", { ut60->service }) && ut60->matches("UT60BT", {}), "UT60BT: by service or name");
     check(!BleGattDevice::profile(FrameFormat::Appa500), "APPA 500 protocol: no Bluetooth");
+    // the ZOTEK meters all advertise as "Bluetooth DMM", notify and write on 0xFFF4
+    const auto zotek = BleGattDevice::profile(FrameFormat::ZotekBLE);
+    check(zotek && zotek->matches("Bluetooth DMM", fff0) && !zotek->matches("APPA S2", fff0)
+          && !appa->matches("Bluetooth DMM", fff0) && zotek->notify == QBluetoothUuid(quint16(0xFFF4))
+          && zotek->write.value(0) == zotek->notify, "ZOTEK profile: by its name, 0xFFF4");
   }
 #endif
 

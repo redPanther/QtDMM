@@ -89,6 +89,72 @@ int main(int argc, char **argv)
     expect(ut61plus, "fn_v", "");
     expect(FrameFormat::Metex14, "hold", "");   // no remote control
 
+    // the ZOTEK meters: AB CD 03 <key> 00 00 00 00 <sum>, scrambled with the
+    // packets' key (dmm-tools ZOTEK spec §8: AUTO on air EA EC 70 ED ...)
+    {
+      const FrameFormat::DataFormat zotek = FrameFormat::ZotekBLE;
+      auto z = DmmDecoder::getInstance(zotek);
+      expect(zotek, "fn_auto", "eaec70eda2c132716499");
+      expect(zotek, "hold", "eaec70e1a2c132716485");
+      expect(zotek, "fn_cap", "eaec70e5a2c132716481");
+      expect(zotek, "minmax", "eaec7084a2c1327164e6");
+      expect(zotek, "range", "");
+      auto zdecode = [&](const char *hex) { return z->decode(QByteArray::fromHex(hex), 0); };
+      auto zcheck = [&](bool ok, const char *what)
+      {
+        if (!ok)
+        {
+          qWarning() << "ZOTEK:" << what;
+          ++problems;
+        }
+      };
+      // °C/°F sets the other unit than shown, ZERO only in capacitance
+      zcheck(z->keyRequest("unit2") == QByteArray::fromHex("eaec70e3a2c13271649b"), "unit2 before a reading: °C");
+      zcheck(z->keyRequest("zero").isEmpty(), "no ZERO before a reading");
+      zdecode("1b847051a261ff2666aa3b");   // 25 C
+      zcheck(z->keyRequest("unit2") == QByteArray::fromHex("eaec70e2a2c132716498"), "unit2 while °C: °F");
+      zcheck(z->keyRequest("zero").isEmpty(), "no ZERO in °C");
+      zdecode("1b8471153c2bd9fa77aa");   // 4.700 nF
+      zcheck(z->keyRequest("zero") == QByteArray::fromHex("eaec70e0a2c13271649a"), "ZERO in capacitance");
+      // the keys per model: all on the pocket meters, MAX/MIN on the dial ones
+      zcheck(z->hasKey("fn_cap", "ZT-5B *") && z->hasKey("zero", "V05B *") && !z->hasKey("minmax", "ZT-5B *"),
+             "ZT-5B keys");
+      zcheck(!z->hasKey("fn_cap", "ZT-300AB *") && z->hasKey("minmax", "ZT-300AB *") && !z->hasKey("hold", "AN9002 *"),
+             "ZT-300AB keys");
+      zcheck(z->hasKey("hold", "ZT-5566SE *") && !z->hasKey("fn_auto", "ZT-5566SE *"), "ZT-5566SE keys");
+      // NCV dashes, no number; a blank display at a function change is no reading
+      const auto dashes = zdecode("1b847051a6c5367566aa3b");
+      zcheck(dashes && dashes->main().val == "----" && dashes->main().special == "NCV", "dashes are NCV");
+      zcheck(!zdecode("1b847055a2c1227166fa3a"), "blank display: no reading");
+      // the layout names the model
+      zcheck(z->modelsFromFrame(QByteArray::fromHex("1b847041085c7d7f66fa3a"))
+               == QStringList({ "ZOTEK ZT-300AB *", "ANENG AN9002 *" }), "type 3 is the ZT-300AB");
+      zcheck(z->modelsFromFrame(QByteArray::fromHex("1b8471153c2bd9fa66a9")).value(0) == "ZOTEK ZT-5B *", "type 2 is the ZT-5B");
+      zcheck(z->modelsFromFrame(QByteArray::fromHex("0102030405")).isEmpty(), "no packet, no model");
+      // a notification longer than its packet (zeros after it, the key on
+      // air): two packets in a row are still two frames, each decoded
+      const QByteArray rest = QByteArray::fromHex("3bd0e2a83314201aaabb");
+      const QByteArray packet = QByteArray::fromHex("1b8471153c2bd9fa66a9");
+      const QByteArray stream = packet + rest + packet + rest;
+      char fifo[FIFO_LENGTH] = {};
+      size_t length = 0;
+      int frames = 0, values = 0;
+      for (char c : stream)
+      {
+        fifo[length] = c;
+        if (z->checkFormat(fifo, length))
+        {
+          const auto r = z->decode(QByteArray(fifo, int(length) + 1), 0);
+          ++frames;
+          values += r && r->main().val == "4.700" ? 1 : 0;
+          length = 0;
+        }
+        else
+          ++length;
+      }
+      zcheck(frames == 2 && values == 2, "longer notifications: two frames, two values");
+    }
+
     // the Keysight U12xx polling loop as it runs: a request each tick, the
     // meter's answer through the ring buffer the way FrameReader reads a
     // variable-length frame, the frame into decode(). The CONF? answer is no

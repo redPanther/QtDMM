@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "device/dmmdecoder.h"
+#include "device/framereader.h"
 #include "device/transports/hidreader.h"   // hidapi
 #include "service/mdnsbrowser.h"
 
@@ -364,6 +365,15 @@ void BleDiscoverer::start()
       c.models = Families::preferByName(c.models, info.name());
       if (c.models.isEmpty())
         return;
+      // several meters of one name whose frames tell them apart (ZOTEK's
+      // "Bluetooth DMM"): the first frame chooses
+      FrameFormat::DataFormat format = FrameFormat::Invalid;
+      for (const DmmDecoder::DMMInfo &m : DmmDecoder::getDeviceConfigurations())
+        if (m.name == c.models.first())
+          format = m.protocol;
+      const auto decoder = DmmDecoder::getInstance(format);
+      if (c.models.size() > 1 && decoder && decoder->tellsModel())
+        c.probe = format;
       c.title = info.name().isEmpty() ? QCoreApplication::translate("Discovery", "Bluetooth meter") : info.name();
       c.hint = QCoreApplication::translate("Discovery", "Switch Bluetooth on at the meter.");
     }
@@ -390,4 +400,67 @@ void BleDiscoverer::stop()
   if (d->agent && d->agent->isActive())
     d->agent->stop();
 #endif
+}
+
+// ---------------------------------------------------------------- probe
+
+FrameProbe::FrameProbe(QIODevice *port, FrameFormat::DataFormat format, QObject *parent) :
+  QObject(parent),
+  m_port(port),
+  m_decoder(DmmDecoder::getInstance(format))
+{
+  if (m_port)
+    m_port->setParent(this);
+  m_timeout.setSingleShot(true);
+  connect(&m_timeout, &QTimer::timeout, this, [this] { finish({}); });
+}
+
+FrameProbe::~FrameProbe()
+{
+  if (m_reader)
+    m_reader->setHandle(nullptr);
+  if (m_port)
+    m_port->close();
+}
+
+void FrameProbe::start(int timeoutMs)
+{
+  if (!m_port || !m_decoder || (!m_port->isOpen() && !m_port->open(QIODevice::ReadWrite)))
+  {
+    QTimer::singleShot(0, this, [this] { finish({}); });
+    return;
+  }
+#ifdef QTDMM_WITH_BLE
+  if (auto *gatt = qobject_cast<BleGattDevice *>(m_port))
+    connect(gatt, &BleGattDevice::finished, this, [this] { finish({}); });
+#endif
+  m_reader = new FrameReader(this);
+  m_reader->setDecoder(m_decoder);
+  m_reader->setHandle(m_port);
+  connect(m_reader, &FrameReader::readEvent, this, [this](const QByteArray &frame)
+  {
+    finish(m_decoder->modelsFromFrame(frame));
+  });
+  m_timeout.start(timeoutMs);
+}
+
+void FrameProbe::finish(const QStringList &models)
+{
+  if (m_done)
+    return;
+  m_done = true;
+  m_timeout.stop();
+  Q_EMIT finished(models);
+}
+
+QIODevice *FrameProbe::blePort(const Candidate &candidate)
+{
+#ifdef QTDMM_WITH_BLE
+  for (const DmmDecoder::DMMInfo &m : DmmDecoder::getDeviceConfigurations())
+    if (!candidate.models.isEmpty() && m.name == candidate.models.first())
+      return new BleGattDevice(m, candidate.keys.value("Port settings/ble-address").toString());
+#else
+  Q_UNUSED(candidate);
+#endif
+  return nullptr;
 }

@@ -59,6 +59,10 @@ public:
   /// BridgeDiscoverer for the network. The test
   /// gives none and adds the finds itself.
   void        setDiscoverers(std::function<QList<Discoverer *>(Connection)> make) { m_makeDiscoverers = std::move(make); }
+  /// The port a FrameProbe listens to for a find that tells its model by
+  /// its first frame (Candidate::probe); FrameProbe::blePort() by default.
+  /// The test gives one of its own.
+  void        setProbePort(std::function<QIODevice *(const Candidate &)> make) { m_makeProbePort = std::move(make); }
 
   /// Page 1: the connection; goes on to the next page.
   void        chooseConnection(Connection connection);
@@ -71,7 +75,11 @@ public:
   /// Page 2: the cards in their order, by Candidate::key.
   QStringList candidates() const;
   /// Page 2: chooses the card @p key; its port goes into the port field.
+  /// A find whose first frame tells its model is listened to (FrameProbe),
+  /// and the model it names comes first.
   void        chooseCandidate(const QString &key);
+  /// Page 2: the models a find can be, the likeliest first.
+  QStringList candidateModels(const QString &key) const;
   /// Page 2: the port field (a port, a Bluetooth address, or host:port).
   void        setPort(const QString &port);
   /// The entry of My devices the device is (found at its place, the model
@@ -106,6 +114,10 @@ private:
   /// The card for the port field's text, or -1 when it was typed in.
   int         chosenCandidate() const;
   void        updateHint();
+  /// Listens to the find in row @p row for its first frame; stopProbe()
+  /// ends it.
+  void        startProbe(int row);
+  void        stopProbe();
   /// From page 2 to page 3: the find (or the typed port) into the fields,
   /// a known entry with its name.
   void        takePort();
@@ -131,6 +143,10 @@ private:
   QMap<QString, QString> m_inUse;
   QList<Discoverer *> m_running;
   std::function<QList<Discoverer *>(Connection)> m_makeDiscoverers;
+  std::function<QIODevice *(const Candidate &)> m_makeProbePort = &FrameProbe::blePort;
+  FrameProbe     *m_probe = nullptr;
+  QStringList     m_probed;   ///< the finds listened to, by Candidate::key
+  QString         m_probeHint;   ///< the hint of the find m_probe listens to, before it
   QString         m_known;    ///< the entry of My devices at the chosen place
   QPushButton    *m_back = nullptr;
   QPushButton    *m_next = nullptr;
