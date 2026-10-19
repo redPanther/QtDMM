@@ -1831,6 +1831,19 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 void MainWindow::changeEvent(QEvent *event)
 {
   QMainWindow::changeEvent(event);
+  // the desktop switched between light and dark: the design afresh, or the
+  // palettes set on the views and the sidebar's background stay the old
+  // ones. Not again for the palette change the design itself makes
+  if ((event->type() == QEvent::ThemeChange || event->type() == QEvent::ApplicationPaletteChange)
+      && !m_designPending && (!m_designApplied.isValid() || m_designApplied.elapsed() > 500))
+  {
+    m_designPending = true;
+    QTimer::singleShot(0, this, [this]
+    {
+      m_designPending = false;
+      setDesign(Designs::current());
+    });
+  }
   if (event->type() != QEvent::WindowStateChange)
     return;
   // maximized is no size chosen: back from it, the window grows once for
@@ -1896,6 +1909,7 @@ void MainWindow::updateControls()
 void MainWindow::setDesign(int design)
 {
   const auto d = static_cast<Designs::Design>(design);
+  m_designApplied.start();
   Designs::apply(d);
   m_mdi->setBackground(Designs::areaBrush(d));
   QPalette empty = m_emptyStart->palette();

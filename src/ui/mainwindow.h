@@ -145,6 +145,8 @@ protected:
   QAction    *m_poincareAction = nullptr;
   QAction    *m_addDeviceAction = nullptr;
   QDockWidget   *m_sidebarDock = nullptr;
+  QElapsedTimer  m_designApplied;          ///< since setDesign(): its own palette change is no switch
+  bool           m_designPending = false;  ///< the desktop switched: setDesign() on its way
   QAction       *m_sidebarAction = nullptr; ///< shows and hides the sidebar
   DeviceSidebar *m_sidebar = nullptr;     ///< "My devices" at the left
   /// "Settings..." of an entry: its meter's settings; the device in use

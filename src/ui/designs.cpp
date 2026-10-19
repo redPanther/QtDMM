@@ -8,8 +8,10 @@
 #include <QWidget>
 #include <QLinearGradient>
 #include <QPalette>
+#include <QProxyStyle>
 #include <QStyle>
 #include <QStyleFactory>
+#include <QStyleOption>
 
 namespace
 {
@@ -113,6 +115,35 @@ QPalette silverPalette()
   return p;
 }
 
+// Fusion edges a check box or radio button with the window colour a bit
+// darker: on the dark menus and dialogs an empty one was hardly there. The
+// dark design gives them a light edge.
+class DarkIndicatorStyle : public QProxyStyle
+{
+public:
+  using QProxyStyle::QProxyStyle;
+  void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
+                     const QWidget *widget) const override
+  {
+    if (element != PE_IndicatorCheckBox && element != PE_IndicatorRadioButton)
+    {
+      QProxyStyle::drawPrimitive(element, option, painter, widget);
+      return;
+    }
+    // the edge is Window.darker(140): #b4b4ba gives #808085. Fusion reads
+    // the options of a button (menus pass one as well)
+    const auto *button = qstyleoption_cast<const QStyleOptionButton *>(option);
+    if (!button)
+    {
+      QProxyStyle::drawPrimitive(element, option, painter, widget);
+      return;
+    }
+    QStyleOptionButton copy(*button);
+    copy.palette.setColor(QPalette::Window, QColor(0xb4, 0xb4, 0xba));
+    QProxyStyle::drawPrimitive(element, &copy, painter, widget);
+  }
+};
+
 const char *kSilverSheet =
   "QToolBar { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
   "  stop:0 #ffffff, stop:0.45 #e4e7eb, stop:0.55 #d3d8de, stop:1 #aeb5bf);"
@@ -164,12 +195,16 @@ void Designs::apply(Design d)
   {
     qApp->setStyleSheet(QString());
     QApplication::setStyle(QStyleFactory::create(g_systemStyle));
-    QApplication::setPalette(g_systemPalette);
+    // a palette without roles set: the desktop's, also when it switches
+    // between light and dark later
+    QApplication::setPalette(QPalette());
+    g_systemPalette = QApplication::palette();
   }
   else
   {
     // native styles (Windows, macOS) take no palette; Fusion does
-    QApplication::setStyle(QStyleFactory::create("Fusion"));
+    QStyle *fusion = QStyleFactory::create("Fusion");
+    QApplication::setStyle(d == Dark ? new DarkIndicatorStyle(fusion) : fusion);
     QApplication::setPalette(d == Dark ? darkPalette() : silverPalette());
     qApp->setStyleSheet(d == Silver ? kSilverSheet : kDarkSheet);
   }
