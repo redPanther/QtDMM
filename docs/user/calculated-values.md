@@ -78,6 +78,13 @@ built for you from a few fields:
 - **Formula** — what the fields expand to; with *Custom formula* you edit
   it directly and may use everything from the section above, including the
   readings of other instances.
+- **Values** — 1 to 4. From 2 on, a row for each further value with its
+  unit, coupling and formula; besides `t` and the other instances a formula
+  can use the values before it as `v1`, `v2`, `v3`. Preset: value 2 a
+  current around 0.5 A, value 3 the power `v1 * v2` in W, value 4 a slowly
+  swinging temperature in °C. The further values go where a meter's second
+  display goes: the display's small line, the graph, the readings table,
+  the alarms and SCPI `READ? (@2)`.
 
 The simulated meter needs no other instance and publishes its value like a
 real one, so `u * i` works just as well with a virtual `u`.

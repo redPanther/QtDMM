@@ -268,6 +268,18 @@
         "port": "current.ac",
         "special": "AC"
       }
+    },
+    {
+      "comment": "[sigrok.yaml] 'P2: 22.50 °C AUTO'",
+      "hex": "20 20 20 20 20 20 20 20 20 20 20 50 32 3A 20 32 32 2E 35 30 20 C2 B0 43 20 41 55 54 4F 0A",
+      "expected": {
+        "dval": 22.5,
+        "unit": "C",
+        "range": "AUTO",
+        "hold": false,
+        "port": "temperature",
+        "id": 1
+      }
     }
   ]
 }

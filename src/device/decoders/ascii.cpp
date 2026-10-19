@@ -1,5 +1,7 @@
 #include "device/decoders/ascii.h"
 
+#include "core/sampletypes.h"
+
 static const bool registered = []() {
   DmmDecoder::addConfig({"Digitech", "QM1350", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
   DmmDecoder::addConfig({"MASTECH", "MAS-343", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
@@ -86,6 +88,18 @@ bool DecoderAscii::decodeSigrok(QString str)
   QStringList list = str.trimmed().split(" ", Qt::SkipEmptyParts);
   if (list.size()<2)
     return false;
+  // the channel: P1 the main value, P2 ... the meter's others (a sigrok
+  // meter with several channels, CalcDevice with several values), each in
+  // a line of its own; past kMaxValues none of them
+  static const QRegularExpression channel("^P(\\d+):$");
+  const QRegularExpressionMatch ch = channel.match(list[0]);
+  if (ch.hasMatch())
+  {
+    const int n = ch.captured(1).toInt();
+    if (n > kMaxValues)
+      return false;
+    m_result.main().id = qMax(1, n) - 1;
+  }
   m_result.main().val = list[1];
   if (m_result.main().val == "inf")
     m_result.main().val = " OL ";

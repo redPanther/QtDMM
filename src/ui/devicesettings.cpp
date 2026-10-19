@@ -38,6 +38,7 @@
 #include "device/transports/blegatt.h"
 #endif
 #include "service/sharedstatemanager.h"
+#include "core/sampletypes.h"
 #include "core/siprefix.h"
 #include "decoders.h"
 
@@ -62,6 +63,43 @@ DeviceSettings::DeviceSettings(QWidget *parent) : QWidget(parent)
   for (QLineEdit *e : {ui_virtualMin, ui_virtualMax, ui_virtualPeriod, ui_virtualNoise})
     connect(e, &QLineEdit::textChanged, this, &DeviceSettings::updateVirtualFormula);
   connect(ui_virtualFormula, &QLineEdit::textChanged, this, [this]{ if (ui_virtualSignal->currentIndex() == 7) updateVirtualFormula(); });
+  // the simulated meter's other values, below the waveform: how many, then
+  // a row each with unit, coupling and formula
+  {
+    auto *label = new QLabel(tr("&Values:"), ui_virtualGroup);
+    m_virtualValues = new QSpinBox(ui_virtualGroup);
+    m_virtualValues->setObjectName("ui_virtualValues");
+    m_virtualValues->setRange(1, kMaxValues);
+    m_virtualValues->setToolTip(tr("How many values the simulated meter shows: the waveform above and up to three more, "
+                                   "each a formula of its own (v1, v2 ... are the values before it)"));
+    label->setBuddy(m_virtualValues);
+    gridLayout_virtual->addWidget(label, 5, 0);
+    gridLayout_virtual->addWidget(m_virtualValues, 5, 1);
+    for (int i = 0; i < int(m_virtualRows.size()); ++i)
+    {
+      VirtualValue &row = m_virtualRows[size_t(i)];
+      row.label = new QLabel(tr("Value %1:").arg(i + 2), ui_virtualGroup);
+      row.unit = new QLineEdit(ui_virtualGroup);
+      row.unit->setObjectName(QString("ui_virtualUnit%1").arg(i + 2));
+      row.unit->setMaximumWidth(ui_virtualUnit->maximumWidth());
+      row.unit->setToolTip(tr("The unit of value %1").arg(i + 2));
+      row.coupling = new QComboBox(ui_virtualGroup);
+      row.coupling->setObjectName(QString("ui_virtualCoupling%1").arg(i + 2));
+      row.coupling->addItems({ "DC", "AC" });
+      row.formula = new QLineEdit(ui_virtualGroup);
+      row.formula->setObjectName(QString("ui_virtualFormula%1").arg(i + 2));
+      row.formula->setProperty("tip", tr("The formula of value %1: t is the time in seconds, v1 ... v%2 the values "
+                                         "before it").arg(i + 2).arg(i + 1));
+      gridLayout_virtual->addWidget(row.label, 6 + i, 0);
+      gridLayout_virtual->addWidget(row.unit, 6 + i, 1);
+      gridLayout_virtual->addWidget(row.coupling, 6 + i, 2);
+      gridLayout_virtual->addWidget(row.formula, 6 + i, 3);
+      connect(row.formula, &QLineEdit::textChanged, this, &DeviceSettings::updateVirtualValues);
+    }
+    connect(m_virtualValues, &QSpinBox::valueChanged, this, &DeviceSettings::updateVirtualValues);
+    connect(m_virtualValues, &QSpinBox::valueChanged, this, &DeviceSettings::changed);
+    updateVirtualValues();
+  }
   // no frames: a section title above each group, shown with it
   for (QGroupBox *group : findChildren<QGroupBox *>())
     sectionTitle(group);
@@ -109,7 +147,13 @@ bool DeviceSettings::isComplete() const
   if (isCalculated())
     return CalcExpr::parse(ui_calcExpression->text()).has_value();
   if (isVirtual())
+  {
+    for (int i = 0; i < m_virtualValues->value() - 1; ++i)
+      if (m_virtualRows[size_t(i)].unit->text().trimmed().isEmpty()
+          || !CalcExpr::parse(m_virtualRows[size_t(i)].formula->text()).has_value())
+        return false;
     return CalcExpr::parse(ui_virtualFormula->text()).has_value();
+  }
   if (isSigrokMeter())
     return !ui_sigrokDriver->text().trimmed().isEmpty();
   const QString address = ui_bleAddress->currentText().section(' ', 0, 0).trimmed();
@@ -365,6 +409,14 @@ void DeviceSettings::load(const QVariantMap &keys)
   ui_virtualNoise->setText    (cfgString("DMM/virtual-noise", "0"));
   if (ui_virtualSignal->currentIndex() == 7)
     ui_virtualFormula->setText(cfgString("DMM/virtual-formula"));
+  m_virtualValues->setValue(cfgInt("DMM/virtual-values", 1));
+  for (int i = 0; i < int(m_virtualRows.size()); ++i)
+  {
+    const QString n = QString::number(i + 2);
+    m_virtualRows[size_t(i)].unit->setText(cfgString("DMM/virtual-unit" + n, kVirtualDefaults[i][0]));
+    m_virtualRows[size_t(i)].coupling->setCurrentText(cfgString("DMM/virtual-coupling" + n, "DC"));
+    m_virtualRows[size_t(i)].formula->setText(cfgString("DMM/virtual-formula" + n, kVirtualDefaults[i][1]));
+  }
   baudRate->setCurrentText    (cfgString("Port settings/baud"));
   bitsCombo->setCurrentText   (cfgString("Port settings/bits", "7"));
   stopBitsCombo->setCurrentText(cfgString("Port settings/stop-bits", "1"));
@@ -494,6 +546,14 @@ QVariantMap DeviceSettings::keys() const
   keys.insert("DMM/virtual-period", ui_virtualPeriod->text().trimmed());
   keys.insert("DMM/virtual-noise", ui_virtualNoise->text().trimmed());
   keys.insert("DMM/virtual-formula", ui_virtualFormula->text().trimmed());
+  keys.insert("DMM/virtual-values", m_virtualValues->value());
+  for (int i = 0; i < int(m_virtualRows.size()); ++i)
+  {
+    const QString n = QString::number(i + 2);
+    keys.insert("DMM/virtual-unit" + n, m_virtualRows[size_t(i)].unit->text().trimmed());
+    keys.insert("DMM/virtual-coupling" + n, m_virtualRows[size_t(i)].coupling->currentText());
+    keys.insert("DMM/virtual-formula" + n, m_virtualRows[size_t(i)].formula->text().trimmed());
+  }
   keys.insert("Port settings/baud", baudRate->currentText());
   keys.insert("Port settings/bits", bitsCombo->currentText());
   keys.insert("Port settings/stop-bits", stopBitsCombo->currentText());
@@ -584,6 +644,28 @@ void DeviceSettings::updateVirtualFormula()
   const bool ok = CalcExpr::parse(ui_virtualFormula->text(), &error, &pos).has_value();
   ui_virtualFormula->setStyleSheet(ok ? QString() : QStringLiteral("QLineEdit { color: #b00; }"));
   ui_virtualFormula->setToolTip(ok ? QString() : tr("Position %1: %2").arg(pos + 1).arg(error));
+}
+
+const char *const DeviceSettings::kVirtualDefaults[3][2] = {
+  { "A", "0.5 + 0.2 * sin(2 * pi * t / 13)" },
+  { "W", "v1 * v2" },
+  { "°C", "21 + 2 * sin(2 * pi * t / 300)" },
+};
+
+void DeviceSettings::updateVirtualValues()
+{
+  for (int i = 0; i < int(m_virtualRows.size()); ++i)
+  {
+    const VirtualValue &row = m_virtualRows[size_t(i)];
+    const bool shown = i < m_virtualValues->value() - 1;
+    for (QWidget *w : std::initializer_list<QWidget *>{ row.label, row.unit, row.coupling, row.formula })
+      w->setVisible(shown);
+    QString error;
+    int pos = -1;
+    const bool ok = CalcExpr::parse(row.formula->text(), &error, &pos).has_value();
+    row.formula->setStyleSheet(ok ? QString() : QStringLiteral("QLineEdit { color: #b00; }"));
+    row.formula->setToolTip(ok ? row.formula->property("tip").toString() : tr("Position %1: %2").arg(pos + 1).arg(error));
+  }
 }
 
 void DeviceSettings::setStateManager(SharedStateManager *state)
@@ -855,6 +937,8 @@ int DeviceSettings::valueCount() const
   // a Victron: main and second value, and the third and fourth chosen
   if (isBluetooth() && !isGatt())
     return m_dmmInfo.valueCount() + bleExtraValues();
+  if (isVirtual())
+    return m_virtualValues->value();
   return m_dmmInfo.valueCount();
 }
 
@@ -1122,8 +1206,16 @@ QString DeviceSettings::device() const
   if (isCalculated())
     return QString("calc %1 %2").arg(ui_calcUnit->text().trimmed(), ui_calcExpression->text().trimmed());
   if (isVirtual())
-    return QString("calc %1/%2 %3").arg(ui_virtualUnit->text().trimmed(), ui_virtualCoupling->currentText(),
-                                        ui_virtualFormula->text().trimmed());
+  {
+    // the other values after ';' (CalcDevice)
+    QString calc = QString("calc %1/%2 %3").arg(ui_virtualUnit->text().trimmed(), ui_virtualCoupling->currentText(),
+                                                ui_virtualFormula->text().trimmed());
+    for (int i = 0; i < m_virtualValues->value() - 1; ++i)
+      calc += QString("; %1/%2 %3").arg(m_virtualRows[size_t(i)].unit->text().trimmed(),
+                                        m_virtualRows[size_t(i)].coupling->currentText(),
+                                        m_virtualRows[size_t(i)].formula->text().trimmed());
+    return calc;
+  }
   return port->currentText();
 }
 

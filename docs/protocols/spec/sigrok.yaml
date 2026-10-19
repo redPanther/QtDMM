@@ -98,3 +98,11 @@ vectors:
     bytes: 20 20 20 20 20 20 20 20 20 50 31 3A 20 30 2E 30 32 20 C2 B5 41 20 41 43 20 41 55 54 4F 0A
     reading: {value: "0.02", unit: "µA", range_mode: auto}
     expect: {special: "AC"}
+  # SYNTHETIC: a second channel, as sigrok-cli prints it for a meter with
+  # several (P2, P3 ...) and QtDMM's simulated meter with several values: the
+  # meter's value 2 (id 1), not the main one
+  - source: docs/protocols/spec/sigrok.yaml
+    source_line: "P2: 22.50 °C AUTO"
+    bytes: 20 20 20 20 20 20 20 20 20 20 20 50 32 3A 20 32 32 2E 35 30 20 C2 B0 43 20 41 55 54 4F 0A
+    reading: {value: "22.50", unit: "C", range_mode: auto}
+    expect: {id: 1}

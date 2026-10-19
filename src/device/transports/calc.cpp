@@ -1,6 +1,9 @@
 #include "device/transports/calc.h"
 #include "service/sharedstatemanager.h"
+#include "core/sampletypes.h"
 #include "core/siprefix.h"
+
+#include <QRegularExpression>
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -22,19 +25,27 @@ CalcDevice::CalcDevice(const DmmDecoder::DMMInfo &info, const QString &device,
     m_dmmInfo(info),
     m_state(state)
 {
-  // "<unit> <formula>": the unit has no spaces, the formula may
-  const QString d = device.trimmed();
-  const int space = d.indexOf(' ');
-  m_unit = space < 0 ? d : d.left(space);
-  m_source = space < 0 ? QString() : d.mid(space + 1).trimmed();
-  // "V/AC": coupling rides along with the unit token
-  const int slash = m_unit.indexOf('/');
-  if (slash >= 0)
+  // "<unit> <formula>" per value, the values separated by ';': the unit has
+  // no spaces, the formula may
+  for (const QString &part : device.split(';'))
   {
-    const QString c = m_unit.mid(slash + 1).toUpper();
-    m_unit = m_unit.left(slash);
-    if (c == "AC" || c == "DC")
-      m_special = c;
+    const QString d = part.trimmed();
+    if (d.isEmpty() && !m_values.isEmpty())
+      continue;
+    Value v;
+    const int space = d.indexOf(' ');
+    v.unit = space < 0 ? d : d.left(space);
+    v.source = space < 0 ? QString() : d.mid(space + 1).trimmed();
+    // "V/AC": coupling rides along with the unit token
+    const int slash = v.unit.indexOf('/');
+    if (slash >= 0)
+    {
+      const QString c = v.unit.mid(slash + 1).toUpper();
+      v.unit = v.unit.left(slash);
+      if (c == "AC" || c == "DC")
+        v.special = c;
+    }
+    m_values << v;
   }
 
   m_timer.setInterval(kIntervalMs);
@@ -43,18 +54,40 @@ CalcDevice::CalcDevice(const DmmDecoder::DMMInfo &info, const QString &device,
 
 bool CalcDevice::open(OpenMode mode)
 {
-  if (m_unit.isEmpty())
+  if (m_values.size() > kMaxValues)
   {
-    setErrorString(QCoreApplication::translate("CalcDevice", "No unit given for the calculated value."));
+    setErrorString(QCoreApplication::translate("CalcDevice", "At most %1 values.").arg(kMaxValues));
     return false;
   }
-  QString error;
-  int pos = -1;
-  m_expr = CalcExpr::parse(m_source, &error, &pos);
-  if (!m_expr)
+  static const QRegularExpression earlier("^v(\\d)$");
+  for (int n = 0; n < m_values.size(); ++n)
   {
-    setErrorString(QCoreApplication::translate("CalcDevice", "Formula error at position %1: %2").arg(pos + 1).arg(error));
-    return false;
+    Value &v = m_values[n];
+    // the value's number in the messages only when there are several
+    const QString which = m_values.size() > 1 ? QCoreApplication::translate("CalcDevice", "Value %1: ").arg(n + 1)
+                                               : QString();
+    if (v.unit.isEmpty())
+    {
+      setErrorString(which + QCoreApplication::translate("CalcDevice", "No unit given for the calculated value."));
+      return false;
+    }
+    QString error;
+    int pos = -1;
+    v.expr = CalcExpr::parse(v.source, &error, &pos);
+    if (!v.expr)
+    {
+      setErrorString(which + QCoreApplication::translate("CalcDevice", "Formula error at position %1: %2").arg(pos + 1).arg(error));
+      return false;
+    }
+    for (const QString &var : v.expr->variables())
+    {
+      const QRegularExpressionMatch m = earlier.match(var);
+      if (m.hasMatch() && m.captured(1).toInt() > n && m.captured(1).toInt() <= m_values.size())
+      {
+        setErrorString(which + QCoreApplication::translate("CalcDevice", "%1 is not a value before this one.").arg(var));
+        return false;
+      }
+    }
   }
   if (!m_state)
   {
@@ -83,75 +116,100 @@ void CalcDevice::close()
 QByteArray CalcDevice::currentLine(qint64 now, QString *status) const
 {
   QString message;
-  QByteArray line;
+  QByteArray lines;
+  const auto readings = m_state ? m_state->readings() : QMap<QString, SharedStateManager::Reading>();
+  static const QRegularExpression earlier("^v(\\d)$");
+  QList<std::optional<double>> results;   // of the values before, v1, v2 ...
 
-  if (!m_expr || !m_state)
-    line = m_special.toUtf8() + " inf " + m_unit.toUtf8();
-  else
+  for (int n = 0; n < m_values.size(); ++n)
   {
-    // instance ids as variables; "uni-t_803" is reachable as uni_t_803
-    const auto readings = m_state->readings();
-    QMap<QString, double> values;
-    values.insert("t", (now - m_openedMs) / 1000.0);
-    QStringList missing, stale, invalid;
-    for (const QString &var : m_expr->variables())
-    {
-      if (var == "t")
-        continue;
-      QString id = var;
-      if (!readings.contains(id))
-      {
-        for (auto it = readings.constBegin(); it != readings.constEnd(); ++it)
-          if (QString(it.key()).replace('-', '_') == var)
-            id = it.key();
-      }
-      if (!readings.contains(id))
-      {
-        missing << var;
-        continue;
-      }
-      const SharedStateManager::Reading &r = readings[id];
-      if (now - r.msecs > kStaleMs)
-        stale << var;
-      else if (!r.valid)
-        invalid << var;
-      else
-        values.insert(var, r.value);
-    }
-
+    const Value &v = m_values[n];
     std::optional<double> result;
-    if (missing.isEmpty() && stale.isEmpty() && invalid.isEmpty())
-      result = m_expr->eval(values);
-
-    if (!missing.isEmpty())
-      message = QCoreApplication::translate("CalcDevice", "Waiting for instance '%1'").arg(missing.join("', '"));
-    else if (!stale.isEmpty())
-      message = QCoreApplication::translate("CalcDevice", "No current value from instance '%1'").arg(stale.join("', '"));
-    else if (!invalid.isEmpty())
-      message = QCoreApplication::translate("CalcDevice", "Instance '%1' shows no numeric value").arg(invalid.join("', '"));
-    else if (!result)
-      message = QCoreApplication::translate("CalcDevice", "Formula has no result (division by zero?)");
-
-    if (result)
+    if (v.expr && m_state)
     {
-      QString prefix;
-      const QString value = formatValue(*result, m_dmmInfo.display, &prefix);
-      line = m_special.toUtf8() + " " + value.toUtf8() + " " + (prefix + m_unit).toUtf8() + " AUTO";
-    }
-    else
-      line = m_special.toUtf8() + " inf " + m_unit.toUtf8() + " AUTO";
-  }
+      // instance ids as variables; "uni-t_803" is reachable as uni_t_803;
+      // v1, v2 ... the values before this one
+      QMap<QString, double> values;
+      values.insert("t", (now - m_openedMs) / 1000.0);
+      QStringList missing, stale, invalid;
+      bool earlierMissing = false;
+      for (const QString &var : v.expr->variables())
+      {
+        if (var == "t")
+          continue;
+        const QRegularExpressionMatch m = earlier.match(var);
+        const int index = m.hasMatch() ? m.captured(1).toInt() - 1 : -1;
+        if (index >= 0 && index < results.size())
+        {
+          if (results[index])
+            values.insert(var, *results[index]);
+          else
+            earlierMissing = true;
+          continue;
+        }
+        QString id = var;
+        if (!readings.contains(id))
+        {
+          for (auto it = readings.constBegin(); it != readings.constEnd(); ++it)
+            if (QString(it.key()).replace('-', '_') == var)
+              id = it.key();
+        }
+        if (!readings.contains(id))
+        {
+          missing << var;
+          continue;
+        }
+        const SharedStateManager::Reading &r = readings[id];
+        if (now - r.msecs > kStaleMs)
+          stale << var;
+        else if (!r.valid)
+          invalid << var;
+        else
+          values.insert(var, r.value);
+      }
 
-  // fixed length, like SigrokDevice: the decoder's frame is 30 bytes ending in LF
-  if (line.size() >= kLineLength - 1)
-    line = line.left(kLineLength - 1);
-  else
-    line.prepend(QByteArray(kLineLength - 1 - line.size(), ' '));
-  line.append('\n');
+      if (missing.isEmpty() && stale.isEmpty() && invalid.isEmpty() && !earlierMissing)
+        result = v.expr->eval(values);
+
+      // the first problem is the message; a value without result because
+      // one before it has none says nothing new
+      if (message.isEmpty())
+      {
+        if (!missing.isEmpty())
+          message = QCoreApplication::translate("CalcDevice", "Waiting for instance '%1'").arg(missing.join("', '"));
+        else if (!stale.isEmpty())
+          message = QCoreApplication::translate("CalcDevice", "No current value from instance '%1'").arg(stale.join("', '"));
+        else if (!invalid.isEmpty())
+          message = QCoreApplication::translate("CalcDevice", "Instance '%1' shows no numeric value").arg(invalid.join("', '"));
+        else if (!result && !earlierMissing)
+          message = QCoreApplication::translate("CalcDevice", "Formula has no result (division by zero?)");
+      }
+    }
+    results << result;
+
+    // one value: "DC 6.02 W AUTO" as ever; several: sigrok-cli's channel in
+    // front, "P2: 0.500 A DC AUTO"
+    QByteArray line;
+    QString value = "inf", prefix;
+    if (result)
+      value = formatValue(*result, m_dmmInfo.display, &prefix);
+    if (m_values.size() == 1)
+      line = v.special.toUtf8() + " " + value.toUtf8() + " " + (prefix + v.unit).toUtf8() + " AUTO";
+    else
+      line = "P" + QByteArray::number(n + 1) + ": " + value.toUtf8() + " " + (prefix + v.unit).toUtf8() + " "
+             + v.special.toUtf8() + " AUTO";
+
+    // fixed length, like SigrokDevice: the decoder's frame is 30 bytes ending in LF
+    if (line.size() >= kLineLength - 1)
+      line = line.left(kLineLength - 1);
+    else
+      line.prepend(QByteArray(kLineLength - 1 - line.size(), ' '));
+    lines += line + '\n';
+  }
 
   if (status)
     *status = message;
-  return line;
+  return lines;
 }
 
 QString CalcDevice::formatValue(double value, int counts, QString *prefix)

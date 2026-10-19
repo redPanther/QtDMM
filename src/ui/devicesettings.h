@@ -32,6 +32,7 @@ class QGroupBox;
 #include "device/frameformat.h"
 #include "device/dmmdecoder.h"
 #include <QTimer>
+#include <array>
 #include <functional>
 
 class SharedStateManager;
@@ -140,6 +141,9 @@ protected Q_SLOTS:
   void           updateCalcHint();
   /// Rebuilds the virtual meter's formula from the waveform fields.
   void           updateVirtualFormula();
+  /// The rows of the simulated meter's values 2-4: those chosen shown, a
+  /// formula that does not parse red.
+  void           updateVirtualValues();
   /// Validates address and key, explains what is missing.
   void           updateBleHint();
   /// Fills the main/second/third/fourth value combos with the fields of the
@@ -189,4 +193,16 @@ private:
   bool           m_portParameters = false;   ///< showPortParameters()
   QStringListModel *m_completerNames = nullptr;   ///< what the model field completes
   QString        m_sigrokExe = QStringLiteral("sigrok-cli");
+  /// The simulated meter's values 2-4 (values 1 is the waveform above).
+  struct VirtualValue
+  {
+    QLabel    *label = nullptr;
+    QLineEdit *unit = nullptr;
+    QComboBox *coupling = nullptr;
+    QLineEdit *formula = nullptr;
+  };
+  QSpinBox      *m_virtualValues = nullptr;   ///< how many values the simulated meter has
+  std::array<VirtualValue, 3> m_virtualRows;
+  /// What a value row holds before it is set: A, W = v1 * v2, °C.
+  static const char *const kVirtualDefaults[3][2];
 };

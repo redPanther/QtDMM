@@ -783,37 +783,52 @@
 <context>
     <name>CalcDevice</name>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="48"/>
+        <location filename="../../src/device/transports/calc.cpp" line="59"/>
+        <source>At most %1 values.</source>
+        <translation>Höchstens %1 Werte.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/calc.cpp" line="67"/>
+        <source>Value %1: </source>
+        <translation>Wert %1: </translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/calc.cpp" line="71"/>
         <source>No unit given for the calculated value.</source>
         <translation>Keine Einheit für den berechneten Wert angegeben.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="56"/>
+        <location filename="../../src/device/transports/calc.cpp" line="79"/>
         <source>Formula error at position %1: %2</source>
         <translation>Fehler in der Formel an Position %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="61"/>
+        <location filename="../../src/device/transports/calc.cpp" line="87"/>
+        <source>%1 is not a value before this one.</source>
+        <translation>%1 ist kein Wert vor diesem.</translation>
+    </message>
+    <message>
+        <location filename="../../src/device/transports/calc.cpp" line="94"/>
         <source>No instance data available.</source>
         <translation>Keine Instanzdaten verfügbar.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="127"/>
+        <location filename="../../src/device/transports/calc.cpp" line="179"/>
         <source>Waiting for instance &apos;%1&apos;</source>
         <translation>Warte auf Instanz &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="129"/>
+        <location filename="../../src/device/transports/calc.cpp" line="181"/>
         <source>No current value from instance &apos;%1&apos;</source>
         <translation>Kein aktueller Wert von Instanz &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="131"/>
+        <location filename="../../src/device/transports/calc.cpp" line="183"/>
         <source>Instance &apos;%1&apos; shows no numeric value</source>
         <translation>Instanz &apos;%1&apos; zeigt keinen Zahlenwert</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="133"/>
+        <location filename="../../src/device/transports/calc.cpp" line="185"/>
         <source>Formula has no result (division by zero?)</source>
         <translation>Formel hat kein Ergebnis (Division durch Null?)</translation>
     </message>
@@ -1163,129 +1178,155 @@
 <context>
     <name>DeviceSettings</name>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="197"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="69"/>
+        <source>&amp;Values:</source>
+        <translation>Wer&amp;te:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="73"/>
+        <source>How many values the simulated meter shows: the waveform above and up to three more, each a formula of its own (v1, v2 ... are the values before it)</source>
+        <translation>Wie viele Werte das simulierte Messgerät zeigt: die Signalform oben und bis zu drei weitere, jeder mit eigener Formel (v1, v2 ... sind die Werte davor)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="81"/>
+        <source>Value %1:</source>
+        <translation>Wert %1:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="85"/>
+        <source>The unit of value %1</source>
+        <translation>Die Einheit von Wert %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="91"/>
+        <source>The formula of value %1: t is the time in seconds, v1 ... v%2 the values before it</source>
+        <translation>Die Formel von Wert %1: t ist die Zeit in Sekunden, v1 ... v%2 die Werte davor</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesettings.cpp" line="241"/>
         <source>Manual settings</source>
         <translation>Manuelle Einstellung</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="198"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="242"/>
         <source>All vendors</source>
         <translation>Alle Hersteller</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="586"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="669"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="646"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="667"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="751"/>
         <source>Position %1: %2</source>
         <translation>Position %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="685"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="767"/>
         <source>%1: no such instance running</source>
         <translation>%1: keine solche Instanz läuft</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="695"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="777"/>
         <source>Running instances: %1</source>
         <translation>Laufende Instanzen: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="697"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="779"/>
         <source>No other instance is running.</source>
         <translation>Keine andere Instanz läuft.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="930"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1014"/>
         <source>none</source>
         <translation>keiner</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="999"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1083"/>
         <source>%1 was not found or does not run. Install sigrok-cli, or set its path in the settings, page General.</source>
         <translation>%1 wurde nicht gefunden oder läuft nicht. sigrok-cli installieren oder den Pfad in den Einstellungen, Seite Allgemein, angeben.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1002"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1086"/>
         <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
         <translation>%1 hat keinen Treiber „%2&quot;; siehe sigrok-cli --list-supported.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1004"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1088"/>
         <source>%1 found.</source>
         <translation>%1 gefunden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1014"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1098"/>
         <source>Running %1 --driver %2 --scan ...</source>
         <translation>%1 --driver %2 --scan läuft …</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1036"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1120"/>
         <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
         <translation>Kein Messgerät hat innerhalb von 30 s geantwortet (an einer seriellen Schnittstelle ohne SCPI-Gerät wartet sigrok-cli endlos).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1038"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1122"/>
         <source>Found: %1</source>
         <translation>Gefunden: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1040"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1124"/>
         <source>No meter answered.</source>
         <translation>Kein Messgerät hat geantwortet.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1049"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1133"/>
         <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
         <translation>Dieses QtDMM wurde ohne Bluetooth-Unterstützung gebaut und kann sich daher nicht mit diesem Messgerät verbinden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1056"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1140"/>
         <source>Pick the device or type its Bluetooth address.</source>
         <translation>Gerät auswählen oder seine Bluetooth-Adresse eingeben.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1059"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1143"/>
         <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
         <translation>Schalte das Bluetooth des Messgeräts ein (das Bluetooth-Symbol erscheint), bevor du suchst oder verbindest.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1064"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1148"/>
         <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
         <translation>Der Schlüssel ist der 32-stellige „Verschlüsselungsschlüssel&quot;, den VictronConnect unter Produktinfo, Sofortanzeige über Bluetooth zeigt.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1074"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1158"/>
         <source>Scanning for %1 (6 s)...</source>
         <translation>Suche nach %1 (6 s)...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1075"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1159"/>
         <source>Scanning for Victron devices (5 s)...</source>
         <translation>Suche Victron-Geräte (5 s)…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1086"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1170"/>
         <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
         <translation>Kein Messgerät gefunden. Ist sein Bluetooth eingeschaltet und kein anderes Programm damit verbunden?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1087"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1171"/>
         <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
         <translation>Kein Victron-Gerät gefunden. Ist Bluetooth an und die Sofortanzeige am Gerät aktiviert?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1132"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1224"/>
         <source>Load DMM description</source>
         <translation>DMM Beschreibung laden</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1132"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="1158"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1224"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1250"/>
         <source>DMM description (*.cfg)</source>
         <translation>DMM Beschreibung (*.cfg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1158"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1250"/>
         <source>Save DMM description</source>
         <translation>DMM Beschreibung speichern</translation>
     </message>
@@ -3709,109 +3750,109 @@ Ist das DMM angeschlossen und eingeschaltet?</translation>
         <translation>%1 beendet mit Exit-Code %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="303"/>
+        <location filename="../../src/service/metercontroller.cpp" line="305"/>
         <source>already recording, the recording goes on</source>
         <translation>Aufnahme läuft bereits und geht weiter</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="305"/>
+        <location filename="../../src/service/metercontroller.cpp" line="307"/>
         <source>start ignored, the recording shown is not saved yet</source>
         <translation>Start ignoriert, die angezeigte Aufnahme ist noch nicht gespeichert</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="352"/>
+        <location filename="../../src/service/metercontroller.cpp" line="358"/>
         <source>%1: %2 (%3)</source>
         <translation>%1: %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="358"/>
+        <location filename="../../src/service/metercontroller.cpp" line="364"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="374"/>
-        <location filename="../../src/service/metercontroller.cpp" line="399"/>
+        <location filename="../../src/service/metercontroller.cpp" line="380"/>
+        <location filename="../../src/service/metercontroller.cpp" line="405"/>
         <source>%1: could not run %2</source>
         <translation>%1: %2 konnte nicht gestartet werden</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="377"/>
+        <location filename="../../src/service/metercontroller.cpp" line="383"/>
         <source>%1: %2 is still running</source>
         <translation>%1: %2 läuft noch</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="550"/>
+        <location filename="../../src/service/metercontroller.cpp" line="570"/>
         <source>SCPI server: %1</source>
         <translation>SCPI-Server: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="563"/>
-        <location filename="../../src/service/metercontroller.cpp" line="587"/>
+        <location filename="../../src/service/metercontroller.cpp" line="583"/>
+        <location filename="../../src/service/metercontroller.cpp" line="607"/>
         <source>the SCPI server is not running</source>
         <translation>der SCPI-Server läuft nicht</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="572"/>
+        <location filename="../../src/service/metercontroller.cpp" line="592"/>
         <source>HiSLIP server: %1</source>
         <translation>HiSLIP-Server: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="596"/>
+        <location filename="../../src/service/metercontroller.cpp" line="616"/>
         <source>VXI-11 server: %1</source>
         <translation>VXI-11-Server: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="627"/>
+        <location filename="../../src/service/metercontroller.cpp" line="647"/>
         <source>The server is not running.</source>
         <translation>Der Server läuft nicht.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="628"/>
+        <location filename="../../src/service/metercontroller.cpp" line="648"/>
         <source>The server could not start: %1.</source>
         <translation>Der Server konnte nicht starten: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="633"/>
+        <location filename="../../src/service/metercontroller.cpp" line="653"/>
         <source>1 client</source>
         <translation>1 Client</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="633"/>
+        <location filename="../../src/service/metercontroller.cpp" line="653"/>
         <source>%1 clients</source>
         <translation>%1 Clients</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="634"/>
+        <location filename="../../src/service/metercontroller.cpp" line="654"/>
         <source>Listening on %1, port %2, %3 connected.</source>
         <translation>Lauscht auf %1, Port %2, %3 verbunden.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="636"/>
+        <location filename="../../src/service/metercontroller.cpp" line="656"/>
         <source>HiSLIP on port %1: %2.</source>
         <translation>HiSLIP auf Port %1: %2.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="638"/>
+        <location filename="../../src/service/metercontroller.cpp" line="658"/>
         <source>HiSLIP could not start: %1.</source>
         <translation>HiSLIP konnte nicht starten: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="640"/>
+        <location filename="../../src/service/metercontroller.cpp" line="660"/>
         <source>VXI-11 through the system rpcbind: %1.</source>
         <translation>VXI-11 über das rpcbind des Systems: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="641"/>
+        <location filename="../../src/service/metercontroller.cpp" line="661"/>
         <source>VXI-11 with an own portmapper on port %2: %1.</source>
         <translation>VXI-11 mit eigenem Portmapper auf Port %2: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="644"/>
+        <location filename="../../src/service/metercontroller.cpp" line="664"/>
         <source>VXI-11 is off: %1.</source>
         <translation>VXI-11 ist aus: %1.</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="646"/>
+        <location filename="../../src/service/metercontroller.cpp" line="666"/>
         <source>Announced as &quot;%1&quot;.</source>
         <translation>Angekündigt als „%1“.</translation>
     </message>
