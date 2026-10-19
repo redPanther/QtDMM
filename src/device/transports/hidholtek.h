@@ -28,8 +28,8 @@
 /// The records arrive one at a time in no fixed order. Once one of each of
 /// the three has been seen, this device turns the set into three text lines
 /// - "50 <raw>\n", "42 <raw>\n", "41 <raw>\n", always in that order - which
-/// DecoderTfaAirControl converts (FrameReader hands them over as frames 0, 1
-/// and 2 of a reading, so the meter is configured with numValues 3). The
+/// DecoderTfaAirControl converts (each line one frame; the decoder tells the
+/// value by the address, the table gives the meter 3 channels). The
 /// conversion lives in the decoder so it is testable and documented with the
 /// other protocols; this class only frames the records.
 ///

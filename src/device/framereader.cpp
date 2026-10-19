@@ -38,7 +38,7 @@ FrameReader::FrameReader(QObject *receiver) :
   m_length(0),
   m_sendRequest(true),
   m_id(0),
-  m_numValues(1),
+  m_framesPerReading(1),
   m_decoder(nullptr)
 {
   m_port = nullptr;
@@ -123,7 +123,7 @@ void FrameReader::socketNotifierSLOT()
 
       Q_EMIT readEvent( QByteArray(m_buffer,bytesToRead), m_id);
 
-      m_id = (m_id + 1) % m_numValues;
+      m_id = (m_id + 1) % m_framesPerReading;
 
       if (m_port->bytesAvailable() < bytesToRead) {
         break;

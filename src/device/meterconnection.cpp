@@ -445,7 +445,7 @@ void MeterConnection::readEventSLOT(const QByteArray &data, int id)
     setState(LinkState::Connected, tr("Error %1").arg(deviceName()));
 }
 
-void MeterConnection::setNumValues(int numValues)
+void MeterConnection::setFramesPerReading(int frames)
 {
-  m_readerThread->setNumValues(numValues);
+  m_readerThread->setFramesPerReading(frames);
 }

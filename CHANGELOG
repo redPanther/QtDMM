@@ -91,6 +91,9 @@
   main value hidden, the reference line, the min/max band and the cursors' level lines follow the value on the
   left axis instead of going away
 - Poincaré plot: in a wide window the title of the y axis stands at its labels, not at the left edge of the window
+- Device settings: the box "Number of values" of the manual settings is called "Lines per reading", what it
+  always counted (a Metex M-3850D sends four lines, one per value). How many values a model from the table has
+  is told by the table apart from that; a meter with both values in one frame no longer counts its frames
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

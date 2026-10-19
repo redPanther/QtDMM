@@ -53,7 +53,9 @@ sidebar (Shift+F8 for the one in use) hold the settings of the meter:
 
 With *Manual settings* the serial parameters, the protocol and **DTR** /
 **RTS** are shown: set them, DTR / RTS if the meter's cable needs them
-powered.
+powered. **Lines per reading** is for meters that send one line per value
+(the Metex M-3850D sends four): each line becomes a value of its own, the
+first one the main value. Leave it at 1 for all others.
 
 Manual settings are for meters that are not in the table yet. If you find a
 combination that works, please report it on the project page so it can be

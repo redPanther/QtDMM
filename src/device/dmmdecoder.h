@@ -94,7 +94,7 @@ public:
     FrameFormat::DataFormat protocol{FrameFormat::Invalid}; ///< which decoder handles the meter
     int   bits{8};                     ///< data bits, 5..8
     int   stopBits{1};                 ///< 1 or 2
-    int   numValues{1};                ///< frames per reading, for meters that send several lines
+    int   framesPerReading{1};         ///< frames per reading, for meters that send one line per value (Metex)
     int   parity{0};                   ///< 0 none, 1 even, 2 odd
     int   display{0};                  ///< display counts: 2000, 4000, 6000, ... 1000000
     bool  externalSetup{false};        ///< true: leave the port settings alone, the user configured it
@@ -102,6 +102,10 @@ public:
     bool  dtr{false};                  ///< drive DTR high
     QString sigrokExe{""};             ///< sigrok-cli path for SigrokDevice, empty otherwise
     QString sigrokDriver{""};          ///< libsigrok driver of a bench meter read through sigrok-cli ("scpi-dmm"), empty otherwise
+    int   channels{0};                 ///< values the meter shows (main + secondary displays); 0 = framesPerReading
+
+    /// How many values the meter has: channels, or one per frame.
+    int valueCount() const { return channels > 0 ? channels : framesPerReading; }
   };
 
   explicit DmmDecoder(FrameFormat::DataFormat df);
@@ -158,7 +162,7 @@ public:
   }
   /// Decodes one frame (getPacketLength() bytes, or a variable-length one
   /// with its terminator). @p id tells which of
-  /// DMMInfo::numValues frames this is. Returns nothing when the frame is
+  /// DMMInfo::framesPerReading frames this is. Returns nothing when the frame is
   /// corrupt; the caller then keeps the previous reading.
   virtual std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &data, int id) = 0;
 

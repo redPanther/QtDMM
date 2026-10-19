@@ -38,7 +38,7 @@ class QSerialPort;
 /// DmmDecoder::checkFormat() is asked whether the buffer now ends with a
 /// complete frame; if so the frame is emitted through readEvent() and the
 /// value id advances (meters that send several lines per reading, see
-/// setNumValues()). For polled protocols (Metex14) a request is written to
+/// setFramesPerReading()). For polled protocols (Metex14) a request is written to
 /// the port once per second (start(), startRead()).
 class FrameReader : public QObject
 {
@@ -58,7 +58,7 @@ public:
 
   /// Number of frames one reading consists of; the id passed with
   /// readEvent() cycles through 0..num-1.
-  void        setNumValues(int num)  { m_numValues = num; }
+  void        setFramesPerReading(int num) { m_framesPerReading = num; }
 
 Q_SIGNALS:
   /// A complete frame: exactly DmmDecoder::getPacketLength() bytes, or for a
@@ -74,7 +74,7 @@ protected:
   int                   m_length;
   bool                  m_sendRequest;
   int                   m_id;
-  int                   m_numValues;
+  int                   m_framesPerReading;
   std::shared_ptr<DmmDecoder> m_decoder;
   void sendReadRequest();
 

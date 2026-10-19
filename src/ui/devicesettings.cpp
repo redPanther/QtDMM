@@ -374,7 +374,7 @@ void DeviceSettings::load(const QVariantMap &keys)
   uidtr->setChecked(cfgBool("DMM/dtr", false));
 
   selectFormat(formatFromSetting(cfgString("DMM/data-format", "Metex14")));
-  ui_numValues->setValue(cfgInt("DMM/number-of-values", 1));
+  ui_framesPerReading->setValue(cfgInt("DMM/number-of-values", 1));
 
   QString model = cfgString("DMM/model");
 
@@ -499,7 +499,7 @@ QVariantMap DeviceSettings::keys() const
   keys.insert("DMM/external-setup", ui_externalSetup->isChecked());
 
   keys.insert("DMM/data-format", FrameFormat::toString(format()));
-  keys.insert("DMM/number-of-values", ui_numValues->value());
+  keys.insert("DMM/number-of-values", ui_framesPerReading->value());
   const int modelIdx = ui_model->currentIndex();
   const bool haveModel = ui_vendor->currentIndex() != 0
                          && modelIdx >= 0
@@ -711,7 +711,7 @@ void DeviceSettings::enterManualMode()
   displayCombo->setDisabled(false);
   stopBitsCombo->setDisabled(false);
   parityCombo->setDisabled(false);
-  ui_numValues->setDisabled(false);
+  ui_framesPerReading->setDisabled(false);
   ui_externalSetup->setDisabled(false);
   uirts->setDisabled(false);
   uidtr->setDisabled(false);
@@ -727,7 +727,7 @@ void DeviceSettings::enterManualMode()
   m_dmmInfo.stopBits = stopBitsCombo->currentText().toInt();
   m_dmmInfo.parity = parityCombo->currentIndex();
   m_dmmInfo.display = displayCombo->currentText().toInt();
-  m_dmmInfo.numValues = ui_numValues->value();
+  m_dmmInfo.framesPerReading = ui_framesPerReading->value();
   m_dmmInfo.externalSetup = ui_externalSetup->isChecked();
   m_dmmInfo.rts = uirts->isChecked();
   m_dmmInfo.dtr = uidtr->isChecked();
@@ -758,7 +758,7 @@ void DeviceSettings::on_ui_model_activated(int id)
   displayCombo->setDisabled(true);
   stopBitsCombo->setDisabled(true);
   parityCombo->setDisabled(true);
-  ui_numValues->setDisabled(true);
+  ui_framesPerReading->setDisabled(true);
   ui_externalSetup->setDisabled(true);
   uirts->setDisabled(true);
   uidtr->setDisabled(true);
@@ -777,7 +777,7 @@ void DeviceSettings::on_ui_model_activated(int id)
   stopBitsCombo->setCurrentText(QString::number(m_currentVendorModels[id].stopBits));
   parityCombo->setCurrentIndex(m_currentVendorModels[id].parity);
   selectDisplay(QString::number(m_currentVendorModels[id].display));
-  ui_numValues->setValue(m_currentVendorModels[id].numValues);
+  ui_framesPerReading->setValue(m_currentVendorModels[id].framesPerReading);
   ui_externalSetup->setChecked(m_currentVendorModels[id].externalSetup);
   uirts->setChecked(m_currentVendorModels[id].rts);
   uidtr->setChecked(m_currentVendorModels[id].dtr);
@@ -838,9 +838,14 @@ bool DeviceSettings::externalSetup() const
   return ui_externalSetup->isChecked();
 }
 
-int DeviceSettings::numValues() const
+int DeviceSettings::framesPerReading() const
 {
-  return ui_numValues->value();
+  return ui_framesPerReading->value();
+}
+
+int DeviceSettings::valueCount() const
+{
+  return ui_vendor->currentIndex() == 0 ? ui_framesPerReading->value() : m_dmmInfo.valueCount();
 }
 
 FrameFormat::DataFormat DeviceSettings::format() const
@@ -1101,7 +1106,7 @@ void DeviceSettings::on_ui_load_clicked()
     selectDisplay(cfg.value("DMM/display", "4000").toString());
     ui_externalSetup->setChecked(cfg.value("DMM/external-setup", false).toBool());
     selectFormat(formatFromSetting(cfg.value("DMM/data-format", "Metex14")));
-    ui_numValues->setValue(cfg.value("DMM/number-of-values", 1).toInt());
+    ui_framesPerReading->setValue(cfg.value("DMM/number-of-values", 1).toInt());
     uirts->setChecked(cfg.value("DMM/rts", true).toBool());
     uidtr->setChecked(cfg.value("DMM/dtr", false).toBool());
   }
@@ -1126,7 +1131,7 @@ void DeviceSettings::on_ui_save_clicked()
     cfg.setValue("DMM/display", displayCombo->currentText());
     cfg.setValue("DMM/external-setup", ui_externalSetup->isChecked());
     cfg.setValue("DMM/data-format", FrameFormat::toString(format()));
-    cfg.setValue("DMM/number-of-values", ui_numValues->value());
+    cfg.setValue("DMM/number-of-values", ui_framesPerReading->value());
 
     cfg.setValue("DMM/rts", uirts->isChecked());
     cfg.setValue("DMM/dtr", uidtr->isChecked());

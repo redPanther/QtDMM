@@ -11,24 +11,24 @@
 // 40000, 503/505 and their relatives 50000 (sub display 9999), 506/506B,
 // 507, 208/208B 50000.
 static const bool registered = []() {
-  DmmDecoder::addConfig({"APPA", "501 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 40000, 0, 0, 0});
-  DmmDecoder::addConfig({"APPA", "502 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 40000, 0, 0, 0});
-  DmmDecoder::addConfig({"APPA", "506 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"APPA", "506B *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"APPA", "507 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"APPA", "208 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"APPA", "208B *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"BENNING", "MM 12 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Sefram", "7351 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Sefram", "7352B *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"KPS", "DMM9000BT *", "", 9600, FrameFormat::AppaDmm, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"APPA", "503 *", "", 9600, FrameFormat::Appa500, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"APPA", "505 *", "", 9600, FrameFormat::Appa500, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Voltcraft", "VC 930 *", "", 9600, FrameFormat::Appa500, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Voltcraft", "VC 950 *", "", 9600, FrameFormat::Appa500, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Iso-Tech", "IDM 503 *", "", 9600, FrameFormat::Appa500, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Iso-Tech", "IDM 505 *", "", 9600, FrameFormat::Appa500, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"CMT", "3503 *", "", 9600, FrameFormat::Appa500, 8, 1, 2, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"APPA", "501 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 40000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "502 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 40000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "506 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "506B *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "507 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "208 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "208B *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"BENNING", "MM 12 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "7351 *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sefram", "7352B *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"KPS", "DMM9000BT *", "", 9600, FrameFormat::AppaDmm, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "503 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"APPA", "505 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Voltcraft", "VC 930 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Voltcraft", "VC 950 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Iso-Tech", "IDM 503 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Iso-Tech", "IDM 505 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"CMT", "3503 *", "", 9600, FrameFormat::Appa500, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
   return true;
 }();
 

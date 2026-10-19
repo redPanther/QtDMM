@@ -618,17 +618,17 @@
              <item row="0" column="0">
               <widget class="QLabel" name="TextLabel1_6">
                <property name="text">
-                <string>&amp;Number of values:</string>
+                <string>&amp;Lines per reading:</string>
                </property>
                <property name="buddy">
-                <cstring>ui_numValues</cstring>
+                <cstring>ui_framesPerReading</cstring>
                </property>
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QSpinBox" name="ui_numValues">
+              <widget class="QSpinBox" name="ui_framesPerReading">
                <property name="whatsThis">
-                <string>Some multimeter send several lines of data containing different measured values. As QtDMM only shows one variable here you can set the number of lines to be ignored for each measurement (That means that QtDMM only uses the first line).</string>
+                <string>Some meters send one line of data per value, several lines for each reading (Metex M-3850D: four). QtDMM counts the lines and shows each as a value of its own: the first one as the main value, the others below it.</string>
                </property>
                <property name="minimum">
                 <number>1</number>

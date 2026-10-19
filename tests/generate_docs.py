@@ -26,8 +26,8 @@ DOCS = REPO / "docs"
 DEVICES_MD = DOCS / "user" / "supported-devices.md"
 README = REPO / "README.md"
 
-# {"Vendor", "Model", "", baud, FrameFormat::Proto, bits, stopBits, numValues,
-#  parity, display, externalSetup, rts, dtr}
+# {"Vendor", "Model", "", baud, FrameFormat::Proto, bits, stopBits, framesPerReading,
+#  parity, display, externalSetup, rts, dtr[, sigrokExe, sigrokDriver, channels]}
 ADD_CONFIG = re.compile(
     r'addConfig\(\s*\{\s*"(?P<vendor>[^"]*)"\s*,\s*"(?P<model>[^"]*)"\s*,\s*"[^"]*"\s*,'
     r'\s*(?P<baud>\d+)\s*,\s*FrameFormat::(?P<protocol>\w+)\s*,\s*(?P<bits>\d)\s*,'

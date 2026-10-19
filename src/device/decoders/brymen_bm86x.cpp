@@ -4,12 +4,12 @@
 // "*": ported from the libsigrok parser, not confirmed on hardware. The
 // BM869s was confirmed by a user (2026-09).
 static const bool registered = []() {
-  DmmDecoder::addConfig({"Brymen", "BM867s *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Brymen", "BM869s", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Brymen", "BM867s *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Brymen", "BM869s", "", 0, FrameFormat::BrymenBM86x, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
   // the BM869s under other names (HKJ's TestController device list, "BrymenDMM")
-  DmmDecoder::addConfig({"Elma", "BM869s *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Greenlee", "DM-860A *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
-  DmmDecoder::addConfig({"Sanwa", "PC7000 *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 2, 0, 50000, 0, 0, 0});
+  DmmDecoder::addConfig({"Elma", "BM869s *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Greenlee", "DM-860A *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
+  DmmDecoder::addConfig({"Sanwa", "PC7000 *", "", 0, FrameFormat::BrymenBM86x, 8, 1, 1, 0, 50000, 0, 0, 0, "", "", 2});
   return true;
 }();
 
@@ -85,7 +85,7 @@ std::optional<DmmDecoder::DmmResponse> DecoderBrymenBM86x::decode(const QByteArr
 
   m_result = {};
   // one frame carries both displays: main is id 0, the second id 1 (and
-  // numValues 2 in the table, so the display shows it)
+  // channels 2 in the table, so the display shows it)
   m_result.main().id = 0;
   DmmChannel &sub = m_result.addChannel(1);
   m_result.showBar = true;
