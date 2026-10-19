@@ -2479,17 +2479,17 @@ y cierre la sesión y vuelva a entrar.</translation>
         <translation>Gráfica escrita en %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="772"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="768"/>
         <source>%1 off: the %2 axis shows %3 now</source>
         <translation>%1 desactivado: el eje %2 muestra ahora %3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="773"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
         <source>right</source>
         <translation>derecho</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="773"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
         <source>left</source>
         <translation>izquierdo</translation>
     </message>
@@ -5911,7 +5911,12 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
         <translation>Instrumento &amp;analógico</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="101"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="69"/>
+        <source>&amp;Off</source>
+        <translation>&amp;Desactivado</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/valuemenu.cpp" line="94"/>
         <source>&amp;Poincaré plot</source>
         <translation>Diagrama de &amp;Poincaré</translation>
     </message>
@@ -5936,37 +5941,22 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
         <translation>Es el valor principal</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="64"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="65"/>
         <source>&amp;Graph</source>
         <translation>&amp;Gráfica</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="66"/>
-        <source>&amp;Show in graph</source>
-        <translation>&amp;Mostrar en la gráfica</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/valuemenu.cpp" line="70"/>
-        <source>Two units are shown already: choose an axis for it</source>
-        <translation>Ya se muestran dos unidades: elija un eje para él</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="80"/>
-        <source>&amp;Automatic axis</source>
-        <translation>Eje &amp;automático</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="81"/>
         <source>&amp;Left axis</source>
         <translation>Eje &amp;izquierdo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="82"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="71"/>
         <source>&amp;Right axis</source>
         <translation>Eje &amp;derecho</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="90"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="80"/>
         <source>The main value is on the left axis</source>
         <translation>El valor principal está en el eje izquierdo</translation>
     </message>

@@ -724,18 +724,14 @@ bool GraphWidget::valueDrawn(int id) const
   return false;
 }
 
-bool GraphWidget::valueFits(int id) const
+GraphWidget::ValueAxis GraphWidget::valueSide(int id) const
 {
-  const QString unit = valueUnitOf(id);
-  if (unit.isEmpty())
-    return true;
-  QSet<QString> units;
-  if (m_mainShown && id != 0 && !m_store->unit().isEmpty())
-    units.insert(m_store->unit());
-  for (int other : m_shownValues)
-    if (other != id && !valueUnitOf(other).isEmpty())
-      units.insert(valueUnitOf(other));
-  return units.contains(unit) || units.size() < 2;
+  if (id <= 0)
+    return m_mainShown ? AxisLeft : AxisAuto;
+  for (int i = m_store->extraCount() - 1; i >= 0; --i)
+    if (i < int(m_extraCurves.size()) && m_store->extra(i).id == id && m_extraCurves[size_t(i)].shown)
+      return m_extraCurves[size_t(i)].right ? AxisRight : AxisLeft;
+  return AxisAuto;
 }
 
 void GraphWidget::makeRoom(int id, ValueAxis axis, bool chosenOnly)

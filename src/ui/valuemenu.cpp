@@ -59,42 +59,35 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
     wid->setMeterValue(id);
     show(View::Meter);
   });
-  // the graph: shown or not, and on which axis
+  // the graph: off, or on an axis. A unit the axis has already joins it,
+  // another one takes its place there (GraphWidget::setValueAxis())
   GraphWidget *graph = wid->graph();
   QMenu *curves = menu->addMenu(tr("&Graph"));
+  auto *sides = new QActionGroup(curves);
   const bool shown = id == 0 ? graph->mainShown() : graph->shownValues().contains(id);
-  QAction *inGraph = checkable(curves, tr("&Show in graph"), shown);
-  if (!shown && graph->valueAxis(id) == GraphWidget::AxisAuto && !graph->valueFits(id))
-  {
-    inGraph->setEnabled(false);
-    inGraph->setToolTip(tr("Two units are shown already: choose an axis for it"));
-  }
-  QObject::connect(inGraph, &QAction::triggered, menu, [graph, id, show](bool on)
-  {
-    graph->setValueShown(id, on);
-    if (on)
-      show(View::Graph);
-  });
-  curves->addSeparator();
-  auto *axes = new QActionGroup(curves);
-  const std::pair<GraphWidget::ValueAxis, QString> choices[] = { { GraphWidget::AxisAuto, tr("&Automatic axis") },
+  const GraphWidget::ValueAxis side = graph->valueSide(id);
+  const std::pair<GraphWidget::ValueAxis, QString> choices[] = { { GraphWidget::AxisAuto, tr("&Off") },
                                                                  { GraphWidget::AxisLeft, tr("&Left axis") },
                                                                  { GraphWidget::AxisRight, tr("&Right axis") } };
   for (const auto &[axis, text] : choices)
   {
-    QAction *a = checkable(curves, text, graph->valueAxis(id) == axis);
-    axes->addAction(a);
-    if (id == 0 && axis != GraphWidget::AxisLeft)
+    const bool off = axis == GraphWidget::AxisAuto;
+    QAction *a = checkable(curves, text, off ? !shown : side == axis);
+    sides->addAction(a);
+    if (id == 0 && axis == GraphWidget::AxisRight)
     {
       a->setEnabled(false);
       a->setToolTip(tr("The main value is on the left axis"));
     }
-    QObject::connect(a, &QAction::triggered, menu, [graph, id, axis = axis, show]
+    QObject::connect(a, &QAction::triggered, menu, [graph, id, axis = axis, off, show]
     {
+      if (off)
+      {
+        graph->setValueShown(id, false);
+        return;
+      }
       graph->setValueAxis(id, axis);
-      // automatic: on only when there is an axis for it
-      if (axis != GraphWidget::AxisAuto || graph->valueFits(id))
-        graph->setValueShown(id, true);
+      graph->setValueShown(id, true);
       show(View::Graph);
     });
   }

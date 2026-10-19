@@ -301,10 +301,11 @@ public:
   /// drawn: a value in a third one waits until another goes off, or until
   /// an axis is chosen for it (setValueAxis()).
   void             setValueShown(int id, bool shown);
-  /// The axis of a value: Auto puts the first unit left, the second right,
-  /// a unit there already on its axis. Left or Right takes that axis for the
-  /// value's unit; the curves of another unit on it go off (notice()). The
-  /// main value is always on the left.
+  /// The axis of a value (the sidebar's value menu): Left or Right puts it
+  /// there - a unit the axis has already joins it, another one takes the
+  /// axis, and the curves of the old unit on it go off (notice()). Auto, for
+  /// the layouts from before: the first unit left, the second right, a unit
+  /// there already on its axis. The main value is always on the left.
   enum ValueAxis { AxisAuto, AxisLeft, AxisRight };
   void             setValueAxis(int id, ValueAxis axis);
   ValueAxis        valueAxis(int id) const { return id <= 0 ? AxisLeft : m_valueAxes.value(id, AxisAuto); }
@@ -312,8 +313,8 @@ public:
   bool             valueDrawn(int id) const;
   /// The colour of value @p id's curve (also while it is off).
   QColor           valueColor(int id) const { return id <= 0 ? dataColor() : extraColor(id); }
-  /// Whether showing value @p id needs no axis taken from another unit.
-  bool             valueFits(int id) const;
+  /// The axis value @p id is drawn on, AxisAuto while it is not drawn.
+  ValueAxis        valueSide(int id) const;
   /// The other values shown (ids > 0).
   QList<int>       shownValues() const;
   bool             mainShown() const { return m_mainShown; }

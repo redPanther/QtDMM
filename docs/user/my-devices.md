@@ -54,12 +54,10 @@ shows which value - right-click a value:
   **Secondary value** - on the small line below, two at most: a third
   replaces the older one.
 - **Analog meter** - the value the needle shows (one).
-- **Graph** ▸ **Show in graph** - the value's curve on or off.
-  **Automatic axis**, **Left axis**, **Right axis** - where its curve goes.
-  The axes follow the units: values in the same unit share an axis (two
-  voltages on the left, a current on the right). Automatic puts the first
-  unit on the left, the second on the right. A chosen axis takes that axis
-  for the value's unit; the curves of the other unit on it go off, the
+- **Graph** ▸ **Off**, **Left axis**, **Right axis** - the value's curve
+  off or on that axis. A value in the unit the axis has already joins it
+  (two voltages on the left, a current on the right); one in another unit
+  takes the axis over, and the curves of the old unit there go off - the
   status line says which. The main value is always on the left.
 - **Poincaré plot** - the value the plot takes (one).
 

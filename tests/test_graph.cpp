@@ -2167,7 +2167,9 @@ int main(int argc, char **argv)
     check(graph.valueDrawn(0) && graph.valueDrawn(1) && graph.valueDrawn(3) && graph.leftAxisTitle() == "[V]"
             && graph.rightAxisTitle() == "[A]",
           "axes: two voltages left, the current right, got " + graph.rightAxisTitle());
-    check(!graph.valueFits(2), "axes: a third unit has no axis");
+    check(graph.valueSide(1) == GraphWidget::AxisRight && graph.valueSide(3) == GraphWidget::AxisLeft
+            && graph.valueSide(2) == GraphWidget::AxisAuto,
+          "axes: the side each is drawn on, none for one off");
     // the temperature to the right: the current goes off, with a notice
     graph.setValueAxis(2, GraphWidget::AxisRight);
     graph.setValueShown(2, true);
@@ -2194,6 +2196,11 @@ int main(int argc, char **argv)
     // automatic again: the voltage shares the left axis
     graph.setValueAxis(3, GraphWidget::AxisAuto);
     check(graph.valueDrawn(3) && graph.valueAxis(3) == GraphWidget::AxisAuto, "axes: automatic, on the left");
+    // the left axis chosen in its unit: it joins the main value, nothing goes off
+    const qsizetype before = notices.size();
+    graph.setValueAxis(3, GraphWidget::AxisLeft);
+    check(graph.valueSide(3) == GraphWidget::AxisLeft && graph.valueDrawn(0) && notices.size() == before,
+          "axes: the same unit joins the axis");
     check(graph.valueColor(1) != graph.valueColor(0), "axes: a colour per curve");
   }
 

@@ -2479,17 +2479,17 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>Wykres zapisany do %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="772"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="768"/>
         <source>%1 off: the %2 axis shows %3 now</source>
         <translation>%1 wyłączone: oś %2 pokazuje teraz %3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="773"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
         <source>right</source>
         <translation>prawa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="773"/>
+        <location filename="../../src/ui/views/graphwidget_curves.cpp" line="769"/>
         <source>left</source>
         <translation>lewa</translation>
     </message>
@@ -5912,7 +5912,12 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <translation>Miernik &amp;analogowy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="101"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="69"/>
+        <source>&amp;Off</source>
+        <translation>&amp;Wyłączone</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/valuemenu.cpp" line="94"/>
         <source>&amp;Poincaré plot</source>
         <translation>Wykres &amp;Poincarégo</translation>
     </message>
@@ -5937,37 +5942,22 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <translation>To jest wartość główna</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="64"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="65"/>
         <source>&amp;Graph</source>
         <translation>&amp;Wykres</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="66"/>
-        <source>&amp;Show in graph</source>
-        <translation>&amp;Pokaż na wykresie</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/valuemenu.cpp" line="70"/>
-        <source>Two units are shown already: choose an axis for it</source>
-        <translation>Pokazane są już dwie jednostki: wybierz dla niej oś</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="80"/>
-        <source>&amp;Automatic axis</source>
-        <translation>Oś &amp;automatyczna</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="81"/>
         <source>&amp;Left axis</source>
         <translation>Oś &amp;lewa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="82"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="71"/>
         <source>&amp;Right axis</source>
         <translation>Oś &amp;prawa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/valuemenu.cpp" line="90"/>
+        <location filename="../../src/ui/valuemenu.cpp" line="80"/>
         <source>The main value is on the left axis</source>
         <translation>Wartość główna jest na lewej osi</translation>
     </message>
