@@ -48,7 +48,7 @@ to the end, or tick **Follow**, to resume.
 
 The table keeps the newest **N rows** (10 000 by default, set it next to
 **Keep**) and drops the oldest beyond that - at four readings a second
-that is about forty minutes. **Clear** empties it; the recorder's graph is
+that is about forty minutes. **Clear table** empties it; the recorder's graph is
 not affected, and clearing the graph (Ctrl+Del) leaves the table alone.
 
 Below the table a line sums up what it holds for one value - the main

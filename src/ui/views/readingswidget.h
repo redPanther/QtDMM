@@ -7,6 +7,7 @@
 
 #include "recording/readingsmodel.h"
 
+class QAction;
 class QCheckBox;
 class QHBoxLayout;
 class QLabel;
@@ -24,6 +25,9 @@ public:
   explicit ReadingsWidget(QWidget *parent = nullptr);
 
   ReadingsModel *log() { return m_log; }
+  /// Entries of the window around the table ("Hide window"), first in its
+  /// context menu; not owned.
+  void setWindowActions(const QList<QAction *> &actions) { m_windowActions = actions; }
   /// Rows to keep (persisted by MainWindow).
   int maxRows() const;
   void setMaxRows(int rows);
@@ -58,6 +62,7 @@ private Q_SLOTS:
 
 private:
   ReadingsModel *m_log;
+  QList<QAction *> m_windowActions;
   class ValueFilter;
   ValueFilter *m_filter = nullptr;
   QTableView *m_view;

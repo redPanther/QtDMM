@@ -376,12 +376,13 @@ void DeviceSidebar::fill()
   m_filling = false;
 }
 
-void DeviceSidebar::setCurrent(const QString &id, bool active)
+void DeviceSidebar::setCurrent(const QString &id, bool active, bool blink)
 {
-  if (id == m_current && active == m_active)
+  if (id == m_current && active == m_active && blink == m_blink)
     return;
   m_current = id;
   m_active = active;
+  m_blink = blink;
   m_filling = true;
   updateMarks();
   m_filling = false;
@@ -399,7 +400,7 @@ void DeviceSidebar::updateMarks()
     font.setBold(current);
     item->setFont(0, font);
     item->setIcon(0, dot(!current  ? QColor()
-                         : m_active ? QColor(0x22, 0xaa, 0x22)
+                         : m_active ? (m_blink ? QColor(0x66, 0xcc, 0x66) : QColor(0x22, 0xaa, 0x22))
                                     : palette().color(QPalette::Disabled, QPalette::WindowText),
                          devicePixelRatioF(), item->data(0, kSymbol).value<QPixmap>()));
   }

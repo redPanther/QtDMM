@@ -82,11 +82,16 @@ ReadingsWidget::ReadingsWidget(QWidget *parent) :
   connect(m_view, &QTableView::customContextMenuRequested, this, [this](const QPoint &pos)
   {
     QMenu menu(this);
+    if (!m_windowActions.isEmpty())
+    {
+      menu.addActions(m_windowActions);
+      menu.addSeparator();
+    }
     menu.addAction(tr("&Copy"), this, &ReadingsWidget::copySLOT);
     menu.addAction(tr("Select &all"), m_view, &QTableView::selectAll);
     menu.addSeparator();
     menu.addAction(tr("&Export..."), this, &ReadingsWidget::exportSLOT);
-    menu.addAction(tr("C&lear"), this, &ReadingsWidget::clearSLOT);
+    menu.addAction(tr("C&lear table"), this, &ReadingsWidget::clearSLOT);
     menu.exec(m_view->viewport()->mapToGlobal(pos));
   });
   // Ctrl+C copies whole rows while the table has the focus. Elsewhere in
@@ -137,7 +142,8 @@ ReadingsWidget::ReadingsWidget(QWidget *parent) :
   QPushButton *exportButton = new QPushButton(tr("&Export..."), m_barRight);
   connect(exportButton, &QPushButton::clicked, this, &ReadingsWidget::exportSLOT);
   right->addWidget(exportButton);
-  QPushButton *clearButton = new QPushButton(tr("C&lear"), m_barRight);
+  QPushButton *clearButton = new QPushButton(tr("C&lear table"), m_barRight);
+  clearButton->setToolTip(tr("Remove all rows; the recorder's graph is not affected"));
   connect(clearButton, &QPushButton::clicked, this, &ReadingsWidget::clearSLOT);
   right->addWidget(clearButton);
 

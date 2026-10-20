@@ -22,7 +22,8 @@ uses it takes the change at once.
 window, with the node **My devices**. Each entry has a small picture of its
 kind of instrument (handheld, clamp, bench meter, ...) in its maker's
 colours. The device in use is bold, with a dot
-that is green while its readings come in; where a device is connected shows
+that blinks green while its readings come in and turns grey when none has
+come for three seconds; where a device is connected shows
 when the mouse rests on it. Click another one: QtDMM disconnects, takes over
 its settings and connects again. A running recording stops and the graph
 starts empty - another meter is another measurement; readings not exported

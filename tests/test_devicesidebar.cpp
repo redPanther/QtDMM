@@ -39,6 +39,16 @@ int main(int argc, char **argv)
   sidebar.setCurrent(tfa, true);
   check(sidebar.deviceItem(tfa)->font(0).bold() && !bench->font(0).bold(), "the one in use is bold");
   check(!sidebar.deviceItem(tfa)->icon(0).isNull(), "the one in use has its state");
+  {
+    // the dot blinks with the readings: the other green each time
+    const QImage on = sidebar.deviceItem(tfa)->icon(0).pixmap(16).toImage();
+    sidebar.setCurrent(tfa, true, true);
+    const QImage blink = sidebar.deviceItem(tfa)->icon(0).pixmap(16).toImage();
+    sidebar.setCurrent(tfa, false);
+    const QImage off = sidebar.deviceItem(tfa)->icon(0).pixmap(16).toImage();
+    check(on != blink && on != off && blink != off, "the dot: green, the other green, grey");
+    sidebar.setCurrent(tfa, true);
+  }
 
   // 2. a click switches, but not to the one in use
   QStringList switched;

@@ -64,8 +64,9 @@ public:
 
   explicit DeviceSidebar(DeviceLibrary *library, QWidget *parent = nullptr);
 
-  /// The entry this window uses (empty: none) and whether its readings come in.
-  void        setCurrent(const QString &id, bool active);
+  /// The entry this window uses (empty: none) and whether its readings come
+  /// in; @p blink the dot in the other green, flipped with each reading.
+  void        setCurrent(const QString &id, bool active, bool blink = false);
   /// The node "My devices".
   QTreeWidgetItem *devicesNode() const { return m_devices; }
   /// The item of the entry @p id, nullptr when there is none.
@@ -144,5 +145,6 @@ private:
   QString          m_selectInstance;   ///< renamed: selected again under this name
   QString          m_current;
   bool             m_active = false;
+  bool             m_blink = false;   ///< the other green, flipped with each reading
   bool             m_filling = false;
 };
