@@ -41,6 +41,12 @@ const QBluetoothUuid kFff0Write(quint16(0xFFF2));
 // 0xFFF4 (dmm-tools, ZOTEK spec §2, after ZOTEK's apps)
 const QBluetoothUuid kFff4(quint16(0xFFF4));
 
+// AiCare's module in the HoldPeak HP-570C-APP clamp: the FS9721 frame on
+// 0xFFB2 of service 0xFFB0; 0xFFB1 is never written (AiCare's app)
+const QBluetoothUuid kFfb0Service(quint16(0xFFB0));
+const QBluetoothUuid kFfb0Notify(quint16(0xFFB2));
+const QBluetoothUuid kFfb0Write(quint16(0xFFB1));
+
 // connecting and finding the characteristics takes a second or two; a
 // meter that is switched off or out of range never answers
 constexpr int kConnectTimeoutMs = 20000;
@@ -84,6 +90,10 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       // every model advertises as "Bluetooth DMM" (ZOTEK's apps also take
       // "ZY", seen on no meter); the first packet tells which one it is
       return Profile{ kFff0Service, kFff4, { kFff4 }, { "Bluetooth DMM" }, QByteArray(), true };
+    case FrameFormat::VC820BLE:
+      // AiCare's app finds the meter by the service it advertises, not by
+      // its name (which is not known here)
+      return Profile{ kFfb0Service, kFfb0Notify, { kFfb0Write }, {} };
     default:
       return std::nullopt;
   }

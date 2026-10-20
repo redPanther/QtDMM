@@ -517,14 +517,15 @@
       "match": [
         "HoldPeak"
       ],
-      "url": "",
+      "url": "https://www.holdpeak.com/",
       "example_device": "HP-90EPC",
       "colors": {
         "primary": "#E3B82D",
         "secondary": "#33383D"
       },
       "types": [
-        "handheld_dmm"
+        "handheld_dmm",
+        "clamp_meter"
       ]
     },
     "hp": {

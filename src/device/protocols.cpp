@@ -57,6 +57,7 @@ const std::vector<ProtocolInfo> &protocols()
     { FrameFormat::UniTUT382,             "UniTUT382",             QT_TRANSLATE_NOOP("Protocols", "33 bytes, continuous, lx or fc (UNI-T UT382 luxmeter)"), "",                          "",                         make<DecoderUniTUT382> },
     { FrameFormat::BenetechGM1020,        "BenetechGM1020",        QT_TRANSLATE_NOOP("Protocols", "8 bytes binary, continuous after a start command, lx and °C (Benetech GM1020)"), "",  "",                         make<DecoderBenetechGM1020> },
     { FrameFormat::ZotekBLE,              "ZotekBLE",              QT_TRANSLATE_NOOP("Protocols", "10 to 19 bytes, scrambled LCD segments, streamed over Bluetooth LE (ZOTEK, ANENG)"), "", "Bluetooth LE", make<DecoderZotek> },
+    { FrameFormat::VC820BLE,              "VC820BLE",              QT_TRANSLATE_NOOP("Protocols", "14 bytes binary, streamed over Bluetooth LE (FS9721, HoldPeak HP-570C-APP)"), "FS9721 LP3", "Bluetooth LE", make<DecoderVC820> },
   };
   return table;
 }

@@ -5,7 +5,8 @@ QtDMM reads two kinds of Bluetooth LE meters:
 - **UNI-T UT60BT** (and, untested, the UT161B/D/E and the UT61B+/D+/E+
   with the UT-D07B adapter) and, untested, the **APPA** Bluetooth meters
   and their BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram twins and the
-  **ZOTEK** meters (ZOYI, BSIDE, ANENG) - QtDMM *connects* to the meter and
+  **ZOTEK** meters (ZOYI, BSIDE, ANENG) and the **HoldPeak HP-570C-APP**
+  clamp - QtDMM *connects* to the meter and
   reads it, like a serial meter on a cable.
 - **Victron** SmartShunt, BMV-712, MPPT chargers and Phoenix inverters - QtDMM
   *listens* to the readings they broadcast, without a connection.
@@ -116,6 +117,21 @@ Not tried with a real meter yet: the protocol comes from the
 out from ZOTEK's apps and manuals and checked there on a ZOYI ZT-5B (its
 readings and keys); which model sends which packet layout is inferred
 except for the ZT-5B. Please report how it works for you.
+
+## HoldPeak HP-570C-APP
+
+The HoldPeak **HP-570C-APP** clamp, also sold as **AOPUTTRIVER
+AP-570C-APP**, sends what its LCD shows over Bluetooth LE all the time it
+is on. **Add device** finds it by the Bluetooth service it advertises, not
+by a name; choose the meter found and the model. There is nothing to pair.
+
+QtDMM shows value, unit, AC/DC, AUTO, HOLD, REL, the diode symbol, the
+low battery symbol and OL. The meter has no keys QtDMM could
+press: the link only reads.
+
+Not tried with a real meter yet: the Bluetooth details come from the
+maker's app, the frame is the one of the HP-90EPC (its FS9721 chip, per a
+review of a twin of the clamp). Please report how it works for you.
 
 ## Victron Instant Readout
 

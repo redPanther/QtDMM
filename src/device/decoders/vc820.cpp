@@ -1,5 +1,7 @@
 #include "device/decoders/vc820.h"
 
+#include "core/sampletypes.h"
+
 /* FortuneFS9721
  *
  * Packet structure:
@@ -64,17 +66,33 @@ static const bool registered = []() {
   DmmDecoder::addConfig({"Uni-Trend", "UT60E"  , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   DmmDecoder::addConfig({"Voltcraft", "VC 820" , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
   DmmDecoder::addConfig({"Voltcraft", "VC 840" , "", 2400, FrameFormat::VC820Continuous, 8, 1, 1, 0, 4000, 0, 0, 1});
+  // the same frame over Bluetooth LE, as two notifications of 7 bytes
+  // (ablage/holdpeak: AiCare's "INTELLIGENT CLAMP METER" app, decompiled; the
+  // FS9721-LP3 per lygte-info's review of the BTMeter BT-570C-APP twin); not
+  // tried on a meter here
+  DmmDecoder::addConfig({"HoldPeak", "HP-570C-APP *", "", 0, FrameFormat::VC820BLE, 8, 1, 1, 0, 4000, 0, 0, 0});
+  DmmDecoder::addConfig({"AOPUTTRIVER", "AP-570C-APP *", "", 0, FrameFormat::VC820BLE, 8, 1, 1, 0, 4000, 0, 0, 0});
   return true;
 }();
 
+// The last 14 bytes, their sequence numbers 1 to 14 in the high nibbles: over
+// Bluetooth a frame comes in two halves, and after a lost first half the
+// second one of the frame before must not be read with it.
 bool DecoderVC820::checkFormat(const char* data, size_t idx)
 {
-  return (m_type == FrameFormat::VC820Continuous && ((data[idx] & 0xf0) == 0xe0));
+  if ((data[idx] & 0xf0) != 0xe0)
+    return false;
+  unsigned char f[kFrameLength];
+  lastBytes(data, idx, kFrameLength, f);
+  for (int i = 0; i < kFrameLength; ++i)
+    if ((f[i] >> 4) != i + 1)
+      return false;
+  return true;
 }
 
 size_t DecoderVC820::getPacketLength()
 {
-  return  (m_type == FrameFormat::VC820Continuous ? 14 : 0);
+  return kFrameLength;
 }
 
 std::optional<DmmDecoder::DmmResponse> DecoderVC820::decode(const QByteArray &data, int id)
@@ -82,6 +100,9 @@ std::optional<DmmDecoder::DmmResponse> DecoderVC820::decode(const QByteArray &da
   m_result = {};
   m_result.main().id = id;
   m_result.hold      = (data[11] & 0x01);
+  m_result.lowBat    = (data[12] & 0x01);
+  if (data[11] & 0x02)
+    m_result.main().states |= SampleFlag::Relative;
   m_result.showBar= true;
   m_result.range = (bit(data, 0, 1)? "AUTO" : "MANU");
 
