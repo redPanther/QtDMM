@@ -35,7 +35,15 @@ public:
   {
     setSourceModel(log);
   }
-  void refresh() { invalidateFilter(); }
+  void refresh()
+  {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+    beginFilterChange();   // invalidateFilter() is deprecated from there on
+    endFilterChange();
+#else
+    invalidateFilter();
+#endif
+  }
 
 protected:
   bool filterAcceptsRow(int row, const QModelIndex &) const override
