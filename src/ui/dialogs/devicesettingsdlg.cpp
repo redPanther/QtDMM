@@ -8,10 +8,12 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QTabWidget>
+#include <QTextBrowser>
 #include <QUrl>
 #include <QVBoxLayout>
 
 #include "ui/devicesettings.h"
+#include "ui/devicespecs.h"
 #include "ui/devicesummary.h"
 #include "ui/devicesymbol.h"
 
@@ -25,7 +27,7 @@ DeviceSettingsDlg::DeviceSettingsDlg(const QString &name, QWidget *parent)
   layout->addWidget(m_tabs, 1);
 
   // Info: the device at a glance, its state now, where to read more
-  auto *info = new QWidget(m_tabs);
+  auto *info = m_info = new QWidget(m_tabs);
   auto *infoLayout = new QVBoxLayout(info);
   m_summary = new DeviceSummary(info);
   infoLayout->addWidget(m_summary);
@@ -54,6 +56,12 @@ DeviceSettingsDlg::DeviceSettingsDlg(const QString &name, QWidget *parent)
   });
   infoLayout->addWidget(m_links);
   m_tabs->addTab(info, tr("&Info"));
+
+  // Data: the manual's specifications, a tab only for the models that have them
+  m_data = new QTextBrowser(m_tabs);
+  m_data->setObjectName("ui_deviceData");
+  m_data->setOpenExternalLinks(true);
+  m_tabs->addTab(m_data, tr("&Data"));
 
   m_settings = new DeviceSettings(m_tabs);
   m_settings->setDescriptionFilesVisible(false);
@@ -89,12 +97,20 @@ QVariantMap DeviceSettingsDlg::keys() const
 
 void DeviceSettingsDlg::showTab(Tab tab)
 {
-  m_tabs->setCurrentIndex(int(tab));
+  if (tab == DataTab && !hasData())
+    tab = InfoTab;
+  m_tabs->setCurrentWidget(tab == InfoTab ? m_info : tab == DataTab ? static_cast<QWidget *>(m_data) : m_settings);
 }
 
 DeviceSettingsDlg::Tab DeviceSettingsDlg::currentTab() const
 {
-  return Tab(m_tabs->currentIndex());
+  const QWidget *w = m_tabs->currentWidget();
+  return w == m_info ? InfoTab : w == m_data ? DataTab : SettingsTab;
+}
+
+bool DeviceSettingsDlg::hasData() const
+{
+  return m_tabs->isTabVisible(m_tabs->indexOf(m_data));
 }
 
 void DeviceSettingsDlg::setStatus(const std::function<QString()> &status)
@@ -120,8 +136,16 @@ QString DeviceSettingsDlg::linksText() const
 void DeviceSettingsDlg::updateInfo()
 {
   m_summary->show(m_settings, m_name);
-  QStringList links;
   const QString vendor = m_settings->dmmInfo().vendor;
+  const QString model = m_settings->dmmInfo().name;
+  if (model != m_dataModel)
+  {
+    m_dataModel = model;
+    const QJsonObject spec = DeviceSpecs::find(vendor, m_settings->dmmInfo().model);
+    m_data->setHtml(spec.isEmpty() ? QString() : DeviceSpecs::html(spec));
+    m_tabs->setTabVisible(m_tabs->indexOf(m_data), !spec.isEmpty());
+  }
+  QStringList links;
   const QString site = DeviceSymbol::website(vendor);
   if (!site.isEmpty())
     links << QString("<a href=\"%1\">%2</a>").arg(site.toHtmlEscaped(), tr("Website of %1").arg(vendor).toHtmlEscaped());

@@ -81,6 +81,17 @@ foreach(file_path IN LISTS HELP_FILES)
 endforeach()
 set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
+## specification data of some meters from their manuals (dmm-tools, via
+## tools/update_device_specs.py) for the Data tab of a device's info
+file(GLOB SPEC_FILES CONFIGURE_DEPENDS assets/specs/*.json)
+list(SORT SPEC_FILES)
+set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/specs\">\n")
+foreach(file_path IN LISTS SPEC_FILES)
+	get_filename_component(base_name "${file_path}" NAME)
+	set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${base_name}\">${file_path}</file>\n")
+endforeach()
+set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
+
 ## written only when the content changed, so a reconfigure doesn't rebuild the resources
 file(WRITE "${CMAKE_BINARY_DIR}/resources.qrc.new" "<!-- ATTENTION this file is auto generated -->\n<RCC>\n${RES_CONTENT}</RCC>\n")
 configure_file("${CMAKE_BINARY_DIR}/resources.qrc.new" "${RESOURCES}" COPYONLY)

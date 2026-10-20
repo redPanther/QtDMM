@@ -73,7 +73,7 @@ choices are kept with the window layout.
 
 The context menu of a device:
 
-- **Info and settings...** (also a double click) - two tabs:
+- **Info and settings...** (also a double click) - two or three tabs:
   - **Info**: the device at a glance as on the assistant's last page
     (picture, name, model, type, protocol, connection); whether it is in use
     in this window, in another instance or not at all; in this window
@@ -81,6 +81,13 @@ The context menu of a device:
     battery, and its values with their readings, updated every second. Below
     a link to the maker's website (in the browser) and to the list of
     supported devices in this help.
+  - **Data** (only for some meters - UNI-T UT803, UT804, UT61B+/D+/E+,
+    UT161B/D/E, ZOTEK ZT-5B / ANENG V05B): the specifications from the
+    meter's manual, per function the ranges with resolution and accuracy
+    (per frequency band for AC), the input impedance, the overload
+    protection, the manual's notes and its page. They were transcribed from
+    the manuals by the [dmm-tools](https://github.com/antoinecellerier/dmm-tools)
+    project - check the manual before relying on a number.
   - **Settings**: the meter's settings as in the assistant; with **OK** the
     device in use takes them at once.
 - **Rename** - in place.

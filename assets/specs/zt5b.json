@@ -1,0 +1,522 @@
+{
+ "source": "dmm-tools f96e318",
+ "device": "zt5b",
+ "models": [
+  "ZOTEK ZT-5B",
+  "ANENG V05B"
+ ],
+ "model": "ZT-5B / V05B",
+ "tables": [
+  {
+   "input_impedance": null,
+   "notes": [
+    "Red lead in VΩ: picks V above 0.8V or Ω",
+    "Red lead in A mA: picks current",
+    "SEL/NCV: continuity/diode, cap, Hz, °C",
+    "Hold SEL/NCV for NCV"
+   ],
+   "overload_protection": null,
+   "page": 1,
+   "ranges": [],
+   "table": "Auto"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 600V"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "0.5%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "4.000V",
+     "resolution": "0.001V"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "0.5%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "40.00V",
+     "resolution": "0.01V"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "0.5%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "400.0V",
+     "resolution": "0.1V"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "0.5%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "600V",
+     "resolution": null
+    }
+   ],
+   "table": "DC VOLTAGE (V)"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 600V",
+    "Frequency response 40Hz–1kHz"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.0%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000V",
+     "resolution": "0.001V"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.0%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "60.00V",
+     "resolution": "0.01V"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.0%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "600.0V",
+     "resolution": "0.1V"
+    }
+   ],
+   "table": "AC Voltage (V)"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 9.999A",
+    "Frequency response 40Hz–1kHz"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "2.0%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "999.9mA",
+     "resolution": "0.1mA"
+    }
+   ],
+   "table": "AC current (mA)"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 9.999A",
+    "Frequency response 40Hz–1kHz",
+    "Over 2A: measure for less than 3s"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "2.0%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "9.999A",
+     "resolution": "0.001A"
+    }
+   ],
+   "table": "AC current (A)"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 9.999A"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.0%+4",
+       "freq_range": null
+      }
+     ],
+     "range": "999.9mA",
+     "resolution": "0.1mA"
+    }
+   ],
+   "table": "DC current (mA)"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 9.999A",
+    "Over 2A: measure for less than 3s"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.0%+4",
+       "freq_range": null
+      }
+     ],
+     "range": "9.999A",
+     "resolution": "0.001A"
+    }
+   ],
+   "table": "DC current (A)"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 40MΩ"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.5%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000kΩ",
+     "resolution": "0.001kΩ"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.0%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "60.00kΩ",
+     "resolution": "0.01kΩ"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.0%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "600.0kΩ",
+     "resolution": "0.1kΩ"
+    }
+   ],
+   "table": "Resistance"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 40MΩ"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.0%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000MΩ",
+     "resolution": "0.001MΩ"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1.5%+3",
+       "freq_range": null
+      }
+     ],
+     "range": "60.00MΩ",
+     "resolution": "0.01MΩ"
+    }
+   ],
+   "table": "Resistance"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 4mF"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "5.0%+20",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000nF",
+     "resolution": "0.001nF"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "3.5%+4",
+       "freq_range": null
+      }
+     ],
+     "range": "60.00nF",
+     "resolution": "0.01nF"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "3.5%+4",
+       "freq_range": null
+      }
+     ],
+     "range": "600.0nF",
+     "resolution": "0.1nF"
+    }
+   ],
+   "table": "Capacitance"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 4mF"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "3.5%+4",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000µF",
+     "resolution": "0.001µF"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "3.5%+4",
+       "freq_range": null
+      }
+     ],
+     "range": "60.00µF",
+     "resolution": "0.01µF"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "3.5%+4",
+       "freq_range": null
+      }
+     ],
+     "range": "600.0µF",
+     "resolution": "0.1µF"
+    }
+   ],
+   "table": "Capacitance"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 4mF"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "5.0%+5",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000mF",
+     "resolution": "0.001mF"
+    }
+   ],
+   "table": "Capacitance"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 10MHz"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "1%+2",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000Hz",
+     "resolution": "0.001Hz"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1%+2",
+       "freq_range": null
+      }
+     ],
+     "range": "60.00Hz",
+     "resolution": "0.01Hz"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1%+2",
+       "freq_range": null
+      }
+     ],
+     "range": "600.0Hz",
+     "resolution": "0.1Hz"
+    }
+   ],
+   "table": "Frequency"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 10MHz"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "1%+2",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000kHz",
+     "resolution": "0.001kHz"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1%+2",
+       "freq_range": null
+      }
+     ],
+     "range": "60.00kHz",
+     "resolution": "0.01kHz"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1%+2",
+       "freq_range": null
+      }
+     ],
+     "range": "600.0kHz",
+     "resolution": "0.1kHz"
+    }
+   ],
+   "table": "Frequency"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Max 10MHz"
+   ],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "1%+2",
+       "freq_range": null
+      }
+     ],
+     "range": "6.000MHz",
+     "resolution": "0.001MHz"
+    },
+    {
+     "accuracy": [
+      {
+       "accuracy": "1%+2",
+       "freq_range": null
+      }
+     ],
+     "range": "10.00MHz",
+     "resolution": "0.01MHz"
+    }
+   ],
+   "table": "Frequency"
+  },
+  {
+   "input_impedance": null,
+   "notes": [
+    "Beeps <50Ω"
+   ],
+   "overload_protection": null,
+   "page": 1,
+   "ranges": [],
+   "table": "Continuity"
+  },
+  {
+   "input_impedance": null,
+   "notes": [],
+   "overload_protection": null,
+   "page": 2,
+   "ranges": [
+    {
+     "accuracy": [
+      {
+       "accuracy": "3%+5",
+       "freq_range": null
+      }
+     ],
+     "range": "-20℃-1000℃/-4℉-1832℉",
+     "resolution": null
+    }
+   ],
+   "table": "Temperature"
+  }
+ ]
+}
