@@ -14,6 +14,7 @@
 #include "core/devicelibrary.h"
 #include "ui/devicesettings.h"
 #include "ui/devicesidebar.h"
+#include "ui/devicespecs.h"
 #include "ui/dialogs/devicesettingsdlg.h"
 #include "testutil.h"
 
@@ -151,6 +152,23 @@ int main(int argc, char **argv)
     check(page == "supported-devices.md", "Info: the help link asks for its page");
     dlg.showTab(DeviceSettingsDlg::SettingsTab);
     check(dlg.currentTab() == DeviceSettingsDlg::SettingsTab && dlg.settings()->isVisibleTo(&dlg), "the Settings tab");
+    check(!dlg.hasData(), "UT61E: no specifications, no Data tab");
+    dlg.showTab(DeviceSettingsDlg::DataTab);
+    check(dlg.currentTab() == DeviceSettingsDlg::InfoTab, "no Data tab: Info instead");
+  }
+  {
+    // Data: the manual's specifications (dmm-tools), also for a twin and the
+    // Bluetooth adapter's entry
+    DeviceSettingsDlg dlg("Bench");
+    dlg.load({ { "DMM/model", "Uni-Trend UT803" }, { "Port settings/device", "SERIAL /dev/ttyUSB0" } });
+    check(dlg.hasData(), "UT803: a Data tab");
+    dlg.showTab(DeviceSettingsDlg::DataTab);
+    const QString data = dlg.findChild<QTextBrowser *>("ui_deviceData")->toPlainText();
+    check(dlg.currentTab() == DeviceSettingsDlg::DataTab && data.contains("DC Voltage") && data.contains("600mV")
+            && data.contains("dmm-tools"), "UT803 data: " + data.left(200));
+    check(DeviceSpecs::find("ANENG", "V05B *").value("device") == "zt5b"
+            && DeviceSpecs::find("Uni-Trend", "UT61E+ (UT-D07B Bluetooth) *").value("device") == "ut61eplus"
+            && DeviceSpecs::find("Uni-Trend", "UT61E").isEmpty(), "specifications by model, twin and adapter");
   }
 
   // 7. the instances: this window's bold, a click raises another, a double click starts it

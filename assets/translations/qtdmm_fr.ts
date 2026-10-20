@@ -1279,22 +1279,27 @@
 <context>
     <name>DeviceSettingsDlg</name>
     <message>
-        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="56"/>
+        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="58"/>
         <source>&amp;Info</source>
         <translation>&amp;Infos</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="60"/>
+        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="64"/>
+        <source>&amp;Data</source>
+        <translation>&amp;Données</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="68"/>
         <source>&amp;Settings</source>
         <translation>&amp;Réglages</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="127"/>
+        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="151"/>
         <source>Website of %1</source>
         <translation>Site web de %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="128"/>
+        <location filename="../../src/ui/dialogs/devicesettingsdlg.cpp" line="152"/>
         <source>Supported devices (help)</source>
         <translation>Appareils pris en charge (aide)</translation>
     </message>
@@ -1421,6 +1426,44 @@
         <location filename="../../src/ui/devicesidebar.cpp" line="551"/>
         <source>Remove &quot;%1&quot; from My devices?</source>
         <translation>Retirer « %1 » de Mes appareils ?</translation>
+    </message>
+</context>
+<context>
+    <name>DeviceSpecs</name>
+    <message>
+        <location filename="../../src/ui/devicespecs.cpp" line="70"/>
+        <source>Input impedance: %1</source>
+        <translation>Impédance d&apos;entrée : %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicespecs.cpp" line="72"/>
+        <source>Overload protection: %1</source>
+        <translation>Protection contre les surcharges : %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicespecs.cpp" line="74"/>
+        <source>manual p. %1</source>
+        <translation>manuel p. %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicespecs.cpp" line="77"/>
+        <source>Range</source>
+        <translation>Gamme</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicespecs.cpp" line="78"/>
+        <source>Resolution</source>
+        <translation>Résolution</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicespecs.cpp" line="79"/>
+        <source>Accuracy ±(% of reading + digits)</source>
+        <translation>Précision ±(% de la lecture + digits)</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicespecs.cpp" line="103"/>
+        <source>From the manual, transcribed by &lt;a href=&quot;https://github.com/antoinecellerier/dmm-tools&quot;&gt;dmm-tools&lt;/a&gt; (%1, GPL-3.0-or-later) - thank you. Check the manual before relying on it.</source>
+        <translation>Tiré du manuel, transcrit par &lt;a href=&quot;https://github.com/antoinecellerier/dmm-tools&quot;&gt;dmm-tools&lt;/a&gt; (%1, GPL-3.0-or-later) - merci. Vérifiez dans le manuel avant de vous fier à une valeur.</translation>
     </message>
 </context>
 <context>

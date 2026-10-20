@@ -13,10 +13,12 @@ class DeviceSummary;
 class QLabel;
 class QPushButton;
 class QTabWidget;
+class QTextBrowser;
 
 /// "Info and settings..." of an entry of My devices (also its double
 /// click): the tab Info - the device at a glance, its state now, its
-/// maker's website and its help page - and the tab Settings, the meter's
+/// maker's website and its help page - the tab Data, its manual's
+/// specifications where QtDMM has them (DeviceSpecs), and the tab Settings, the meter's
 /// settings as on page 3 of the assistant. OK takes the settings, only
 /// when they are complete. The caller gives settings() its ports first,
 /// then load()s the keys.
@@ -24,7 +26,7 @@ class DeviceSettingsDlg : public QDialog
 {
   Q_OBJECT
 public:
-  enum Tab { InfoTab, SettingsTab };
+  enum Tab { InfoTab, DataTab, SettingsTab };
 
   explicit DeviceSettingsDlg(const QString &name, QWidget *parent = nullptr);
 
@@ -40,6 +42,8 @@ public:
   /// The Info tab's text of the state and the links (for the tests).
   QString     statusText() const;
   QString     linksText() const;
+  /// Whether the Data tab is there (the model has specifications).
+  bool        hasData() const;
 
 Q_SIGNALS:
   /// The link to the help: a page of QtDMM's help ("supported-devices.md").
@@ -51,6 +55,9 @@ private:
 
   QString         m_name;
   QTabWidget     *m_tabs = nullptr;
+  QWidget        *m_info = nullptr;
+  QTextBrowser   *m_data = nullptr;
+  QString         m_dataModel;   ///< whose specifications m_data shows
   DeviceSummary  *m_summary = nullptr;
   QLabel         *m_status = nullptr;
   QLabel         *m_links = nullptr;
