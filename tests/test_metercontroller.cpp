@@ -102,6 +102,12 @@ int main(int argc, char **argv)
       Q_EMIT dmm->response(r);
     };
     send("CALC:AVER:CLE");
+    // the memory of each value as a signal (the analog meter on another value)
+    QMap<int, std::pair<double, double>> told;
+    const auto conn = QObject::connect(&ctl, &MeterController::valueMinMaxChanged, [&](int id, double lo, double hi)
+    {
+      told[id] = { lo, hi };
+    });
     frame(1, 50);
     frame(3, 60);
     frame(9, 99, true);   // held: no new reading
@@ -112,7 +118,11 @@ int main(int argc, char **argv)
           "each value its own min/max, the held reading left out");
     check(query("CALC:AVER:COUN?") == "1" && query("CALC2:AVER:COUN?") == "3",
           "the display's memory began anew with the second value, the value's own went on");
+    check(told.value(1) == std::make_pair(50.0, 60.0) && told.value(0) == std::make_pair(1.0, 3.0),
+          QString("each value tells its min/max: %1..%2").arg(told.value(1).first).arg(told.value(1).second));
     send("CALC:AVER:CLE (@2)");
+    check(std::isnan(told.value(1).first) && told.value(0).second == 3.0, "CLEar (@2) tells that value's memory empty");
+    QObject::disconnect(conn);
     check(query("CALC:AVER:COUN? (@1:2)") == "3,0" && query("CALC:AVER:COUN?") == "1",
           "CLEar (@2): that value's own memory alone");
     send("CALC:AVER:CLE");

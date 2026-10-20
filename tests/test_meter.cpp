@@ -151,15 +151,17 @@ int main(int argc, char **argv)
     m.showReading(reading(0, "734", "ppm", ""));
     m.showReading(reading(1, "22.5", "C", "TE"));
     check(near(m.fullScale(), 4000.0), QString("value 1: the ppm scale, got %1").arg(m.fullScale()));
-    m.setValueId(1, false);
+    m.setValueId(1);
     m.showReading(reading(0, "734", "ppm", ""));
     m.showReading(reading(1, "22.5", "C", "TE"));
     check(m.valueId() == 1 && near(m.fullScale(), 50.0), QString("value 2: the temperature's scale, got %1").arg(m.fullScale()));
-    m.showMaximum(1000.0, "1000", "ppm");
+    m.showValueMinMax(0, 700.0, 1000.0);
     check(std::isnan(m.maxMark()), "value 2: the memory of value 1 is no mark here");
-    m.setValueId(1, true);
-    m.showMaximum(30.0, "30.0", "C");
-    check(near(m.maxMark(), 30.0), QString("value 2 with its memory: the mark, got %1").arg(m.maxMark()));
+    m.showValueMinMax(1, 20.0, 30.0);
+    check(near(m.maxMark(), 30.0) && near(m.minMark(), 20.0),
+          QString("value 2 with its memory: the marks, got %1..%2").arg(m.minMark()).arg(m.maxMark()));
+    m.showValueMinMax(1, std::nan(""), std::nan(""));
+    check(std::isnan(m.maxMark()), "its memory cleared: no marks");
   }
 
   // --- 2b. scale step: 1-2-5, labels do not touch, 0 is a major tick ---

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "service/metercontroller.h"
 
+#include <limits>
+
 #include <QDateTime>
 #include <QHostInfo>
 #include <QProcess>
@@ -242,8 +244,12 @@ void MeterController::publish(const Reading &rd)
       Q_EMIT unitChanged(valueUnit);
     m_lastUnit = valueUnit;
   }
+  bool valueMinMaxNew = false;
   if (!hold && id >= 0 && id < kMaxValues)
-    m_valueMinMax[size_t(id)].feed(rd);
+  {
+    const MinMaxMemory::Result mm = m_valueMinMax[size_t(id)].feed(rd);
+    valueMinMaxNew = mm.reset || mm.newMin || mm.newMax;
+  }
   if (id == m_minMaxId && !hold)
   {
     // kept across a range change (mV -> V), afresh on another port
@@ -270,6 +276,8 @@ void MeterController::publish(const Reading &rd)
     Q_EMIT maximumChanged(m_minMax.maximum(), val, unit);
   if (newMin)
     Q_EMIT minimumChanged(m_minMax.minimum(), val, unit);
+  if (valueMinMaxNew)
+    emitValueMinMax(id);
 
   if (id == 0)
   {
@@ -345,6 +353,15 @@ void MeterController::resetMinMax()
   for (MinMaxMemory &m : m_valueMinMax)
     m.clear();
   Q_EMIT minMaxReset();
+  for (int id = 0; id < kMaxValues; ++id)
+    emitValueMinMax(id);
+}
+
+void MeterController::emitValueMinMax(int id)
+{
+  const MinMaxMemory &m = valueMinMax(id);
+  const double nan = std::numeric_limits<double>::quiet_NaN();
+  Q_EMIT valueMinMaxChanged(id, m.isEmpty() ? nan : m.minimum(), m.isEmpty() ? nan : m.maximum());
 }
 
 void MeterController::forgetUnit()
@@ -488,7 +505,10 @@ void MeterController::installScpiSources()
   s.clearChannelStats = [this](int channel)
   {
     if (channel >= 1 && channel <= kMaxValues)
+    {
       m_valueMinMax[size_t(channel - 1)].clear();
+      emitValueMinMax(channel - 1);
+    }
   };
   s.recording = [this]
   {

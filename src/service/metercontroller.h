@@ -162,6 +162,9 @@ Q_SIGNALS:
   /// or its value moved to another port (MinMaxMemory) - not a range change
   /// (mV -> V).
   void        minMaxReset();
+  /// The min/max memory of value @p id changed (valueMinMax()): a new
+  /// extreme, afresh on another port, or cleared (NaN, NaN). SI base units.
+  void        valueMinMaxChanged(int id, double minimum, double maximum);
   /// The unit of the main value changed ("mV" -> "V"), unit(); empty after
   /// forgetUnit().
   void        unitChanged(const QString &unit);
@@ -204,6 +207,8 @@ Q_SIGNALS:
   void        scpiStatusChanged(const QString &detail);
 
 private:
+  /// valueMinMaxChanged() with the memory of value @p id as it is.
+  void        emitValueMinMax(int id);
   void        responseSLOT(const DmmDecoder::DmmResponse &response);
   /// One value as the views get it: min/max, alarms, the other instances, SCPI.
   void        publish(const Reading &reading);

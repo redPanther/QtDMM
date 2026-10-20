@@ -263,9 +263,8 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
   m_meter = meter;
   connect(m_ctl, &MeterController::reading, meter, &AnalogMeter::showReading);
   connect(m_ctl, &MeterController::staleChanged, meter, &AnalogMeter::setStale);
-  connect(m_ctl, &MeterController::minimumChanged, meter, &AnalogMeter::showMinimum);
-  connect(m_ctl, &MeterController::maximumChanged, meter, &AnalogMeter::showMaximum);
-  connect(m_ctl, &MeterController::minMaxReset, meter, &AnalogMeter::clearMinMax);
+  // the memory of the value it shows, whichever the LCD follows
+  connect(m_ctl, &MeterController::valueMinMaxChanged, meter, &AnalogMeter::showValueMinMax);
   applyValueChoice();
 }
 
@@ -350,7 +349,13 @@ void InstanceWidget::applyValueChoice()
     m_display->setPrimary(m_lcdValue);
   m_ctl->setMinMaxValue(lcd);
   if (m_meter)
-    m_meter->setValueId(has(m_meterValue), has(m_meterValue) == lcd);
+  {
+    const int id = has(m_meterValue);
+    m_meter->setValueId(id);
+    const MinMaxMemory &mm = m_ctl->valueMinMax(id);
+    if (!mm.isEmpty())
+      m_meter->showValueMinMax(id, mm.minimum(), mm.maximum());
+  }
   if (m_poincare)
     m_poincare->setValueId(has(m_poincareValue));
 }
