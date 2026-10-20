@@ -10,6 +10,7 @@
 #include <QElapsedTimer>
 #include <QFileInfo>
 
+#include "ui/frameclock.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/graphflags.h"
 #include "ui/views/graphminimap.h"
@@ -2314,6 +2315,58 @@ int main(int argc, char **argv)
     check(!info.isEmpty() && info.last().first().toString().startsWith("1:10"),
           "live: the status bar says 1:10 with a window of 1 min, got "
             + (info.isEmpty() ? QString("nothing") : info.last().first().toString()));
+  }
+
+  // --- 9c. the FrameClock: Live runs on with the time between the readings
+  //          (a Victron sends one a second), held or hidden it does not;
+  //          a recording seen at its end runs on as well ---
+  {
+    GraphWidget graph(nullptr, &settings);
+    graph.setSampleTime(10);
+    graph.setGraphSize(10);
+    graph.setSampleLength(100);         // live keeps 10 s
+    graph.setMode(GraphWidget::Manual);
+    Feed feed(graph, 1000);
+    graph.show();
+    graph.liveSLOT();
+    for (int i = 0; i < 30; ++i)        // 30 s, one reading a second
+      feed.value(i);
+    FrameClock *clock = FrameClock::instance();
+    check(clock->wanted(&graph) && clock->isRunning(), "clock: wanted while live and shown");
+    clock->tickNow();                   // now: a second after the last reading
+    const double before = graph.timeAxisStart();
+    feed.now += 400;                    // 0.4 s later, no reading
+    clock->tickNow();
+    check(std::abs(graph.timeAxisStart() - before - 0.4) < 0.01,
+          QString("clock: the window moved on by %1 s without a reading").arg(graph.timeAxisStart() - before));
+    Q_EMIT graph.minimap()->moveRequested(graph.store()->origin());   // held by the overview
+    const double held = graph.timeAxisStart();
+    feed.now += 400;
+    clock->tickNow();
+    check(graph.livePaused() && graph.timeAxisStart() == held, "clock: held, the window stays");
+    Q_EMIT graph.minimap()->endRequested();
+    graph.hide();
+    check(!clock->wanted(&graph), "clock: hidden, not wanted");
+    graph.show();
+    // a recording longer than the window, seen at its end
+    graph.setSampleLength(0);
+    graph.startSLOT();
+    graph.setGraphSize(5);              // not "All": a window of 5 s
+    for (int i = 0; i < 20; ++i)
+      feed.value(i);
+    clock->tickNow();
+    const double recorded = graph.timeAxisStart();
+    feed.now += 500;
+    clock->tickNow();
+    check(std::abs(graph.timeAxisStart() - recorded - 0.5) < 0.01,
+          QString("clock: recording at its end runs on, moved %1 s").arg(graph.timeAxisStart() - recorded));
+    graph.findChild<QScrollBar *>()->setValue(0);   // scrolled back
+    const double back = graph.timeAxisStart();
+    feed.now += 500;
+    clock->tickNow();
+    check(graph.timeAxisStart() == back, "clock: scrolled back, the window stays");
+    graph.stopSLOT();
+    check(!clock->wanted(&graph), "clock: viewing a recording, not wanted");
   }
 
   if (failed == 0)

@@ -165,6 +165,9 @@ if (BUILD_TESTING)
 	## the Poincaré plot's values: pairs, SD1/SD2, gaps, port changes
 	qtdmm_add_test(poincare_series test_poincare tests/test_poincare.cpp)
 
+	## the drawing clock of the views: wanted, off, slower when ticks cost too much
+	qtdmm_add_test(frame_clock test_frameclock tests/test_frameclock.cpp)
+
 	## "My devices": the meter keys, devices.conf, the stable port name
 	qtdmm_add_test(device_library test_devicelibrary tests/test_devicelibrary.cpp)
 

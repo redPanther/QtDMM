@@ -260,6 +260,8 @@ public:
   /// @}
   /// How often the curves were built anew from the whole store (for the tests).
   int              rebuilds() const { return m_rebuilds; }
+  /// Where the time axis starts, s since the start of the recording (for the tests).
+  double           timeAxisStart() const;
   /// @name The min/max band behind the curve
   /// Per pixel column the lowest and the highest value of the columns
   /// within kEnvelopeColumns either side: a band as wide on screen whatever
@@ -517,6 +519,15 @@ protected:
   void             connectStore();
   /// Where the window starts (ms since the start of the recording).
   qint64           windowStart() const;
+  /// The start of a window that has the newest reading at its right edge.
+  qint64           followStart() const;
+  /// Whether the window moves on with the time: Live (not held by the
+  /// overview), or a recording seen at its end.
+  bool             following() const;
+  /// FrameClock: wanted while the graph is shown and Live or recording.
+  void             updateClockWant();
+  /// A tick of the FrameClock: the time axis on to now, between readings.
+  void             frameTick();
   qint64           bucketSize() const;
   int              bucketStart(int i) const;
   static QList<QPointF> withoutGaps(const QList<QPointF> &points);
@@ -727,6 +738,8 @@ protected:
   void             updateMarkPositions();
 
   void             resizeEvent(QResizeEvent *)Q_DECL_OVERRIDE;
+  void             showEvent(QShowEvent *) override;
+  void             hideEvent(QHideEvent *) override;
   bool             eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
 
   void             handleChartMousePress(QMouseEvent *);
@@ -743,7 +756,12 @@ protected:
   /// change, also a hidden one (that was most of the time of a reading).
   bool             pointsShown() const { return m_pointMode != NoPoint; }
   bool             intPointsShown() const { return m_showIntegration && m_intPointMode != NoPoint; }
+  /// The time axis, what depends on the window's readings too (mean line,
+  /// band).
   void             updateXAxisRange();
+  /// The time axis alone: range, ticks, labels, time cursors, the
+  /// overview's window. Cheap enough for each FrameClock tick.
+  void             updateTimeAxis();
   void             updateSeriesAppearance();
   void             updateThresholdLinesVisibility();
   void             updateThresholdLinePositions();
