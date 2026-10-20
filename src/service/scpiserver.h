@@ -33,6 +33,10 @@ class ScpiServer : public QObject
 {
   Q_OBJECT
 public:
+  /// The unit as every answer spells it: plain ASCII, one spelling per
+  /// unit whatever the meter's protocol writes - "C", "F", "Ohm" for °C,
+  /// °F ("dF") and Ω. Scripts compare against it.
+  static QString unit(const QString &baseUnit);
   /// What the meter last delivered, in SI base units.
   struct Reading
   {

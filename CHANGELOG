@@ -144,6 +144,8 @@
   export stays as it was); "Readings table" in the value menu of the sidebar leaves a value out of the table and
   of copying. The statistics line is of one value: it counted the readings of all values, and says which
 - Analog meter: MIN/MAX of the value the needle shows; on another value than the display's it showed "—"
+- SCPI: units in one ASCII spelling each - "C", "F", "Ohm"; the UNI-T iENV meters answered "°C", meters with °F
+  "dF" or "°F"
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell
