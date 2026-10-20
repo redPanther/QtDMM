@@ -17,6 +17,7 @@ It opens as a window in a column right of the graph; see
 | Column | Content |
 |---|---|
 | Time | when the reading arrived, to the millisecond; the date is added once the rows span more than one day |
+| No. | which value of the meter, 1 the main one - only for a meter with more than one |
 | Value | the value as shown on the meter, `OL` for overload |
 | Unit | with its SI prefix, as on the display (`mV`, `kOhm`) |
 | Mode | `DC`, `AC`, `AC+DC`, `Resistance`, `Diode`, `Continuity`, `Capacitance`, `Frequency`, `Temperature` |
@@ -28,9 +29,12 @@ not jump while readings come in; a table narrower than that scrolls
 sideways. Copied rows always carry the date.
 
 Meters that send a second value with each reading (a frequency next to the
-voltage, say) get an extra row for it, marked `2nd` in the Mode column; a
-third and fourth value (the humidity of an AirCO2ntrol, the fields chosen
-for a Victron) are marked `3rd` and `4th`.
+voltage, say) get an extra row for it, with 2 in the No. column; a third
+and fourth value (the humidity of an AirCO2ntrol, the fields chosen for a
+Victron) have 3 and 4. Four rows for each reading are a lot: **Readings
+table** in the menu of a value in the sidebar (see
+[The meter's values](my-devices.md#the-meters-values)) leaves a value out
+of the table and switches it on again. Kept with the window layout.
 
 ## Following, keeping, clearing
 
@@ -47,21 +51,26 @@ The table keeps the newest **N rows** (10 000 by default, set it next to
 that is about forty minutes. **Clear** empties it; the recorder's graph is
 not affected, and clearing the graph (Ctrl+Del) leaves the table alone.
 
-Below the table a line sums up what it holds: the number of rows and the
-minimum, maximum, mean and span of the main readings in the function of
-the newest one (V DC, Ω, ...; overloads, second values and readings of
-another function are left out).
+Below the table a line sums up what it holds for one value - the main
+one, or the first one the table shows: the number of its rows and the
+minimum, maximum, mean and span of its readings in the function of the
+newest one (V DC, Ω, ...; overloads and readings of another function are
+left out). For a meter with more values the line begins with the value it
+is of: *Value 1 (Battery voltage): 4 readings  Min ...*.
 
 ## Getting the data out
 
 - **Copy** (Ctrl+C while the table has the focus, or the context menu) puts
-  the selected rows - all rows when nothing is selected - on the clipboard
-  as tab-separated text with a header line, ready to paste into a
-  spreadsheet. Ctrl+A selects everything.
-- **Export...** writes the whole table as CSV: `timestamp;value;unit;mode;range;hold`
+  the selected rows - all rows the table shows when nothing is selected -
+  on the clipboard as tab-separated text with a header line, ready to
+  paste into a spreadsheet. Ctrl+A selects everything.
+- **Export...** writes the whole table as CSV, the values left out of it
+  too: `timestamp;value;unit;mode;range;hold`
   with ISO 8601 timestamps (`2026-09-21T14:03:05,250`), the value and unit
   exactly as displayed - or, with a `.xlsx` / `.ods` file name or the file
   type picked in the dialog, as an Excel / OpenDocument sheet with date and
   number cells and an extra *Alarm* column. The recorder's own export
   ([The recorder](recorder.md)) remains the one to use for the time-gridded
-  series the graph shows.
+  series the graph shows. The export has no No. column: a second, third and
+  fourth value are marked `2nd`, `3rd` and `4th` in its mode
+  (`2nd DC`), as before.

@@ -44,7 +44,9 @@ port, or *off*. At the start only this window's instance is unfolded.
 For a meter with more than one value (a second display, the CO2,
 temperature and humidity of the TFA AirCO2ntrol, the voltage, current and
 state of charge of a Victron) this window's instance has a row for each
-value below its device: its number, what it measures and its reading. A
+value below its device: its number, its name and its reading. The name is
+the one the meter gives the value (a Victron's *Battery voltage*), else
+unit and coupling (*V DC*); the tooltip has the full one. A
 coloured dot shows that the graph draws it, in the colour of its curve, so
 the rows are the graph's legend as well. This is where you say which window
 shows which value - right-click a value:
@@ -60,6 +62,8 @@ shows which value - right-click a value:
   takes the axis over, and the curves of the old unit there go off - the
   status line says which. The main value is always on the left.
 - **Poincaré plot** - the value the plot takes (one).
+- **Readings table** - whether the [readings table](readings-table.md)
+  lists it (all values at first).
 
 A choice opens the window it is for, also when the toolbar is hidden. The
 choices are kept with the window layout.

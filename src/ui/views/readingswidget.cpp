@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScrollBar>
+#include <QSortFilterProxyModel>
 #include <QSpinBox>
 #include <QStyle>
 #include <QStyleOptionViewItem>
@@ -23,6 +24,36 @@
 #include <QVBoxLayout>
 
 #include "core/siprefix.h"
+
+// The rows of the values the table shows (ReadingsModel::hiddenValues()).
+// Only in use while one is left out: a full table of a million rows costs
+// nothing extra the rest of the time.
+class ReadingsWidget::ValueFilter : public QSortFilterProxyModel
+{
+public:
+  explicit ValueFilter(ReadingsModel *log, QObject *parent) : QSortFilterProxyModel(parent), m_log(log)
+  {
+    setSourceModel(log);
+  }
+  void refresh()
+  {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+    beginFilterChange();   // invalidateFilter() is deprecated from there on
+    endFilterChange();
+#else
+    invalidateFilter();
+#endif
+  }
+
+protected:
+  bool filterAcceptsRow(int row, const QModelIndex &) const override
+  {
+    return !m_log->hiddenValues().contains(m_log->entry(row).id);
+  }
+
+private:
+  ReadingsModel *m_log;
+};
 
 ReadingsWidget::ReadingsWidget(QWidget *parent) :
   QWidget(parent),
@@ -153,9 +184,41 @@ ReadingsWidget::ReadingsWidget(QWidget *parent) :
         || m_view->verticalScrollBar()->hasFocus())
       m_follow->setChecked(value >= m_view->verticalScrollBar()->maximum());
   });
+  connect(m_log, &ReadingsModel::hiddenValuesChanged, this, &ReadingsWidget::applyFilter);
+  connect(m_log, &ReadingsModel::hiddenValuesChanged, this, &ReadingsWidget::updateStats);
+  connect(m_log, &ReadingsModel::valueNamesChanged, this, &ReadingsWidget::updateStats);
+  connect(m_log, &ReadingsModel::otherValuesChanged, this, [this](bool on)
+  {
+    m_view->setColumnHidden(ReadingsModel::Number, !on);
+    fitColumns();
+  });
+  m_view->setColumnHidden(ReadingsModel::Number, !m_log->hasOtherValues());
   m_need.fill(0, ReadingsModel::ColumnCount);
   measureRows(0, -1);
   updateStats();
+}
+
+void ReadingsWidget::applyFilter()
+{
+  const bool filter = !m_log->hiddenValues().isEmpty();
+  const bool created = filter && !m_filter;
+  if (created)
+    m_filter = new ValueFilter(m_log, this);
+  else if (filter)
+    m_filter->refresh();
+  QAbstractItemModel *model = filter ? static_cast<QAbstractItemModel *>(m_filter) : m_log;
+  if (m_view->model() != model)
+  {
+    m_view->setModel(model);
+    m_view->setColumnHidden(ReadingsModel::Number, !m_log->hasOtherValues());
+    fitColumns();
+  }
+  // the filter has a new row only after the model's signal: follow it from
+  // there, after the view took it (connected after setModel()), or the
+  // newest row stays below the end
+  if (created)
+    connect(m_filter, &QAbstractItemModel::rowsInserted, this, &ReadingsWidget::followSLOT);
+  followSLOT();
 }
 
 void ReadingsWidget::measureRows(int first, int last)
@@ -192,13 +255,18 @@ void ReadingsWidget::measureRows(int first, int last)
 
 void ReadingsWidget::fitColumns()
 {
-  int sum = 0;
-  for (int w : m_need)
-    sum += w;
+  int sum = 0, n = 0, last = 0;
+  for (int c = 0; c < ReadingsModel::ColumnCount; ++c)
+    if (!m_view->isColumnHidden(c))
+    {
+      sum += m_need[c];
+      ++n;
+      last = c;
+    }
   const int extra = qMax(0, m_view->viewport()->width() - sum);
-  const int n = ReadingsModel::ColumnCount;
-  for (int c = 0; c < n; ++c)
-    m_view->horizontalHeader()->resizeSection(c, m_need[c] + extra / n + (c == n - 1 ? extra % n : 0));
+  for (int c = 0; c < ReadingsModel::ColumnCount; ++c)
+    if (!m_view->isColumnHidden(c))
+      m_view->horizontalHeader()->resizeSection(c, m_need[c] + extra / n + (c == last ? extra % n : 0));
 }
 
 QSize ReadingsWidget::minimumSizeHint() const
@@ -264,8 +332,9 @@ void ReadingsWidget::followSLOT()
 
 void ReadingsWidget::updateStats()
 {
+  // of one value: the first one the table shows
   const ReadingsModel::Stats s = m_log->stats();
-  if (s.count == 0)
+  if (m_log->rowCount() == 0)
   {
     m_stats->setText(tr("No readings yet."));
     return;
@@ -280,7 +349,14 @@ void ReadingsWidget::updateStats()
     return QString::number(scaled, 'g', 5) + nbsp + SiPrefix::displayText(prefix + s.unit);
   };
   auto entry = [&](const QString &e) { return QString(e).replace(' ', nbsp); };
-  QStringList entries { entry(tr("%n reading(s)", "", s.count)) };
+  QStringList entries;
+  // a meter with more values: which one they are of
+  if (m_log->hasOtherValues())
+  {
+    const QString name = m_log->valueNames().value(s.id);
+    entries << entry(name.isEmpty() ? tr("Value %1:").arg(s.id + 1) : tr("Value %1 (%2):").arg(s.id + 1).arg(name));
+  }
+  entries << entry(tr("%n reading(s)", "", s.count));
   if (s.numeric)
     entries << entry(tr("Min %1").arg(fmt(s.min))) << entry(tr("Max %1").arg(fmt(s.max)))
             << entry(tr("Mean %1").arg(fmt(s.mean))) << entry(tr("Span %1").arg(fmt(s.max - s.min)));
@@ -311,7 +387,7 @@ void ReadingsWidget::copySLOT()
 {
   QList<int> rows;
   for (const QModelIndex &index : m_view->selectionModel()->selectedRows())
-    rows << index.row();
+    rows << (m_view->model() == m_filter ? m_filter->mapToSource(index).row() : index.row());
   QApplication::clipboard()->setText(m_log->toText(rows));
 }
 

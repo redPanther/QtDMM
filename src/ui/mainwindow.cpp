@@ -1360,7 +1360,8 @@ void MainWindow::updateInstances()
         const QString text = m_wid->valueText(value);
         const bool drawn = m_wid->graph()->valueDrawn(value);
         row.values << DeviceSidebar::Value{ value, m_wid->valueName(value), text,
-                                            drawn ? m_wid->graph()->valueColor(value) : QColor() };
+                                            drawn ? m_wid->graph()->valueColor(value) : QColor(),
+                                            m_wid->valueShortName(value) };
       }
     rows << row;
   }
@@ -1375,6 +1376,7 @@ void MainWindow::valueMenu(int id, const QPoint &globalPos)
     QAction *action = view == ValueMenu::View::Lcd     ? m_displayAction
                     : view == ValueMenu::View::Meter   ? m_meterAction
                     : view == ValueMenu::View::Poincare ? m_poincareAction
+                    : view == ValueMenu::View::Table   ? m_readingsAction
                                                         : action_Graph;
     action->setChecked(true);
   });
@@ -1609,6 +1611,12 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
       m_wid->graph()->setValueShown(id, shown.contains(QString::number(id)));
     m_wid->graph()->setValueShown(0, get("Windows/graph-main-shown", true).toBool());
   }
+  // the values the readings table leaves out, "1 2"; none at first
+  {
+    const QStringList hidden = get("Windows/table-hidden-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
+    for (int id = 0; id < kMaxValues; ++id)
+      m_wid->setTableValueShown(id, !hidden.contains(QString::number(id)));
+  }
   // an unchecked action did not toggle: hide its window explicitly
   for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction, m_poincareAction })
     qobject_cast<QWidget *>(a->property("window").value<QObject *>())->setVisible(a->isChecked());
@@ -1648,6 +1656,11 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
     shown << QString::number(id);
   set("Windows/graph-shown-values", shown.join(' '));
   set("Windows/graph-main-shown", m_wid->graph()->mainShown());
+  QStringList tableHidden;
+  for (int id = 0; id < kMaxValues; ++id)
+    if (!m_wid->tableValueShown(id))
+      tableHidden << QString::number(id);
+  set("Windows/table-hidden-values", tableHidden.join(' '));
   if (m_wid->lcdSecondariesChosen())
   {
     QStringList small;

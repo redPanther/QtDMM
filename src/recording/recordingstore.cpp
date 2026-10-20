@@ -527,6 +527,7 @@ void RecordingStore::setReading(const Reading &reading)
       m_recordBaseUnit = reading.baseUnit;
       m_series.port = reading.port;
       m_series.unit = reading.baseUnit;
+      m_series.name = reading.name;
     }
     else if (reading.port != m_recordPort || reading.baseUnit != m_recordBaseUnit)
     {
@@ -543,6 +544,7 @@ void RecordingStore::setReading(const Reading &reading)
       m_recordBaseUnit = reading.baseUnit;
       m_series.port = reading.port;
       m_series.unit = reading.baseUnit;
+      m_series.name = reading.name;
     }
   }
   if (m_state == View)
@@ -700,6 +702,7 @@ void RecordingStore::appendExtra(const Reading &reading)
   {
     m_extra[i].port = reading.port;
     m_extra[i].unit = reading.baseUnit;
+    m_extra[i].name = reading.name;
   }
   if (off && m_extra[i].last().gap())
     return;   // one gap is enough
@@ -860,6 +863,7 @@ void RecordingStore::begin(qint64 preMs)
       part.id = s.id;
       part.port = s.port;
       part.unit = s.unit;
+      part.name = s.name;
       for (int i = qMax(0, s.holding(elapsed() - preMs)); i < s.count(); ++i)
         part.append(s.at(i));
       preExtra.append(part);
@@ -890,6 +894,7 @@ void RecordingStore::begin(qint64 preMs)
       s.id = part.id;
       s.port = part.port;
       s.unit = part.unit;
+      s.name = part.name;
       m_extra.append(s);
       for (int i = 0; i < part.count(); ++i)
       {
@@ -973,6 +978,7 @@ void RecordingStore::clear()
   m_extra.clear();
   m_series.port = PortKey();
   m_series.unit.clear();
+  m_series.name.clear();
   m_floorMs = 0;
   m_recordPort = PortKey();
   m_recordBaseUnit.clear();

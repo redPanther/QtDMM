@@ -89,6 +89,7 @@ public:
   /// Min/max memory as marks on the scale arc (display units; NaN hides one).
   void setMinMax(double minValue, double maxValue);
   double maxMark() const { return m_markMax; }   ///< NaN = none (for the tests)
+  double minMark() const { return m_markMin; }
   void setScaleMode(ScaleMode mode);
   /// Colours and options; the static layers are re-rendered.
   void setStyle(const AnalogMeterStyle &style);
@@ -106,10 +107,10 @@ public:
   /// from the unit and the coupling, overload from letters in the text.
   /// @{
   void setDisplayCounts(int counts) { m_counts = counts; }
-  /// Which value of the meter the needle shows (Reading::id; the context
-  /// menu "Value"); another one starts afresh. The min/max memory is the
-  /// LCD's primary value's: its marks only when @p minMax says it is this one.
-  void setValueId(int id, bool minMax);
+  /// Which value of the meter the needle shows (Reading::id; the value
+  /// menu); another one starts afresh, its min/max marks come with
+  /// showValueMinMax().
+  void setValueId(int id);
   int  valueId() const { return m_valueId; }
 public Q_SLOTS:
   void showReading(const Reading &reading);
@@ -117,9 +118,10 @@ public Q_SLOTS:
   /// and readouts fade, the dial stays.
   void setStale(bool stale);
   bool isStale() const { return m_stale; }
-  /// Min/max memory in SI base units; drawn as marks in display units.
-  void showMinimum(double value, const QString &text, const QString &unit);
-  void showMaximum(double value, const QString &text, const QString &unit);
+  /// The min/max memory of value @p id (MeterController::valueMinMaxChanged),
+  /// in SI base units, NaN when empty; drawn as marks in display units when
+  /// it is the value shown.
+  void showValueMinMax(int id, double minimum, double maximum);
   void clearMinMax();
   /// @}
 public:
@@ -208,7 +210,6 @@ private:
   int m_counts = 4000;
   QString m_unitText;   ///< unit of the last reading, with prefix
   int    m_valueId = 0;
-  bool   m_minMaxOwn = true;   ///< the min/max memory follows this value (setValueId())
   double m_minBase = std::numeric_limits<double>::quiet_NaN();
   double m_maxBase = std::numeric_limits<double>::quiet_NaN();
   int m_decimals = 0;   ///< most decimals of a reading (not an overload) since reset()

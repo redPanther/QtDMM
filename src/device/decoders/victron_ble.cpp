@@ -4,6 +4,8 @@
 
 #include <limits>
 
+#include <QCoreApplication>
+
 #include "core/siprefix.h"
 #include "device/victronble.h"
 
@@ -100,15 +102,28 @@ std::optional<DmmDecoder::DmmResponse> DecoderVictronBLE::decode(const QByteArra
   if (!main || !main->valid)
     return std::nullopt;   // unknown field, or no reading for it yet
 
+  // the field's name as the device settings list it ("Battery voltage")
+  const QList<VictronBle::Field> fields = VictronBle::fields(type);
+  auto name = [&fields](const Value &v)
+  {
+    for (const VictronBle::Field &f : fields)
+      if (v.id == QLatin1String(f.id))
+        return QCoreApplication::translate("VictronBle", f.label);
+    return QString();
+  };
+  m_result.main().name = name(*main);
   m_result.main().dval = main->dval;
   m_result.main().val = main->val;
   m_result.main().unit = main->unit;
   m_result.main().special = main->special;
   m_result.main().noValue = std::isnan(main->dval);   // "--": no number shown
-  auto fill = [](DmmChannel &c, const Value *v)
+  auto fill = [&name](DmmChannel &c, const Value *v)
   {
-    if (!v || !v->valid)
-      return;   // none chosen, or no reading for it now: the display cleared
+    if (!v)
+      return;   // none chosen: the display cleared
+    c.name = name(*v);
+    if (!v->valid)
+      return;   // no reading for it now
     c.dval = v->dval;
     c.val = v->val;
     c.unit = v->unit;

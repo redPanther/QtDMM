@@ -22,7 +22,7 @@ class ValueMenu
 {
   Q_DECLARE_TR_FUNCTIONS(ValueMenu)
 public:
-  enum class View { Lcd, Meter, Poincare, Graph };
+  enum class View { Lcd, Meter, Poincare, Graph, Table };
 
   /// Fills @p menu for value @p id (Reading::id) of @p wid; @p show opens the
   /// window of a view.

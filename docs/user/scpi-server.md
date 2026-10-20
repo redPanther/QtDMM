@@ -101,7 +101,7 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | `QTDMM:ALARm:ACKnowledge` | acknowledges the alarms, as the banner's button |
 | `QTDMM:MARK "text"` | a mark at the newest reading, in the graph and the readings table (`SCPI` without text) |
 | `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV meters UT333BT, UT353BT, UT363BT, UT383BT, the ZOTEK Bluetooth meters), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
-| `QTDMM:CHANnel:CATalog?` | the channels of `READ? (@n)`: number, what it measures and unit - `1,"carbon_dioxide","ppm",2,"temperature","°C"`; empty strings before a channel's first reading |
+| `QTDMM:CHANnel:CATalog?` | the channels of `READ? (@n)`: number, what it measures and unit - `1,"carbon_dioxide","ppm",2,"temperature","C"`; empty strings before a channel's first reading |
 | `QTDMM:INSTances?` | the running instances with their last reading: `"default",+1.234000E+00,"V","psu",9.91E+37,""` |
 
 ```
@@ -220,6 +220,10 @@ requests).
 
 - Values are in base units: a meter showing `12.34 mV` answers
   `+1.234000E-02`, `UNIT?` says `"V"`.
+- Units are spelled as the meter's protocol has them, not as the display
+  writes them: `"C"` for °C and `"Ohm"` for Ω with most meters (the UNI-T
+  iENV meters send `"°C"`) - in `UNIT?`, `QTDMM:CHANnel:CATalog?`,
+  `QTDMM:RECord?` and `QTDMM:INSTances?` alike.
 - The reading is the last one the meter sent; `READ?` does not trigger a
   measurement. Meters deliver two to four readings a second, so polling
   faster than that repeats values.

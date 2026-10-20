@@ -53,6 +53,8 @@ int main(int argc, char **argv)
     if (r)
     {
       check(r->main().val == "12.53" && r->main().unit == "V", "the voltage that is there is shown: " + r->main().val);
+      check(r->main().name == "Battery voltage" && second(*r).name == "Battery current",
+            "the fields' names ride along: " + r->main().name);
       check(second(*r).val.isEmpty() || second(*r).val == "---", "the truncated current is not: '" + second(*r).val + "'");
     }
     const auto sc = d.decode(VictronBle::frame(VictronBle::SolarCharger, QByteArray::fromHex("0000e504"), {"V", "I"}), 0);

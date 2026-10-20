@@ -97,14 +97,21 @@ public:
   bool        lcdSecondariesChosen() const { return m_lcdSecondaries.has_value(); }
   void        setMeterValue(int id);
   void        setPoincareValue(int id);
+  /// Whether the readings table shows value @p id (all at first).
+  bool        tableValueShown(int id) const;
+  void        setTableValueShown(int id, bool shown);
   int         lcdValue() const { return m_lcdValue; }
   int         meterValue() const { return m_meterValue; }
   int         poincareValue() const { return m_poincareValue; }
   /// The values the meter has: DMMInfo::valueCount(), or more when more came;
   /// at most kMaxValues.
   int         numValues() const;
-  /// "CO2 (ppm)" from its last reading, "Value 2" before one came.
+  /// The meter's own name of the value ("Battery voltage"), else "CO2 (ppm)"
+  /// from its last reading, "Value 2" before one came.
   QString     valueName(int id) const;
+  /// Where room is short: the meter's own name, else unit and coupling
+  /// ("V DC", "°C"); valueName() before a reading came.
+  QString     valueShortName(int id) const;
   /// Its last reading as shown: "-14.9 A", "OL"; empty before one came.
   QString     valueText(int id) const { return m_lastText.value(id); }
   /// @}
@@ -232,6 +239,7 @@ protected:
   void        showAlertColor();
   AnalogMeter   *m_meter;
   PoincarePlot  *m_poincare = nullptr;
+  QPointer<ReadingsModel> m_readingLog;
   int         m_lcdValue = 0;
   int         m_meterValue = 0;
   int         m_poincareValue = 0;
@@ -245,8 +253,9 @@ protected:
   /// The values chosen, as far as the meter has them, to the views and the
   /// min/max memory.
   void        applyValueChoice();
-  /// The alarm page's choice of value: the meter's values by name.
-  void        updateAlarmValueNames();
+  /// The meter's values by name: the alarm page's choice of value, the
+  /// readings table's statistics line.
+  void        updateValueNames();
   /// The desktop part of an alarm: beep, raise the window, popup.
   void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
   Settings    *m_settings;

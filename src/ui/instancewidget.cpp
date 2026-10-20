@@ -122,14 +122,14 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
                                       : QString("%1 %2").arg(r.text, SiPrefix::displayText(r.unit)).trimmed();
     if (r.text.isEmpty() || r.overload || r.noNumber() || r.port.quantity == Quantity::Unknown)
       return;
-    const bool news = m_lastReading.value(r.id).baseUnit != r.baseUnit || !m_lastReading.contains(r.id);
+    const bool news = m_lastReading.value(r.id).baseUnit != r.baseUnit || m_lastReading.value(r.id).name != r.name
+                      || !m_lastReading.contains(r.id);
     m_lastReading[r.id] = r;
     // the alarms on another value: their thresholds in its unit
     if (news && r.id > 0)
-    {
       m_configDlg->alarmPage()->setValueUnit(r.id, r.baseUnit);
-      updateAlarmValueNames();
-    }
+    if (news)
+      updateValueNames();
   });
   // the alarm thresholds are in the reading's base unit, also while the
   // (modeless) dialog is open
@@ -263,9 +263,8 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
   m_meter = meter;
   connect(m_ctl, &MeterController::reading, meter, &AnalogMeter::showReading);
   connect(m_ctl, &MeterController::staleChanged, meter, &AnalogMeter::setStale);
-  connect(m_ctl, &MeterController::minimumChanged, meter, &AnalogMeter::showMinimum);
-  connect(m_ctl, &MeterController::maximumChanged, meter, &AnalogMeter::showMaximum);
-  connect(m_ctl, &MeterController::minMaxReset, meter, &AnalogMeter::clearMinMax);
+  // the memory of the value it shows, whichever the LCD follows
+  connect(m_ctl, &MeterController::valueMinMaxChanged, meter, &AnalogMeter::showValueMinMax);
   applyValueChoice();
 }
 
@@ -316,7 +315,20 @@ QString InstanceWidget::valueName(int id) const
   const auto it = m_lastReading.constFind(id);
   if (it == m_lastReading.cend())
     return tr("Value %1").arg(id + 1);
+  if (!it->name.isEmpty())
+    return it->name;
   return RecordingStore::describe(it->port, it->baseUnit);
+}
+
+QString InstanceWidget::valueShortName(int id) const
+{
+  const auto it = m_lastReading.constFind(id);
+  if (it == m_lastReading.cend() || !it->name.isEmpty())
+    return valueName(id);
+  const QString unit = SiPrefix::displayText(it->baseUnit);
+  if (unit.isEmpty())
+    return valueName(id);
+  return QString("%1 %2").arg(unit, couplingText(it->port.defining)).trimmed();
 }
 
 void InstanceWidget::applyValueCount()
@@ -329,7 +341,7 @@ void InstanceWidget::applyValueCount()
 
 void InstanceWidget::applyValueChoice()
 {
-  updateAlarmValueNames();
+  updateValueNames();
   const int n = numValues();
   auto has = [n](int id) { return id < n ? id : 0; };
   const int lcd = has(m_lcdValue);
@@ -337,7 +349,13 @@ void InstanceWidget::applyValueChoice()
     m_display->setPrimary(m_lcdValue);
   m_ctl->setMinMaxValue(lcd);
   if (m_meter)
-    m_meter->setValueId(has(m_meterValue), has(m_meterValue) == lcd);
+  {
+    const int id = has(m_meterValue);
+    m_meter->setValueId(id);
+    const MinMaxMemory &mm = m_ctl->valueMinMax(id);
+    if (!mm.isEmpty())
+      m_meter->showValueMinMax(id, mm.minimum(), mm.maximum());
+  }
   if (m_poincare)
     m_poincare->setValueId(has(m_poincareValue));
 }
@@ -346,7 +364,9 @@ void InstanceWidget::setReadingLog(ReadingsModel *log)
 {
   // the table shows the recorder's readings series: the controller feeds it
   // whether or not a table exists
+  m_readingLog = log;
   log->setStore(m_ctl->recorder());
+  updateValueNames();
   connect(m_ctl, &MeterController::markRequested, log, [log](const QColor &color, const QString &name, bool, bool table)
   {
     if (table)
@@ -464,17 +484,33 @@ void InstanceWidget::configSLOT()
   openConfig();
 }
 
-void InstanceWidget::updateAlarmValueNames()
+void InstanceWidget::updateValueNames()
 {
-  QStringList names;
+  QStringList names, plain;
   for (int id = 0; numValues() > 1 && id < numValues(); ++id)
+  {
     names << QString("%1: %2").arg(id + 1).arg(valueName(id));
+    plain << valueName(id);
+  }
   m_configDlg->alarmPage()->setValueNames(names);
+  if (m_readingLog)
+    m_readingLog->setValueNames(plain);
+}
+
+bool InstanceWidget::tableValueShown(int id) const
+{
+  return !m_readingLog || !m_readingLog->hiddenValues().contains(id);
+}
+
+void InstanceWidget::setTableValueShown(int id, bool shown)
+{
+  if (m_readingLog)
+    m_readingLog->setValueHidden(id, !shown);
 }
 
 void InstanceWidget::openConfig(int page)
 {
-  updateAlarmValueNames();
+  updateValueNames();
   // the meter goes on reading, and a recording on recording: the dialog
   // has no meter page any more (it disconnected for that, and stopped a
   // recording)

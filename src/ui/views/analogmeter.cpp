@@ -800,9 +800,8 @@ void AnalogMeter::paintEvent(QPaintEvent *)
 // The analog meter works in the unit the multimeter displays (with prefix),
 // so its full scale follows the display count and the decimals of the
 // reading, exactly like the meter's own bar graph.
-void AnalogMeter::setValueId(int id, bool minMax)
+void AnalogMeter::setValueId(int id)
 {
-  m_minMaxOwn = minMax;
   if (id == m_valueId)
     return;
   m_valueId = id;
@@ -854,21 +853,17 @@ void AnalogMeter::showReading(const Reading &r)
   applyMinMax();
 }
 
-void AnalogMeter::showMinimum(double value, const QString &, const QString &unit)
+void AnalogMeter::showValueMinMax(int id, double minimum, double maximum)
 {
-  if (!m_minMaxOwn)
+  if (id != m_valueId)
     return;
-  m_minBase = value;
-  m_unitText = unit;
-  applyMinMax();
-}
-
-void AnalogMeter::showMaximum(double value, const QString &, const QString &unit)
-{
-  if (!m_minMaxOwn)
+  if (std::isnan(minimum) && std::isnan(maximum))
+  {
+    clearMinMax();
     return;
-  m_maxBase = value;
-  m_unitText = unit;
+  }
+  m_minBase = minimum;
+  m_maxBase = maximum;
   applyMinMax();
 }
 

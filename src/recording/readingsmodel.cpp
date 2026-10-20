@@ -23,9 +23,17 @@ ReadingsModel::ReadingsModel(QObject *parent) :
 // The store's signals come in pairs around each change, as the model wants them.
 void ReadingsModel::connectStore()
 {
-  connect(m_store, &RecordingStore::readingsAboutToInsert, this,
-          [this](int first, int last) { beginInsertRows(QModelIndex(), first, last); });
-  connect(m_store, &RecordingStore::readingsInserted, this, [this] { endInsertRows(); updateSingleDay(); });
+  connect(m_store, &RecordingStore::readingsAboutToInsert, this, [this](int first, int last)
+  {
+    m_inserting = { first, last };
+    beginInsertRows(QModelIndex(), first, last);
+  });
+  connect(m_store, &RecordingStore::readingsInserted, this, [this]
+  {
+    endInsertRows();
+    updateSingleDay();
+    noteValues(m_inserting.first, m_inserting.second);
+  });
   connect(m_store, &RecordingStore::readingsAboutToRemove, this,
           [this](int first, int last) { beginRemoveRows(QModelIndex(), first, last); });
   connect(m_store, &RecordingStore::readingsRemoved, this, [this] { endRemoveRows(); updateSingleDay(); });
@@ -63,6 +71,7 @@ void ReadingsModel::setStore(RecordingStore *store)
   connectStore();
   m_singleDay = allOneDay();
   endResetModel();
+  noteValues(0, m_store->readingCount() - 1);
 }
 
 bool ReadingsModel::isPaused() const
@@ -114,15 +123,46 @@ QString ReadingsModel::formatTime(const QDateTime &when)
   return when.toString("yyyy-MM-dd HH:mm:ss.zzz");
 }
 
-QString ReadingsModel::modeColumn(int id, const PortKey &port, quint32 flags, bool translated)
+QString ReadingsModel::modeColumn(int id, const PortKey &port, quint32 flags)
 {
   // the other values of the meter by their place: 2nd, 3rd, 4th
-  static const char *const ordinals[] = { QT_TR_NOOP("2nd"), QT_TR_NOOP("3rd"), QT_TR_NOOP("4th") };
+  static const char *const ordinals[] = { "2nd", "3rd", "4th" };
   const QString mode = modeText(port, flags);
   if (id <= 0)
     return mode;
-  const char *ordinal = ordinals[qMin(id, kMaxValues - 1) - 1];
-  return ((translated ? tr(ordinal) : QString::fromLatin1(ordinal)) + ' ' + mode).trimmed();
+  return (QString::fromLatin1(ordinals[qMin(id, kMaxValues - 1) - 1]) + ' ' + mode).trimmed();
+}
+
+void ReadingsModel::setValueHidden(int id, bool hidden)
+{
+  if (hidden == m_hidden.contains(id))
+    return;
+  if (hidden)
+    m_hidden.insert(id);
+  else
+    m_hidden.remove(id);
+  Q_EMIT hiddenValuesChanged();
+}
+
+void ReadingsModel::setValueNames(const QStringList &names)
+{
+  if (names == m_names)
+    return;
+  m_names = names;
+  Q_EMIT valueNamesChanged();
+}
+
+void ReadingsModel::noteValues(int first, int last)
+{
+  if (m_otherValues)
+    return;
+  for (int r = qMax(0, first); r <= last && r < m_store->readingCount(); ++r)
+    if (m_store->readingAt(r).id > 0)
+    {
+      m_otherValues = true;
+      Q_EMIT otherValuesChanged(true);
+      return;
+    }
 }
 
 QString ReadingsModel::modeText(const PortKey &port, quint32 flags)
@@ -163,7 +203,8 @@ QVariant ReadingsModel::data(const QModelIndex &index, int role) const
   if (role == Qt::ToolTipRole && !e.alarmName.isEmpty())
     return e.alarmName;   // the row is marked in the alarm's colour; "Alarm 1", not "Alarm Alarm 1"
   if (role == Qt::TextAlignmentRole)
-    return int(index.column() == Value ? Qt::AlignRight | Qt::AlignVCenter : Qt::AlignLeft | Qt::AlignVCenter);
+    return int(index.column() == Value || index.column() == Number ? Qt::AlignRight | Qt::AlignVCenter
+                                                                   : Qt::AlignLeft | Qt::AlignVCenter);
   if (role != Qt::DisplayRole)
     return QVariant();
 
@@ -174,9 +215,10 @@ QVariant ReadingsModel::data(const QModelIndex &index, int role) const
       const QDateTime when = QDateTime::fromMSecsSinceEpoch(e.when);
       return m_singleDay ? when.toString("HH:mm:ss.zzz") : formatTime(when);
     }
+    case Number: return e.id + 1;
     case Value: return SiPrefix::withoutLeadingZeros(e.text);   // "000.00" -> "0.00", as the meter shows it
     case Unit:  return SiPrefix::displayText(e.unit);   // "°C", "kΩ" as on the display
-    case Mode:  return modeColumn(e.id, e.port, e.flags, true);
+    case Mode:  return modeText(e.port, e.flags);
     case Range: return e.range;
     case Hold:  return e.hold() ? tr("HOLD") : QString();
   }
@@ -192,6 +234,7 @@ QVariant ReadingsModel::headerData(int section, Qt::Orientation orientation, int
   switch (section)
   {
     case Time:  return tr("Time");
+    case Number: return tr("No.");
     case Value: return tr("Value");
     case Unit:  return tr("Unit");
     case Mode:  return tr("Mode");
@@ -251,16 +294,24 @@ void ReadingsModel::setMaxRows(int rows)
   m_store->setReadingCapacity(rows);
 }
 
-ReadingsModel::Stats ReadingsModel::stats() const
+ReadingsModel::Stats ReadingsModel::stats(int id) const
 {
   static const QRegularExpression letters("[A-Za-z]");
   Stats s;
-  s.count = m_store->readingCount();
-  // the function of the newest main reading (second values have their
-  // own): the numbers are over its readings only - a table that holds
-  // volts and ohms has no minimum of both
-  int newest = s.count - 1;
-  while (newest >= 0 && m_store->readingAt(newest).id != 0)
+  if (id < 0)
+  {
+    id = 0;
+    while (m_hidden.contains(id) && id < kMaxValues - 1)
+      ++id;
+  }
+  s.id = id;
+  for (int i = 0; i < m_store->readingCount(); ++i)
+    if (m_store->readingAt(i).id == id)
+      ++s.count;
+  // the function of the value's newest reading: the numbers are over its
+  // readings only - a table that holds volts and ohms has no minimum of both
+  int newest = m_store->readingCount() - 1;
+  while (newest >= 0 && m_store->readingAt(newest).id != id)
     --newest;
   if (newest < 0)
     return s;
@@ -270,7 +321,7 @@ ReadingsModel::Stats ReadingsModel::stats() const
   for (int i = 0; i <= newest; ++i)
   {
     const LoggedReading &e = m_store->readingAt(i);
-    if (e.id != 0 || e.text.contains(letters) || !std::isfinite(e.value))   // secondary values, OL
+    if (e.id != id || e.text.contains(letters) || !std::isfinite(e.value))   // other values, OL
       continue;
     if (e.port != port || SiPrefix::split(e.unit).baseUnit != s.unit)
       continue;
@@ -290,14 +341,18 @@ QString ReadingsModel::toText(const QList<int> &rows) const
 {
   QStringList lines;
   QStringList header;
+  // the number only when the table shows it
+  auto copied = [this](int c) { return c != Number || m_otherValues; };
   for (int c = 0; c < ColumnCount; ++c)
-    header << headerData(c, Qt::Horizontal, Qt::DisplayRole).toString();
+    if (copied(c))
+      header << headerData(c, Qt::Horizontal, Qt::DisplayRole).toString();
   lines << header.join('\t');
 
   QList<int> which = rows;
   if (which.isEmpty())
     for (int r = 0; r < m_store->readingCount(); ++r)
-      which << r;
+      if (!m_hidden.contains(m_store->readingAt(r).id))
+        which << r;
   std::sort(which.begin(), which.end());
   for (int r : which)
   {
@@ -307,7 +362,8 @@ QString ReadingsModel::toText(const QList<int> &rows) const
     // the date stays in the copy: pasted elsewhere the rows lose their context
     cells << formatTime(QDateTime::fromMSecsSinceEpoch(m_store->readingAt(r).when));
     for (int c = Time + 1; c < ColumnCount; ++c)
-      cells << data(index(r, c), Qt::DisplayRole).toString();
+      if (copied(c))
+        cells << data(index(r, c), Qt::DisplayRole).toString();
     lines << cells.join('\t');
   }
   return lines.join('\n') + '\n';
@@ -333,7 +389,7 @@ bool ReadingsModel::write(const QString &path, QString *error) const
     const Entry e = entry(i);
     ts << QString("%1;%2;%3;%4;%5;%6\n")
             .arg(e.when.toString("yyyy-MM-ddTHH:mm:ss,zzz"), SiPrefix::withoutLeadingZeros(e.val), e.unit,
-                 modeColumn(e.id, e.port, e.flags, false), e.range, e.hold ? "1" : "0");
+                 modeColumn(e.id, e.port, e.flags), e.range, e.hold ? "1" : "0");
   }
   return true;
 }
@@ -358,7 +414,7 @@ bool ReadingsModel::writeAny(const QString &path, QString *error) const
     bool numeric = false;
     const double number = val.toDouble(&numeric);
     sheet.addRow({e.when, numeric ? QVariant(number) : QVariant(val), e.unit,
-                  modeColumn(e.id, e.port, e.flags, false), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName});
+                  modeColumn(e.id, e.port, e.flags), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName});
   }
   return sheet.write(path, *format, error);
 }

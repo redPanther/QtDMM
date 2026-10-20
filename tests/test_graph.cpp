@@ -86,10 +86,11 @@ struct Feed
     now += step;
   }
   /// Another value of the meter (a second display) now, without moving the clock.
-  void other(int id, double v, const QString &unit, Quantity quantity)
+  void other(int id, double v, const QString &unit, Quantity quantity, const QString &name = {})
   {
     Reading r;
     r.id = id;
+    r.name = name;
     r.value = v;
     r.text = QString::number(v);
     r.unit = r.baseUnit = unit;
@@ -1898,7 +1899,7 @@ int main(int argc, char **argv)
     {
       feed.other(1, 20 + i * 0.1, "°C", Quantity::Temperature);   // comes before the main value: dropped at first
       feed.value(1.0 + i * 0.01);
-      feed.other(2, 0.5, "V", Quantity::Voltage);
+      feed.other(2, 0.5, "V", Quantity::Voltage, "Battery voltage");
       feed.other(3, 50, "Hz", Quantity::Frequency);
     }
     QTest::qWait(20);
@@ -1923,6 +1924,7 @@ int main(int argc, char **argv)
     const QString legend = graph.legendText();
     check(legend.contains("Temperature") && legend.contains("°C") && !legend.contains("Hz"),
           "legend names the curves drawn: " + legend);
+    check(legend.contains("Battery voltage (V)"), "the meter's own name of a value in the legend: " + legend);
     check(graph.extraCurve(celsius)->pen().color() != graph.extraCurve(volts)->pen().color(),
           "other values: a colour each");
     // a value that keeps coming adds to its curve

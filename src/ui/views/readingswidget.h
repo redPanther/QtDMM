@@ -53,9 +53,13 @@ private Q_SLOTS:
   void measureRows(int first, int last);
   /// Column widths: m_need each, the rest of the viewport shared evenly.
   void fitColumns();
+  /// The table on the model, or on the filter while a value is left out.
+  void applyFilter();
 
 private:
   ReadingsModel *m_log;
+  class ValueFilter;
+  ValueFilter *m_filter = nullptr;
   QTableView *m_view;
   QToolButton *m_pause;
   QCheckBox *m_follow;

@@ -94,4 +94,15 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
     wid->setPoincareValue(id);
     show(View::Poincare);
   });
+  // the readings table: all values at first; copying follows it, the
+  // export keeps them all
+  menu->addSeparator();
+  QAction *table = checkable(menu, tr("Readings &table"), wid->tableValueShown(id));
+  table->setToolTip(tr("Show this value's readings in the readings table"));
+  QObject::connect(table, &QAction::triggered, menu, [wid, id, show](bool on)
+  {
+    wid->setTableValueShown(id, on);
+    if (on)
+      show(View::Table);
+  });
 }
