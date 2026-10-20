@@ -90,6 +90,9 @@ QPalette darkPalette()
   // Qt's default is a half transparent black: invisible on the dark fields
   p.setColor(QPalette::PlaceholderText, QColor(130, 130, 136));
   p.setColor(QPalette::Disabled, QPalette::PlaceholderText, QColor(85, 85, 90));
+  // Qt's link blue is for light ground: lighter here (the device info, the help)
+  p.setColor(QPalette::Link, QColor(0x6a, 0xb0, 0xf3));
+  p.setColor(QPalette::LinkVisited, QColor(0xb0, 0x8c, 0xf0));
   return p;
 }
 

@@ -26,6 +26,8 @@ constexpr int kRunning = Qt::UserRole + 1;
 constexpr int kSymbol = Qt::UserRole + 2;
 // a value row: the value's Reading::id
 constexpr int kValueId = Qt::UserRole + 3;
+// a device: its model and where it is connected, the start of its tooltip
+constexpr int kWhere = Qt::UserRole + 4;
 // the dot, then the picture of a device: every row the same width, so the
 // names line up
 constexpr int kDotSize = 12;
@@ -116,17 +118,40 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
       Q_EMIT addDeviceRequested();
       return;
     }
+    // another device: after the double-click time, a double click is Info
+    // and switches nothing (the click before it would)
     const QString id = idOf(item);
-    if (!id.isEmpty() && id != m_current)
-      Q_EMIT switchRequested(id);
+    if (!id.isEmpty() && id != m_current && !m_doubleClicked)
+    {
+      m_pendingSwitch = id;
+      m_switchDelay.start(QApplication::doubleClickInterval());
+    }
     // a click brings a running instance to the front; starting a stopped
     // one takes a double click or its menu - no new window by a stray click
     const QString instance = instanceOf(item);
     if (!instance.isEmpty() && instance != m_ownInstance && instanceRunning(item))
       Q_EMIT instanceRequested(instance);
   });
+  m_switchDelay.setSingleShot(true);
+  connect(&m_switchDelay, &QTimer::timeout, this, [this]
+  {
+    if (m_library->find(m_pendingSwitch) && m_pendingSwitch != m_current)
+      Q_EMIT switchRequested(m_pendingSwitch);
+    m_pendingSwitch.clear();
+  });
   connect(this, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item)
   {
+    const QString id = idOf(item);
+    if (!id.isEmpty())
+    {
+      m_switchDelay.stop();
+      m_pendingSwitch.clear();
+      // the release of the second click may come as a click again
+      m_doubleClicked = true;
+      QTimer::singleShot(QApplication::doubleClickInterval(), this, [this] { m_doubleClicked = false; });
+      Q_EMIT settingsRequested(id);
+      return;
+    }
     if (item && item->parent() == m_services)
     {
       Q_EMIT serviceSettingsRequested();
@@ -359,7 +384,7 @@ void DeviceSidebar::fill()
     item->setData(0, Qt::UserRole, d.id);
     item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEditable);
     item->setFirstColumnSpanned(true);
-    item->setToolTip(0, d.where().isEmpty() ? d.model() : QString("%1 · %2").arg(d.model(), d.where()));
+    item->setData(0, kWhere, d.where().isEmpty() ? d.model() : QString("%1 · %2").arg(d.model(), d.where()));
     item->setData(0, kSymbol, symbolOf(d, devicePixelRatioF()));
     if (d.id == selected)
       setCurrentItem(item);
@@ -396,6 +421,11 @@ void DeviceSidebar::updateMarks()
     if (item == m_addItem)
       continue;
     const bool current = idOf(item) == m_current;
+    // model and port, whether it is in use here, how to read more
+    QString tip = item->data(0, kWhere).toString();
+    if (current)
+      tip += '\n' + (m_active ? tr("In use in this window, readings are coming in") : tr("In use in this window"));
+    item->setToolTip(0, tip + '\n' + tr("Double-click: info and settings"));
     QFont font = item->font(0);
     font.setBold(current);
     item->setFont(0, font);
@@ -505,7 +535,7 @@ void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
   if (!d)
     return;
   QMenu menu(this);
-  QAction *settings = menu.addAction(QIcon::fromTheme("configure"), tr("&Settings..."));
+  QAction *settings = menu.addAction(QIcon::fromTheme("configure"), tr("&Info and settings..."));
   QAction *rename = menu.addAction(tr("&Rename"));
   QAction *window = menu.addAction(QIcon::fromTheme("window-new"), tr("Open in a &new window"));
   menu.addSeparator();

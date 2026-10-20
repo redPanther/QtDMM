@@ -53,24 +53,33 @@ QPixmap render(const QString &path, QSize box, qreal dpr)
   renderer.render(&painter, target);
   return pm;
 }
+
+// addConfig vendor -> text, a file the generator wrote (device_symbols.cmake)
+QHash<QString, QString> vendorMap(const QString &resource)
+{
+  QHash<QString, QString> map;
+  QFile file(resource);
+  if (file.open(QIODevice::ReadOnly))
+  {
+    const QJsonObject o = QJsonDocument::fromJson(file.readAll()).object();
+    for (auto it = o.begin(); it != o.end(); ++it)
+      map.insert(it.key(), it.value().toString());
+  }
+  return map;
+}
 }
 
 QString folder(const QString &vendor)
 {
   // vendor -> folder, as the generator wrote it
-  static const QHash<QString, QString> folders = []
-  {
-    QHash<QString, QString> map;
-    QFile file(QStringLiteral(":/devices/vendors.json"));
-    if (file.open(QIODevice::ReadOnly))
-    {
-      const QJsonObject o = QJsonDocument::fromJson(file.readAll()).object();
-      for (auto it = o.begin(); it != o.end(); ++it)
-        map.insert(it.key(), it.value().toString());
-    }
-    return map;
-  }();
+  static const QHash<QString, QString> folders = vendorMap(QStringLiteral(":/devices/vendors.json"));
   return folders.value(vendor);
+}
+
+QString website(const QString &vendor)
+{
+  static const QHash<QString, QString> urls = vendorMap(QStringLiteral(":/devices/websites.json"));
+  return urls.value(vendor);
 }
 
 QString path(const QString &vendor, DeviceType::Type type, Design design)

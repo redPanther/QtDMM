@@ -154,6 +154,12 @@
 - Graph: live (and recording, with its end in view) the time axis runs on smoothly with the clock, about 30 times
   a second, instead of jumping with each reading (a Victron sends one a second); one drawing clock for the graph
   and the Poincaré plot, slower by itself when drawing takes too long (Graph/frame-rate, 0 = as before)
+- My devices: a double click on a device, or "Info and settings..." in its menu, opens its info - the picture and
+  data as on the assistant's last page, where it is in use, connected or not, the last reading, a low battery, its
+  values, a link to the maker's website and to the supported devices - next to its settings. A click switches after
+  the double-click time, so a double click does not switch first; the tooltip says whether it is in use here
+- Add device, last page: the TFA sensor's connection reads "USB-HID /dev/hidraw3", without serial parameters.
+  Dark design: links in a light blue (the help, the device info)
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

@@ -379,7 +379,7 @@ void MainWindow::createSidebar()
     m_wid->switchDevice(id);
     m_sidebar->setCurrentItem(m_sidebar->deviceItem(m_wid->currentDevice()));
   });
-  connect(m_sidebar, &DeviceSidebar::settingsRequested, this, &MainWindow::deviceSettings);
+  connect(m_sidebar, &DeviceSidebar::settingsRequested, this, [this](const QString &id) { deviceSettings(id); });
   connect(m_sidebar, &DeviceSidebar::valueMenuRequested, this, &MainWindow::valueMenu);
   connect(m_wid->graph(), &GraphWidget::notice, this, [this](const QString &text)
   {
@@ -544,6 +544,8 @@ void MainWindow::createStatusBar()
   {
     if (r.id != 0)
       return;
+    m_lastReadingAt = QDateTime::currentMSecsSinceEpoch();
+    m_lowBattery = r.flags & SampleFlag::LowBattery;
     m_ledActive = true;
     m_ledBlink = !m_ledBlink;
     m_ledIdle->start();
@@ -820,7 +822,7 @@ void MainWindow::createActions()
   connect(action_ConfigureDMM, &QAction::triggered, this, [this]
   {
     if (m_wid->devices()->find(m_wid->currentDevice()))
-      deviceSettings(m_wid->currentDevice());
+      deviceSettings(m_wid->currentDevice(), true);
     else
       addDevice();
   });
@@ -1441,7 +1443,7 @@ void MainWindow::deleteInstance(const QString &id)
   updateInstances();
 }
 
-void MainWindow::deviceSettings(const QString &id)
+void MainWindow::deviceSettings(const QString &id, bool settingsTab)
 {
   const std::optional<MyDevice> device = m_wid->devices()->find(id);
   if (!device)
@@ -1451,6 +1453,17 @@ void MainWindow::deviceSettings(const QString &id)
   dlg.settings()->setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
   dlg.settings()->setStateManager(m_stateMgr);
   dlg.load(device->keys);
+  dlg.setStatus([this, id] { return deviceStatus(id); });
+  if (settingsTab)
+    dlg.showTab(DeviceSettingsDlg::SettingsTab);
+  // the help beside the dialog: a child of it, the dialog blocks the others
+  connect(&dlg, &DeviceSettingsDlg::helpRequested, &dlg, [this, &dlg](const QString &page)
+  {
+    auto *help = new HelpDlg(m_wid->settings(), &dlg);
+    help->setAttribute(Qt::WA_DeleteOnClose);
+    help->showPage(page);
+    help->show();
+  });
   if (dlg.exec() != QDialog::Accepted)
     return;
   QVariantMap keys = dlg.keys();
@@ -1464,6 +1477,45 @@ void MainWindow::deviceSettings(const QString &id)
   m_wid->devices()->update(id, keys);
   if (inUse)
     m_wid->switchDevice(id, false);
+}
+
+QString MainWindow::deviceStatus(const QString &id) const
+{
+  const std::optional<MyDevice> device = m_wid->devices()->find(id);
+  if (!device)
+    return QString();
+  auto para = [](const QString &text) { return QString("<p>%1</p>").arg(text.toHtmlEscaped()); };
+  if (id != m_wid->currentDevice())
+  {
+    const QString owner = placeOwners().value(DeviceLibrary::place(device->keys));
+    return para(owner.isEmpty() ? tr("Not in use. A click on it in My devices takes it into this window.")
+                                : tr("In use in the instance %1.").arg(owner));
+  }
+  QString state;
+  const qint64 ago = m_lastReadingAt > 0 ? (QDateTime::currentMSecsSinceEpoch() - m_lastReadingAt) / 1000 : -1;
+  switch (m_wid->controller()->dmm()->linkState())
+  {
+    case MeterConnection::LinkState::Closed:     state = tr("Not connected."); break;
+    case MeterConnection::LinkState::Connecting: state = tr("Connecting ..."); break;
+    case MeterConnection::LinkState::Timeout:    state = tr("Connected, but the meter sends nothing."); break;
+    case MeterConnection::LinkState::Error:      state = tr("The connection went away; QtDMM tries again."); break;
+    case MeterConnection::LinkState::Connected:
+      state = m_ledActive ? tr("Connected, readings are coming in.") : tr("Connected, no reading for %n s.", "", int(ago));
+      break;
+  }
+  QString html = para(tr("In use in this window.")) + para(state);
+  if (ago >= 0)
+    html += para(tr("Last reading %n s ago.", "", int(ago)));
+  if (m_lowBattery)
+    html += para(tr("The meter's battery is low."));
+  // its values with their readings
+  QString rows;
+  for (int value = 0; value < m_wid->numValues(); ++value)
+    rows += QString("<tr><td>%1&nbsp;&nbsp;</td><td>%2&nbsp;&nbsp;</td><td align=\"right\">%3</td></tr>")
+              .arg(value + 1).arg(m_wid->valueName(value).toHtmlEscaped(), m_wid->valueText(value).toHtmlEscaped());
+  if (!rows.isEmpty())
+    html += "<table cellspacing=\"0\" cellpadding=\"2\">" + rows + "</table>";
+  return html;
 }
 
 void MainWindow::openInNewWindow(const QString &id)

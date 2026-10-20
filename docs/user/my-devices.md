@@ -12,9 +12,10 @@ show), sigrok options, the signal of the simulated meter. Display, graph,
 recorder and alarms stay with the window. An older `devices.conf` with more
 in it is tidied up when QtDMM starts.
 
-The window remembers which entry it uses. **Settings...** of an entry in
-the sidebar changes the entry (Shift+F8: the one in use); the window that
-uses it takes the change at once.
+The window remembers which entry it uses. **Info and settings...** of an
+entry in the sidebar, or a double click on it, shows and changes the entry
+(Shift+F8: the settings of the one in use); the window that uses it takes
+the change at once.
 
 ## The sidebar
 
@@ -24,7 +25,8 @@ kind of instrument (handheld, clamp, bench meter, ...) in its maker's
 colours. The device in use is bold, with a dot
 that blinks green while its readings come in and turns grey when none has
 come for three seconds; where a device is connected shows
-when the mouse rests on it. Click another one: QtDMM disconnects, takes over
+when the mouse rests on it. Click another one - QtDMM waits the double-click
+time first, a double click opens its info instead -: QtDMM disconnects, takes over
 its settings and connects again. A running recording stops and the graph
 starts empty - another meter is another measurement; readings not exported
 yet are offered for export first, and **Cancel** stays with the current
@@ -71,8 +73,16 @@ choices are kept with the window layout.
 
 The context menu of a device:
 
-- **Settings...** - the meter's settings as in the assistant; the device in
-  use takes them at once.
+- **Info and settings...** (also a double click) - two tabs:
+  - **Info**: the device at a glance as on the assistant's last page
+    (picture, name, model, type, protocol, connection); whether it is in use
+    in this window, in another instance or not at all; in this window
+    whether it is connected, how long ago the last reading came, a low
+    battery, and its values with their readings, updated every second. Below
+    a link to the maker's website (in the browser) and to the list of
+    supported devices in this help.
+  - **Settings**: the meter's settings as in the assistant; with **OK** the
+    device in use takes them at once.
 - **Rename** - in place.
 - **Open in a new window** - a new instance with the settings of this one
   and the device. A device another window already uses brings that window

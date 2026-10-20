@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
+#include <QTimer>
 #include <QTreeWidget>
 #include <QVariant>
 
@@ -103,6 +104,7 @@ public:
 
 Q_SIGNALS:
   void        switchRequested(const QString &id);
+  /// Info and settings of the entry @p id: its double click, its menu.
   void        settingsRequested(const QString &id);
   void        newWindowRequested(const QString &id);
   /// Bring the instance @p id to the front, or start it.
@@ -146,5 +148,8 @@ private:
   QString          m_current;
   bool             m_active = false;
   bool             m_blink = false;   ///< the other green, flipped with each reading
+  QTimer           m_switchDelay;     ///< a click switches after the double-click time
+  QString          m_pendingSwitch;   ///< to this entry
+  bool             m_doubleClicked = false;   ///< just now: the clicks that follow switch nothing
   bool             m_filling = false;
 };

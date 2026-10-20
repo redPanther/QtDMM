@@ -49,11 +49,13 @@ QString DeviceSummary::connection(const DeviceSettings *settings)
     return tr("Bluetooth LE, %1").arg(device.section(' ', 1, 1));
   if (settings->isSigrokMeter())
     return tr("sigrok-cli, %1").arg(device.section(' ', 1));
-  // "SERIAL /dev/ttyUSB0" -> "/dev/ttyUSB0", "HID 0x1a86:0xe008 /dev/hidraw3" -> "USB-HID /dev/hidraw3"
-  const QString kind = device.section(' ', 0, 0);
-  QString text = kind == QLatin1String("HID") ? tr("USB-HID %1").arg(device.section(' ', -1))
+  // "SERIAL /dev/ttyUSB0" -> "/dev/ttyUSB0", "HID 0x1a86:0xe008 /dev/hidraw3" (or
+  // HIDHOLTEK, the TFA sensor) -> "USB-HID /dev/hidraw3", without serial parameters
+  const QString kind = device.section(' ', 0, 0).toUpper();
+  const bool hid = kind.startsWith(QLatin1String("HID"));
+  QString text = hid ? tr("USB-HID %1").arg(device.section(' ', -1))
                  : kind == QLatin1String("SERIAL") ? device.section(' ', 1) : device;
-  if (settings->speed() > 0 && kind != QLatin1String("HID"))
+  if (settings->speed() > 0 && !hid)
   {
     const char parity = settings->parity() == QSerialPort::EvenParity ? 'E'
                         : settings->parity() == QSerialPort::OddParity ? 'O' : 'N';
