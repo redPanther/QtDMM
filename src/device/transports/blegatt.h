@@ -50,8 +50,13 @@ public:
     QByteArray hello;              ///< written once when ready, before the first poll
     bool byNameOnly = false;       ///< the service is a common one (0xFFF0 of many BLE
                                    ///< UART modules): only the name tells the meter
-    /// True when a device seen in a scan, with @p name and @p services, is one of these.
-    bool matches(const QString &name, const QList<QBluetoothUuid> &services) const;
+    quint16 manufacturer = 0;      ///< a company id of its manufacturer data that tells the
+                                   ///< meter too (0: none); Qt reports it also when the
+                                   ///< service UUIDs come too late or not at all
+    /// True when a device seen in a scan, with @p name, @p services and the
+    /// company ids of its manufacturer data, is one of these.
+    bool matches(const QString &name, const QList<QBluetoothUuid> &services,
+                 const QList<quint16> &manufacturers = {}) const;
   };
   /// The profile for @p format, or nullopt when it is not a GATT protocol.
   static std::optional<Profile> profile(FrameFormat::DataFormat format);

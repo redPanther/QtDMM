@@ -17,6 +17,9 @@
 #include <QBluetoothLocalDevice>
 #include "device/transports/blegatt.h"
 #include "device/victronble.h"
+
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(lcBle)
 #endif
 
 namespace
@@ -306,6 +309,7 @@ struct BleDiscoverer::Private
 #ifdef QTDMM_WITH_BLE
   QBluetoothDeviceDiscoveryAgent *agent = nullptr;
   QSet<QString> seen;
+  QHash<QString, QString> logged;   ///< what the debug log said of each address last
 #endif
 };
 
@@ -342,6 +346,23 @@ void BleDiscoverer::start()
     const QString address = info.address().toString().toUpper();
     if (d->seen.contains(address))
       return;
+    // every device as Qt sees it, when it changes (QT_LOGGING_RULES
+    // "qtdmm.ble.debug=true"): why a meter is not offered
+    if (lcBle().isDebugEnabled())
+    {
+      QStringList uuids, companies;
+      for (const QBluetoothUuid &u : info.serviceUuids())
+        uuids << u.toString(QUuid::WithoutBraces);
+      for (quint16 id : info.manufacturerIds())
+        companies << QString("0x%1: %2").arg(id, 4, 16, QChar('0')).arg(QString(info.manufacturerData(id).toHex(' ')));
+      const QString line = QString("name \"%1\" services [%2] manufacturer data [%3]")
+                             .arg(info.name(), uuids.join(", "), companies.join("; "));
+      if (d->logged.value(address) != line)
+      {
+        d->logged.insert(address, line);
+        qCDebug(lcBle).noquote() << "scan:" << address << line;
+      }
+    }
     Candidate c;
     c.kind = Candidate::Bluetooth;
     c.key = address;
@@ -359,7 +380,7 @@ void BleDiscoverer::start()
         const auto profile = BleGattDevice::profile(FrameFormat::DataFormat(f));
         if (!profile)
           continue;
-        if (profile->matches(info.name(), info.serviceUuids()))
+        if (profile->matches(info.name(), info.serviceUuids(), info.manufacturerIds()))
           c.models += Families::models(FrameFormat::DataFormat(f), false);
       }
       c.models = Families::preferByName(c.models, info.name());
