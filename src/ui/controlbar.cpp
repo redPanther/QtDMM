@@ -62,8 +62,7 @@ ControlBar::ControlBar(QWidget *parent) :
     { { "max", QT_TR_NOOP("MAX"), QT_TR_NOOP("The meter shows its maximum"), true },
       { "min", QT_TR_NOOP("MIN"), QT_TR_NOOP("The meter shows its minimum"), true },
       { "avg", QT_TR_NOOP("AVG"), QT_TR_NOOP("The meter shows its average"), true } },
-    { { "unit", QT_TR_NOOP("UNIT"), QT_TR_NOOP("The next unit of the main value (lx/fc, dBA/dBC, %RH/%, m/s ... mph)"),
-        false },
+    { { "unit", QT_TR_NOOP("UNIT"), QT_TR_NOOP("The next unit of the main value (lx/fc, dBA/dBC, %RH/%, m/s ... mph)"), false },
       { "unit2", QT_TR_NOOP("°C/°F"), QT_TR_NOOP("The unit of the temperature"), false },
       { "weighting", QT_TR_NOOP("FAST/SLOW"), QT_TR_NOOP("Fast or slow time weighting"), false } },
     // HOLD on the right, as on the UT60BT, where it shares its key with LIGHT

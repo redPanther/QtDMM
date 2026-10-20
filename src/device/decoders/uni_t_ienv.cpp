@@ -14,7 +14,7 @@
 // UT333BT has been tried with QtDMM, so the others keep the "*".
 static const bool registered = []() {
   DmmDecoder::addConfig({"Uni-Trend", "UT333BT", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 1000, 0, 0, 0, "", "", 2});
-  DmmDecoder::addConfig({"Uni-Trend", "UT353BT *", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 10000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT353BT", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 10000, 0, 0, 0});
   DmmDecoder::addConfig({"Uni-Trend", "UT363BT *", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 10000, 0, 0, 0, "", "", 2});
   DmmDecoder::addConfig({"Uni-Trend", "UT383BT *", "", 0, FrameFormat::UniTiENV, 8, 1, 1, 0, 100000, 0, 0, 0});
   return true;
@@ -136,19 +136,22 @@ QByteArray DecoderUniTiENV::keyRequest(const QString &key) const
 // The UT333BT has no unit key for the humidity (%RH only; tried).
 bool DecoderUniTiENV::hasKey(const QString &key, const QString &model) const
 {
+  const bool temp = model.contains("UT333BT");
   const bool wind = model.contains("UT363BT");
+  const bool sound = model.contains("UT353BT");
+  const bool light = model.contains("UT383BT");
   if (key == "hold" || key == "max")
     return true;
   if (key == "unit")
-    return !model.contains("UT333BT");
+    return wind || light;
   if (key == "min")
     return !wind;
   if (key == "avg")
     return wind;
   if (key == "unit2")
-    return wind || model.contains("UT333BT");
+    return wind || temp;
   if (key == "weighting")
-    return model.contains("UT353BT");
+    return sound;
   return false;
 }
 
