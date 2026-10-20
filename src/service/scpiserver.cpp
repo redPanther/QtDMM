@@ -171,6 +171,17 @@ QString ScpiServer::number(double v)
   return QString::asprintf("%+.6E", v);
 }
 
+QString ScpiServer::unit(const QString &baseUnit)
+{
+  if (baseUnit == QStringLiteral("°C"))
+    return QStringLiteral("C");
+  if (baseUnit == QStringLiteral("°F") || baseUnit == QLatin1String("dF"))
+    return QStringLiteral("F");
+  if (baseUnit == QStringLiteral("Ω"))
+    return QStringLiteral("Ohm");
+  return baseUnit;
+}
+
 // The SCPI function name behind the meter's mode and unit, for CONF?.
 QString ScpiServer::function(const Reading &r) const
 {
@@ -192,7 +203,7 @@ QString ScpiServer::function(const Reading &r) const
     case Quantity::PulseWidth:
     case Quantity::Time:        return "PWID";
     default:
-      return r.unit.isEmpty() ? QString("NONE") : r.unit.toUpper();
+      return r.unit.isEmpty() ? QString("NONE") : unit(r.unit).toUpper();
   }
 }
 
@@ -499,7 +510,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
       return {};
     const RecordingState r = m_sources.recording ? m_sources.recording() : RecordingState();
     static const char *const modes[] = { "IDLE", "LIVE", "REC", "VIEW" };
-    return QString("%1,%2,%3,%4").arg(modes[r.mode]).arg(r.seconds, 0, 'f', 3).arg(r.count).arg(quoted(r.unit));
+    return QString("%1,%2,%3,%4").arg(modes[r.mode]).arg(r.seconds, 0, 'f', 3).arg(r.count).arg(quoted(unit(r.unit)));
   }
 
   // QTDMM:ALARm? the alarms raised (acknowledged ones too), :LIST? each
@@ -587,7 +598,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     for (int c = 1; c <= channelCount(); ++c)
     {
       const Reading r = m_readings.value(c - 1);
-      out << QString::number(c) << quoted(r.valid ? r.port.toString() : QString()) << quoted(r.unit);
+      out << QString::number(c) << quoted(r.valid ? r.port.toString() : QString()) << quoted(unit(r.unit));
     }
     return out.join(',');
   }
@@ -600,7 +611,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     QStringList out;
     if (m_sources.instances)
       for (const Instance &i : m_sources.instances())
-        out << quoted(i.id) << (i.valid ? number(i.value) : QString(kNotANumber)) << quoted(i.unit);
+        out << quoted(i.id) << (i.valid ? number(i.value) : QString(kNotANumber)) << quoted(unit(i.unit));
     return out.isEmpty() ? QString("\"\"") : out.join(',');
   }
 
@@ -795,7 +806,7 @@ QString ScpiServer::handleReading(const Command &cmd, bool &isQuery)
   {
     const Reading r = m_readings.value(channel - 1);
     if (matches(head, "UNIT"))
-      out << QString("\"%1\"").arg(r.unit);
+      out << QString("\"%1\"").arg(unit(r.unit));
     else if (matches(head, "CONFigure"))
     {
       QString range = r.range.toUpper() == "AUTO" ? QString("AUTO") : r.range;

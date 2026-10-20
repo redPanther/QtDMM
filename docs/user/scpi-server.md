@@ -220,10 +220,11 @@ requests).
 
 - Values are in base units: a meter showing `12.34 mV` answers
   `+1.234000E-02`, `UNIT?` says `"V"`.
-- Units are spelled as the meter's protocol has them, not as the display
-  writes them: `"C"` for °C and `"Ohm"` for Ω with most meters (the UNI-T
-  iENV meters send `"°C"`) - in `UNIT?`, `QTDMM:CHANnel:CATalog?`,
-  `QTDMM:RECord?` and `QTDMM:INSTances?` alike.
+- Units are plain ASCII with one spelling each, whatever the meter's
+  protocol writes: `"C"` for °C, `"F"` for °F, `"K"`, `"Ohm"` for Ω - in
+  `UNIT?`, `CONFigure?`, `QTDMM:CHANnel:CATalog?`, `QTDMM:RECord?` and
+  `QTDMM:INSTances?` alike, so a script can compare against them. (`"F"` is
+  also farad: `CONFigure?` says `TEMP` or `CAP`.)
 - The reading is the last one the meter sent; `READ?` does not trigger a
   measurement. Meters deliver two to four readings a second, so polling
   faster than that repeats values.
