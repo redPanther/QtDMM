@@ -59,6 +59,9 @@ public:
     /// The meter shows a fault word instead of a number ("FUSE", "Er",
     /// "PROBE", "BATT"): the word, also in val. A gap and a message.
     QString fault;
+    /// The meter's own name of this value, translated ("Battery voltage");
+    /// empty when it has none (the views then name it by what it measures).
+    QString name;
   };
 
   /// A decoded frame: its values (channels[0] the main display) and the

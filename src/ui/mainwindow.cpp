@@ -1360,7 +1360,8 @@ void MainWindow::updateInstances()
         const QString text = m_wid->valueText(value);
         const bool drawn = m_wid->graph()->valueDrawn(value);
         row.values << DeviceSidebar::Value{ value, m_wid->valueName(value), text,
-                                            drawn ? m_wid->graph()->valueColor(value) : QColor() };
+                                            drawn ? m_wid->graph()->valueColor(value) : QColor(),
+                                            m_wid->valueShortName(value) };
       }
     rows << row;
   }

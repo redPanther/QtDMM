@@ -276,7 +276,7 @@ void DeviceSidebar::fillValues(QTreeWidgetItem *parent, int first, const QList<V
       item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
     }
     item->setData(0, kValueId, value.id);
-    item->setText(0, QString("%1  %2").arg(value.id + 1).arg(value.name));
+    item->setText(0, QString("%1  %2").arg(value.id + 1).arg(value.shortName.isEmpty() ? value.name : value.shortName));
     item->setText(1, value.text);
     item->setToolTip(0, value.color.isValid() ? tr("%1 - in the graph").arg(value.name) : value.name);
     item->setIcon(0, dot(value.color, devicePixelRatioF()));

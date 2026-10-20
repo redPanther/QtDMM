@@ -34,6 +34,7 @@ struct Reading
   quint32 flags = 0;       ///< SampleFlag: AC, DC, Diode, Hold, Autorange, LowBattery, ...
   Quality quality = Quality::Valid;
   Range   measuringRange;  ///< autorange and full scale (NaN when not known)
+  QString name;            ///< the meter's own name of the value ("Battery voltage"), empty when none
 
   /// The meter shows no number, or a fault word (text): no value, no overload.
   bool noNumber() const { return quality == Quality::NoValue || quality == Quality::Fault; }

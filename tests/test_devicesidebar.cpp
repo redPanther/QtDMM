@@ -182,6 +182,12 @@ int main(int argc, char **argv)
     rows[0].values = values.mid(0, 1);
     sidebar.setInstances(rows, "default");
     check(own->childCount() == 1 && !sidebar.valueItem(0), "one value: no rows");
+    // where the row is short: unit and coupling, the full name in the tooltip
+    rows[0].values = values;
+    rows[0].values[1].shortName = "A DC";
+    sidebar.setInstances(rows, "default");
+    check(sidebar.valueItem(1)->text(0) == "2  A DC" && sidebar.valueItem(1)->toolTip(0) == "Current DC",
+          "the short name in the row, the full one in the tooltip");
   }
 
   // 8. the services: port or off, the address to copy, settings by a double click

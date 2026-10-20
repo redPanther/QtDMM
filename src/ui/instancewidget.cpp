@@ -316,7 +316,20 @@ QString InstanceWidget::valueName(int id) const
   const auto it = m_lastReading.constFind(id);
   if (it == m_lastReading.cend())
     return tr("Value %1").arg(id + 1);
+  if (!it->name.isEmpty())
+    return it->name;
   return RecordingStore::describe(it->port, it->baseUnit);
+}
+
+QString InstanceWidget::valueShortName(int id) const
+{
+  const auto it = m_lastReading.constFind(id);
+  if (it == m_lastReading.cend() || !it->name.isEmpty())
+    return valueName(id);
+  const QString unit = SiPrefix::displayText(it->baseUnit);
+  if (unit.isEmpty())
+    return valueName(id);
+  return QString("%1 %2").arg(unit, couplingText(it->port.defining)).trimmed();
 }
 
 void InstanceWidget::applyValueCount()

@@ -21,10 +21,13 @@ inline QString durationText(qint64 seconds)
   return d ? QString("%1 d %2").arg(d).arg(text) : text;
 }
 
-/// What a curve shows: "Temperature (°C)", or the unit alone
+/// What a curve shows: the meter's name of the value or "Temperature (°C)",
+/// or the unit alone
 inline QString curveName(const RecordingSeries &s, const QString &unit)
 {
   const QString u = SiPrefix::displayText(unit);
+  if (!s.name.isEmpty())
+    return u.isEmpty() ? s.name : QString("%1 (%2)").arg(s.name, u);
   if (s.port.quantity == Quantity::Unknown)
     return u;
   QString text = Quantities::name(s.port.quantity);

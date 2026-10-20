@@ -103,8 +103,12 @@ public:
   /// The values the meter has: DMMInfo::valueCount(), or more when more came;
   /// at most kMaxValues.
   int         numValues() const;
-  /// "CO2 (ppm)" from its last reading, "Value 2" before one came.
+  /// The meter's own name of the value ("Battery voltage"), else "CO2 (ppm)"
+  /// from its last reading, "Value 2" before one came.
   QString     valueName(int id) const;
+  /// Where room is short: the meter's own name, else unit and coupling
+  /// ("V DC", "°C"); valueName() before a reading came.
+  QString     valueShortName(int id) const;
   /// Its last reading as shown: "-14.9 A", "OL"; empty before one came.
   QString     valueText(int id) const { return m_lastText.value(id); }
   /// @}

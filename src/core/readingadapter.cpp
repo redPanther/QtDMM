@@ -259,6 +259,7 @@ Reading ReadingAdapter::reading(const PortSample &ps)
   r.flags = ps.sample.flags;
   r.quality = ps.sample.quality;
   r.measuringRange = ps.sample.range;
+  r.name = ps.name;
   return r;
 }
 
@@ -272,6 +273,7 @@ QList<PortSample> ReadingAdapter::adapt(const DmmDecoder::DmmResponse &r, qint64
     // MAX/MIN, AVG, REL, PEAK: states of the value, not of the port
     out.last().sample.flags |= c.states & (SampleFlag::Max | SampleFlag::Min | SampleFlag::Avg | SampleFlag::Relative
                                            | SampleFlag::Peak);
+    out.last().name = c.name;
   }
   return out;
 }

@@ -32,9 +32,10 @@ public:
   struct Value
   {
     int     id = 0;         ///< Reading::id, 0 the main value
-    QString name;           ///< "Current DC", "Value 2" before a reading
+    QString name;           ///< "Current DC (A)", "Value 2" before a reading; the row's tooltip
     QString text;           ///< its reading with the unit, "OL"
     QColor  color;          ///< its curve's colour while the graph shows it, else invalid
+    QString shortName;      ///< shown in the row ("A DC"); name when empty
   };
 
   /// One row of the node "Instances".
