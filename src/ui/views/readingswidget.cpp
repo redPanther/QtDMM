@@ -139,10 +139,12 @@ ReadingsWidget::ReadingsWidget(QWidget *parent) :
   connect(m_maxRows, qOverload<int>(&QSpinBox::valueChanged), m_log, &ReadingsModel::setMaxRows);
   right->addWidget(m_maxRows);
 
-  QPushButton *exportButton = new QPushButton(tr("&Export..."), m_barRight);
+  // the buttons sit in a narrow column: short words where a language has
+  // them, the menu has the long ones
+  QPushButton *exportButton = new QPushButton(tr("&Export...", "button"), m_barRight);
   connect(exportButton, &QPushButton::clicked, this, &ReadingsWidget::exportSLOT);
   right->addWidget(exportButton);
-  QPushButton *clearButton = new QPushButton(tr("C&lear table"), m_barRight);
+  QPushButton *clearButton = new QPushButton(tr("C&lear table", "button"), m_barRight);
   clearButton->setToolTip(tr("Remove all rows; the recorder's graph is not affected"));
   connect(clearButton, &QPushButton::clicked, this, &ReadingsWidget::clearSLOT);
   right->addWidget(clearButton);

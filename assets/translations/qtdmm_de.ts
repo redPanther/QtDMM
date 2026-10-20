@@ -4558,13 +4558,11 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
     </message>
     <message>
         <location filename="../../src/ui/views/readingswidget.cpp" line="93"/>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="142"/>
         <source>&amp;Export...</source>
         <translation>&amp;Exportieren…</translation>
     </message>
     <message>
         <location filename="../../src/ui/views/readingswidget.cpp" line="94"/>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="145"/>
         <source>C&amp;lear table</source>
         <translation>Tabelle &amp;leeren</translation>
     </message>
@@ -4605,27 +4603,39 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
         <translation>Wie viele Messwerte die Tabelle behält; die ältesten fallen weg.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="146"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="144"/>
+        <source>&amp;Export...</source>
+        <comment>button</comment>
+        <translation>&amp;Export</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="147"/>
+        <source>C&amp;lear table</source>
+        <comment>button</comment>
+        <translation>&amp;Leeren</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="148"/>
         <source>Remove all rows; the recorder&apos;s graph is not affected</source>
         <translation>Alle Zeilen entfernen; der Graph des Rekorders bleibt unberührt</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="345"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="347"/>
         <source>No readings yet.</source>
         <translation>Noch keine Messwerte.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="363"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="365"/>
         <source>Value %1:</source>
         <translation>Wert %1:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="363"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="365"/>
         <source>Value %1 (%2):</source>
         <translation>Wert %1 (%2):</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/views/readingswidget.cpp" line="365"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="367"/>
         <source>%n reading(s)</source>
         <translation>
             <numerusform>%n Messwert</numerusform>
@@ -4633,43 +4643,43 @@ Melden Sie sich anschließend ab und wieder an, damit die neue Gruppenzugehörig
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="367"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="369"/>
         <source>Min %1</source>
         <translation>Min %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="367"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="369"/>
         <source>Max %1</source>
         <translation>Max %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="368"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="370"/>
         <source>Mean %1</source>
         <translation>Mittel %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="368"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="370"/>
         <source>Span %1</source>
         <translation>Spanne %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="379"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="381"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="379"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="381"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="379"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="381"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="381"/>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="389"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="383"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="391"/>
         <source>Export readings</source>
         <translation>Messwerte exportieren</translation>
     </message>
