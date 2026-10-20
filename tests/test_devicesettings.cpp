@@ -176,6 +176,9 @@ int main(int argc, char **argv)
     const auto hp = BleGattDevice::profile(FrameFormat::VC820BLE);
     check(hp && hp->matches("", { QBluetoothUuid(quint16(0xFFB0)) }) && !hp->matches("Bluetooth DMM", fff0)
           && hp->notify == QBluetoothUuid(quint16(0xFFB2)), "HP-570C-APP profile: by service 0xFFB0");
+    // or by AiCare's manufacturer data (company 0xFFAC) when Qt has no service UUIDs
+    check(hp && hp->matches("", {}, { 0xFFAC }) && !hp->matches("", {}, { 0x02E1 }) && !zotek->matches("", {}, { 0xFFAC }),
+          "HP-570C-APP profile: by company 0xFFAC");
     check(!BleGattDevice::profile(FrameFormat::VC820Continuous), "VC820 on a cable: no Bluetooth");
   }
 #endif
