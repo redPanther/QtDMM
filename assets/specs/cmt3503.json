@@ -1,0 +1,172 @@
+{
+ "source": "data sheet of Cosinus Messtechnik",
+ "device": "cmt3503",
+ "models": [
+  "CMT 3503"
+ ],
+ "model": "cmt 3503",
+ "tables": [
+  {
+   "table": "DC Voltage",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "1000V DC/AC rms",
+   "notes": [
+    "One accuracy for the whole function (the data sheet gives no values per range); see the manual for each range"
+   ],
+   "ranges": [
+    {
+     "range": "0.001mV ~ 1000V",
+     "resolution": "0.001mV ~ 1V",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.03%+20"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "AC Voltage (True RMS)",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "1000V DC/AC rms",
+   "notes": [
+    "One accuracy for the whole function (the data sheet gives no values per range); see the manual for each range"
+   ],
+   "ranges": [
+    {
+     "range": "0.001mV ~ 1000V",
+     "resolution": "0.001mV ~ 1V",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.7%+50"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "DC Current",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "Fuse F440mA/1000V",
+   "notes": [
+    "One accuracy for the whole function (the data sheet gives no values per range); see the manual for each range"
+   ],
+   "ranges": [
+    {
+     "range": "0.001mA ~ 10A",
+     "resolution": "0.001mA",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.2%+4"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "AC Current (True RMS)",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "Fuse F440mA/1000V",
+   "notes": [
+    "One accuracy for the whole function (the data sheet gives no values per range); see the manual for each range"
+   ],
+   "ranges": [
+    {
+     "range": "0.001mA ~ 1A",
+     "resolution": "0.001mA",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.5%+20"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Resistance and Continuity",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "1000V DC/AC rms",
+   "notes": [
+    "One accuracy for the whole function (the data sheet gives no values per range); see the manual for each range",
+    "Continuity: below 30Ω"
+   ],
+   "ranges": [
+    {
+     "range": "0.1Ω ~ 40MΩ",
+     "resolution": "0.01Ω ~ 10kΩ",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.1%+10"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Frequency",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "1000V DC/AC",
+   "notes": [
+    "The data sheet also lists \"1.2kΩ @ 20mA\" here"
+   ],
+   "ranges": [
+    {
+     "range": "10Hz ~ 4MHz",
+     "resolution": "0.01Hz ~ 10Hz",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "±2 digits"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Capacitance",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": null,
+   "notes": [
+    "One accuracy for the whole function (the data sheet gives no values per range); see the manual for each range"
+   ],
+   "ranges": [
+    {
+     "range": "40nF ~ 40mF",
+     "resolution": "0.01nF",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.9%+2"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Temperature",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": null,
+   "notes": [],
+   "ranges": [
+    {
+     "range": "-200°C ~ 1200°C",
+     "resolution": "",
+     "accuracy": []
+    }
+   ]
+  }
+ ]
+}

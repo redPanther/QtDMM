@@ -173,6 +173,7 @@ int main(int argc, char **argv)
     check(hp.value("device") == "hp570c-app" && DeviceSpecs::html(hp).contains("1000A")
             && DeviceSpecs::html(hp).contains("FCC ID") && !DeviceSpecs::html(hp).contains("dmm-tools"),
           "HP-570C-APP: from its manual, not dmm-tools");
+    check(DeviceSpecs::html(DeviceSpecs::find("CMT", "3503 *")).contains("Cosinus"), "CMT 3503: from its data sheet");
   }
 
   // 7. the instances: this window's bold, a click raises another, a double click starts it
