@@ -1,16 +1,21 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ReadingsModel: the readings table model without its widget. Ring behaviour,
-// model signals (QAbstractItemModelTester watches the contracts), the
-// statistics line, tab text for the clipboard and the CSV export.
+// ReadingsModel: the readings table model. Ring behaviour, model signals
+// (QAbstractItemModelTester watches the contracts), the statistics line, tab
+// text for the clipboard and the CSV export; at the end the widget's value
+// filter.
 
 #include <QtCore>
 #include <QAbstractItemModelTester>
+#include <QApplication>
+#include <QLabel>
+#include <QTableView>
 
 #include "recording/readingsmodel.h"
 #include "core/reading.h"
 #include "recording/recordingstore.h"
+#include "ui/views/readingswidget.h"
 #include "testutil.h"
 
 static ReadingsModel::Entry entry(double dval, const QString &val, const QString &unit, int secs, int id = 0)
@@ -29,7 +34,9 @@ static ReadingsModel::Entry entry(double dval, const QString &val, const QString
 
 int main(int argc, char **argv)
 {
-  QCoreApplication app(argc, argv);
+  if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
+    qputenv("QT_QPA_PLATFORM", "offscreen");
+  QApplication app(argc, argv);
   ReadingsModel log;
   QAbstractItemModelTester tester(&log, QAbstractItemModelTester::FailureReportingMode::Warning);
 
@@ -50,10 +57,12 @@ int main(int argc, char **argv)
   check(log.data(log.index(1, ReadingsModel::Value)).toString() == "12.2", "value cell");
   check(log.data(log.index(1, ReadingsModel::Unit)).toString() == "mV", "unit cell");
   check(log.data(log.index(2, ReadingsModel::Value)).toString() == "OL", "overload cell is trimmed");
-  check(log.data(log.index(3, ReadingsModel::Mode)).toString().startsWith("2nd"), "secondary value marked");
-  check(ReadingsModel::modeColumn(2, PortKey{}, 0, false) == "3rd" && ReadingsModel::modeColumn(3, PortKey{}, 0, false) == "4th"
-        && ReadingsModel::modeColumn(0, PortKey{}, 0, false).isEmpty(), "the third and fourth value by their place: "
-        + ReadingsModel::modeColumn(2, PortKey{}, 0, false) + "/" + ReadingsModel::modeColumn(3, PortKey{}, 0, false));
+  check(log.data(log.index(3, ReadingsModel::Number)).toInt() == 2 && log.data(log.index(0, ReadingsModel::Number)).toInt() == 1
+          && !log.data(log.index(3, ReadingsModel::Mode)).toString().startsWith("2nd") && log.hasOtherValues(),
+        "the value by its number, the mode the function alone: " + log.data(log.index(3, ReadingsModel::Mode)).toString());
+  check(ReadingsModel::modeColumn(2, PortKey{}, 0) == "3rd" && ReadingsModel::modeColumn(3, PortKey{}, 0) == "4th"
+        && ReadingsModel::modeColumn(0, PortKey{}, 0).isEmpty(), "the third and fourth value by their place: "
+        + ReadingsModel::modeColumn(2, PortKey{}, 0) + "/" + ReadingsModel::modeColumn(3, PortKey{}, 0));
   check(log.data(log.index(1, ReadingsModel::Value), ReadingsModel::DvalRole).toDouble() == 0.0122, "dval role");
   check(log.headerData(ReadingsModel::Value, Qt::Horizontal).toString() == "Value", "header");
   {
@@ -92,10 +101,20 @@ int main(int argc, char **argv)
 
   // --- 2. statistics skip overloads and secondary values ---
   ReadingsModel::Stats s = log.stats();
-  check(s.count == 4 && s.numeric == 2, QString("stats count %1 numeric %2").arg(s.count).arg(s.numeric));
+  check(s.id == 0 && s.count == 3 && s.numeric == 2,
+        QString("stats of the main value: count %1 numeric %2").arg(s.count).arg(s.numeric));
   check(qFuzzyCompare(s.min, 0.0122) && qFuzzyCompare(s.max, 1.234), "stats min/max");
   check(qFuzzyCompare(s.mean, (1.234 + 0.0122) / 2), "stats mean");
   check(s.unit == "V", "stats unit is the newest main reading's base unit, not the 2nd value's: " + s.unit);
+  {
+    const ReadingsModel::Stats second = log.stats(1);
+    check(second.count == 1 && second.numeric == 1 && second.unit == "Hz" && qFuzzyCompare(second.max, 50.0),
+          QString("stats of the second value: %1 rows, %2").arg(second.count).arg(second.unit));
+    // the main value left out of the table: the line is of the first one shown
+    log.setValueHidden(0, true);
+    check(log.stats().id == 1, "stats of the first value shown");
+    log.setValueHidden(0, false);
+  }
   {
     // another function before: not in the numbers (611 Ω were "Max 611 V")
     ReadingsModel mixed;
@@ -146,9 +165,31 @@ int main(int argc, char **argv)
   log.append(entry(2.0, "2.000", "V", 1));
   const QString text = log.toText();
   const QStringList lines = text.split('\n', Qt::SkipEmptyParts);
-  check(lines.size() == 3 && lines[0].startsWith("Time\tValue\tUnit"), "tab text has a header: " + lines.value(0));
-  check(lines[2] == "2026-09-21 14:03:06.250\t2.000\tV\tDC\tAUTO\t", "tab text row: " + lines.value(2));
+  // the log had a second value before the clear: the number stays
+  check(lines.size() == 3 && lines[0].startsWith("Time\tNo.\tValue\tUnit"), "tab text has a header: " + lines.value(0));
+  check(lines[2] == "2026-09-21 14:03:06.250\t1\t2.000\tV\tDC\tAUTO\t", "tab text row: " + lines.value(2));
   check(log.toText({1}).split('\n', Qt::SkipEmptyParts).size() == 2, "selected rows only");
+  {
+    // more values: copied with their number; one left out of the table is
+    // left out of the copy, not of the export
+    ReadingsModel more;
+    more.append(entry(1.0, "1.000", "V", 0));
+    more.append(entry(50.0, "50.0", "Hz", 0, 1));
+    more.append(entry(2.0, "2.000", "V", 1));
+    QStringList rows = more.toText().split('\n', Qt::SkipEmptyParts);
+    check(rows.size() == 4 && rows[0].startsWith("Time\tNo.\tValue") && rows[2].contains("\t2\t50.0\tHz"),
+          "copied with the number: " + rows.value(0) + " | " + rows.value(2));
+    int changed = 0;
+    QObject::connect(&more, &ReadingsModel::hiddenValuesChanged, [&] { ++changed; });
+    more.setValueHidden(1, true);
+    more.setValueHidden(1, true);
+    rows = more.toText().split('\n', Qt::SkipEmptyParts);
+    check(changed == 1 && rows.size() == 3 && !rows.join('\n').contains("Hz"), "a value left out is not copied");
+    QTemporaryDir dir;
+    check(more.write(dir.filePath("more.csv")), "export with a value left out");
+    QFile all(dir.filePath("more.csv"));
+    check(all.open(QIODevice::ReadOnly) && QString::fromUtf8(all.readAll()).contains("2nd"), "the export keeps it, as 2nd");
+  }
 
   // --- 5. CSV export ---
   QTemporaryDir tmp;
@@ -238,6 +279,41 @@ int main(int argc, char **argv)
           QString("store gone: the log must be empty, has %1 rows").arg(log.rowCount()));
     log.append(entry(3.0, "3.000", "V", 0));
     check(log.rowCount() == 1 && log.entry(0).dval == 3.0, "store gone: the log goes on with its own store");
+  }
+
+  // --- 7. the widget: the number column with more values, a value left out
+  //        of the table, the statistics line names its value ---
+  {
+    ReadingsWidget widget;
+    widget.resize(700, 300);
+    ReadingsModel *model = widget.log();
+    auto *view = widget.findChild<QTableView *>();
+    QLabel *stats = nullptr;
+    for (QLabel *l : widget.findChildren<QLabel *>())
+      if (l->textInteractionFlags() & Qt::TextSelectableByMouse)
+        stats = l;
+    model->append(entry(1.0, "1.000", "V", 0));
+    check(view && view->isColumnHidden(ReadingsModel::Number), "one value: no number column");
+    check(stats && !stats->text().contains("Value 1"), "one value: the line names none: " + (stats ? stats->text() : ""));
+    model->append(entry(0.5, "0.500", "A", 0, 1));
+    model->append(entry(2.0, "2.000", "V", 1));
+    model->append(entry(0.6, "0.600", "A", 1, 1));
+    model->setValueNames({ "Battery voltage", "Battery current" });
+    check(!view->isColumnHidden(ReadingsModel::Number), "two values: the number column");
+    check(stats->text().contains("Value\u00a01\u00a0(Battery\u00a0voltage):") && stats->text().contains("2\u00a0reading"),
+          "the line names its value and counts its readings: " + stats->text());
+    model->setValueHidden(1, true);
+    check(view->model()->rowCount() == 2 && view->model()->index(1, ReadingsModel::Value).data().toString() == "2.000",
+          QString("value 2 left out: %1 rows").arg(view->model()->rowCount()));
+    model->append(entry(0.7, "0.700", "A", 2, 1));
+    model->append(entry(3.0, "3.000", "V", 2));
+    check(view->model()->rowCount() == 3, "new rows of value 2 stay out");
+    model->setValueHidden(1, false);
+    model->setValueHidden(0, true);
+    check(stats->text().contains("Value\u00a02\u00a0(Battery\u00a0current)") && view->model()->rowCount() == 3,
+          "value 1 left out: the line is of value 2: " + stats->text());
+    model->setValueHidden(0, false);
+    check(view->model() == model && view->model()->rowCount() == 6, "all shown: the table on the model again");
   }
 
   if (failed == 0)

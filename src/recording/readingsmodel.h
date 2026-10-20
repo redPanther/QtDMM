@@ -5,6 +5,8 @@
 #include <QAbstractTableModel>
 #include <QColor>
 #include <QDateTime>
+#include <QSet>
+#include <QStringList>
 #include <QVector>
 
 #include "core/sampletypes.h"
@@ -39,15 +41,18 @@ public:
     QString alarmName;
   };
 
-  enum Column { Time, Value, Unit, Mode, Range, Hold, ColumnCount };
+  /// Number: which value of the meter (1 the main one), only shown for a
+  /// meter with more than one
+  enum Column { Time, Number, Value, Unit, Mode, Range, Hold, ColumnCount };
   /// Qt::UserRole on any cell gives the row's dval as double.
   static constexpr int DvalRole = Qt::UserRole;
 
-  /// Statistics over the numeric (non-overload) main readings in the log.
+  /// Statistics over the numeric (non-overload) readings of one value in the log.
   struct Stats
   {
-    int count = 0;        ///< rows in the log, overloads included
-    int numeric = 0;      ///< rows min/max/mean are computed from: the main readings of the newest one's
+    int id = 0;           ///< the value they are of
+    int count = 0;        ///< its rows in the log, overloads included
+    int numeric = 0;      ///< rows min/max/mean are computed from: its readings of the newest one's
                           ///< function (port and unit), without overloads
     double min = 0, max = 0, mean = 0;
     QString unit;         ///< unit of the newest main reading, prefix stripped
@@ -87,10 +92,27 @@ public:
   /// Rows to keep, at least 1; trims the log when it shrinks.
   void setMaxRows(int rows);
 
-  Stats stats() const;
+  /// Over value @p id; the first one shown in the table when -1.
+  Stats stats(int id = -1) const;
 
-  /// Text of the rows @p rows (all when empty) - tab separated with a
-  /// header, as a spreadsheet pastes it.
+  /// The values the table leaves out (by Reading::id); copying leaves them
+  /// out too, the export and the store keep them.
+  QSet<int> hiddenValues() const { return m_hidden; }
+  void setValueHidden(int id, bool hidden);
+  /// Whether a value other than the main one has come: the Number column.
+  bool hasOtherValues() const { return m_otherValues; }
+  /// The names of the values, by id, for the statistics line.
+  QStringList valueNames() const { return m_names; }
+  void setValueNames(const QStringList &names);
+
+Q_SIGNALS:
+  void hiddenValuesChanged();
+  void otherValuesChanged(bool);
+  void valueNamesChanged();
+
+public:
+  /// Text of the rows @p rows (all shown ones when empty) - tab separated
+  /// with a header, as a spreadsheet pastes it.
   QString toText(const QList<int> &rows = {}) const;
   /// CSV export: `timestamp;value;unit;mode;range;hold`, ISO timestamps
   /// with milliseconds, the value as displayed (with the SI prefix on the
@@ -109,15 +131,20 @@ public:
   /// The Mode column: the decoders' codes as words ("OH" -> "Resistance").
   /// The Mode column: "DC", "AC+DC", "Diode", "Resistance", ...
   static QString modeText(const PortKey &port, quint32 flags);
-  /// The Mode column of value @p id: modeText(), for another value than the
-  /// main one after its place ("2nd AC", "3rd", "4th"); @p translated for
-  /// the table, the export writes the English word.
-  static QString modeColumn(int id, const PortKey &port, quint32 flags, bool translated);
+  /// The export's mode of value @p id: modeText(), for another value than
+  /// the main one after its place ("2nd AC", "3rd", "4th"), in English.
+  static QString modeColumn(int id, const PortKey &port, quint32 flags);
 
 private:
   RecordingStore *m_own;     ///< used until setStore(), and after that store is gone
   RecordingStore *m_store;
   bool m_singleDay = true;
+  QSet<int> m_hidden;
+  bool m_otherValues = false;
+  QStringList m_names;
+  std::pair<int, int> m_inserting;   ///< rows being inserted, for noteValues()
+  /// Rows @p first..@p last came: whether one of them is another value.
+  void noteValues(int first, int last);
   void connectStore();
   bool allOneDay() const;
   /// Recomputes m_singleDay after rows came or went; when it flips, the
