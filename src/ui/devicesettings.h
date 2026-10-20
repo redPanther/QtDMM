@@ -81,7 +81,7 @@ public:
   void           setSigrokExe(const QString &exe) { m_sigrokExe = exe; }
 
   /// The DMMInfo of the chosen model, or the manual settings.
-  DmmDecoder::DMMInfo dmmInfo() { return m_dmmInfo; };
+  DmmDecoder::DMMInfo dmmInfo() const { return m_dmmInfo; }
   QSerialPort::Parity parity() const;
   QSerialPort::DataBits bits() const;
   QSerialPort::StopBits stopBits() const;

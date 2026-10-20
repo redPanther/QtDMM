@@ -9,6 +9,7 @@
 
 #include <QtWidgets>
 #include <QTemporaryDir>
+#include <QTest>
 
 #include "core/devicelibrary.h"
 #include "ui/devicesettings.h"
@@ -53,10 +54,35 @@ int main(int argc, char **argv)
   // 2. a click switches, but not to the one in use
   QStringList switched;
   QObject::connect(&sidebar, &DeviceSidebar::switchRequested, [&](const QString &id) { switched << id; });
+  // after the double-click time: a double click would be Info instead
+  const int wait = QApplication::doubleClickInterval() + 100;
+  // (waiting, the sidebar may fill anew from the library's file: the items
+  // are looked up again after it)
   Q_EMIT sidebar.itemClicked(bench, 0);
+  check(switched.isEmpty(), "a click switches not at once");
+  QTest::qWait(wait);
   Q_EMIT sidebar.itemClicked(sidebar.deviceItem(tfa), 0);
   Q_EMIT sidebar.itemClicked(sidebar.devicesNode(), 0);
+  QTest::qWait(wait);
+  bench = sidebar.deviceItem(ut61e);
   check(switched == QStringList({ ut61e }), "click switches: " + switched.join(','));
+  {
+    // a double click: info and settings, no switch
+    QStringList info;
+    const auto conn = QObject::connect(&sidebar, &DeviceSidebar::settingsRequested, [&](const QString &id) { info << id; });
+    Q_EMIT sidebar.itemClicked(bench, 0);
+    Q_EMIT sidebar.itemDoubleClicked(bench, 0);
+    Q_EMIT sidebar.itemClicked(bench, 0);   // the release of the second click
+    QTest::qWait(wait);
+    bench = sidebar.deviceItem(ut61e);
+    check(info == QStringList({ ut61e }) && switched.size() == 1,
+          QString("double click: info, no switch (%1 / %2)").arg(info.join(',')).arg(switched.size()));
+    QObject::disconnect(conn);
+    check(sidebar.deviceItem(tfa)->toolTip(0).contains("In use in this window")
+            && sidebar.deviceItem(tfa)->toolTip(0).contains("Double-click")
+            && !bench->toolTip(0).contains("In use"),
+          "the tooltip: in use here, how to read more: " + sidebar.deviceItem(tfa)->toolTip(0));
+  }
 
   // the last row adds a device; it is no device itself
   QTreeWidgetItem *add = sidebar.devicesNode()->child(sidebar.devicesNode()->childCount() - 1);
@@ -103,6 +129,28 @@ int main(int argc, char **argv)
                { "Port settings/ble-key", "00112233445566778899aabbccddeeff" } });
     check(ok->isEnabled(), "complete: OK");
     check(dlg.keys().value("DMM/model") == "Victron SmartShunt", "keys: the model");
+  }
+  {
+    // Info first: the device at a glance, its state, the maker's website, the help
+    DeviceSettingsDlg dlg("Bench");
+    dlg.load({ { "DMM/model", "Uni-Trend UT61E" }, { "Port settings/device", "SERIAL /dev/ttyUSB0" } });
+    check(dlg.currentTab() == DeviceSettingsDlg::InfoTab, "the dialog opens on Info");
+    const QString summary = dlg.findChild<QLabel *>("ui_deviceInfo")->text();
+    check(summary.contains("Bench") && summary.contains("UT61E") && summary.contains("/dev/ttyUSB0"),
+          "Info: name, model, connection: " + summary);
+    int asked = 0;
+    dlg.setStatus([&] { ++asked; return QString("<p>In use in this window.</p>"); });
+    check(asked == 1 && dlg.statusText().contains("In use"), "Info: the state at once");
+    QTest::qWait(1100);
+    check(asked >= 2, QString("Info: the state again each second, asked %1 times").arg(asked));
+    check(dlg.linksText().contains("https://www.uni-trend.com/") && dlg.linksText().contains("help:supported-devices.md"),
+          "Info: the maker's website and the help: " + dlg.linksText());
+    QString page;
+    QObject::connect(&dlg, &DeviceSettingsDlg::helpRequested, [&](const QString &p) { page = p; });
+    Q_EMIT dlg.findChild<QLabel *>("ui_deviceLinks")->linkActivated("help:supported-devices.md");
+    check(page == "supported-devices.md", "Info: the help link asks for its page");
+    dlg.showTab(DeviceSettingsDlg::SettingsTab);
+    check(dlg.currentTab() == DeviceSettingsDlg::SettingsTab && dlg.settings()->isVisibleTo(&dlg), "the Settings tab");
   }
 
   // 7. the instances: this window's bold, a click raises another, a double click starts it

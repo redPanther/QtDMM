@@ -81,6 +81,9 @@ int main(int argc, char **argv)
     check(DeviceSymbol::path(info.vendor, type, DeviceSymbol::Design::Dark).endsWith("_dark.svg"), info.name + ": dark twin");
   }
   check(DeviceSymbol::folder("Uni-Trend") == "uni_t" && DeviceSymbol::folder("No such vendor").isEmpty(), "folders");
+  check(DeviceSymbol::website("Uni-Trend") == "https://www.uni-trend.com/" && DeviceSymbol::website("QtDMM").isEmpty()
+          && DeviceSymbol::website("No such vendor").isEmpty(),
+        "the makers' websites: " + DeviceSymbol::website("Uni-Trend"));
   check(!DeviceSymbol::pixmap("Uni-Trend", DeviceType::HandheldDmm, QSize(20, 20), 2.0).isNull()
           && !DeviceSymbol::unknown(QSize(20, 20)).isNull(), "drawn, also at 20 px for the sidebar");
 

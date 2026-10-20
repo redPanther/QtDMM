@@ -37,4 +37,7 @@ QString path(const QString &vendor, DeviceType::Type type, Design design = Desig
 /// The folder of @p vendor's pictures ("uni_t" for "Uni-Trend"), empty for a
 /// vendor without colours of its own.
 QString folder(const QString &vendor);
+/// The maker's website ("https://www.uni-trend.com/" for "Uni-Trend"), from
+/// manufacturer-colors.json; empty when it has none.
+QString website(const QString &vendor);
 }

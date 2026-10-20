@@ -137,6 +137,8 @@ protected:
   QTimer     *m_ledIdle;
   bool        m_ledActive = false;
   bool        m_ledBlink = false;
+  qint64      m_lastReadingAt = 0;   ///< ms since the epoch, the newest main reading
+  bool        m_lowBattery = false;  ///< its low battery annunciator
   QMdiSubWindow *m_displayWin;
   QMdiSubWindow *m_meterWin;
   QMdiSubWindow *m_graphWin;
@@ -154,7 +156,11 @@ protected:
   DeviceSidebar *m_sidebar = nullptr;     ///< "My devices" at the left
   /// "Settings..." of an entry: its meter's settings; the device in use
   /// takes them at once (unsaved readings first), unchanged ones change nothing.
-  void        deviceSettings(const QString &id);
+  /// Info and settings of the entry @p id, on its Info tab or the Settings tab.
+  void        deviceSettings(const QString &id, bool settingsTab = false);
+  /// The Info tab's state of the entry @p id: in use where, connected,
+  /// the last reading, the values; rich text.
+  QString     deviceStatus(const QString &id) const;
   /// The entry @p id in a new window (instance) of its own; a device that a
   /// running instance uses brings that one to the front instead.
   void        openInNewWindow(const QString &id);

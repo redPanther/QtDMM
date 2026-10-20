@@ -11,7 +11,8 @@
 ## Out: <build>/devices/<type>.svg in the neutral colours ("default"), and
 ##      <build>/devices/<key>/<type>.svg for each manufacturer and kind it
 ##      has, each with <type>_dark.svg, the outline light for a dark design;
-##      <build>/devices/vendors.json, addConfig vendor -> key.
+##      <build>/devices/vendors.json, addConfig vendor -> key;
+##      <build>/devices/websites.json, addConfig vendor -> the maker's "url".
 ##
 ## qtdmm_device_symbols(<var>) sets <var> to the <qresource prefix="/devices">
 ## block of resources.qrc. A file is written only when it changed, so rcc
@@ -63,6 +64,7 @@ function(qtdmm_device_symbols result)
 
 	# each manufacturer, the kinds it has
 	set(vendors "")
+	set(websites "")
 	string(JSON count LENGTH "${json}" manufacturers)
 	math(EXPR last "${count} - 1")
 	foreach(i RANGE ${last})
@@ -73,12 +75,16 @@ function(qtdmm_device_symbols result)
 		if(NOT key MATCHES "^[a-z0-9_]+$")
 			message(FATAL_ERROR "manufacturer-colors.json: key \"${key}\" - lower case, [a-z0-9_] only")
 		endif()
+		string(JSON url ERROR_VARIABLE nourl GET "${json}" manufacturers ${key} url)
 		string(JSON matches LENGTH "${json}" manufacturers ${key} match)
 		if(matches GREATER 0)
 			math(EXPR mlast "${matches} - 1")
 			foreach(m RANGE ${mlast})
 				string(JSON vendor GET "${json}" manufacturers ${key} match ${m})
 				string(APPEND vendors "  \"${vendor}\": \"${key}\",\n")
+				if(NOT nourl AND url MATCHES "^https?://")
+					string(APPEND websites "  \"${vendor}\": \"${url}\",\n")
+				endif()
 			endforeach()
 		endif()
 		string(JSON types ERROR_VARIABLE none LENGTH "${json}" manufacturers ${key} types)
@@ -122,6 +128,11 @@ function(qtdmm_device_symbols result)
 	configure_file("${out}/vendors.json.new" "${out}/vendors.json" COPYONLY)
 	file(REMOVE "${out}/vendors.json.new")
 	string(APPEND qrc "        <file alias=\"vendors.json\">${out}/vendors.json</file>\n")
+	string(REGEX REPLACE ",\n$" "\n" websites "${websites}")
+	file(WRITE "${out}/websites.json.new" "{\n${websites}}\n")
+	configure_file("${out}/websites.json.new" "${out}/websites.json" COPYONLY)
+	file(REMOVE "${out}/websites.json.new")
+	string(APPEND qrc "        <file alias=\"websites.json\">${out}/websites.json</file>\n")
 
 	string(APPEND qrc "    </qresource>\n")
 	set(${result} "${qrc}" PARENT_SCOPE)

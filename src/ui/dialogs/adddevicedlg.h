@@ -12,6 +12,7 @@
 
 class DeviceLibrary;
 class DeviceSettings;
+class DeviceSummary;
 class SharedStateManager;
 class QLabel;
 class QLineEdit;
@@ -131,8 +132,7 @@ private:
   QLineEdit      *m_name = nullptr;
   QToolButton    *m_thisWindow = nullptr;
   QToolButton    *m_newWindow = nullptr;
-  QLabel         *m_symbol = nullptr;
-  QLabel         *m_deviceInfo = nullptr;
+  DeviceSummary  *m_summary = nullptr;   ///< page 4: the device as set up
   QProgressBar   *m_progress = nullptr;
   QListWidget    *m_cards = nullptr;
   QLabel         *m_hint = nullptr;

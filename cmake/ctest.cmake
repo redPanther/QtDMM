@@ -91,6 +91,7 @@ if (BUILD_TESTING)
 
 	## the sidebar "Devices": My devices in order, the one in use, click, rename, when it is shown; Settings of an entry; the instances
 	qtdmm_add_test(device_sidebar test_devicesidebar tests/test_devicesidebar.cpp)
+	target_link_libraries(test_devicesidebar PRIVATE qtdmm_resources)   # the pictures, the makers' websites
 
 	## the meter's keys under the display: which a meter has, what a click sends, the states
 	qtdmm_add_test(control_bar test_controlbar tests/test_controlbar.cpp)
