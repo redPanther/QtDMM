@@ -41,6 +41,10 @@ and importing a file ask first when the readings viewed are not saved yet:
 
 *Export* while live saves what the graph holds up to now.
 
+The time axis runs on smoothly with the clock, also between two readings of
+a meter that sends one a second: live, and while recording with the end of
+the recording in view. A slow computer draws it less often by itself.
+
 ## Sampling
 
 **Settings → Recording** (Ctrl+F8) sets:

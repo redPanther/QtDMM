@@ -27,6 +27,7 @@
 #include <QMenu>
 
 #include "ui/mainwindow.h"
+#include "ui/frameclock.h"
 #include "ui/dialogs/helpdlg.h"
 #include "ui/dialogs/devicesettingsdlg.h"
 #include "ui/devicesettings.h"
@@ -280,6 +281,8 @@ void MainWindow::createViews()
   m_wid->setStateManager(m_stateMgr);
 
   m_graphWin = addView(m_wid, tr("Graph"), MdiArranger::Graph, "graph");
+  // the drawing clock of the views; 0 = off, the graph moves with each reading only
+  FrameClock::instance()->setRate(m_wid->settings()->getInt("Graph/frame-rate", 30));
 
   m_readings = new ReadingsWidget(this);
   m_wid->setReadingLog(m_readings->log());   // the row limit is the store's: set it after

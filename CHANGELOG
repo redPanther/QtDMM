@@ -151,6 +151,9 @@
   Readings table: "Clear table" instead of "Clear" (it looked like it deleted a row)
 - SCPI: units in one ASCII spelling each - "C", "F", "Ohm"; the UNI-T iENV meters answered "°C", meters with °F
   "dF" or "°F"
+- Graph: live (and recording, with its end in view) the time axis runs on smoothly with the clock, about 30 times
+  a second, instead of jumping with each reading (a Victron sends one a second); one drawing clock for the graph
+  and the Poincaré plot, slower by itself when drawing takes too long (Graph/frame-rate, 0 = as before)
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

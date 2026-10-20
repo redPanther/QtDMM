@@ -1,6 +1,7 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "ui/views/poincareplot.h"
+#include "ui/frameclock.h"
 
 #include <QActionGroup>
 #include <QApplication>
@@ -21,18 +22,17 @@ PoincarePlot::PoincarePlot(QWidget *parent) :
 {
   setMouseTracking(true);
   setMinimumSize(160, 160);
+  // new readings are drawn on the FrameClock's next tick, not each one at
+  // once; with the clock off on a timer of its own, at most 20 a second
   m_repaint.setSingleShot(true);
-  m_repaint.setInterval(50);   // at most 20 pictures a second
-  connect(&m_repaint, &QTimer::timeout, this, [this]
+  m_repaint.setInterval(50);
+  connect(&m_repaint, &QTimer::timeout, this, &PoincarePlot::refresh);
+  connect(FrameClock::instance(), &FrameClock::tick, this, [this]
   {
-    if (!m_hold)
-    {
-      m_shown = m_series.pairs();
-      m_stats = m_series.stats();
-      m_unit = m_series.unit();
-      m_resolution = m_series.resolution();
-    }
-    update();
+    if (!FrameClock::instance()->wanted(this))
+      return;
+    FrameClock::instance()->want(this, false);
+    refresh();
   });
 }
 
@@ -118,8 +118,22 @@ void PoincarePlot::clear()
 
 void PoincarePlot::scheduleUpdate()
 {
-  if (!m_repaint.isActive())
+  if (FrameClock::instance()->rate() > 0)
+    FrameClock::instance()->want(this, true);
+  else if (!m_repaint.isActive())
     m_repaint.start();
+}
+
+void PoincarePlot::refresh()
+{
+  if (!m_hold)
+  {
+    m_shown = m_series.pairs();
+    m_stats = m_series.stats();
+    m_unit = m_series.unit();
+    m_resolution = m_series.resolution();
+  }
+  update();
 }
 
 void PoincarePlot::addMenuActions(QMenu *menu)

@@ -28,6 +28,7 @@
 #include <QtWidgets>
 #include <cmath>
 
+#include "ui/frameclock.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/graphwidget_p.h"
 #include "core/nicestep.h"
@@ -39,17 +40,60 @@ qint64 GraphWidget::windowStart() const
   // axis ends a sample time short of the window, updateXAxisRange())
   if (m_store->state() == RecordingStore::Live)
   {
-    const qint64 window = qint64(qMax(1, m_windowSeconds)) * 1000;
-    const qint64 shortOf = qMin<qint64>(m_store->sampleTime() * 100, window / 10);
-    const qint64 follow = qMax(m_store->origin(), m_store->duration() - window + shortOf);
     // paused by the overview: where it was put, while the store keeps it
+    const qint64 follow = followStart();
     return m_liveHold ? qBound(m_store->origin(), m_holdStart, follow) : follow;
   }
+  // a recording seen at its end: to the millisecond, as Live, so it runs
+  // on smoothly between the readings
+  if (following())
+    return followStart();
   // the scroll bar counts tenths of a second from what the store keeps
   return m_store->origin() + qint64(qMax(0, scrollbar->value())) * 100;
 }
 
+double GraphWidget::timeAxisStart() const
+{
+  return m_xAxis->min();
+}
+
+qint64 GraphWidget::followStart() const
+{
+  const qint64 window = qint64(qMax(1, m_windowSeconds)) * 1000;
+  const qint64 shortOf = qMin<qint64>(m_store->sampleTime() * 100, window / 10);
+  return qMax(m_store->origin(), m_store->duration() - window + shortOf);
+}
+
+bool GraphWidget::following() const
+{
+  if (m_store->state() == RecordingStore::Live)
+    return !m_liveHold;
+  return m_store->state() == RecordingStore::Record && scrollbar->maximum() > 0
+         && scrollbar->value() >= scrollbar->maximum();
+}
+
+void GraphWidget::updateClockWant()
+{
+  const bool moving = m_store->state() == RecordingStore::Live || m_store->state() == RecordingStore::Record;
+  FrameClock::instance()->want(this, moving && isVisible());
+}
+
+void GraphWidget::frameTick()
+{
+  if (!following() || !isVisible())
+    return;
+  updateTimeAxis();
+  updateMarkPositions();
+}
+
 void GraphWidget::updateXAxisRange()
+{
+  updateTimeAxis();
+  updateReferenceLine();   // the window's mean, minimum or maximum
+  updateEnvelope();
+}
+
+void GraphWidget::updateTimeAxis()
 {
   // one sample time short of the window, as it always was: no label on the
   // right edge
@@ -72,9 +116,7 @@ void GraphWidget::updateXAxisRange()
   m_xAxis->setTickAnchor(0);
   m_xAxis->setTickInterval(div);
   updateXLabels();
-  updateReferenceLine();   // the window's mean, minimum or maximum
   updateMinimapView();
-  updateEnvelope();
 }
 
 double GraphWidget::timeStep(double v)

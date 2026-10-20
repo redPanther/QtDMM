@@ -78,7 +78,9 @@ private:
   int         m_valueId = 0;
   bool        m_ellipse = true;
   Settings   *m_cfg = nullptr;
-  QTimer      m_repaint;
+  QTimer      m_repaint;   ///< with the FrameClock off
+  /// The readings collected since into the picture (unless held), drawn.
+  void        refresh();
 
   // the axes of the last paint, for the crosshair
   double      m_lo = 0;

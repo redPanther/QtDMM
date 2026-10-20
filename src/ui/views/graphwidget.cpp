@@ -30,6 +30,7 @@
 #include <QPen>
 #include <cmath>
 
+#include "ui/frameclock.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/graphwidget_p.h"
 #include "ui/views/graphflags.h"
@@ -252,6 +253,8 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_legend->hide();
 
   connectStore();
+  // Live runs on with the time between the readings
+  connect(FrameClock::instance(), &FrameClock::tick, this, &GraphWidget::frameTick);
 }
 
 void GraphWidget::connectStore()
@@ -291,7 +294,7 @@ void GraphWidget::setStore(RecordingStore *store)
   showUnit();
   rebuildSeries();
   syncMarks();
-  onStateChanged();
+  onStateChanged();   // and the clock for its state
 }
 
 void GraphWidget::timeButtonClicked(int seconds)
@@ -448,6 +451,18 @@ void GraphWidget::showSpan(qint64 start, qint64 width, bool atEnd)
   updateTimeButtons();
 }
 
+void GraphWidget::showEvent(QShowEvent *event)
+{
+  QWidget::showEvent(event);
+  updateClockWant();
+}
+
+void GraphWidget::hideEvent(QHideEvent *event)
+{
+  QWidget::hideEvent(event);
+  updateClockWant();
+}
+
 void GraphWidget::resizeEvent(QResizeEvent *)
 {
   layoutParts();
@@ -562,6 +577,7 @@ void GraphWidget::onStateChanged()
   updateStateLabel();
   emitInfo();
   m_chartView->viewport()->update();
+  updateClockWant();
   Q_EMIT stateChanged(int(m_store->state()));
 }
 
