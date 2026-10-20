@@ -7,9 +7,11 @@
 
 /// The specification data of a meter as its manual has it - resolution and
 /// accuracy per range, input impedance, overload protection, notes - for the
-/// Data tab of a device's info. It comes from dmm-tools, which transcribed
-/// it from the manuals (tools/update_device_specs.py writes assets/specs,
-/// the resources have it as ":/specs/<id>.json"); only some meters have it.
+/// Data tab of a device's info. Most comes from dmm-tools, which transcribed
+/// it from the manuals (tools/update_device_specs.py writes assets/specs);
+/// a file whose "source" is not dmm-tools was written by hand from a manual
+/// (hp570c-app.json). The resources have them as ":/specs/<id>.json"; only
+/// some meters have it.
 namespace DeviceSpecs
 {
 /// The data of @p vendor's @p model (DMMInfo::vendor and name, as addConfig

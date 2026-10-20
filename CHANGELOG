@@ -165,7 +165,7 @@
   (VC 820, UT60E, HP-90EPC, ...) show REL and the low battery symbol
 - My devices, Info and settings: a tab Data with the manual's specifications (ranges, resolution, accuracy, input
   impedance, overload protection) of the UT803, UT804, UT61B+/D+/E+, UT161B/D/E and ZT-5B / V05B, transcribed by
-  dmm-tools (tools/update_device_specs.py takes them over)
+  dmm-tools (tools/update_device_specs.py takes them over), and of the HP-570C-APP from its manual
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

@@ -10,7 +10,8 @@ info.
 
 runs dmm-tools' dump_specs example (cargo, offline: the crates must be in
 cargo's cache) for each model below and writes its JSON with the QtDMM
-models it belongs to and the dmm-tools commit. dmm-tools is GPL-3.0-or-later
+models it belongs to and the dmm-tools commit; the other files there
+(hp570c-app.json) are written by hand and left alone. dmm-tools is GPL-3.0-or-later
 (https://github.com/antoinecellerier/dmm-tools).
 """
 import json

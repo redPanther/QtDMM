@@ -169,6 +169,10 @@ int main(int argc, char **argv)
     check(DeviceSpecs::find("ANENG", "V05B *").value("device") == "zt5b"
             && DeviceSpecs::find("Uni-Trend", "UT61E+ (UT-D07B Bluetooth) *").value("device") == "ut61eplus"
             && DeviceSpecs::find("Uni-Trend", "UT61E").isEmpty(), "specifications by model, twin and adapter");
+    const QJsonObject hp = DeviceSpecs::find("AOPUTTRIVER", "AP-570C-APP *");
+    check(hp.value("device") == "hp570c-app" && DeviceSpecs::html(hp).contains("1000A")
+            && DeviceSpecs::html(hp).contains("FCC ID") && !DeviceSpecs::html(hp).contains("dmm-tools"),
+          "HP-570C-APP: from its manual, not dmm-tools");
   }
 
   // 7. the instances: this window's bold, a click raises another, a double click starts it
