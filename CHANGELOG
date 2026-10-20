@@ -137,6 +137,13 @@
   the CSV `fault`. APPA's dashes and fault words gave no reading at all before
 - Graph axis, readings table and its statistics write the units as the display does: °C instead of C, kΩ instead of
   kOhm (the Brymen BM869s with two temperatures showed "[C]")
+- Values of a meter with more than one: the names the meter gives them (Victron: "Battery voltage", "State of
+  charge") in the sidebar, the value menu, the alarm's choice of value and the graph legend; without one the
+  sidebar row shows unit and coupling ("A DC"), the tooltip the full name
+- Readings table: a column No. for a meter with more values, Mode is the function alone ("DC", not "2nd DC"; the
+  export stays as it was); "Readings table" in the value menu of the sidebar leaves a value out of the table and
+  of copying. The statistics line is of one value: it counted the readings of all values, and says which
+- Analog meter: MIN/MAX of the value the needle shows; on another value than the display's it showed "—"
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
 - Nix: flake.nix in the repository - "nix run github:qtdmm/QtDMM" starts QtDMM, "nix develop" gives a shell

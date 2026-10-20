@@ -55,8 +55,7 @@ meter's right-click menu, or on the *Appearance* settings page.
 For a meter with more than one value, the right-click menu of the value in
 the sidebar chooses the one the needle shows (**Analog meter**, see
 [The meter's values](my-devices.md#the-meters-values); kept with the window
-layout). The min/max
-marks are those of the display's primary value, so they show only when the
-meter shows that value too.
+layout). **MIN**, **MAX** and their marks are those of the value the needle
+shows, whichever the display shows.
 **Needle inertia** can be switched off to make the needle jump straight to each
 new reading.
