@@ -203,9 +203,9 @@ the graph or the table for the first time, the window grows to make room -
 down for the graph, to the right for the table - up to most of the screen;
 it never shrinks by itself. Once you have sized or snapped the window
 yourself, it keeps your size. A view switched on while the window is
-maximized gets its room when the window comes back to its size. The window title names the configured meter; in the status bar a
-dot blinks green while readings come in and turns grey when none has come
-for three seconds.
+maximized gets its room when the window comes back to its size. The window title names the configured meter; in the sidebar its dot in
+[My devices](my-devices.md) blinks green while readings come in and turns
+grey when none has come for three seconds.
 
 **Arrange** in the toolbar (and in the menu) chooses how the windows are
 placed:
@@ -242,13 +242,14 @@ loaded last.
 
 **Hide title bars** (F10) takes the title bars away so the windows sit
 flush next to each other - the default for the arranged modes. Right-click
-the display or the meter for its window menu (hide the window, title bar on
-or off); in *Free* mode Ctrl+drag moves a window without title bar. Window
+a window for its menu: **Hide window** comes first, in the graph and the
+readings table too; in *Free* mode Ctrl+drag moves a window without title
+bar. Window
 layouts of versions before 26.1 are not taken over.
 
 **Hide toolbar** (Ctrl+M) in the menu takes the toolbar away for more room;
-the same key brings it back, and so does the entry in the right-click menu
-of the display, the analog meter and the Poincaré plot. A note says so when
+the same key brings it back, and so does the small arrow at the right end of
+the status line, which is always there. A note says so when
 the toolbar goes (*Do not show this again* switches it off). The menu then
 opens with F7 at the top right of the window, and the other keys keep working.
 

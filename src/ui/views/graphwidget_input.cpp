@@ -100,6 +100,11 @@ void GraphWidget::handleChartMousePress(QMouseEvent *ev)
       return a;
     };
 
+    if (!m_windowActions.isEmpty())
+    {
+      m_popup->addActions(m_windowActions);
+      m_popup->addSeparator();
+    }
     if (m_store->isRunning())
       item(tr("Stop recording"), IDStopRecorder);
     else

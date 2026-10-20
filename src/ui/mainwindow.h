@@ -106,8 +106,11 @@ protected Q_SLOTS:
   void      toolbarHiddenHint();   ///< after hiding the toolbar by hand: how it comes back (until switched off)
   /// Arrange actions and the title-bar action follow the arranger.
   void      syncArrangeActions();
-  /// The readings dot in the status bar and its tooltip (meter and port).
+  /// The dot of the device in My devices: green while readings come in,
+  /// blinking with them, grey when they stop.
   void      updateLed();
+  /// The arrow of the toolbar button at the end of the status line.
+  void      updateToolbarButton();
 
 protected:
   /// @name Parts of the constructor, in this order
@@ -130,7 +133,7 @@ protected:
   AlarmBar   *m_alarmBar;
   QMdiArea   *m_mdi;
   MdiArranger *m_arranger;
-  QLabel     *m_led;        ///< readings dot in the status bar
+  QToolButton *m_toolbarButton = nullptr;   ///< toolbar on/off, at the end of the status line
   QTimer     *m_ledIdle;
   bool        m_ledActive = false;
   bool        m_ledBlink = false;

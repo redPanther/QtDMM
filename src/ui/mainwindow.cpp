@@ -325,6 +325,16 @@ void MainWindow::createViews()
        "drift stretches it along it. SD1 and SD2 put both in numbers.</p></body></html>"));
   // the graph keeps its action from the .ui (toolbar button with Ctrl+3)
   bindWindowAction(action_Graph, m_graphWin);
+  // graph and table have menus of their own: they begin with the window's
+  // entry, as the window menu of the others
+  auto hideWindow = [this](QMdiSubWindow *win)
+  {
+    QAction *hide = new QAction(tr("&Hide window"), this);
+    connect(hide, &QAction::triggered, win, &QWidget::hide);
+    return hide;
+  };
+  m_wid->graph()->setWindowActions({ hideWindow(m_graphWin) });
+  m_readings->setWindowActions({ hideWindow(m_readingsWin) });
   m_displayAction->setObjectName("action_WindowDisplay");
   m_meterAction->setObjectName("action_WindowMeter");
   m_readingsAction->setObjectName("action_WindowReadings");
@@ -517,11 +527,8 @@ void MainWindow::createDesignMenu()
 // The readings dot, the connection and the info field, and what feeds them.
 void MainWindow::createStatusBar()
 {
-  // status bar
-  // a dot that blinks green while readings come in and turns grey when they
-  // stop; the connection text follows it
-  m_led = new QLabel(statusBar());
-  statusBar()->addWidget(m_led);
+  // the dot of the device in My devices blinks green while readings come
+  // in and turns grey when they stop
   m_ledIdle = new QTimer(this);
   m_ledIdle->setSingleShot(true);
   m_ledIdle->setInterval(3000);
@@ -550,6 +557,15 @@ void MainWindow::createStatusBar()
   m_info->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   statusBar()->addWidget(m_info, 10);
   m_info->setLineWidth(1);
+
+  // the toolbar on and off: the way back with the mouse, always there
+  m_toolbarButton = new QToolButton(statusBar());
+  m_toolbarButton->setObjectName("toolbarButton");
+  m_toolbarButton->setAutoRaise(true);
+  statusBar()->addPermanentWidget(m_toolbarButton);
+  connect(m_toolbarButton, &QToolButton::clicked, m_toolbars, &QAction::trigger);
+  connect(m_toolbars, &QAction::toggled, this, &MainWindow::updateToolbarButton);
+  updateToolbarButton();
 
   // the SCPI server and HiSLIP are in the sidebar (Services), not here
   connect(m_wid, &InstanceWidget::servicesChanged, this, &MainWindow::updateServices);
@@ -928,10 +944,10 @@ void MainWindow::toolbarHiddenHint()
     return;
   const QString key = m_toolbars->shortcut().toString(QKeySequence::NativeText);
   const QString menuKey = action_Menu->shortcut().toString(QKeySequence::NativeText);
-  QString text = key.isEmpty() ? tr("The toolbar is hidden. To bring it back, right-click the display or the "
-                                    "analog meter and choose Hide toolbar again.")
-                               : tr("The toolbar is hidden. %1 brings it back, and so does Hide toolbar in the "
-                                    "right-click menu of the display or the analog meter.").arg(key);
+  QString text = key.isEmpty() ? tr("The toolbar is hidden. The arrow at the right end of the status line "
+                                    "brings it back.")
+                               : tr("The toolbar is hidden. %1 brings it back, and so does the arrow at the right "
+                                    "end of the status line.").arg(key);
   if (!menuKey.isEmpty())
     text += ' ' + tr("The menu opens with %1.").arg(menuKey);
   QMessageBox box(QMessageBox::Information, tr("Hide toolbar"), text, QMessageBox::Ok, this);
@@ -1217,9 +1233,6 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
 {
   QMenu menu(this);
   QAction *hide = menu.addAction(tr("&Hide window"));
-  QAction *title = menu.addAction(tr("&Title bar"));
-  title->setCheckable(true);
-  title->setChecked(!MdiArranger::titleBarHidden(win));
   if (win == m_displayWin && m_controlsSupported)
   {
     QAction *hideControls = menu.addAction(tr("Hide &controls"));
@@ -1261,14 +1274,8 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     menu.addSeparator();
     m_poincare->addMenuActions(&menu);
   }
-  // a way back with the mouse once the toolbar is hidden (and its keys taken away)
-  menu.addSeparator();
-  menu.addAction(m_toolbars);
-  QAction *chosen = menu.exec(globalPos);
-  if (chosen == hide)
+  if (menu.exec(globalPos) == hide)
     win->hide();
-  else if (chosen == title)
-    m_arranger->setTitleBarHidden(win, !title->isChecked());
 }
 
 void MainWindow::showSidebar(bool show)
@@ -1490,14 +1497,17 @@ void MainWindow::syncArrangeActions()
 
 void MainWindow::updateLed()
 {
-  const QColor c = !m_ledActive ? QApplication::palette().color(QPalette::Disabled, QPalette::WindowText)
-                                : m_ledBlink ? QColor(0x22, 0xaa, 0x22) : QColor(0x66, 0xcc, 0x66);
-  m_led->setText(QString("<span style='color:%1'>&#9679;</span>").arg(c.name()));
-  m_sidebar->setCurrent(m_wid->currentDevice(), m_ledActive);
-  const QString meter = m_wid->dmmConfigured() ? QString("%1 · %2").arg(m_wid->dmmTitle(), m_wid->portName())
-                                               : m_wid->dmmTitle();
-  m_led->setToolTip(m_ledActive ? tr("%1: readings are coming in").arg(meter)
-                                : tr("%1: no reading for 3 s").arg(meter));
+  m_sidebar->setCurrent(m_wid->currentDevice(), m_ledActive, m_ledBlink);
+}
+
+void MainWindow::updateToolbarButton()
+{
+  // an arrow where the toolbar goes or comes from
+  const bool hidden = m_toolbars->isChecked();
+  m_toolbarButton->setArrowType(hidden ? Qt::DownArrow : Qt::UpArrow);
+  const QString key = m_toolbars->shortcut().toString(QKeySequence::NativeText);
+  const QString tip = hidden ? tr("Show the toolbar") : tr("Hide the toolbar");
+  m_toolbarButton->setToolTip(key.isEmpty() ? tip : QString("%1 (%2)").arg(tip, key));
 }
 
 // Which windows are shown, the mode and - in Free mode - where
