@@ -79,6 +79,7 @@ public:
     UniTUT202BT,
     UniTiENV,
     ZotekBLE,
+    VC820BLE,
     EndOfList              // new stuff always before!
   };
 

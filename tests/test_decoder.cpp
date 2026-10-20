@@ -155,6 +155,40 @@ int main(int argc, char **argv)
       zcheck(frames == 2 && values == 2, "longer notifications: two frames, two values");
     }
 
+    // the HoldPeak HP-570C-APP: the FS9721 frame in two notifications of 7
+    // bytes. A lost first half must not glue the second half of the frame
+    // before to the next one; the ring wraps as the reader's does.
+    {
+      auto hp = DmmDecoder::getInstance(FrameFormat::VC820BLE);
+      const QByteArray volts = QByteArray::fromHex("1a253b415f677d8b9ea0b0c0d4e0");   // AC 230.5 V
+      const QByteArray amps = QByteArray::fromHex("1a2035455b6b7e879da0b0c0d8e0");    // AC 12.50 A
+      QByteArray stream;
+      for (int i = 0; i < 10; ++i)
+        stream += volts;
+      stream += amps.mid(7) + volts;   // the first half of the amps lost
+      char fifo[FIFO_LENGTH] = {};
+      size_t length = 0;
+      QStringList got;
+      for (char c : stream)
+      {
+        fifo[length] = c;
+        if (hp->checkFormat(fifo, length))
+        {
+          QByteArray frame(14, 0);
+          for (int k = 0; k < 14; ++k)
+            frame[k] = fifo[(length + FIFO_LENGTH - 13 + k) % FIFO_LENGTH];
+          const auto r = hp->decode(frame, 0);
+          got += r ? r->main().val.trimmed() + r->main().unit : QString("-");
+        }
+        length = (length + 1) % FIFO_LENGTH;
+      }
+      if (got != QStringList(11, "230.5V"))
+      {
+        qWarning() << "HP-570C-APP halves:" << got;
+        ++problems;
+      }
+    }
+
     // the Keysight U12xx polling loop as it runs: a request each tick, the
     // meter's answer through the ring buffer the way FrameReader reads a
     // variable-length frame, the frame into decode(). The CONF? answer is no
@@ -646,6 +680,8 @@ int main(int argc, char **argv)
     if (expected.contains("error"))   check("error",   result->error,     expected["error"]);
     if (expected.contains("noValue")) check("noValue", main.noValue,      expected["noValue"]);
     if (expected.contains("fault"))   check("fault",   main.fault,        expected["fault"]);
+    if (expected.contains("lowBat"))  check("lowBat",  result->lowBat,    expected["lowBat"]);
+    if (expected.contains("relative")) check("relative", bool(main.states & SampleFlag::Relative), expected["relative"]);
     if (expected.contains("dval2"))   check("dval2",   sub.dval,          expected["dval2"]);
     if (expected.contains("val2"))    check("val2",    sub.val,           expected["val2"]);
     if (expected.contains("unit2"))   check("unit2",   sub.unit,          expected["unit2"]);

@@ -1,0 +1,58 @@
+protocol: VC820BLE
+decoder: src/device/decoders/vc820.cpp
+devices: [HoldPeak HP-570C-APP, AOPUTTRIVER AP-570C-APP]
+frames_per_reading: 1
+unit_map:                      # spec spelling -> what the decoder emits
+  "°C": "C"
+sources:
+  - "ablage/holdpeak/sources/hp570c.md (notes on AiCare's app \"INTELLIGENT CLAMP METER\", cn.net.aicare.clamptable 1.0.9, decompiled: GATT service, frame assembly, segment map)"
+  - "ablage/holdpeak/sources/decode_lcd14.py (the app's decoding, ported)"
+  - "https://lygte-info.dk/review/DMMBTMeter%20BT-570C-APP.html (the BTMeter BT-570C-APP twin: FS9721-LP3 and a DA14580 Bluetooth module)"
+
+# The FS9721 frame of vc820.yaml, sent by the clamp's Bluetooth module: the
+# notifications of service 0xFFB0, characteristic 0xFFB2, carry 7 bytes each,
+# a frame in two of them (sequence numbers 1-7, then 8-14). The meter streams
+# on its own; nothing is written to it (0xFFB1 is the module's write
+# characteristic, AiCare's app never uses it). AiCare's segment map is the
+# FS9721's bit for bit; degrees C is bit 2 of byte 14 (c2c1_10).
+#
+# SYNTHETIC: no HP-570C-APP has been connected. The frames are built from the
+# app's segment map and decoded with its ported logic (decode_lcd14.py), not
+# captured. Replace with captures.
+vectors:
+  - source_line: "AC -1.234 V AUTO, low battery"
+    bytes: 1A 28 35 4D 5B 61 7F 82 97 A0 B0 C0 D5 E0
+    reading: {value: "-1.234", unit: "V", coupling: AC, range_mode: auto}
+    expect: {special: "AC", lowBat: true}
+  - source_line: "AC 230.5 V AUTO"
+    bytes: 1A 25 3B 41 5F 67 7D 8B 9E A0 B0 C0 D4 E0
+    reading: {value: "230.5", unit: "V", coupling: AC, range_mode: auto}
+  - source_line: "1.234 kOhm AUTO"
+    bytes: 12 20 35 4D 5B 61 7F 82 97 A2 B0 C4 D0 E0
+    reading: {value: "1.234", unit: "kOhm", range_mode: auto}
+  - source_line: "23 °C MANU (byte 14 bit 2)"
+    bytes: 10 20 30 45 5B 61 7F 80 90 A0 B0 C0 D0 E4
+    reading: {value: "23", unit: "°C", range_mode: manual}
+  - source_line: "AC 12.50 A AUTO"
+    bytes: 1A 20 35 45 5B 6B 7E 87 9D A0 B0 C0 D8 E0
+    reading: {value: "12.50", unit: "A", coupling: AC, range_mode: auto}
+  - source_line: "DC 12.50 A AUTO"
+    bytes: 16 20 35 45 5B 6B 7E 87 9D A0 B0 C0 D8 E0
+    reading: {value: "12.50", unit: "A", coupling: DC, range_mode: auto}
+  - source_line: "0L MOhm AUTO"
+    bytes: 12 20 30 47 5D 66 78 80 90 A0 B2 C4 D0 E0
+    reading: {value: "0L", unit: "MOhm", range_mode: auto}
+  - source_line: "10.72 nF AUTO"
+    bytes: 12 20 35 47 5D 69 75 85 9B A4 B0 C8 D0 E0
+    reading: {value: "10.72", unit: "nF", range_mode: auto}
+  - source_line: "0.500 V Diode AUTO"
+    bytes: 12 27 3D 4B 5E 67 7D 87 9D A1 B0 C0 D4 E0
+    reading: {value: "0.500", unit: "V", range_mode: auto, function: diode}
+    expect: {special: "DI"}
+  - source_line: "500.0 Hz AUTO H"
+    bytes: 12 23 3E 47 5D 67 7D 8F 9D A0 B0 C1 D2 E0
+    reading: {value: "500.0", unit: "Hz", range_mode: auto, flags: [HOLD]}
+  - source_line: "DC 0.123 mV MANU REL"
+    bytes: 14 27 3D 48 55 65 7B 81 9F A0 B8 C2 D4 E0
+    reading: {value: "0.123", unit: "mV", coupling: DC, range_mode: manual}
+    expect: {relative: true, lowBat: false}

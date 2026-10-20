@@ -52,6 +52,7 @@ Type ofProtocol(FrameFormat::DataFormat protocol)
     case FrameFormat::BenetechGM1020:
       return Luxmeter;
     case FrameFormat::UniTUT202BT:
+    case FrameFormat::VC820BLE:
       return ClampMeter;
     case FrameFormat::TfaAirControl:
     case FrameFormat::UniTiENV:   // UNI-T's environment meters; the luxmeter and the sound level meter below

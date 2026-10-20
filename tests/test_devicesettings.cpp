@@ -172,6 +172,11 @@ int main(int argc, char **argv)
     check(zotek && zotek->matches("Bluetooth DMM", fff0) && !zotek->matches("APPA S2", fff0)
           && !appa->matches("Bluetooth DMM", fff0) && zotek->notify == QBluetoothUuid(quint16(0xFFF4))
           && zotek->write.value(0) == zotek->notify, "ZOTEK profile: by its name, 0xFFF4");
+    // the HoldPeak HP-570C-APP by its service 0xFFB0, whatever its name
+    const auto hp = BleGattDevice::profile(FrameFormat::VC820BLE);
+    check(hp && hp->matches("", { QBluetoothUuid(quint16(0xFFB0)) }) && !hp->matches("Bluetooth DMM", fff0)
+          && hp->notify == QBluetoothUuid(quint16(0xFFB2)), "HP-570C-APP profile: by service 0xFFB0");
+    check(!BleGattDevice::profile(FrameFormat::VC820Continuous), "VC820 on a cable: no Bluetooth");
   }
 #endif
 
