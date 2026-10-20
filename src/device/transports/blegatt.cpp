@@ -42,10 +42,13 @@ const QBluetoothUuid kFff0Write(quint16(0xFFF2));
 const QBluetoothUuid kFff4(quint16(0xFFF4));
 
 // AiCare's module in the HoldPeak HP-570C-APP clamp: the FS9721 frame on
-// 0xFFB2 of service 0xFFB0; 0xFFB1 is never written (AiCare's app)
+// 0xFFB2 of service 0xFFB0; 0xFFB1 is never written. It advertises the
+// service and manufacturer data of company 0xFFAC (bytes AC FF, its address
+// reversed at the end), which AiCare's app checks both (AiCare's app)
 const QBluetoothUuid kFfb0Service(quint16(0xFFB0));
 const QBluetoothUuid kFfb0Notify(quint16(0xFFB2));
 const QBluetoothUuid kFfb0Write(quint16(0xFFB1));
+constexpr quint16 kAicareCompany = 0xFFAC;
 
 // connecting and finding the characteristics takes a second or two; a
 // meter that is switched off or out of range never answers
@@ -91,17 +94,21 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       // "ZY", seen on no meter); the first packet tells which one it is
       return Profile{ kFff0Service, kFff4, { kFff4 }, { "Bluetooth DMM" }, QByteArray(), true };
     case FrameFormat::VC820BLE:
-      // AiCare's app finds the meter by the service it advertises, not by
-      // its name (which is not known here)
-      return Profile{ kFfb0Service, kFfb0Notify, { kFfb0Write }, {} };
+      // AiCare's app finds the meter by the service and the manufacturer
+      // data it advertises, not by its name (which is not known here); a
+      // meter was not found by the service alone
+      return Profile{ kFfb0Service, kFfb0Notify, { kFfb0Write }, {}, QByteArray(), false, kAicareCompany };
     default:
       return std::nullopt;
   }
 }
 
-bool BleGattDevice::Profile::matches(const QString &name, const QList<QBluetoothUuid> &services) const
+bool BleGattDevice::Profile::matches(const QString &name, const QList<QBluetoothUuid> &services,
+                                     const QList<quint16> &manufacturers) const
 {
   if (!byNameOnly && services.contains(service))
+    return true;
+  if (manufacturer != 0 && manufacturers.contains(manufacturer))
     return true;
   for (const QString &prefix : namePrefixes)
     if (name.startsWith(prefix, Qt::CaseInsensitive))
@@ -398,7 +405,7 @@ QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms)
     const QString address = info.address().toString().toUpper();
     if (seen.contains(address))
       return;
-    if (!p->matches(info.name(), info.serviceUuids()))
+    if (!p->matches(info.name(), info.serviceUuids(), info.manufacturerIds()))
       return;
     seen.insert(address);
     found << address + ' ' + info.name();
