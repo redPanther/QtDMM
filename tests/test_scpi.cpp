@@ -111,10 +111,15 @@ int main(int argc, char **argv)
     check(ask(c, "READ? (@3,1)") == "+4.500000E+01,+8.000000E+02", "channels: (@3,1) in the list's order");
     check(ask(c, "MEAS:VOLT:DC? (@2)") == "+2.250000E+01" && ask(c, "READ3?") == "+4.500000E+01", "channels: MEAS: and READ3?");
     check(ask(c, "READ2? (@1)") == "+8.000000E+02", "channels: the list before the suffix");
-    check(ask(c, "UNIT? (@1:3)") == QString::fromUtf8("\"ppm\",\"°C\",\"%\"") && ask(c, "CONF? (@2)") == "\"TEMP AUTO\"",
+    // a meter that writes "°C" (the UNI-T iENV ones) answers "C" like the others
+    check(ask(c, "UNIT? (@1:3)") == "\"ppm\",\"C\",\"%\"" && ask(c, "CONF? (@2)") == "\"TEMP AUTO\"",
           "channels: UNIT? CONF? " + ask(c, "UNIT? (@1:3)"));
-    check(ask(c, "QTDMM:CHAN:CAT?") == QString::fromUtf8("1,\"carbon_dioxide\",\"ppm\",2,\"temperature\",\"°C\",3,\"relative_humidity\",\"%\""),
+    check(ask(c, "QTDMM:CHAN:CAT?") == "1,\"carbon_dioxide\",\"ppm\",2,\"temperature\",\"C\",3,\"relative_humidity\",\"%\"",
           "channels: the catalog " + ask(c, "QTDMM:CHAN:CAT?"));
+    check(ScpiServer::unit("°C") == "C" && ScpiServer::unit("C") == "C" && ScpiServer::unit("°F") == "F"
+            && ScpiServer::unit("dF") == "F" && ScpiServer::unit("Ω") == "Ohm" && ScpiServer::unit("Ohm") == "Ohm"
+            && ScpiServer::unit("V") == "V",
+          "units: one ASCII spelling each");
     c.process("*CLS");
     check(ask(c, "READ? (@4)").isEmpty() && ask(c, "SYST:ERR?").startsWith("-222,"), "channels: (@4) the meter has not");
     for (const char *bad : { "READ? (@", "READ? (@)", "READ? (@3:1)", "READ? (@a)", "READ? (@1,)" })
