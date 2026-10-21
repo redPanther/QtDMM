@@ -1461,9 +1461,14 @@
         <translation>Genauigkeit ±(% vom Messwert + Digits)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicespecs.cpp" line="103"/>
+        <location filename="../../src/ui/devicespecs.cpp" line="105"/>
         <source>From the manual, transcribed by &lt;a href=&quot;https://github.com/antoinecellerier/dmm-tools&quot;&gt;dmm-tools&lt;/a&gt; (%1, GPL-3.0-or-later) - thank you. Check the manual before relying on it.</source>
         <translation>Aus dem Handbuch, übertragen von &lt;a href=&quot;https://github.com/antoinecellerier/dmm-tools&quot;&gt;dmm-tools&lt;/a&gt; (%1, GPL-3.0-or-later) – danke. Vor dem Verlassen auf einen Wert bitte im Handbuch nachsehen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicespecs.cpp" line="107"/>
+        <source>From the %1. Check the manual before relying on it.</source>
+        <translation>Aus: %1. Vor dem Verlassen auf einen Wert bitte im Handbuch nachsehen.</translation>
     </message>
 </context>
 <context>

@@ -99,10 +99,13 @@ QString html(const QJsonObject &spec)
     if (!notes.isEmpty())
       out += "<ul>" + notes.join(QString()) + "</ul>";
   }
-  out += QString("<p><small>%1</small></p>")
-           .arg(QCoreApplication::translate("DeviceSpecs", "From the manual, transcribed by <a href=\"https://github.com/antoinecellerier/dmm-tools\">dmm-tools</a> "
-                   "(%1, GPL-3.0-or-later) - thank you. Check the manual before relying on it.")
-                  .arg(esc(spec.value("source"))));
+  // dmm-tools' transcriptions (update_device_specs.py) or our own from a manual
+  const QString source = spec.value("source").toString();
+  const QString from = source.startsWith(QLatin1String("dmm-tools"))
+    ? QCoreApplication::translate("DeviceSpecs", "From the manual, transcribed by <a href=\"https://github.com/antoinecellerier/dmm-tools\">dmm-tools</a> "
+                                  "(%1, GPL-3.0-or-later) - thank you. Check the manual before relying on it.")
+    : QCoreApplication::translate("DeviceSpecs", "From the %1. Check the manual before relying on it.");
+  out += QString("<p><small>%1</small></p>").arg(from.arg(source.toHtmlEscaped()));
   return out;
 }
 }

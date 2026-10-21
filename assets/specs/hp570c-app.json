@@ -1,0 +1,475 @@
+{
+ "source": "user manual, FCC ID 2A7T4-HP-570C-APP",
+ "device": "hp570c-app",
+ "models": [
+  "HoldPeak HP-570C-APP",
+  "AOPUTTRIVER AP-570C-APP"
+ ],
+ "model": "HP-570C-APP",
+ "tables": [
+  {
+   "table": "DC Voltage",
+   "page": 1,
+   "input_impedance": "More than 100MΩ",
+   "overload_protection": "1000V DC / 750Vrms AC",
+   "notes": [],
+   "ranges": [
+    {
+     "range": "400mV",
+     "resolution": "0.1mV",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.5%+2"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "DC Voltage",
+   "page": 1,
+   "input_impedance": "10MΩ",
+   "overload_protection": "1000V DC / 750Vrms AC",
+   "notes": [],
+   "ranges": [
+    {
+     "range": "4V",
+     "resolution": "1mV",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.5%+2"
+      }
+     ]
+    },
+    {
+     "range": "40V",
+     "resolution": "10mV",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.5%+2"
+      }
+     ]
+    },
+    {
+     "range": "400V",
+     "resolution": "100mV",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.5%+2"
+      }
+     ]
+    },
+    {
+     "range": "1000V",
+     "resolution": "1V",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.8%+2"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "AC Voltage",
+   "page": 1,
+   "input_impedance": "10MΩ",
+   "overload_protection": "1000V DC / 750Vrms AC",
+   "notes": [
+    "Average sensing, calibrated to rms of sine wave"
+   ],
+   "ranges": [
+    {
+     "range": "4V",
+     "resolution": "1mV",
+     "accuracy": [
+      {
+       "freq_range": "40Hz~400Hz",
+       "accuracy": "0.8%+3"
+      }
+     ]
+    },
+    {
+     "range": "40V",
+     "resolution": "10mV",
+     "accuracy": [
+      {
+       "freq_range": "40Hz~400Hz",
+       "accuracy": "0.8%+3"
+      }
+     ]
+    },
+    {
+     "range": "400V",
+     "resolution": "100mV",
+     "accuracy": [
+      {
+       "freq_range": "40Hz~400Hz",
+       "accuracy": "0.8%+3"
+      }
+     ]
+    },
+    {
+     "range": "750V",
+     "resolution": "1V",
+     "accuracy": [
+      {
+       "freq_range": "40Hz~400Hz",
+       "accuracy": "1.2%+3"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "DC Current",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "1000Arms within 60 seconds",
+   "notes": [
+    "Recommended for currents above 10A",
+    "Press REL before measuring to zero the display"
+   ],
+   "ranges": [
+    {
+     "range": "200A",
+     "resolution": "0.1A",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "3.0%+12"
+      }
+     ]
+    },
+    {
+     "range": "1000A",
+     "resolution": "1A",
+     "accuracy": [
+      {
+       "freq_range": "0~800A",
+       "accuracy": "3.5%+12"
+      },
+      {
+       "freq_range": "800A~1000A",
+       "accuracy": "6.5%+12"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "AC Current",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "1000Arms within 60 seconds",
+   "notes": [
+    "Average sensing, calibrated to rms of sine wave",
+    "Recommended for currents above 10A"
+   ],
+   "ranges": [
+    {
+     "range": "400A",
+     "resolution": "0.1A",
+     "accuracy": [
+      {
+       "freq_range": "50Hz~60Hz",
+       "accuracy": "3.0%+12"
+      }
+     ]
+    },
+    {
+     "range": "1000A",
+     "resolution": "1A",
+     "accuracy": [
+      {
+       "freq_range": "50Hz~60Hz, 0~800A",
+       "accuracy": "3.5%+12"
+      },
+      {
+       "freq_range": "50Hz~60Hz, 800A~1000A",
+       "accuracy": "6.5%+12"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Resistance",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "250V DC / 250Vrms AC",
+   "notes": [],
+   "ranges": [
+    {
+     "range": "400Ω",
+     "resolution": "0.1Ω",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "1.0%+3"
+      }
+     ]
+    },
+    {
+     "range": "4kΩ",
+     "resolution": "1Ω",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "1.0%+2"
+      }
+     ]
+    },
+    {
+     "range": "40kΩ",
+     "resolution": "10Ω",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "1.0%+2"
+      }
+     ]
+    },
+    {
+     "range": "400kΩ",
+     "resolution": "100Ω",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "1.0%+2"
+      }
+     ]
+    },
+    {
+     "range": "4MΩ",
+     "resolution": "1kΩ",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "1.0%+2"
+      }
+     ]
+    },
+    {
+     "range": "40MΩ",
+     "resolution": "10kΩ",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "1.5%+3"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Capacitance",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "250V DC / 250Vrms AC",
+   "notes": [
+    "Large capacitors take longer (100µF: about 15 s)",
+    "Small capacitances: press REL first"
+   ],
+   "ranges": [
+    {
+     "range": "51.2nF",
+     "resolution": "10pF",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "3.0%+10"
+      }
+     ]
+    },
+    {
+     "range": "512nF",
+     "resolution": "100pF",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "2.5%+5"
+      }
+     ]
+    },
+    {
+     "range": "5.12µF",
+     "resolution": "1nF",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "2.5%+5"
+      }
+     ]
+    },
+    {
+     "range": "51.2µF",
+     "resolution": "10nF",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "2.5%+5"
+      }
+     ]
+    },
+    {
+     "range": "100µF",
+     "resolution": "100nF",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "5.0%+10"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Frequency",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "250V DC / 250Vrms AC",
+   "notes": [
+    "Sensitivity: sine 0.6V~10Vrms (5.12MHz: 1.5V~10Vrms)"
+   ],
+   "ranges": [
+    {
+     "range": "5.12Hz",
+     "resolution": "0.001Hz",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.1%+5"
+      }
+     ]
+    },
+    {
+     "range": "51.2Hz",
+     "resolution": "0.01Hz",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.1%+5"
+      }
+     ]
+    },
+    {
+     "range": "512Hz",
+     "resolution": "0.1Hz",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.1%+5"
+      }
+     ]
+    },
+    {
+     "range": "5.12kHz",
+     "resolution": "1Hz",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.1%+5"
+      }
+     ]
+    },
+    {
+     "range": "51.2kHz",
+     "resolution": "10Hz",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.1%+5"
+      }
+     ]
+    },
+    {
+     "range": "512kHz",
+     "resolution": "100Hz",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.1%+5"
+      }
+     ]
+    },
+    {
+     "range": "5.12MHz",
+     "resolution": "1kHz",
+     "accuracy": [
+      {
+       "freq_range": null,
+       "accuracy": "0.1%+5"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Duty Cycle",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "250V DC / 250Vrms AC",
+   "notes": [],
+   "ranges": [
+    {
+     "range": "0.1%~99.9%",
+     "resolution": "0.1%",
+     "accuracy": []
+    }
+   ]
+  },
+  {
+   "table": "Temperature (NiCr-NiSi, type K)",
+   "page": 1,
+   "input_impedance": null,
+   "overload_protection": "250V DC / 250Vrms AC",
+   "notes": [
+    "Use the WRNM-010 contact thermocouple supplied, up to 250°C (300°C briefly)"
+   ],
+   "ranges": [
+    {
+     "range": "°C",
+     "resolution": "1°C",
+     "accuracy": [
+      {
+       "freq_range": "-20°C~150°C",
+       "accuracy": "3°C+1"
+      },
+      {
+       "freq_range": "150°C~1000°C",
+       "accuracy": "3%+2"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "table": "Diode and Continuity",
+   "page": 2,
+   "input_impedance": null,
+   "overload_protection": "250V DC / 250Vrms AC",
+   "notes": [
+    "Diode: forward current about 0.4mA, reverse voltage about 1.5V",
+    "Continuity: buzzer below about 100Ω, open circuit about 0.5V"
+   ],
+   "ranges": [
+    {
+     "range": "Diode",
+     "resolution": "",
+     "accuracy": []
+    },
+    {
+     "range": "Continuity",
+     "resolution": "",
+     "accuracy": []
+    }
+   ]
+  }
+ ]
+}

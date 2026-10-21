@@ -75,8 +75,8 @@
       "url": "",
       "example_device": "M-3360D",
       "colors": {
-        "primary": "#C52D32",
-        "secondary": "#55585C"
+        "primary": "#414c64",
+        "secondary": "#535a66"
       },
       "types": [
         "handheld_dmm",
@@ -139,7 +139,7 @@
       "url": "",
       "example_device": "72-1016",
       "colors": {
-        "primary": "#D73532",
+        "primary": "#db7539",
         "secondary": "#34383D"
       },
       "types": [
@@ -263,7 +263,7 @@
       "url": "",
       "example_device": "DT4000ZC",
       "colors": {
-        "primary": "#D72E32",
+        "primary": "#eca222",
         "secondary": "#383C41"
       },
       "types": [
@@ -369,7 +369,7 @@
       "url": "",
       "example_device": "VA18B",
       "colors": {
-        "primary": "#D82C30",
+        "primary": "#eecb34",
         "secondary": "#343A40"
       },
       "types": [
@@ -384,8 +384,8 @@
       "url": "",
       "example_device": "Victor 70C",
       "colors": {
-        "primary": "#D72D32",
-        "secondary": "#4B5056"
+        "primary": "#f4d437",
+        "secondary": "#464553"
       },
       "types": [
         "handheld_dmm"
@@ -427,11 +427,11 @@
       "match": [
         "CMT"
       ],
-      "url": "",
+      "url": "https://www.cosinus.de/",
       "example_device": "3503",
       "colors": {
-        "primary": "#D62D32",
-        "secondary": "#4A4F54"
+        "primary": "#cccacb",
+        "secondary": "#7aaa9c"
       },
       "types": [
         "handheld_dmm"
@@ -460,8 +460,8 @@
       "url": "",
       "example_device": "DO3122",
       "colors": {
-        "primary": "#D52C32",
-        "secondary": "#3D4247"
+        "primary": "#ff312f",
+        "secondary": "#384963"
       },
       "types": [
         "handheld_dmm"
@@ -490,8 +490,8 @@
       "url": "",
       "example_device": "EZ-735",
       "colors": {
-        "primary": "#D52D32",
-        "secondary": "#41464B"
+        "primary": "#f4d437",
+        "secondary": "#464553"
       },
       "types": [
         "handheld_dmm"
@@ -639,7 +639,7 @@
       "match": [
         "Sinometer"
       ],
-      "url": "",
+      "url": "http://www.sinometer.com",
       "example_device": "MAS-343",
       "colors": {
         "primary": "#D62D32",
@@ -732,11 +732,90 @@
       "url": "",
       "example_device": "TD2200",
       "colors": {
-        "primary": "#D62D32",
-        "secondary": "#3F4449"
+        "primary": "#135285",
+        "secondary": "#a0a7a0"
       },
       "types": [
         "handheld_dmm"
+      ]
+    },
+    "aneng": {
+      "name": "ANENG",
+        "match": [
+          "ANENG"
+        ],
+        "url": "",
+        "example_device": "A9002",
+        "colors": {
+          "primary": "#ff2433",
+          "secondary": "#4d4d4d"
+        },
+        "types": [
+          "bench_dmm",
+          "handheld_dmm",
+          "clamp_meter"
+        ]
+    },
+    "megger": {
+      "name": "Megger",
+      "match": [
+        "Megger"
+      ],
+      "url": "https://www.megger.com",
+      "example_device": "DPM1000",
+      "colors": {
+        "primary": "#b2b1ad",
+        "secondary": "#444342"
+      },
+      "types": [
+        "clamp_meter"
+      ]
+    },
+    "metravi": {
+      "name": "Metravi",
+      "match": [
+        "Metravi"
+      ],
+      "url": "https://www.metravi.com",
+      "example_device": "PRO Solar-1",
+      "colors": {
+        "primary": "#d70b0c",
+        "secondary": "#655654"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "rspro": {
+      "name": "RS PRO",
+      "match": [
+        "RS PRO"
+      ],
+      "url": "https://rs-online.com",
+      "example_device": "S2",
+      "colors": {
+        "primary": "#ff2433",
+        "secondary": "#4d4d4d"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "zotek": {
+      "name": "ZOTEK",
+      "match": [
+        "ZOTEK"
+      ],
+      "url": "",
+      "example_device": "ZT-5B",
+      "colors": {
+        "primary": "#ff2433",
+        "secondary": "#4d4d4d"
+      },
+      "types": [
+        "bench_dmm",
+        "handheld_dmm",
+        "clamp_meter"
       ]
     }
   },

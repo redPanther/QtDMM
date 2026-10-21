@@ -82,12 +82,14 @@ The context menu of a device:
     a link to the maker's website (in the browser) and to the list of
     supported devices in this help.
   - **Data** (only for some meters - UNI-T UT803, UT804, UT61B+/D+/E+,
-    UT161B/D/E, ZOTEK ZT-5B / ANENG V05B): the specifications from the
+    UT161B/D/E, ZOTEK ZT-5B / ANENG V05B, HoldPeak HP-570C-APP, CMT 3503): the specifications from the
     meter's manual, per function the ranges with resolution and accuracy
     (per frequency band for AC), the input impedance, the overload
     protection, the manual's notes and its page. They were transcribed from
     the manuals by the [dmm-tools](https://github.com/antoinecellerier/dmm-tools)
-    project - check the manual before relying on a number.
+    project (the HP-570C-APP's from its manual filed with the FCC, the CMT
+    3503's from its data sheet, one accuracy per function) - check the
+    manual before relying on a number.
   - **Settings**: the meter's settings as in the assistant; with **OK** the
     device in use takes them at once.
 - **Rename** - in place.
