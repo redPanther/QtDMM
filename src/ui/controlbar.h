@@ -55,6 +55,7 @@ Q_SIGNALS:
 
 protected:
   void resizeEvent(QResizeEvent *event) override;
+  void showEvent(QShowEvent *event) override;
 
 private:
   QList<QWidget *> m_groups;
@@ -69,6 +70,8 @@ private:
   QToolButton *m_avg = nullptr;
   /// Places the groups in rows for @p width; returns the height used.
   int layoutGroups(int width, bool apply) const;
+  /// layoutGroups() for the width now, the height to fit.
+  void relayout();
 };
 
 /// The small fold button in the top right corner of the display that hides

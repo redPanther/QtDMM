@@ -6,6 +6,7 @@
 // readings report.
 #include <QApplication>
 #include <QDebug>
+#include <QFrame>
 #include <QSignalSpy>
 #include <QTest>
 #include <QToolButton>
@@ -131,6 +132,32 @@ int main(int argc, char **argv)
   second.hold = true;
   bar.showReading(second);
   check(!key(bar, "hold")->isChecked(), "states: a secondary value is ignored");
+
+  // --- 3b. another meter at the same size: the groups placed anew, none
+  //         over another, each as wide as its keys (they overlapped until
+  //         the window was resized) ---
+  {
+    ControlBar other;
+    other.setConnected(true);
+    other.setProtocol(FrameFormat::ZotekBLE, "ZT-5B *");
+    other.resize(700, 80);
+    other.show();
+    QTest::qWait(20);
+    other.setProtocol(FrameFormat::UniTiDMM, "UT60BT");
+    QTest::qWait(20);
+    QList<QWidget *> shown;
+    for (QFrame *g : other.findChildren<QFrame *>(Qt::FindDirectChildrenOnly))
+      if (!g->isHidden())
+        shown << g;
+    bool apart = !shown.isEmpty();
+    for (int i = 0; i < shown.size(); ++i)
+    {
+      apart = apart && shown[i]->width() == shown[i]->sizeHint().width();
+      for (int j = i + 1; j < shown.size(); ++j)
+        apart = apart && !shown[i]->geometry().intersects(shown[j]->geometry());
+    }
+    check(apart, QString("another meter at the same size: %1 groups apart").arg(shown.size()));
+  }
 
   // a picture to look at: QTDMM_SHOT=<dir> writes the bar per meter
   if (qEnvironmentVariableIsSet("QTDMM_SHOT"))
