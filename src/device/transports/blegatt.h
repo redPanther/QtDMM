@@ -50,6 +50,7 @@ public:
     QByteArray hello;              ///< written once when ready, before the first poll
     bool byNameOnly = false;       ///< the service is a common one (0xFFF0 of many BLE
                                    ///< UART modules): only the name tells the meter
+    bool helperScan = false;       ///< Linux: bluetoothctl scans beside the search (bleHelperScan())
     quint16 manufacturer = 0;      ///< a company id of its manufacturer data that tells the
                                    ///< meter too (0: none); Qt reports it also when the
                                    ///< service UUIDs come too late or not at all

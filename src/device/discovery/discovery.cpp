@@ -425,6 +425,14 @@ void BleDiscoverer::start()
   });
   bleLeOnlySearch();   // as "bluetoothctl scan le": a seldom advertising meter is heard
   d->agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+  // the search for all kinds: with the helper while a protocol wants it
+  // (HP-570C-APP), it cannot know which meter is looked for
+  for (int f = 0; f < FrameFormat::EndOfList; ++f)
+    if (const auto p = BleGattDevice::profile(FrameFormat::DataFormat(f)); p && p->helperScan)
+    {
+      bleHelperScan(d->agent, d->agent->lowEnergyDiscoveryTimeout());
+      break;
+    }
 #else
   QTimer::singleShot(0, this, &Discoverer::finished);
 #endif

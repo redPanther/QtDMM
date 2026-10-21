@@ -180,6 +180,8 @@
   placed anew only when the window was resized)
 - Bluetooth on Linux: the search asks BlueZ for LE only, as "bluetoothctl scan le" does; Qt's mixed classic + LE
   search heard a seldom advertising meter (a user's HP-570C-APP) only now and then
+- Bluetooth on Linux, workaround for the HP-570C-APP: Add device's search, the settings' Scan and the connect run
+  "bluetoothctl scan le" beside Qt's search (when installed); a user's meter was found only so
 
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)
