@@ -196,7 +196,9 @@ void ControlBar::setProtocol(FrameFormat::DataFormat format, const QString &mode
       any = any || !b->isHidden();
     g->setVisible(any);
   }
-  updateGeometry();
+  // the groups have other widths now; at the same size no resizeEvent
+  // places them anew (they overlapped until the window was resized)
+  relayout();
 }
 
 void ControlBar::showReading(const Reading &reading)
@@ -281,12 +283,25 @@ QSize ControlBar::minimumSizeHint() const
 void ControlBar::resizeEvent(QResizeEvent *event)
 {
   QWidget::resizeEvent(event);
+  relayout();
+}
+
+void ControlBar::showEvent(QShowEvent *event)
+{
+  QWidget::showEvent(event);
+  relayout();   // set up while hidden
+}
+
+void ControlBar::relayout()
+{
+  // a group's size hint follows its keys shown only once its layout has run
+  for (QWidget *g : std::as_const(m_groups))
+    if (g->layout())
+      g->layout()->activate();
   const int h = layoutGroups(width(), true);
   if (h != height())
-  {
     setFixedHeight(h);
-    updateGeometry();
-  }
+  updateGeometry();
 }
 
 // ---------------------------------------------------------------- FoldButton
