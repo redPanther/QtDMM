@@ -738,15 +738,61 @@
       "types": [
         "handheld_dmm"
       ]
-  },
-  "aneng": {
-    "name": "ANENG",
+    },
+    "aneng": {
+      "name": "ANENG",
+        "match": [
+          "ANENG"
+        ],
+        "url": "",
+        "example_device": "A9002",
+        "colors": {
+          "primary": "#ff2433",
+          "secondary": "#4d4d4d"
+        },
+        "types": [
+          "bench_dmm",
+          "handheld_dmm",
+          "clamp_meter"
+        ]
+    },
+    "megger": {
+      "name": "Megger",
       "match": [
-        "aneng",
-        "zotek"
+        "Megger"
       ],
-      "url": "",
-      "example_device": "A9002",
+      "url": "https://www.megger.com",
+      "example_device": "DPM1000",
+      "colors": {
+        "primary": "#b2b1ad",
+        "secondary": "#444342"
+      },
+      "types": [
+        "clamp_meter"
+      ]
+    },
+    "metravi": {
+      "name": "Metravi",
+      "match": [
+        "Metravi"
+      ],
+      "url": "https://www.metravi.com",
+      "example_device": "PRO Solar-1",
+      "colors": {
+        "primary": "#d70b0c",
+        "secondary": "#655654"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+    },
+    "rspro": {
+      "name": "RS PRO",
+      "match": [
+        "RS PRO"
+      ],
+      "url": "https://rs-online.com",
+      "example_device": "S2",
       "colors": {
         "primary": "#ff2433",
         "secondary": "#4d4d4d"
@@ -754,20 +800,22 @@
       "types": [
         "handheld_dmm"
       ]
-  },
-  "megger": {
-      "name": "Megger",
+    },
+    "zotek": {
+      "name": "ZOTEK",
       "match": [
-        "Megger"
+        "ZOTEK"
       ],
       "url": "",
-      "example_device": "DPM1000",
+      "example_device": "ZT-5B",
       "colors": {
-        "primary": "#b2b1ad",
-        "secondary": "#444342"
+        "primary": "#ff2433",
+        "secondary": "#4d4d4d"
       },
       "types": [
-        "handheld_dmm"
+        "bench_dmm",
+        "handheld_dmm",
+        "clamp_meter"
       ]
     }
   },
