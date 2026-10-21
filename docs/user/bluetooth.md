@@ -142,6 +142,12 @@ FS9721 chip).
 
 ## A meter is not found
 
+When Bluetooth cannot be used - no adapter, the Bluetooth service not
+running, Bluetooth switched off, or a QtDMM built without Bluetooth - the
+**Bluetooth** tile of **Add device** and the **Scan** button of the
+settings are greyed out; their tooltip says why. A search that fails says
+so, with the reason, instead of "nothing found".
+
 Start QtDMM from a terminal with
 
     QT_LOGGING_RULES="qtdmm.ble.debug=true" qtdmm

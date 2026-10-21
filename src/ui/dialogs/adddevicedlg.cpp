@@ -13,6 +13,10 @@
 #include "ui/devicesymbol.h"
 #include "ui/tilebutton.h"
 
+#ifdef QTDMM_WITH_BLE
+#include <QBluetoothLocalDevice>
+#endif
+
 namespace
 {
 const QSize kTileSize(180, 120);
@@ -59,7 +63,20 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
     connect(button, &QToolButton::clicked, this, [this, id] { chooseConnection(id); });
     tiles->addWidget(button, column / 3, column % 3);
     ++column;
+    if (id == Bluetooth)
+    {
+      m_bluetoothTile = button;
+      m_bluetoothTip = kind.toolTip;
+    }
   }
+  // no adapter, switched off, a build without Bluetooth: the tile off, its
+  // tooltip says why; on again when the adapter is switched on
+  m_bluetoothCheck = &BleDiscoverer::unavailable;
+  updateBluetoothTile();
+#ifdef QTDMM_WITH_BLE
+  auto *adapter = new QBluetoothLocalDevice(this);
+  connect(adapter, &QBluetoothLocalDevice::hostModeStateChanged, this, &AddDeviceDlg::updateBluetoothTile);
+#endif
   tiles->setRowStretch(2, 1);
   m_pages->addWidget(connection);
 
@@ -302,10 +319,24 @@ AddDeviceDlg::~AddDeviceDlg()
   stopSearch();
 }
 
+void AddDeviceDlg::setBluetoothCheck(std::function<QString()> check)
+{
+  m_bluetoothCheck = std::move(check);
+  updateBluetoothTile();
+}
+
+void AddDeviceDlg::updateBluetoothTile()
+{
+  const QString why = m_bluetoothCheck ? m_bluetoothCheck() : QString();
+  m_bluetoothTile->setEnabled(why.isEmpty());
+  m_bluetoothTile->setToolTip(why.isEmpty() ? m_bluetoothTip : tr("Bluetooth cannot be used: %1").arg(why));
+}
+
 void AddDeviceDlg::startSearch()
 {
   stopProbe();
   stopSearch();
+  m_searchError.clear();
   m_probed.clear();
   m_found.clear();
   m_cards->clear();
@@ -315,6 +346,8 @@ void AddDeviceDlg::startSearch()
     connect(d, &Discoverer::found, this, &AddDeviceDlg::addCandidate);
     connect(d, &Discoverer::finished, this, [this, d]
     {
+      if (!d->error().isEmpty())
+        m_searchError = d->error();
       m_running.removeAll(d);
       d->deleteLater();
       updateHint();
@@ -496,6 +529,8 @@ void AddDeviceDlg::updateHint()
   }
   else if (!m_running.isEmpty())
     m_hint->setText(tr("Searching ..."));
+  else if (m_found.isEmpty() && !m_searchError.isEmpty())
+    m_hint->setText(tr("The search failed (%1). Or type the address.").arg(m_searchError));
   else if (m_found.isEmpty())
     m_hint->setText(m_connection == Bluetooth
                     ? tr("Nothing found. Is the meter's Bluetooth on and no other program connected to it? "

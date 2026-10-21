@@ -57,10 +57,16 @@ public:
   using QObject::QObject;
   virtual void start() = 0;
   virtual void stop() {}
+  /// Why the search stopped early, empty when it ran to its end (asked
+  /// after finished()).
+  QString     error() const { return m_error; }
 
 Q_SIGNALS:
   void        found(const Candidate &candidate);
   void        finished();
+
+protected:
+  QString     m_error;
 };
 
 /// The meter families a cable or sensor stands for, and the hints.
@@ -177,7 +183,8 @@ public:
   ~BleDiscoverer() override;
   void        start() override;
   void        stop() override;
-  /// Empty when a scan is possible, else why not ("no Bluetooth adapter").
+  /// Empty when a scan is possible, else why not: a build without
+  /// Bluetooth, no adapter (or no Bluetooth service), the adapter off.
   static QString unavailable();
 
 private:

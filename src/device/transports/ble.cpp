@@ -126,9 +126,15 @@ qint64 BleAdvertisementDevice::writeData(const char *, qint64 len)
   return len;   // nothing to say to a broadcaster
 }
 
-QStringList BleAdvertisementDevice::scan(int ms)
+QStringList BleAdvertisementDevice::scan(int ms, QString *error)
 {
   QBluetoothDeviceDiscoveryAgent agent;
+  QObject::connect(&agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, [&]
+  {
+    qCWarning(lcBle) << "scan failed:" << agent.errorString();
+    if (error)
+      *error = agent.errorString();
+  });
   QMap<QString, QString> found;
   QObject::connect(&agent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, [&](const QBluetoothDeviceInfo &info)
   {

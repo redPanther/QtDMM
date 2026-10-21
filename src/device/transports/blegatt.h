@@ -82,8 +82,8 @@ public:
   static constexpr int kRepollMs = 300;
 
   /// Meters of @p format seen in a short scan, as "<address> <name>". Blocks
-  /// for @p ms.
-  static QStringList scan(FrameFormat::DataFormat format, int ms = 6000);
+  /// for @p ms; when the scan fails, @p error (if given) says why.
+  static QStringList scan(FrameFormat::DataFormat format, int ms = 6000, QString *error = nullptr);
 
 Q_SIGNALS:
   /// The link is gone or could not be set up; the text says why.
