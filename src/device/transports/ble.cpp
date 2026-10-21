@@ -9,10 +9,32 @@
 #include <QElapsedTimer>
 #include <QLoggingCategory>
 #include <QSet>
+#ifdef Q_OS_LINUX
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusMessage>
+#endif
 
 #include "device/victronble.h"
 
 Q_LOGGING_CATEGORY(lcBle, "qtdmm.ble", QtWarningMsg)
+
+void bleLeOnlySearch()
+{
+#ifdef Q_OS_LINUX
+  // the adapters are /org/bluez/hci<n>; one that is not there gives an error
+  for (int n = 0; n < 4; ++n)
+  {
+    QDBusInterface adapter(QStringLiteral("org.bluez"), QStringLiteral("/org/bluez/hci%1").arg(n),
+                           QStringLiteral("org.bluez.Adapter1"), QDBusConnection::systemBus());
+    if (!adapter.isValid())
+      continue;
+    const QDBusMessage reply = adapter.call(QStringLiteral("SetDiscoveryFilter"),
+                                            QVariantMap{ { QStringLiteral("Transport"), QStringLiteral("le") } });
+    qCDebug(lcBle) << "LE-only search on hci" << n << (reply.type() == QDBusMessage::ErrorMessage ? reply.errorMessage() : QString("ok"));
+  }
+#endif
+}
 
 BleAdvertisementDevice::BleAdvertisementDevice(const DmmDecoder::DMMInfo &, const QString &device, QObject *parent)
   : BufferedDevice(parent)
@@ -64,9 +86,13 @@ bool BleAdvertisementDevice::open(OpenMode mode)
   connect(m_agent, &QBluetoothDeviceDiscoveryAgent::finished, this, [this]
   {
     if (isOpen() && m_agent)
+    {
+      bleLeOnlySearch();
       m_agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+    }
   });
   m_agent->setLowEnergyDiscoveryTimeout(60000);
+  bleLeOnlySearch();
   m_agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
   if (m_agent->error() != QBluetoothDeviceDiscoveryAgent::NoError)
   {
@@ -142,6 +168,7 @@ QStringList BleAdvertisementDevice::scan(int ms, QString *error)
       found[info.address().toString()] = info.name();
   });
   agent.setLowEnergyDiscoveryTimeout(ms);
+  bleLeOnlySearch();
   agent.start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
   QElapsedTimer t;
   t.start();

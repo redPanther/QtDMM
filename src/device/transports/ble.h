@@ -52,3 +52,11 @@ private:
   int m_lastIv = -1;
   int m_keyMismatches = 0;
 };
+
+/// Linux: asks BlueZ for an LE-only search for this process before a Qt
+/// discovery starts, as "bluetoothctl scan le" does. Qt's own search is the
+/// mixed BR/EDR + LE one, which hears a seldom advertising meter (a user's
+/// HP-570C-APP) only now and then. BlueZ keeps the filter per D-Bus client,
+/// and Qt's BlueZ backend uses the same system bus connection. A no-op
+/// elsewhere and when BlueZ refuses.
+void bleLeOnlySearch();

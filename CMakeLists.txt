@@ -127,6 +127,10 @@ if (QTDMM_WITH_BLE)
 		set(QTDMM_WITH_BLE OFF)
 	endif()
 endif()
+## Linux: the LE-only discovery filter of BlueZ (bleLeOnlySearch())
+if (QTDMM_WITH_BLE AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	find_package(Qt6 REQUIRED COMPONENTS DBus)
+endif()
 
 if (NOT QTDMM_WITH_BLE)
 	list(FILTER SRC_FILES EXCLUDE REGEX "transports/ble(gatt)?\\.(h|cpp)$")
@@ -269,6 +273,7 @@ target_link_libraries(qtdmm_core PUBLIC
 	Qt6::Svg
 	${HIDAPI_TARGET}
 	$<$<BOOL:${QTDMM_WITH_BLE}>:Qt6::Bluetooth>
+	$<$<AND:$<BOOL:${QTDMM_WITH_BLE}>,$<PLATFORM_ID:Linux>>:Qt6::DBus>
 )
 
 if (QTDMM_WITH_BLE)

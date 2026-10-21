@@ -178,6 +178,8 @@
   reason (and in the log, also when the connect searches for the meter) instead of finding nothing
 - Display: the meter's keys under the LCD no longer lie over each other after choosing another meter (they were
   placed anew only when the window was resized)
+- Bluetooth on Linux: the search asks BlueZ for LE only, as "bluetoothctl scan le" does; Qt's mixed classic + LE
+  search heard a seldom advertising meter (a user's HP-570C-APP) only now and then
 
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)

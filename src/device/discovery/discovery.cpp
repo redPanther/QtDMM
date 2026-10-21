@@ -15,6 +15,7 @@
 #ifdef QTDMM_WITH_BLE
 #include <QBluetoothDeviceDiscoveryAgent>
 #include <QBluetoothLocalDevice>
+#include "device/transports/ble.h"
 #include "device/transports/blegatt.h"
 #include "device/victronble.h"
 
@@ -422,6 +423,7 @@ void BleDiscoverer::start()
     qCWarning(lcBle) << "search failed:" << m_error;
     Q_EMIT finished();
   });
+  bleLeOnlySearch();   // as "bluetoothctl scan le": a seldom advertising meter is heard
   d->agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 #else
   QTimer::singleShot(0, this, &Discoverer::finished);
