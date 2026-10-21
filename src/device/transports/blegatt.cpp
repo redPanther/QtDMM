@@ -57,9 +57,11 @@ constexpr int kConnectTimeoutMs = 20000;
 // after a loss comes sooner (a UT60BT now and then stays in the discovery
 // of the service details)
 constexpr int kSetupTimeoutMs = 10000;
-// the scan for the meter before connecting: a meter that advertises shows
-// within a second or two
-constexpr int kFindMs = 8000;
+// the scan for the meter before connecting: most meters show within a second
+// or two, the HP-570C-APP now and then only after 15 s (a user's bluetoothctl
+// scans); BlueZ connects only to a device it has seen lately, so the scan has
+// to wait for it. It stops as soon as the meter is seen
+constexpr int kFindMs = 30000;
 }
 
 std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFormat format)
@@ -95,9 +97,9 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       return Profile{ kFff0Service, kFff4, { kFff4 }, { "Bluetooth DMM" }, QByteArray(), true };
     case FrameFormat::VC820BLE:
       // AiCare's app finds the meter by the service and the manufacturer
-      // data it advertises, not by its name (which is not known here); a
-      // meter was not found by the service alone
-      return Profile{ kFfb0Service, kFfb0Notify, { kFfb0Write }, {}, QByteArray(), false, kAicareCompany };
+      // data it advertises; a user's meter advertises as "FS9721-LP3" (the
+      // chip's name, bluetoothctl)
+      return Profile{ kFfb0Service, kFfb0Notify, { kFfb0Write }, { "FS9721" }, QByteArray(), false, kAicareCompany };
     default:
       return std::nullopt;
   }
@@ -153,7 +155,7 @@ bool BleGattDevice::open(OpenMode mode)
     if (!m_ready)
       fail(tr("No answer from %1 - is the meter on and its Bluetooth switched on?").arg(m_address));
   });
-  m_connectTimeout->start(kConnectTimeoutMs);
+  m_connectTimeout->start(kFindMs + kConnectTimeoutMs);   // connectTo() starts it anew
 
   m_repoll = new QTimer(this);
   m_repoll->setSingleShot(true);

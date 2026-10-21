@@ -340,7 +340,9 @@ void BleDiscoverer::start()
 #ifdef QTDMM_WITH_BLE
   // one scan for everything: two agents at once get in each other's way
   d->agent = new QBluetoothDeviceDiscoveryAgent(this);
-  d->agent->setLowEnergyDiscoveryTimeout(7000);
+  // long enough for meters that advertise seldom (the HP-570C-APP showed
+  // after up to 15 s in a user's bluetoothctl scans)
+  d->agent->setLowEnergyDiscoveryTimeout(20000);
   auto take = [this](const QBluetoothDeviceInfo &info)
   {
     const QString address = info.address().toString().toUpper();
