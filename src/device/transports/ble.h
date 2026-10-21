@@ -60,3 +60,12 @@ private:
 /// and Qt's BlueZ backend uses the same system bus connection. A no-op
 /// elsewhere and when BlueZ refuses.
 void bleLeOnlySearch();
+
+class QBluetoothDeviceDiscoveryAgent;
+/// Linux workaround: runs "bluetoothctl --timeout <s> scan le" beside
+/// @p agent's search, for @p ms, and ends it when the search ends. A user's
+/// HP-570C-APP was heard by Qt's search only while bluetoothctl scanned
+/// (the LE-only filter of bleLeOnlySearch() did not help); BlueZ shares
+/// what one client's scan finds with all. Not pretty, pragmatic. A no-op
+/// elsewhere and without bluetoothctl.
+void bleHelperScan(QBluetoothDeviceDiscoveryAgent *agent, int ms);

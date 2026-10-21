@@ -8,6 +8,7 @@
 #include <QCoreApplication>
 #include <QElapsedTimer>
 #include <QLoggingCategory>
+#include <QProcess>
 #include <QSet>
 #ifdef Q_OS_LINUX
 #include <QDBusConnection>
@@ -33,6 +34,30 @@ void bleLeOnlySearch()
                                             QVariantMap{ { QStringLiteral("Transport"), QStringLiteral("le") } });
     qCDebug(lcBle) << "LE-only search on hci" << n << (reply.type() == QDBusMessage::ErrorMessage ? reply.errorMessage() : QString("ok"));
   }
+#endif
+}
+
+void bleHelperScan(QBluetoothDeviceDiscoveryAgent *agent, int ms)
+{
+#ifdef Q_OS_LINUX
+  auto *helper = new QProcess(agent);   // killed with the agent at the latest
+  helper->setStandardOutputFile(QProcess::nullDevice());
+  helper->setStandardErrorFile(QProcess::nullDevice());
+  QObject::connect(helper, &QProcess::errorOccurred, helper, [](QProcess::ProcessError e)
+  {
+    if (e == QProcess::FailedToStart)
+      qCDebug(lcBle) << "bluetoothctl not there: no helper scan";
+  });
+  auto stop = [helper] { helper->kill(); };
+  QObject::connect(agent, &QBluetoothDeviceDiscoveryAgent::finished, helper, stop);
+  QObject::connect(agent, &QBluetoothDeviceDiscoveryAgent::canceled, helper, stop);
+  QObject::connect(agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, helper, stop);
+  helper->start(QStringLiteral("bluetoothctl"),
+                { QStringLiteral("--timeout"), QString::number(ms / 1000 + 1), QStringLiteral("scan"), QStringLiteral("le") });
+  qCDebug(lcBle) << "helper scan: bluetoothctl scan le for" << ms / 1000 + 1 << "s";
+#else
+  Q_UNUSED(agent);
+  Q_UNUSED(ms);
 #endif
 }
 

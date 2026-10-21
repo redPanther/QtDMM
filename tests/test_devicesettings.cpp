@@ -180,6 +180,7 @@ int main(int argc, char **argv)
     check(hp && hp->matches("", {}, { 0xFFAC }) && !hp->matches("", {}, { 0x02E1 }) && !zotek->matches("", {}, { 0xFFAC }),
           "HP-570C-APP profile: by company 0xFFAC");
     check(hp && hp->matches("FS9721-LP3", {}) && !hp->matches("Bluetooth DMM", {}), "HP-570C-APP profile: by its name");
+    check(hp && hp->helperScan && !zotek->helperScan && !ut60->helperScan, "the bluetoothctl helper for the HP-570C-APP only");
     check(!BleGattDevice::profile(FrameFormat::VC820Continuous), "VC820 on a cable: no Bluetooth");
   }
 #endif

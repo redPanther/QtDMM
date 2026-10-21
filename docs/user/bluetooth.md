@@ -142,6 +142,11 @@ FS9721 chip).
 
 ## A meter is not found
 
+On Linux QtDMM runs `bluetoothctl scan le` (from the bluez package) beside
+its own search for the HoldPeak HP-570C-APP - in Add device, for Scan and
+before connecting: it was found only so. Without bluetoothctl the search
+works as before.
+
 When Bluetooth cannot be used - no adapter, the Bluetooth service not
 running, Bluetooth switched off, or a QtDMM built without Bluetooth - the
 **Bluetooth** tile of **Add device** and the **Scan** button of the

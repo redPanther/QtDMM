@@ -100,7 +100,8 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       // AiCare's app finds the meter by the service and the manufacturer
       // data it advertises; a user's meter advertises as "FS9721-LP3" (the
       // chip's name, bluetoothctl)
-      return Profile{ kFfb0Service, kFfb0Notify, { kFfb0Write }, { "FS9721" }, QByteArray(), false, kAicareCompany };
+      // Qt's search hears it on some machines only while bluetoothctl scans
+      return Profile{ kFfb0Service, kFfb0Notify, { kFfb0Write }, { "FS9721" }, QByteArray(), false, true, kAicareCompany };
     default:
       return std::nullopt;
   }
@@ -201,6 +202,8 @@ bool BleGattDevice::open(OpenMode mode)
   qCDebug(lcBle) << m_address << "looking for the meter";
   bleLeOnlySearch();
   m_finder->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+  if (m_profile->helperScan)
+    bleHelperScan(m_finder, kFindMs);
   return QIODevice::open(mode | QIODevice::Unbuffered);
 }
 
@@ -433,6 +436,8 @@ QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms, QString 
   t.start();
   bleLeOnlySearch();
   agent.start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+  if (p->helperScan)
+    bleHelperScan(&agent, ms);
   while (agent.isActive() && t.elapsed() < ms + 1000)
     QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
   agent.stop();
