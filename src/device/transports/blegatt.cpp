@@ -190,7 +190,13 @@ bool BleGattDevice::open(OpenMode mode)
     }
   };
   connect(m_finder, &QBluetoothDeviceDiscoveryAgent::finished, this, notSeen);
-  connect(m_finder, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, notSeen);
+  connect(m_finder, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, [this, notSeen]
+  {
+    // said always: the connect to the address alone works only when BlueZ
+    // knows the meter already (a user's: only after bluetoothctl scan)
+    qCWarning(lcBle) << m_address << "search failed:" << m_finder->errorString();
+    notSeen();
+  });
   qCDebug(lcBle) << m_address << "looking for the meter";
   m_finder->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
   return QIODevice::open(mode | QIODevice::Unbuffered);
@@ -393,7 +399,7 @@ void BleGattDevice::sendPoll()
   m_service->writeCharacteristic(m_writeChar, m_lastPoll, mode);
 }
 
-QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms)
+QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms, QString *error)
 {
   const auto p = profile(format);
   if (!p)
@@ -413,6 +419,12 @@ QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms)
     found << address + ' ' + info.name();
   };
   QObject::connect(&agent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, take);
+  QObject::connect(&agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, [&]
+  {
+    qCWarning(lcBle) << "scan failed:" << agent.errorString();
+    if (error)
+      *error = agent.errorString();
+  });
   QObject::connect(&agent, &QBluetoothDeviceDiscoveryAgent::deviceUpdated,
                    [&](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { take(info); });
   QElapsedTimer t;

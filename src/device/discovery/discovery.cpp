@@ -327,9 +327,14 @@ BleDiscoverer::~BleDiscoverer()
 QString BleDiscoverer::unavailable()
 {
 #ifdef QTDMM_WITH_BLE
-  if (QBluetoothLocalDevice::allDevices().isEmpty())
-    return QCoreApplication::translate("Discovery", "No Bluetooth adapter found.");
-  return QString();
+  // on Linux the adapters come from BlueZ: none also when bluetoothd is not running
+  const QList<QBluetoothHostInfo> hosts = QBluetoothLocalDevice::allDevices();
+  if (hosts.isEmpty())
+    return QCoreApplication::translate("Discovery", "No Bluetooth adapter found (or the Bluetooth service is not running).");
+  for (const QBluetoothHostInfo &host : hosts)
+    if (QBluetoothLocalDevice(host.address()).hostMode() != QBluetoothLocalDevice::HostPoweredOff)
+      return QString();
+  return QCoreApplication::translate("Discovery", "Bluetooth is switched off.");
 #else
   return QCoreApplication::translate("Discovery", "This build of QtDMM has no Bluetooth.");
 #endif
@@ -410,7 +415,13 @@ void BleDiscoverer::start()
           [take](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { take(info); });
   connect(d->agent, &QBluetoothDeviceDiscoveryAgent::finished, this, &Discoverer::finished);
   connect(d->agent, &QBluetoothDeviceDiscoveryAgent::canceled, this, &Discoverer::finished);
-  connect(d->agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, &Discoverer::finished);
+  connect(d->agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, [this]
+  {
+    // said, not only a search that found nothing
+    m_error = d->agent->errorString();
+    qCWarning(lcBle) << "search failed:" << m_error;
+    Q_EMIT finished();
+  });
   d->agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 #else
   QTimer::singleShot(0, this, &Discoverer::finished);

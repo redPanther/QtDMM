@@ -30,6 +30,7 @@
 
 #include "ui/devicesettings.h"
 #include "device/devicetype.h"
+#include "device/discovery/discovery.h"
 #include "device/protocols.h"
 #include "core/calcexpr.h"
 #include "device/victronble.h"
@@ -1130,9 +1131,19 @@ void DeviceSettings::updateBleHint()
 {
 #ifndef QTDMM_WITH_BLE
   ui_bleScan->setEnabled(false);
+  ui_bleScan->setToolTip(BleDiscoverer::unavailable());
   ui_bleHint->setText(tr("This QtDMM was built without Bluetooth support, so it cannot connect to this meter."));
   return;
 #endif
+  // no adapter, or switched off: no scan, the tooltip and the hint say why
+  const QString unavailable = BleDiscoverer::unavailable();
+  ui_bleScan->setEnabled(unavailable.isEmpty());
+  ui_bleScan->setToolTip(unavailable.isEmpty() ? tr("Search for the device (a few seconds)") : unavailable);
+  if (!unavailable.isEmpty())
+  {
+    ui_bleHint->setText(unavailable);
+    return;
+  }
   const QString address = ui_bleAddress->currentText().section(' ', 0, 0).trimmed();
   const bool keyOk = VictronBle::keyFromHex(ui_bleKey->text()).size() == 16;
   QStringList hints;
@@ -1160,14 +1171,20 @@ void DeviceSettings::on_ui_bleScan_clicked()
   ui_bleHint->setText(gatt ? tr("Scanning for %1 (%2 s)...").arg(m_dmmInfo.model.section(' ', 0, 0)).arg(seconds)
                            : tr("Scanning for Victron devices (%1 s)...").arg(seconds));
   QCoreApplication::processEvents();
-  const QStringList found = gatt ? BleGattDevice::scan(m_dmmInfo.protocol, seconds * 1000)
-                                 : BleAdvertisementDevice::scan(seconds * 1000);
+  QString error;
+  const QStringList found = gatt ? BleGattDevice::scan(m_dmmInfo.protocol, seconds * 1000, &error)
+                                 : BleAdvertisementDevice::scan(seconds * 1000, &error);
   const QString current = ui_bleAddress->currentText();
   ui_bleAddress->clear();
   ui_bleAddress->addItems(found);
   if (!current.isEmpty())
     ui_bleAddress->setCurrentText(current);   // keep what was configured, found or not
   ui_bleScan->setEnabled(true);
+  if (found.isEmpty() && !error.isEmpty())
+  {
+    ui_bleHint->setText(tr("The search failed: %1").arg(error));
+    return;
+  }
   if (found.isEmpty())
   {
     ui_bleHint->setText(gatt ? tr("No meter found. Is its Bluetooth switched on, and no other program connected to it?")

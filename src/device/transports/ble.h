@@ -32,8 +32,9 @@ public:
   bool isSequential() const override { return true; }
 
   /// Names of Victron devices seen in a short scan, as "<address> <name>";
-  /// the settings dialog fills its combo with them. Blocks for @p ms.
-  static QStringList scan(int ms = 5000);
+  /// the settings dialog fills its combo with them. Blocks for @p ms; when
+  /// the scan fails, @p error (if given) says why.
+  static QStringList scan(int ms = 5000, QString *error = nullptr);
 
 Q_SIGNALS:
   /// The scan cannot go on (adapter gone) or the key does not match; the

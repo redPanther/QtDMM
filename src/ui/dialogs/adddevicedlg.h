@@ -64,6 +64,9 @@ public:
   /// its first frame (Candidate::probe); FrameProbe::blePort() by default.
   /// The test gives one of its own.
   void        setProbePort(std::function<QIODevice *(const Candidate &)> make) { m_makeProbePort = std::move(make); }
+  /// Why Bluetooth cannot be used, empty when it can (BleDiscoverer::unavailable();
+  /// for the tests): the Bluetooth tile is off then and its tooltip says why.
+  void        setBluetoothCheck(std::function<QString()> check);
 
   /// Page 1: the connection; goes on to the next page.
   void        chooseConnection(Connection connection);
@@ -155,4 +158,10 @@ private:
   QString         m_currentDevice;
   QString         m_model;   ///< the model the name was suggested for
   bool            m_targetChoice = true;
+  QToolButton    *m_bluetoothTile = nullptr;
+  QString         m_bluetoothTip;   ///< its tooltip while Bluetooth can be used
+  std::function<QString()> m_bluetoothCheck;
+  QString         m_searchError;    ///< why the last search stopped early (Discoverer::error())
+  /// The Bluetooth tile on or off by m_bluetoothCheck.
+  void            updateBluetoothTile();
 };

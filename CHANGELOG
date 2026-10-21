@@ -173,6 +173,9 @@
   Add device searches 20 s (was 7), the settings' Scan 15 s (was 6), the connect waits up to 30 s for the meter (was
   8; BlueZ connects only to a device it has just seen, so a meter not seen in time was not connected and not found
   again after a loss)
+- Bluetooth: without an adapter, with Bluetooth switched off or in a build without it, the Bluetooth tile of Add
+  device and the Scan button of the settings are off, their tooltip says why; a search that fails says so with the
+  reason (and in the log, also when the connect searches for the meter) instead of finding nothing
 - Display: the meter's keys under the LCD no longer lie over each other after choosing another meter (they were
   placed anew only when the window was resized)
 

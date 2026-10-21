@@ -396,6 +396,37 @@ int main(int argc, char **argv)
     }
   }
 
+  // 7. Bluetooth not usable: its tile off, the tooltip says why; a search
+  //    that fails says so instead of "nothing found"
+  {
+    AddDeviceDlg dlg(&library);
+    dlg.setDiscoverers([](AddDeviceDlg::Connection) { return QList<Discoverer *>(); });
+    auto *tile = dlg.findChild<QToolButton *>(QString("ui_connection%1").arg(int(AddDeviceDlg::Bluetooth)));
+    dlg.setBluetoothCheck([] { return QString("Bluetooth is switched off."); });
+    check(tile && !tile->isEnabled() && tile->toolTip().contains("switched off"),
+          "Bluetooth off: the tile off, why in its tooltip: " + (tile ? tile->toolTip() : QString()));
+    dlg.setBluetoothCheck([] { return QString(); });
+    check(tile && tile->isEnabled() && !tile->toolTip().contains("cannot"), "Bluetooth usable: the tile on");
+
+    class Failing : public Discoverer
+    {
+    public:
+      void start() override
+      {
+        m_error = "Input/output error";
+        QTimer::singleShot(0, this, &Discoverer::finished);
+      }
+    };
+    dlg.setDiscoverers([](AddDeviceDlg::Connection) { return QList<Discoverer *>{ new Failing }; });
+    dlg.chooseConnection(AddDeviceDlg::Bluetooth);
+    QApplication::processEvents();
+    QString shown;
+    for (QLabel *l : dlg.findChildren<QLabel *>())
+      if (l->text().contains("search failed"))
+        shown = l->text();
+    check(shown.contains("Input/output error"), "a failed search says why: " + shown);
+  }
+
   if (failed)
     qWarning() << failed << "check(s) failed";
   else
