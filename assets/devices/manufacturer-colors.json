@@ -738,6 +738,37 @@
       "types": [
         "handheld_dmm"
       ]
+  },
+  "aneng": {
+    "name": "ANENG",
+      "match": [
+        "aneng",
+        "zotek"
+      ],
+      "url": "",
+      "example_device": "A9002",
+      "colors": {
+        "primary": "#ff2433",
+        "secondary": "#4d4d4d"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
+  },
+  "megger": {
+      "name": "Megger",
+      "match": [
+        "Megger"
+      ],
+      "url": "",
+      "example_device": "DPM1000",
+      "colors": {
+        "primary": "#b2b1ad",
+        "secondary": "#444342"
+      },
+      "types": [
+        "handheld_dmm"
+      ]
     }
   },
   "notes": [
