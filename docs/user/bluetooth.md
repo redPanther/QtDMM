@@ -20,7 +20,7 @@ again after a while without a connection.
 In QtDMM, **Add device**, *Bluetooth*: choose the meter found, then vendor
 **Uni-Trend** and the model **UT60BT**. Instead of the port box a **Bluetooth** group appears:
 
-- **Device** - press **Scan** to list the UT60BT meters in range (six
+- **Device** - press **Scan** to list the UT60BT meters in range (15
   seconds), or type the address. The meter advertises as *UT60BT*.
 
 Then **Connect**. QtDMM connects to the meter, asks it for a reading about
@@ -122,18 +122,23 @@ except for the ZT-5B. Please report how it works for you.
 
 The HoldPeak **HP-570C-APP** clamp, also sold as **AOPUTTRIVER
 AP-570C-APP**, sends what its LCD shows over Bluetooth LE all the time it
-is on. **Add device** finds it by the Bluetooth service and the
-manufacturer data it advertises, not by a name; choose the meter found and
-the model. There is nothing to pair. Close the maker's app on the phone
-first: the meter connects to it by itself and is then no longer seen.
+is on. It advertises as *FS9721-LP3* (the name of its chip); **Add
+device** finds it by that name, its Bluetooth service or its manufacturer
+data. Choose the meter found and the model. There is nothing to pair.
+Close the maker's app on the phone first: the meter connects to it by
+itself and is then no longer seen.
+
+The meter advertises seldom: the search may take up to 20 seconds to find
+it, and QtDMM waits up to 30 seconds for it before it connects (also after
+the meter was out of range).
 
 QtDMM shows value, unit, AC/DC, AUTO, HOLD, REL, the diode symbol, the
 low battery symbol and OL. The meter has no keys QtDMM could
 press: the link only reads.
 
-Not tried with a real meter yet: the Bluetooth details come from the
-maker's app, the frame is the one of the HP-90EPC (its FS9721 chip, per a
-review of a twin of the clamp). Please report how it works for you.
+Tried by a user: it connects and shows readings. The Bluetooth details
+come from the maker's app, the frame is the one of the HP-90EPC (its
+FS9721 chip).
 
 ## A meter is not found
 

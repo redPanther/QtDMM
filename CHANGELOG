@@ -169,6 +169,10 @@
   from its data sheet
 - Add device: the HoldPeak HP-570C-APP is also found by its manufacturer data (company 0xFFAC), a meter was not found
   by its service alone; with QT_LOGGING_RULES="qtdmm.ble.debug=true" the search logs each Bluetooth device it sees
+- Bluetooth: the HP-570C-APP is found by its name "FS9721-LP3" too, and seldom advertising meters are found at all -
+  Add device searches 20 s (was 7), the settings' Scan 15 s (was 6), the connect waits up to 30 s for the meter (was
+  8; BlueZ connects only to a device it has just seen, so a meter not seen in time was not connected and not found
+  again after a loss)
 
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)

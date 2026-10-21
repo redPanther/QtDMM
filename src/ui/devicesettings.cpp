@@ -1155,10 +1155,13 @@ void DeviceSettings::on_ui_bleScan_clicked()
 #ifdef QTDMM_WITH_BLE
   ui_bleScan->setEnabled(false);
   const bool gatt = isGatt();
-  ui_bleHint->setText(gatt ? tr("Scanning for %1 (6 s)...").arg(m_dmmInfo.model.section(' ', 0, 0))
-                           : tr("Scanning for Victron devices (5 s)..."));
+  // a GATT meter may advertise seldom (HP-570C-APP)
+  const int seconds = gatt ? 15 : 5;
+  ui_bleHint->setText(gatt ? tr("Scanning for %1 (%2 s)...").arg(m_dmmInfo.model.section(' ', 0, 0)).arg(seconds)
+                           : tr("Scanning for Victron devices (%1 s)...").arg(seconds));
   QCoreApplication::processEvents();
-  const QStringList found = gatt ? BleGattDevice::scan(m_dmmInfo.protocol, 6000) : BleAdvertisementDevice::scan(5000);
+  const QStringList found = gatt ? BleGattDevice::scan(m_dmmInfo.protocol, seconds * 1000)
+                                 : BleAdvertisementDevice::scan(seconds * 1000);
   const QString current = ui_bleAddress->currentText();
   ui_bleAddress->clear();
   ui_bleAddress->addItems(found);

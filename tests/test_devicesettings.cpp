@@ -179,6 +179,7 @@ int main(int argc, char **argv)
     // or by AiCare's manufacturer data (company 0xFFAC) when Qt has no service UUIDs
     check(hp && hp->matches("", {}, { 0xFFAC }) && !hp->matches("", {}, { 0x02E1 }) && !zotek->matches("", {}, { 0xFFAC }),
           "HP-570C-APP profile: by company 0xFFAC");
+    check(hp && hp->matches("FS9721-LP3", {}) && !hp->matches("Bluetooth DMM", {}), "HP-570C-APP profile: by its name");
     check(!BleGattDevice::profile(FrameFormat::VC820Continuous), "VC820 on a cable: no Bluetooth");
   }
 #endif
