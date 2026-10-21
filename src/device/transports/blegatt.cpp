@@ -1,6 +1,7 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "device/transports/blegatt.h"
+#include "device/transports/ble.h"
 
 #include <QBluetoothAddress>
 #include <QBluetoothDeviceDiscoveryAgent>
@@ -198,6 +199,7 @@ bool BleGattDevice::open(OpenMode mode)
     notSeen();
   });
   qCDebug(lcBle) << m_address << "looking for the meter";
+  bleLeOnlySearch();
   m_finder->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
   return QIODevice::open(mode | QIODevice::Unbuffered);
 }
@@ -429,6 +431,7 @@ QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms, QString 
                    [&](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { take(info); });
   QElapsedTimer t;
   t.start();
+  bleLeOnlySearch();
   agent.start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
   while (agent.isActive() && t.elapsed() < ms + 1000)
     QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
