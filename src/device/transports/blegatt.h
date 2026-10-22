@@ -115,6 +115,7 @@ private:
   QTimer *m_repoll = nullptr;
   QByteArray m_lastPoll;
   QElapsedTimer m_keySent;   ///< no poll for kKeyQuietMs after a key (sendCommand())
+  QElapsedTimer m_pollSent;  ///< a poll out and not answered yet: no second one
   void sendPoll();
   bool m_serviceFound = false;
   bool m_ready = false;
