@@ -182,6 +182,9 @@
   search heard a seldom advertising meter (a user's HP-570C-APP) only now and then
 - Bluetooth on Linux, workaround for the HP-570C-APP: Add device's search, the settings' Scan and the connect run
   "bluetoothctl scan le" beside Qt's search (when installed); a user's meter was found only so
+- UNI-T Bluetooth meters: a key takes effect sooner - no poll for 0.6 s after it (a poll before the meter's
+  acknowledgement went unanswered); UT202BT in AC A: the LCD's HOLD no longer flickers (the frequency frames took
+  HOLD as off)
 
 * 18/10/2026 26.2 (this section has the changes after rc1, the release candidate below lists everything new
   before)

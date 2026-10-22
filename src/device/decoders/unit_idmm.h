@@ -56,4 +56,5 @@ public:
 private:
   /// The display text of @p frame into m_result: val, and dval with @p prefix.
   DmmResponse displayed(const unsigned char *frame, const char *prefix);
+  bool m_hold = false;   ///< HOLD of the last main frame, for the second display's frames
 };
