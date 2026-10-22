@@ -307,6 +307,7 @@ void BleGattDevice::onDiscoveryFinished()
       return;
     qCDebug(lcBle) << m_address << "rx" << value.toHex(' ');
     m_rx += value;
+    m_pollSent.invalidate();
     // the answer is in: ask again, but not faster than kRepollMs
     if (!m_lastPoll.isEmpty() && m_repoll && !m_repoll->isActive())
       m_repoll->start();
@@ -392,6 +393,9 @@ bool BleGattDevice::sendCommand(const QByteArray &frame)
   const auto mode = (m_writeChar.properties() & QLowEnergyCharacteristic::WriteNoResponse)
                     ? QLowEnergyService::WriteWithoutResponse : QLowEnergyService::WriteWithResponse;
   m_service->writeCharacteristic(m_writeChar, frame, mode);
+  // the polls wait for the meter to take the key, then go on
+  m_keySent.start();
+  QTimer::singleShot(kKeyQuietMs, this, &BleGattDevice::sendPoll);
   return true;
 }
 
@@ -399,6 +403,14 @@ void BleGattDevice::sendPoll()
 {
   if (!m_ready || !m_service || m_lastPoll.isEmpty())
     return;   // not connected yet: the reader repeats its poll
+  if (m_keySent.isValid() && m_keySent.elapsed() < kKeyQuietMs - 50)
+    return;   // a key just went out (sendCommand() polls again after)
+  // one poll out at a time: Qt queues the writes, polls piling up there
+  // held a key back for seconds (UT202BT: 5 to 10 s); an unanswered one
+  // counts as lost after a second
+  if (m_pollSent.isValid() && m_pollSent.elapsed() < 1000)
+    return;
+  m_pollSent.start();
   const auto mode = (m_writeChar.properties() & QLowEnergyCharacteristic::WriteNoResponse)
                     ? QLowEnergyService::WriteWithoutResponse : QLowEnergyService::WriteWithResponse;
   m_service->writeCharacteristic(m_writeChar, m_lastPoll, mode);

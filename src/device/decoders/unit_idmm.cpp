@@ -285,10 +285,13 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
   m_result.main().unit = QString::fromUtf8(prefix) + QString::fromLatin1(func.unit);
   if (second)
   {
+    // its flags are not known: HOLD as the main display has it, else the
+    // LCD's HOLD flickered with each frequency frame (UT202BT, AC A)
     m_result.showBar = false;
+    m_result.hold = m_hold;
     return displayed(f, prefix);
   }
-  m_result.hold = flagsA & 0x02;
+  m_result.hold = m_hold = flagsA & 0x02;
   // the meter's other keys: A bit3 MAX, bit2 MIN, bit0 REL; C bit2/bit1 peak
   // max/min
   if (flagsA & 0x08)

@@ -5,6 +5,7 @@
 #include "device/transports/buffereddevice.h"
 
 #include <QBluetoothUuid>
+#include <QElapsedTimer>
 #include <QLowEnergyCharacteristic>
 #include <QStringList>
 
@@ -81,6 +82,10 @@ public:
 
   /// Shortest time between two repeated polls.
   static constexpr int kRepollMs = 300;
+  /// After a key no poll for this long: a poll sent before the meter's
+  /// acknowledgement can go unanswered, and the key took effect late
+  /// (UT202BT; dmm-tools waits for the ack likewise, up to 415 ms seen)
+  static constexpr int kKeyQuietMs = 600;
 
   /// Meters of @p format seen in a short scan, as "<address> <name>". Blocks
   /// for @p ms; when the scan fails, @p error (if given) says why.
@@ -109,6 +114,8 @@ private:
   QTimer *m_connectTimeout = nullptr;
   QTimer *m_repoll = nullptr;
   QByteArray m_lastPoll;
+  QElapsedTimer m_keySent;   ///< no poll for kKeyQuietMs after a key (sendCommand())
+  QElapsedTimer m_pollSent;  ///< a poll out and not answered yet: no second one
   void sendPoll();
   bool m_serviceFound = false;
   bool m_ready = false;
