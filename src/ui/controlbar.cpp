@@ -38,13 +38,11 @@ ControlBar::ControlBar(QWidget *parent) :
   struct Key { const char *key; const char *text; const char *tip; bool state; const char *longKey = nullptr; };
   const QList<QList<Key>> groups = {
     // the UT202BT's function keys, in the colours of the clamp
-    { { "fn_v", QT_TR_NOOP("V~"), QT_TR_NOOP("The V key (red): AC V, AC V LPF and DC V in turn"), false },
-      { "fn_a", QT_TR_NOOP("A~"), QT_TR_NOOP("The A key (yellow): AC A and AC A LPF in turn; held, inrush current"),
-        false, "fn_a_long" },
-      { "fn_ohm", QT_TR_NOOP("Ω"), QT_TR_NOOP("The Ω key (blue): resistance, continuity, capacitance and temperature in turn"),
-        false },
-      { "fn_ncv", QT_TR_NOOP("NCV/PEAK"), QT_TR_NOOP("Non-contact voltage; held, peak capture (AC V and AC A)"), false,
-        "fn_ncv_long" } },
+    { { "fn_a", QT_TR_NOOP("A~"), QT_TR_NOOP("The A key (yellow): AC A and AC A LPF in turn; held, inrush current"), false, "fn_a_long" },
+      { "fn_v", QT_TR_NOOP("V~"), QT_TR_NOOP("The V key (red): AC V, AC V LPF and DC V in turn"), false },
+      { "fn_ohm", QT_TR_NOOP("Ω"), QT_TR_NOOP("The Ω key (blue): resistance, continuity, capacitance and temperature in turn"), false },
+      { "fn_ncv", QT_TR_NOOP("NCV/PEAK"), QT_TR_NOOP("Non-contact voltage; held, peak capture (AC V and AC A)"), false, "fn_ncv_long" } },
+
     // the ZOTEK meters' function keys, as in ZOTEK's app; NCV is fn_ncv above
     { { "fn_auto", QT_TR_NOOP("AUTO"), QT_TR_NOOP("Automatic function: the meter picks V, Ω or A by itself"), false },
       { "fn_cap", QT_TR_NOOP("CAP"), QT_TR_NOOP("Capacitance"), false },
