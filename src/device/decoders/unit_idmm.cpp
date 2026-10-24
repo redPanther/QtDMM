@@ -24,7 +24,7 @@ static const bool registered = []() {
   DmmDecoder::addConfig({"Uni-Trend", "UT61D+ (UT-D07B Bluetooth) *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
   DmmDecoder::addConfig({"Uni-Trend", "UT61B+ (UT-D07B Bluetooth) *", "", 0, FrameFormat::UniTUT61Plus, 8, 1, 1, 0, 6000, 0, 0, 0});
   // UT202BT clamp, Bluetooth built in, 9999 counts; not tried with QtDMM
-  DmmDecoder::addConfig({"Uni-Trend", "UT202BT *", "", 0, FrameFormat::UniTUT202BT, 8, 1, 1, 0, 10000, 0, 0, 0});
+  DmmDecoder::addConfig({"Uni-Trend", "UT202BT", "", 0, FrameFormat::UniTUT202BT, 8, 1, 1, 0, 10000, 0, 0, 0});
   return true;
 }();
 
@@ -301,7 +301,14 @@ std::optional<DmmDecoder::DmmResponse> DecoderUniTiDMM::decode(const QByteArray 
   if (flagsA & 0x01)
     m_result.main().states |= SampleFlag::Relative;
   if (flagsC & 0x06)
+  {
     m_result.main().states |= SampleFlag::Peak;
+    // which of the two the LCD shows (UT202BT: C bit2 PEAK MAX, bit1 PEAK MIN)
+    if (flagsC & 0x04)
+      m_result.main().states |= SampleFlag::Max;
+    if (flagsC & 0x02)
+      m_result.main().states |= SampleFlag::Min;
+  }
   m_result.range = (flagsB & 0x04) ? "MANU" : "AUTO";
   return displayed(f, prefix);
 }
