@@ -510,7 +510,8 @@ double holdWidth(double fontPx) { return fontPx * 0.95; }
 // the gap after annunciator @p t when @p next follows: "AC+DC" stays together
 double flagGap(const QString &t, const QString &next, double gap)
 {
-  return t == QLatin1String("+") || next == QLatin1String("+") ? gap * 0.25 : gap;
+  // "+" between AC and DC, "P" (peak) right before MAX and MIN
+  return t == QLatin1String("+") || next == QLatin1String("+") || t == QLatin1String("P") ? gap * 0.25 : gap;
 }
 double flagWidth(const QString &t, const QFontMetricsF &fm, double fontPx)
 {
@@ -642,9 +643,10 @@ namespace
 const QStringList &leftFlags()
 {
   // manual range is AUTO off, as on the meters; MAX, MIN and AVG: the
-  // meter shows its own maximum, minimum or average (its MAX/MIN keys)
-  static const QStringList l = { LcdWidget::tr("AUTO"), LcdWidget::tr("MAX"), LcdWidget::tr("MIN"),
-                                 LcdWidget::tr("AVG") };
+  // meter shows its own maximum, minimum or average (its MAX/MIN keys); P
+  // before them: the peak maximum or minimum (UT202BT)
+  static const QStringList l = { LcdWidget::tr("AUTO"), QStringLiteral("P"), LcdWidget::tr("MAX"), QStringLiteral("P"),
+                                 LcdWidget::tr("MIN"), LcdWidget::tr("AVG") };
   return l;
 }
 const QStringList &rightFlags()
@@ -696,11 +698,14 @@ void LcdWidget::drawFlags(QPainter &p, const Layout &l) const
   const QStringList &lt = leftFlags();
   const QStringList &rt = rightFlags();
   const bool ac = flags & SampleFlag::AC, dc = flags & SampleFlag::DC;
+  const bool peak = flags & SampleFlag::Peak;
   const Flag left[] = {
     { lt[0], m_auto },
-    { lt[1], bool(flags & SampleFlag::Max) },
-    { lt[2], bool(flags & SampleFlag::Min) },
-    { lt[3], bool(flags & SampleFlag::Avg) },
+    { lt[1], peak && (flags & SampleFlag::Max) },
+    { lt[2], bool(flags & SampleFlag::Max) },
+    { lt[3], peak && (flags & SampleFlag::Min) },
+    { lt[4], bool(flags & SampleFlag::Min) },
+    { lt[5], bool(flags & SampleFlag::Avg) },
   };
   const Flag right[] = {
     { rt[0], ac },
@@ -713,11 +718,11 @@ void LcdWidget::drawFlags(QPainter &p, const Layout &l) const
 
   double x = l.flags.left();
   auto width = [&](const QString &t) { return flagWidth(t, fm, fontPx); };
-  for (const Flag &f : left)
+  for (int i = 0; i < int(sizeof(left) / sizeof(left[0])); ++i)
   {
-    const double w = width(f.text);
-    drawAnnunciator(p, QRectF(x, l.flags.top(), w + 2, l.flags.height()), f.text, f.on, fontPx);
-    x += w + gap;
+    const double w = width(left[i].text);
+    drawAnnunciator(p, QRectF(x, l.flags.top(), w + 2, l.flags.height()), left[i].text, left[i].on, fontPx);
+    x += w + flagGap(left[i].text, QString(), gap);
   }
   double xr = l.flags.right();
   for (int i = int(sizeof(right) / sizeof(right[0])) - 1; i >= 0; --i)

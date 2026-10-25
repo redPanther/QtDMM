@@ -280,9 +280,10 @@ int main(int argc, char **argv)
       ++problems;
     }
     if ((flagsOf(frame(0x08, 0)) & states) != SampleFlag::Max || (flagsOf(frame(0x01, 0)) & states) != SampleFlag::Relative
-        || (flagsOf(frame(0, 0x02)) & states) != SampleFlag::Peak)
+        || (flagsOf(frame(0, 0x02)) & states) != (SampleFlag::Peak | SampleFlag::Min)
+        || (flagsOf(frame(0, 0x04)) & states) != (SampleFlag::Peak | SampleFlag::Max))
     {
-      qWarning() << "MAX, REL or peak min alone not told apart";
+      qWarning() << "MAX, REL, peak min or peak max alone not told apart (peak min/max light MIN/MAX too)";
       ++problems;
     }
     // they are states of the value: V AC stays the same port
