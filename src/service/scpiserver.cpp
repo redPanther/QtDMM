@@ -233,7 +233,13 @@ QList<int> ScpiServer::channels(const Command &cmd, int suffix)
   for (const QString &item : m.captured(1).split(','))
   {
     const QStringList ends = item.split(':');
-    const int from = ends.first().trimmed().toInt(), to = ends.last().trimmed().toInt();
+    bool fromOk = false, toOk = false;
+    const int from = ends.first().trimmed().toInt(&fromOk), to = ends.last().trimmed().toInt(&toOk);
+    if (!fromOk || !toOk)   // beyond int: toInt() gave 0
+    {
+      pushError(-222, QString("Data out of range; the meter has %1 channels").arg(count));
+      return {};
+    }
     if (from > to)
     {
       pushError(-104, "Data type error; a channel range goes up (@1:3)");

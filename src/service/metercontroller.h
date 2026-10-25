@@ -89,6 +89,7 @@ public:
   void        setInstanceId(const QString &id) { m_instanceId = id; }
   /// The configured meter's name, for SCPI *IDN? and mDNS.
   void        setModel(const QString &model);
+  QString     model() const { return m_model; }
   void        setAlarms(const QList<Alarm> &alarms);
   const AlarmManager *alarms() const { return m_alarms; }
 
