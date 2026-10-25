@@ -51,7 +51,8 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 - **Flags for alarm marks** — under the graph with their number and, as room allows, the alarm's name; phosphor draws a vertical line on the trigger of a pre-triggered recording. The mark at a change of function reads "Function changed", not "Alarm Function changed".
 - **Phosphor: no cross in the middle any more** — it said nothing; the fine scale sits on the reference line and the trigger line, else on the bottom and left edge.
 - **Smaller points on the curves** — 5 px, large 8 px instead of 7 and 11.
-- **The time axis runs on smoothly with the clock** — live (and recording, with its end in view), about 30 times a second, instead of jumping with each reading (a Victron sends one a second); one drawing clock for the graph and the Poincaré plot, slower by itself when drawing takes too long (`Graph/frame-rate`, 0 = as before).
+- **The time axis runs on smoothly with the clock** — live (and recording, with its end in view), about 30 times a second, instead of jumping with each reading (a Victron sends one a second); one drawing clock for the graph and the Poincaré plot, slower by itself when drawing takes too long (`Graph/frame-rate`, 0 = as before). Each curve's newest value is drawn on to now, faint, so the curves run on with it too; All stretches its axis to now until the window is full, the curves reach the right edge.
+- **A line style for each value** — value 2 dashed, 3 dotted, 4 dash-dot, a little thinner than the main value and drawn on top of it: curves on top of each other are all seen. The legend shows each curve's line instead of a coloured square; Scope blue has a solid, fainter grid.
 - **Poincaré plot: the y axis title stands at its labels in a wide window** — not at the left edge of the window.
 - **With the main value hidden, graph helpers follow the left axis** — the reference line, the min/max band and the cursors' level lines follow the value on the left axis instead of going away.
 
@@ -92,7 +93,7 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 
 ### Bug fixes
 
-- **A long recording no longer slows down with every reading** — at 2000 readings the graph took ~7 ms for each one (a whole curve built anew every few readings, and the hidden points and integral kept up to date); now ~0.5 ms, ~1.6 ms with points shown.
+- **A long recording no longer slows down with every reading** — at 2000 readings the graph took ~7 ms for each one (a whole curve built anew every few readings, and the hidden points and integral kept up to date); now ~0.5 ms, ~1.6 ms with points shown. The chart gets only the points around the window, so a reading costs the same at 20000 readings as at 2000 (it grew to ~8 ms at 40000).
 - **Switching to another device starts with an empty graph** — before, the last reading of the device before stayed in it with its second display: the axis kept that scale and prefix (k%RH after a CO2 meter), the right axis and the legend kept its temperature. The Poincaré plot starts anew too; the axis title comes with the first reading, also when the new device measures in the same unit.
 - **A CSV file with a tiny value loads again** — an average around 0 was written as 5.55e-17, and QtDMM refused its own file as "not a valid file".
 - **ppm, min and m/s from sigrok, calculated values and the Simulated meter are no longer scaled** — 415 ppm was read as 415 p·pm (4.15e-10) in the graph, min/max, alarms and SCPI; the display was right.

@@ -37,6 +37,7 @@
 #include "recording/recordingstore.h"
 
 class GraphFlagItem;
+class GraphLegend;
 class GraphMinimap;
 class Settings;
 
@@ -605,8 +606,11 @@ protected:
   QMap<int, ValueAxis> m_valueAxes;      ///< setValueAxis(), missing: AxisAuto
   bool             m_mainShown = true;   ///< the main value's curve, setValueShown(0)
   int              m_intValueId = 0;     ///< setIntegrationValue()
-  QLabel          *m_legend = nullptr;
+  GraphLegend     *m_legend = nullptr;
   QColor           extraColor(int i) const;
+  /// The line of value @p id (1 = value 2 ...): its colour, valueStyle().
+  QPen             extraPen(int id) const;
+  static Qt::PenStyle valueStyle(int id);
   void             rebuildExtras();
   void             onExtraAppended(int i);
   void             rebuildOtherIntegral();
@@ -762,6 +766,14 @@ protected:
   /// The time axis alone: range, ticks, labels, time cursors, the
   /// overview's window. Cheap enough for each FrameClock tick.
   void             updateTimeAxis();
+  /// "All" while it runs and the window is not full: the axis ends now and
+  /// stretches with the clock (stretchedSeconds() wide, at least 10 s), the
+  /// curve reaches the right edge; the window grows in steps for the buckets.
+  bool             stretching() const;
+  double           stretchedSeconds() const;
+  /// The lines get the points around the time axis' range, and the hold
+  /// to now while the window follows the readings (GapLine).
+  void             updateLineSpans();
   void             updateSeriesAppearance();
   void             updateThresholdLinesVisibility();
   void             updateThresholdLinePositions();

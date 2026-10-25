@@ -2014,11 +2014,14 @@ int main(int argc, char **argv)
     graph.setValueShown(1, true);
     check(graph.extraCurveShown(celsius) && !graph.extraCurveShown(hertz), "°C shown again");
 
-    // phosphor: one hue, dashes
+    // a line style by the value's number, in every design: overlapping
+    // curves are all seen, also in phosphor's one hue
     graph.setColorVariant(GraphWidget::PhosphorGreen);
     check(graph.extraCurve(celsius)->pen().style() != Qt::SolidLine, "phosphor: the other values dashed");
     graph.setColorVariant(GraphWidget::Neutral);
-    check(graph.extraCurve(celsius)->pen().style() == Qt::SolidLine, "neutral: solid again");
+    check(graph.extraCurve(celsius)->pen().style() != Qt::SolidLine
+            && graph.extraCurve(celsius)->pen().style() != graph.extraCurve(hertz)->pen().style(),
+          "neutral: dashed too, a style each");
 
     // a new window starts with what the displays show
     graph.liveSLOT();
@@ -2071,6 +2074,39 @@ int main(int argc, char **argv)
       feed.value(1.0 + (i % 10) * 0.01);
     qInfo() << "record: 500 readings with points in" << timer.elapsed() << "ms";
     check(points && points->count() == line->count(), "record: the points go on with the line");
+  }
+
+  // --- 7m2. a long recording in a short window: a reading costs what the
+  //           window has, not what the recording has (the chart got every
+  //           point, ~8 ms a reading at 40000; R14-02) ---
+  {
+    Settings cfg("record-long", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    graph.setLineStyle(GraphWidget::Solid, GraphWidget::NoPoint, GraphWidget::NoLine, GraphWidget::Circle);
+    graph.setGraphSize(60);
+    Feed feed(graph);
+    graph.startSLOT();
+    QElapsedTimer timer;
+    auto block = [&]
+    {
+      timer.restart();
+      for (int i = 0; i < 1000; ++i)
+        feed.value(1.0 + (i % 10) * 0.01);
+      return timer.elapsed();
+    };
+    block();
+    const qint64 early = block();
+    for (int k = 0; k < 16; ++k)
+      block();
+    const qint64 late = block();
+    auto *line = qobject_cast<QLineSeries *>(graph.findChild<QChartView *>()->chart()->series().first());
+    qInfo() << "record: 1000 readings at 2000 in" << early << "ms, at 19000 in" << late << "ms; the chart has"
+            << line->count() << "points";
+    check(late < 3 * early + 50, QString("record: 1000 readings at 19000 took %1 ms, at 2000 %2 ms").arg(late).arg(early));
+    check(line->count() < 5000, QString("record: the chart has the points around the window, %1").arg(line->count()));
   }
 
   // --- 7l3. three values in three units (CO2, °C, %RH): at most two at a

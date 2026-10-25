@@ -6,6 +6,7 @@
 #include <QChart>
 #include <QLineSeries>
 
+#include <algorithm>
 #include <cmath>
 
 GapLine::GapLine(QLineSeries *first)
@@ -15,20 +16,32 @@ GapLine::GapLine(QLineSeries *first)
   m_visible = first->isVisible();
 }
 
+QLineSeries *GapLine::newSeries(const QPen &pen)
+{
+  QLineSeries *first = m_segments.first();
+  auto *s = new QLineSeries();
+  first->chart()->addSeries(s);
+  for (QAbstractAxis *axis : first->attachedAxes())
+    s->attachAxis(axis);
+  s->setPen(pen);
+  s->setVisible(m_visible);
+  return s;
+}
+
 QLineSeries *GapLine::segment(int i)
 {
   while (m_segments.size() <= i)
-  {
-    QLineSeries *first = m_segments.first();
-    auto *s = new QLineSeries();
-    first->chart()->addSeries(s);
-    for (QAbstractAxis *axis : first->attachedAxes())
-      s->attachAxis(axis);
-    s->setPen(m_pen);
-    s->setVisible(m_visible);
-    m_segments << s;
-  }
+    m_segments << newSeries(m_pen);
   return m_segments[i];
+}
+
+// the hold: the line's colour, faint
+static QPen holdPen(QPen pen)
+{
+  QColor c = pen.color();
+  c.setAlphaF(c.alphaF() * 0.4);
+  pen.setColor(c);
+  return pen;
 }
 
 void GapLine::setPen(const QPen &pen)
@@ -36,11 +49,16 @@ void GapLine::setPen(const QPen &pen)
   m_pen = pen;
   for (QLineSeries *s : std::as_const(m_segments))
     s->setPen(pen);
+  if (m_hold)
+    m_hold->setPen(holdPen(pen));
 }
 
 void GapLine::setAxes(const QList<QAbstractAxis *> &axes)
 {
-  for (QLineSeries *s : std::as_const(m_segments))
+  QList<QLineSeries *> all = m_segments;
+  if (m_hold)
+    all << m_hold;
+  for (QLineSeries *s : std::as_const(all))
   {
     for (QAbstractAxis *axis : s->attachedAxes())
       if (!axes.contains(axis))
@@ -56,6 +74,8 @@ void GapLine::setVisible(bool on)
   m_visible = on;
   for (QLineSeries *s : std::as_const(m_segments))
     s->setVisible(on);
+  if (m_hold)
+    m_hold->setVisible(on);
 }
 
 void GapLine::add(const QPointF &p)
@@ -87,12 +107,26 @@ void GapLine::add(const QPointF &p)
 void GapLine::append(const QList<QPointF> &points)
 {
   for (const QPointF &p : points)
-    add(p);
+  {
+    m_all << p;
+    if (m_toEnd)
+      add(p);
+  }
+  updateHold();
 }
 
 void GapLine::removeLast(int count)
 {
-  for (int i = 0; i < count && !m_steps.isEmpty(); ++i)
+  count = int(qMin<qsizetype>(count, m_all.size()));
+  m_all.resize(m_all.size() - count);
+  if (!m_toEnd)
+    return;
+  if (m_steps.size() < count || m_all.size() < m_from)
+  {
+    load();   // more than the chart's newest points can undo
+    return;
+  }
+  for (int i = 0; i < count; ++i)
   {
     const Step step = m_steps.takeLast();
     if (!step.gap)
@@ -104,17 +138,60 @@ void GapLine::removeLast(int count)
     }
     m_pending = step.pendingBefore;
   }
+  updateHold();
 }
 
 void GapLine::replace(const QList<QPointF> &points)
 {
+  m_all = points;
+  load();
+}
+
+void GapLine::setSpan(double min, double max)
+{
+  m_spanMin = min;
+  m_spanMax = max;
+  const double width = max - min;
+  if (!(width > 0) || !std::isfinite(width))
+  {
+    if (m_from > 0 || !m_toEnd)
+      load();
+    return;
+  }
+  // anew when the span leaves what the chart has, or when that is much
+  // more than the span (zoomed in, or Live has run on for a while)
+  const double loadedTo = m_toEnd ? qMax(max, m_all.isEmpty() ? max : m_all.last().x()) : m_loadMax;
+  if ((min < m_loadMin && m_from > 0) || (!m_toEnd && max > m_loadMax) || loadedTo - m_loadMin > 2 * width)
+    load();
+}
+
+void GapLine::load()
+{
+  const double width = m_spanMax - m_spanMin;
+  m_from = 0;
+  qsizetype to = m_all.size();
+  m_loadMin = -qInf();
+  m_loadMax = qInf();
+  if (width > 0 && std::isfinite(width))
+  {
+    // the span and half of it on each side; a point beyond, so that the line
+    // runs out of the plot
+    m_loadMin = m_spanMin - width / 2;
+    m_loadMax = m_spanMax + width / 2;
+    auto byX = [](const QPointF &p, double x) { return p.x() < x; };
+    m_from = qMax<qsizetype>(0, std::lower_bound(m_all.cbegin(), m_all.cend(), m_loadMin, byX) - m_all.cbegin() - 1);
+    to = qMin<qsizetype>(m_all.size(), std::lower_bound(m_all.cbegin(), m_all.cend(), m_loadMax, byX) - m_all.cbegin() + 1);
+  }
+  m_toEnd = to >= m_all.size();
+
   // split first, then one replace() per segment: much faster than append()
   // point by point
   QList<QList<QPointF>> runs(1);
   m_steps.clear();
   m_pending = false;
-  for (const QPointF &p : points)
+  for (qsizetype i = m_from; i < to; ++i)
   {
+    const QPointF &p = m_all[i];
     Step step;
     step.pendingBefore = m_pending;
     if (std::isnan(p.y()))
@@ -143,6 +220,29 @@ void GapLine::replace(const QList<QPointF> &points)
   for (int i = m_used; i < m_segments.size(); ++i)
     if (m_segments[i]->count() > 0)
       m_segments[i]->clear();
+  updateHold();
+}
+
+void GapLine::setHold(double x)
+{
+  m_holdX = x;
+  updateHold();
+}
+
+void GapLine::updateHold()
+{
+  // the newest value holds until the next one; not after a gap
+  const bool on = m_toEnd && !m_all.isEmpty() && std::isfinite(m_all.last().y()) && m_holdX > m_all.last().x();
+  if (!on)
+  {
+    if (m_hold && m_hold->count() > 0)
+      m_hold->clear();
+    return;
+  }
+  if (!m_hold)
+    m_hold = newSeries(holdPen(m_pen));
+  const QPointF last = m_all.last();
+  m_hold->replace({ last, QPointF(m_holdX, last.y()) });
 }
 
 void GapLine::clear()

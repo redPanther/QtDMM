@@ -30,6 +30,7 @@
 #include <cmath>
 #include <climits>
 
+#include "ui/views/graphlegend.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/graphwidget_p.h"
 #include "ui/views/graphminimap.h"
@@ -388,9 +389,14 @@ void GraphWidget::onAppended(bool shifted)
   if (m_followAll && (recorded >= window || window > 2 * qMax<qint64>(10000, recorded)))
     requestAll(true);
   const bool rebuilt = m_rebuilds != rebuilds;
-  updateScrollRange();
-  // a full store, or Live: the window moves on with what it keeps
-  if (m_store->origin() > 0 || m_store->state() == RecordingStore::Live)
+  {
+    // the scroll bar's own move of the axis would come once more below
+    const QSignalBlocker block(scrollbar);
+    updateScrollRange();
+  }
+  // a full store, Live or a recording seen at its end: the window moves on
+  // with what it keeps
+  if (m_store->origin() > 0 || m_store->state() == RecordingStore::Live || following())
   {
     updateXAxisRange();
     updateMarkPositions();
@@ -477,9 +483,7 @@ void GraphWidget::rebuildExtras()
     c.right = fitsRight && (axis == AxisRight || !fitsLeft);
     c.shown = m_shownValues.contains(s.id) && (fitsLeft || c.right);
     c.line->setAxes({ m_xAxis, c.right ? m_yAxis2 : m_yAxis });
-    const bool dashed = phosphor();
-    c.line->setPen(QPen(extraColor(s.id), m_lineWidth, dashed ? (s.id % 2 ? Qt::DashLine : Qt::DotLine) : Qt::SolidLine,
-                        Qt::RoundCap, Qt::RoundJoin));
+    c.line->setPen(extraPen(s.id));
     c.line->setVisible(c.shown);
     if (!c.shown)
     {
@@ -617,6 +621,26 @@ void GraphWidget::onExtraAppended(int i)
     updateTimeCursors();
 }
 
+// A style for each value, by its number, so curves on top of each other are
+// all seen and a value keeps its look when another is hidden: value 2
+// dashed, 3 dotted, 4 dash-dot; a little thinner than the main value, drawn
+// on top of it.
+Qt::PenStyle GraphWidget::valueStyle(int id)
+{
+  switch (id)
+  {
+    case 0:  return Qt::SolidLine;
+    case 1:  return Qt::DashLine;
+    case 2:  return Qt::DotLine;
+    default: return Qt::DashDotLine;
+  }
+}
+
+QPen GraphWidget::extraPen(int id) const
+{
+  return QPen(extraColor(id), qMax(1.0, m_lineWidth * 0.75), valueStyle(id), Qt::RoundCap, Qt::RoundJoin);
+}
+
 QString GraphWidget::legendText() const
 {
   return m_legend && m_legend->isVisible() ? m_legend->text() : QString();
@@ -627,19 +651,15 @@ void GraphWidget::updateLegend()
   if (!m_legend)
     return;
   // one entry per value, its newest series; only with more than the main one
-  QStringList entries;
+  QList<GraphLegend::Entry> entries;
   QSet<int> seen;
-  auto entry = [](const QColor &c, const QString &name)
-  {
-    return QString("<span style=\"color:%1\">&#9632;</span>&nbsp;%2").arg(c.name(), name.toHtmlEscaped());
-  };
   for (int i = m_store->extraCount() - 1; i >= 0; --i)
   {
     const RecordingSeries &s = m_store->extra(i);
     if (seen.contains(s.id) || i >= int(m_extraCurves.size()) || !m_extraCurves[size_t(i)].shown)
       continue;
     seen.insert(s.id);
-    entries.prepend(entry(extraColor(s.id), curveName(s, s.unit)));
+    entries.prepend({ extraPen(s.id), curveName(s, s.unit) });
   }
   // the main value alone needs none; without it, the axis does not say which
   if (entries.isEmpty() && m_mainShown)
@@ -648,16 +668,14 @@ void GraphWidget::updateLegend()
     return;
   }
   if (m_mainShown)
-    entries.prepend(entry(dataColor(), curveName(m_store->series(), m_store->unit())));
+    entries.prepend({ QPen(dataColor(), m_lineWidth, penStyle(m_lineMode)), curveName(m_store->series(), m_store->unit()) });
   if (entries.isEmpty())
   {
     m_legend->hide();
     return;
   }
   const QColor ink = m_xLabelColor.isValid() ? m_xLabelColor : palette().color(QPalette::WindowText);
-  m_legend->setStyleSheet(QString("QLabel { color: %1; background: transparent; }").arg(ink.name()));
-  m_legend->setText(entries.join("&nbsp;&nbsp;&nbsp;"));
-  m_legend->adjustSize();
+  m_legend->setEntries(entries, ink);
   // top left inside the plot, below the state ("LIVE", "REC")
   const QPoint topLeft = m_chartView->mapFromScene(m_chart->plotArea().topLeft());
   const int below = m_stateLabel && m_stateLabel->isVisible() ? m_stateLabel->height() : 0;
