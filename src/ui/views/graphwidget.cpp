@@ -654,10 +654,8 @@ void GraphWidget::onCleared()
   m_dataLine->clear();
   m_curvePts.clear();
   m_envelope->setVisible(false);
-  m_dataPoints->clear();
   m_intLine->clear();
-  m_intPoints->clear();
-  m_tailData = m_tailInt = m_tailDataPts = m_tailIntPts = 0;
+  m_tailData = m_tailInt = 0;
   clearTimeCursors();
   if (m_liveHold)
   {

@@ -93,7 +93,7 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 
 ### Bug fixes
 
-- **A long recording no longer slows down with every reading** — at 2000 readings the graph took ~7 ms for each one (a whole curve built anew every few readings, and the hidden points and integral kept up to date); now ~0.5 ms, ~1.6 ms with points shown. The chart gets only the points around the window, so a reading costs the same at 20000 readings as at 2000 (it grew to ~8 ms at 40000).
+- **A long recording no longer slows down with every reading** — at 2000 readings the graph took ~7 ms for each one (a whole curve built anew every few readings, and the hidden points and integral kept up to date); now ~0.5 ms, ~1.6 ms with points shown. The chart gets only the points around the window, so a reading costs the same at 20000 readings as at 2000 (it grew to ~8 ms at 40000). With points or the integral's points shown it grew much faster, to ~50 ms at 6000; they now take the same way.
 - **Switching to another device starts with an empty graph** — before, the last reading of the device before stayed in it with its second display: the axis kept that scale and prefix (k%RH after a CO2 meter), the right axis and the legend kept its temperature. The Poincaré plot starts anew too; the axis title comes with the first reading, also when the new device measures in the same unit.
 - **The LCD fills both places on its small line** — a choice of secondary values made with a meter of two values left the third value of the next meter (TFA AIRCO2NTROL: CO2, °C, %RH) off the display until it was put there by hand.
 - **A CSV file with a tiny value loads again** — an average around 0 was written as 5.55e-17, and QtDMM refused its own file as "not a valid file".

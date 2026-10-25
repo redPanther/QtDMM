@@ -5,6 +5,7 @@
 #include <QAbstractAxis>
 #include <QChart>
 #include <QLineSeries>
+#include <QScatterSeries>
 
 #include <algorithm>
 #include <cmath>
@@ -69,6 +70,13 @@ void GapLine::setAxes(const QList<QAbstractAxis *> &axes)
   }
 }
 
+void GapLine::setMarkers(QScatterSeries *markers)
+{
+  if (m_markers && m_markers != markers && m_markers->count() > 0)
+    m_markers->clear();
+  m_markers = markers;
+}
+
 void GapLine::setVisible(bool on)
 {
   m_visible = on;
@@ -106,12 +114,19 @@ void GapLine::add(const QPointF &p)
 
 void GapLine::append(const QList<QPointF> &points)
 {
+  QList<QPointF> marks;
   for (const QPointF &p : points)
   {
     m_all << p;
-    if (m_toEnd)
-      add(p);
+    if (!m_toEnd)
+      continue;
+    add(p);
+    if (!std::isnan(p.y()))
+      marks << p;
   }
+  // in one change: Qt Charts lays a scatter series out anew with each
+  if (m_markers && !marks.isEmpty())
+    m_markers->append(marks);
   updateHold();
 }
 
@@ -126,6 +141,7 @@ void GapLine::removeLast(int count)
     load();   // more than the chart's newest points can undo
     return;
   }
+  int marks = 0;
   for (int i = 0; i < count; ++i)
   {
     const Step step = m_steps.takeLast();
@@ -135,9 +151,12 @@ void GapLine::removeLast(int count)
       open->removePoints(open->count() - 1, 1);
       if (step.newSegment)
         m_used--;   // empty again, back in the pool
+      marks++;
     }
     m_pending = step.pendingBefore;
   }
+  if (m_markers && marks > 0)
+    m_markers->removePoints(m_markers->count() - marks, marks);
   updateHold();
 }
 
@@ -215,8 +234,15 @@ void GapLine::load()
   }
 
   m_used = int(runs.size());
+  QList<QPointF> marks;
   for (int i = 0; i < runs.size(); ++i)
+  {
     segment(i)->replace(runs[i]);
+    if (m_markers)
+      marks << runs[i];
+  }
+  if (m_markers)
+    m_markers->replace(marks);
   for (int i = m_used; i < m_segments.size(); ++i)
     if (m_segments[i]->count() > 0)
       m_segments[i]->clear();
