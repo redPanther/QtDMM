@@ -168,12 +168,17 @@ public:
              "fn_hz", "select1", "select2", "range", "auto", "hold", "rel", "zero", "minmax", "minmax_off", "peak",
              "peak_off", "max", "min", "avg", "unit", "unit2", "weighting", "lamp" };
   }
-  /// True when the frames tell the models of the protocol apart (ZotekBLE:
-  /// the layout), so modelsFromFrame() knows which one sent a frame.
+  /// True when the meter tells which model of the protocol it is: its frames
+  /// (ZotekBLE: the layout, modelsFromFrame()) or its device information
+  /// (OwonBLE: modelsFromInfo()).
   virtual bool tellsModel() const { return false; }
   /// The models (DMMInfo::name) a meter that sent @p frame can be; empty
   /// when the frames do not tell (tellsModel()).
   virtual QStringList modelsFromFrame(const QByteArray &frame) const { Q_UNUSED(frame); return {}; }
+  /// The models a Bluetooth meter can be by @p info, the value of its
+  /// device-information characteristic (BleGattDevice::Profile::info, OWON:
+  /// the model code); empty when it does not tell.
+  virtual QStringList modelsFromInfo(const QByteArray &info) const { Q_UNUSED(info); return {}; }
   /// Decodes one frame (getPacketLength() bytes, or a variable-length one
   /// with its terminator). @p id tells which of
   /// DMMInfo::framesPerReading frames this is. Returns nothing when the frame is

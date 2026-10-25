@@ -475,7 +475,17 @@ void FrameProbe::start(int timeoutMs)
   }
 #ifdef QTDMM_WITH_BLE
   if (auto *gatt = qobject_cast<BleGattDevice *>(m_port))
+  {
     connect(gatt, &BleGattDevice::finished, this, [this] { finish({}); });
+    // a meter whose device information tells the model (OWON) tells it
+    // before the first frame
+    connect(gatt, &BleGattDevice::infoRead, this, [this](const QByteArray &info)
+    {
+      const QStringList models = m_decoder->modelsFromInfo(info);
+      if (!models.isEmpty())
+        finish(models);
+    });
+  }
 #endif
   m_reader = new FrameReader(this);
   m_reader->setDecoder(m_decoder);
