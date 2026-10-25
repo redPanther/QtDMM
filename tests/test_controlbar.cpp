@@ -64,8 +64,8 @@ int main(int argc, char **argv)
   }
   bar.setProtocol(FrameFormat::UniTiENV, "UT363BT *");
   check(!key(bar, "hold")->isHidden() && !key(bar, "max")->isHidden() && !key(bar, "avg")->isHidden()
-          && !key(bar, "unit")->isHidden() && !key(bar, "unit2")->isHidden(),
-        "UT363BT: HOLD, MAX, AVG, UNIT, °C/°F shown");
+          && !key(bar, "unit")->isHidden() && key(bar, "unit2")->isHidden(),
+        "UT363BT: HOLD, MAX, AVG, UNIT shown, no °C/°F");
   check(key(bar, "min")->isHidden() && key(bar, "weighting")->isHidden() && key(bar, "minmax")->parentWidget()->isHidden()
           && key(bar, "select1")->parentWidget()->isHidden(),
         "UT363BT: no MIN, FAST/SLOW; the MIN/MAX and SELECT groups hidden");

@@ -389,7 +389,7 @@ int main(int argc, char **argv)
       const Pad pads[] = {
         { "UT333BT", "hold max min unit2", "avg unit weighting" },
         { "UT353BT", "hold max min weighting", "avg unit unit2" },
-        { "UT363BT *", "hold max avg unit unit2", "min weighting" },
+        { "UT363BT *", "hold max avg unit", "min unit2 weighting" },
         { "UT383BT *", "hold max min unit", "avg unit2 weighting" },
       };
       for (const Pad &pad : pads)
