@@ -423,7 +423,6 @@ void BleDiscoverer::start()
     qCWarning(lcBle) << "search failed:" << m_error;
     Q_EMIT finished();
   });
-  bleLeOnlySearch();   // as "bluetoothctl scan le": a seldom advertising meter is heard
   d->agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
   // the search for all kinds: with the helper while a protocol wants it
   // (HP-570C-APP), it cannot know which meter is looked for

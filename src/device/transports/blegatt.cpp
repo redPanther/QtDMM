@@ -200,7 +200,6 @@ bool BleGattDevice::open(OpenMode mode)
     notSeen();
   });
   qCDebug(lcBle) << m_address << "looking for the meter";
-  bleLeOnlySearch();
   m_finder->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
   if (m_profile->helperScan)
     bleHelperScan(m_finder, kFindMs);
@@ -446,7 +445,6 @@ QStringList BleGattDevice::scan(FrameFormat::DataFormat format, int ms, QString 
                    [&](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { take(info); });
   QElapsedTimer t;
   t.start();
-  bleLeOnlySearch();
   agent.start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
   if (p->helperScan)
     bleHelperScan(&agent, ms);
