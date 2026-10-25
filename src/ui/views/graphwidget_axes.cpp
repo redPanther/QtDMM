@@ -68,8 +68,9 @@ bool GraphWidget::following() const
 {
   if (m_store->state() == RecordingStore::Live)
     return !m_liveHold;
-  return m_store->state() == RecordingStore::Record && scrollbar->maximum() > 0
-         && scrollbar->value() >= scrollbar->maximum();
+  // "All" shows the whole recording, its end too
+  return m_store->state() == RecordingStore::Record
+         && (m_followAll || (scrollbar->maximum() > 0 && scrollbar->value() >= scrollbar->maximum()));
 }
 
 void GraphWidget::updateClockWant()
@@ -97,8 +98,14 @@ void GraphWidget::updateTimeAxis()
 {
   // one sample time short of the window, as it always was: no label on the
   // right edge
-  const double window = qMax(1, m_windowSeconds);
+  double window = qMax(1, m_windowSeconds);
   double start = windowStart() / 1000.0, end = start + window - qMin(m_store->sampleTime() / 10.0, window / 10);
+  if (stretching())
+  {
+    start = m_store->origin() / 1000.0;
+    window = stretchedSeconds();
+    end = start + window;
+  }
   double div = timeStep((end - start) / 6);   // about 5 ticks
   if (divisions())
   {
@@ -110,6 +117,7 @@ void GraphWidget::updateTimeAxis()
     end = start + window;
   }
   m_xAxis->setRange(start, end);
+  updateLineSpans();
   // the ticks on whole steps, counted from the start of the recording
   m_xStep = div;
   m_xAxis->setTickType(QValueAxis::TicksDynamic);
@@ -117,6 +125,31 @@ void GraphWidget::updateTimeAxis()
   m_xAxis->setTickInterval(div);
   updateXLabels();
   updateMinimapView();
+}
+
+bool GraphWidget::stretching() const
+{
+  return m_followAll && following() && m_store->duration() - m_store->origin() < qint64(m_windowSeconds) * 1000;
+}
+
+double GraphWidget::stretchedSeconds() const
+{
+  return qMax(10.0, (m_store->duration() - m_store->origin()) / 1000.0);
+}
+
+void GraphWidget::updateLineSpans()
+{
+  const double min = m_xAxis->min(), max = m_xAxis->max();
+  // the newest values run on with the clock while the window follows them
+  const double now = following() ? m_store->duration() / 1000.0 : qQNaN();
+  m_dataLine->setSpan(min, max);
+  m_dataLine->setHold(now);
+  m_intLine->setSpan(min, max);
+  for (ExtraCurve &c : m_extraCurves)
+  {
+    c.line->setSpan(min, max);
+    c.line->setHold(now);
+  }
 }
 
 double GraphWidget::timeStep(double v)

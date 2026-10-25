@@ -330,9 +330,13 @@ int main(int argc, char **argv)
     f.setSecondaries(QList<int>{ 2, 0 });
     check(four() == "1013 45.10 734 22.50", "small line 3 and 1, got " + four());
     f.setSecondaries(QList<int>{ 3, 1 });
-    check(f.secondaries() == QList<int>{ 1 } && f.smallLineValues() == 1, "the big one is not on the small line again");
+    check(f.secondaries() == (QList<int>{ 1, 0 }), "the big one is not on the small line again, the place filled");
     f.setSecondaries(QList<int>());
-    check(f.smallLineValues() == 0 && f.lineValue(0) == "1013", "none chosen: no small line");
+    check(f.secondaries() == (QList<int>{ 0, 1 }) && f.lineValue(0) == "1013", "none chosen: the first values");
+    // a choice from a meter of two values: the next meter's third value
+    // takes the free place
+    f.setSecondaries(QList<int>{ 2 });
+    check(f.secondaries() == (QList<int>{ 2, 0 }), "one chosen: the free place filled");
     f.setSecondaries(QList<int>{ 1, 2 });
     f.setValueCount(2);
     check(f.secondaries() == QList<int>{ 1 }, "a value the meter lacks is left out, got " + QString::number(f.smallLineValues()));

@@ -5,6 +5,7 @@
 #include <QList>
 #include <QPen>
 #include <QPointF>
+#include <QtNumeric>
 
 class QAbstractAxis;
 class QChart;
@@ -18,6 +19,14 @@ class QLineSeries;
 /// first segment is the series the chart maps positions with; the others
 /// are kept in a pool and reused, so a gap that comes and goes does not
 /// grow the chart.
+///
+/// The line keeps all its points, but gives the chart only those around the
+/// span on the time axis (setSpan()): Qt Charts lays out every point of a
+/// series with each new one and each move of the axis, and a long recording
+/// made each reading and each frame cost as much as the whole curve.
+///
+/// The hold (setHold()) draws the newest value on to a time, faint: the
+/// curve runs on with the clock between the readings instead of jumping.
 class GapLine
 {
 public:
@@ -36,9 +45,15 @@ public:
   /// Points after the last ones.
   void append(const QList<QPointF> &points);
   /// Takes back the last @p count points given to append() or replace()
-  /// (gap points included); at most the last kUndo.
+  /// (gap points included).
   void removeLast(int count);
   void clear();
+
+  /// The x range on the axis: the chart gets the points in it and half as
+  /// much again on each side, anew only when the range leaves them.
+  void setSpan(double min, double max);
+  /// The newest value drawn on to @p x, faint; NaN: none.
+  void setHold(double x);
 
   /// Segments that have points (for the tests).
   int segments() const;
@@ -54,7 +69,11 @@ private:
   };
 
   QLineSeries *segment(int i);
+  QLineSeries *newSeries(const QPen &pen);
   void         add(const QPointF &p);
+  /// The points of the span into the segments.
+  void         load();
+  void         updateHold();
 
   QList<QLineSeries *> m_segments;
   int          m_used = 1;          ///< segments in use; the last is the open one
@@ -62,4 +81,12 @@ private:
   QList<Step>  m_steps;             ///< the last points, for removeLast()
   QPen         m_pen;
   bool         m_visible = true;
+
+  QList<QPointF> m_all;             ///< every point, the chart has m_from.. of them
+  qsizetype    m_from = 0;
+  bool         m_toEnd = true;      ///< the chart has the points up to the newest
+  double       m_spanMin = -qInf(), m_spanMax = qInf();
+  double       m_loadMin = -qInf(), m_loadMax = qInf();   ///< the x range loaded
+  QLineSeries *m_hold = nullptr;
+  double       m_holdX = qQNaN();
 };

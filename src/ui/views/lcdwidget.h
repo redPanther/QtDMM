@@ -95,8 +95,8 @@ public:
   static constexpr int kSmallLineValues = 2;
   /// The values on the small line, in this order (the sidebar's value menu,
   /// kept with the window layout); the meter's others and the big one are
-  /// left out, at most kSmallLineValues. Unset (std::nullopt) the small
-  /// line shows the first values after the big one.
+  /// left out, at most kSmallLineValues. A place left free (nothing chosen,
+  /// or fewer than the meter has) takes the next value after the big one.
   void setSecondaries(const std::optional<QList<int>> &ids);
   /// The values on the small line now (lines 1 .. of lineValue()).
   QList<int> secondaries() const;

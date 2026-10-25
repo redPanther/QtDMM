@@ -243,7 +243,7 @@ void GraphWidget::applyThemeColors()
     case ScopeBlue:
       background = QColor("#0b1633");
       plot = vgrad(QColor("#16306a"), QColor("#081338"));
-      grid = QPen(QColor(90, 130, 200, 150), 1, Qt::DashLine);
+      grid = QPen(QColor(90, 130, 200, 80), 1);   // solid and faint: dashes are the curves'
       line = QPen(QColor("#5a78b0"));
       labels = QColor("#b9c9e8");
       break;

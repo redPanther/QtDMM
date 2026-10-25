@@ -31,6 +31,7 @@
 #include <cmath>
 
 #include "ui/frameclock.h"
+#include "ui/views/graphlegend.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/graphwidget_p.h"
 #include "ui/views/graphflags.h"
@@ -246,10 +247,8 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_stateLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
   m_stateLabel->hide();
 
-  m_legend = new QLabel(m_chartView);
+  m_legend = new GraphLegend(m_chartView);
   m_legend->setObjectName("ui_graphLegend");
-  m_legend->setAttribute(Qt::WA_TransparentForMouseEvents);
-  m_legend->setTextFormat(Qt::RichText);
   m_legend->hide();
 
   connectStore();
@@ -403,7 +402,8 @@ void GraphWidget::setEnvelopeVisible(bool on)
 
 void GraphWidget::updateMinimapView()
 {
-  m_minimap->setView(windowStart(), qint64(qMax(1, m_windowSeconds)) * 1000);
+  const qint64 width = stretching() ? qint64(stretchedSeconds() * 1000) : qint64(qMax(1, m_windowSeconds)) * 1000;
+  m_minimap->setView(windowStart(), width);
 }
 
 void GraphWidget::showFrom(qint64 start)
