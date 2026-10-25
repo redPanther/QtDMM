@@ -11,12 +11,6 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 - **APPA meters over Bluetooth LE (not tried with a real meter yet)** — the S0–S3, 155B–158B, the 170B clamps, A17N, sFlex, 208B and 506B, and the BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram meters built on them; found by the name they advertise, as their Bluetooth service is a common one.
 - **ZOTEK Bluetooth meters (not tried with a real meter yet)** — ZT-5B, ZT-5BQ, ZT-300AB and ZT-5566SE, sold also as ZOYI, BSIDE and ANENG (V05B, ST207, AN9002, AN999S), with the keys of ZOTEK's app. They all advertise as "Bluetooth DMM": Add device listens to the meter found and chooses the model its first reading names.
 - **HoldPeak HP-570C-APP clamp over Bluetooth LE** — also sold as AOPUTTRIVER AP-570C-APP; the FS9721 frame of the HP-90EPC, found by its service 0xFFB0, by its manufacturer data (company 0xFFAC) and by its name "FS9721-LP3". From the maker's app, not tried on a meter yet. The FS9721 meters (VC 820, UT60E, HP-90EPC, ...) show REL and the low battery symbol.
-- **Every model has a kind** — handheld or bench multimeter, thermometer, luxmeter, air quality meter, battery monitor, solar charge controller, inverter, ... (by its protocol, a few models named one by one). The model list of Add device and the device settings shows it as a tooltip, the list of supported devices in a column of its own. The last page of Add device ("Where should it go?") shows a picture of the kind with the name, model, type, protocol and connection of the device.
-- **Device pictures in the makers' colours** — a red UNI-T, a yellow Fluke ... — on the last page of Add device and, small, before each entry of My devices in the sidebar; with a light outline in a dark design.
-- **Specifications in a Data tab** — My devices, Info and settings shows the manual's ranges, resolution, accuracy, input impedance and overload protection of the UT803, UT804, UT61B+/D+/E+, UT161B/D/E and ZT-5B / V05B (transcribed by dmm-tools; `tools/update_device_specs.py` takes them over), of the HP-570C-APP from its manual and of the CMT 3503 from its data sheet.
-- **Up to four values per meter** — the main one and three more; the display's small line shows two, any of them can be the big one. The Metex M-3850D and its relatives keep all four lines they send; the views' value menus, the alarms and SCPI (`@4`) offer the fourth. A meter set up by hand shows as many values as it sends, not only as many as its lines per reading.
-- **Victron: a third and a fourth value** — besides the main and the second one (device settings, none at first), on the display's small line, in the graph and the export.
-- **Simulated meter with up to four values** — Device settings, "Values"; the further ones each with unit, coupling and a formula that may use the values before it (`v1 * v2`). sigrok: a meter's channels P2 to P4 are its second to fourth value; they went into the main value by turns.
 - **New units: m/s (wind speed), %RH (relative humidity), dBA and dBC (sound level)** — no longer read as milli-"/s" or unknown.
 - **Meters that show dashes or a fault word instead of a number** — "----" (APPA), "--" (Victron's time to go while charging) and ZOTEK's NCV dashes are no value: a gap, not an overload, in the CSV `none`. "FUSE", "Er", "PROBE", "BATT" (APPA) are a fault: the display shows the word, the status line says it, a red mark where it began, in the CSV `fault`. APPA's dashes and fault words gave no reading at all before.
 - **Benetech GM1020 shows its temperature as second value** — it came along, but only SCPI had it.
@@ -27,7 +21,7 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 - **Keys of your own** — the new settings page Keyboard lists the commands of the main window with their key and the default; a key can be changed, taken away or set back, a key in use is taken from the other command after a question. One set for all instances (`shortcuts.conf`), a running instance takes a change over at once.
 - **Hide toolbar (Ctrl+M)** — in the menu and the right-click menu of the windows: the toolbar goes away for more room, the same key brings it back (a note says so, until "Do not show this again"); the workspace keeps it. The menu moves from Ctrl+M to F7. The toolbar also comes back with the small arrow at the right end of the status line, always there.
 - **Alarms colour the displays** — while an alarm is raised, the display and the analog meter take its colour (the LCD's face, light or dark digits for contrast; a third of it in the meter's dial), also after Acknowledge until the reading is back; with several alarms the one raised last. A switch per alarm (on by default), and "Coloured displays blink" on the Alarms page (off by default).
-- **MAX, MIN and AVG light on the display** — when the meter shows its own maximum, minimum or average (UNI-T iENV, APPA); the AVG of APPA meters was lost on the way to the keys and the display.
+- **MAX, MIN and AVG light on the display** — when the meter shows its own maximum, minimum or average (UNI-T iENV, APPA); a "P" before MAX and MIN for the peak values (UT202BT); the AVG of APPA meters was lost on the way to the keys and the display.
 - **Window menus tidied** — "Title bar" and "Hide toolbar" are gone from the window menus (the title bars stay in Arrange, F10); the graph and the readings table have "Hide window" first in their menus as the other windows.
 - **Status line without a readings dot** — the dot of the device in My devices blinks with the readings instead. Readings table: "Clear table" instead of "Clear" (it looked like it deleted a row).
 - **Design Silver: the area behind the windows is a plain grey** — its gradient showed as stripes across it.
@@ -38,6 +32,9 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 
 ### Multi-value meters
 
+- **Up to four values per meter** — the main one and three more; the display's small line shows two, any of them can be the big one. The Metex M-3850D and its relatives keep all four lines they send; the views' value menus, the alarms and SCPI (`@4`) offer the fourth. A meter set up by hand shows as many values as it sends, not only as many as its lines per reading.
+- **Victron: a third and a fourth value** — besides the main and the second one (device settings, none at first), on the display's small line, in the graph and the export.
+- **Simulated meter with up to four values** — Device settings, "Values"; the further ones each with unit, coupling and a formula that may use the values before it (`v1 * v2`). sigrok: a meter's channels P2 to P4 are its second to fourth value; they went into the main value by turns.
 - **Primary value** — the display's right-click menu chooses the value shown big (the min/max memory follows it); the analog meter and the Poincaré plot choose theirs under Value; kept with the window layout. The recording stays the main value's.
 - **A sidebar row for each value** — below this window's instance, with its reading and a dot in its curve's colour while the graph shows it. Its right-click menu says which window shows the value: the LCD (main value, or left or right on the small line), the analog meter, the graph — off or on the left or right axis, where the same unit joins and another one takes the axis over — and the Poincaré plot. The value menus of the windows are gone.
 - **Names the meter gives its values** — Victron: "Battery voltage", "State of charge" — in the sidebar, the value menu, the alarm's choice of value and the graph legend; without one the sidebar row shows unit and coupling ("A DC"), the tooltip the full name.
@@ -56,6 +53,7 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 - **Smaller points on the curves** — 5 px, large 8 px instead of 7 and 11.
 - **The time axis runs on smoothly with the clock** — live (and recording, with its end in view), about 30 times a second, instead of jumping with each reading (a Victron sends one a second); one drawing clock for the graph and the Poincaré plot, slower by itself when drawing takes too long (`Graph/frame-rate`, 0 = as before).
 - **Poincaré plot: the y axis title stands at its labels in a wide window** — not at the left edge of the window.
+- **With the main value hidden, graph helpers follow the left axis** — the reference line, the min/max band and the cursors' level lines follow the value on the left axis instead of going away.
 
 ### Export
 
@@ -69,18 +67,21 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 - **The meter's values as channels** — `READ? (@2)`, `FETCh? (@1:3)`, `(@1,3)` and the like for `READ?`, `FETCh?`, `MEASure?`, `DATA?`, `VALue?`, `UNIT?` and `CONFigure?`, several answered in one line; `READ3?` alike. `QTDMM:CHANnel:CATalog?` lists them. qtdmm-mcp: `reading` and `watch` take a channel, the tool `channels` lists them; `reading2` is gone.
 - **Min/max memory and recorded readings per value** — of each value of a meter, not only of the display's or the main one: `CALCulate:AVERage:MAXimum? (@2)` (or `CALCulate2:...`) and its `CLEar`, `QTDMM:RECord:DATA? 500,(@2)`; several channels at once. qtdmm-mcp: `min_max` and `recording_data` take a channel.
 - **Units in one ASCII spelling each** — "C", "F", "Ohm"; the UNI-T iENV meters answered "°C", meters with °F "dF" or "°F".
+- **VXI-11 on Windows** — the own portmapper on a free port could fail to start ("The address is protected") when Windows kept the ports in a row for itself; it now takes a port Windows allows for UDP first.
 
 ### Devices and connections
 
 - **My devices: Info and settings** — a double click on a device, or "Info and settings..." in its menu, opens its info — the picture and data as on the assistant's last page, where it is in use, connected or not, the last reading, a low battery, its values, a link to the maker's website and to the supported devices — next to its settings. A click switches after the double-click time, so a double click does not switch first; the tooltip says whether it is in use here.
 - **Add device, last page** — the TFA sensor's connection reads "USB-HID /dev/hidraw3", without serial parameters.
 - **Device settings: "Lines per reading"** — the box "Number of values" of the manual settings is called "Lines per reading", what it always counted (a Metex M-3850D sends four lines, one per value). How many values a model from the table has is told by the table apart from that; a meter with both values in one frame no longer counts its frames.
+- **Every model has a kind** — handheld or bench multimeter, thermometer, luxmeter, air quality meter, battery monitor, solar charge controller, inverter, ... (by its protocol, a few models named one by one). The model list of Add device and the device settings shows it as a tooltip, the list of supported devices in a column of its own. The last page of Add device ("Where should it go?") shows a picture of the kind with the name, model, type, protocol and connection of the device.
+- **Device pictures in the makers' colours** — a red UNI-T, a yellow Fluke ... — on the last page of Add device and, small and without outline, before each entry of My devices in the sidebar; with a light outline in a dark design.
+- **Specifications in a Data tab** — My devices, Info and settings shows the manual's ranges, resolution, accuracy, input impedance and overload protection of the UT803, UT804, UT61B+/D+/E+, UT161B/D/E and ZT-5B / V05B (transcribed by dmm-tools; `tools/update_device_specs.py` takes them over), of the HP-570C-APP from its manual and of the CMT 3503 from its data sheet.
 
 ### Bluetooth
 
 - **Seldom advertising meters are found** — Add device searches 20 s (was 7), the settings' Scan 15 s (was 6), the connect waits up to 30 s for the meter (was 8; BlueZ connects only to a device it has just seen, so a meter not seen in time was not connected and not found again after a loss). With `QT_LOGGING_RULES="qtdmm.ble.debug=true"` the search logs each Bluetooth device it sees.
 - **Without an adapter, with Bluetooth switched off or in a build without it** — the Bluetooth tile of Add device and the Scan button of the settings are off, their tooltip says why; a search that fails says so with the reason (and in the log, also when the connect searches for the meter) instead of finding nothing.
-- **Linux: the search asks BlueZ for LE only** — as `bluetoothctl scan le` does; Qt's mixed classic + LE search heard a seldom advertising meter (a user's HP-570C-APP) only now and then.
 - **Linux, workaround for the HP-570C-APP** — Add device's search, the settings' Scan and the connect run `bluetoothctl scan le` beside Qt's search (when installed); a user's meter was found only so.
 - **UNI-T Bluetooth meters: a key takes effect sooner** — no poll for 0.6 s after it (a poll before the meter's acknowledgement went unanswered).
 
@@ -94,12 +95,9 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 - **A long recording no longer slows down with every reading** — at 2000 readings the graph took ~7 ms for each one (a whole curve built anew every few readings, and the hidden points and integral kept up to date); now ~0.5 ms, ~1.6 ms with points shown.
 - **Switching to another device starts with an empty graph** — before, the last reading of the device before stayed in it with its second display: the axis kept that scale and prefix (k%RH after a CO2 meter), the right axis and the legend kept its temperature. The Poincaré plot starts anew too; the axis title comes with the first reading, also when the new device measures in the same unit.
 - **Alarm thresholds carry the unit of the reading** — the settings page labels them with A, Ohm, ppm ...; it always said V. It follows another device also while the settings are open, and before the first reading the thresholds go without a unit.
-- **With the main value hidden, graph helpers follow the left axis** — the reference line, the min/max band and the cursors' level lines follow the value on the left axis instead of going away.
-- **VXI-11 on Windows** — the own portmapper on a free port could fail to start ("The address is protected") when Windows kept the ports in a row for itself; it now takes a port Windows allows for UDP first.
 - **Victron: the time to go shows in minutes below an hour and in hours with a decimal above** — 1.5 h, not 90 min, and "--" while charging instead of nothing (as VictronConnect has it); the graph keeps minutes.
 - **The meter's keys under the LCD no longer lie over each other after choosing another meter** — they were placed anew only when the window was resized.
 - **Dark design: the sidebar's background stayed unpainted** — after the desktop switches between light and dark, the design is applied anew.
-- **The UT202BT's HOLD no longer flickers in AC A** — the frequency frames took HOLD as off.
 - **Readings table statistics** — the statistics line is of one value: it counted the readings of all values, and says which.
 
 ## v26.2 — Nix Flake (2026-10-18)
