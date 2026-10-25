@@ -46,6 +46,12 @@ std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &d
 {
   m_result = {};
   m_result.main().id = id;
+  const auto dataError = [this]
+  {
+    printf("Data error!\n");
+    m_result.error = "Data error!";
+    return m_result;
+  };
   m_result.hold      = bit(data,7,1);
   m_result.range     = bit(data,7,5) ? "AUTO" : "MANU";
   m_result.showBar= bit(data,7,0);
@@ -62,22 +68,13 @@ std::optional<DmmDecoder::DmmResponse> DecoderQM1537::decode(const QByteArray &d
   {
     m_result.main().val = "";
   }
-  else goto error;
+  else
+    return dataError();
 
   for(int i=1;i<4;i++)
   {
-    if(data[i]<'0')
-      goto error;
-    if(data[i]>'9')
-      goto error;
-  }
-
-  if(0)
-  {
-    error:
-      printf("Data error!\n");
-      m_result.error = "Data error!";
-      return m_result;
+    if(data[i]<'0' || data[i]>'9')
+      return dataError();
   }
 
   if ((data[1] == ';') &&

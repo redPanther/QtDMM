@@ -402,7 +402,8 @@ void MainWindow::createSidebar()
 void MainWindow::fillViewToolbar()
 {
   toolBarDMM->insertAction(toolBarDMM->actions().value(0), m_sidebarAction);
-  m_addDeviceAction = new QAction(QIcon(new PlusIconEngine("qtdmm-dmm")), tr("&Add device..."), this);
+  auto *plusIcon = new PlusIconEngine("qtdmm-dmm");   // QIcon owns it
+  m_addDeviceAction = new QAction(QIcon(plusIcon), tr("&Add device..."), this);
   m_addDeviceAction->setObjectName("action_AddDevice");
   m_addDeviceAction->setToolTip(tr("Add device: a meter, a sensor or a calculated value"));
   m_addDeviceAction->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Add device</span></p>"
