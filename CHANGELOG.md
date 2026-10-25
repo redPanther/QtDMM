@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 26.3 (not released yet)
+## v26.3-rc1 — Multi-Value Meters, Time Cursors and Flatpak (2026-10-25)
 
 Keys of your own, a hideable toolbar, alarm colours on the displays, time cursors and an overview in the graph, meters with up to four values (a sidebar row for each), and a much larger SCPI server (channels, VXI-11). New Bluetooth meters from UNI-T, APPA, ZOTEK and HoldPeak; a Flatpak joins the release files.
 

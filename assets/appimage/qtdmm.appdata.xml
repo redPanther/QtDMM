@@ -40,6 +40,12 @@
   <update_contact>hello@qtdmm.de</update_contact>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="26.3~rc1" date="2026-10-25" type="development">
+      <description>
+        <p>First release candidate for QtDMM 26.3: keys of your own, a hideable toolbar, alarm colours on the displays, time cursors, a reference line and an overview in the graph, meters with up to four values with a sidebar row for each, and a much larger SCPI server with channels and VXI-11. New Bluetooth meters from UNI-T, APPA, ZOTEK and HoldPeak, and a Flatpak with its own signed repository.</p>
+      </description>
+      <url>https://github.com/qtdmm/QtDMM/releases/tag/26.3-rc1</url>
+    </release>
     <release version="26.2" date="2026-10-18">
       <description>
         <p>QtDMM 26.2: a new main window with display, analog meter, graph, readings table and the new Poincaré plot as windows in one area, the designs System, Silver and Dark, a sidebar with My devices and an assistant to add a meter, a tidied settings dialog, the graph modes Live, Record and View with a recording that keeps every reading, the SCPI server also over HiSLIP for VISA, keys for the UNI-T Bluetooth meters, USB-HID cables that are found again after plugging in, and about 60 more meters, among them Keysight U12xx, APPA, UNI-T thermometers and luxmeters. Since the release candidate: fixes for the graph and the digital display, and a Nix flake.</p>
