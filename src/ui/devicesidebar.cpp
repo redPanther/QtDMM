@@ -68,8 +68,8 @@ QPixmap symbolOf(const MyDevice &d, qreal dpr)
   const QSize box(kSymbolSize, kSymbolSize);
   for (const DmmDecoder::DMMInfo &info : DmmDecoder::getDeviceConfigurations())
     if (DmmDecoder::sameModel(d.model(), info.name))
-      return DeviceSymbol::pixmap(info.vendor, DeviceType::of(info), box, dpr);
-  return DeviceSymbol::unknown(box, dpr);
+      return DeviceSymbol::pixmap(info.vendor, DeviceType::of(info), box, dpr, DeviceSymbol::Design::Flat);
+  return DeviceSymbol::unknown(box, dpr, DeviceSymbol::Design::Flat);
 }
 }
 
