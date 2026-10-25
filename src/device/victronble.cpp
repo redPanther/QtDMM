@@ -158,7 +158,7 @@ quint32 VictronBle::BitReader::unsignedBits(int bits)
 qint32 VictronBle::BitReader::signedBits(int bits)
 {
   const quint32 raw = unsignedBits(bits);
-  if (bits < 32 && (raw & (quint32(1) << (bits - 1))))
+  if (bits > 0 && bits < 32 && (raw & (quint32(1) << (bits - 1))))
     return qint32(raw) - qint32(quint32(1) << bits);
   return qint32(raw);
 }

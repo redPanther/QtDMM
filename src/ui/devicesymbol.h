@@ -20,7 +20,8 @@ enum class Design
 {
   Auto,    ///< from the application's palette: dark when its window colour is
   Light,
-  Dark
+  Dark,
+  Flat     ///< without the outline: the small pictures of the sidebar, alike in both designs
 };
 
 /// The picture of @p type for a model of @p vendor (DMMInfo::vendor, as

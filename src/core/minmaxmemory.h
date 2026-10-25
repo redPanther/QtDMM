@@ -47,7 +47,7 @@ public:
       m_min = r.value;
       res.newMin = true;
     }
-    if (!r.overload && r.value == r.value)   // not NaN
+    if (!r.overload && !std::isnan(r.value))
     {
       m_sum += r.value;
       ++m_count;

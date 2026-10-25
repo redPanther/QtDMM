@@ -44,8 +44,8 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
 
 ## Making a release
 
-1. **CHANGELOG**: give the top section its version and date,
-   `* 12/10/2026 26.1`.
+1. **CHANGELOG.md**: give the top section its version and date,
+   `## v26.3 — <title> (2026-11-22)` instead of `## Unreleased — 26.3 (not released yet)`.
 2. **AppStream** (`assets/appimage/qtdmm.appdata.xml`): add the release at
    the top of `<releases>`. A release candidate gets `type="development"`
    and a `~` instead of the `-`: AppStream sorts `26.1-rc1` after `26.1`, and
@@ -88,7 +88,7 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    and until then the release has no binaries.
    Mark a release candidate as a pre-release there by hand.
 7. Check the draft on GitHub: download and start the builds, then write the
-   notes (from CHANGELOG). Publish it. The macOS `.dmg` is only checked by
+   notes (from CHANGELOG.md). Publish it. The macOS `.dmg` is only checked by
    CI (bundle contents, architectures, signature, minimum macOS, a start
    with `--version`); test it on a Mac when one is available.
 8. Publishing the release runs the **GitHub Pages** workflow

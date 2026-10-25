@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
+#include <cmath>
 #include <QString>
 #include <QVector>
 
@@ -16,7 +17,7 @@ struct RawPoint
   Quality quality = Quality::Valid;   ///< Overload, Stale (a gap) or Valid
   quint32 flags = 0;        ///< SampleFlag of the reading
 
-  bool    gap() const { return value != value; }   // NaN, without <cmath>
+  bool    gap() const { return std::isnan(value); }
 };
 
 /// The readings of one port of a recording, in time order, with their times.

@@ -14,6 +14,7 @@ See docs/dev/qtdmm-mcp.md.
 """
 
 import argparse
+import math
 import socket
 import time
 from datetime import datetime
@@ -130,9 +131,10 @@ def split_list(text):
 def value(text):
     """+1.2E+00 as a number; overload (-overload for -OL) and no reading as words."""
     v = float(text)
-    if abs(v) == 9.9e37:
+    # the SCPI marks 9.9E+37 and 9.91E+37, compared without float equality
+    if math.isclose(abs(v), 9.9e37, rel_tol=1e-6):
         return "overload" if v > 0 else "-overload"
-    if v == 9.91e37:
+    if math.isclose(v, 9.91e37, rel_tol=1e-6):
         return "no reading"
     return v
 

@@ -99,5 +99,5 @@ jobs:
           gh release create "$TAG" dist/* \
             --repo "$GITHUB_REPOSITORY" --verify-tag --draft $pre \
             --title "QtDMM $TAG" \
-            --notes "Draft created from tag $TAG. The changes are in CHANGELOG; the handbook is at https://qtdmm.de/docs/."
+            --notes "Draft created from tag $TAG. The changes are in CHANGELOG.md; the handbook is at https://qtdmm.de/docs/."
         fi

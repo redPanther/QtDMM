@@ -1,12 +1,22 @@
 <!-- GENERATED from docs/ by tests/generate_docs.py - edit the pages in docs/, not this file -->
 
-[![](https://img.shields.io/github/v/release/qtdmm/QtDMM?sort=date)](https://github.com/qtdmm/QtDMM/releases)
+[![Release](https://img.shields.io/github/v/release/qtdmm/QtDMM?sort=date)](https://github.com/qtdmm/QtDMM/releases)
 [![License: GPL-3.0-or-later](https://img.shields.io/github/license/qtdmm/QtDMM)](https://github.com/qtdmm/QtDMM/blob/master/LICENSE)
 
-|         Build        | Status |
-| -------------------- | ------ |
-|  Fedora Copr master  |[![](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/) |
-| Fedora Copr release |[![](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/) |
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=qtdmm_QtDMM&metric=alert_status)](https://sonarcloud.io/dashboard?id=qtdmm_QtDMM)
+[![Security](https://sonarcloud.io/api/project_badges/measure?project=qtdmm_QtDMM&metric=security_rating)](https://sonarcloud.io/dashboard?id=qtdmm_QtDMM)
+[![Reliability](https://sonarcloud.io/api/project_badges/measure?project=qtdmm_QtDMM&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=qtdmm_QtDMM)
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=qtdmm_QtDMM&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=qtdmm_QtDMM)
+
+| Build               | Status |
+| ------------------- | ------ |
+| Windows             | [![Windows](https://github.com/qtdmm/QtDMM/actions/workflows/cmake-windows-platform.yml/badge.svg?branch=master)](https://github.com/qtdmm/QtDMM/actions/workflows/cmake-windows-platform.yml) |
+| macOS               | [![macOS](https://github.com/qtdmm/QtDMM/actions/workflows/cmake-mac-platform.yml/badge.svg?branch=master)](https://github.com/qtdmm/QtDMM/actions/workflows/cmake-mac-platform.yml) |
+| FreeBSD             | [![FreeBSD](https://github.com/qtdmm/QtDMM/actions/workflows/cmake-freebsd-platform.yml/badge.svg?branch=master)](https://github.com/qtdmm/QtDMM/actions/workflows/cmake-freebsd-platform.yml) |
+| Flatpak             | [![Flatpak](https://github.com/qtdmm/QtDMM/actions/workflows/flatpak.yml/badge.svg?branch=master)](https://github.com/qtdmm/QtDMM/actions/workflows/flatpak.yml) |
+| Nix                 | [![Nix](https://github.com/qtdmm/QtDMM/actions/workflows/nix.yml/badge.svg?branch=master)](https://github.com/qtdmm/QtDMM/actions/workflows/nix.yml) |
+| Fedora Copr master | [![Copr master](https://img.shields.io/badge/Fedora-Copr%20master-51A2DA?logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/) |
+| Fedora Copr release | [![Copr release](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/) |
 
 # QtDMM
 
@@ -303,7 +313,7 @@ meter working, please report it on the
 | Uni-Trend | UT161B ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
 | Uni-Trend | UT161D ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 6000 |
 | Uni-Trend | UT161E ¹ | Handheld multimeter | - | `UniTUT61Plus` | Bluetooth LE | - | 22000 |
-| Uni-Trend | UT202BT ¹ | Clamp meter | - | `UniTUT202BT` | Bluetooth LE | - | 10000 |
+| Uni-Trend | UT202BT | Clamp meter | - | `UniTUT202BT` | Bluetooth LE | - | 10000 |
 | Uni-Trend | UT30A ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Uni-Trend | UT30E ¹ | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | Uni-Trend | UT321 ¹ | Thermometer | - | `UniTUT32x` | 2400 8N1 | - | 9999 |

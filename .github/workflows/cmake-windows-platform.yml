@@ -17,7 +17,7 @@ jobs:
         fetch-depth: 0   # tags and history: the version comes from git describe
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4
       with:
         version: '6.8.*'
         arch: win64_msvc2022_64
@@ -47,7 +47,7 @@ jobs:
         Get-ChildItem $fonts
 
     - name: Set up MSVC environment
-      uses: ilammy/msvc-dev-cmd@v1
+      uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
       with:
         arch: x64
 

@@ -35,10 +35,19 @@ QString first(const QStringList &names, Design design)
   return {};
 }
 
-QPixmap render(const QString &path, QSize box, qreal dpr)
+// the outline of the light pictures (QTDMM_SYMBOL_OUTLINE_LIGHT of device_symbols.cmake)
+constexpr char kOutline[] = "#3A3D41";
+
+QPixmap render(const QString &path, QSize box, qreal dpr, Design design = Design::Light)
 {
-  QSvgRenderer renderer(path);
-  if (path.isEmpty() || !renderer.isValid())
+  QByteArray svg;
+  QFile file(path);
+  if (!path.isEmpty() && file.open(QIODevice::ReadOnly))
+    svg = file.readAll();
+  if (design == Design::Flat)
+    svg.replace(kOutline, "none").replace(QByteArray(kOutline).toLower(), "none");
+  QSvgRenderer renderer(svg);
+  if (svg.isEmpty() || !renderer.isValid())
     return {};
 
   QPixmap pm(box * dpr);
@@ -95,11 +104,11 @@ QString path(const QString &vendor, DeviceType::Type type, Design design)
 
 QPixmap pixmap(const QString &vendor, DeviceType::Type type, QSize box, qreal devicePixelRatio, Design design)
 {
-  return render(path(vendor, type, design), box, devicePixelRatio);
+  return render(path(vendor, type, design), box, devicePixelRatio, design);
 }
 
 QPixmap unknown(QSize box, qreal devicePixelRatio, Design design)
 {
-  return render(first({ QStringLiteral("unknown") }, design), box, devicePixelRatio);
+  return render(first({ QStringLiteral("unknown") }, design), box, devicePixelRatio, design);
 }
 }
