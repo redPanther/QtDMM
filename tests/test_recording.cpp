@@ -142,6 +142,24 @@ int main(int argc, char **argv)
       check(lines.value(3).endsWith(QString::fromUtf8(";nan;V;-OL;nan;A;gap")) && lines.value(1).endsWith(";1;V;ok;;;"),
             "status: written again: " + lines.join(" | "));
     }
+    // only value 3 exported, and a value with an exponent (R14-03, R14-07)
+    const QString threePath = tmp.path() + "/three.csv";
+    QFile t(threePath);
+    check(t.open(QIODevice::WriteOnly | QIODevice::Text), "value 3 file opens");
+    QTextStream(&t) << "timestamp;time (s);value;unit;status;value 3;unit 3;status 3\n"
+                       "2026-01-01T00:00:00,000;0;5.55111512313e-17;V;ok;2;A;ok\n";
+    t.close();
+    const auto three = RecordingFile::read(threePath, &err);
+    check(three && three->extra.size() == 1 && three->extra[0].id == 2 && std::fabs(three->values.value(0)) < 1e-15,
+          "value 3 keeps its number, an exponent reads: " + err);
+    if (three)
+    {
+      const QString out = tmp.path() + "/three_out.csv";
+      check(RecordingFile::write(*three, out, &err), "value 3: write: " + err);
+      QFile o(out);
+      check(o.open(QIODevice::ReadOnly | QIODevice::Text) && QString::fromUtf8(o.readLine()).trimmed().endsWith(";value 3;unit 3;status 3"),
+            "value 3: the header says value 3");
+    }
     const auto old = RecordingFile::read(writeCsv("old.csv", "2026-01-01T00:00:00,000;0;nan;V\n2026-01-01T00:00:01,000;1;2;V\n"), &err);
     check(old && old->stateAt(0) == CellState::Gap && old->stateAt(1) == CellState::Ok && old->extra.isEmpty(),
           "status: an old file, nan a gap");

@@ -239,15 +239,15 @@ QList<int> ScpiServer::channels(const Command &cmd, int suffix)
       pushError(-104, "Data type error; a channel range goes up (@1:3)");
       return {};
     }
+    // check the range before writing it out: (@1:2147483647) must not allocate or loop forever
+    if (from < 1 || to > count)
+    {
+      pushError(-222, QString("Data out of range; channel %1, the meter has %2").arg(from < 1 ? from : to).arg(count));
+      return {};
+    }
     for (int c = from; c <= to; ++c)
       out << c;
   }
-  for (int c : out)
-    if (c < 1 || c > count)
-    {
-      pushError(-222, QString("Data out of range; channel %1, the meter has %2").arg(c).arg(count));
-      return {};
-    }
   return out;
 }
 

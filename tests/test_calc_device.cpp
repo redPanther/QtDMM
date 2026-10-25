@@ -108,6 +108,14 @@ int main(int argc, char **argv)
   r = decode(calc.currentLine(now, nullptr));
   check(r && std::fabs(r->main().dval - 0.006) < 1e-9 && r->main().unit == "mW", QString("6 mW: dval %1 unit %2").arg(r ? r->main().dval : -1).arg(r ? r->main().unit : "-"));
 
+  // units of their own are no prefix: 415 ppm is not 415 p·pm (R14-04)
+  for (const auto &[text, value] : { std::pair{ "P1: 415 ppm AUTO", 415.0 }, { "P1: 5 min AUTO", 5.0 },
+                                     { "P1: 3.5 m/s AUTO", 3.5 }, { "P1: 2.5 KOhm AUTO", 2500.0 }, { "P1: 12 mV AUTO", 0.012 } })
+  {
+    const auto u = decode(QByteArray(text).rightJustified(29, ' ') + '\n');
+    check(u && std::fabs(u->main().dval - value) < 1e-9 * value, QString("%1: dval %2").arg(text).arg(u ? u->main().dval : -1));
+  }
+
   // --- 4. stale and invalid inputs ---
   r = decode(calc.currentLine(now + CalcDevice::kStaleMs + 1, &status));
   check(r && r->main().val.trimmed() == "OL" && status.contains("No current value"), "stale input -> OL + message: " + status);

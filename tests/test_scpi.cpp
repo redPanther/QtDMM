@@ -122,6 +122,12 @@ int main(int argc, char **argv)
           "units: one ASCII spelling each");
     c.process("*CLS");
     check(ask(c, "READ? (@4)").isEmpty() && ask(c, "SYST:ERR?").startsWith("-222,"), "channels: (@4) the meter has not");
+    // a huge range is refused before it is written out (R14-01)
+    for (const char *huge : { "READ? (@1:999999999)", "READ? (@1:2147483647)", "READ? (@0:2)" })
+    {
+      c.process("*CLS");
+      check(ask(c, huge).isEmpty() && ask(c, "SYST:ERR?").startsWith("-222,"), QString("channels: %1 is -222").arg(huge));
+    }
     for (const char *bad : { "READ? (@", "READ? (@)", "READ? (@3:1)", "READ? (@a)", "READ? (@1,)" })
     {
       c.process("*CLS");

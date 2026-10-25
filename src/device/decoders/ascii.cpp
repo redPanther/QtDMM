@@ -1,6 +1,7 @@
 #include "device/decoders/ascii.h"
 
 #include "core/sampletypes.h"
+#include "core/siprefix.h"
 
 static const bool registered = []() {
   DmmDecoder::addConfig({"Digitech", "QM1350", "", 600, FrameFormat::Metex14, 7, 2, 1, 0, 4000, 0, 0, 1});
@@ -140,7 +141,6 @@ std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &da
   m_result.range = "";
   m_result.hold = false;
   m_result.showBar = true;
-  QStringList unit_prefixes = {"k","M","G","m","µ","u","n","p"};
     QString str(data);
 
   switch (m_type)
@@ -181,13 +181,15 @@ std::optional<DmmDecoder::DmmResponse> DecoderAscii::decode(const QByteArray &da
       // docs/protocols/sources/metex-22t.log, and heha's Metex.cpp lists
       // "pnum KMG" as the prefix alphabet). Normalise it so the value is scaled
       // and the unit matches what LcdWidget knows.
-      QString prefix = m_result.main().unit.left(1);
-      if (prefix == "K")
-        prefix = "k";
-      if (unit_prefixes.contains(prefix))
-        formatResultValue(0, prefix, m_result.main().unit.mid(1));
-      else
+      QString unit = m_result.main().unit;
+      if (unit.startsWith('K'))
+        unit[0] = 'k';
+      // split() keeps units of their own whole: 415 ppm, 5 min, 3.5 m/s
+      const SiPrefix::Split split = SiPrefix::split(unit);
+      if (split.prefix.isEmpty())
         formatResultValue(0, "", m_result.main().unit);
+      else
+        formatResultValue(0, split.prefix, split.baseUnit);
       break;
     }
   }

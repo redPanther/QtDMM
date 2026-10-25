@@ -24,6 +24,7 @@ enum class CellState : quint8
 /// unit and, row by row as Recording::values, its values and states.
 struct RecordingColumn
 {
+  int id = 0;                 ///< the value (1 = value 2 ...); 0 = by its place
   QString unit;               ///< without SI prefix
   QVector<double> values;     ///< NaN for anything but Ok
   QVector<CellState> states;  ///< one per row

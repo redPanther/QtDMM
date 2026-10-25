@@ -23,11 +23,12 @@ public:
     bool newMax = false;
   };
 
-  /// A main value that is not held. An overload (NaN) is no new extreme.
+  /// A main value that is not held. An overload (NaN) is no new extreme;
+  /// neither it nor "----"/"Er" (no unit) starts the memory afresh.
   Result feed(const Reading &r)
   {
     Result res;
-    if (!r.overload && r.port.quantity != Quantity::Unknown)
+    if (!r.overload && !r.noNumber() && r.port.quantity != Quantity::Unknown)
     {
       if (m_port.isValid() && (r.port != m_port || r.baseUnit != m_baseUnit))
       {
