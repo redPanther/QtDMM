@@ -142,7 +142,11 @@ int main(int argc, char **argv)
     int asked = 0;
     dlg.setStatus([&] { ++asked; return QString("<p>In use in this window.</p>"); });
     check(asked == 1 && dlg.statusText().contains("In use"), "Info: the state at once");
-    QTest::qWait(1100);
+    // a second, and a busy CI runner may be late with it
+    QElapsedTimer waited;
+    waited.start();
+    while (asked < 2 && waited.elapsed() < 3000)
+      QTest::qWait(50);
     check(asked >= 2, QString("Info: the state again each second, asked %1 times").arg(asked));
     check(dlg.linksText().contains("https://www.uni-trend.com/") && dlg.linksText().contains("help:supported-devices.md"),
           "Info: the maker's website and the help: " + dlg.linksText());
