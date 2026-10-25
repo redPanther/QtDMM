@@ -118,14 +118,13 @@ QList<int> LcdWidget::secondaries() const
   const int primary = primaryShown();
   QList<int> ids;
   if (m_secondaries)
-  {
     for (int id : *m_secondaries)
       if (id >= 0 && id < m_numValues && id != primary && !ids.contains(id) && ids.size() < kSmallLineValues)
         ids << id;
-    return ids;
-  }
+  // a free place takes the next value: a choice made with a meter of two
+  // values left the third one of the next meter off the display
   for (int id = 0; id < m_numValues && ids.size() < kSmallLineValues; ++id)
-    if (id != primary)
+    if (id != primary && !ids.contains(id))
       ids << id;
   return ids;
 }
