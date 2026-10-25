@@ -100,6 +100,10 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    page says the repository is not online yet. A release published on the
    release page before its files were there gets its Flatpak bundle into the
    repository too: the Release workflow starts Pages again after the upload.
+   A release runs on its tag, so the environment `github-pages` (*Settings →
+   Environments*) needs a rule of ref type **Tag**, `[0-9]*`, next to the
+   branch `master`; without it the deploy job fails with "Tag ... is not
+   allowed to deploy to github-pages" (set up for 26.3-rc1).
 9. Tell the website: the download page links the new release.
 
 A bugfix release `26.1.1` is tagged the same way, on a branch `26.1` created
