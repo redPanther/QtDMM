@@ -100,7 +100,7 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | `QTDMM:ALARm:LIST?` | every alarm with its state: `"Over 5 V",RAIS,"Low",OFF` - `OFF`, `PEND` (the condition holds, not yet for its minimum duration), `RAIS`, `ACKN` |
 | `QTDMM:ALARm:ACKnowledge` | acknowledges the alarms, as the banner's button |
 | `QTDMM:MARK "text"` | a mark at the newest reading, in the graph and the readings table (`SCPI` without text) |
-| `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV meters UT333BT, UT353BT, UT363BT, UT383BT, the ZOTEK Bluetooth meters), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
+| `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV meters UT333BT, UT353BT, UT363BT, UT383BT, the ZOTEK and OWON Bluetooth meters), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
 | `QTDMM:CHANnel:CATalog?` | the channels of `READ? (@n)`: number, what it measures and unit - `1,"carbon_dioxide","ppm",2,"temperature","C"`; empty strings before a channel's first reading |
 | `QTDMM:INSTances?` | the running instances with their last reading: `"default",+1.234000E+00,"V","psu",9.91E+37,""` |
 

@@ -1,0 +1,107 @@
+protocol: OwonBLE
+decoder: src/device/decoders/owon_ble.cpp
+devices: [OWON B33T+, OWON B35T+, OWON B41T+, OWON OW16B, OWON OW18B, OWON OW18E, OWON CM2100B]
+frames_per_reading: 1
+unit_map:                      # spec spelling -> what the decoder emits
+  "u": "µ"
+sources:
+  - "ablage/dmm-tools/docs/research/owon/reverse-engineered-protocol.md (dmm-tools, GPL-3.0-or-later: from OWON's app iMeter 1.2.4, its PC software pcMultimeter 1.4.5 and manuals; no meter on dmm-tools' bench)"
+  - "the community captures that spec collects in §14.5 (inflex/owon-b35 issue 1, webspiderteam, sercona/Owon-Multimeters, kwasmich/ow18e, pjpa365/owon-suite)"
+
+# The meter advertises as "BDM", service 0xFFF0, and notifies on 0xFFF4,
+# about three frames a second, unasked. A frame is three 16-bit
+# little-endian words, no header, length or checksum:
+#   function/range: bits 0-2 decimal point (0-5 digits after it, 6 UL,
+#     7 OL), 3-5 prefix (p n u m - k M G), 6-9 function (0 DC V, 1 AC V,
+#     2 DC A, 3 AC A, 4 Ohm, 5 F, 6 Hz, 7 %, 8 C, 9 F, 10 diode,
+#     11 continuity, 12 hFE, 13 NCV, 14 W, 15 VA), 10-15 111100 in every
+#     capture;
+#   status: bit 0 HOLD, 1 REL, 2 AUTO, 3 low battery, 4 MIN, 5 MAX (the
+#     higher bits disagree between OWON's two programs);
+#   count: bit 15 the sign, bits 0-14 the magnitude; 0x6FFF is no reading.
+# Value = count / 10^dp with the prefix (none for %, C, F, hFE, NCV). NCV:
+# 0 is "EF", 1-4 that many dashes.
+# 0xFFF2, read once, has the model code in byte 0: 33 B33, 35 B35, 41 B41,
+# 18 OW18B (OW16B), 20 OW18E, 21 CM2100. Keys: <code> <01 short, 00 long>
+# on 0xFFF3; 1 SELECT, 2 RANGE, 3 HOLD (held: light), 4 REL / ZERO on the
+# CM2100, 5 Hz/duty, 6 MAX/MIN.
+#
+# The first vector is OWON's own (a comment in its PC software, §12.1), the
+# next ones community captures with the reading their sources report
+# (§14.5). The last ones are SYNTHETIC, built from the tables (§6); they
+# test the decoder's reading of the spec, not a meter. No reading (0x6FFF),
+# the NCV dashes, the keys and the model codes are tested in
+# test_decoder --keys.
+vectors:
+  - source_line: "249.3 mV DC, AUTO (OWON's PC software, §12.1)"
+    bytes: 19 F0 04 00 BD 09
+    reading: {value: "249.3", unit: "mV", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "B35T+: 356.1 mV DC, AUTO (inflex issue 1, §14.5)"
+    bytes: 19 F0 04 00 E9 0D
+    reading: {value: "356.1", unit: "mV", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "B35T+: 29 C, no flags (inflex issue 1, §14.5)"
+    bytes: 20 F2 00 00 1D 00
+    reading: {value: "29", unit: "C", range_mode: manual}
+    expect: {special: "TE"}
+  - source_line: "B35T+: 0.016 V AC, AUTO (inflex issue 1, §14.5)"
+    bytes: 63 F0 04 00 10 00
+    reading: {value: "0.016", unit: "V", range_mode: auto}
+    expect: {special: "AC"}
+  - source_line: "B35T+: continuity OL (inflex issue 1, §14.5)"
+    bytes: E7 F2 00 00 00 00
+    reading: {value: "OL", unit: "Ohm", range_mode: manual}
+    expect: {special: "BUZ"}
+  - source_line: "B35T+: OL in MOhm, AUTO (webspiderteam, §14.5)"
+    bytes: 37 F1 04 00 00 00
+    reading: {value: "OL", unit: "MOhm", range_mode: auto}
+    expect: {special: "OH"}
+  - source_line: "B35T+: diode OL (webspiderteam, §14.5)"
+    bytes: A7 F2 00 00 00 00
+    reading: {value: "OL", unit: "V", range_mode: manual}
+    expect: {special: "DI"}
+  - source_line: "B35T+: -234.7 mV DC, AUTO (webspiderteam, §14.5)"
+    bytes: 19 F0 04 00 2B 89
+    reading: {value: "-234.7", unit: "mV", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "B41T+: 1.1137 MOhm, AUTO (sercona, §14.5)"
+    bytes: 34 F1 04 00 81 2B
+    reading: {value: "1.1137", unit: "MOhm", range_mode: auto}
+    expect: {special: "OH"}
+  - source_line: "CM2100B: 1.5046 V DC, AUTO (sercona, §14.5)"
+    bytes: 24 F0 04 00 C6 3A
+    reading: {value: "1.5046", unit: "V", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "CM2100B: 45.11 Ohm, AUTO (sercona, §14.5)"
+    bytes: 22 F1 04 00 9F 11
+    reading: {value: "45.11", unit: "Ohm", range_mode: auto}
+    expect: {special: "OH"}
+  - source_line: "OW18E: 2.390 kOhm, AUTO (sercona, §14.5)"
+    bytes: 2B F1 04 00 56 09
+    reading: {value: "2.390", unit: "kOhm", range_mode: auto}
+    expect: {special: "OH"}
+  - source_line: "OW18E: 0.0031 V DC, HOLD, AUTO (kwasmich, §14.5)"
+    bytes: 24 F0 05 00 1F 00
+    reading: {value: "0.0031", unit: "V", range_mode: auto, flags: [HOLD]}
+    expect: {special: "DC"}
+  - source_line: "-12.34 V DC, AUTO (constructed in the spec, §12.4)"
+    bytes: 22 F0 04 00 D2 84
+    reading: {value: "-12.34", unit: "V", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "SYNTHETIC: 12.5 uA DC, AUTO (prefix 2)"
+    bytes: 91 F0 04 00 7D 00
+    reading: {value: "12.5", unit: "uA", range_mode: auto}
+    expect: {special: "DC"}
+  - source_line: "SYNTHETIC: 1.0 mV DC, REL and AUTO, low battery"
+    bytes: 19 F0 0E 00 0A 00
+    reading: {value: "1.0", unit: "mV", range_mode: auto}
+    expect: {special: "DC", relative: true, lowBat: true}
+  - source_line: "SYNTHETIC: 50.00 % duty (the prefix bits say none)"
+    bytes: E2 F1 04 00 88 13
+    reading: {value: "50.00", unit: "%", range_mode: auto}
+    expect: {special: "DU"}
+  - source_line: "SYNTHETIC: NCV, no field (EF)"
+    bytes: 60 F3 00 00 00 00
+    reading: {value: "EF", unit: "", range_mode: manual}
+    expect: {special: "NCV", noValue: true}

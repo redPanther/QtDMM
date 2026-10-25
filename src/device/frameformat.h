@@ -80,6 +80,7 @@ public:
     UniTiENV,
     ZotekBLE,
     VC820BLE,
+    OwonBLE,
     EndOfList              // new stuff always before!
   };
 
