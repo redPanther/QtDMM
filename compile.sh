@@ -129,7 +129,7 @@ then
 		file="$(basename ${tool}).AppImage"
 		if [ ! -x "${file}" ]
 		then
-			wget -q "https://github.com/linuxdeploy/$(dirname ${tool})/releases/download/continuous/${file}" || exit 1
+			wget -q --https-only "https://github.com/linuxdeploy/$(dirname ${tool})/releases/download/continuous/${file}" || exit 1
 			chmod +x "${file}"
 		fi
 	done

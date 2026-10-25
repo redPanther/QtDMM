@@ -525,7 +525,7 @@ void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
     Q_EMIT valueMenuRequested(item->data(0, kValueId).toInt(), event->globalPos());
     return;
   }
-  if (!instanceOf(item).isEmpty())
+  if (item && !instanceOf(item).isEmpty())
   {
     instanceMenu(item, event->globalPos());
     return;
