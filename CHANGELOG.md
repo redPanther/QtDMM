@@ -94,6 +94,9 @@ Keys of your own, a hideable toolbar, alarm colours on the displays, time cursor
 
 - **A long recording no longer slows down with every reading** — at 2000 readings the graph took ~7 ms for each one (a whole curve built anew every few readings, and the hidden points and integral kept up to date); now ~0.5 ms, ~1.6 ms with points shown.
 - **Switching to another device starts with an empty graph** — before, the last reading of the device before stayed in it with its second display: the axis kept that scale and prefix (k%RH after a CO2 meter), the right axis and the legend kept its temperature. The Poincaré plot starts anew too; the axis title comes with the first reading, also when the new device measures in the same unit.
+- **A CSV file with a tiny value loads again** — an average around 0 was written as 5.55e-17, and QtDMM refused its own file as "not a valid file".
+- **ppm, min and m/s from sigrok, calculated values and the Simulated meter are no longer scaled** — 415 ppm was read as 415 p·pm (4.15e-10) in the graph, min/max, alarms and SCPI; the display was right.
+- **Min/max survive "----" and "Er" in continuity** — such a word has no unit, and the memory started afresh.
 - **Alarm thresholds carry the unit of the reading** — the settings page labels them with A, Ohm, ppm ...; it always said V. It follows another device also while the settings are open, and before the first reading the thresholds go without a unit.
 - **Victron: the time to go shows in minutes below an hour and in hours with a decimal above** — 1.5 h, not 90 min, and "--" while charging instead of nothing (as VictronConnect has it); the graph keeps minutes.
 - **The meter's keys under the LCD no longer lie over each other after choosing another meter** — they were placed anew only when the window was resized.

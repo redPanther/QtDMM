@@ -13,8 +13,9 @@
 | FreeBSD             | [![FreeBSD](https://github.com/qtdmm/QtDMM/actions/workflows/cmake-freebsd-platform.yml/badge.svg?branch=master)](https://github.com/qtdmm/QtDMM/actions/workflows/cmake-freebsd-platform.yml) |
 | Flatpak             | [![Flatpak](https://github.com/qtdmm/QtDMM/actions/workflows/flatpak.yml/badge.svg?branch=master)](https://github.com/qtdmm/QtDMM/actions/workflows/flatpak.yml) |
 | Nix                 | [![Nix](https://github.com/qtdmm/QtDMM/actions/workflows/nix.yml/badge.svg?branch=master)](https://github.com/qtdmm/QtDMM/actions/workflows/nix.yml) |
-| Fedora Copr master | [![Copr master](https://img.shields.io/badge/Fedora-Copr%20master-51A2DA?logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/) |
+| Fedora Copr master  | [![Copr master](https://img.shields.io/badge/Fedora-Copr%20master-51A2DA?logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm-git-master/) |
 | Fedora Copr release | [![Copr release](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/frankb/QtDMM/package/qtdmm/) |
+| openSUSE (OBS)      | [![OBS build result](https://build.opensuse.org/projects/electronics/packages/QtDMM/badge.svg?type=default)](https://build.opensuse.org/package/show/electronics/QtDMM) |
 
 # QtDMM
 

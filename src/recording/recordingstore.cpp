@@ -306,7 +306,10 @@ Recording RecordingStore::toRecording(bool raw, const QList<int> &extras) const
       others << &m_extra[e];
   rec.extra.resize(others.size());
   for (int c = 0; c < others.size(); ++c)
+  {
+    rec.extra[c].id = others[c]->id;
     rec.extra[c].unit = others[c]->unit;
+  }
   if (raw)
   {
     // from the reading that holds at the origin on, a row at every reading
@@ -441,7 +444,7 @@ void RecordingStore::load(const Recording &rec)
   {
     const RecordingColumn &col = rec.extra[c];
     RecordingSeries s;
-    s.id = c + 1;
+    s.id = col.id > 0 ? col.id : c + 1;
     s.unit = col.unit;
     m_extra << s;
     for (int i = 0; i < rec.values.size() && i < col.states.size(); i++)

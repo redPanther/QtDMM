@@ -369,6 +369,7 @@ void MeterController::forgetUnit()
   m_lastUnit.clear();
   m_baseUnit.clear();
   m_valueUnits.clear();
+  m_scpi->clearReadings();   // CHANnel:CATalog? and UNIT? (@4) must not keep the previous meter
   Q_EMIT unitChanged(QString());
   Q_EMIT baseUnitChanged(QString());
 }

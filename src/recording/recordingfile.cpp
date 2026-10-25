@@ -83,7 +83,7 @@ struct Cell
 // "1.25", "-3", "nan" (a gap or an overload), empty (not there)
 std::optional<Cell> cellFrom(const QString &value, const QString &unit, const QString *status)
 {
-  static const QRegularExpression number(R"(^-?\d+(?:\.\d+)?$)");
+  static const QRegularExpression number(R"(^-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?$)");
   Cell c;
   c.unit = unit;
   if (value.isEmpty())
@@ -129,11 +129,12 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
   bool withStatus = false;
   int groups = 1;
   bool header = false;
+  QStringList headerNames;
   if (line.startsWith("timestamp"))   // the CSV header
   {
-    const QStringList names = line.split(';');
-    withStatus = names.value(4) == QLatin1String("status");
-    groups = withStatus ? qMax(1, int(names.size() - 2) / 3) : 1;
+    headerNames = line.split(';');
+    withStatus = headerNames.value(4) == QLatin1String("status");
+    groups = withStatus ? qMax(1, int(headerNames.size() - 2) / 3) : 1;
     header = true;
     line = ts.readLine();
     if (line.isNull())
@@ -144,11 +145,11 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
   }
 
   static const QRegularExpression reLegacy(
-    R"(^(?<day>\d{2})\.(?<month>\d{2})\.(?<year>\d{4})\t(?<hour>\d{2}):(?<minute>\d{2}):(?<second>\d{2})(?::(?<ms>\d{1,3}))?\t(?<value>-?\d+(?:\.\d+)?|nan)\t(?<unit>.*)$)",
+    R"(^(?<day>\d{2})\.(?<month>\d{2})\.(?<year>\d{4})\t(?<hour>\d{2}):(?<minute>\d{2}):(?<second>\d{2})(?::(?<ms>\d{1,3}))?\t(?<value>-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?|nan)\t(?<unit>.*)$)",
     QRegularExpression::CaseInsensitiveOption);
   static const QRegularExpression reTime(
     R"(^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})T(?<hour>\d{2}):(?<minute>\d{2}):(?<second>\d{2})[,\.](?<ms>\d{1,3})$)");
-  static const QRegularExpression reDelta(R"(^(?:-?\d+(?:\.\d+)?|nan)$)", QRegularExpression::CaseInsensitiveOption);
+  static const QRegularExpression reDelta(R"(^(?:-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?|nan)$)", QRegularExpression::CaseInsensitiveOption);
 
   const bool isLegacy = reLegacy.match(line).hasMatch();
   // a CSV without the header: the columns say which format
@@ -159,6 +160,12 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
   }
   Recording rec;
   rec.extra.resize(groups - 1);
+  // "value 3": the column group is value 3 (id 2)
+  for (int g = 1; g < groups; ++g)
+  {
+    const QStringList name = headerNames.value(2 + 3 * g).split(' ');
+    rec.extra[g - 1].id = name.size() == 2 && name[0] == QLatin1String("value") ? qMax(0, name[1].toInt() - 1) : 0;
+  }
   QDateTime end;
   auto when = [](const QRegularExpressionMatch &m)
   {
@@ -250,12 +257,13 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
 namespace
 {
 // the header of the columns of each value: value, unit, status, then value 2 ...
-QStringList columnNames(int groups, const QStringList &names)
+// numbered by the value, so that a file with only value 3 says so
+QStringList columnNames(const QList<RecordingColumn> &extra, const QStringList &names)
 {
-  QStringList out;
-  for (int g = 0; g < groups; ++g)
+  QStringList out = names;
+  for (int g = 0; g < extra.size(); ++g)
     for (const QString &name : names)
-      out << (g ? QString("%1 %2").arg(name).arg(g + 1) : name);
+      out << QString("%1 %2").arg(name).arg((extra[g].id > 0 ? extra[g].id : g + 1) + 1);
   return out;
 }
 }
@@ -275,7 +283,7 @@ bool RecordingFile::write(const Recording &recording, const QString &path, QStri
   }
 
   QTextStream ts(&file);
-  ts << "timestamp;time (s);" << columnNames(1 + int(recording.extra.size()), { "value", "unit", "status" }).join(';') << '\n';
+  ts << "timestamp;time (s);" << columnNames(recording.extra, { "value", "unit", "status" }).join(';') << '\n';
   auto cell = [&](double v, CellState state, const QString &unit)
   {
     if (state == CellState::None)
@@ -308,7 +316,7 @@ bool RecordingFile::writeAny(const Recording &recording, const QString &path, QS
     return false;
   }
   SpreadsheetWriter sheet(tr("Recording"));
-  sheet.setHeader(QStringList{ tr("timestamp"), tr("time (s)") } + columnNames(1 + int(recording.extra.size()), { tr("value"), tr("unit"), tr("status") }));
+  sheet.setHeader(QStringList{ tr("timestamp"), tr("time (s)") } + columnNames(recording.extra, { tr("value"), tr("unit"), tr("status") }));
   // a value that is no number is an empty cell: a spreadsheet has no NaN
   auto cells = [](QList<QVariant> &row, double v, CellState state, const QString &unit)
   {

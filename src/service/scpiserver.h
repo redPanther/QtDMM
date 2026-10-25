@@ -69,6 +69,8 @@ public:
   /// Reading of value @p id (0 = main, 1 = second ...) as it arrives:
   /// channel id + 1 of the queries.
   void setReading(int id, const Reading &reading);
+  /// Another meter was taken over: the readings of the previous one go.
+  void clearReadings() { m_readings.clear(); }
   /// The values the meter has (its Device page): channels 1..@p count of
   /// READ? (@<n>) and the like. Channels 1 and 2 are always there (READ2?
   /// on a meter without a second value answers as stale), and so is one

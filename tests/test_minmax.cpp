@@ -36,6 +36,11 @@ int main()
   // a value without a known quantity neither
   res = m.feed(reading(0.5, "", ""));
   check(!res.reset, "unknown quantity keeps min/max");
+  // "----" or "Er" has no unit; it does not start the memory afresh (R14-06)
+  Reading word = reading(std::nan(""), "voltage.dc", "");
+  word.quality = Quality::NoValue;
+  res = m.feed(word);
+  check(!res.reset && m.maximum() == 1.5, "a word without unit keeps min/max");
   // another coupling at the meter
   res = m.feed(reading(0.9, "voltage.ac", "V"));
   check(res.reset && res.newMin && res.newMax && m.minimum() == 0.9, "DC -> AC starts afresh");
