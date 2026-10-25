@@ -35,7 +35,9 @@ bool readName(const QByteArray &d, int &pos, QString &name)
     }
     if ((len & 0xC0) == 0xC0)
     {
-      if (p + 1 >= d.size() || ++hops > 16)
+      if (p + 1 >= d.size())
+        return false;
+      if (++hops > 16)
         return false;
       const int target = ((len & 0x3F) << 8) | quint8(d[p + 1]);
       if (!jumped)

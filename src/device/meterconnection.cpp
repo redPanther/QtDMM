@@ -389,7 +389,9 @@ void MeterConnection::timerEvent(QTimerEvent *)
   if (!m_portHandler->port())
   {
     // lost: try again every m_reconnectSeconds
-    if (m_reconnectSeconds > 0 && ++m_secondsInError >= m_reconnectSeconds)
+    if (m_reconnectSeconds > 0)
+      ++m_secondsInError;
+    if (m_reconnectSeconds > 0 && m_secondsInError >= m_reconnectSeconds)
     {
       m_secondsInError = 0;
       if (!openPort())

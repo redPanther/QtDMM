@@ -178,11 +178,11 @@ QColor GraphWidget::intColor() const
   }
 }
 
-void GraphWidget::setColorVariant(ColorVariant defaultVariant, int override)
+void GraphWidget::setColorVariant(ColorVariant defaultVariant, int variant)
 {
   m_defaultVariant = defaultVariant;
-  m_variantOverride = override;
-  m_variant = override >= 0 ? static_cast<ColorVariant>(override) : defaultVariant;
+  m_variantOverride = variant;
+  m_variant = variant >= 0 ? static_cast<ColorVariant>(variant) : defaultVariant;
   applyThemeColors();
   updateSeriesAppearance();
 }

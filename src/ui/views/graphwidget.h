@@ -197,9 +197,9 @@ public:
   /// replaces the curve colour only while that is the default blue.
   void             setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
                                   const QColor &data = QColor());
-  /// The colours in use: @p override for this graph (context menu), or
-  /// the default from the settings page when @p override is -1.
-  void             setColorVariant(ColorVariant defaultVariant, int override = -1);
+  /// The colours in use: @p variant for this graph (context menu), or
+  /// the default from the settings page when @p variant is -1.
+  void             setColorVariant(ColorVariant defaultVariant, int variant = -1);
   ColorVariant     colorVariant() const { return m_variant; }
   int              colorOverride() const { return m_variantOverride; }
   /// "neutral", "scope", "phosphor-green", "phosphor-amber", "recorder", "custom"
@@ -380,7 +380,7 @@ Q_SIGNALS:
   void             sampleTime(int);
   /// The context menu chose this graph's colours: a ColorVariant, or -1
   /// for the default from the settings page.
-  void             colorVariantChanged(int override);
+  void             colorVariantChanged(int variant);
   void             zoomIn(double);
   void             zoomOut(double);
   /// Show the whole recording (key 0).
