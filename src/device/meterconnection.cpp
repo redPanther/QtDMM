@@ -268,7 +268,7 @@ bool MeterConnection::openPort()
   else if (auto *htk = dynamic_cast<HidHoltekDevice *>(port))
     connect(htk, &HidHoltekDevice::finished, this, [this, htk] { portLost(htk, QString()); });
   else if (auto *sig = dynamic_cast<SigrokDevice *>(port))
-    connect(sig, &SigrokDevice::finished, this, [this, sig] { portLost(sig, QString()); });
+    connect(sig, &SigrokDevice::finished, this, [this, sig] { portLost(sig, sig->errorString()); });
 #ifdef QTDMM_WITH_BLE
   else if (auto *ble = dynamic_cast<BleAdvertisementDevice *>(port))
     connect(ble, &BleAdvertisementDevice::finished, this, [this, ble](const QString &reason) { portLost(ble, reason); });
