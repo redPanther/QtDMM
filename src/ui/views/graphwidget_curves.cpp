@@ -275,14 +275,12 @@ void GraphWidget::rebuildSeries()
     first = last + 1;
   }
 
+  m_dataLine->setMarkers(pointsShown() ? m_dataPoints : nullptr);
   m_dataLine->replace(points);
   m_curvePts = points;
-  m_dataPoints->replace(pointsShown() ? withoutGaps(points) : QList<QPointF>());
   // the integral of another value: rebuildExtras()
+  m_intLine->setMarkers(intPointsShown() ? m_intPoints : nullptr);
   m_intLine->replace(intPoints);
-  m_intPoints->replace(intPointsShown() ? withoutGaps(intPoints) : QList<QPointF>());
-  m_tailDataPts = pointsShown() ? finiteTail(points, m_tailData) : 0;
-  m_tailIntPts = intPointsShown() ? finiteTail(intPoints, m_tailInt) : 0;
   rebuildExtras();   // the same buckets
 }
 
@@ -302,8 +300,6 @@ void GraphWidget::appendToSeries()
   m_tailData = pointsOf(m_store->series(), first, count - 1, false, points);
   m_dataLine->append(points);
   m_curvePts.append(points);
-  if (pointsShown())
-    m_tailDataPts = replaceTail(m_dataPoints, filling ? m_tailDataPts : 0, withoutGaps(points));
   if (m_intValueId == 0 && m_showIntegration)   // else onExtraAppended()
     appendIntegral(m_store->series(), first, count - 1, filling);
 }
@@ -317,20 +313,6 @@ void GraphWidget::appendIntegral(const RecordingSeries &series, int first, int l
   QList<QPointF> intPoints;
   m_tailInt = pointsOf(series, first, last, true, intPoints);
   m_intLine->append(intPoints);
-  if (intPointsShown())
-    m_tailIntPts = replaceTail(m_intPoints, filling ? m_tailIntPts : 0, withoutGaps(intPoints));
-}
-
-// The last @p remove points of @p series give way to @p points, in one
-// change: Qt Charts lays a scatter series out anew with every change, and
-// removing and appending point by point were three. Returns how many came.
-int GraphWidget::replaceTail(QScatterSeries *series, int remove, const QList<QPointF> &points)
-{
-  QList<QPointF> all = series->points();
-  all.resize(qMax<qsizetype>(0, all.size() - remove));
-  all.append(points);
-  series->replace(all);
-  return int(points.size());
 }
 
 void GraphWidget::setIntegrationValue(int id)
@@ -352,26 +334,6 @@ void GraphWidget::integralOnAxis(QAbstractAxis *axis)
       m_intPoints->detachAxis(a);
   if (!m_intPoints->attachedAxes().contains(axis))
     m_intPoints->attachAxis(axis);
-}
-
-QList<QPointF> GraphWidget::withoutGaps(const QList<QPointF> &points)
-{
-  QList<QPointF> out;
-  out.reserve(points.size());
-  for (const QPointF &p : points)
-    if (!std::isnan(p.y()))
-      out.append(p);
-  return out;
-}
-
-// how many of the last @p tail points have a value
-int GraphWidget::finiteTail(const QList<QPointF> &points, int tail)
-{
-  int n = 0;
-  for (qsizetype i = qMax<qsizetype>(0, points.size() - tail); i < points.size(); ++i)
-    if (!std::isnan(points[i].y()))
-      n++;
-  return n;
 }
 
 void GraphWidget::onAppended(bool shifted)
@@ -553,9 +515,8 @@ void GraphWidget::rebuildOtherIntegral()
     }
   }
   integralOnAxis(axis);
+  m_intLine->setMarkers(intPointsShown() ? m_intPoints : nullptr);
   m_intLine->replace(points);
-  m_intPoints->replace(intPointsShown() ? withoutGaps(points) : QList<QPointF>());
-  m_tailIntPts = intPointsShown() ? finiteTail(points, m_tailInt) : 0;
   updateThresholdLinePositions();   // the integration threshold on that axis
 }
 

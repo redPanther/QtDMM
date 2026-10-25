@@ -250,6 +250,9 @@ protected:
   /// The number of values (numValues()) to the display and SCPI, then
   /// applyValueChoice().
   void        applyValueCount();
+  /// Another meter: the units, the values seen and SCPI's channels of the
+  /// one before go; they come with its first readings.
+  void        forgetValues();
   /// The values chosen, as far as the meter has them, to the views and the
   /// min/max memory.
   void        applyValueChoice();

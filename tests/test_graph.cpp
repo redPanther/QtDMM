@@ -2109,6 +2109,47 @@ int main(int argc, char **argv)
     check(line->count() < 5000, QString("record: the chart has the points around the window, %1").arg(line->count()));
   }
 
+  // --- 7m3. the same with points and the integral's points: the scatter
+  //           series had the whole recording, copied and laid out anew with
+  //           each reading (50 ms a reading at 6000; R14-08) ---
+  {
+    Settings cfg("record-long-points", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    graph.setLineStyle(GraphWidget::Solid, GraphWidget::Circle, GraphWidget::Solid, GraphWidget::Circle);
+    graph.setIntegration(true, 1, 0, 0);
+    graph.setGraphSize(60);
+    Feed feed(graph);
+    graph.startSLOT();
+    QElapsedTimer timer;
+    auto block = [&]
+    {
+      timer.restart();
+      for (int i = 0; i < 1000; ++i)
+        feed.value(1.0 + (i % 10) * 0.01);
+      return timer.elapsed();
+    };
+    block();
+    const qint64 early = block();
+    for (int k = 0; k < 6; ++k)
+      block();
+    const qint64 late = block();
+    QList<QScatterSeries *> scatters;
+    for (QAbstractSeries *s : graph.findChild<QChartView *>()->chart()->series())
+      if (auto *scatter = qobject_cast<QScatterSeries *>(s))
+        scatters << scatter;
+    const int dataPts = scatters.value(0) ? scatters.value(0)->count() : -1;
+    const int intPts = scatters.value(1) ? scatters.value(1)->count() : -1;
+    qInfo() << "record with points: 1000 readings at 2000 in" << early << "ms, at 9000 in" << late
+            << "ms; the chart has" << dataPts << "and" << intPts << "points";
+    check(late < 3 * early + 50,
+          QString("record with points: 1000 readings at 9000 took %1 ms, at 2000 %2 ms").arg(late).arg(early));
+    check(dataPts > 0 && dataPts < 5000 && intPts > 0 && intPts < 5000,
+          QString("record with points: the chart has the points around the window, %1 and %2").arg(dataPts).arg(intPts));
+  }
+
   // --- 7l3. three values in three units (CO2, °C, %RH): at most two at a
   //          time, the main value can be hidden - the left axis takes the
   //          unit of the lowest value shown; its lines go with it ---

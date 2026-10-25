@@ -477,8 +477,6 @@ protected:
   qint64           m_bucket = 1;    ///< ms per drawn min/max pair (see bucketSize())
   int              m_tailData = 0;  ///< points the newest bucket gave the data line (1 or 2; a gap is 1)
   int              m_tailInt = 0;   ///< the same for the integral
-  int              m_tailDataPts = 0;  ///< and the data points (a gap has none)
-  int              m_tailIntPts = 0;
   int              m_windowSeconds = 600;   ///< the visible window, applyWindow()
   int              m_savedWindow = 0;       ///< the settings' window, setGraphSize(); 0 = none yet
   int              m_rebuilds = 0;          ///< rebuildSeries() calls, see onAppended()
@@ -531,11 +529,8 @@ protected:
   void             frameTick();
   qint64           bucketSize() const;
   int              bucketStart(int i) const;
-  static QList<QPointF> withoutGaps(const QList<QPointF> &points);
-  static int       finiteTail(const QList<QPointF> &points, int tail);
   void             appendToSeries();
   void             appendIntegral(const RecordingSeries &series, int first, int last, bool filling);
-  static int       replaceTail(QScatterSeries *series, int remove, const QList<QPointF> &points);
   void             onAppended(bool shifted);
   void             onCleared();
   void             onStateChanged();

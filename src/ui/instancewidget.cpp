@@ -584,13 +584,7 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   // the window starts without the last value of the one before
   m_ctl->resetMinMax();
   m_ctl->recorder()->forgetReading();
-  m_ctl->forgetUnit();   // the axis title and the alarm unit come with the first reading
-  m_lastReading.clear();   // and what the values measure
-  m_lastText.clear();
-  m_seenValues = 0;
-  for (int id = 1; id < kMaxValues; ++id)
-    m_configDlg->alarmPage()->setValueUnit(id, QString());
-  applyValueCount();
+  forgetValues();
   ui_graph->liveSLOT();
   Q_EMIT meterChanged();
 
@@ -637,6 +631,17 @@ void InstanceWidget::configScpiSLOT()
   openConfig(SettingsDialog::Scpi);
 }
 
+void InstanceWidget::forgetValues()
+{
+  m_ctl->forgetUnit();   // the axis title and the alarm unit come with the first reading
+  m_lastReading.clear();   // and what the values measure
+  m_lastText.clear();
+  m_seenValues = 0;
+  for (int id = 1; id < kMaxValues; ++id)
+    m_configDlg->alarmPage()->setValueUnit(id, QString());
+  applyValueCount();
+}
+
 void InstanceWidget::applySLOT()
 {
   readConfig();
@@ -644,7 +649,11 @@ void InstanceWidget::applySLOT()
   m_alertBlink = m_configDlg->alarmPage()->blink();
   showAlertColor();
   ui_graph->setAlertUnsaved(m_configDlg->generalPage()->alertUnsavedData());
-  m_ctl->setModel(m_configDlg->meterSettings()->dmmName());
+  const QString model = m_configDlg->meterSettings()->dmmName();
+  const bool otherMeter = !m_ctl->model().isEmpty() && model != m_ctl->model();
+  m_ctl->setModel(model);
+  if (otherMeter)   // chosen on the Device page; the sidebar's takeOver() does the same
+    forgetValues();
   ScpiConfig scpi;
   scpi.enabled = m_configDlg->scpiPage()->enabled();
   scpi.allInterfaces = m_configDlg->scpiPage()->allInterfaces();

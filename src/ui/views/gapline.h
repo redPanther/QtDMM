@@ -10,6 +10,7 @@
 class QAbstractAxis;
 class QChart;
 class QLineSeries;
+class QScatterSeries;
 
 /// A line with gaps: Qt Charts draws a line across a NaN point as if it were
 /// not there, so a gap (overload, no value) splits the line into segments,
@@ -27,6 +28,9 @@ class QLineSeries;
 ///
 /// The hold (setHold()) draws the newest value on to a time, faint: the
 /// curve runs on with the clock between the readings instead of jumping.
+///
+/// The markers (setMarkers()) get the same points as the segments, without
+/// the gaps: a scatter series with the whole recording cost as much.
 class GapLine
 {
 public:
@@ -37,6 +41,9 @@ public:
 
   void setPen(const QPen &pen);
   void setVisible(bool on);
+  /// The points also go to @p markers from the next replace() on; nullptr:
+  /// none (the old ones are emptied).
+  void setMarkers(QScatterSeries *markers);
   /// Moves every segment onto @p axes (the x axis and one y axis).
   void setAxes(const QList<QAbstractAxis *> &axes);
 
@@ -87,6 +94,7 @@ private:
   bool         m_toEnd = true;      ///< the chart has the points up to the newest
   double       m_spanMin = -qInf(), m_spanMax = qInf();
   double       m_loadMin = -qInf(), m_loadMax = qInf();   ///< the x range loaded
+  QScatterSeries *m_markers = nullptr;
   QLineSeries *m_hold = nullptr;
   double       m_holdX = qQNaN();
 };
