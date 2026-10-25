@@ -217,7 +217,7 @@ int main(int argc, char **argv)
         render(n, QSize(width, 400)).save(QDir(dump).filePath(QString("display_narrow_%1.png").arg(width)));
     }
     // a roomy panel is not shrunk by the width rule
-    n.resize(520, 200);
+    n.resize(700, 200);   // the left row has P before MAX and MIN
     const LcdWidget::Layout l = n.layout();
     check(l.flagsPx <= l.flags.height() * 0.75 + 0.01, "annunciator font never exceeds the row's");
     check(!scalableFont || qFuzzyCompare(l.flagsPx, l.flags.height() * 0.75), "wide panel: annunciator font is the row's");
