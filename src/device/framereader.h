@@ -63,8 +63,10 @@ public:
 Q_SIGNALS:
   /// A complete frame: exactly DmmDecoder::getPacketLength() bytes, or for a
   /// variable-length protocol (packet length 0) everything received since
-  /// the previous frame, terminator included.
-  void        readEvent(const QByteArray &, int id);
+  /// the previous frame, terminator included. @p t (Sample::now()) and
+  /// @p wall (ms since the epoch) are when its bytes came in, so a busy
+  /// event loop does not shift the readings of one meter against another.
+  void        readEvent(const QByteArray &, int id, qint64 t, qint64 wall);
 
 protected:
   bool                  m_readValue;

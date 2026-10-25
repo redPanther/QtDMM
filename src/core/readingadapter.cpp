@@ -269,7 +269,10 @@ QList<PortSample> ReadingAdapter::adapt(const DmmDecoder::DmmResponse &r, qint64
   for (const DmmDecoder::DmmChannel &c : r.channels)
   {
     const Quality shown = !c.fault.isEmpty() ? Quality::Fault : c.noValue ? Quality::NoValue : Quality::Valid;
-    out << adaptValue(c.dval, c.val, c.unit, c.special, r.range, r.hold, r.showBar, r.lowBat, c.id, wall, shown);
+    out << adaptValue(c.dval, c.val, c.unit, c.special, r.range, r.hold, r.showBar, r.lowBat, c.id,
+                      r.receivedWall != 0 ? r.receivedWall : wall, shown);
+    if (r.received != 0)
+      out.last().sample.t = r.received;
     // MAX/MIN, AVG, REL, PEAK: states of the value, not of the port
     out.last().sample.flags |= c.states & (SampleFlag::Max | SampleFlag::Min | SampleFlag::Avg | SampleFlag::Relative
                                            | SampleFlag::Peak);
