@@ -45,7 +45,7 @@ QT_QPA_PLATFORM=offscreen %ctest
 
 %files -f %{name}.lang
 %license LICENSE assets/icons/sets/LICENSE.breeze assets/icons/sets/LICENSE.oxygen
-%doc AUTHORS README.md CHANGELOG
+%doc AUTHORS README.md CHANGELOG.md
 %{_bindir}/%{name}
 %{_datadir}/applications/%{appid}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{appid}.png

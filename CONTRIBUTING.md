@@ -98,7 +98,7 @@ the sources, so it starts with every string of the current version.
    `tests/generate_fixtures.py`); ctest fails when they are out of date.
    Write the code as described in [Coding style](docs/dev/coding-style.md).
 4. Update the user documentation in `docs/user/` in the same pull request
-   when the change is visible to users, and add a line to `CHANGELOG`.
+   when the change is visible to users, and add a line to `CHANGELOG.md`.
 5. Open the pull request against `master` and say what it changes and why.
    A change to a decoder should say whether it was tried with the real
    meter.
