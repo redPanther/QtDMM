@@ -1642,9 +1642,10 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
   m_wid->graph()->setReferenceSetting(get("Windows/graph-reference", QString()).toString());
   m_wid->graph()->setMinimapVisible(get("Windows/graph-minimap", true).toBool());
   m_wid->graph()->setEnvelopeVisible(get("Windows/graph-envelope", false).toBool());
-  m_wid->setLcdValue(get("Windows/lcd-value", 0).toInt());
-  m_wid->setMeterValue(get("Windows/meter-value", 0).toInt());
-  m_wid->setPoincareValue(get("Windows/poincare-value", 0).toInt());
+  // "1", another meter's value "1@device:ab12cd34" (ValueRef)
+  m_wid->setLcdValue(ValueRef::fromString(get("Windows/lcd-value", 0).toString()));
+  m_wid->setMeterValue(ValueRef::fromString(get("Windows/meter-value", 0).toString()));
+  m_wid->setPoincareValue(ValueRef::fromString(get("Windows/poincare-value", 0).toString()));
   // the LCD's small line, "1 2"; missing: the first values after the big one
   {
     const QString small = get("Windows/lcd-secondary-values", QStringLiteral("-")).toString();
@@ -1670,11 +1671,21 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
       m_wid->graph()->setValueAxis(id, axis);
     }
   }
-  // the meter's other values shown in the graph: their ids, "1 2"; none at first
+  // the meter's other values shown in the graph: their ids, "1 2"; none at
+  // first. Another meter's ("1@device:ab12cd34") is kept for the save.
   {
-    const QStringList shown = get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
+    QSet<int> own;
+    m_graphOtherValues.clear();
+    for (const QString &text : get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts))
+    {
+      const ValueRef v = ValueRef::fromString(text);
+      if (m_wid->ownMeter(v))
+        own.insert(v.id);
+      else
+        m_graphOtherValues << v;
+    }
     for (int id = 1; id <= 3; ++id)
-      m_wid->graph()->setValueShown(id, shown.contains(QString::number(id)));
+      m_wid->graph()->setValueShown(id, own.contains(id));
     m_wid->graph()->setValueShown(0, get("Windows/graph-main-shown", true).toBool());
   }
   // the values the readings table leaves out, "1 2"; none at first
@@ -1714,12 +1725,14 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/graph-reference", m_wid->graph()->referenceSetting());
   set("Windows/graph-minimap", m_wid->graph()->minimapVisible());
   set("Windows/graph-envelope", m_wid->graph()->envelopeVisible());
-  set("Windows/lcd-value", m_wid->lcdValue());
-  set("Windows/meter-value", m_wid->meterValue());
-  set("Windows/poincare-value", m_wid->poincareValue());
+  set("Windows/lcd-value", m_wid->lcdValue().toString());
+  set("Windows/meter-value", m_wid->meterValue().toString());
+  set("Windows/poincare-value", m_wid->poincareValue().toString());
   QStringList shown;
   for (int id : m_wid->graph()->shownValues())
-    shown << QString::number(id);
+    shown << ValueRef(id).toString();
+  for (const ValueRef &v : m_graphOtherValues)
+    shown << v.toString();
   set("Windows/graph-shown-values", shown.join(' '));
   set("Windows/graph-main-shown", m_wid->graph()->mainShown());
   QStringList tableHidden;

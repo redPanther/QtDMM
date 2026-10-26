@@ -274,9 +274,9 @@ void InstanceWidget::setPoincare(PoincarePlot *plot)
   applyValueChoice();
 }
 
-void InstanceWidget::setLcdValue(int id)
+void InstanceWidget::setLcdValue(const ValueRef &value)
 {
-  m_lcdValue = qBound(0, id, kMaxValues - 1);
+  m_lcdValue = value;
   applyValueChoice();
 }
 
@@ -292,16 +292,26 @@ QList<int> InstanceWidget::lcdSecondaries() const
   return m_display ? m_display->secondaries() : m_lcdSecondaries.value_or(QList<int>());
 }
 
-void InstanceWidget::setMeterValue(int id)
+void InstanceWidget::setMeterValue(const ValueRef &value)
 {
-  m_meterValue = qBound(0, id, kMaxValues - 1);
+  m_meterValue = value;
   applyValueChoice();
 }
 
-void InstanceWidget::setPoincareValue(int id)
+void InstanceWidget::setPoincareValue(const ValueRef &value)
 {
-  m_poincareValue = qBound(0, id, kMaxValues - 1);
+  m_poincareValue = value;
   applyValueChoice();
+}
+
+bool InstanceWidget::ownMeter(const ValueRef &value) const
+{
+  return value.source.isEmpty() || value.source == m_ctl->source();
+}
+
+int InstanceWidget::ownValue(const ValueRef &value) const
+{
+  return ownMeter(value) && value.id >= 0 && value.id < numValues() ? value.id : 0;
 }
 
 int InstanceWidget::numValues() const
@@ -342,22 +352,21 @@ void InstanceWidget::applyValueCount()
 void InstanceWidget::applyValueChoice()
 {
   updateValueNames();
-  const int n = numValues();
-  auto has = [n](int id) { return id < n ? id : 0; };
-  const int lcd = has(m_lcdValue);
+  const int lcd = ownValue(m_lcdValue);
+  // the LCD itself falls back while the meter has fewer values (primaryShown())
   if (m_display)
-    m_display->setPrimary(m_lcdValue);
+    m_display->setPrimary(ownMeter(m_lcdValue) ? m_lcdValue.id : 0);
   m_ctl->setMinMaxValue(lcd);
   if (m_meter)
   {
-    const int id = has(m_meterValue);
+    const int id = ownValue(m_meterValue);
     m_meter->setValueId(id);
     const MinMaxMemory &mm = m_ctl->valueMinMax(id);
     if (!mm.isEmpty())
       m_meter->showValueMinMax(id, mm.minimum(), mm.maximum());
   }
   if (m_poincare)
-    m_poincare->setValueId(has(m_poincareValue));
+    m_poincare->setValueId(ownValue(m_poincareValue));
 }
 
 void InstanceWidget::setReadingLog(ReadingsModel *log)
@@ -800,7 +809,7 @@ void InstanceWidget::readConfig()
     for (const Alarm &a : m_configDlg->alarmPage()->alarms())
     {
       // the graph's axis is the main value's
-      if (!a.enabled || a.value != 0 || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
+      if (!a.enabled || a.value != ValueRef() || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
         continue;
       thresholds << a.a;
       if (a.condition == Alarm::Outside || a.condition == Alarm::Inside)

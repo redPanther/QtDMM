@@ -48,8 +48,8 @@ QJsonObject Alarm::toJson() const
   QJsonObject o;
   o["name"] = name;
   o["enabled"] = enabled;
-  if (value != 0)
-    o["value"] = value;
+  if (value != ValueRef())
+    o["value"] = value.toJson();
   o["condition"] = conditionKey(condition);
   o["a"] = a;
   o["b"] = b;
@@ -75,7 +75,7 @@ Alarm Alarm::fromJson(const QJsonObject &o)
   Alarm al;
   al.name = o["name"].toString();
   al.enabled = o["enabled"].toBool(true);
-  al.value = qBound(0, o["value"].toInt(0), kMaxValues - 1);
+  al.value = ValueRef::fromJson(o["value"]);
   al.condition = conditionFromKey(o["condition"].toString());
   al.a = o["a"].toDouble();
   al.b = o["b"].toDouble();
@@ -226,7 +226,7 @@ QColor AlarmManager::displayColor() const
   return QColor();
 }
 
-void AlarmManager::feed(double value, bool overload, qint64 nowMs, int id)
+void AlarmManager::feed(double value, bool overload, qint64 nowMs, int id, const QString &source)
 {
   if (id == 0)
   {
@@ -250,7 +250,7 @@ void AlarmManager::feed(double value, bool overload, qint64 nowMs, int id)
       m_since[i] = nowMs;
       continue;
     }
-    if (al.value != id)
+    if (!al.value.matches(id, source))
       continue;
     evaluate(i, al.matches(value, overload), al.released(value, overload), value, nowMs);
   }

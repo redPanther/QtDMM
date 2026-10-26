@@ -183,7 +183,7 @@ int main(int argc, char **argv)
     check(threshold() == "&Threshold (ppm):", "alarm: the main value's unit at first, got " + threshold());
     if (value)
       value->setCurrentIndex(2);
-    check(threshold() == "&Threshold (%):" && dlg.alarm().value == 2, "alarm: value 3 in %, got " + threshold());
+    check(threshold() == "&Threshold (%):" && dlg.alarm().value == ValueRef(2), "alarm: value 3 in %, got " + threshold());
   }
 
   if (failed)

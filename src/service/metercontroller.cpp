@@ -316,7 +316,7 @@ void MeterController::publish(const Reading &rd)
   if (!baseUnit.isEmpty())
     m_valueUnits[id] = baseUnit;
   m_valueOverload[id] = overload;
-  m_alarms->feed(dval, overload, now, id);
+  m_alarms->feed(dval, overload, now, id, rd.source);
 
   ScpiServer::Reading r;
   r.value = dval;
@@ -393,8 +393,8 @@ QString MeterController::valueUnit(int id) const
 
 void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
 {
-  const QString unit = valueUnit(alarm.value);
-  const bool overload = m_valueOverload.value(alarm.value);
+  const QString unit = valueUnit(alarm.value.id);
+  const bool overload = m_valueOverload.value(alarm.value.id);
   const QString shown = overload ? QStringLiteral("OL") : EngNumberValidator::engValue(value) + unit;
   const QString text = alarm.message.isEmpty() ? alarm.describe(unit) : alarm.message;
   Q_EMIT error(tr("%1: %2 (%3)").arg(Alarm::title(alarm.name), text, shown));
@@ -477,7 +477,7 @@ void MeterController::updateBanner()
     if (m_alarms->state(i) != AlarmManager::Raised || !list[i].banner)
       continue;
     const Alarm &al = list[i];
-    lines << QString("%1: %2").arg(al.name, al.message.isEmpty() ? al.describe(valueUnit(al.value)) : al.message);
+    lines << QString("%1: %2").arg(al.name, al.message.isEmpty() ? al.describe(valueUnit(al.value.id)) : al.message);
     if (!color.isValid())
       color = al.color;
   }
