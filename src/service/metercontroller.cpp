@@ -139,7 +139,6 @@ MeterController::~MeterController() = default;
 void MeterController::setStateManager(SharedStateManager *mgr)
 {
   m_stateMgr = mgr;
-  m_dmm->setStateManager(mgr);
 }
 
 void MeterController::setModel(const QString &model)
@@ -308,6 +307,7 @@ void MeterController::publish(const Reading &rd)
 
   if (id == 0)
   {
+    m_lastMain = rd;
     m_stale.arrived(m_clock.elapsed());
     m_overload = overload;
     if (m_baseUnit != baseUnit)

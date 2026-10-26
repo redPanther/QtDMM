@@ -23,7 +23,7 @@ bool Transport::create(const DmmDecoder::DMMInfo &spec, PortType t, QString devi
     case PortType::HidHoltek: m_port = new HidHoltekDevice(spec, device); break;
     case PortType::Sigrok: m_port = new SigrokDevice(spec,device);       break;
     case PortType::RFC2217:m_port = new RFC2217SerialDevice(spec,device);break;
-    case PortType::Calc:   m_port = new CalcDevice(spec, device, m_state); break;
+    case PortType::Calc:   m_port = new CalcDevice(spec, device, m_calcInputs); break;
 #ifdef QTDMM_WITH_BLE
     case PortType::Ble:    m_port = new BleAdvertisementDevice(spec, device); break;
     case PortType::BleGatt: m_port = new BleGattDevice(spec, device); break;

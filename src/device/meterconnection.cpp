@@ -147,9 +147,9 @@ void MeterConnection::setDevice(const QString &device)
     m_device = deviceList.last();
 }
 
-void MeterConnection::setStateManager(SharedStateManager *state)
+void MeterConnection::setCalcInputs(CalcDevice::Inputs inputs)
 {
-  m_portHandler->setStateManager(state);
+  m_portHandler->setCalcInputs(std::move(inputs));
 }
 
 void MeterConnection::initDecoder( FrameFormat::DataFormat df)

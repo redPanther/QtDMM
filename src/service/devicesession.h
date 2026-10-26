@@ -8,6 +8,8 @@
 #include <QString>
 #include <QVariantMap>
 
+#include "device/transports/calc.h"
+
 class DeviceLibrary;
 class MeterController;
 class SharedStateManager;
@@ -32,8 +34,9 @@ public:
   void        setConfigDir(const QString &dir);
   /// This instance's id (--config-id), for the meters' mDNS and SCPI names.
   void        setInstanceId(const QString &id) { m_instanceId = id; }
-  /// The other instances' readings, which a calculated or simulated meter
-  /// reads (CalcDevice). The meters opened here publish nothing there.
+  /// The other instances' readings, which a calculated value reads after
+  /// the meters of the process (calcInputs()). The meters opened here
+  /// publish nothing there.
   void        setStateManager(SharedStateManager *mgr) { m_stateMgr = mgr; }
   /// sigrok-cli for the meters read through it ("Port settings/sigrok_exe").
   void        setSigrokExe(const QString &exe) { m_sigrokExe = exe; }
@@ -56,6 +59,16 @@ public:
   QList<MeterController *> controllers() const;
   /// The meter whose readings come from @p source (MeterController::source()).
   MeterController *controller(const QString &source) const;
+  /// What a calculated value of this process reads (CalcDevice): the main
+  /// value of each meter here by its name in My devices, as a variable
+  /// ("UT61E Bench": ut61e_bench), then the other instances by id; a
+  /// meter here wins over an instance of the same name.
+  CalcDevice::Inputs calcInputs() const;
+  /// The variable of a meter named @p name in a formula: lower case,
+  /// other characters than letters, digits and '_' as '_', a '_' before a
+  /// leading digit.
+  static QString variableName(const QString &name);
+
   /// The entries of "My devices", for QTDMM:DEVice:CATalog?.
   DeviceLibrary *library() const { return m_library; }
 

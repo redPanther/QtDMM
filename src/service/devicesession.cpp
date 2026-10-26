@@ -9,6 +9,7 @@
 #include "service/metercontroller.h"
 #include "service/scpiserver.h"
 #include "service/servicehost.h"
+#include "service/sharedstatemanager.h"
 
 DeviceSession::DeviceSession(QObject *parent)
   : QObject(parent)
@@ -26,6 +27,39 @@ void DeviceSession::setConfigDir(const QString &dir)
 void DeviceSession::adopt(MeterController *ctl)
 {
   m_adopted = ctl;
+  ctl->dmm()->setCalcInputs(calcInputs());
+}
+
+QString DeviceSession::variableName(const QString &name)
+{
+  QString out = name.toLower();
+  for (QChar &c : out)
+    if (!c.isLetterOrNumber() && c != '_')
+      c = '_';
+  // a name begins with a letter: "34465A" is _34465a
+  return !out.isEmpty() && out[0].isDigit() ? '_' + out : out;
+}
+
+CalcDevice::Inputs DeviceSession::calcInputs() const
+{
+  return [this]
+  {
+    QMap<QString, CalcDevice::Input> out;
+    if (m_stateMgr)
+    {
+      const auto readings = m_stateMgr->readings();
+      for (auto it = readings.cbegin(); it != readings.cend(); ++it)
+        out.insert(it.key(), { it->value, it->unit, it->msecs, it->valid });
+    }
+    for (const MeterController *ctl : controllers())
+    {
+      const Reading &r = ctl->lastReading();
+      if (ctl->deviceName().isEmpty() || r.msecs == 0)
+        continue;
+      out.insert(variableName(ctl->deviceName()), { r.value, r.baseUnit, r.msecs, !r.hold && !r.overload && !r.noNumber() });
+    }
+    return out;
+  };
 }
 
 MeterController *DeviceSession::open(const QString &id, QString *error)
@@ -56,7 +90,7 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   ctl->setValueCount(setup.valueCount);
   ctl->setRecordingAllowed(false);
   ctl->configure(setup);
-  ctl->dmm()->setStateManager(m_stateMgr);
+  ctl->dmm()->setCalcInputs(calcInputs());
   // no window to ask: INPut ON|OFF goes to the connection
   connect(ctl, &MeterController::connectRequested, ctl, [ctl](bool on) { ctl->connectMeter(on); });
   if (!ctl->connectMeter(true))

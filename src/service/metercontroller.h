@@ -74,6 +74,9 @@ public:
   /// Where its readings come from (Reading::source): the "My devices" entry,
   /// else this instance, "device:<id>" or "instance:<id>".
   QString     source() const;
+  /// The last reading of the main value (a calculated value's input), an
+  /// empty Reading before the first.
+  const Reading &lastReading() const { return m_lastMain; }
   /// The name setDevice() gave, empty for none.
   QString     deviceName() const { return m_deviceName; }
   /// The configured meter's name, for SCPI *IDN? and mDNS.
@@ -224,6 +227,7 @@ private:
   int         m_minMaxId = 0;
   std::array<MinMaxMemory, kMaxValues> m_valueMinMax;   ///< per value id, valueMinMax()
   QString     m_lastUnit;
+  Reading     m_lastMain;   ///< lastReading()
   QString     m_baseUnit;
   QMap<int, QString> m_valueUnits;   ///< base unit by value id, valueUnit()
   QMap<int, bool> m_valueOverload;   ///< the last reading of each value was OL

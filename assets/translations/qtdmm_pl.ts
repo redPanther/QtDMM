@@ -738,52 +738,47 @@
 <context>
     <name>CalcDevice</name>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="59"/>
+        <location filename="../../src/device/transports/calc.cpp" line="58"/>
         <source>At most %1 values.</source>
         <translation>Najwyżej %1 wartości.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="67"/>
+        <location filename="../../src/device/transports/calc.cpp" line="66"/>
         <source>Value %1: </source>
         <translation>Wartość %1: </translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="71"/>
+        <location filename="../../src/device/transports/calc.cpp" line="70"/>
         <source>No unit given for the calculated value.</source>
         <translation>Nie podano jednostki dla wartości obliczanej.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="79"/>
+        <location filename="../../src/device/transports/calc.cpp" line="78"/>
         <source>Formula error at position %1: %2</source>
         <translation>Błąd we wzorze na pozycji %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="87"/>
+        <location filename="../../src/device/transports/calc.cpp" line="86"/>
         <source>%1 is not a value before this one.</source>
         <translation>%1 nie jest wartością przed tą.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="94"/>
-        <source>No instance data available.</source>
-        <translation>Brak danych instancji.</translation>
+        <location filename="../../src/device/transports/calc.cpp" line="172"/>
+        <source>Waiting for &apos;%1&apos;</source>
+        <translation>Oczekiwanie na „%1”</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="179"/>
-        <source>Waiting for instance &apos;%1&apos;</source>
-        <translation>Oczekiwanie na instancję „%1”</translation>
+        <location filename="../../src/device/transports/calc.cpp" line="174"/>
+        <source>No current value from &apos;%1&apos;</source>
+        <translation>Brak aktualnej wartości z „%1”</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="181"/>
-        <source>No current value from instance &apos;%1&apos;</source>
-        <translation>Brak aktualnej wartości z instancji „%1”</translation>
+        <location filename="../../src/device/transports/calc.cpp" line="176"/>
+        <source>&apos;%1&apos; shows no numeric value</source>
+        <translation>„%1” nie pokazuje wartości liczbowej</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="183"/>
-        <source>Instance &apos;%1&apos; shows no numeric value</source>
-        <translation>Instancja „%1” nie pokazuje wartości liczbowej</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/transports/calc.cpp" line="185"/>
+        <location filename="../../src/device/transports/calc.cpp" line="178"/>
         <source>Formula has no result (division by zero?)</source>
         <translation>Wzór nie ma wyniku (dzielenie przez zero?)</translation>
     </message>
@@ -1133,7 +1128,7 @@
 <context>
     <name>DeviceSession</name>
     <message>
-        <location filename="../../src/service/devicesession.cpp" line="100"/>
+        <location filename="../../src/service/devicesession.cpp" line="134"/>
         <source>%1 closed in the background: the window uses it now</source>
         <translation>%1 zamknięto w tle: teraz używa go okno</translation>
     </message>
@@ -3926,7 +3921,7 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>%1 zakończył się z kodem wyjścia %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="297"/>
+        <location filename="../../src/service/metercontroller.cpp" line="296"/>
         <source>The meter shows %1</source>
         <translation>Miernik pokazuje %1</translation>
     </message>

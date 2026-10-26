@@ -6,6 +6,7 @@
 // only, no hardware.
 
 #include <QCoreApplication>
+#include <QDateTime>
 #include <QTemporaryDir>
 
 #include "core/devicelibrary.h"
@@ -19,18 +20,22 @@
 
 int main(int argc, char **argv)
 {
+  // shared memory of its own (test_calc_device does the same)
+  qputenv("QTDMM_IPC_KEY", "qtdmm_test_session_" + QByteArray::number(QCoreApplication::applicationPid()));
   QCoreApplication app(argc, argv);
   QTemporaryDir dir;
   DeviceLibrary lib(dir.path());
   const QString sim = lib.add("Bench sim", {{"DMM/model", "QtDMM Simulated meter"}, {"Port settings/device", "calc V/DC 1"},
                                             {"DMM/virtual-waveform", 0}, {"DMM/virtual-min", "1.5"}, {"DMM/virtual-max", "1.5"}});
-  const QString calc = lib.add("Power", {{"DMM/model", "QtDMM Calculated value"}, {"Port settings/device", "calc W 2 * 3"},
-                                         {"DMM/calc-unit", "W"}, {"DMM/calc-expression", "2 * 3"}});
+  const QString calc = lib.add("Power", {{"DMM/model", "QtDMM Calculated value"}, {"Port settings/device", "calc W bench_sim * 2"},
+                                         {"DMM/calc-unit", "W"}, {"DMM/calc-expression", "bench_sim * 2"}});
 
   DeviceSession session;
   session.setInstanceId("test");
   session.setConfigDir(dir.path());
-  SharedStateManager state("devicesession-test");   // CalcDevice reads through it
+  // the other instances, after the meters of the process
+  SharedStateManager state("test"), other("bench_sim"), third("psu");
+  check(state.registerInstance() && other.registerInstance() && third.registerInstance(), "instances register");
   session.setStateManager(&state);
   MeterController window(nullptr, session.host());
   window.setInstanceId("test");
@@ -70,6 +75,31 @@ int main(int argc, char **argv)
         "QTDMM:DEV:CAT?: " + cat);
   ask(QString("QTDMM:DEV:OPEN \"%1\"").arg(calc).toLatin1());
   check(ask("SYST:ERR?").startsWith("0,") && session.controller("device:" + calc), "QTDMM:DEV:OPEN");
+  // the calculated value reads the simulated meter of this process by its name
+  if (MeterController *power = session.controller("device:" + calc))
+  {
+    double value = 0;
+    QObject::connect(power, &MeterController::reading, [&value](const Reading &r) { value = r.value; });
+    check(waitFor([&] { return qAbs(value - 3.0) < 1e-9; }, 4000), QString("bench_sim * 2 = 3: %1").arg(value));
+  }
+  // a meter of the process wins over an instance of the same name; the
+  // others are there as before
+  {
+    SharedStateManager::Reading r;
+    r.value = 9;
+    r.unit = "V";
+    r.msecs = QDateTime::currentMSecsSinceEpoch();
+    r.valid = true;
+    other.publishReading(r);
+    third.publishReading(r);
+    state.checkForChanges();
+    const QMap<QString, CalcDevice::Input> in = session.calcInputs()();
+    check(in.contains("bench_sim") && qAbs(in.value("bench_sim").value - 1.5) < 1e-9 && in.contains("psu")
+            && qAbs(in.value("psu").value - 9) < 1e-9,
+          QString("process before instances: bench_sim %1, psu %2").arg(in.value("bench_sim").value).arg(in.value("psu").value));
+  }
+  check(DeviceSession::variableName("UT61E Bench") == "ut61e_bench" && DeviceSession::variableName("34465A") == "_34465a",
+        "variable names");
   check(ask("INST:CAT?") == "\"WINDOW_METER\",\"BENCH_SIM\",\"POWER\"", "three meters: " + ask("INST:CAT?"));
   ask("QTDMM:DEV:OPEN \"nosuch\"");
   check(ask("SYST:ERR?").startsWith("-224,"), "QTDMM:DEV:OPEN of an unknown id");

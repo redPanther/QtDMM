@@ -738,52 +738,47 @@
 <context>
     <name>CalcDevice</name>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="59"/>
+        <location filename="../../src/device/transports/calc.cpp" line="58"/>
         <source>At most %1 values.</source>
         <translation>Au plus %1 valeurs.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="67"/>
+        <location filename="../../src/device/transports/calc.cpp" line="66"/>
         <source>Value %1: </source>
         <translation>Valeur %1 : </translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="71"/>
+        <location filename="../../src/device/transports/calc.cpp" line="70"/>
         <source>No unit given for the calculated value.</source>
         <translation>Aucune unité indiquée pour la valeur calculée.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="79"/>
+        <location filename="../../src/device/transports/calc.cpp" line="78"/>
         <source>Formula error at position %1: %2</source>
         <translation>Erreur dans la formule à la position %1 : %2</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="87"/>
+        <location filename="../../src/device/transports/calc.cpp" line="86"/>
         <source>%1 is not a value before this one.</source>
         <translation>%1 n&apos;est pas une valeur avant celle-ci.</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="94"/>
-        <source>No instance data available.</source>
-        <translation>Aucune donnée d&apos;instance disponible.</translation>
+        <location filename="../../src/device/transports/calc.cpp" line="172"/>
+        <source>Waiting for &apos;%1&apos;</source>
+        <translation>En attente de « %1 »</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="179"/>
-        <source>Waiting for instance &apos;%1&apos;</source>
-        <translation>En attente de l&apos;instance « %1 »</translation>
+        <location filename="../../src/device/transports/calc.cpp" line="174"/>
+        <source>No current value from &apos;%1&apos;</source>
+        <translation>Pas de valeur actuelle de « %1 »</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="181"/>
-        <source>No current value from instance &apos;%1&apos;</source>
-        <translation>Pas de valeur actuelle de l&apos;instance « %1 »</translation>
+        <location filename="../../src/device/transports/calc.cpp" line="176"/>
+        <source>&apos;%1&apos; shows no numeric value</source>
+        <translation>« %1 » n&apos;affiche pas de valeur numérique</translation>
     </message>
     <message>
-        <location filename="../../src/device/transports/calc.cpp" line="183"/>
-        <source>Instance &apos;%1&apos; shows no numeric value</source>
-        <translation>L&apos;instance « %1 » n&apos;affiche pas de valeur numérique</translation>
-    </message>
-    <message>
-        <location filename="../../src/device/transports/calc.cpp" line="185"/>
+        <location filename="../../src/device/transports/calc.cpp" line="178"/>
         <source>Formula has no result (division by zero?)</source>
         <translation>La formule n&apos;a pas de résultat (division par zéro ?)</translation>
     </message>
@@ -1133,7 +1128,7 @@
 <context>
     <name>DeviceSession</name>
     <message>
-        <location filename="../../src/service/devicesession.cpp" line="100"/>
+        <location filename="../../src/service/devicesession.cpp" line="134"/>
         <source>%1 closed in the background: the window uses it now</source>
         <translation>%1 fermé en arrière-plan : la fenêtre l’utilise maintenant</translation>
     </message>
@@ -3924,7 +3919,7 @@ Le multimètre est-il branché et allumé ?</translation>
         <translation>%1 s&apos;est terminé avec le code de sortie %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="297"/>
+        <location filename="../../src/service/metercontroller.cpp" line="296"/>
         <source>The meter shows %1</source>
         <translation>L&apos;appareil affiche %1</translation>
     </message>
