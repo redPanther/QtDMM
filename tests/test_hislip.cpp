@@ -134,7 +134,9 @@ int main(int argc, char **argv)
 {
   QCoreApplication app(argc, argv);
   ScpiServer scpi;
-  scpi.setModel("UNI-T UT61E");
+  ScpiDevice scpiDev;
+  scpi.addDevice(&scpiDev);
+  scpiDev.setModel("UNI-T UT61E");
   HislipServer server(scpi.endpoint());
   int sessions = -1;
   QObject::connect(&server, &HislipServer::sessionsChanged, [&](int n) { sessions = n; });
@@ -281,7 +283,7 @@ int main(int argc, char **argv)
     auto *s = new Session;
     check(s->open(port), "session before the dialog");
     std::vector<Session *> others;
-    auto conn = QObject::connect(&scpi, &ScpiServer::connectRequested, [&](bool)
+    auto conn = QObject::connect(&scpiDev, &ScpiDevice::connectRequested, [&](bool)
     {
       s->sync.sock.abort();
       s->async.sock.abort();
@@ -311,7 +313,7 @@ int main(int argc, char **argv)
     raw->connectToHost(QHostAddress::LocalHost, scpi.port());
     check(waitFor([&] { return raw->state() == QAbstractSocket::ConnectedState; }), "raw connected");
     bool ran = false;
-    conn = QObject::connect(&scpi, &ScpiServer::connectRequested, [&](bool)
+    conn = QObject::connect(&scpiDev, &ScpiDevice::connectRequested, [&](bool)
     {
       raw->abort();
       QEventLoop loop;

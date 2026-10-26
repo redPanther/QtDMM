@@ -48,6 +48,11 @@ prefix: 12 V times 0.5 mA is `6.00 mW`.
   as `uni-t_803`, is written with an underscore in the formula
   (`uni_t_803`). A calculated instance can itself be an input for another
   one. `t` is reserved: the seconds since the instance connected.
+- A meter of *My devices* opened in the same QtDMM without a window
+  (`--also`, SCPI `QTDMM:DEVice:OPEN`, see [command line](command-line.md))
+  is a variable by its name in lower case, other characters than letters
+  and digits as `_`: *UT61E Bench* is `ut61e_bench` (a name beginning with
+  a digit gets a `_` in front). It wins over an instance of the same name.
 
 Examples:
 
@@ -95,7 +100,7 @@ The calculated instance polls the others four times a second. While a
 variable has no running instance, that instance has not delivered a value
 for three seconds, or it shows *OL*, the calculated display shows **OL** and
 the status line says which input is the problem, for example *Waiting for
-instance 'i'*. The recorder keeps running; the gap is recorded like an
+'i'*. The recorder keeps running; the gap is recorded like an
 overload from a real meter.
 
 Readings arrive at the pace of the slowest meter and the poll interval, so

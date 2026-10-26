@@ -31,8 +31,6 @@
 #include "device/dmmdecoder.h"
 #include "device/transport.h"
 
-class SharedStateManager;
-
 /// The connection to one multimeter: port, frame reader and decoder.
 ///
 /// InstanceWidget configures it from the settings (setDmmInfo(), setDevice(),
@@ -106,8 +104,8 @@ public:
   void    setFramesPerReading(int frames);
   /// --debug: dump every frame as hex to stdout.
   void    setConsoleLogging(bool on) { m_consoleLogging = on; }
-  /// Instance coordinator, the input of a calculated value (PortType::Calc).
-  void    setStateManager(SharedStateManager *state);
+  /// The inputs of a calculated value (PortType::Calc, CalcDevice).
+  void    setCalcInputs(CalcDevice::Inputs inputs);
 
 Q_SIGNALS:
   /// The whole decoded frame, for ReadingAdapter (MeterController); value()

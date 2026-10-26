@@ -77,7 +77,7 @@ command after `;` continues at the level of the one before
 | `CONFigure?` `CONFigure2?` `CONFigure? (@2)` | function and range, `"VOLT:DC AUTO"` - functions `VOLT:DC`, `VOLT:AC`, `CURR:DC`, `CURR:AC`, `RES`, `CONT`, `CAP`, `FREQ`, `TEMP`, `DIOD`, `PER`, `POW` |
 | `STATus:QUEStionable?` | bit 0 overload, bit 1 hold, bit 2 meter not connected (also while QtDMM reconnects it), bit 3 no current reading |
 | `STATus:OPERation?` | 16 while the recorder runs, plus 512 while an alarm is raised (acknowledged or not) |
-| `INITiate` / `ABORt` | starts / stops the recorder; while it records, or over a recording shown and not saved yet, `INITiate` is ignored with error -213 *Init ignored* |
+| `INITiate` / `ABORt` | starts / stops the recorder; while it records, or over a recording shown and not saved yet, `INITiate` is ignored with error -213 *Init ignored*. On a meter opened without a window (`QTDMM:DEVice:OPEN`, `--also`) they start and stop the window's recording, and with it those of all meters of this QtDMM |
 | `INPut ON|OFF`, `INPut?` | connects / disconnects the meter, asks whether it is; the connection starts after the command, so `INPut ON;INPut?` still answers 0 |
 | `HCOPy:SDUMp:DATA?` | a screenshot of the QtDMM window as PNG (IEEE 488.2 block), like a bench instrument's screen dump; `HCOPy:SDUMp:DATA:FORMat PNG\|BMP\|JPG` chooses the format |
 | `SYSTem:ERRor?` `SYSTem:ERRor:COUNt?` | the error queue: `0,"No error"`, `-113,"Undefined header"`, `-230,"Data corrupt or stale"`, ... |
@@ -86,6 +86,8 @@ command after `;` continues at the level of the one before
 | `CALCulate:AVERage:CLEar` | resets min/max, like F4: the display's and those of all values |
 | `CALCulate:AVERage:CLEar (@2)` `CALCulate2:AVERage:CLEar` | resets the memory of that value alone |
 | `*RST` `*CLS` `*OPC?` `*TST?` `*ESR?` `*STB?` `SYSTem:VERSion?` | the usual IEEE 488.2 replies |
+| `INSTrument:CATalog?`, `INSTrument:CATalog:FULL?` | the meters of this QtDMM by name, `"UT61E_BENCH"`, with `FULL` also by number: `"UT61E_BENCH",1`. The name is the one in *My devices* (else the instance's), in upper case, other characters than letters and digits as `_`; two of the same name: the later one `_2`. A name stays with its meter while it is open |
+| `INSTrument[:SELect] <name>`, `INSTrument:NSELect <n>`, `INSTrument?`, `INSTrument:NSELect?` | chooses the meter the other commands go to, by name or number, as on a multi-channel bench instrument; the first meter at first. One choice for all clients: two clients that choose in turn reach each other's meter, so send `INST SIM_B;MEAS?` in one line. When the meter chosen is closed, none is chosen: queries answer as without a meter (`9.91E+37`, `INST?` `""`), other commands error -241, until `INSTrument` chooses again |
 
 ### QtDMM's own commands
 
@@ -96,6 +98,7 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 |---|---|
 | `QTDMM:RECord?` | what the graph does - `LIVE`, `REC` (recording), `VIEW` (a recording that ended, a file) or `IDLE` (nothing yet) - with the seconds it spans, the number of readings and the unit: `REC,42.250,170,"V"` |
 | `QTDMM:RECord:DATA? [<n>\|MAX][,(@list)]` | the last n readings of the graph (100 without n, at most 10000) as CSV in an IEEE 488.2 block: a line `seconds,value`, then one line per reading, seconds since the start; `9.9E+37` for an overload, `nan` for a gap. A channel list picks the value (1 the main value, the default): `QTDMM:RECord:DATA? 500,(@2)`; with several the lines begin with the channel, `channel,seconds,value`, the last n of each, one channel after the other (each value has its own times) |
+| `QTDMM:RECord:SAVE "<file>"[,RAW]` | writes the recording that ended to `<file>` in the folder *Documents/QtDMM* (made when missing), as the export does: on the grid of the sample time, or every reading with `RAW`; CSV without a suffix, `.xlsx` and `.ods` by theirs. A file name only, no folder (error -257), and no file that exists already (-257); -221 while it records or with nothing recorded, -250 when it cannot be written. The recording counts as saved then |
 | `QTDMM:ALARm?` | the number of alarms raised (acknowledged ones too) |
 | `QTDMM:ALARm:LIST?` | every alarm with its state: `"Over 5 V",RAIS,"Low",OFF` - `OFF`, `PEND` (the condition holds, not yet for its minimum duration), `RAIS`, `ACKN` |
 | `QTDMM:ALARm:ACKnowledge` | acknowledges the alarms, as the banner's button |
@@ -103,6 +106,8 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV meters UT333BT, UT353BT, UT363BT, UT383BT, the ZOTEK Bluetooth meters), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
 | `QTDMM:CHANnel:CATalog?` | the channels of `READ? (@n)`: number, what it measures and unit - `1,"carbon_dioxide","ppm",2,"temperature","C"`; empty strings before a channel's first reading |
 | `QTDMM:INSTances?` | the running instances with their last reading: `"default",+1.234000E+00,"V","psu",9.91E+37,""` |
+| `QTDMM:DEVice:CATalog?` | the entries of *My devices*: id, name, and 1 when this QtDMM has it open - `"ab12cd34","UT61E bench",1,"9f3e01aa","SmartShunt",0` |
+| `QTDMM:DEVice:OPEN "<id>"`, `QTDMM:DEVice:CLOSe "<id>"` | opens and connects an entry of *My devices* in this QtDMM without a window, or closes it again; `INSTrument` then reaches it. Error -224 for an unknown id, -221 for one open already (or the window's, which only the window closes), -240 when it does not connect. Such a meter has no alarms; it records with the window: its recording starts and stops with the window's, on the same time base and sample time, also when it is opened while the window records. Save it with `QTDMM:RECord:SAVE`: the next start overwrites one not saved (the status bar says so). When the window chooses it, it is closed in the background first |
 
 ```
 $ lxi scpi -a localhost -p 5025 -r "QTDMM:REC?;:CALC:AVER:MIN?;MAX?"
@@ -112,7 +117,7 @@ $ lxi scpi -a localhost -p 5025 'QTDMM:MARK "load on"'
 
 The commands that change something - `INPut`, `INITiate`, `ABORt`,
 `CALCulate:AVERage:CLEar`, `QTDMM:ALARm:ACKnowledge`, `QTDMM:MARK`,
-`QTDMM:KEY` - work for every client that reaches the port. With *This
+`QTDMM:KEY`, `QTDMM:DEVice:OPEN`/`CLOSe`, `QTDMM:RECord:SAVE` - work for every client that reaches the port. With *This
 computer only* that is a program on this computer; open the port to the
 network only where everyone on it may do so.
 

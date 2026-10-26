@@ -65,6 +65,7 @@ private:
   QMap<int, QString> m_units;
   QString m_unit;   ///< the unit of the value chosen
   int m_valueId = 0;
+  QString m_valueSource;   ///< the meter of the value (ValueRef::source), kept as it was
   class QComboBox *m_value = nullptr;   ///< which value; none with one
   class QLineEdit *m_name, *m_a, *m_b, *m_seconds, *m_hysteresis, *m_message, *m_command;
   class QComboBox *m_condition, *m_recorder;

@@ -55,11 +55,12 @@
 #include "core/alarm.h"
 #include "core/siprefix.h"
 #include "core/settings.h"
+#include "service/devicesession.h"
 #include "service/sharedstatemanager.h"
 
 
 
-InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *parent) :  QFrame(parent),
+InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSession *session, QWidget *parent) :  QFrame(parent),
   m_display(nullptr),
   m_meter(nullptr)
 {
@@ -67,7 +68,11 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
   setWindowIcon(QPixmap(":/Symbols/icon.xpm"));
 
   // the meter session: connection, min/max, alarms, SCPI
-  m_ctl = new MeterController(this);
+  m_session = session;
+  m_ctl = new MeterController(this, session->host());
+  session->adopt(m_ctl);
+  connect(session, &DeviceSession::error, this, &InstanceWidget::error);
+  connect(session, &DeviceSession::info, this, &InstanceWidget::info);
   m_ctl->setInstanceId(instanceId.isEmpty() ? QString("default") : instanceId);
 
   m_instanceId = instanceId;
@@ -274,9 +279,9 @@ void InstanceWidget::setPoincare(PoincarePlot *plot)
   applyValueChoice();
 }
 
-void InstanceWidget::setLcdValue(int id)
+void InstanceWidget::setLcdValue(const ValueRef &value)
 {
-  m_lcdValue = qBound(0, id, kMaxValues - 1);
+  m_lcdValue = value;
   applyValueChoice();
 }
 
@@ -292,16 +297,26 @@ QList<int> InstanceWidget::lcdSecondaries() const
   return m_display ? m_display->secondaries() : m_lcdSecondaries.value_or(QList<int>());
 }
 
-void InstanceWidget::setMeterValue(int id)
+void InstanceWidget::setMeterValue(const ValueRef &value)
 {
-  m_meterValue = qBound(0, id, kMaxValues - 1);
+  m_meterValue = value;
   applyValueChoice();
 }
 
-void InstanceWidget::setPoincareValue(int id)
+void InstanceWidget::setPoincareValue(const ValueRef &value)
 {
-  m_poincareValue = qBound(0, id, kMaxValues - 1);
+  m_poincareValue = value;
   applyValueChoice();
+}
+
+bool InstanceWidget::ownMeter(const ValueRef &value) const
+{
+  return value.source.isEmpty() || value.source == m_ctl->source();
+}
+
+int InstanceWidget::ownValue(const ValueRef &value) const
+{
+  return ownMeter(value) && value.id >= 0 && value.id < numValues() ? value.id : 0;
 }
 
 int InstanceWidget::numValues() const
@@ -342,22 +357,21 @@ void InstanceWidget::applyValueCount()
 void InstanceWidget::applyValueChoice()
 {
   updateValueNames();
-  const int n = numValues();
-  auto has = [n](int id) { return id < n ? id : 0; };
-  const int lcd = has(m_lcdValue);
+  const int lcd = ownValue(m_lcdValue);
+  // the LCD itself falls back while the meter has fewer values (primaryShown())
   if (m_display)
-    m_display->setPrimary(m_lcdValue);
+    m_display->setPrimary(ownMeter(m_lcdValue) ? m_lcdValue.id : 0);
   m_ctl->setMinMaxValue(lcd);
   if (m_meter)
   {
-    const int id = has(m_meterValue);
+    const int id = ownValue(m_meterValue);
     m_meter->setValueId(id);
     const MinMaxMemory &mm = m_ctl->valueMinMax(id);
     if (!mm.isEmpty())
       m_meter->showValueMinMax(id, mm.minimum(), mm.maximum());
   }
   if (m_poincare)
-    m_poincare->setValueId(has(m_poincareValue));
+    m_poincare->setValueId(ownValue(m_poincareValue));
 }
 
 void InstanceWidget::setReadingLog(ReadingsModel *log)
@@ -493,6 +507,7 @@ void InstanceWidget::updateValueNames()
     plain << valueName(id);
   }
   m_configDlg->alarmPage()->setValueNames(names);
+  m_configDlg->recorderPage()->setValueNames(names);
   if (m_readingLog)
     m_readingLog->setValueNames(plain);
 }
@@ -665,6 +680,8 @@ void InstanceWidget::applySLOT()
   scpi.vxi11Rpc = Vxi11Server::modeFromName(m_configDlg->scpiPage()->vxi11Rpc());
   m_ctl->applyScpi(scpi);
   syncDevice();
+  const std::optional<MyDevice> device = m_devices->find(m_settings->getString("DMM/my-device"));
+  m_ctl->setDevice(device ? device->id : QString(), device ? device->name : QString());
   Q_EMIT configChanged();
 }
 
@@ -757,15 +774,15 @@ void InstanceWidget::readConfig()
 {
   MeterConnection *dmm = m_ctl->dmm();
   bool reopen = false;
-  const DeviceSettings *devSettings = m_configDlg->meterSettings();
   const GraphPrefs *graph = m_configDlg->graphPage();
   const RecorderPrefs *recorder = m_configDlg->recorderPage();
   const GuiPrefs *gui = m_configDlg->guiPage();
 
   // the port only when the meter changed: a reopen costs a Bluetooth meter
   // seconds, and the readings and a recording a gap
+  const MeterSetup setup = m_configDlg->meterSetup();
   QVariantMap keys = m_settings->meterKeys();
-  keys.insert("sigrok", m_configDlg->dmmInfo().sigrokExe);
+  keys.insert("sigrok", setup.info.sigrokExe);
   if (!dmm->isOpen() || keys != m_appliedMeter)
   {
     m_appliedMeter = keys;
@@ -775,9 +792,9 @@ void InstanceWidget::readConfig()
       reopen = true;
     }
 
-    dmm->setDmmInfo(m_configDlg->dmmInfo());
-    dmm->setDevice(devSettings->device());
-    dmm->setFormat(devSettings->format());
+    // a meter the session has open in the background gives up the port
+    m_session->release(m_settings->getString("DMM/my-device"));
+    m_ctl->configure(setup);
   }
 
   // the sample time first: setGraphSize() counts the window in samples, and
@@ -791,6 +808,8 @@ void InstanceWidget::readConfig()
 
   ui_graph->setCrosshair(graph->crosshair());
 
+  // the value first: the graph shows the trigger line only for the main value
+  ui_graph->store()->setTriggerValue(recorder->triggerValue());
   ui_graph->setThresholds(recorder->fallingThreshold(), recorder->raisingThreshold());
 
   // the reference line snaps to the alarms' thresholds
@@ -799,7 +818,7 @@ void InstanceWidget::readConfig()
     for (const Alarm &a : m_configDlg->alarmPage()->alarms())
     {
       // the graph's axis is the main value's
-      if (!a.enabled || a.value != 0 || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
+      if (!a.enabled || a.value != ValueRef() || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
         continue;
       thresholds << a.a;
       if (a.condition == Alarm::Outside || a.condition == Alarm::Inside)
@@ -830,14 +849,12 @@ void InstanceWidget::readConfig()
     setLcdVariant(LcdWidget::Custom);
   m_lcdTint = tint;
   m_display->setFaceColor(tint);
-  m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), numValues());
-  dmm->setFramesPerReading(devSettings->framesPerReading());
+  m_display->setDisplayMode(setup.info.display, gui->showMinMax(), gui->showBar(), numValues());
   applyValueCount();
-  m_ctl->setDisplayCounts(devSettings->display());
 
   if (m_meter)
   {
-    m_meter->setDisplayCounts(devSettings->display());
+    m_meter->setDisplayCounts(setup.info.display);
     applyMeterStyle();
     m_meter->setScaleMode(static_cast<AnalogMeter::ScaleMode>(
       gui->meterScaleMode() == 1 ? AnalogMeter::Unipolar :
@@ -857,7 +874,7 @@ void InstanceWidget::readConfig()
     Q_EMIT info(tr("Falling threshold %1").arg(recorder->fallingThreshold()));
   Q_EMIT useTextLabel(gui->useTextLabel());
   Q_EMIT iconSet(gui->iconSet());
-  Q_EMIT remoteControl(ControlBar::supported(m_configDlg->dmmInfo()));
+  Q_EMIT remoteControl(ControlBar::supported(setup.info));
   Q_EMIT showDisplay(gui->showDisplay());
 
   if (reopen)
