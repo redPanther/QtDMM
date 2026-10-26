@@ -1167,6 +1167,42 @@ int main(int argc, char **argv)
     check(store.state() == RecordingStore::View, "trigger: not again in View after a recording");
   }
 
+  // --- 7. one time base: a store started as another one was (startAt)
+  //         counts from the same moment, from what its Live holds since then;
+  //         the time does not move to the first reading ---
+  {
+    RecordingStore lead, follow;
+    TestClock clock;
+    clock.attach(lead);
+    clock.attach(follow);
+    clock.now = 1000;
+    lead.live();
+    follow.live();
+    follow.setReading(clock.at(1200, reading(2, "2", "DC")));
+    follow.setReading(clock.at(1400, reading(3, "3", "DC")));
+    clock.now = 1300;
+    lead.start();
+    lead.holdOrigin();
+    clock.now = 1500;
+    follow.startAt(lead.startClock(), lead.startDateTime());
+    check(follow.isRunning() && follow.startDateTime() == TestClock::wall(1300) && follow.count() == 2
+            && follow.series().first().t == 0 && follow.series().last().t == 100,
+          QString("startAt: %1 points from 1300 ms, the last at %2").arg(follow.count()).arg(follow.series().last().t));
+    lead.setReading(clock.at(1800, reading(5, "5", "DC")));
+    follow.setReading(clock.at(1800, reading(4, "4", "DC")));
+    check(lead.series().last().t == 500 && follow.series().last().t == 500 && lead.startDateTime() == TestClock::wall(1300),
+          QString("one time base: %1 and %2 ms").arg(lead.series().last().t).arg(follow.series().last().t));
+    // started without a fresh reading: the reading that held, as start() has it
+    RecordingStore late;
+    clock.attach(late);
+    late.live();
+    clock.now = 2000;
+    late.startAt(1300, TestClock::wall(1300));
+    late.setReading(clock.at(2100, reading(1, "1", "DC")));
+    check(late.count() == 1 && late.series().first().t == 800, QString("startAt, no reading yet: the first at %1 ms")
+                                                                   .arg(late.count() ? late.series().first().t : -1));
+  }
+
   if (failed)
   {
     qWarning() << failed << "RecordingStore check(s) failed";

@@ -559,7 +559,7 @@ void RecordingStore::setReading(const Reading &reading)
 
   // the time starts with the first reading, not when the graph was cleared
   // or the meter was still connecting: the curve begins at 0
-  if (m_series.isEmpty() && m_marks.isEmpty() && reading.t > m_t0)
+  if (m_series.isEmpty() && m_marks.isEmpty() && !m_holdOrigin && reading.t > m_t0)
   {
     m_start = m_start.addMSecs(reading.t - m_t0);
     m_t0 = reading.t;
@@ -863,69 +863,105 @@ void RecordingStore::begin(qint64 preMs)
 {
   // the pre-trigger: what the live window holds of that time, from the
   // reading that held at its start on
-  QVector<RawPoint> pre;
-  QList<RecordingSeries> preExtra;   // the other values over the same time
-  const qint64 liveT0 = m_t0;
+  LivePart pre;
   if (preMs > 0 && m_state == Live)
-  {
-    for (int i = qMax(0, m_series.holding(elapsed() - preMs)); i < m_series.count(); ++i)
-      pre.append(m_series.at(i));
-    for (const RecordingSeries &s : std::as_const(m_extra))
-    {
-      if (s.isEmpty() || s.last().t < elapsed() - preMs)
-        continue;
-      RecordingSeries part;
-      part.id = s.id;
-      part.port = s.port;
-      part.unit = s.unit;
-      part.name = s.name;
-      for (int i = qMax(0, s.holding(elapsed() - preMs)); i < s.count(); ++i)
-        part.append(s.at(i));
-      preExtra.append(part);
-    }
-  }
+    pre = livePart(elapsed() - preMs);
   const State was = m_state;
   m_state = Record;
   clear();
   m_stopT = -1;
   m_preUsed = 0;
+  m_holdOrigin = false;
 
-  if (!pre.isEmpty())
+  if (!pre.main.isEmpty())
   {
     // the recording reaches back by the pre-trigger time, or as far as
     // there were readings
-    const qint64 back = qBound<qint64>(0, m_t0 - (liveT0 + pre.first().t), preMs);
+    const qint64 back = qBound<qint64>(0, m_t0 - (pre.t0 + pre.main.first().t), preMs);
     m_t0 -= back;
     m_start = m_start.addMSecs(-back);
     m_preUsed = back;
-    for (RawPoint p : pre)
-    {
-      p.t = qMax<qint64>(0, liveT0 + p.t - m_t0);
-      append(p);
-    }
-    for (const RecordingSeries &part : std::as_const(preExtra))
-    {
-      RecordingSeries s;
-      s.id = part.id;
-      s.port = part.port;
-      s.unit = part.unit;
-      s.name = part.name;
-      m_extra.append(s);
-      for (int i = 0; i < part.count(); ++i)
-      {
-        RawPoint p = part.at(i);
-        p.t = qMax<qint64>(0, liveT0 + p.t - m_t0);
-        appendExtraPoint(int(m_extra.size()) - 1, p);
-      }
-    }
-    if (!preExtra.isEmpty())
-      Q_EMIT extrasChanged();
+    appendLivePart(pre);
     m_marks.append(Mark { back, kTriggerColor, QCoreApplication::translate("RecordingStore", "Trigger") });
     Q_EMIT marksChanged();
   }
   else
     appendCurrent();
+  started(was);
+}
 
+void RecordingStore::startAt(qint64 t0, const QDateTime &start)
+{
+  LivePart since;
+  if (m_state == Live)
+    since = livePart(t0 - m_t0);
+  const State was = m_state;
+  m_state = Record;
+  clear();
+  m_stopT = -1;
+  m_preUsed = 0;
+  m_t0 = t0;
+  m_start = start;
+  m_holdOrigin = true;
+  // what came since the start; when that is only the reading that held
+  // then, the one shown now if it is fresh, as start() has it
+  if (since.main.size() > 1)
+    appendLivePart(since);
+  else
+    appendCurrent();
+  started(was);
+}
+
+RecordingStore::LivePart RecordingStore::livePart(qint64 from) const
+{
+  LivePart part;
+  part.t0 = m_t0;
+  for (int i = qMax(0, m_series.holding(from)); i < m_series.count(); ++i)
+    part.main.append(m_series.at(i));
+  for (const RecordingSeries &s : std::as_const(m_extra))
+  {
+    if (s.isEmpty() || s.last().t < from)
+      continue;
+    RecordingSeries extra;
+    extra.id = s.id;
+    extra.port = s.port;
+    extra.unit = s.unit;
+    extra.name = s.name;
+    for (int i = qMax(0, s.holding(from)); i < s.count(); ++i)
+      extra.append(s.at(i));
+    part.extra.append(extra);
+  }
+  return part;
+}
+
+void RecordingStore::appendLivePart(const LivePart &part)
+{
+  for (RawPoint p : part.main)
+  {
+    p.t = qMax<qint64>(0, part.t0 + p.t - m_t0);
+    append(p);
+  }
+  for (const RecordingSeries &extra : part.extra)
+  {
+    RecordingSeries s;
+    s.id = extra.id;
+    s.port = extra.port;
+    s.unit = extra.unit;
+    s.name = extra.name;
+    m_extra.append(s);
+    for (int i = 0; i < extra.count(); ++i)
+    {
+      RawPoint p = extra.at(i);
+      p.t = qMax<qint64>(0, part.t0 + p.t - m_t0);
+      appendExtraPoint(int(m_extra.size()) - 1, p);
+    }
+  }
+  if (!part.extra.isEmpty())
+    Q_EMIT extrasChanged();
+}
+
+void RecordingStore::started(State was)
+{
   Q_EMIT progressChanged();
   if (was != Record)
     Q_EMIT stateChanged(Record);
@@ -977,6 +1013,7 @@ void RecordingStore::live()
   m_state = Live;
   clear();
   m_preUsed = 0;
+  m_holdOrigin = false;
   // the first reading in the window has nothing to cross from
   m_lastValValid = false;
   appendCurrent();

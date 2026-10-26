@@ -216,6 +216,8 @@ public:
   /// When the recording started (for an import: the file's first time stamp;
   /// in Live: when the live window started).
   QDateTime   startDateTime() const { return m_start; }
+  /// The start on the core clock (ms, Sample::now()), for startAt().
+  qint64      startClock() const { return m_t0; }
   State       state() const { return m_state; }
   /// Recording (not Live).
   bool        isRunning() const { return m_state == Record; }
@@ -301,6 +303,14 @@ public Q_SLOTS:
   /// Clears the recording and starts it; from Live with the pre-trigger's
   /// readings when a threshold started it.
   void        start();
+  /// Starts as another store's recording did (DeviceSession: the meters of
+  /// one process on one time base): at @p t0 on the core clock, wall clock
+  /// @p start, from Live with what it holds since then. The time does not
+  /// move to the first reading.
+  void        startAt(qint64 t0, const QDateTime &start);
+  /// The time of the recording that runs stays where it is, also when the
+  /// first reading comes later: others started with startAt() share it.
+  void        holdOrigin() { m_holdOrigin = true; }
   /// Ends a recording: View. Nothing in Live or View.
   void        stop();
   /// Live: the live window starts anew, empty but for the value the meter
@@ -377,6 +387,19 @@ private:
   /// Starts a recording; with @p preMs (from Live) it reaches back into
   /// the live window.
   void        begin(qint64 preMs);
+  /// What Live holds from @p from (ms of its time) on: the reading that
+  /// held then and those after it, of every value.
+  struct LivePart
+  {
+    QVector<RawPoint> main;
+    QList<RecordingSeries> extra;
+    qint64  t0 = 0;   ///< Live's start, which their times count from
+  };
+  LivePart    livePart(qint64 from) const;
+  /// Appends @p part to the recording, its times counted from m_t0.
+  void        appendLivePart(const LivePart &part);
+  /// The signals at the start of a recording, in state @p was before.
+  void        started(State was);
   /// The value the meter shows, as the first point at the start (when it
   /// is not stale); the other values too.
   void        appendCurrent();
@@ -416,6 +439,7 @@ private:
   int         m_sampleTime = 1;
   int         m_sampleLength = 0;
   int         m_preMs = 0;
+  bool        m_holdOrigin = false;   ///< holdOrigin(), startAt(): the start stays
   qint64      m_preUsed = 0;          ///< ms the current recording reaches back before its trigger
   double      m_integral = 0;   ///< the running integral, carried over gaps
   State       m_state = View;
