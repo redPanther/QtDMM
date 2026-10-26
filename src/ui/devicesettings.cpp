@@ -380,14 +380,15 @@ void DeviceSettings::load(const QVariantMap &keys)
   ui_bleKey->setText          (cfgString("Port settings/ble-key"));
   // filled again from the loaded choice: widgets still filled for the same
   // model kept the choice of before (a Victron always showed the voltage
-  // after a takeover, a typed sigrok driver went back to the model's)
+  // after a takeover, a typed sigrok driver went back to the model's). The
+  // Victron combos stay empty until the model below fills them: filled now,
+  // for the model of before, they mapped the loaded choice onto its fields
   ui_sigrokDriver->setProperty("model", QVariant());
   ui_bleMain->setProperty("readoutType", QVariant());
   ui_bleMain->clear();
   ui_bleSecond->clear();
   ui_bleThird->clear();
   ui_bleFourth->clear();
-  updateBleFields();
   ui_calcUnit->setText        (cfgString("DMM/calc-unit", "W"));
   ui_calcExpression->setText  (cfgString("DMM/calc-expression"));
   ui_virtualSignal->setCurrentIndex(cfgInt("DMM/virtual-waveform", 2));
