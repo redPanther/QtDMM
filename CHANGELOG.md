@@ -9,6 +9,10 @@
 - **Readings take their time from when their bytes came in** — not from when they were decoded, so frames read together share one time and meters read side by side drift less against each other.
 - **sigrok meters start and stop without holding up the program** — and when sigrok-cli fails to start or exits, the status bar says why (its own message) and QtDMM connects again, instead of a timeout without reason.
 
+### Platforms and build
+
+- **The Linux AppImage brings Qt 6.8.3** — instead of Ubuntu's Qt 6.4.2; it still runs on systems with glibc 2.39 or newer.
+
 ## Unreleased — 26.3 (not released yet)
 
 Changes after rc1; the release candidate below lists everything new before.
