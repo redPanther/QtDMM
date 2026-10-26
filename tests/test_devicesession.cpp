@@ -170,5 +170,32 @@ int main(int argc, char **argv)
   check(!session.controller("device:" + sim) && message.contains("Bench sim"), "release: closed, said so: " + message);
   check(session.controllers().size() == 1, "only the window's meter left");
 
+  // 6. no window (a later program without one): INIT on one of the meters
+  // starts all of the process at one moment, ABOR stops them
+  {
+    const QString two = lib.add("Bench two", {{"DMM/model", "QtDMM Simulated meter"}, {"Port settings/device", "calc V/DC 2"},
+                                              {"DMM/virtual-waveform", 0}, {"DMM/virtual-min", "2"}, {"DMM/virtual-max", "2"}});
+    DeviceSession alone;
+    alone.setInstanceId("alone");
+    alone.setConfigDir(dir.path());
+    MeterController *a = alone.open(sim);
+    MeterController *b = alone.open(two);
+    check(a && b && alone.controllers().size() == 2, "no window: two meters");
+    if (a && b)
+    {
+      auto tell = [&](const char *line) { return QString::fromLatin1(alone.host()->scpi()->process(line)).trimmed(); };
+      tell("INST BENCH_TWO");
+      tell("INIT");
+      settle();
+      check(a->recorder()->isRunning() && b->recorder()->isRunning()
+              && a->recorder()->startClock() == b->recorder()->startClock(),
+            "no window: INIT starts both at one moment");
+      tell("ABOR");
+      settle();
+      check(a->recorder()->state() == RecordingStore::View && b->recorder()->state() == RecordingStore::View,
+            "no window: ABOR stops both");
+    }
+  }
+
   return failed == 0 ? 0 : 1;
 }
