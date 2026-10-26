@@ -823,8 +823,14 @@ void MdiArranger::doArrange()
 QMdiSubWindow *MdiArranger::subWindowOf(QObject *object) const
 {
   for (QObject *o = object; o; o = o->parent())
+  {
     if (auto *w = qobject_cast<QMdiSubWindow *>(o))
       return m_order.contains(w) ? w : nullptr;
+    // a dialog of a window (Preferences) has it as its parent, but is a
+    // window of its own on top of the area: neither divider nor Ctrl+drag
+    if (auto *widget = qobject_cast<QWidget *>(o); widget && widget->isWindow())
+      return nullptr;
+  }
   return nullptr;
 }
 

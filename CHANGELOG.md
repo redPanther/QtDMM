@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased — 26.4 (not released yet)
+
+26.3 is finished on its release branch (`release/26.3`); its fixes come here when the branch is merged into master.
+
+### Multi-meter core
+
+- **Readings take their time from when their bytes came in** — not from when they were decoded, so frames read together share one time and meters read side by side drift less against each other.
+- **sigrok meters start and stop without holding up the program** — and when sigrok-cli fails to start or exits, the status bar says why (its own message) and QtDMM connects again, instead of a timeout without reason.
+
+## Unreleased — 26.3 (not released yet)
+
+Changes after rc1; the release candidate below lists everything new before.
+
+### Bug fixes
+
+- **The window dividers no longer react through a dialog** — over the Preferences (or another dialog of a window) lying on top of a divider, the mouse showed the split cursor and could drag the divider; Ctrl+drag in such a dialog moved the window below it.
+
 ## v26.3-rc1 — Multi-Value Meters, Time Cursors and Flatpak (2026-10-25)
 
 Keys of your own, a hideable toolbar, alarm colours on the displays, time cursors and an overview in the graph, meters with up to four values (a sidebar row for each), and a much larger SCPI server (channels, VXI-11). New Bluetooth meters from UNI-T, APPA, ZOTEK and HoldPeak; a Flatpak joins the release files.
