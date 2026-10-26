@@ -769,15 +769,15 @@ void InstanceWidget::readConfig()
 {
   MeterConnection *dmm = m_ctl->dmm();
   bool reopen = false;
-  const DeviceSettings *devSettings = m_configDlg->meterSettings();
   const GraphPrefs *graph = m_configDlg->graphPage();
   const RecorderPrefs *recorder = m_configDlg->recorderPage();
   const GuiPrefs *gui = m_configDlg->guiPage();
 
   // the port only when the meter changed: a reopen costs a Bluetooth meter
   // seconds, and the readings and a recording a gap
+  const MeterSetup setup = m_configDlg->meterSetup();
   QVariantMap keys = m_settings->meterKeys();
-  keys.insert("sigrok", m_configDlg->dmmInfo().sigrokExe);
+  keys.insert("sigrok", setup.info.sigrokExe);
   if (!dmm->isOpen() || keys != m_appliedMeter)
   {
     m_appliedMeter = keys;
@@ -787,9 +787,9 @@ void InstanceWidget::readConfig()
       reopen = true;
     }
 
-    dmm->setDmmInfo(m_configDlg->dmmInfo());
-    dmm->setDevice(devSettings->device());
-    dmm->setFormat(devSettings->format());
+    dmm->setDmmInfo(setup.info);
+    dmm->setDevice(setup.device);
+    dmm->setFormat(setup.format);
   }
 
   // the sample time first: setGraphSize() counts the window in samples, and
@@ -844,14 +844,14 @@ void InstanceWidget::readConfig()
     setLcdVariant(LcdWidget::Custom);
   m_lcdTint = tint;
   m_display->setFaceColor(tint);
-  m_display->setDisplayMode(devSettings->display(), gui->showMinMax(), gui->showBar(), numValues());
-  dmm->setFramesPerReading(devSettings->framesPerReading());
+  m_display->setDisplayMode(setup.info.display, gui->showMinMax(), gui->showBar(), numValues());
+  dmm->setFramesPerReading(setup.info.framesPerReading);
   applyValueCount();
-  m_ctl->setDisplayCounts(devSettings->display());
+  m_ctl->setDisplayCounts(setup.info.display);
 
   if (m_meter)
   {
-    m_meter->setDisplayCounts(devSettings->display());
+    m_meter->setDisplayCounts(setup.info.display);
     applyMeterStyle();
     m_meter->setScaleMode(static_cast<AnalogMeter::ScaleMode>(
       gui->meterScaleMode() == 1 ? AnalogMeter::Unipolar :
@@ -871,7 +871,7 @@ void InstanceWidget::readConfig()
     Q_EMIT info(tr("Falling threshold %1").arg(recorder->fallingThreshold()));
   Q_EMIT useTextLabel(gui->useTextLabel());
   Q_EMIT iconSet(gui->iconSet());
-  Q_EMIT remoteControl(ControlBar::supported(m_configDlg->dmmInfo()));
+  Q_EMIT remoteControl(ControlBar::supported(setup.info));
   Q_EMIT showDisplay(gui->showDisplay());
 
   if (reopen)

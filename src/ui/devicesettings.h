@@ -102,8 +102,6 @@ public:
   void           selectDisplay(const QString &counts);
   /// Selects the protocol combo entry for @p df.
   void           selectFormat(FrameFormat::DataFormat df);
-  /// Protocol from a settings value: name, or the enum number of old files.
-  static FrameFormat::DataFormat formatFromSetting(const QVariant &value);
   QString        dmmName() const;
   /// The port entry as typed or chosen, e.g. "/dev/ttyUSB0" or "HID 0x1a86:0xe008 ...";
   /// for a calculated value "calc <unit> <formula>".
@@ -149,11 +147,6 @@ protected Q_SLOTS:
   /// Fills the main/second/third/fourth value combos with the fields of the
   /// chosen model.
   void           updateBleFields();
-  /// The field id a Victron value combo has chosen, "-" for none.
-  static QString bleField(const QComboBox *combo);
-  /// How many of the third and fourth value are chosen: 2 when the fourth
-  /// is (the third then comes as empty value), 1 for the third alone.
-  int            bleExtraValues() const;
   /// Five-second scan for Victron devices, fills the device combo.
   void           on_ui_bleScan_clicked();
   /// Checks sigrok-cli and the driver, explains what is missing.
@@ -203,6 +196,4 @@ private:
   };
   QSpinBox      *m_virtualValues = nullptr;   ///< how many values the simulated meter has
   std::array<VirtualValue, 3> m_virtualRows;
-  /// What a value row holds before it is set: A, W = v1 * v2, °C.
-  static const char *const kVirtualDefaults[3][2];
 };

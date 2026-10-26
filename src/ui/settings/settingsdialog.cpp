@@ -419,13 +419,9 @@ void SettingsDialog::thresholdChangedSLOT(GraphWidget::CursorMode mode, double v
 // DMM
 //
 
-DmmDecoder::DMMInfo SettingsDialog::dmmInfo() const
+MeterSetup SettingsDialog::meterSetup() const
 {
-  DmmDecoder::DMMInfo info = m_meter->dmmInfo();
-  // the check box, also for a manual setup changed after it was chosen
-  info.externalSetup = m_meter->externalSetup();
-  info.sigrokExe = m_settings->getString("Port settings/sigrok_exe", "sigrok-cli");
-  return info;
+  return MeterSetup::fromKeys(m_meter->keys(), m_settings->getString("Port settings/sigrok_exe", "sigrok-cli"));
 }
 
 /////////////////////////////////////////////////////////////////

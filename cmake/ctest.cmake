@@ -79,6 +79,9 @@ if (BUILD_TESTING)
 	## the meter's settings widget (DeviceSettings): keys in and out, "Advanced", groups per kind of meter
 	qtdmm_add_test(device_settings test_devicesettings tests/test_devicesettings.cpp)
 
+	## how to open a meter from its keys alone (MeterSetup), for every model as the settings page has it
+	qtdmm_add_test(meter_setup test_metersetup tests/test_metersetup.cpp)
+
 	## the assistant "Add device": pages per connection, models, name, Next, the
 	## buttons that finish it; draws the device symbols (:/devices)
 	qtdmm_add_test(add_device test_adddevice tests/test_adddevice.cpp)
