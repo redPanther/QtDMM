@@ -14,6 +14,10 @@
 - **Calculated values read the meters of the program** — by their My devices name (`UT61E Bench` is `ut61e_bench`), before instances of the same name. A formula without variables (the Simulated meter, a formula of `t`) needs no other meter.
 - **The recording trigger can watch another value** — on the Recording page, a meter with more than one value chooses which value the rising/falling threshold watches, e.g. record the voltage when the current crosses 5 A.
 
+### GUI
+
+- **New design: Brushed metal** — the digital display, the analog meter and the table stand on brushed metal, the sidebar is light grey, everything else (workspace, graph, Poincaré plot) is Silver's. In the Design menu and on the Appearance page of the Preferences.
+
 ### Platforms and build
 
 - **The Linux AppImage brings Qt 6.8.3** — instead of Ubuntu's Qt 6.4.2; it still runs on systems with glibc 2.39 or newer.
