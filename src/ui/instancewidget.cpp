@@ -59,7 +59,7 @@
 
 
 
-InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *parent) :  QFrame(parent),
+InstanceWidget::InstanceWidget(QString instanceId, QString configPath, ServiceHost *host, QWidget *parent) :  QFrame(parent),
   m_display(nullptr),
   m_meter(nullptr)
 {
@@ -67,7 +67,7 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, QWidget *
   setWindowIcon(QPixmap(":/Symbols/icon.xpm"));
 
   // the meter session: connection, min/max, alarms, SCPI
-  m_ctl = new MeterController(this);
+  m_ctl = new MeterController(this, host);
   m_ctl->setInstanceId(instanceId.isEmpty() ? QString("default") : instanceId);
 
   m_instanceId = instanceId;

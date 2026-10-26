@@ -11,6 +11,7 @@
 
 #include "device/meterconnection.h"
 #include "service/metercontroller.h"
+#include "service/scpiserver.h"
 #include "testutil.h"
 
 // lets the queued work run
@@ -165,6 +166,34 @@ int main(int argc, char **argv)
           QString("FUSE: one message, one mark, got %1 / %2").arg(errors.join('|'), marks.join('|')));
     shown("----", false);
     check(errors.filter("----").isEmpty() && marks.size() == 1, "dashes: no message, no mark");
+  }
+
+  // two meters, one ServiceHost: one server, INSTrument chooses the meter
+  {
+    ServiceHost host;
+    MeterController bench(nullptr, &host);
+    auto *shunt = new MeterController(nullptr, &host);
+    bench.setInstanceId("bench");
+    shunt->setDevice("ab12cd34", "SmartShunt");
+    auto feed = [](MeterController *m, double v, const char *unit)
+    {
+      DmmDecoder::DmmResponse r;
+      r.main().dval = v;
+      r.main().val = QString::number(v);
+      r.main().unit = unit;
+      r.main().special = "DC";
+      Q_EMIT m->findChild<MeterConnection *>()->response(r);
+    };
+    auto ask = [&](const char *line) { return QString::fromLatin1(host.scpi()->process(line)).trimmed(); };
+    check(ask("INST:CAT?") == "\"BENCH\",\"SMARTSHUNT\"", "one server, both meters: " + ask("INST:CAT?"));
+    feed(&bench, 1.5, "V");
+    feed(shunt, 12.8, "V");
+    check(ask("UNIT?") == "\"V\"" && host.scpi()->selectedDevice()->name() == "bench", "the first meter at first");
+    host.scpi()->process("INST SMARTSHUNT");
+    check(ask("INST:NSEL?") == "2", "INST SMARTSHUNT");
+    delete shunt;
+    check(ask("INST:CAT?") == "\"BENCH\"" && ask("INST?") == "BENCH", "a meter that goes leaves the server");
+    check(ctl.serviceHost() != &host && bench.serviceHost() == &host, "a controller without a host has its own");
   }
 
   if (failed)

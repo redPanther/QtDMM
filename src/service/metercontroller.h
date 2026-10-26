@@ -16,45 +16,16 @@
 #include "core/reading.h"
 #include "core/sampletypes.h"
 #include "core/stalerule.h"
-#include "service/vxi11server.h"
+#include "service/servicehost.h"
 
 class MeterConnection;
 class QProcess;
 class ScpiDevice;
-class ScpiServer;
-class HislipServer;
-class MdnsResponder;
 class SharedStateManager;
 class RecordingStore;
 
-/// What the SCPI server should do (from the settings page).
-struct ScpiConfig
-{
-  bool    enabled = false;
-  bool    allInterfaces = false;   ///< else localhost only
-  quint16 port = 5025;
-  bool    mdns = false;            ///< announce as _scpi-raw._tcp (and _hislip._tcp)
-  bool    hislip = false;          ///< also HiSLIP for VISA (NI-VISA, LabVIEW, PyVISA)
-  quint16 hislipPort = 4880;
-  bool    vxi11 = false;           ///< also VXI-11 (portmapper on 111): older VISA, lxi discover
-  Vxi11Server::RpcbindMode vxi11Rpc = Vxi11Server::RpcbindMode::Auto;   ///< system rpcbind or own portmapper
-};
-
-/// One network service of the session (the SCPI server, HiSLIP), as the
-/// sidebar shows it.
-struct ServiceState
-{
-  QString id;               ///< "scpi", "hislip", "vxi11"
-  QString name;             ///< "SCPI", "HiSLIP", "VXI-11"
-  bool    running = false;
-  quint16 port = 0;
-  QString address;          ///< "localhost:5025", "TCPIP::localhost::hislip0::INSTR"
-  int     clients = 0;
-  QString error;            ///< switched on but not running: why (port taken, ...)
-};
-
 /// The meter session without any user interface: the connection (MeterConnection), the
-/// min/max memory, the alarms, the SCPI server with its mDNS announcement,
+/// min/max memory, the alarms, its part in the SCPI server (ScpiDevice in a ServiceHost),
 /// the alarms' programs and the publishing of readings to the other
 /// instances.
 ///
@@ -66,7 +37,9 @@ class MeterController : public QObject
 {
   Q_OBJECT
 public:
-  explicit MeterController(QObject *parent = nullptr);
+  /// The meter takes part in the network services of @p host (MainWindow's);
+  /// without one it keeps services of its own.
+  explicit MeterController(QObject *parent = nullptr, ServiceHost *host = nullptr);
   ~MeterController() override;
 
   /// The connection; the settings page configures its port and protocol.
@@ -109,23 +82,13 @@ public:
   /// The recorder started or stopped (SCPI reports it).
   void        setRecording(bool on);
 
-  /// Starts, restarts or stops the SCPI server; keeps a running server when
-  /// nothing about it changed, so its clients stay connected.
+  /// The network services this meter takes part in.
+  ServiceHost *serviceHost() const { return m_host; }
+  /// ServiceHost::apply() with this instance and model.
   void        applyScpi(const ScpiConfig &config);
-  /// The VISA address of the HiSLIP server ("TCPIP::localhost::hislip0::INSTR"),
-  /// empty while it does not run.
-  QString     hislipResource() const;
-  /// The VISA address of the VXI-11 server, "TCPIP::host::INSTR"; empty when it does not run.
-  QString     vxi11Resource() const;
-  /// How VXI-11 reaches the portmapper, from --vxi11-rpc: it replaces the setting for this run
-  /// (scripts, service starts). Set before the first applyScpi().
-  static void setVxi11RpcOverride(std::optional<Vxi11Server::RpcbindMode> mode);
-  /// From --vxi11-portmapper-port (tests, development): an own portmapper on this port instead of
-  /// 111 for this run (0: any free one). Set before the first applyScpi().
-  static void setVxi11PortmapperPort(std::optional<quint16> port);
-  /// The SCPI server, HiSLIP and VXI-11, running or not.
+  /// The SCPI server, HiSLIP and VXI-11, running or not (ServiceHost::services()).
   QList<ServiceState> services() const;
-  /// Source of the SCPI screen dump (HCOPy:SDUMp:DATA?): format -> image bytes.
+  /// Source of the SCPI screen dump (ServiceHost::setScreenshotSource()).
   void        setScreenshotSource(std::function<QByteArray(const QByteArray &)> source);
 
   /// Min/max memory in SI base units; +-1e20 when empty.
@@ -222,7 +185,6 @@ private:
   void        publish(const Reading &reading);
   void        onAlarmRaised(int index, const Alarm &alarm, double value);
   void        updateBanner();
-  void        updateScpiStatus();
   /// The name INSTrument:CATalog? shows: the device's, else the instance id.
   void        updateScpiName();
   /// What the QTDMM: and CALCulate queries read (ScpiServer::Sources).
@@ -234,15 +196,7 @@ private:
   RecordingStore     *m_recorder;
   ReadingAdapter      m_adapter;
   ScpiDevice         *m_scpiDevice;   ///< this meter in the SCPI server
-  ScpiServer         *m_scpi;
-  MdnsResponder      *m_mdns;
-  HislipServer       *m_hislip;       ///< the same interpreter over HiSLIP
-  MdnsResponder      *m_mdnsHislip;
-  Vxi11Server        *m_vxi11;        ///< and over VXI-11
-  MdnsResponder      *m_mdnsVxi11;
-  QString             m_vxi11Error;
-  QString             m_scpiError;    ///< why the switched-on server is not running
-  QString             m_hislipError;
+  ServiceHost        *m_host;
   // a SCPI start or (dis)connect checked but not run yet (it runs after the
   // command): the next command's check counts it, so "INIT;INIT" starts once
   bool                m_startPending = false;

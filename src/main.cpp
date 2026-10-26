@@ -157,7 +157,7 @@ int main(int argc, char **argv)
                 << std::endl;
       return 2;
     }
-    MeterController::setVxi11RpcOverride(mode);
+    ServiceHost::setVxi11RpcOverride(mode);
   }
   if (parser.isSet("vxi11-portmapper-port"))
   {
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
                 << std::endl;
       return 2;
     }
-    MeterController::setVxi11PortmapperPort(quint16(port));
+    ServiceHost::setVxi11PortmapperPort(quint16(port));
   }
 
   if (parser.isSet(checkMnemonics))

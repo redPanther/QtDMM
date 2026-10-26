@@ -148,7 +148,9 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   this->toolBarMenu->addWidget(spacer);
   this->toolBarMenu->addAction(this->action_Menu);
-  m_wid = new InstanceWidget(m_configId, parser.value("config-dir"), this);
+  // the network services are the window's: the meters of the window take part in them
+  m_services = new ServiceHost(this);
+  m_wid = new InstanceWidget(m_configId, parser.value("config-dir"), m_services, this);
   m_wid->setFrameShape(QFrame::NoFrame);
   setConsoleLogging(parser.isSet("debug"));
 
