@@ -8,7 +8,8 @@
 #include <QString>
 
 /// The colour designs of the main window: the system's look, "Silver"
-/// (polished aluminium, gradients only) and "Dark".
+/// (polished aluminium, gradients only), "Dark" and "Brushed metal"
+/// (Silver on a brushed metal texture).
 ///
 /// A design is more than a palette: Fusion ignores gradient brushes in the
 /// palette on most widgets, so the gradients come from a style sheet
@@ -17,9 +18,9 @@
 /// analog meter's style are settings of their own and stay as they are.
 namespace Designs
 {
-  enum Design { System, Silver, Dark };
+  enum Design { System, Silver, Dark, BrushedMetal };
 
-  /// "system", "silver", "dark" - the settings value.
+  /// "system", "silver", "dark", "brushed" - the settings value.
   QString name(Design d);
   Design fromName(const QString &name);
 

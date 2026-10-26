@@ -48,8 +48,9 @@ GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
   ui_design->addItem(tr("System"), QString("system"));
   ui_design->addItem(tr("Silver"), QString("silver"));
   ui_design->addItem(tr("Dark"), QString("dark"));
-  ui_design->setToolTip(tr("The look of the whole window: the colours of the desktop (System), brushed metal "
-                           "(Silver) or dark. The same as Design in the menu."));
+  ui_design->addItem(tr("Brushed metal"), QString("brushed"));
+  ui_design->setToolTip(tr("The look of the whole window: the colours of the desktop (System), polished metal "
+                           "(Silver), dark, or Silver on brushed metal. The same as Design in the menu."));
   form->addRow(tr("D&esign:"), ui_design);
   ui_iconSet = new QComboBox(this);
   ui_iconSet->setObjectName("ui_iconSet");
