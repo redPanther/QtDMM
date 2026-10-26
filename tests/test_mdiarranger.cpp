@@ -1,6 +1,7 @@
 // Tests for MdiArranger: the automatic layout ("Displays on top") and the
 // title bars on a real QMdiArea (offscreen).
 #include <QApplication>
+#include <QDialog>
 #include <QDebug>
 #include <QLabel>
 #include <QMdiArea>
@@ -409,6 +410,32 @@ static void testArranged()
   QTest::qWait(50);
   check(qAbs(wins[2]->geometry().top() - (top2 - 30)) <= 1 && labels[2]->presses == 0,
         QString("divider taken inside the window edge (gap at %1)").arg(gap2));
+
+  // a dialog of a window (Preferences) lying over the divider: its mouse is
+  // its own - no split cursor, no divider drag, no Ctrl+drag of the window
+  {
+    auto *dialog = new QDialog(labels[2]);
+    auto *inside = new ClickCounter("dialog", dialog);
+    inside->resize(200, 100);
+    dialog->resize(200, 100);
+    const QPoint overGap = vp->mapToGlobal(QPoint(500, (wins[0]->geometry().bottom() + wins[2]->geometry().top()) / 2));
+    dialog->move(overGap - QPoint(100, 50));
+    dialog->show();
+    QTest::qWait(50);
+    const QRect graphBefore = wins[2]->geometry();
+    sendAt(inside, QEvent::MouseMove, overGap, Qt::NoButton);
+    check(QApplication::overrideCursor() == nullptr, "no split cursor over a dialog");
+    sendAt(inside, QEvent::MouseButtonPress, overGap, Qt::LeftButton);
+    sendAt(inside, QEvent::MouseMove, overGap + QPoint(0, 40), Qt::LeftButton);
+    sendAt(inside, QEvent::MouseButtonRelease, overGap + QPoint(0, 40), Qt::NoButton);
+    sendAt(inside, QEvent::MouseButtonPress, overGap, Qt::LeftButton, Qt::ControlModifier);
+    sendAt(inside, QEvent::MouseMove, overGap + QPoint(40, 30), Qt::LeftButton, Qt::ControlModifier);
+    sendAt(inside, QEvent::MouseButtonRelease, overGap + QPoint(40, 30), Qt::NoButton, Qt::ControlModifier);
+    QTest::qWait(50);
+    check(wins[2]->geometry() == graphBefore && inside->presses == 2,
+          "a press in a dialog over the divider stays in the dialog");
+    delete dialog;
+  }
 
   // saved and taken back by another arranger
   const QString saved = arranger.layoutText();
