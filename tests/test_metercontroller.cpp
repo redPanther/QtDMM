@@ -192,7 +192,7 @@ int main(int argc, char **argv)
     host.scpi()->process("INST SMARTSHUNT");
     check(ask("INST:NSEL?") == "2", "INST SMARTSHUNT");
     delete shunt;
-    check(ask("INST:CAT?") == "\"BENCH\"" && ask("INST?") == "BENCH", "a meter that goes leaves the server");
+    check(ask("INST:CAT?") == "\"BENCH\"" && ask("INST?") == "\"\"", "a meter that goes leaves the server, none chosen");
     check(ctl.serviceHost() != &host && bench.serviceHost() == &host, "a controller without a host has its own");
   }
 

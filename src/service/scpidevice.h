@@ -153,6 +153,8 @@ private:
   friend class ScpiServer;
 
   QString m_name;
+  QString m_scpiName;   ///< the server's name for it, made of m_scpiFrom
+  QString m_scpiFrom;
   QString m_model;
   QMap<int, Reading> m_readings;   ///< by value id (channel - 1)
   int m_channelCount = 2;

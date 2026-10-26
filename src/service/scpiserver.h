@@ -170,7 +170,7 @@ private:
   QList<QTcpSocket *> m_released;
   QString m_error;
   QList<QPointer<ScpiDevice>> m_devices;
-  int m_selected = 0;                ///< index into m_devices (INSTrument:NSELect - 1)
+  int m_selected = 0;                ///< index into m_devices (INSTrument:NSELect - 1); -1: the one chosen was closed
   ScpiDevice *m_none;                ///< answers when there is no meter
   DeviceControl m_deviceControl;
   QList<QPair<int, QString>> m_errors;

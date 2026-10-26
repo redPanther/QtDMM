@@ -101,9 +101,20 @@ int main(int argc, char **argv)
   check(ask("INST:CAT?") == "\"WINDOW_METER\",\"BENCH_SIM\",\"POWER\"", "three meters: " + ask("INST:CAT?"));
   ask("QTDMM:DEV:OPEN \"nosuch\"");
   check(ask("SYST:ERR?").startsWith("-224,"), "QTDMM:DEV:OPEN of an unknown id");
+  // a second of the same name is POWER_2, and stays so when the first closes
+  const QString twin = lib.add("power", {{"DMM/model", "QtDMM Simulated meter"}, {"Port settings/device", "calc V/DC 7"},
+                                         {"DMM/virtual-waveform", 0}, {"DMM/virtual-min", "7"}, {"DMM/virtual-max", "7"}});
+  check(session.open(twin) && ask("INST:CAT?").endsWith("\"POWER\",\"POWER_2\""), "the same name twice: " + ask("INST:CAT?"));
+  // the meter chosen closed: none chosen, not silently another one
+  ask("INST POWER");
   ask(QString("QTDMM:DEV:CLOS \"%1\"").arg(calc).toLatin1());
-  check(!session.controller("device:" + calc) && ask("INST:CAT?") == "\"WINDOW_METER\",\"BENCH_SIM\"",
+  check(!session.controller("device:" + calc) && ask("INST:CAT?") == "\"WINDOW_METER\",\"BENCH_SIM\",\"POWER_2\"",
         "QTDMM:DEV:CLOS: " + ask("INST:CAT?"));
+  check(ask("INST?") == "\"\"" && ask("MEAS?") == "9.91E+37", "the meter chosen closed: none: " + ask("INST?"));
+  ask("*CLS");
+  ask("INIT");
+  check(ask("SYST:ERR?").startsWith("-241,"), "the meter chosen closed: INIT -241");
+  session.close(twin);
 
   // 4. recording: the window's starts and stops the meter here, on its time
   // base; INIT and ABOR on the meter here start and stop the window's (as

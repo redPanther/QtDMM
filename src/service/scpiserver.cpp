@@ -91,15 +91,20 @@ void ScpiServer::addDevice(ScpiDevice *device)
 void ScpiServer::removeDevice(ScpiDevice *device)
 {
   // nullptr: the ones destroyed meanwhile
+  auto gone = [device](const QPointer<ScpiDevice> &d) { return d.isNull() || d == device; };
+  const bool chosenGone = m_selected < 0 || (m_selected < m_devices.size() && gone(m_devices[m_selected]));
   const ScpiDevice *chosen = selectedDevice();
-  m_devices.removeIf([device](const QPointer<ScpiDevice> &d) { return d.isNull() || d == device; });
-  const qsizetype still = m_devices.indexOf(chosen);
-  m_selected = still >= 0 ? int(still) : 0;
+  m_devices.removeIf(gone);
+  // the meter chosen is gone: none, not silently another one
+  if (chosenGone)
+    m_selected = -1;
+  else
+    m_selected = int(qMax<qsizetype>(0, m_devices.indexOf(chosen)));
 }
 
 ScpiDevice *ScpiServer::selectedDevice() const
 {
-  return m_selected < m_devices.size() ? m_devices[m_selected].data() : nullptr;
+  return m_selected >= 0 && m_selected < m_devices.size() ? m_devices[m_selected].data() : nullptr;
 }
 
 ScpiDevice &ScpiServer::dev() const
@@ -110,19 +115,36 @@ ScpiDevice &ScpiServer::dev() const
 
 QStringList ScpiServer::instrumentNames() const
 {
+  // a name stays with its meter while the meter's name stays: another one
+  // closed does not rename it
+  QStringList taken;
+  for (const QPointer<ScpiDevice> &d : m_devices)
+    if (d && !d->m_scpiName.isEmpty() && d->m_scpiFrom == d->name())
+      taken << d->m_scpiName;
   QStringList names;
   for (const QPointer<ScpiDevice> &d : m_devices)
   {
-    QString name = d ? d->name().toUpper() : QString();
-    for (QChar &c : name)
-      if (!(c.isLetterOrNumber() && c.unicode() < 128) && c != '_')
-        c = '_';
-    if (name.isEmpty() || !name.front().isLetter())
-      name.prepend("METER_");
-    const QString base = name;
-    for (int n = 2; names.contains(name); ++n)
-      name = QString("%1_%2").arg(base).arg(n);
-    names << name;
+    if (!d)
+    {
+      names << QString();
+      continue;
+    }
+    if (d->m_scpiName.isEmpty() || d->m_scpiFrom != d->name())
+    {
+      QString name = d->name().toUpper();
+      for (QChar &c : name)
+        if (!(c.isLetterOrNumber() && c.unicode() < 128) && c != '_')
+          c = '_';
+      if (name.isEmpty() || !name.front().isLetter())
+        name.prepend("METER_");
+      const QString base = name;
+      for (int n = 2; taken.contains(name); ++n)
+        name = QString("%1_%2").arg(base).arg(n);
+      d->m_scpiName = name;
+      d->m_scpiFrom = d->name();
+      taken << name;
+    }
+    names << d->m_scpiName;
   }
   return names;
 }
@@ -746,6 +768,12 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
 
   if (head.startsWith('*'))
     return handleCommon(cmd, isQuery);
+  // the meter chosen was closed: nothing goes to another one until
+  // INSTrument chooses again; queries answer as without a meter
+  const bool aside = matches(head, "INSTrument") || matches(head, "SYSTem") || matches(head, "STATus")
+                     || (matches(head, "QTDMM") && depth >= 2 && matches(cmd.path[1], "DEVice"));
+  if (m_selected < 0 && !cmd.query && !aside)
+    return refuse(isQuery, -241, "Hardware missing; instrument closed");
 
   // readings: READ? FETCh? MEASure? [SENSe:]DATA? VALue1?/VALue2?, also
   // MEASure:VOLTage:DC? and the like; UNIT? and CONFigure?
@@ -1012,7 +1040,7 @@ QString ScpiServer::handleInstrument(const Command &cmd, bool &isQuery)
     return refuse(isQuery, -113, "Undefined header");
   if (cmd.query)
   {
-    if (m_devices.isEmpty())
+    if (m_devices.isEmpty() || m_selected < 0)
       return numeric ? QStringLiteral("0") : QStringLiteral("\"\"");
     return numeric ? QString::number(m_selected + 1) : names.value(m_selected);
   }

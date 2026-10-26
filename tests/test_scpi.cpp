@@ -472,16 +472,21 @@ int main(int argc, char **argv)
     QObject::connect(&b, &ScpiDevice::connectRequested, [&] { ++connB; });
     m.process("INST:NSEL 2;:INP OFF");
     check(connA == 0 && connB == 1, "INPut OFF goes to the chosen meter");
-    // the chosen one goes: back to the first; another one goes: the choice stays
+    // the chosen one goes: none, until INSTrument chooses again; another
+    // one goes: the choice stays. A name stays with its meter
     m.removeDevice(&b);
-    check(ask(m, "INST?") == "UT61E_BENCH", "the chosen meter removed: the first");
+    m.process("*CLS");
+    m.process("INP OFF");
+    check(ask(m, "INST?") == "\"\"" && ask(m, "READ?") == "9.91E+37" && ask(m, "SYST:ERR?").startsWith("-241,")
+            && connA == 0,
+          "the chosen meter removed: none");
     m.process("INST:NSEL 2");
     {
       ScpiDevice gone;
       gone.setName("gone");
       m.addDevice(&gone);
     }
-    check(ask(m, "INST:CAT?") == "\"UT61E_BENCH\",\"SMARTSHUNT\"" && ask(m, "INST?") == "SMARTSHUNT",
+    check(ask(m, "INST:CAT?") == "\"UT61E_BENCH\",\"SMARTSHUNT_2\"" && ask(m, "INST?") == "SMARTSHUNT_2",
           "a destroyed meter leaves the catalog, the choice stays: " + ask(m, "INST:CAT?"));
   }
 
