@@ -1,6 +1,8 @@
 #include "device/transports/sigrok.h"
 
-#include <QThread>
+#include <QCoreApplication>
+#include <QTimer>
+#include <utility>
 
 //#define SIGROK_DEBUG
 
@@ -8,11 +10,8 @@ SigrokDevice::SigrokDevice(const DmmDecoder::DMMInfo &info, QString device, QObj
   : QIODevice(parent)
   , m_dmmInfo(info)
   , m_device(device)
-  , m_process(new QProcess(this))
 {
   m_sigrok = info.sigrokExe.isEmpty() ? "sigrok-cli" : info.sigrokExe;
-
-  connect(m_process, &QProcess::readyReadStandardOutput, this, &SigrokDevice::onProcessReadyRead);
 }
 
 SigrokDevice::~SigrokDevice()
@@ -22,18 +21,35 @@ SigrokDevice::~SigrokDevice()
 
 
 bool SigrokDevice::init() {
-  if (m_process->state() != QProcess::NotRunning)
+  if (m_process != nullptr)
     return false;
 
   QStringList args;
   args << "--driver" << m_device << "--continuous";
 
+  // nothing here waits for sigrok-cli: one that cannot start or ends later
+  // reports it through finished(), like a lost port
+  m_process = new QProcess(this);
+  connect(m_process, &QProcess::readyReadStandardOutput, this, &SigrokDevice::onProcessReadyRead);
+  connect(m_process, &QProcess::errorOccurred, this, [this](QProcess::ProcessError e)
+  {
+    if (e == QProcess::FailedToStart)
+      lost(m_process->errorString());
+  });
+  connect(m_process, &QProcess::finished, this, [this]
+  {
+    lost(QString::fromLocal8Bit(m_process->readAllStandardError()).trimmed());
+  });
   m_process->start(m_sigrok, args);
-  if (!m_process->waitForStarted())
-    return false;
 
   open(QIODevice::ReadOnly);
   return true;
+}
+
+void SigrokDevice::lost(const QString &reason)
+{
+  setErrorString(reason.isEmpty() ? m_sigrok : QString("%1: %2").arg(m_sigrok, reason));
+  Q_EMIT finished();
 }
 
 
@@ -92,13 +108,21 @@ void SigrokDevice::close()
 {
   // Keyed off the process state rather than isOpen(), so a process that was
   // started by init() but never reached QIODevice::open() still gets reaped.
-  if (m_process->state() != QProcess::NotRunning)
+  if (m_process != nullptr)
   {
-    m_process->terminate();
-    if (!m_process->waitForFinished(2000))
+    QProcess *p = std::exchange(m_process, nullptr);
+    p->disconnect(this);
+    // later: close() may run from inside one of the process's own signals
+    if (p->state() == QProcess::NotRunning)
+      p->deleteLater();
+    else
     {
-      m_process->kill();
-      m_process->waitForFinished();
+      // sigrok-cli ends in its own time instead of blocking the event loop
+      // (and every other meter); the application owns it until then
+      p->setParent(QCoreApplication::instance());
+      connect(p, &QProcess::finished, p, &QObject::deleteLater);
+      p->terminate();
+      QTimer::singleShot(2000, p, [p] { p->kill(); });
     }
   }
 

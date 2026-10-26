@@ -7,6 +7,7 @@
 ### Multi-meter core
 
 - **Readings take their time from when their bytes came in** — not from when they were decoded, so frames read together share one time and meters read side by side drift less against each other.
+- **sigrok meters start and stop without holding up the program** — and when sigrok-cli fails to start or exits, the status bar says why (its own message) and QtDMM connects again, instead of a timeout without reason.
 
 ## Unreleased — 26.3 (not released yet)
 
