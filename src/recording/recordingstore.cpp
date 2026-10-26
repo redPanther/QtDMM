@@ -904,11 +904,12 @@ void RecordingStore::startAt(qint64 t0, const QDateTime &start)
   m_start = start;
   m_holdOrigin = true;
   // what came since the start; when that is only the reading that held
-  // then, the one shown now if it is fresh, as start() has it
+  // then, the one shown now if it is fresh, at the time it came: the
+  // start may lie back (the pre-trigger)
   if (since.main.size() > 1)
     appendLivePart(since);
   else
-    appendCurrent();
+    appendCurrent(true);
   started(was);
 }
 
@@ -968,12 +969,14 @@ void RecordingStore::started(State was)
   Q_EMIT runningChanged(true);
 }
 
-void RecordingStore::appendCurrent()
+void RecordingStore::appendCurrent(bool atItsTime)
 {
   // the first value is the one the meter shows at the start
   if (!m_haveReading || m_monotonic() - m_reading.t > m_staleMs)
     return;
   RawPoint p;
+  if (atItsTime)
+    p.t = qMax<qint64>(0, m_reading.t - m_t0);
   p.value = m_reading.overload ? overloadValue(m_reading.value) : m_reading.value;
   p.quality = pointQuality(m_reading);
   p.flags = m_reading.flags;
@@ -984,7 +987,7 @@ void RecordingStore::appendCurrent()
     if (m_monotonic() - r.t <= m_staleMs && !r.text.isEmpty())
     {
       Reading now = r;
-      now.t = m_t0;
+      now.t = atItsTime ? qMax(r.t, m_t0) : m_t0;
       appendExtra(now);
       m_extraReading[r.id] = r;   // it came when it came
     }

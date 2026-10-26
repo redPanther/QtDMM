@@ -155,6 +155,15 @@ int main(int argc, char **argv)
     check(mine->isRunning() && replaced.contains("Bench sim"), "not saved: replaced, said so: " + replaced);
     lead->stop();
   }
+  // the window Live: the meter here too, so that a start reaching back
+  // (the pre-trigger) has its readings
+  lead->live();
+  check(mine->state() == RecordingStore::Live, "the window Live: the meter here too");
+  check(waitFor([&] { return mine->count() >= 2; }, 4000), "Live: readings");
+  lead->startAt(Sample::now() - 2000, QDateTime::currentDateTime().addMSecs(-2000));
+  check(mine->isRunning() && mine->count() >= 2 && mine->series().last().t >= 1500,
+        QString("started 2 s back: its Live readings, the last at %1 ms").arg(mine->count() ? mine->series().last().t : -1));
+  lead->stop();
   // opened while the window records: it joins on the window's time base
   lead->start();
   ask(QString("QTDMM:DEV:OPEN \"%1\"").arg(calc).toLatin1());

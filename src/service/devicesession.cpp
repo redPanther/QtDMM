@@ -57,16 +57,32 @@ void DeviceSession::followWindow(int state)
     for (MeterController *ctl : std::as_const(m_opened))
       startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
   }
+  else if (state == RecordingStore::Live)
+    // live with it: a start with the pre-trigger finds their readings too
+    for (MeterController *ctl : std::as_const(m_opened))
+      liveFollower(ctl);
   else
     for (MeterController *ctl : std::as_const(m_opened))
       ctl->recorder()->stop();
 }
 
+void DeviceSession::liveFollower(MeterController *ctl)
+{
+  warnUnsaved(ctl);
+  ctl->recorder()->live();
+}
+
+void DeviceSession::warnUnsaved(MeterController *ctl)
+{
+  const RecordingStore *store = ctl->recorder();
+  if (store->state() == RecordingStore::View && store->dirty())
+    Q_EMIT error(tr("%1: the recording was not saved, the new one replaces it").arg(ctl->deviceName()));
+}
+
 void DeviceSession::startFollower(MeterController *ctl, qint64 t0, const QDateTime &start, int sampleTime)
 {
   RecordingStore *store = ctl->recorder();
-  if (store->state() == RecordingStore::View && store->dirty())
-    Q_EMIT error(tr("%1: the recording was not saved, the new one replaces it").arg(ctl->deviceName()));
+  warnUnsaved(ctl);
   if (sampleTime > 0)
     store->setSampleTime(sampleTime);
   store->startAt(t0, start);
@@ -176,6 +192,8 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
     lead->holdOrigin();
     startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
   }
+  else if (!m_adopted || m_adopted->recorder()->state() == RecordingStore::Live)
+    ctl->recorder()->live();
   Q_EMIT opened(ctl);
   return ctl;
 }

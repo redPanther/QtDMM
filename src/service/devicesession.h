@@ -87,11 +87,15 @@ Q_SIGNALS:
 
 private:
   void        installScpi();
-  /// The window's recording started (Record) or ended (another state).
+  /// The window's recording started (Record), ended (View), or it went Live.
   void        followWindow(int state);
   /// Starts the recording of @p ctl at @p t0 on the core clock, wall clock
   /// @p start, the grid @p sampleTime (tenths, 0: its own).
   void        startFollower(MeterController *ctl, qint64 t0, const QDateTime &start, int sampleTime);
+  /// The window went Live: @p ctl too (its recording not saved is replaced).
+  void        liveFollower(MeterController *ctl);
+  /// The message that the recording of @p ctl not saved is replaced.
+  void        warnUnsaved(MeterController *ctl);
   /// INITiate or ABORt on a meter here.
   void        onRecordingRequested(bool start);
 

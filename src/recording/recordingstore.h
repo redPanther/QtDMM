@@ -401,8 +401,9 @@ private:
   /// The signals at the start of a recording, in state @p was before.
   void        started(State was);
   /// The value the meter shows, as the first point at the start (when it
-  /// is not stale); the other values too.
-  void        appendCurrent();
+  /// is not stale); the other values too. @p atItsTime: at the time it
+  /// came, not at the start (startAt() reaching back without Live).
+  void        appendCurrent(bool atItsTime = false);
   /// A reading of another value (id > 0) into its series.
   void        appendExtra(const Reading &reading);
   /// Appends @p p to extra(@p i), at the earliest at its last point.

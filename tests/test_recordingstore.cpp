@@ -1201,6 +1201,24 @@ int main(int argc, char **argv)
     late.setReading(clock.at(2100, reading(1, "1", "DC")));
     check(late.count() == 1 && late.series().first().t == 800, QString("startAt, no reading yet: the first at %1 ms")
                                                                    .arg(late.count() ? late.series().first().t : -1));
+    // not Live, the start further back (the pre-trigger): the reading
+    // shown at the time it came, not at the start
+    RecordingStore view;
+    clock.attach(view);
+    clock.now = 3000;
+    view.setReading(clock.at(3000, reading(6, "6", "DC")));
+    clock.now = 3100;
+    view.startAt(1000, TestClock::wall(1000));
+    check(view.count() == 1 && view.series().first().t == 2000,
+          QString("startAt from View: the reading at %1 ms").arg(view.count() ? view.series().first().t : -1));
+    // a store alone: the time begins with the first reading
+    RecordingStore alone;
+    clock.attach(alone);
+    clock.now = 4000;
+    alone.start();
+    alone.setReading(clock.at(4500, reading(1, "1", "DC")));
+    check(alone.series().first().t == 0 && alone.startClock() == 4500,
+          QString("alone: the first reading at %1 ms, from %2").arg(alone.series().first().t).arg(alone.startClock()));
   }
 
   if (failed)
