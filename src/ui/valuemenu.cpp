@@ -24,8 +24,10 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
   // display when it had none
   QMenu *lcd = menu->addMenu(tr("&LCD"));
   auto *places = new QActionGroup(lcd);
+  // the menu is of this meter's values: another meter's choice is none of them
+  auto own = [wid](const ValueRef &v) { return wid->ownMeter(v) ? v.id : -1; };
   const QList<int> small = wid->lcdSecondaries();
-  const int taken[] = { wid->lcdValue(), int(small.value(0, -1)), int(small.value(1, -1)) };
+  const int taken[] = { own(wid->lcdValue()), int(small.value(0, -1)), int(small.value(1, -1)) };
   const QString texts[] = { tr("&Main value"), tr("Secondary value &left"), tr("Secondary value &right") };
   for (int place = 0; place < 3; ++place)
   {
@@ -33,10 +35,10 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
     places->addAction(a);
     // a meter with two values has one place on the small line
     a->setEnabled(place == 0 || place < wid->numValues());
-    QObject::connect(a, &QAction::triggered, menu, [wid, id, place, show]
+    QObject::connect(a, &QAction::triggered, menu, [wid, id, place, show, own]
     {
       const QList<int> small = wid->lcdSecondaries();
-      QList<int> now { wid->lcdValue(), int(small.value(0, -1)), int(small.value(1, -1)) };
+      QList<int> now { own(wid->lcdValue()), int(small.value(0, -1)), int(small.value(1, -1)) };
       const qsizetype from = now.indexOf(id);
       if (from >= 0)
         now[from] = now[place];
@@ -45,15 +47,16 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
       for (int i = 1; i < 3; ++i)
         if (now[i] >= 0)
           line << now[i];
-      wid->setLcdValue(now[0]);
+      if (now[0] >= 0)
+        wid->setLcdValue(ValueRef(now[0]));
       wid->setLcdSecondaries(line);
       show(View::Lcd);
     });
   }
-  QObject::connect(checkable(menu, tr("&Analog meter"), wid->meterValue() == id), &QAction::triggered, menu,
+  QObject::connect(checkable(menu, tr("&Analog meter"), own(wid->meterValue()) == id), &QAction::triggered, menu,
                    [wid, id, show]
   {
-    wid->setMeterValue(id);
+    wid->setMeterValue(ValueRef(id));
     show(View::Meter);
   });
   // the graph: off, or on an axis. A unit the axis has already joins it,
@@ -88,10 +91,10 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
       show(View::Graph);
     });
   }
-  QObject::connect(checkable(menu, tr("&Poincaré plot"), wid->poincareValue() == id), &QAction::triggered, menu,
+  QObject::connect(checkable(menu, tr("&Poincaré plot"), own(wid->poincareValue()) == id), &QAction::triggered, menu,
                    [wid, id, show]
   {
-    wid->setPoincareValue(id);
+    wid->setPoincareValue(ValueRef(id));
     show(View::Poincare);
   });
   // the readings table: all values at first; copying follows it, the

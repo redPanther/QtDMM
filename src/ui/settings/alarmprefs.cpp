@@ -124,8 +124,8 @@ void AlarmPrefs::refresh()
   {
     // with more than one value: which one it watches
     const QString what = m_valueNames.size() > 1 && al.condition != Alarm::NoReadings
-                           ? tr("value %1: ").arg(al.value + 1) : QString();
-    auto *item = new QListWidgetItem(QString("%1  —  %2%3").arg(al.name, what, al.describe(m_units.value(al.value))),
+                           ? tr("value %1: ").arg(al.value.id + 1) : QString();
+    auto *item = new QListWidgetItem(QString("%1  —  %2%3").arg(al.name, what, al.describe(m_units.value(al.value.id))),
                                      m_list);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(al.enabled ? Qt::Checked : Qt::Unchecked);
@@ -183,7 +183,8 @@ void AlarmPrefs::toggle(int row, bool on)
 // ---------------------------------------------------------------------------
 
 AlarmDlg::AlarmDlg(const Alarm &alarm, const QMap<int, QString> &units, const QStringList &valueNames, QWidget *parent)
-  : QDialog(parent), m_units(units), m_unit(units.value(alarm.value)), m_valueId(alarm.value), m_colorValue(alarm.color)
+  : QDialog(parent), m_units(units), m_unit(units.value(alarm.value.id)), m_valueId(alarm.value.id),
+    m_valueSource(alarm.value.source), m_colorValue(alarm.color)
 {
   setWindowTitle(tr("Alarm"));
   auto *layout = new QVBoxLayout(this);
@@ -204,12 +205,12 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QMap<int, QString> &units, const QS
   auto *cond = new QGroupBox(tr("Condition"), this);
   auto *cf = new QFormLayout(cond);
   // the meter's value it watches, when it has more than one
-  if (valueNames.size() > 1 || alarm.value > 0)
+  if (valueNames.size() > 1 || alarm.value.id > 0)
   {
     m_value = new QComboBox(cond);
-    for (int id = 0; id < qMax(int(valueNames.size()), alarm.value + 1); ++id)
+    for (int id = 0; id < qMax(int(valueNames.size()), alarm.value.id + 1); ++id)
       m_value->addItem(valueNames.value(id, tr("Value %1").arg(id + 1)), id);
-    m_value->setCurrentIndex(m_value->findData(alarm.value));
+    m_value->setCurrentIndex(m_value->findData(alarm.value.id));
     cf->addRow(tr("&Value:"), m_value);
     connect(m_value, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]
     {
@@ -387,7 +388,7 @@ Alarm AlarmDlg::alarm() const
   al.name = m_name->text().trimmed().isEmpty() ? tr("Alarm") : m_name->text().trimmed();
   al.enabled = m_enabled->isChecked();
   al.condition = Alarm::Condition(m_condition->currentData().toInt());
-  al.value = al.condition == Alarm::NoReadings ? 0 : m_valueId;
+  al.value = al.condition == Alarm::NoReadings ? ValueRef() : ValueRef(m_valueId, m_valueSource);
   al.a = EngNumberValidator::value(m_a->text().isEmpty() ? "0" : m_a->text());
   al.b = EngNumberValidator::value(m_b->text().isEmpty() ? "0" : m_b->text());
   al.seconds = m_seconds->text().toDouble();

@@ -7,17 +7,15 @@
 #include <QDebug>
 #include <cmath>
 
-#include "service/sharedstatemanager.h"
 #include "device/transports/calc.h"
 #include "device/dmmdecoder.h"
 #include "testutil.h"
 
-static SharedStateManager::Reading reading(double value, const QString &unit, qint64 now, bool valid = true)
+static CalcDevice::Input reading(double value, const QString &unit, qint64 now, bool valid = true)
 {
-  SharedStateManager::Reading r;
+  CalcDevice::Input r;
   r.value = value;
   r.unit = unit;
-  r.port = "voltage.dc";
   r.msecs = now;
   r.valid = valid;
   return r;
@@ -36,18 +34,11 @@ static std::optional<DmmDecoder::DmmResponse> decode(const QByteArray &line)
 
 int main(int argc, char **argv)
 {
-  const QByteArray key = "qtdmm_test_calc_" + QByteArray::number(QCoreApplication::applicationPid());
-  qputenv("QTDMM_IPC_KEY", key);
   QCoreApplication app(argc, argv);
-  app.setApplicationName("qtdmm_test");
-  {
-    QSharedMemory leftover(QString::fromLatin1(key));
-    if (leftover.attach())
-      leftover.detach();
-  }
 
-  SharedStateManager u("u"), i("i"), p("p"), odd("uni-t_803");
-  check(u.registerInstance() && i.registerInstance() && p.registerInstance() && odd.registerInstance(), "all register");
+  // the other meters' main values by name (DeviceSession::calcInputs())
+  QMap<QString, CalcDevice::Input> in;
+  const CalcDevice::Inputs p = [&in] { return in; };
 
   DmmDecoder::DMMInfo info;
   info.protocol = FrameFormat::Sigrok;
@@ -65,17 +56,23 @@ int main(int argc, char **argv)
 
   // --- 2. open() rejects bad input with a message ---
   {
-    CalcDevice bad(info, "W u * ", &p);
+    CalcDevice bad(info, "W u * ", p);
     check(!bad.open(QIODevice::ReadWrite), "unparsable formula does not open");
     check(bad.errorString().contains("osition"), "error names the position: " + bad.errorString());
-    CalcDevice noUnit(info, "", &p);
+    CalcDevice noUnit(info, "", p);
     check(!noUnit.open(QIODevice::ReadWrite), "empty device string does not open");
-    CalcDevice noState(info, "W u", nullptr);
-    check(!noState.open(QIODevice::ReadWrite), "no state manager does not open");
+    // without inputs: a formula of t alone has a result, a variable waits
+    CalcDevice gen0(info, "V 2 + t", CalcDevice::Inputs());
+    QString st;
+    check(gen0.open(QIODevice::ReadWrite) && decode(gen0.currentLine(0, &st)).has_value() && st.isEmpty(),
+          "no inputs: a formula without variables opens and has a result: " + st);
+    CalcDevice none(info, "W u", CalcDevice::Inputs());
+    check(none.open(QIODevice::ReadWrite) && none.currentLine(0, &st).contains("inf") && st.contains("'u'"),
+          "no inputs: a variable waits: " + st);
   }
 
   // --- 3. P = U * I through the decoder ---
-  CalcDevice calc(info, "W u * i", &p);
+  CalcDevice calc(info, "W u * i", p);
   const bool opened = calc.open(QIODevice::ReadWrite);
   check(opened, "formula opens: " + calc.errorString());   // errorString() after open(): MSVC
                                                           // evaluates arguments right to left
@@ -88,9 +85,8 @@ int main(int argc, char **argv)
   auto r = decode(line);
   check(r && r->main().val.trimmed() == "OL", "no inputs -> OL");
 
-  u.publishReading(reading(12.0, "V", now));
-  i.publishReading(reading(0.5, "A", now));
-  p.checkForChanges();
+  in["u"] = reading(12.0, "V", now);
+  in["i"] = reading(0.5, "A", now);
   line = calc.currentLine(now, &status);
   r = decode(line);
   check(status.isEmpty(), "all inputs present -> no status message, got: " + status);
@@ -103,8 +99,7 @@ int main(int argc, char **argv)
   }
 
   // small results get an SI prefix and still decode to base units
-  i.publishReading(reading(0.0005, "A", now + 1));
-  p.checkForChanges();
+  in["i"] = reading(0.0005, "A", now + 1);
   r = decode(calc.currentLine(now, nullptr));
   check(r && std::fabs(r->main().dval - 0.006) < 1e-9 && r->main().unit == "mW", QString("6 mW: dval %1 unit %2").arg(r ? r->main().dval : -1).arg(r ? r->main().unit : "-"));
 
@@ -120,22 +115,19 @@ int main(int argc, char **argv)
   r = decode(calc.currentLine(now + CalcDevice::kStaleMs + 1, &status));
   check(r && r->main().val.trimmed() == "OL" && status.contains("No current value"), "stale input -> OL + message: " + status);
 
-  i.publishReading(reading(0, "A", now + 2, false));
-  p.checkForChanges();
+  in["i"] = reading(0, "A", now + 2, false);
   r = decode(calc.currentLine(now + 2, &status));
   check(r && r->main().val.trimmed() == "OL" && status.contains("'i'") && status.contains("numeric"), "overloaded input -> OL + message: " + status);
 
   // --- 5. division by zero, and an instance id with a hyphen ---
-  i.publishReading(reading(0.0, "A", now + 3, true));
-  p.checkForChanges();
-  CalcDevice div(info, "Ohm u / i", &p);
+  in["i"] = reading(0.0, "A", now + 3, true);
+  CalcDevice div(info, "Ohm u / i", p);
   check(div.open(QIODevice::ReadWrite), "u / i opens");
   r = decode(div.currentLine(now + 3, &status));
   check(r && r->main().val.trimmed() == "OL" && status.contains("division"), "1/0 -> OL + message: " + status);
 
-  odd.publishReading(reading(3.0, "V", now + 3));
-  p.checkForChanges();
-  CalcDevice alias(info, "V uni_t_803 * 2", &p);
+  in["uni-t_803"] = reading(3.0, "V", now + 3);
+  CalcDevice alias(info, "V uni_t_803 * 2", p);
   check(alias.open(QIODevice::ReadWrite), "aliased id opens");
   r = decode(alias.currentLine(now + 3, &status));
   check(r && qFuzzyCompare(r->main().dval, 6.0) && status.isEmpty(), "uni-t_803 is reachable as uni_t_803");
@@ -156,7 +148,7 @@ int main(int argc, char **argv)
 
   // --- 5b. time and coupling: a signal generator needs no other instance ---
   {
-    CalcDevice gen(info, "V/AC 10 + t", &p);
+    CalcDevice gen(info, "V/AC 10 + t", p);
     check(gen.open(QIODevice::ReadWrite), "generator opens");
     check(gen.unit() == "V" && gen.coupling() == "AC", "unit/coupling split: " + gen.unit() + "/" + gen.coupling());
     // t counts from open(); currentLine() takes the reference time
@@ -164,7 +156,7 @@ int main(int argc, char **argv)
     r = decode(gen.currentLine(opened + 2500, &status));
     check(r && status.isEmpty() && r->main().special == "AC", "AC coupling in the line");
     check(r && std::fabs(r->main().dval - 12.5) < 0.01, QString("t = 2.5 s -> 12.5, got %1").arg(r ? r->main().dval : -1));
-    CalcDevice rnd(info, "V 5 + rand()", &p);
+    CalcDevice rnd(info, "V 5 + rand()", p);
     check(rnd.open(QIODevice::ReadWrite), "rand() opens");
     r = decode(rnd.currentLine(opened, nullptr));
     // rand() is below 1, but the line has the meter's digits: 5.9997 comes as 6.000
@@ -174,7 +166,7 @@ int main(int argc, char **argv)
 
   // --- 5c. several values: a line each, P1 ... P4, value n can use v1 ... v(n-1) ---
   {
-    CalcDevice multi(info, "V/DC 10 + t; A/DC 0.5; W v1 * v2; °C/DC 21", &p);
+    CalcDevice multi(info, "V/DC 10 + t; A/DC 0.5; W v1 * v2; °C/DC 21", p);
     check(multi.open(QIODevice::ReadWrite) && multi.valueCount() == 4, "four values open");
     check(multi.unit(1) == "A" && multi.unit(3) == "°C" && multi.formula(2) == "v1 * v2", "the values split at ';'");
     const qint64 opened = QDateTime::currentMSecsSinceEpoch();
@@ -190,13 +182,13 @@ int main(int argc, char **argv)
     check(rs[3] && rs[3]->main().id == 3 && rs[3]->main().unit == "C", "P4: °C");
 
     // a value can use only those before it
-    CalcDevice later(info, "V v2; A 1", &p);
+    CalcDevice later(info, "V v2; A 1", p);
     check(!later.open(QIODevice::ReadWrite) && later.errorString().contains("v2"), "v2 in value 1: " + later.errorString());
-    CalcDevice noUnit2(info, "V 1; 2", &p);
+    CalcDevice noUnit2(info, "V 1; 2", p);
     check(!noUnit2.open(QIODevice::ReadWrite) && noUnit2.errorString().startsWith("Value 2"),
           "a value without unit says which: " + noUnit2.errorString());
     // a value without result leaves the ones after it without one, OL
-    CalcDevice waits(info, "V nosuchinstance; W v1 * 2", &p);
+    CalcDevice waits(info, "V nosuchinstance; W v1 * 2", p);
     check(waits.open(QIODevice::ReadWrite), "an input instance missing opens");
     const QByteArray ol = waits.currentLine(opened, &status);
     const auto w2 = decode(ol.mid(30, 30));

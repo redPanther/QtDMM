@@ -79,6 +79,21 @@ if (BUILD_TESTING)
 	## the meter's settings widget (DeviceSettings): keys in and out, "Advanced", groups per kind of meter
 	qtdmm_add_test(device_settings test_devicesettings tests/test_devicesettings.cpp)
 
+	## how to open a meter from its keys alone (MeterSetup), for every model as the settings page has it
+	qtdmm_add_test(meter_setup test_metersetup tests/test_metersetup.cpp)
+
+	## the meters of one process (DeviceSession): opened from My devices without a window, SCPI QTDMM:DEVice
+	qtdmm_add_test(device_session test_devicesession tests/test_devicesession.cpp)
+
+	## the program itself, offscreen: a meter in the window and two with --also, read over SCPI TCP
+	## (Unix only: the console and the end of a GUI process on Windows)
+	if(NOT WIN32)
+		qtdmm_add_test(process_e2e test_process_e2e tests/test_process_e2e.cpp $<TARGET_FILE:${PROJECT_NAME}>)
+		target_link_libraries(test_process_e2e PRIVATE Qt6::Network)
+		add_dependencies(test_process_e2e ${PROJECT_NAME})
+		set_tests_properties(process_e2e PROPERTIES TIMEOUT 60)
+	endif()
+
 	## the assistant "Add device": pages per connection, models, name, Next, the
 	## buttons that finish it; draws the device symbols (:/devices)
 	qtdmm_add_test(add_device test_adddevice tests/test_adddevice.cpp)
@@ -162,6 +177,16 @@ if (BUILD_TESTING)
 		target_compile_options(test_minmax PRIVATE ${QTDMM_WARNING_FLAGS})
 	endif()
 	add_test(NAME minmax_memory COMMAND test_minmax)
+
+	## which value of which meter a view follows: text and JSON forms, matching
+	## (header only: nothing to link but QtCore)
+	add_executable(test_valueref MACOSX_BUNDLE tests/test_valueref.cpp)
+	target_include_directories(test_valueref PRIVATE src)
+	target_link_libraries(test_valueref PRIVATE Qt6::Core)
+	if (QTDMM_WARNING_FLAGS)
+		target_compile_options(test_valueref PRIVATE ${QTDMM_WARNING_FLAGS})
+	endif()
+	add_test(NAME value_ref COMMAND test_valueref)
 
 	## the Poincaré plot's values: pairs, SD1/SD2, gaps, port changes
 	qtdmm_add_test(poincare_series test_poincare tests/test_poincare.cpp)

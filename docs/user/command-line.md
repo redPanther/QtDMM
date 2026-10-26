@@ -7,6 +7,7 @@ qtdmm [options]
 | Option | Meaning |
 |---|---|
 | `--config-id <id>` | Use the named configuration instead of `default`. Each id has its own settings file, so one meter can be set up per id. |
+| `--also <id>` | Open the entry `<id>` of *My devices* as well, without a window, for this run; repeat it for more. Its readings reach the SCPI server (`INSTrument:SELect`), and it records whenever the window records; see [SCPI server](scpi-server.md#qtdmms-own-commands). The ids are listed by `QTDMM:DEVice:CATalog?`. |
 | `--config-dir <dir>` | Directory for the configuration files (default: the platform's user config location). |
 | `--vxi11-rpc auto\|system\|own` | For this run, where VXI-11 gets its portmapper from: the system's rpcbind, an own one on port 111, or automatically (see [SCPI server](scpi-server.md#vxi-11)). Replaces the setting without changing it. |
 | `--vxi11-portmapper-port <port>` | For tests and development: VXI-11 with an own portmapper on this port instead of 111 (0: any free one), for this run. VISA libraries and lxi-tools ask port 111 and do not find it there; a client of your own (or a test) asks this port. |

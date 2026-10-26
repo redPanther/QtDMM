@@ -1,5 +1,4 @@
 #include "device/transports/calc.h"
-#include "service/sharedstatemanager.h"
 #include "core/sampletypes.h"
 #include "core/siprefix.h"
 
@@ -20,10 +19,10 @@ static const bool registered = []()
 }();
 
 CalcDevice::CalcDevice(const DmmDecoder::DMMInfo &info, const QString &device,
-                       SharedStateManager *state, QObject *parent)
+                       Inputs inputs, QObject *parent)
   : BufferedDevice(parent),
     m_dmmInfo(info),
-    m_state(state)
+    m_inputs(std::move(inputs))
 {
   // "<unit> <formula>" per value, the values separated by ';': the unit has
   // no spaces, the formula may
@@ -89,12 +88,6 @@ bool CalcDevice::open(OpenMode mode)
       }
     }
   }
-  if (!m_state)
-  {
-    setErrorString(QCoreApplication::translate("CalcDevice", "No instance data available."));
-    return false;
-  }
-
   if (!QIODevice::open(mode & ~WriteOnly))
     return false;
   m_rx.clear();
@@ -117,7 +110,7 @@ QByteArray CalcDevice::currentLine(qint64 now, QString *status) const
 {
   QString message;
   QByteArray lines;
-  const auto readings = m_state ? m_state->readings() : QMap<QString, SharedStateManager::Reading>();
+  const QMap<QString, Input> readings = m_inputs ? m_inputs() : QMap<QString, Input>();
   static const QRegularExpression earlier("^v(\\d)$");
   QList<std::optional<double>> results;   // of the values before, v1, v2 ...
 
@@ -125,9 +118,9 @@ QByteArray CalcDevice::currentLine(qint64 now, QString *status) const
   {
     const Value &v = m_values[n];
     std::optional<double> result;
-    if (v.expr && m_state)
+    if (v.expr)
     {
-      // instance ids as variables; "uni-t_803" is reachable as uni_t_803;
+      // the inputs' names as variables; "uni-t_803" is reachable as uni_t_803;
       // v1, v2 ... the values before this one
       QMap<QString, double> values;
       values.insert("t", (now - m_openedMs) / 1000.0);
@@ -159,7 +152,7 @@ QByteArray CalcDevice::currentLine(qint64 now, QString *status) const
           missing << var;
           continue;
         }
-        const SharedStateManager::Reading &r = readings[id];
+        const Input &r = readings[id];
         if (now - r.msecs > kStaleMs)
           stale << var;
         else if (!r.valid)
@@ -176,11 +169,11 @@ QByteArray CalcDevice::currentLine(qint64 now, QString *status) const
       if (message.isEmpty())
       {
         if (!missing.isEmpty())
-          message = QCoreApplication::translate("CalcDevice", "Waiting for instance '%1'").arg(missing.join("', '"));
+          message = QCoreApplication::translate("CalcDevice", "Waiting for '%1'").arg(missing.join("', '"));
         else if (!stale.isEmpty())
-          message = QCoreApplication::translate("CalcDevice", "No current value from instance '%1'").arg(stale.join("', '"));
+          message = QCoreApplication::translate("CalcDevice", "No current value from '%1'").arg(stale.join("', '"));
         else if (!invalid.isEmpty())
-          message = QCoreApplication::translate("CalcDevice", "Instance '%1' shows no numeric value").arg(invalid.join("', '"));
+          message = QCoreApplication::translate("CalcDevice", "'%1' shows no numeric value").arg(invalid.join("', '"));
         else if (!result && !earlierMissing)
           message = QCoreApplication::translate("CalcDevice", "Formula has no result (division by zero?)");
       }

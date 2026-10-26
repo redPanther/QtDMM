@@ -5,9 +5,9 @@ name: Flatpak build
 # it for a version tag and puts the bundle into the draft release.
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "release/**" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "release/**" ]
   workflow_call:   # from release.yml for a version tag
 
 jobs:

@@ -49,7 +49,8 @@ public:
   /// The values of one decoded frame: the main one and, when the frame has
   /// one, the second. A second value that is empty (the meter's secondary
   /// display is off) comes along with an empty text, so the views can clear
-  /// it.
+  /// it. The samples carry the time the frame came in (DmmResponse::received);
+  /// a response without one gets Sample::now() and @p wall.
   QList<PortSample> adapt(const DmmDecoder::DmmResponse &response, qint64 wall);
 
   /// One value, the fields as MeterConnection::value() delivers them.

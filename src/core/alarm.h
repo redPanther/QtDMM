@@ -8,6 +8,8 @@
 #include <QObject>
 #include <QString>
 
+#include "core/valueref.h"
+
 /// One alarm as the user set it up: a condition on a value of the meter (the
 /// main one at first) and what to do while it holds. Kept as JSON in the
 /// settings ([Alarms] list).
@@ -18,9 +20,10 @@ struct Alarm
 
   QString name;
   bool enabled = true;
-  /// Which value of the meter it watches (Reading::id): 0 the main one, 1 and
-  /// 2 the others. "No readings" is the meter's silence: always the main value.
-  int value = 0;
+  /// Which value it watches: of the meter's values (Reading::id) 0 the main
+  /// one, 1.. the others; with a source, only that meter's. "No readings" is
+  /// the meter's silence: always the main value.
+  ValueRef value;
   Condition condition = Below;
   double a = 0;              ///< threshold, or lower bound of the range, in base units
   double b = 0;              ///< upper bound (Outside/Inside)
@@ -83,10 +86,11 @@ public:
   /// Alarm::tintDisplay; invalid when there is none.
   QColor displayColor() const;
 
-  /// A reading of value @p id arrived (Reading::id): @p value in base units,
-  /// @p overload for OL. The alarms on that value look at it; the main
-  /// value's readings also end a silence.
-  void feed(double value, bool overload, qint64 nowMs, int id = 0);
+  /// A reading of value @p id arrived (Reading::id) from the meter @p source
+  /// (Reading::source): @p value in base units, @p overload for OL. The
+  /// alarms on that value look at it; the main value's readings also end a
+  /// silence.
+  void feed(double value, bool overload, qint64 nowMs, int id = 0, const QString &source = QString());
   /// The meter was connected or disconnected. "No readings" is silence of a
   /// connected meter, so it is counted from the connection, not from the
   /// start of the program: without this call a NoReadings alarm never

@@ -5,55 +5,54 @@
 #include <limits>
 
 #include <QDateTime>
+#include <QDir>
+#include <QFileInfo>
 #include <QHostInfo>
 #include <QProcess>
 #include <QTimer>
 #include <QRegularExpression>
+#include <QStandardPaths>
 
 #include "device/meterconnection.h"
+#include "device/metersetup.h"
 #include "ui/engnumbervalidator.h"
-#include "service/hislipserver.h"
-#include "service/mdnsresponder.h"
 #include "recording/recordingstore.h"
 #include "service/scpiserver.h"
+#include "service/servicehost.h"
 #include "service/sharedstatemanager.h"
 #include "core/siprefix.h"
 
-namespace
-{
-// --vxi11-rpc: replaces the setting Scpi/vxi11-rpc for this run
-std::optional<Vxi11Server::RpcbindMode> s_vxi11RpcOverride;
-// --vxi11-portmapper-port: an own portmapper on this port for this run (tests)
-std::optional<quint16> s_vxi11PortmapperPort;
-}
 
 
-MeterController::MeterController(QObject *parent)
+MeterController::MeterController(QObject *parent, ServiceHost *host)
   : QObject(parent)
   , m_dmm(new MeterConnection(this))
   , m_alarms(new AlarmManager(this))
   , m_recorder(new RecordingStore(this))
-  , m_scpi(new ScpiServer(this))
-  , m_mdns(new MdnsResponder(this))
-  , m_hislip(new HislipServer(m_scpi->endpoint(), this))
-  , m_mdnsHislip(new MdnsResponder(this))
-  , m_vxi11(new Vxi11Server(m_scpi->endpoint(), this))
-  , m_mdnsVxi11(new MdnsResponder(this))
+  , m_scpiDevice(new ScpiDevice(this))
+  , m_host(host ? host : new ServiceHost(this))
   , m_external(new QProcess(this))
 {
   qRegisterMetaType<Reading>();
+  m_host->scpi()->addDevice(m_scpiDevice);
+  connect(m_host, &ServiceHost::statusChanged, this, &MeterController::scpiStatusChanged);
+  connect(m_host, &ServiceHost::error, this, &MeterController::error);
+  updateScpiName();
   connect(m_dmm, &MeterConnection::response, this, &MeterController::responseSLOT);
   connect(m_dmm, &MeterConnection::error, this, &MeterController::error);
   // SCPI's "connected" (INPut?, STAT:QUES? bit 2) is the link itself: lost
   // and reconnecting (a Bluetooth meter switched off) is not connected
   connect(m_dmm, &MeterConnection::linkStateChanged, this, [this](MeterConnection::LinkState state)
   {
-    m_scpi->setConnected(state == MeterConnection::LinkState::Connected);
+    m_scpiDevice->setConnected(state == MeterConnection::LinkState::Connected);
   });
 
   // the recorder keeps every reading of the main value, and a gap where it
   // went stale
   connect(this, &MeterController::reading, m_recorder, &RecordingStore::setReading);
+  // in its base unit, as the values come (the graph sets the same)
+  connect(this, &MeterController::unitChanged, m_recorder,
+          [this](const QString &unit) { m_recorder->setUnit(SiPrefix::split(unit).baseUnit); });
   connect(this, &MeterController::staleChanged, m_recorder, &RecordingStore::setStale);
   connect(m_recorder, &RecordingStore::runningChanged, this, &MeterController::setRecording);
   // another function at the meter ended the recording: say so, and mark
@@ -76,7 +75,7 @@ MeterController::MeterController(QObject *parent)
   // event loop inside the server, where the client may go away meanwhile. The
   // checks stay at once, so the error queue answers the next command; they
   // count what is checked but not run yet, and the run checks once more.
-  connect(m_scpi, &ScpiServer::startRecording, this, [this]
+  connect(m_scpiDevice, &ScpiDevice::startRecording, this, [this]
   {
     QString why;
     if (m_startPending)
@@ -96,15 +95,15 @@ MeterController::MeterController(QObject *parent)
     }
     else
     {
-      m_scpi->pushError(-213, "Init ignored");
+      m_host->scpi()->pushError(-213, "Init ignored");
       Q_EMIT info(tr("SCPI: %1").arg(why));
     }
   });
-  connect(m_scpi, &ScpiServer::stopRecording, this, [this]
+  connect(m_scpiDevice, &ScpiDevice::stopRecording, this, [this]
   {
     QMetaObject::invokeMethod(this, [this] { Q_EMIT recordingRequested(false); }, Qt::QueuedConnection);
   });
-  connect(m_scpi, &ScpiServer::connectRequested, this, [this](bool on)
+  connect(m_scpiDevice, &ScpiDevice::connectRequested, this, [this](bool on)
   {
     // INPut OFF also ends a connection that is lost and being reopened
     if (on == m_connectPending.value_or(m_dmm->isWanted()))
@@ -118,16 +117,13 @@ MeterController::MeterController(QObject *parent)
         m_connectPending.reset();
     }, Qt::QueuedConnection);
   });
-  connect(m_scpi, &ScpiServer::resetMinMaxRequested, this, &MeterController::resetMinMax);
-  connect(m_scpi, &ScpiServer::acknowledgeAlarmsRequested, this, &MeterController::acknowledgeAlarms);
-  connect(m_scpi, &ScpiServer::markRequested, this, [this](const QString &text)
+  connect(m_scpiDevice, &ScpiDevice::resetMinMaxRequested, this, &MeterController::resetMinMax);
+  connect(m_scpiDevice, &ScpiDevice::acknowledgeAlarmsRequested, this, &MeterController::acknowledgeAlarms);
+  connect(m_scpiDevice, &ScpiDevice::markRequested, this, [this](const QString &text)
   {
     Q_EMIT markRequested(QColor(0x1e, 0x90, 0xff), text, true, true);
   });
   installScpiSources();
-  connect(m_scpi, &ScpiServer::clientsChanged, this, [this](int) { updateScpiStatus(); });
-  connect(m_hislip, &HislipServer::sessionsChanged, this, [this](int) { updateScpiStatus(); });
-  connect(m_vxi11, &Vxi11Server::linksChanged, this, [this](int) { updateScpiStatus(); });
 
   // an alarm's program that had the port to itself has ended: the meter again
   connect(m_external, &QProcess::finished, this, [this](int exitCode, QProcess::ExitStatus)
@@ -149,20 +145,29 @@ MeterController::~MeterController() = default;
 void MeterController::setStateManager(SharedStateManager *mgr)
 {
   m_stateMgr = mgr;
-  m_dmm->setStateManager(mgr);
+  m_instanceList = mgr;
 }
 
 void MeterController::setModel(const QString &model)
 {
   m_model = model;
   m_dmm->setName(model);
-  m_scpi->setModel(model);
+  m_scpiDevice->setModel(model);
 }
 
 void MeterController::setAlarms(const QList<Alarm> &alarms)
 {
   m_alarms->setAlarms(alarms);
   updateBanner();
+}
+
+void MeterController::configure(const MeterSetup &setup)
+{
+  m_dmm->setDmmInfo(setup.info);
+  m_dmm->setDevice(setup.device);
+  m_dmm->setFormat(setup.format);
+  m_dmm->setFramesPerReading(setup.info.framesPerReading);
+  setDisplayCounts(setup.info.display);
 }
 
 bool MeterController::connectMeter(bool on)
@@ -185,7 +190,7 @@ bool MeterController::pressKey(const QString &key)
 
 void MeterController::setRecording(bool on)
 {
-  m_scpi->setRecording(on);
+  m_scpiDevice->setRecording(on);
 }
 
 void MeterController::timerEvent(QTimerEvent *)
@@ -208,8 +213,36 @@ void MeterController::responseSLOT(const DmmDecoder::DmmResponse &response)
   // the one place the decoders' strings are read is ReadingAdapter
   m_adapter.setFormat(m_dmm->format());
   const qint64 now = QDateTime::currentMSecsSinceEpoch();
+  const QString from = source();
   for (const PortSample &ps : m_adapter.adapt(response, now))
-    publish(ReadingAdapter::reading(ps));
+  {
+    Reading rd = ReadingAdapter::reading(ps);
+    rd.source = from;
+    publish(rd);
+  }
+}
+
+void MeterController::setInstanceId(const QString &id)
+{
+  m_instanceId = id;
+  updateScpiName();
+}
+
+void MeterController::setDevice(const QString &id, const QString &name)
+{
+  m_deviceId = id;
+  m_deviceName = name;
+  updateScpiName();
+}
+
+void MeterController::updateScpiName()
+{
+  m_scpiDevice->setName(m_deviceName.isEmpty() ? m_instanceId : m_deviceName);
+}
+
+QString MeterController::source() const
+{
+  return m_deviceId.isEmpty() ? "instance:" + m_instanceId : "device:" + m_deviceId;
 }
 
 void MeterController::publish(const Reading &rd)
@@ -281,6 +314,7 @@ void MeterController::publish(const Reading &rd)
 
   if (id == 0)
   {
+    m_lastMain = rd;
     m_stale.arrived(m_clock.elapsed());
     m_overload = overload;
     if (m_baseUnit != baseUnit)
@@ -306,7 +340,7 @@ void MeterController::publish(const Reading &rd)
   if (!baseUnit.isEmpty())
     m_valueUnits[id] = baseUnit;
   m_valueOverload[id] = overload;
-  m_alarms->feed(dval, overload, now, id);
+  m_alarms->feed(dval, overload, now, id, rd.source);
 
   ScpiServer::Reading r;
   r.value = dval;
@@ -317,7 +351,7 @@ void MeterController::publish(const Reading &rd)
   r.overload = overload;
   r.valid = !rd.noNumber();   // no number shown: no measurement (NaN)
   r.msecs = now;
-  m_scpi->setReading(id, r);
+  m_scpiDevice->setReading(id, r);
 }
 
 bool MeterController::mayStartRecording(QString *why) const
@@ -325,16 +359,57 @@ bool MeterController::mayStartRecording(QString *why) const
   QString reason;
   if (m_recorder->state() == RecordingStore::Record)
     reason = tr("already recording, the recording goes on");
-  else if (m_recorder->state() == RecordingStore::View && m_recorder->dirty())
+  else if (m_recorder->state() == RecordingStore::View && m_recorder->dirty() && !m_followsWindow)
     reason = tr("start ignored, the recording shown is not saved yet");
   if (why)
     *why = reason;
   return reason.isEmpty();
 }
 
+namespace
+{
+// a file name only, and one on every system: letters, digits, " _.()-";
+// no drive or stream (':'), no device name of Windows, no other format
+bool plainFileName(const QString &name)
+{
+  static const QRegularExpression chars(R"(^[\w .()-]+$)", QRegularExpression::UseUnicodePropertiesOption);
+  static const QRegularExpression device(R"(^(CON|PRN|AUX|NUL|COM\d|LPT\d)$)", QRegularExpression::CaseInsensitiveOption);
+  const QString suffix = QFileInfo(name).suffix().toLower();
+  return chars.match(name).hasMatch() && !name.startsWith('.') && !name.endsWith('.') && !name.endsWith(' ')
+         && !device.match(name.section('.', 0, 0).trimmed()).hasMatch()
+         && (suffix.isEmpty() || suffix == "csv" || suffix == "xlsx" || suffix == "ods");
+}
+}
+
+QString MeterController::saveRecording(const QString &name, bool raw)
+{
+  // a client on the network names a file, no place: only into the folder
+  // for recordings, and nothing there is overwritten
+  if (!plainFileName(name))
+    return "-257,File name error; a file name only, .csv, .xlsx or .ods: " + name;
+  if (m_recorder->state() == RecordingStore::Record)
+    return "-221,Settings conflict; recording, stop it first";
+  if (m_recorder->state() != RecordingStore::View || m_recorder->count() == 0)
+    return "-221,Settings conflict; nothing recorded";
+  const QString dir = m_saveDir.isEmpty()
+                        ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/QtDMM"
+                        : m_saveDir;
+  const QString path = dir + '/' + (QFileInfo(name).suffix().isEmpty() ? name + ".csv" : name);
+  if (QFileInfo::exists(path))
+    return "-257,File name error; exists already: " + QFileInfo(path).fileName();
+  QList<int> extras;
+  for (int i = 0; i < m_recorder->extraCount(); ++i)
+    extras << i;
+  QString error;
+  if (!QDir().mkpath(dir) || !m_recorder->write(path, &error, raw, extras))
+    return "-250,Mass storage error; " + (error.isEmpty() ? dir : error);
+  Q_EMIT info(tr("SCPI: recording saved as %1").arg(QDir::toNativeSeparators(path)));
+  return {};
+}
+
 void MeterController::setValueCount(int count)
 {
-  m_scpi->setChannelCount(count);
+  m_scpiDevice->setChannelCount(count);
 }
 
 void MeterController::setMinMaxValue(int id)
@@ -369,7 +444,7 @@ void MeterController::forgetUnit()
   m_lastUnit.clear();
   m_baseUnit.clear();
   m_valueUnits.clear();
-  m_scpi->clearReadings();   // CHANnel:CATalog? and UNIT? (@4) must not keep the previous meter
+  m_scpiDevice->clearReadings();   // CHANnel:CATalog? and UNIT? (@4) must not keep the previous meter
   Q_EMIT unitChanged(QString());
   Q_EMIT baseUnitChanged(QString());
 }
@@ -383,8 +458,8 @@ QString MeterController::valueUnit(int id) const
 
 void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
 {
-  const QString unit = valueUnit(alarm.value);
-  const bool overload = m_valueOverload.value(alarm.value);
+  const QString unit = valueUnit(alarm.value.id);
+  const bool overload = m_valueOverload.value(alarm.value.id);
   const QString shown = overload ? QStringLiteral("OL") : EngNumberValidator::engValue(value) + unit;
   const QString text = alarm.message.isEmpty() ? alarm.describe(unit) : alarm.message;
   Q_EMIT error(tr("%1: %2 (%3)").arg(Alarm::title(alarm.name), text, shown));
@@ -467,7 +542,7 @@ void MeterController::updateBanner()
     if (m_alarms->state(i) != AlarmManager::Raised || !list[i].banner)
       continue;
     const Alarm &al = list[i];
-    lines << QString("%1: %2").arg(al.name, al.message.isEmpty() ? al.describe(valueUnit(al.value)) : al.message);
+    lines << QString("%1: %2").arg(al.name, al.message.isEmpty() ? al.describe(valueUnit(al.value.id)) : al.message);
     if (!color.isValid())
       color = al.color;
   }
@@ -525,6 +600,7 @@ void MeterController::installScpiSources()
     r.unit = m_recorder->unit();
     return r;
   };
+  s.saveRecording = [this](const QString &name, bool raw) { return saveRecording(name, raw); };
   s.recordingData = [this](int count, int channel)
   {
     // channel 2 and on: the series of that value used last, as the graph
@@ -556,11 +632,11 @@ void MeterController::installScpiSources()
   s.instances = [this]
   {
     QList<ScpiServer::Instance> list;
-    if (!m_stateMgr)
+    if (!m_instanceList)
       return list;
-    const auto readings = m_stateMgr->readings();
+    const auto readings = m_instanceList->readings();
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    for (const QString &id : m_stateMgr->instances())
+    for (const QString &id : m_instanceList->instances())
     {
       ScpiServer::Instance in;
       in.id = id;
@@ -575,202 +651,20 @@ void MeterController::installScpiSources()
     }
     return list;
   };
-  m_scpi->setSources(std::move(s));
-}
-
-void MeterController::setScreenshotSource(std::function<QByteArray(const QByteArray &)> source)
-{
-  m_scpi->setScreenshotSource(std::move(source));
+  m_scpiDevice->setSources(std::move(s));
 }
 
 void MeterController::applyScpi(const ScpiConfig &config)
 {
-  const QHostAddress address = config.allInterfaces ? QHostAddress::Any : QHostAddress::LocalHost;
-  // keep a running server when nothing about it changed: clients stay
-  const bool same = m_scpi->isListening() && m_scpi->address() == address
-                    && m_scpi->port() >= config.port && m_scpi->port() < config.port + 10;
-  if (!config.enabled)
-  {
-    m_mdns->stop();
-    m_scpi->stop();
-    m_scpiError.clear();
-  }
-  else if (!same)
-  {
-    m_mdns->stop();
-    m_scpiError.clear();
-    if (!m_scpi->start(address, config.port))
-    {
-      m_scpiError = m_scpi->errorString();
-      Q_EMIT error(tr("SCPI server: %1").arg(m_scpiError));
-    }
-  }
-
-  // HiSLIP: the same interpreter for VISA, next to the raw socket; another
-  // instance takes the next port, as for the raw socket
-  const bool hislip = config.enabled && config.hislip && m_scpi->isListening();
-  const bool sameHislip = m_hislip->isListening() && m_hislip->address() == address
-                          && m_hislip->port() >= config.hislipPort && m_hislip->port() < config.hislipPort + 10;
-  if (!hislip)
-  {
-    m_mdnsHislip->stop();
-    m_hislip->stop();
-    m_hislipError = config.enabled && config.hislip ? tr("the SCPI server is not running") : QString();
-  }
-  else if (!sameHislip)
-  {
-    m_mdnsHislip->stop();
-    m_hislipError.clear();
-    if (!m_hislip->start(address, config.hislipPort, 10))
-    {
-      m_hislipError = m_hislip->error();
-      Q_EMIT error(tr("HiSLIP server: %1").arg(m_hislipError));
-    }
-  }
-
-  // VXI-11: one per computer (one portmapper entry), with the system rpcbind
-  // or an own portmapper on 111; switched on but not possible, it stays off
-  // with a reason, the other two run on
-  const bool vxi11 = config.enabled && config.vxi11 && m_scpi->isListening();
-  const Vxi11Server::RpcbindMode rpc =
-    s_vxi11PortmapperPort ? Vxi11Server::RpcbindMode::Own : s_vxi11RpcOverride.value_or(config.vxi11Rpc);
-  const bool sameVxi11 = m_vxi11->isRunning() && m_vxi11->address() == address && m_vxi11->mode() == rpc;
-  if (!vxi11)
-  {
-    m_mdnsVxi11->stop();
-    m_vxi11->stop();
-    m_vxi11Error = config.enabled && config.vxi11 ? tr("the SCPI server is not running") : QString();
-  }
-  else if (!sameVxi11)
-  {
-    m_mdnsVxi11->stop();
-    m_vxi11Error.clear();
-    if (!m_vxi11->start(address, rpc, 0, 0, s_vxi11PortmapperPort.value_or(Vxi11Server::kPortmapperPort)))
-    {
-      m_vxi11Error = m_vxi11->error();
-      Q_EMIT error(tr("VXI-11 server: %1").arg(m_vxi11Error));
-    }
-  }
-
-  QMap<QString, QString> txt;
-  txt["txtvers"] = "1";
-  txt["model"] = m_model;
-  txt["version"] = APP_VERSION;
-  txt["instance"] = m_instanceId;
-  const QString instance = QString("QtDMM %1").arg(m_instanceId == "default"
-                                                   ? QHostInfo::localHostName() : m_instanceId);
-  if (m_scpi->isListening() && config.mdns && !m_mdns->isActive())
-    m_mdns->start("_scpi-raw._tcp", instance, m_scpi->port(), txt);
-  else if (!config.mdns)
-    m_mdns->stop();
-  if (m_hislip->isListening() && config.mdns && !m_mdnsHislip->isActive())
-    m_mdnsHislip->start("_hislip._tcp", instance, m_hislip->port(), txt);
-  else if (!config.mdns)
-    m_mdnsHislip->stop();
-  // VXI-11 clients ask the portmapper: the announced port is 111
-  if (m_vxi11->isRunning() && config.mdns && !m_mdnsVxi11->isActive())
-    m_mdnsVxi11->start("_vxi-11._tcp", instance, Vxi11Server::kPortmapperPort, txt);
-  else if (!config.mdns)
-    m_mdnsVxi11->stop();
-  updateScpiStatus();
-}
-
-void MeterController::updateScpiStatus()
-{
-  if (!m_scpi->isListening())
-  {
-    Q_EMIT scpiStatusChanged(m_scpiError.isEmpty() ? tr("The server is not running.")
-                                                   : tr("The server could not start: %1.").arg(m_scpiError));
-    return;
-  }
-  const QString where = m_scpi->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
-  const int n = m_scpi->clientCount() + m_hislip->sessionCount() + m_vxi11->linkCount();
-  const QString clients = n == 1 ? tr("1 client") : tr("%1 clients").arg(n);
-  QString text = tr("Listening on %1, port %2, %3 connected.").arg(where).arg(m_scpi->port()).arg(clients);
-  if (m_hislip->isListening())
-    text += ' ' + tr("HiSLIP on port %1: %2.").arg(m_hislip->port()).arg(hislipResource());
-  else if (!m_hislipError.isEmpty())
-    text += ' ' + tr("HiSLIP could not start: %1.").arg(m_hislipError);
-  if (m_vxi11->isRunning())
-    text += ' ' + (m_vxi11->usesSystemRpcbind()
-                     ? tr("VXI-11 through the system rpcbind: %1.").arg(vxi11Resource())
-                     : tr("VXI-11 with an own portmapper on port %2: %1.").arg(vxi11Resource())
-                         .arg(m_vxi11->portmapperPort()));
-  else if (!m_vxi11Error.isEmpty())
-    text += ' ' + tr("VXI-11 is off: %1.").arg(m_vxi11Error);
-  if (m_mdns->isActive())
-    text += ' ' + tr("Announced as \"%1\".").arg(m_mdns->instanceName());
-  Q_EMIT scpiStatusChanged(text);
+  m_host->apply(config, m_instanceId, m_model);
 }
 
 QList<ServiceState> MeterController::services() const
 {
-  ServiceState scpi;
-  scpi.id = "scpi";
-  scpi.name = "SCPI";
-  scpi.running = m_scpi->isListening();
-  if (scpi.running)
-  {
-    const QString where = m_scpi->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
-    scpi.port = m_scpi->port();
-    scpi.address = QString("%1:%2").arg(where).arg(scpi.port);
-    scpi.clients = m_scpi->clientCount();
-  }
-  else
-    scpi.error = m_scpiError;
-  ServiceState hislip;
-  hislip.id = "hislip";
-  hislip.name = "HiSLIP";
-  hislip.running = m_hislip->isListening();
-  if (hislip.running)
-  {
-    hislip.port = m_hislip->port();
-    hislip.address = hislipResource();
-    hislip.clients = m_hislip->sessionCount();
-  }
-  else
-    hislip.error = m_hislipError;
-  ServiceState vxi11;
-  vxi11.id = "vxi11";
-  vxi11.name = "VXI-11";
-  vxi11.running = m_vxi11->isRunning();
-  if (vxi11.running)
-  {
-    vxi11.port = m_vxi11->portmapperPort();
-    vxi11.address = vxi11Resource();
-    vxi11.clients = m_vxi11->linkCount();
-  }
-  else
-    vxi11.error = m_vxi11Error;
-  return { scpi, hislip, vxi11 };
+  return m_host->services();
 }
 
-QString MeterController::vxi11Resource() const
+void MeterController::setScreenshotSource(std::function<QByteArray(const QByteArray &)> source)
 {
-  if (!m_vxi11->isRunning())
-    return QString();
-  const QString host = m_vxi11->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
-  return QString("TCPIP::%1::INSTR").arg(host);
+  m_host->setScreenshotSource(std::move(source));
 }
-
-void MeterController::setVxi11RpcOverride(std::optional<Vxi11Server::RpcbindMode> mode)
-{
-  s_vxi11RpcOverride = mode;
-}
-
-void MeterController::setVxi11PortmapperPort(std::optional<quint16> port)
-{
-  s_vxi11PortmapperPort = port;
-}
-
-QString MeterController::hislipResource() const
-{
-  if (!m_hislip->isListening())
-    return QString();
-  const QString host = m_hislip->address() == QHostAddress::LocalHost ? QString("localhost") : QHostInfo::localHostName();
-  // the port only when it is not the standard one
-  if (m_hislip->port() == HislipServer::kDefaultPort)
-    return QString("TCPIP::%1::hislip0::INSTR").arg(host);
-  return QString("TCPIP::%1::hislip0,%2::INSTR").arg(host).arg(m_hislip->port());
-}
-

@@ -29,6 +29,7 @@
 #include "ui/views/graphwidget.h"
 #include "device/frameformat.h"
 #include "device/dmmdecoder.h"
+#include "device/metersetup.h"
 
 class Settings;
 class SharedStateManager;
@@ -90,9 +91,9 @@ public:
   DeviceSettings       *meterSettings() const { return m_meter; }
   /// @}
 
-  /// The meter's description, with the sigrok program and the "external
-  /// setup" check box.
-  DmmDecoder::DMMInfo   dmmInfo() const;
+  /// How to open the meter as the page has it (MeterSetup::fromKeys()),
+  /// with the sigrok program.
+  MeterSetup            meterSetup() const;
 
   /// The recording length as asked when Record is pressed (RecordLengthDlg):
   /// a value, 0 = until stopped, and its unit (0 s, 1 min, 2 h, 3 d). Stored
