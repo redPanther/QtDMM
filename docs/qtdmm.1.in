@@ -65,7 +65,8 @@ Open the entry
 .I id
 of My devices as well, without a window, for this run; repeat the option for
 more. Its readings reach the SCPI server
-.RB ( INSTrument:SELect );
+.RB ( INSTrument:SELect ),
+and it records whenever the window records;
 .B QTDMM:DEVice:CATalog?
 lists the ids.
 .TP

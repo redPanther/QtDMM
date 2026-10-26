@@ -89,6 +89,9 @@ public:
     /// The last @p count readings of @p channel (1 the main value) in the
     /// recording, oldest first.
     std::function<QList<Point>(int count, int channel)> recordingData;
+    /// Writes the recording to the file @p name (QTDMM:RECord:SAVE): empty,
+    /// or the SCPI error, "<code>,<text>".
+    std::function<QString(const QString &name, bool raw)> saveRecording;
     std::function<QList<AlarmState>()> alarms;
     /// The meter's keys QtDMM can press ("hold", "range", ...), empty for a
     /// meter without.

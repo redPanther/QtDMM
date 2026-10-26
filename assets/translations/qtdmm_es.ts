@@ -1128,7 +1128,22 @@
 <context>
     <name>DeviceSession</name>
     <message>
-        <location filename="../../src/service/devicesession.cpp" line="134"/>
+        <location filename="../../src/service/devicesession.cpp" line="67"/>
+        <source>%1: the recording was not saved, the new one replaces it</source>
+        <translation>%1: la grabación no estaba guardada, la nueva la sustituye</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/devicesession.cpp" line="82"/>
+        <source>%1: %2</source>
+        <translation>%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/devicesession.cpp" line="82"/>
+        <source>Window</source>
+        <translation>Ventana</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/devicesession.cpp" line="206"/>
         <source>%1 closed in the background: the window uses it now</source>
         <translation>%1 cerrado en segundo plano: ahora lo usa la ventana</translation>
     </message>
@@ -3888,74 +3903,74 @@ DMM connected and switched on?</source>
 <context>
     <name>MeterController</name>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="56"/>
+        <location filename="../../src/service/metercontroller.cpp" line="59"/>
         <source>Recording stopped: the meter measures %2 now, not %1</source>
         <translation>Grabación detenida: el multímetro mide ahora %2, no %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="57"/>
+        <location filename="../../src/service/metercontroller.cpp" line="60"/>
         <source>Function changed</source>
         <translation>Función cambiada</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="63"/>
+        <location filename="../../src/service/metercontroller.cpp" line="66"/>
         <source>%1 cleared</source>
         <translation>%1 apagada</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="76"/>
+        <location filename="../../src/service/metercontroller.cpp" line="79"/>
         <source>already starting, the recording goes on</source>
         <translation>la grabación ya está arrancando y continúa</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="86"/>
-        <location filename="../../src/service/metercontroller.cpp" line="93"/>
+        <location filename="../../src/service/metercontroller.cpp" line="89"/>
+        <location filename="../../src/service/metercontroller.cpp" line="96"/>
         <source>SCPI: %1</source>
         <translation>SCPI: %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="125"/>
+        <location filename="../../src/service/metercontroller.cpp" line="128"/>
         <source>%1 ended with exit code %2</source>
         <translation>%1 terminó con el código de salida %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="296"/>
+        <location filename="../../src/service/metercontroller.cpp" line="299"/>
         <source>The meter shows %1</source>
         <translation>El multímetro muestra %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="354"/>
-        <source>start ignored, this device has no recording yet</source>
-        <translation>inicio ignorado, este dispositivo aún no tiene grabación</translation>
-    </message>
-    <message>
-        <location filename="../../src/service/metercontroller.cpp" line="356"/>
+        <location filename="../../src/service/metercontroller.cpp" line="357"/>
         <source>already recording, the recording goes on</source>
         <translation>ya se está grabando, la grabación continúa</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="358"/>
+        <location filename="../../src/service/metercontroller.cpp" line="359"/>
         <source>start ignored, the recording shown is not saved yet</source>
         <translation>inicio ignorado, la grabación mostrada aún no está guardada</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="419"/>
+        <location filename="../../src/service/metercontroller.cpp" line="387"/>
+        <source>SCPI: recording saved as %1</source>
+        <translation>SCPI: grabación guardada como %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/service/metercontroller.cpp" line="446"/>
         <source>%1: %2 (%3)</source>
         <translation>%1: %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="425"/>
+        <location filename="../../src/service/metercontroller.cpp" line="452"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="441"/>
-        <location filename="../../src/service/metercontroller.cpp" line="466"/>
+        <location filename="../../src/service/metercontroller.cpp" line="468"/>
+        <location filename="../../src/service/metercontroller.cpp" line="493"/>
         <source>%1: could not run %2</source>
         <translation>%1: no se pudo ejecutar %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="444"/>
+        <location filename="../../src/service/metercontroller.cpp" line="471"/>
         <source>%1: %2 is still running</source>
         <translation>%1: %2 todavía se está ejecutando</translation>
     </message>
@@ -5041,7 +5056,7 @@ Después cierre la sesión y vuelva a iniciarla para que la pertenencia al grupo
 <context>
     <name>RecordingStore</name>
     <message>
-        <location filename="../../src/recording/recordingstore.cpp" line="923"/>
+        <location filename="../../src/recording/recordingstore.cpp" line="885"/>
         <source>Trigger</source>
         <translation>Disparo</translation>
     </message>

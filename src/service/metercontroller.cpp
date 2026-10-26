@@ -5,10 +5,13 @@
 #include <limits>
 
 #include <QDateTime>
+#include <QDir>
+#include <QFileInfo>
 #include <QHostInfo>
 #include <QProcess>
 #include <QTimer>
 #include <QRegularExpression>
+#include <QStandardPaths>
 
 #include "device/meterconnection.h"
 #include "device/metersetup.h"
@@ -350,15 +353,39 @@ void MeterController::publish(const Reading &rd)
 bool MeterController::mayStartRecording(QString *why) const
 {
   QString reason;
-  if (!m_recordingAllowed)
-    reason = tr("start ignored, this device has no recording yet");
-  else if (m_recorder->state() == RecordingStore::Record)
+  if (m_recorder->state() == RecordingStore::Record)
     reason = tr("already recording, the recording goes on");
-  else if (m_recorder->state() == RecordingStore::View && m_recorder->dirty())
+  else if (m_recorder->state() == RecordingStore::View && m_recorder->dirty() && !m_followsWindow)
     reason = tr("start ignored, the recording shown is not saved yet");
   if (why)
     *why = reason;
   return reason.isEmpty();
+}
+
+QString MeterController::saveRecording(const QString &name, bool raw)
+{
+  // a client on the network names a file, no place: only into the folder
+  // for recordings, and nothing there is overwritten
+  if (name.isEmpty() || name.contains('/') || name.contains('\\') || name.startsWith('.'))
+    return "-257,File name error; a file name only: " + name;
+  if (m_recorder->state() == RecordingStore::Record)
+    return "-221,Settings conflict; recording, stop it first";
+  if (m_recorder->state() != RecordingStore::View || m_recorder->count() == 0)
+    return "-221,Settings conflict; nothing recorded";
+  const QString dir = m_saveDir.isEmpty()
+                        ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/QtDMM"
+                        : m_saveDir;
+  const QString path = dir + '/' + (QFileInfo(name).suffix().isEmpty() ? name + ".csv" : name);
+  if (QFileInfo::exists(path))
+    return "-257,File name error; exists already: " + QFileInfo(path).fileName();
+  QList<int> extras;
+  for (int i = 0; i < m_recorder->extraCount(); ++i)
+    extras << i;
+  QString error;
+  if (!QDir().mkpath(dir) || !m_recorder->write(path, &error, raw, extras))
+    return "-250,Mass storage error; " + (error.isEmpty() ? dir : error);
+  Q_EMIT info(tr("SCPI: recording saved as %1").arg(QDir::toNativeSeparators(path)));
+  return {};
 }
 
 void MeterController::setValueCount(int count)
@@ -554,6 +581,7 @@ void MeterController::installScpiSources()
     r.unit = m_recorder->unit();
     return r;
   };
+  s.saveRecording = [this](const QString &name, bool raw) { return saveRecording(name, raw); };
   s.recordingData = [this](int count, int channel)
   {
     // channel 2 and on: the series of that value used last, as the graph

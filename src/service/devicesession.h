@@ -19,8 +19,14 @@ class ServiceHost;
 /// "My devices" without a window (open(): --also, SCPI QTDMM:DEVice:OPEN).
 /// They share the network services (host()); INSTrument chooses among them.
 ///
-/// A meter opened here has no alarms and no recording yet (K8); its
-/// readings carry its source ("device:<id>", Reading::source) and reach SCPI.
+/// A meter opened here has no alarms; its readings carry its source
+/// ("device:<id>", Reading::source) and reach SCPI. Its recording follows
+/// the window's: it starts at the same moment, on one time base
+/// (RecordingStore::startAt()), with the window's sample time, and stops
+/// with it, whatever started or stopped the window's (Record, a trigger,
+/// the length, SCPI, another instance). INITiate and ABORt on it start and
+/// stop the window's; with no window they start and stop those here. A
+/// recording of it not saved (QTDMM:RECord:SAVE) is overwritten by the next.
 /// Each meter is open once: when the window takes one that is open here,
 /// release() closes it first, so that the port is free.
 class DeviceSession : public QObject
@@ -81,6 +87,13 @@ Q_SIGNALS:
 
 private:
   void        installScpi();
+  /// The window's recording started (Record) or ended (another state).
+  void        followWindow(int state);
+  /// Starts the recording of @p ctl at @p t0 on the core clock, wall clock
+  /// @p start, the grid @p sampleTime (tenths, 0: its own).
+  void        startFollower(MeterController *ctl, qint64 t0, const QDateTime &start, int sampleTime);
+  /// INITiate or ABORt on a meter here.
+  void        onRecordingRequested(bool start);
 
   ServiceHost *m_host;
   DeviceLibrary *m_library = nullptr;

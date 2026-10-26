@@ -3,9 +3,13 @@
 
 #include "service/devicesession.h"
 
+#include <QDateTime>
+
 #include "core/devicelibrary.h"
+#include "core/sampletypes.h"
 #include "device/meterconnection.h"
 #include "device/metersetup.h"
+#include "recording/recordingstore.h"
 #include "service/metercontroller.h"
 #include "service/scpiserver.h"
 #include "service/servicehost.h"
@@ -28,6 +32,67 @@ void DeviceSession::adopt(MeterController *ctl)
 {
   m_adopted = ctl;
   ctl->dmm()->setCalcInputs(calcInputs());
+  connect(ctl->recorder(), &RecordingStore::stateChanged, this, &DeviceSession::followWindow);
+  // cleared while it records: a new start, the others too
+  connect(ctl->recorder(), &RecordingStore::cleared, this, [this]
+  {
+    if (m_adopted && m_adopted->recorder()->isRunning())
+      for (MeterController *other : std::as_const(m_opened))
+        if (other->recorder()->isRunning())
+          other->recorder()->clear();
+  });
+}
+
+void DeviceSession::followWindow(int state)
+{
+  if (!m_adopted)
+    return;
+  RecordingStore *lead = m_adopted->recorder();
+  if (state == RecordingStore::Record)
+  {
+    // its start stays where it is, also when its first reading comes later
+    lead->holdOrigin();
+    for (MeterController *ctl : std::as_const(m_opened))
+      startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
+  }
+  else
+    for (MeterController *ctl : std::as_const(m_opened))
+      ctl->recorder()->stop();
+}
+
+void DeviceSession::startFollower(MeterController *ctl, qint64 t0, const QDateTime &start, int sampleTime)
+{
+  RecordingStore *store = ctl->recorder();
+  if (store->state() == RecordingStore::View && store->dirty())
+    Q_EMIT error(tr("%1: the recording was not saved, the new one replaces it").arg(ctl->deviceName()));
+  if (sampleTime > 0)
+    store->setSampleTime(sampleTime);
+  store->startAt(t0, start);
+}
+
+void DeviceSession::onRecordingRequested(bool start)
+{
+  if (m_adopted)
+  {
+    // the window's starts all, as its Record button does
+    QString why;
+    if (start && !m_adopted->mayStartRecording(&why))
+    {
+      m_host->scpi()->pushError(-213, "Init ignored");
+      Q_EMIT error(tr("%1: %2").arg(m_adopted->deviceName().isEmpty() ? tr("Window") : m_adopted->deviceName(), why));
+      return;
+    }
+    m_adopted->requestRecording(start);
+    return;
+  }
+  // no window: those here, from now on
+  const qint64 t0 = Sample::now();
+  const QDateTime wall = QDateTime::currentDateTime();
+  for (MeterController *other : std::as_const(m_opened))
+    if (!start)
+      other->recorder()->stop();
+    else if (!other->recorder()->isRunning())
+      startFollower(other, t0, wall, 0);
 }
 
 QString DeviceSession::variableName(const QString &name)
@@ -88,11 +153,12 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   ctl->setDevice(id, name);
   ctl->setModel(setup.knownModel ? setup.info.name : QStringLiteral("Manual"));
   ctl->setValueCount(setup.valueCount);
-  ctl->setRecordingAllowed(false);
+  ctl->setFollowsWindow(true);
   ctl->configure(setup);
   ctl->dmm()->setCalcInputs(calcInputs());
   // no window to ask: INPut ON|OFF goes to the connection
   connect(ctl, &MeterController::connectRequested, ctl, [ctl](bool on) { ctl->connectMeter(on); });
+  connect(ctl, &MeterController::recordingRequested, this, &DeviceSession::onRecordingRequested);
   if (!ctl->connectMeter(true))
   {
     if (error)
@@ -101,6 +167,12 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
     return nullptr;
   }
   m_opened << ctl;
+  // opened while the window records: it joins, on the same time base
+  if (m_adopted && m_adopted->recorder()->isRunning())
+  {
+    const RecordingStore *lead = m_adopted->recorder();
+    startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
+  }
   Q_EMIT opened(ctl);
   return ctl;
 }

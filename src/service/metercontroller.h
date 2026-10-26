@@ -56,9 +56,21 @@ public:
   /// The connection as @p setup says (model, port, protocol, frames per
   /// reading) and the display count; takes effect at the next connect.
   void        configure(const MeterSetup &setup);
-  /// False: nobody can start a recording of this meter (a meter of
-  /// DeviceSession without a window); SCPI INITiate is refused.
-  void        setRecordingAllowed(bool allowed) { m_recordingAllowed = allowed; }
+  /// A meter of DeviceSession without a window: its recording follows the
+  /// window's, which DeviceSession starts and stops it with; a start of its
+  /// own (SCPI INITiate) goes there through recordingRequested(). One not
+  /// saved yet does not stop a start - nobody to ask - and is overwritten.
+  void        setFollowsWindow(bool follows) { m_followsWindow = follows; }
+  bool        followsWindow() const { return m_followsWindow; }
+  /// A start or stop from elsewhere (DeviceSession: a meter without a
+  /// window was started): recordingRequested(), as an alarm's.
+  void        requestRecording(bool start) { Q_EMIT recordingRequested(start); }
+  /// The folder QTDMM:RECord:SAVE writes into (Documents/QtDMM at first).
+  void        setSaveDir(const QString &dir) { m_saveDir = dir; }
+  /// Writes the recording to @p name in that folder (SCPI QTDMM:RECord:SAVE):
+  /// a file name only, a new one; CSV without a suffix. Empty, or the SCPI
+  /// error ("<code>,<text>", English) why not.
+  QString     saveRecording(const QString &name, bool raw);
   /// The meter's display count (DMMInfo::display), for the range and the
   /// bar graph of the readings.
   void        setDisplayCounts(int counts) { m_adapter.setCounts(counts); }
@@ -212,7 +224,8 @@ private:
   // a SCPI start or (dis)connect checked but not run yet (it runs after the
   // command): the next command's check counts it, so "INIT;INIT" starts once
   bool                m_startPending = false;
-  bool                m_recordingAllowed = true;
+  bool                m_followsWindow = false;
+  QString             m_saveDir;
   std::optional<bool> m_connectPending;
   QProcess           *m_external;     ///< an alarm's program that wanted the port: one at a time
   bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends

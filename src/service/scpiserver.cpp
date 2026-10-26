@@ -555,6 +555,29 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     return QString("%1,%2,%3,%4").arg(modes[r.mode]).arg(r.seconds, 0, 'f', 3).arg(r.count).arg(quoted(unit(r.unit)));
   }
 
+  // QTDMM:RECord:SAVE "<file>"[,RAW] writes the recording, the export's
+  // grid or every reading (RAW), into the folder for recordings
+  if (matches(sub, "RECord") && depth == 3 && matches(leaf, "SAVE"))
+  {
+    if (!commandOnly(cmd, isQuery))
+      return {};
+    const QString args = cmd.args.trimmed();
+    const int end = args.lastIndexOf('"');
+    const QString name = unquote(end > 0 ? args.left(end + 1) : args);
+    const QString rest = end > 0 ? args.mid(end + 1).remove(' ') : QString();
+    const bool raw = rest.compare(",RAW", Qt::CaseInsensitive) == 0;
+    if (name.isEmpty())
+      return refuse(isQuery, -109, "Missing parameter");
+    if (!rest.isEmpty() && !raw)
+      return refuse(isQuery, -224, "Illegal parameter value");
+    if (!dev().m_sources.saveRecording)
+      return refuse(isQuery, -221, "Settings conflict; no recording here");
+    const QString error = dev().m_sources.saveRecording(name, raw);
+    if (!error.isEmpty())
+      return refuse(isQuery, error.section(',', 0, 0).toInt(), error.section(',', 1));
+    return {};
+  }
+
   // QTDMM:ALARm? the alarms raised (acknowledged ones too), :LIST? each
   // with its state, :ACKnowledge as the banner's button
   if (matches(sub, "ALARm") && depth <= 3)

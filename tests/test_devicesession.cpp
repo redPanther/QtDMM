@@ -2,15 +2,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // DeviceSession: meters of "My devices" opened in the process without a
-// window, next to the window's meter, on one SCPI server. Simulated meters
-// only, no hardware.
+// window, next to the window's meter, on one SCPI server; their recordings
+// follow the window's. Simulated meters only, no hardware.
 
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QFile>
 #include <QTemporaryDir>
 
 #include "core/devicelibrary.h"
 #include "core/reading.h"
+#include "recording/recordingstore.h"
 #include "service/devicesession.h"
 #include "service/metercontroller.h"
 #include "service/scpiserver.h"
@@ -59,16 +61,10 @@ int main(int argc, char **argv)
   check(session.controller("device:" + sim) == ctl, "found by source");
   check(ask("INST:CAT?") == "\"WINDOW_METER\",\"BENCH_SIM\"", "both meters on one server: " + ask("INST:CAT?"));
 
-  // 2. refused: twice, unknown, the window's; INIT on a meter without a window
+  // 2. refused: twice, unknown, the window's
   check(!session.open(sim, &error) && error.startsWith("-221,"), "open twice: " + error);
   check(!session.open("nosuch", &error) && error.startsWith("-224,"), "unknown id: " + error);
   check(!session.close("w1", &error) && error.startsWith("-221,"), "the window's meter is not closed here: " + error);
-  ask("INST BENCH_SIM");
-  ask("*CLS");
-  ask("INIT");
-  QCoreApplication::processEvents();
-  check(ask("SYST:ERR?").startsWith("-213,"), "INIT on a meter without a window: refused");
-
   // 3. SCPI: catalog, open, close
   const QString cat = ask("QTDMM:DEV:CAT?");
   check(cat.contains(QString("\"%1\",\"Bench sim\",1").arg(sim)) && cat.contains(QString("\"%1\",\"Power\",0").arg(calc)),
@@ -107,7 +103,66 @@ int main(int argc, char **argv)
   check(!session.controller("device:" + calc) && ask("INST:CAT?") == "\"WINDOW_METER\",\"BENCH_SIM\"",
         "QTDMM:DEV:CLOS: " + ask("INST:CAT?"));
 
-  // 4. the window takes the meter open in the background: it is closed
+  // 4. recording: the window's starts and stops the meter here, on its time
+  // base; INIT and ABOR on the meter here start and stop the window's (as
+  // its Record button: the window's start there)
+  RecordingStore *lead = window.recorder();
+  RecordingStore *mine = ctl->recorder();
+  QObject::connect(&window, &MeterController::recordingRequested, lead, [lead](bool start)
+  {
+    if (start)
+      lead->start();
+    else
+      lead->stop();
+  });
+  auto settle = [] { for (int i = 0; i < 3; ++i) QCoreApplication::processEvents(); };
+  lead->start();
+  check(mine->isRunning() && mine->startClock() == lead->startClock() && mine->startDateTime() == lead->startDateTime(),
+        "the window's start starts the meter here, at the same moment");
+  lead->stop();
+  check(mine->state() == RecordingStore::View, "the window's stop stops it");
+  ask("INST BENCH_SIM");
+  ask("*CLS");
+  ask("INIT");
+  settle();
+  check(lead->isRunning() && mine->isRunning() && ask("SYST:ERR?").startsWith("0,"), "INIT here starts the window's");
+  check(waitFor([&] { return mine->count() >= 2; }, 4000), QString("readings recorded: %1").arg(mine->count()));
+  ask("ABOR");
+  settle();
+  check(!lead->isRunning() && mine->state() == RecordingStore::View && mine->dirty(), "ABOR here stops the window's");
+  // saved into the folder for recordings, by name only, nothing overwritten
+  ctl->setSaveDir(dir.path() + "/rec");
+  ask("QTDMM:REC:SAVE \"bench\"");
+  check(ask("SYST:ERR?").startsWith("0,") && QFile::exists(dir.path() + "/rec/bench.csv") && !mine->dirty(),
+        "QTDMM:REC:SAVE");
+  ask("QTDMM:REC:SAVE \"bench.csv\",RAW");
+  check(ask("SYST:ERR?").startsWith("-257,"), "QTDMM:REC:SAVE: no file overwritten");
+  ask("QTDMM:REC:SAVE \"../bench\"");
+  check(ask("SYST:ERR?").startsWith("-257,"), "QTDMM:REC:SAVE: a file name only");
+  ask("QTDMM:REC:SAVE \"raw.csv\", raw");
+  check(ask("SYST:ERR?").startsWith("0,") && QFile::exists(dir.path() + "/rec/raw.csv"), "QTDMM:REC:SAVE ..., RAW");
+  // one not saved is overwritten, with a message
+  QString replaced;
+  {
+    QObject::connect(&session, &DeviceSession::error, &session, [&replaced](const QString &text) { replaced = text; });
+    lead->start();
+    check(replaced.isEmpty(), "saved: no message at the next start: " + replaced);
+    lead->stop();
+    lead->start();
+    check(mine->isRunning() && replaced.contains("Bench sim"), "not saved: replaced, said so: " + replaced);
+    lead->stop();
+  }
+  // opened while the window records: it joins on the window's time base
+  lead->start();
+  ask(QString("QTDMM:DEV:OPEN \"%1\"").arg(calc).toLatin1());
+  if (MeterController *power = session.controller("device:" + calc))
+  {
+    check(power->recorder()->isRunning() && power->recorder()->startClock() == lead->startClock(), "opened while recording: joins");
+    session.close(calc);
+  }
+  lead->stop();
+
+  // 5. the window takes the meter open in the background: it is closed
   QString message;
   QObject::connect(&session, &DeviceSession::error, [&message](const QString &text) { message = text; });
   session.release(sim);
