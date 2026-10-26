@@ -63,7 +63,8 @@ int main(int argc, char **argv)
       { "Sample/rate", 5 }, { "Sample/rate-unit", 2 }, { "Sample/time", 90 }, { "Sample/time-unit", 1 },
       { "Start/mode", int(GraphWidget::Falling) }, { "Start/hour", 13 }, { "Start/minute", 14 }, { "Start/second", 15 },
       { "Start/raising-threshold", QString("1.5") }, { "Start/falling-threshold", QString("-3") },
-      { "Start/pre-trigger", true }, { "Start/pre-trigger-time", 7 }, { "Start/pre-trigger-unit", 1 } };
+      { "Start/pre-trigger", true }, { "Start/pre-trigger-time", 7 }, { "Start/pre-trigger-unit", 1 },
+      { "Start/trigger-value", QString("2@device:ab12cd34") } };
     for (const auto &[key, value] : keys)
     {
       if (value.typeId() == QMetaType::Bool)
@@ -107,6 +108,14 @@ int main(int argc, char **argv)
     check(recorder.sampleLength() == 90 * 60 * 10 && recorder.sampleMode() == GraphWidget::Falling
             && recorder.startTime() == QTime(13, 14, 15) && recorder.preTrigger() == 7 * 60 * 1000,
           "recorder: length, start or pre-trigger");
+    // the value the threshold watches: chosen among the meter's values, the meter kept
+    auto *triggerValue = child<QComboBox>(recorder, "ui_triggerValue");
+    recorder.setValueNames({ "1: V", "2: A", "3: W" });
+    check(!triggerValue->isHidden() && triggerValue->currentData().toInt() == 2, "recorder: the stored value chosen");
+    triggerValue->setCurrentIndex(1);
+    Q_EMIT triggerValue->activated(1);
+    check(recorder.triggerValue() == ValueRef(1, "device:ab12cd34"), "recorder: another value, the meter kept: "
+            + recorder.triggerValue().toString());
 
     // --- 2. what comes with a choice ---
     graph.show();

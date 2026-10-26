@@ -502,6 +502,7 @@ void InstanceWidget::updateValueNames()
     plain << valueName(id);
   }
   m_configDlg->alarmPage()->setValueNames(names);
+  m_configDlg->recorderPage()->setValueNames(names);
   if (m_readingLog)
     m_readingLog->setValueNames(plain);
 }
@@ -801,6 +802,8 @@ void InstanceWidget::readConfig()
 
   ui_graph->setCrosshair(graph->crosshair());
 
+  // the value first: the graph shows the trigger line only for the main value
+  ui_graph->store()->setTriggerValue(recorder->triggerValue());
   ui_graph->setThresholds(recorder->fallingThreshold(), recorder->raisingThreshold());
 
   // the reference line snaps to the alarms' thresholds

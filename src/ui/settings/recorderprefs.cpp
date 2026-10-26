@@ -88,7 +88,16 @@ RecorderPrefs::RecorderPrefs(QWidget *parent) : SettingsPage(parent)
     e->setToolTip(tr("The threshold; a line in the graph shows it and can be dragged.") + "<p>" + numberHint);
     e->setMaximumWidth(fontMetrics().horizontalAdvance('0') * 12);
   }
-  m_thresholdRow = row({ ui_edge, ui_raisingThreshold, ui_fallingThreshold });
+  // with more than one value: which one the threshold watches (setValueNames())
+  ui_triggerValue = new QComboBox(this);
+  ui_triggerValue->setObjectName("ui_triggerValue");
+  ui_triggerValue->setToolTip(tr("The value the threshold watches; the recording keeps all values."));
+  ui_triggerValue->setVisible(false);
+  connect(ui_triggerValue, &QComboBox::activated, this, [this]
+  {
+    m_triggerValue = ValueRef(ui_triggerValue->currentData().toInt(), m_triggerValue.source);
+  });
+  m_thresholdRow = row({ ui_triggerValue, ui_edge, ui_raisingThreshold, ui_fallingThreshold });
   m_form->addRow(QString(), row({ triggerBut, m_thresholdRow }));
 
   // the options sit in rows of their own: one group keeps them exclusive
@@ -165,6 +174,8 @@ void RecorderPrefs::defaultsSLOT()
   ui_preTrigger->setChecked(m_cfg->getBool("Start/pre-trigger", false));
   ui_preTriggerTime->setValue(m_cfg->getInt("Start/pre-trigger-time", 10));
   ui_preTriggerUnit->setCurrentIndex(m_cfg->getInt("Start/pre-trigger-unit", 0));
+  m_triggerValue = ValueRef::fromString(m_cfg->getString("Start/trigger-value", "0"));
+  ui_triggerValue->setCurrentIndex(qMax(0, ui_triggerValue->findData(m_triggerValue.id)));
   updateRows();
 }
 
@@ -182,6 +193,8 @@ void RecorderPrefs::factoryDefaultsSLOT()
   ui_preTrigger->setChecked(false);
   ui_preTriggerTime->setValue(10);
   ui_preTriggerUnit->setCurrentIndex(0);
+  m_triggerValue = ValueRef();
+  ui_triggerValue->setCurrentIndex(0);
   updateRows();
 }
 
@@ -201,6 +214,21 @@ void RecorderPrefs::applySLOT()
   m_cfg->setBool("Start/pre-trigger", ui_preTrigger->isChecked());
   m_cfg->setInt("Start/pre-trigger-time", ui_preTriggerTime->value());
   m_cfg->setInt("Start/pre-trigger-unit", ui_preTriggerUnit->currentIndex());
+  m_cfg->setString("Start/trigger-value", m_triggerValue.toString());
+}
+
+ValueRef RecorderPrefs::triggerValue() const
+{
+  return m_triggerValue;
+}
+
+void RecorderPrefs::setValueNames(const QStringList &names)
+{
+  ui_triggerValue->clear();
+  for (int id = 0; id < qMax(int(names.size()), m_triggerValue.id + 1); ++id)
+    ui_triggerValue->addItem(names.value(id, tr("Value %1").arg(id + 1)), id);
+  ui_triggerValue->setCurrentIndex(qMax(0, ui_triggerValue->findData(m_triggerValue.id)));
+  ui_triggerValue->setVisible(ui_triggerValue->count() > 1);
 }
 
 GraphWidget::SampleMode RecorderPrefs::sampleMode() const
