@@ -166,7 +166,9 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
       if (!m_session->open(id, &error))
       {
         qWarning().noquote() << "--also" << id << ":" << error.section(',', 1);
-        m_error->setText(tr("--also %1: %2").arg(id, error.section(',', 1)));
+        // one that does not connect said why in the status bar already
+        if (!error.startsWith("-240,"))
+          m_error->setText(tr("--also %1: %2").arg(id, error.section(',', 1)));
       }
     }
   });
