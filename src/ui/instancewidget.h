@@ -32,9 +32,11 @@
 #include "ui_uiinstancewidget.h"
 
 #include "core/reading.h"
+#include "core/valueref.h"
 #include "ui/dialogs/printdlg.h"
 
 class MeterController;
+class DeviceSession;
 class SettingsDialog;
 class LcdWidget;
 class Settings;
@@ -60,8 +62,10 @@ class InstanceWidget : public QFrame, private Ui::UIInstanceWidget
 public:
   /// @param instanceId  name of this instance for multi-instance setups (--config-id)
   /// @param configPath  directory of the settings file (--config-dir), or empty
-  /// @param parent       the MainWindow
-  InstanceWidget(QString instanceId, QString configPath, QWidget *parent = nullptr);
+  /// @param session     the meters of the process: the window's meter takes part
+  ///                    in its network services and is one of them
+  /// @param parent      the MainWindow
+  InstanceWidget(QString instanceId, QString configPath, DeviceSession *session, QWidget *parent = nullptr);
   /// Disconnects, saves the settings and asks about unsaved data. Returns
   /// false when the user cancels; MainWindow then ignores the close event.
   bool        closeWin();
@@ -86,8 +90,10 @@ public:
   /// kept with the window layout. A value the meter does not have
   /// (numValues()) gives the main value. The LCD's primary value is also the
   /// one of the min/max memory; the recording stays the main value's.
+  /// A ValueRef of another meter is kept (and saved) but shows the main
+  /// value until that meter's readings reach this window.
   /// @{
-  void        setLcdValue(int id);
+  void        setLcdValue(const ValueRef &value);
   /// The LCD's small line (LcdWidget::setSecondaries()); std::nullopt: the
   /// first values after the big one.
   void        setLcdSecondaries(const std::optional<QList<int>> &ids);
@@ -95,14 +101,19 @@ public:
   QList<int>  lcdSecondaries() const;
   /// Whether the small line was chosen (else it is not saved).
   bool        lcdSecondariesChosen() const { return m_lcdSecondaries.has_value(); }
-  void        setMeterValue(int id);
-  void        setPoincareValue(int id);
+  void        setMeterValue(const ValueRef &value);
+  void        setPoincareValue(const ValueRef &value);
   /// Whether the readings table shows value @p id (all at first).
   bool        tableValueShown(int id) const;
   void        setTableValueShown(int id, bool shown);
-  int         lcdValue() const { return m_lcdValue; }
-  int         meterValue() const { return m_meterValue; }
-  int         poincareValue() const { return m_poincareValue; }
+  ValueRef    lcdValue() const { return m_lcdValue; }
+  ValueRef    meterValue() const { return m_meterValue; }
+  ValueRef    poincareValue() const { return m_poincareValue; }
+  /// The id of @p value among this meter's values; another meter's value
+  /// and one the meter does not have (numValues()) give the main value.
+  int         ownValue(const ValueRef &value) const;
+  /// @p value belongs to this window's meter (no source, or its own).
+  bool        ownMeter(const ValueRef &value) const;
   /// The values the meter has: DMMInfo::valueCount(), or more when more came;
   /// at most kMaxValues.
   int         numValues() const;
@@ -225,6 +236,7 @@ protected:
   void        openConfig(int page = -1);
   void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
   MeterController *m_ctl;
+  DeviceSession   *m_session;
   SettingsDialog  *m_configDlg;
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;
@@ -240,9 +252,9 @@ protected:
   AnalogMeter   *m_meter;
   PoincarePlot  *m_poincare = nullptr;
   QPointer<ReadingsModel> m_readingLog;
-  int         m_lcdValue = 0;
-  int         m_meterValue = 0;
-  int         m_poincareValue = 0;
+  ValueRef    m_lcdValue;
+  ValueRef    m_meterValue;
+  ValueRef    m_poincareValue;
   std::optional<QList<int>> m_lcdSecondaries;   ///< setLcdSecondaries()
   QMap<int, Reading> m_lastReading;   ///< by id, for valueName()
   QMap<int, QString> m_lastText;      ///< by id, for valueText()

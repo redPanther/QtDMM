@@ -7,11 +7,13 @@
 #include <QList>
 #include <QMap>
 #include <QObject>
+#include <QPointer>
 #include <QString>
 
 #include <functional>
 
 #include "core/sampletypes.h"
+#include "service/scpidevice.h"
 #include "service/scpiendpoint.h"
 
 class QTcpServer;
@@ -24,11 +26,12 @@ class QTcpSocket;
 /// SCPI - lxi-tools, sigrok's scpi-dmm, a Python script - can read a
 /// consumer multimeter.
 ///
-/// The server only reports; it never writes to the meter. It knows the
-/// current reading (setReading()), whether the meter is connected and
-/// whether the recorder runs, and asks for the recorder / connection
-/// through signals. process() is the whole command interpreter and is
-/// public so the test can drive it without sockets.
+/// The server only reports; it never writes to the meter. What it knows of
+/// a meter - the readings, whether it is connected, whether the recorder
+/// runs - is in its ScpiDevice, which also passes on the requests for the
+/// recorder / connection. With several devices (addDevice()) INSTrument
+/// chooses the one the commands go to. process() is the whole command
+/// interpreter and is public so the test can drive it without sockets.
 class ScpiServer : public QObject
 {
   Q_OBJECT
@@ -37,18 +40,13 @@ public:
   /// unit whatever the meter's protocol writes - "C", "F", "Ohm" for °C,
   /// °F ("dF") and Ω. Scripts compare against it.
   static QString unit(const QString &baseUnit);
-  /// What the meter last delivered, in SI base units.
-  struct Reading
-  {
-    double value = 0;
-    QString unit;      ///< "V", "A", "Ohm" ... without prefix
-    PortKey port;      ///< what is measured: voltage.dc, current.ac, voltage.diode, ...
-    QString range;     ///< "AUTO", "MANU" or the meter's range text
-    bool overload = false;
-    bool hold = false;
-    bool valid = false;
-    qint64 msecs = 0;
-  };
+  using Reading = ScpiDevice::Reading;
+  using Stats = ScpiDevice::Stats;
+  using RecordingState = ScpiDevice::RecordingState;
+  using Point = ScpiDevice::Point;
+  using AlarmState = ScpiDevice::AlarmState;
+  using Instance = ScpiDevice::Instance;
+  using Sources = ScpiDevice::Sources;
 
   explicit ScpiServer(QObject *parent = nullptr);
   ~ScpiServer() override;
@@ -64,90 +62,35 @@ public:
   int clientCount() const { return m_clients.size(); }
   QString errorString() const { return m_error; }
 
-  /// The meter shown in *IDN? ("UNI-T UT61E"); the manufacturer is QtDMM.
-  void setModel(const QString &model) { m_model = model; }
-  /// Reading of value @p id (0 = main, 1 = second ...) as it arrives:
-  /// channel id + 1 of the queries.
-  void setReading(int id, const Reading &reading);
-  /// Another meter was taken over: the readings of the previous one go.
-  void clearReadings() { m_readings.clear(); }
-  /// The values the meter has (its Device page): channels 1..@p count of
-  /// READ? (@<n>) and the like. Channels 1 and 2 are always there (READ2?
-  /// on a meter without a second value answers as stale), and so is one
-  /// that a reading came for.
-  void setChannelCount(int count) { m_channelCount = count; }
-  int  channelCount() const;
-  /// The meter sends readings: false while connecting, after a timeout and
-  /// while a lost connection is reopened (STAT:QUES? bit 2, INPut?).
-  void setConnected(bool on) { m_connected = on; }
-  void setRecording(bool on) { m_recording = on; }
-  bool connected() const { return m_connected; }
-  bool recording() const { return m_recording; }
+  /// The meters the commands can go to (INSTrument): @p device until it is
+  /// removed or destroyed. The first one is chosen at first, and again when
+  /// the chosen one goes; without any the server answers as for no meter.
+  void addDevice(ScpiDevice *device);
+  void removeDevice(ScpiDevice *device);
+  /// The meter the commands go to now (INSTrument:SELect).
+  ScpiDevice *selectedDevice() const;
+  /// The SCPI names of the meters, in their order (INSTrument:CATalog?): the
+  /// device's name in upper case, other characters than letters, digits and
+  /// '_' as '_', "_2" for the second of a name.
+  QStringList instrumentNames() const;
 
-  /// A min/max memory (CALCulate:AVERage), in SI base units.
-  struct Stats
-  {
-    int count = 0;      ///< readings since the last reset; 0: min, max and mean are NaN
-    double min = 0;
-    double max = 0;
-    double mean = 0;
-  };
-  /// What the graph is doing (QTDMM:RECord?).
-  struct RecordingState
-  {
-    enum Mode { Idle, Live, Record, View };
-    Mode mode = Idle;
-    double seconds = 0;   ///< from the first to the last reading
-    int count = 0;        ///< readings held
-    QString unit;         ///< base unit, "V"
-  };
-  /// One reading of the recording (QTDMM:RECord:DATA?).
-  struct Point
-  {
-    double seconds = 0;    ///< since the start of the recording
-    double value = 0;      ///< SI base units; NaN = a gap
-    bool overload = false;
-  };
-  /// One alarm of the meter (QTDMM:ALARm:LIST?).
-  struct AlarmState
-  {
-    enum Level { Off, Pending, Raised, Acknowledged };
-    QString name;
-    Level level = Off;
-  };
-  /// A running QtDMM instance with its last reading (QTDMM:INSTances?).
-  struct Instance
+  /// One of "My devices" for QTDMM:DEVice:CATalog?.
+  struct DeviceEntry
   {
     QString id;
-    double value = 0;
-    QString unit;
-    bool valid = false;   ///< a current reading, neither held nor overload
+    QString name;
+    bool    open = false;   ///< a meter of this process uses it
   };
-  /// Where the QTDMM: queries get what the server does not hold itself. A
-  /// source not set answers as if there were nothing.
-  struct Sources
+  /// What QTDMM:DEVice opens and closes the meters with (DeviceSession).
+  /// open/close return an empty text or the error "<code>,<text>"; without
+  /// them the commands are refused.
+  struct DeviceControl
   {
-    /// The display's min/max memory, of its primary value (CALCulate:AVERage
-    /// without a channel).
-    std::function<Stats()> stats;
-    /// The min/max memory of @p channel (1 the main value) of its own, since
-    /// the last reset (CALCulate:AVERage (@n), CALCulate2:AVERage).
-    std::function<Stats(int channel)> channelStats;
-    /// Resets the memory of @p channel alone (CALCulate:AVERage:CLEar (@n)).
-    std::function<void(int channel)> clearChannelStats;
-    std::function<RecordingState()> recording;
-    /// The last @p count readings of @p channel (1 the main value) in the
-    /// recording, oldest first.
-    std::function<QList<Point>(int count, int channel)> recordingData;
-    std::function<QList<AlarmState>()> alarms;
-    /// The meter's keys QtDMM can press ("hold", "range", ...), empty for a
-    /// meter without.
-    std::function<QStringList()> keys;
-    /// Presses @p key; false when it could not (the meter not connected).
-    std::function<bool(const QString &key)> pressKey;
-    std::function<QList<Instance>()> instances;
+    std::function<QList<DeviceEntry>()> catalog;
+    std::function<QString(const QString &id)> open;
+    std::function<QString(const QString &id)> close;
   };
-  void setSources(Sources sources) { m_sources = std::move(sources); }
+  void setDeviceControl(DeviceControl control) { m_deviceControl = std::move(control); }
 
   /// Largest QTDMM:RECord:DATA? answer, in readings.
   static constexpr int kMaxDataPoints = 10000;
@@ -179,17 +122,6 @@ public:
 
 Q_SIGNALS:
   void clientsChanged(int count);
-  /// INITiate / ABORt: the client wants the recorder started or stopped.
-  void startRecording();
-  void stopRecording();
-  /// INPut ON|OFF: the client wants the meter connected or disconnected.
-  void connectRequested(bool on);
-  /// CALCulate:AVERage:CLEar: start the min/max memory afresh (F4).
-  void resetMinMaxRequested();
-  /// QTDMM:ALARm:ACKnowledge
-  void acknowledgeAlarmsRequested();
-  /// QTDMM:MARK "text": a mark in the graph and the readings table.
-  void markRequested(const QString &text);
 
 private:
   struct Command
@@ -210,6 +142,9 @@ private:
   QString handleReading(const Command &cmd, bool &isQuery);
   QString handleStatus(const Command &cmd, bool &isQuery);
   QString handleSystem(const Command &cmd, bool &isQuery);
+  QString handleInstrument(const Command &cmd, bool &isQuery);
+  /// The meter the commands go to: the chosen one, or an empty stand-in.
+  ScpiDevice &dev() const;
   /// A refused command: @p code queued, nothing to answer (isQuery false).
   QString refuse(bool &isQuery, int code, const QString &text);
   /// False and -100 queued when @p cmd is not a query, resp. is one.
@@ -234,14 +169,12 @@ private:
   int m_running = 0;
   QList<QTcpSocket *> m_released;
   QString m_error;
-  QString m_model;
-  QMap<int, Reading> m_readings;   ///< by value id (channel - 1)
-  int m_channelCount = 2;
-  bool m_connected = false;
-  bool m_recording = false;
+  QList<QPointer<ScpiDevice>> m_devices;
+  int m_selected = 0;                ///< index into m_devices (INSTrument:NSELect - 1); -1: the one chosen was closed
+  ScpiDevice *m_none;                ///< answers when there is no meter
+  DeviceControl m_deviceControl;
   QList<QPair<int, QString>> m_errors;
   ScreenshotSource m_screenshot;
-  Sources m_sources;
   QByteArray m_screenshotFormat = "PNG";
   QStringList m_lastPath;   ///< for the "compound header" rule of ';'
 };

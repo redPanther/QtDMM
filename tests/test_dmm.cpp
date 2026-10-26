@@ -5,7 +5,8 @@
 // until the first frame, Connected while frames arrive, Timeout when they
 // stop, Error when the server goes away, reconnect when it is back, and a
 // refused connection reported with its reason. Finally a polled,
-// variable-length protocol (Fluke QM) through the reader.
+// variable-length protocol (Fluke QM) through the reader, and sigrok-cli
+// started and stopped without blocking.
 
 #include <QtCore>
 #include <QtNetwork>
@@ -238,6 +239,63 @@ int main(int argc, char **argv)
           "fluke 45 Connected without error text: " + meter.errorString());
     meter.close();
   }
+
+#ifdef Q_OS_UNIX
+  // --- 9. sigrok-cli without blocking: a fake one (shell script) ---
+  // open() does not wait for it to start, close() not for it to end; one that
+  // fails or exits is a lost port with its reason
+  {
+    QTemporaryDir dir;
+    auto script = [&](const QString &name, const QByteArray &body)
+    {
+      QFile f(dir.filePath(name));
+      check(f.open(QIODevice::WriteOnly), "write " + name);
+      f.write("#!/bin/sh\n" + body);
+      f.close();
+      f.setPermissions(f.permissions() | QFile::ExeOwner);
+      return f.fileName();
+    };
+    DmmDecoder::DMMInfo sigInfo = info;
+
+    sigInfo.sigrokExe = script("running", "echo '" + frame("1.250").trimmed() + "'\nexec sleep 30\n");
+    MeterConnection running(nullptr);
+    running.setDmmInfo(sigInfo);
+    running.setFormat(FrameFormat::Sigrok);
+    running.setDevice("SIGROK fake");
+    QString runningVal;
+    QObject::connect(&running, &MeterConnection::value, [&](double, const QString &val) { runningVal = val; });
+    check(running.open(), "sigrok open()");
+    check(waitFor([&] { return runningVal == "1.250"; }, 3000), "sigrok reading 1.250: " + runningVal);
+    QElapsedTimer closing;
+    closing.start();
+    running.close();
+    check(closing.elapsed() < 200, QString("sigrok close() does not wait (%1 ms)").arg(closing.elapsed()));
+
+    sigInfo.sigrokExe = script("failing", "echo 'No devices found.' >&2\nexit 1\n");
+    MeterConnection failing(nullptr);
+    failing.setDmmInfo(sigInfo);
+    failing.setFormat(FrameFormat::Sigrok);
+    failing.setReconnectInterval(0);
+    failing.setDevice("SIGROK fake");
+    check(failing.open(), "sigrok open() of a failing sigrok-cli");
+    check(waitFor([&] { return failing.linkState() == MeterConnection::LinkState::Error; }, 3000),
+          QString("exited sigrok-cli -> Error (is %1)").arg(name(failing.linkState())));
+    check(failing.errorString().contains("No devices found."), "sigrok's reason: " + failing.errorString());
+    failing.close();
+
+    sigInfo.sigrokExe = dir.filePath("missing");
+    MeterConnection missing(nullptr);
+    missing.setDmmInfo(sigInfo);
+    missing.setFormat(FrameFormat::Sigrok);
+    missing.setReconnectInterval(0);
+    missing.setDevice("SIGROK fake");
+    check(missing.open(), "sigrok open() of a missing sigrok-cli");
+    check(waitFor([&] { return missing.linkState() == MeterConnection::LinkState::Error; }, 3000),
+          QString("missing sigrok-cli -> Error (is %1)").arg(name(missing.linkState())));
+    check(missing.errorString().contains("missing"), "names the program: " + missing.errorString());
+    missing.close();
+  }
+#endif
 
   if (failed == 0)
     qInfo() << "All MeterConnection link state tests passed.";

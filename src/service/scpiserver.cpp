@@ -21,7 +21,7 @@ const char *kNotANumber = "9.91E+37";
 constexpr int kMaxErrors = 20;
 }
 
-ScpiServer::ScpiServer(QObject *parent) : QObject(parent), m_server(new QTcpServer(this))
+ScpiServer::ScpiServer(QObject *parent) : QObject(parent), m_server(new QTcpServer(this)), m_none(new ScpiDevice(this))
 {
   connect(m_server, &QTcpServer::newConnection, this, &ScpiServer::onNewConnection);
 }
@@ -80,17 +80,75 @@ QHostAddress ScpiServer::address() const
   return m_server->serverAddress();
 }
 
-void ScpiServer::setReading(int id, const Reading &reading)
+void ScpiServer::addDevice(ScpiDevice *device)
 {
-  if (id >= 0)
-    m_readings[id] = reading;
+  if (!device || m_devices.contains(device))
+    return;
+  m_devices << device;
+  connect(device, &QObject::destroyed, this, [this] { removeDevice(nullptr); });
 }
 
-int ScpiServer::channelCount() const
+void ScpiServer::removeDevice(ScpiDevice *device)
 {
-  const int seen = m_readings.isEmpty() ? 0 : m_readings.lastKey() + 1;
-  return qMax(qMax(2, m_channelCount), seen);
+  // nullptr: the ones destroyed meanwhile
+  auto gone = [device](const QPointer<ScpiDevice> &d) { return d.isNull() || d == device; };
+  const bool chosenGone = m_selected < 0 || (m_selected < m_devices.size() && gone(m_devices[m_selected]));
+  const ScpiDevice *chosen = selectedDevice();
+  m_devices.removeIf(gone);
+  // the meter chosen is gone: none, not silently another one
+  if (chosenGone)
+    m_selected = -1;
+  else
+    m_selected = int(qMax<qsizetype>(0, m_devices.indexOf(chosen)));
 }
+
+ScpiDevice *ScpiServer::selectedDevice() const
+{
+  return m_selected >= 0 && m_selected < m_devices.size() ? m_devices[m_selected].data() : nullptr;
+}
+
+ScpiDevice &ScpiServer::dev() const
+{
+  ScpiDevice *d = selectedDevice();
+  return d ? *d : *m_none;
+}
+
+QStringList ScpiServer::instrumentNames() const
+{
+  // a name stays with its meter while the meter's name stays: another one
+  // closed does not rename it
+  QStringList taken;
+  for (const QPointer<ScpiDevice> &d : m_devices)
+    if (d && !d->m_scpiName.isEmpty() && d->m_scpiFrom == d->name())
+      taken << d->m_scpiName;
+  QStringList names;
+  for (const QPointer<ScpiDevice> &d : m_devices)
+  {
+    if (!d)
+    {
+      names << QString();
+      continue;
+    }
+    if (d->m_scpiName.isEmpty() || d->m_scpiFrom != d->name())
+    {
+      QString name = d->name().toUpper();
+      for (QChar &c : name)
+        if (!(c.isLetterOrNumber() && c.unicode() < 128) && c != '_')
+          c = '_';
+      if (name.isEmpty() || !name.front().isLetter())
+        name.prepend("METER_");
+      const QString base = name;
+      for (int n = 2; taken.contains(name); ++n)
+        name = QString("%1_%2").arg(base).arg(n);
+      d->m_scpiName = name;
+      d->m_scpiFrom = d->name();
+      taken << name;
+    }
+    names << d->m_scpiName;
+  }
+  return names;
+}
+
 
 void ScpiServer::onNewConnection()
 {
@@ -209,7 +267,7 @@ QString ScpiServer::function(const Reading &r) const
 
 QList<int> ScpiServer::channels(const Command &cmd, int suffix)
 {
-  const int count = channelCount();
+  const int count = dev().channelCount();
   const int open = cmd.args.indexOf("(@");
   if (open < 0)
   {
@@ -467,9 +525,9 @@ QByteArray ScpiServer::recordingData(const Command &cmd, bool &isQuery)
   }
   const bool several = list.size() > 1;
   QByteArray csv = several ? "channel,seconds,value\n" : "seconds,value\n";
-  if (m_sources.recordingData)
+  if (dev().m_sources.recordingData)
     for (int channel : list)
-      for (const Point &p : m_sources.recordingData(count, channel))
+      for (const Point &p : dev().m_sources.recordingData(count, channel))
       {
         const QByteArray value = p.overload ? QByteArray(kOverload)
                                  : std::isnan(p.value) ? QByteArray("nan") : number(p.value).toLatin1();
@@ -514,16 +572,40 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
   {
     if (!queryOnly(cmd, isQuery))
       return {};
-    const RecordingState r = m_sources.recording ? m_sources.recording() : RecordingState();
+    const RecordingState r = dev().m_sources.recording ? dev().m_sources.recording() : RecordingState();
     static const char *const modes[] = { "IDLE", "LIVE", "REC", "VIEW" };
     return QString("%1,%2,%3,%4").arg(modes[r.mode]).arg(r.seconds, 0, 'f', 3).arg(r.count).arg(quoted(unit(r.unit)));
+  }
+
+  // QTDMM:RECord:SAVE "<file>"[,RAW] writes the recording, the export's
+  // grid or every reading (RAW), into the folder for recordings
+  if (matches(sub, "RECord") && depth == 3 && matches(leaf, "SAVE"))
+  {
+    if (!commandOnly(cmd, isQuery))
+      return {};
+    const QString args = cmd.args.trimmed();
+    // "<file>"[,RAW], or without quotes <file>[,RAW]
+    const int end = args.startsWith('"') ? int(args.lastIndexOf('"')) : int(args.lastIndexOf(',')) - 1;
+    const QString name = end >= 0 ? unquote(args.left(end + 1)).trimmed() : unquote(args);
+    const QString rest = end >= 0 ? args.mid(end + 1).remove(' ') : QString();
+    const bool raw = rest.compare(",RAW", Qt::CaseInsensitive) == 0;
+    if (name.isEmpty())
+      return refuse(isQuery, -109, "Missing parameter");
+    if (!rest.isEmpty() && !raw)
+      return refuse(isQuery, -224, "Illegal parameter value");
+    if (!dev().m_sources.saveRecording)
+      return refuse(isQuery, -221, "Settings conflict; no recording here");
+    const QString error = dev().m_sources.saveRecording(name, raw);
+    if (!error.isEmpty())
+      return refuse(isQuery, error.section(',', 0, 0).toInt(), error.section(',', 1));
+    return {};
   }
 
   // QTDMM:ALARm? the alarms raised (acknowledged ones too), :LIST? each
   // with its state, :ACKnowledge as the banner's button
   if (matches(sub, "ALARm") && depth <= 3)
   {
-    const QList<AlarmState> alarms = m_sources.alarms ? m_sources.alarms() : QList<AlarmState>();
+    const QList<AlarmState> alarms = dev().m_sources.alarms ? dev().m_sources.alarms() : QList<AlarmState>();
     if (depth == 2)
     {
       if (!queryOnly(cmd, isQuery))
@@ -546,7 +628,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     if (matches(leaf, "ACKnowledge"))
     {
       if (commandOnly(cmd, isQuery))
-        Q_EMIT acknowledgeAlarmsRequested();
+        Q_EMIT dev().acknowledgeAlarmsRequested();
       return {};
     }
     return refuse(isQuery, -113, "Undefined header");
@@ -558,7 +640,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     if (commandOnly(cmd, isQuery))
     {
       const QString text = unquote(cmd.args);
-      Q_EMIT markRequested(text.isEmpty() ? QStringLiteral("SCPI") : text);
+      Q_EMIT dev().markRequested(text.isEmpty() ? QStringLiteral("SCPI") : text);
     }
     return {};
   }
@@ -566,7 +648,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
   // QTDMM:KEY "hold" presses a key of the meter, QTDMM:KEY:CATalog? lists them
   if (matches(sub, "KEY") && depth <= 3)
   {
-    const QStringList keys = m_sources.keys ? m_sources.keys() : QStringList();
+    const QStringList keys = dev().m_sources.keys ? dev().m_sources.keys() : QStringList();
     if (depth == 3)
     {
       if (!matches(leaf, "CATalog"))
@@ -587,7 +669,7 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
       return refuse(isQuery, -241, "Hardware missing; the meter has no keys QtDMM can press");
     if (!keys.contains(key))
       return refuse(isQuery, -224, "Illegal parameter value");
-    if (!m_sources.pressKey || !m_sources.pressKey(key))
+    if (!dev().m_sources.pressKey || !dev().m_sources.pressKey(key))
       return refuse(isQuery, -240, "Hardware error; the key was not sent");
     return {};
   }
@@ -601,12 +683,44 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     if (!queryOnly(cmd, isQuery))
       return {};
     QStringList out;
-    for (int c = 1; c <= channelCount(); ++c)
+    for (int c = 1; c <= dev().channelCount(); ++c)
     {
-      const Reading r = m_readings.value(c - 1);
+      const Reading r = dev().m_readings.value(c - 1);
       out << QString::number(c) << quoted(r.valid ? r.port.toString() : QString()) << quoted(unit(r.unit));
     }
     return out.join(',');
+  }
+
+  // QTDMM:DEVice:OPEN "<id>" / :CLOSe "<id>" opens and connects one of "My
+  // devices" in this process, or closes it; :CATalog? - "<id>","<name>",<0|1>
+  // for each entry, 1 when it is open
+  if (matches(sub, "DEVice") && depth == 3)
+  {
+    if (matches(leaf, "CATalog"))
+    {
+      if (!queryOnly(cmd, isQuery))
+        return {};
+      QStringList out;
+      if (m_deviceControl.catalog)
+        for (const DeviceEntry &e : m_deviceControl.catalog())
+          out << quoted(e.id) << quoted(e.name) << (e.open ? "1" : "0");
+      return out.isEmpty() ? QString("\"\"") : out.join(',');
+    }
+    const bool open = matches(leaf, "OPEN");
+    if (!open && !matches(leaf, "CLOSe"))
+      return refuse(isQuery, -113, "Undefined header");
+    if (!commandOnly(cmd, isQuery))
+      return {};
+    const QString id = unquote(cmd.args);
+    if (id.isEmpty())
+      return refuse(isQuery, -109, "Missing parameter");
+    const auto &run = open ? m_deviceControl.open : m_deviceControl.close;
+    if (!run)
+      return refuse(isQuery, -221, "Settings conflict; no devices to open in this program");
+    const QString error = run(id);
+    if (!error.isEmpty())
+      return refuse(isQuery, error.section(',', 0, 0).toInt(), error.section(',', 1));
+    return {};
   }
 
   // QTDMM:INSTances? - "<id>",<value>,"<unit>" for each running instance
@@ -615,8 +729,8 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     if (!queryOnly(cmd, isQuery))
       return {};
     QStringList out;
-    if (m_sources.instances)
-      for (const Instance &i : m_sources.instances())
+    if (dev().m_sources.instances)
+      for (const Instance &i : dev().m_sources.instances())
         out << quoted(i.id) << (i.valid ? number(i.value) : QString(kNotANumber)) << quoted(unit(i.unit));
     return out.isEmpty() ? QString("\"\"") : out.join(',');
   }
@@ -655,6 +769,12 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
 
   if (head.startsWith('*'))
     return handleCommon(cmd, isQuery);
+  // the meter chosen was closed: nothing goes to another one until
+  // INSTrument chooses again; queries answer as without a meter
+  const bool aside = matches(head, "INSTrument") || matches(head, "SYSTem") || matches(head, "STATus")
+                     || (matches(head, "QTDMM") && depth >= 2 && matches(cmd.path[1], "DEVice"));
+  if (m_selected < 0 && !cmd.query && !aside)
+    return refuse(isQuery, -241, "Hardware missing; instrument closed");
 
   // readings: READ? FETCh? MEASure? [SENSe:]DATA? VALue1?/VALue2?, also
   // MEASure:VOLTage:DC? and the like; UNIT? and CONFigure?
@@ -672,24 +792,24 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
   if (matches(head, "INITiate") && depth <= 2)
   {
     if (commandOnly(cmd, isQuery))
-      Q_EMIT startRecording();
+      Q_EMIT dev().startRecording();
     return {};
   }
   if (matches(head, "ABORt") && depth == 1)
   {
     if (commandOnly(cmd, isQuery))
-      Q_EMIT stopRecording();
+      Q_EMIT dev().stopRecording();
     return {};
   }
   if (matches(head, "INPut") && (depth == 1 || (depth == 2 && matches(cmd.path[1], "STATe"))))
   {
     if (cmd.query)
-      return m_connected ? "1" : "0";
+      return dev().m_connected ? "1" : "0";
     const QString a = cmd.args.toUpper();
     if (a == "ON" || a == "1")
-      Q_EMIT connectRequested(true);
+      Q_EMIT dev().connectRequested(true);
     else if (a == "OFF" || a == "0")
-      Q_EMIT connectRequested(false);
+      Q_EMIT dev().connectRequested(false);
     else
       pushError(a.isEmpty() ? -109 : -224, a.isEmpty() ? "Missing parameter" : "Illegal parameter value");
     return {};
@@ -717,10 +837,10 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
       if (!commandOnly(cmd, isQuery))
         return {};
       if (!perChannel)
-        Q_EMIT resetMinMaxRequested();
-      else if (m_sources.clearChannelStats)
+        Q_EMIT dev().resetMinMaxRequested();
+      else if (dev().m_sources.clearChannelStats)
         for (int channel : list)
-          m_sources.clearChannelStats(channel);
+          dev().m_sources.clearChannelStats(channel);
       return {};
     }
     const bool min = matches(what, "MINimum"), max = matches(what, "MAXimum");
@@ -738,10 +858,10 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
       return number(min ? s.min : max ? s.max : s.mean);
     };
     if (!perChannel)
-      return answer(m_sources.stats ? m_sources.stats() : Stats());
+      return answer(dev().m_sources.stats ? dev().m_sources.stats() : Stats());
     QStringList out;
     for (int channel : list)
-      out << answer(m_sources.channelStats ? m_sources.channelStats(channel) : Stats());
+      out << answer(dev().m_sources.channelStats ? dev().m_sources.channelStats(channel) : Stats());
     return out.join(',');
   }
 
@@ -751,6 +871,8 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
     return handleStatus(cmd, isQuery);
   if (matches(head, "SYSTem") && depth >= 2)
     return handleSystem(cmd, isQuery);
+  if (matches(head, "INSTrument"))
+    return handleInstrument(cmd, isQuery);
   return refuse(isQuery, -113, "Undefined header");
 }
 
@@ -761,7 +883,7 @@ QString ScpiServer::handleCommon(const Command &cmd, bool &isQuery)
   if (cmd.path.size() != 1)
     return refuse(isQuery, -113, "Undefined header");
   if (head == "*IDN")
-    return queryOnly(cmd, isQuery) ? QString("QtDMM,%1,0,%2").arg(m_model.isEmpty() ? QString("no meter") : m_model,
+    return queryOnly(cmd, isQuery) ? QString("QtDMM,%1,0,%2").arg(dev().m_model.isEmpty() ? QString("no meter") : dev().m_model,
                                                                   QString::fromLatin1(APP_VERSION)) : QString();
   if (head == "*RST" || head == "*CLS")
   {
@@ -810,7 +932,7 @@ QString ScpiServer::handleReading(const Command &cmd, bool &isQuery)
   QStringList out;
   for (int channel : list)
   {
-    const Reading r = m_readings.value(channel - 1);
+    const Reading r = dev().m_readings.value(channel - 1);
     if (matches(head, "UNIT"))
       out << QString("\"%1\"").arg(unit(r.unit));
     else if (matches(head, "CONFigure"))
@@ -820,7 +942,7 @@ QString ScpiServer::handleReading(const Command &cmd, bool &isQuery)
         range = "MANUAL";
       out << QString("\"%1 %2\"").arg(function(r), range);
     }
-    else if (!r.valid || !m_connected || now - r.msecs > kStaleMs)
+    else if (!r.valid || !dev().m_connected || now - r.msecs > kStaleMs)
     {
       stale = true;
       out << kNotANumber;
@@ -848,12 +970,12 @@ QString ScpiServer::handleStatus(const Command &cmd, bool &isQuery)
     // bit 0 overload, bit 1 hold, bit 2 meter not connected, bit 3 no
     // current reading; an old reading's overload or hold is gone
     int bits = 0;
-    const Reading r = m_readings.value(0);
+    const Reading r = dev().m_readings.value(0);
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     const bool current = r.valid && now - r.msecs <= kStaleMs;
     if (current && r.overload) bits |= 1;
     if (current && r.hold) bits |= 2;
-    if (!m_connected) bits |= 4;
+    if (!dev().m_connected) bits |= 4;
     if (!current) bits |= 8;
     return QString::number(bits);
   }
@@ -861,9 +983,9 @@ QString ScpiServer::handleStatus(const Command &cmd, bool &isQuery)
   {
     // SCPI bit 4 = measuring: the recorder runs; bit 9 (QtDMM's own) an
     // alarm is raised, acknowledged or not
-    int bits = m_recording ? 16 : 0;
-    if (m_sources.alarms)
-      for (const AlarmState &a : m_sources.alarms())
+    int bits = dev().m_recording ? 16 : 0;
+    if (dev().m_sources.alarms)
+      for (const AlarmState &a : dev().m_sources.alarms())
         if (a.level >= AlarmState::Raised)
           bits |= 512;
     return QString::number(bits);
@@ -890,4 +1012,54 @@ QString ScpiServer::handleSystem(const Command &cmd, bool &isQuery)
   if (matches(cmd.path[1], "VERSion") && depth == 2)
     return queryOnly(cmd, isQuery) ? QString("1999.0") : QString();
   return refuse(isQuery, -113, "Undefined header");
+}
+
+// INSTrument: which meter the commands go to, as on a multi-channel bench
+// instrument - a state of the server, not of the connection
+QString ScpiServer::handleInstrument(const Command &cmd, bool &isQuery)
+{
+  const int depth = cmd.path.size();
+  const QStringList names = instrumentNames();
+  if (depth >= 2 && matches(cmd.path[1], "CATalog"))
+  {
+    const bool full = depth == 3 && matches(cmd.path[2], "FULL");
+    if ((depth == 3 && !full) || depth > 3)
+      return refuse(isQuery, -113, "Undefined header");
+    if (!queryOnly(cmd, isQuery))
+      return {};
+    QStringList out;
+    for (int i = 0; i < names.size(); ++i)
+    {
+      out << quoted(names[i]);
+      if (full)
+        out << QString::number(i + 1);
+    }
+    return out.isEmpty() ? QStringLiteral("\"\"") : out.join(',');
+  }
+  const bool numeric = depth == 2 && matches(cmd.path[1], "NSELect");
+  if (depth > 2 || (depth == 2 && !numeric && !matches(cmd.path[1], "SELect")))
+    return refuse(isQuery, -113, "Undefined header");
+  if (cmd.query)
+  {
+    if (m_devices.isEmpty() || m_selected < 0)
+      return numeric ? QStringLiteral("0") : QStringLiteral("\"\"");
+    return numeric ? QString::number(m_selected + 1) : names.value(m_selected);
+  }
+  const QString arg = unquote(cmd.args.trimmed());
+  if (arg.isEmpty())
+    return refuse(isQuery, -109, "Missing parameter");
+  int index = -1;
+  if (numeric)
+  {
+    bool ok = false;
+    index = arg.toInt(&ok) - 1;
+    if (!ok)
+      index = -1;
+  }
+  else
+    index = int(names.indexOf(arg.toUpper()));
+  if (index < 0 || index >= names.size())
+    return refuse(isQuery, -224, "Illegal parameter value");
+  m_selected = index;
+  return {};
 }

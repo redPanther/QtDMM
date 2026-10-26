@@ -147,9 +147,9 @@ void MeterConnection::setDevice(const QString &device)
     m_device = deviceList.last();
 }
 
-void MeterConnection::setStateManager(SharedStateManager *state)
+void MeterConnection::setCalcInputs(CalcDevice::Inputs inputs)
 {
-  m_portHandler->setStateManager(state);
+  m_portHandler->setCalcInputs(std::move(inputs));
 }
 
 void MeterConnection::initDecoder( FrameFormat::DataFormat df)
@@ -268,7 +268,7 @@ bool MeterConnection::openPort()
   else if (auto *htk = dynamic_cast<HidHoltekDevice *>(port))
     connect(htk, &HidHoltekDevice::finished, this, [this, htk] { portLost(htk, QString()); });
   else if (auto *sig = dynamic_cast<SigrokDevice *>(port))
-    connect(sig, &SigrokDevice::finished, this, [this, sig] { portLost(sig, QString()); });
+    connect(sig, &SigrokDevice::finished, this, [this, sig] { portLost(sig, sig->errorString()); });
 #ifdef QTDMM_WITH_BLE
   else if (auto *ble = dynamic_cast<BleAdvertisementDevice *>(port))
     connect(ble, &BleAdvertisementDevice::finished, this, [this, ble](const QString &reason) { portLost(ble, reason); });
@@ -419,7 +419,7 @@ void MeterConnection::timerEvent(QTimerEvent *)
 
 // A complete frame from the reader: decode it and publish the reading. Frames
 // are the heartbeat of the connection; the watchdog in timerEvent() misses them.
-void MeterConnection::readEventSLOT(const QByteArray &data, int id)
+void MeterConnection::readEventSLOT(const QByteArray &data, int id, qint64 t, qint64 wall)
 {
   if (m_consoleLogging)
   {
@@ -433,6 +433,8 @@ void MeterConnection::readEventSLOT(const QByteArray &data, int id)
   m_lastFrame.restart();
   if (auto r = m_decoder->decode(data, id); r)
   {
+    r->received = t;
+    r->receivedWall = wall;
     Q_EMIT response(*r);
     for (const DmmDecoder::DmmChannel &c : r->channels)
       Q_EMIT value(c.dval, c.val, c.unit, c.special, r->range, r->hold, r->showBar, c.id);

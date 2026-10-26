@@ -13,6 +13,7 @@
 #include <functional>
 
 #include "core/reading.h"
+#include "core/valueref.h"
 #include "recording/recordingfile.h"
 #include "recording/recordingseries.h"
 #include "core/sampletypes.h"
@@ -52,7 +53,8 @@ struct LoggedReading
 /// RecordingSeries of RawPoint: setReading() from the MeterController. The
 /// other values of the meter (a second display, id > 0) go into series of
 /// their own on the same time axis (extra()), with their integral too; the
-/// triggers, the length, the marks and the export are the main value's. An
+/// length, the marks and the export are the main value's, the triggers
+/// watch the main value or the one setTriggerValue() chose. An
 /// overload is a point without a value, and so is the moment the value went
 /// stale (setStale()). The sample time is no longer the rate it records at
 /// but the grid of the export: grid() gives the time-weighted mean of every
@@ -151,6 +153,10 @@ public:
   void        setRaisingThreshold(double v) { m_raisingThreshold = v; }
   double      fallingThreshold() const { return m_fallingThreshold; }
   double      raisingThreshold() const { return m_raisingThreshold; }
+  /// The value the thresholds watch: the main one at first, or another of
+  /// the meter's values (a recording of a voltage started by its current).
+  void        setTriggerValue(const ValueRef &value);
+  ValueRef    triggerValue() const { return m_triggerValue; }
   /// Values at or below it reset the integral to 0.
   void        setIntegrationThreshold(double v) { m_integrationThreshold = v; }
   double      integrationThreshold() const { return m_integrationThreshold; }
@@ -210,6 +216,8 @@ public:
   /// When the recording started (for an import: the file's first time stamp;
   /// in Live: when the live window started).
   QDateTime   startDateTime() const { return m_start; }
+  /// The start on the core clock (ms, Sample::now()), for startAt().
+  qint64      startClock() const { return m_t0; }
   State       state() const { return m_state; }
   /// Recording (not Live).
   bool        isRunning() const { return m_state == Record; }
@@ -295,6 +303,14 @@ public Q_SLOTS:
   /// Clears the recording and starts it; from Live with the pre-trigger's
   /// readings when a threshold started it.
   void        start();
+  /// Starts as another store's recording did (DeviceSession: the meters of
+  /// one process on one time base): at @p t0 on the core clock, wall clock
+  /// @p start, from Live with what it holds since then. The time does not
+  /// move to the first reading.
+  void        startAt(qint64 t0, const QDateTime &start);
+  /// The time of the recording that runs stays where it is, also when the
+  /// first reading comes later: others started with startAt() share it.
+  void        holdOrigin() { m_holdOrigin = true; }
   /// Ends a recording: View. Nothing in Live or View.
   void        stop();
   /// Live: the live window starts anew, empty but for the value the meter
@@ -364,16 +380,30 @@ private:
   /// series lost points (no reading's appended() says it).
   void        trimForLimits();
   bool        trimMain();
-  /// The start triggers on a new main value.
+  /// The start triggers on a new value of triggerValue().
   bool        trigger(double value);
   /// Stops at the recording length when @p t (ms since the start) reached it.
   bool        lengthReached(qint64 t);
   /// Starts a recording; with @p preMs (from Live) it reaches back into
   /// the live window.
   void        begin(qint64 preMs);
+  /// What Live holds from @p from (ms of its time) on: the reading that
+  /// held then and those after it, of every value.
+  struct LivePart
+  {
+    QVector<RawPoint> main;
+    QList<RecordingSeries> extra;
+    qint64  t0 = 0;   ///< Live's start, which their times count from
+  };
+  LivePart    livePart(qint64 from) const;
+  /// Appends @p part to the recording, its times counted from m_t0.
+  void        appendLivePart(const LivePart &part);
+  /// The signals at the start of a recording, in state @p was before.
+  void        started(State was);
   /// The value the meter shows, as the first point at the start (when it
-  /// is not stale); the other values too.
-  void        appendCurrent();
+  /// is not stale); the other values too. @p atItsTime: at the time it
+  /// came, not at the start (startAt() reaching back without Live).
+  void        appendCurrent(bool atItsTime = false);
   /// A reading of another value (id > 0) into its series.
   void        appendExtra(const Reading &reading);
   /// Appends @p p to extra(@p i), at the earliest at its last point.
@@ -410,6 +440,7 @@ private:
   int         m_sampleTime = 1;
   int         m_sampleLength = 0;
   int         m_preMs = 0;
+  bool        m_holdOrigin = false;   ///< holdOrigin(), startAt(): the start stays
   qint64      m_preUsed = 0;          ///< ms the current recording reaches back before its trigger
   double      m_integral = 0;   ///< the running integral, carried over gaps
   State       m_state = View;
@@ -421,6 +452,7 @@ private:
   QTime       m_startTime;
   double      m_raisingThreshold = 0;
   double      m_fallingThreshold = 0;
+  ValueRef    m_triggerValue;
   double      m_lastVal = 0;
   bool        m_lastValValid = false;
   double      m_integrationThreshold = 0;

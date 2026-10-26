@@ -24,6 +24,7 @@
 #pragma once
 
 #include "ui/settings/settingspage.h"
+#include "core/valueref.h"
 #include "ui/views/graphwidget.h"
 
 class QComboBox;
@@ -62,6 +63,11 @@ public:
   QTime       startTime() const;
   /// Follows the trigger threshold line dragged in the graph.
   void        setThreshold(double);
+  /// The value the threshold watches (Start/trigger-value), the main one at first.
+  ValueRef    triggerValue() const;
+  /// The names of the meter's values ("1: CO2 (ppm)" ...); with more than one
+  /// the threshold chooses the value it watches.
+  void        setValueNames(const QStringList &names);
 
 public Q_SLOTS:
   virtual void  defaultsSLOT()Q_DECL_OVERRIDE;
@@ -75,7 +81,7 @@ private:
 
   QFormLayout  *m_form;
   QSpinBox     *sampleEvery, *ui_preTriggerTime;
-  QComboBox    *ui_sampleUnit, *ui_edge, *ui_preTriggerUnit;
+  QComboBox    *ui_sampleUnit, *ui_edge, *ui_preTriggerUnit, *ui_triggerValue;
   QRadioButton *manualBut, *predefinedBut, *triggerBut;
   QTimeEdit    *ui_startTime;
   QLineEdit    *ui_raisingThreshold, *ui_fallingThreshold;
@@ -83,4 +89,5 @@ private:
   QWidget      *m_thresholdRow, *m_preRow;
   int           m_lengthValue = 500;
   int           m_lengthUnit = 0;
+  ValueRef      m_triggerValue;   ///< as stored; another meter's source is kept
 };

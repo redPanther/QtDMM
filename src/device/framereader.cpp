@@ -28,6 +28,7 @@
 #include <stdio.h>
 
 #include "device/framereader.h"
+#include "core/sampletypes.h"
 
 
 
@@ -98,6 +99,10 @@ void FrameReader::socketNotifierSLOT()
   char byte;
 
   const int64_t packetLength = (m_decoder == nullptr) ? 0 : m_decoder->getPacketLength();
+  // the time of this readyRead(), not of the adaption: frames read together
+  // share it, and the event loop may have held the bytes before
+  const qint64 t = Sample::now();
+  const qint64 wall = QDateTime::currentMSecsSinceEpoch();
 
   while ((r = m_port->read( &byte, 1)) > 0)
   {
@@ -121,7 +126,7 @@ void FrameReader::socketNotifierSLOT()
       m_sendRequest = true;
       m_length = 0;
 
-      Q_EMIT readEvent( QByteArray(m_buffer,bytesToRead), m_id);
+      Q_EMIT readEvent( QByteArray(m_buffer,bytesToRead), m_id, t, wall);
 
       m_id = (m_id + 1) % m_framesPerReading;
 

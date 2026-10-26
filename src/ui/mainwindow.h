@@ -31,9 +31,11 @@
 #include <QCommandLineParser>
 
 #include "ui_uimainwindow.h"
+#include "core/valueref.h"
 #include "service/sharedstatemanager.h"
 
 class InstanceWidget;
+class DeviceSession;
 class LcdWidget;
 class HelpDlg;
 class AnalogMeter;
@@ -125,7 +127,9 @@ protected:
   void      connectInstances();
   /// @}
 
+  DeviceSession     *m_session;   ///< the meters of this process and their network services
   InstanceWidget    *m_wid;
+  QList<ValueRef>    m_graphOtherValues;   ///< graph values of another meter from the layout, saved back as they were
   LcdWidget *m_display;
   AnalogMeter   *m_meter;
   ReadingsWidget *m_readings;

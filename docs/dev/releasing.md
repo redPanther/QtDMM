@@ -13,14 +13,16 @@ year. A version number thus says how current a build is:
 | `26.1-rc1` | release candidate 1 of 26.1 (also `-beta1`, `-alpha1`) |
 | `26.2-dev.14+g1234abc` | development build: 14 commits after 26.1, heading for 26.2 |
 | `26.1-rc1.3+g1234abc` | 3 commits after 26.1-rc1, before 26.1 |
+| `26.4-dev.7+g1234abc` | master, 7 commits after the tag `26.4-dev`, while 26.3 is finished on its release branch |
 
 There is no fixed release calendar; N simply counts the releases of the year.
 
 The version comes from **git tags**; the one thing to bump by hand is
 `qtdmm.spec` (step 2).
-`cmake/git_version.cmake` runs `git describe` on the newest tag of the form
-`YY.N[.P][-rcK]`. The old tags `0.9.x` and `1.0.0-alpha.1` do not match and
-are ignored. The same version appears in different forms:
+`cmake/git_version.cmake` runs `git describe` on the nearest tag of the form
+`YY.N[.P][-rcK]`, and once more on the nearest `YY.N-dev` tag; the one heading
+for the higher version counts (see [Release branch](#release-branch)). The old
+tags `0.9.x` and `1.0.0-alpha.1` do not match and are ignored. The same version appears in different forms:
 
 | Where | Form | Example |
 |---|---|---|
@@ -100,7 +102,36 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    page says the repository is not online yet. A release published on the
    release page before its files were there gets its Flatpak bundle into the
    repository too: the Release workflow starts Pages again after the upload.
+   A release runs on its tag, so the environment `github-pages` (*Settings →
+   Environments*) needs a rule of ref type **Tag**, `[0-9]*`, next to the
+   branch `master`; without it the deploy job fails with "Tag ... is not
+   allowed to deploy to github-pages" (set up for 26.3-rc1).
 9. Tell the website: the download page links the new release.
 
-A bugfix release `26.1.1` is tagged the same way, on a branch `26.1` created
-from the `26.1` tag when `master` has moved on.
+## Release branch
+
+From the first release candidate on, the release is finished on a branch of
+its own, and `master` is open for the next one:
+
+1. **At rc1:** branch `release/26.3` from `master` (not `26.3`: a branch and
+   a tag of the same name make git's refs ambiguous). Tag `26.3-rc1` on it.
+2. **On master:** tag the first commit that is only there `26.4-dev`
+   (`git tag -a 26.4-dev -m "26.4 development"`), so master builds say
+   `26.4-dev.N`. Not the branch point itself: that one is on the release
+   branch too. Then the CHANGELOG gets its section for 26.4.
+3. **Fixes for 26.3:** pull requests against `release/26.3`. Merge the
+   branch into `master` after each one (or a few), so the fixes are there
+   too; merging rather than cherry-picking leaves none behind.
+4. **Further candidates and the release:** `26.3-rc2`, `26.3` are tagged on
+   the release branch, with the steps above.
+5. **After the release:** the branch stays for bugfix releases (`26.3.1`,
+   tagged the same way on it).
+
+The CI builds pushes and pull requests of `release/**` as of `master`; Pages
+and the Flatpak repository follow `master` and the tags.
+
+`git describe` takes the nearest tag. Once the release branch is merged into
+master, its `26.3-rc2` can be nearer than `26.4-dev`, so the version script
+looks for both and takes the one heading for the higher version: 26.4 on
+master, `26.3-rc2` on the release branch (where `26.4-dev` is not), and after
+`26.3` both say 26.4. `ctest -R version_scheme` checks that choice too.
