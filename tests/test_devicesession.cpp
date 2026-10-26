@@ -12,6 +12,8 @@
 
 #include "core/devicelibrary.h"
 #include "core/reading.h"
+#include "core/readingadapter.h"
+#include "core/sampletypes.h"
 #include "recording/recordingstore.h"
 #include "service/devicesession.h"
 #include "service/metercontroller.h"
@@ -169,6 +171,18 @@ int main(int argc, char **argv)
   session.release(sim);
   check(!session.controller("device:" + sim) && message.contains("Bench sim"), "release: closed, said so: " + message);
   check(session.controllers().size() == 1, "only the window's meter left");
+  // the window alone: its time begins with its first reading, as before
+  {
+    lead->start();
+    waitFor([] { return false; }, 50);
+    ReadingAdapter adapter;
+    Reading r = ReadingAdapter::reading(adapter.adaptValue(1, "1.000", "V", "DC", "AUTO", false, true, false, 0,
+                                                           QDateTime::currentMSecsSinceEpoch()));
+    lead->setReading(r);
+    check(lead->count() == 1 && lead->series().first().t == 0 && lead->startClock() == r.t,
+          QString("the window alone: from its first reading, %1 ms").arg(lead->count() ? lead->series().first().t : -1));
+    lead->stop();
+  }
 
   // 6. no window (a later program without one): INIT on one of the meters
   // starts all of the process at one moment, ABOR stops them

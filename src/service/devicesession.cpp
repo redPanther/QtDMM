@@ -50,8 +50,10 @@ void DeviceSession::followWindow(int state)
   RecordingStore *lead = m_adopted->recorder();
   if (state == RecordingStore::Record)
   {
-    // its start stays where it is, also when its first reading comes later
-    lead->holdOrigin();
+    // its start stays where it is, also when its first reading comes later:
+    // the others record on it. Alone it begins with its first reading
+    if (!m_opened.isEmpty())
+      lead->holdOrigin();
     for (MeterController *ctl : std::as_const(m_opened))
       startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
   }
@@ -170,7 +172,8 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   // opened while the window records: it joins, on the same time base
   if (m_adopted && m_adopted->recorder()->isRunning())
   {
-    const RecordingStore *lead = m_adopted->recorder();
+    RecordingStore *lead = m_adopted->recorder();
+    lead->holdOrigin();
     startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
   }
   Q_EMIT opened(ctl);
