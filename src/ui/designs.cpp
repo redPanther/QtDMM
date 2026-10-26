@@ -8,8 +8,8 @@
 #include <QWidget>
 #include <QLinearGradient>
 #include <QPalette>
+#include <QEvent>
 #include <QPixmap>
-#include <QScreen>
 #include <QProxyStyle>
 #include <QStyle>
 #include <QStyleFactory>
@@ -149,23 +149,42 @@ public:
   }
 };
 
-// the texture as wide as the screen: a view shows no seam, the light
-// across it once. Filling ignores a brush's transform, so the picture is
-// scaled itself (no wider than 2560 px); the lines run across, its height
-// repeats unseen
+const QPixmap &brushedMetalTexture()
+{
+  static const QPixmap texture(":/textures/brushed-metal.jpg");
+  return texture;
+}
+
 QBrush brushedMetal()
 {
-  static const QPixmap texture = []
-  {
-    const QPixmap original(":/textures/brushed-metal.jpg");
-    const QScreen *screen = QGuiApplication::primaryScreen();
-    const int width = screen ? qMin(2560, screen->size().width()) : original.width();
-    if (original.isNull() || width <= original.width())
-      return original;
-    return original.scaled(width, original.height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-  }();
-  return QBrush(texture);
+  return QBrush(brushedMetalTexture());
 }
+
+// the texture stretched over a view, anew at each size: the light across
+// it once, as on a sheet of its own (filling ignores a brush's transform,
+// so the picture itself is scaled)
+class TextureFit : public QObject
+{
+public:
+  using QObject::QObject;
+  static void fit(QWidget *view)
+  {
+    if (brushedMetalTexture().isNull() || view->size().isEmpty())
+      return;
+    QPalette pal = view->palette();
+    pal.setBrush(QPalette::Window, QBrush(brushedMetalTexture().scaled(view->size(), Qt::IgnoreAspectRatio,
+                                                                       Qt::SmoothTransformation)));
+    view->setPalette(pal);
+  }
+
+protected:
+  bool eventFilter(QObject *watched, QEvent *event) override
+  {
+    if (event->type() == QEvent::Resize)
+      fit(static_cast<QWidget *>(watched));
+    return false;
+  }
+};
 
 const char *kSilverSheet =
   "QToolBar { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
@@ -318,6 +337,16 @@ QBrush Designs::areaBrush(Design d)
       // strips that meet in steps at the corners
       return g_saved ? g_systemPalette.window().color() : QApplication::palette().window().color();
   }
+}
+
+void Designs::fitTexture(QWidget *view, bool on)
+{
+  static TextureFit *filter = new TextureFit(qApp);
+  view->removeEventFilter(filter);
+  if (!on)
+    return;
+  view->installEventFilter(filter);
+  TextureFit::fit(view);
 }
 
 QBrush Designs::frameBrush(Design d)

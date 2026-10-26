@@ -7,6 +7,8 @@
 #include <QIcon>
 #include <QString>
 
+class QWidget;
+
 /// The colour designs of the main window: the system's look, "Silver"
 /// (polished aluminium, gradients only), "Dark" and "Brushed metal"
 /// (Silver on a brushed metal texture).
@@ -34,6 +36,9 @@ namespace Designs
   /// Background of the views (display, meter, table); Qt::NoBrush = the
   /// palette's window colour.
   QBrush frameBrush(Design d);
+  /// Brushed metal: the texture of frameBrush() stretched over @p view, at
+  /// each size anew (@p on), or no more.
+  void fitTexture(QWidget *view, bool on);
 
   /// Colours the graph uses in design @p d (System: invalid = keep the
   /// colours from the settings).

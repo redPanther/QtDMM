@@ -1989,6 +1989,7 @@ void MainWindow::setDesign(int design)
     pal.setBrush(QPalette::Window, own ? frame : QApplication::palette().window());
     view->setPalette(pal);
     view->setAutoFillBackground(own);
+    Designs::fitTexture(view, frame.style() == Qt::TexturePattern);
     view->update();
   }
   updateLed();
