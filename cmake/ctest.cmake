@@ -91,6 +91,7 @@ if (BUILD_TESTING)
 		qtdmm_add_test(process_e2e test_process_e2e tests/test_process_e2e.cpp $<TARGET_FILE:${PROJECT_NAME}>)
 		target_link_libraries(test_process_e2e PRIVATE Qt6::Network)
 		add_dependencies(test_process_e2e ${PROJECT_NAME})
+		set_tests_properties(process_e2e PROPERTIES TIMEOUT 60)
 	endif()
 
 	## the assistant "Add device": pages per connection, models, name, Next, the

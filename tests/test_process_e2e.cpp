@@ -18,6 +18,9 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QTemporaryDir>
+#include <QTimer>
+
+#include <cstdlib>
 
 #include "testutil.h"
 
@@ -162,6 +165,14 @@ vxi11=false
   qtdmm.setProcessChannelMode(QProcess::ForwardedChannels);
   qtdmm.start(QString::fromLocal8Bit(argv[1]), { "--config-dir", cfg, "--config-id", "e2e", "--also", "b", "--also", "p" });
   check(qtdmm.waitForStarted(5000), "qtdmm starts: " + qtdmm.errorString());
+  // never left running: ended before ctest's timeout (60 s) ends the test
+  QTimer::singleShot(45000, &qtdmm, [&qtdmm]
+  {
+    qWarning() << "test_process_e2e: 45 s, qtdmm ended";
+    qtdmm.kill();
+    qtdmm.waitForFinished(2000);
+    std::exit(1);
+  });
 
   Client scpi;
   if (!scpi.connectTo(port, 15000))
