@@ -13,6 +13,7 @@
 #include <functional>
 
 #include "core/reading.h"
+#include "core/valueref.h"
 #include "recording/recordingfile.h"
 #include "recording/recordingseries.h"
 #include "core/sampletypes.h"
@@ -52,7 +53,8 @@ struct LoggedReading
 /// RecordingSeries of RawPoint: setReading() from the MeterController. The
 /// other values of the meter (a second display, id > 0) go into series of
 /// their own on the same time axis (extra()), with their integral too; the
-/// triggers, the length, the marks and the export are the main value's. An
+/// length, the marks and the export are the main value's, the triggers
+/// watch the main value or the one setTriggerValue() chose. An
 /// overload is a point without a value, and so is the moment the value went
 /// stale (setStale()). The sample time is no longer the rate it records at
 /// but the grid of the export: grid() gives the time-weighted mean of every
@@ -151,6 +153,10 @@ public:
   void        setRaisingThreshold(double v) { m_raisingThreshold = v; }
   double      fallingThreshold() const { return m_fallingThreshold; }
   double      raisingThreshold() const { return m_raisingThreshold; }
+  /// The value the thresholds watch: the main one at first, or another of
+  /// the meter's values (a recording of a voltage started by its current).
+  void        setTriggerValue(const ValueRef &value);
+  ValueRef    triggerValue() const { return m_triggerValue; }
   /// Values at or below it reset the integral to 0.
   void        setIntegrationThreshold(double v) { m_integrationThreshold = v; }
   double      integrationThreshold() const { return m_integrationThreshold; }
@@ -364,7 +370,7 @@ private:
   /// series lost points (no reading's appended() says it).
   void        trimForLimits();
   bool        trimMain();
-  /// The start triggers on a new main value.
+  /// The start triggers on a new value of triggerValue().
   bool        trigger(double value);
   /// Stops at the recording length when @p t (ms since the start) reached it.
   bool        lengthReached(qint64 t);
@@ -421,6 +427,7 @@ private:
   QTime       m_startTime;
   double      m_raisingThreshold = 0;
   double      m_fallingThreshold = 0;
+  ValueRef    m_triggerValue;
   double      m_lastVal = 0;
   bool        m_lastValValid = false;
   double      m_integrationThreshold = 0;

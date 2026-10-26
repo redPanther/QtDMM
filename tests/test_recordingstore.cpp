@@ -471,6 +471,32 @@ int main(int argc, char **argv)
     store.setReading(clock.at(6000, reading(6, "6.000", "DC")));
     check(!store.isRunning() && store.duration() == 3000, QString("pre-trigger: stopped after %1 ms").arg(store.duration()));
 
+    // the trigger on another value: a recording of the voltage started by
+    // the current (value 2) crossing 5 A; the voltage's own 6 does nothing
+    {
+      RecordingStore by;
+      TestClock c;
+      c.attach(by);
+      by.setStartMode(RecordingStore::Raising);
+      by.setThresholds(0, 5);
+      by.setTriggerValue(ValueRef(1));
+      by.setReadingsPaused(true);
+      by.live();
+      by.setReading(c.at(0, reading(1, "1", "DC")));
+      by.setReading(c.at(0, other(1, 1, "1.000", "A", "DC")));
+      by.setReading(c.at(500, reading(6, "6.000", "DC")));
+      check(!by.isRunning(), "trigger on value 2: the main value's 6 does not start it");
+      by.setReading(c.at(1000, other(1, 4, "4.000", "A", "DC")));
+      by.setReading(c.at(1500, other(1, 7, "7.000", "A", "DC")));
+      check(by.isRunning(), "trigger on value 2: its 7 A starts it");
+      by.stop();
+      by.live();
+      by.setTriggerValue(ValueRef(1, "device:other"));
+      by.setReading(c.at(2000, other(1, 1, "1.000", "A", "DC")));
+      by.setReading(c.at(2500, other(1, 7, "7.000", "A", "DC")));
+      check(!by.isRunning(), "trigger on another meter's value: this meter's 7 A does not start it");
+    }
+
     // a value gone stale before the trigger is a gap in it
     RecordingStore gap;
     TestClock gc;

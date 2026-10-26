@@ -509,6 +509,9 @@ void RecordingStore::setReading(const Reading &reading)
   if (reading.id != 0)
   {
     appendExtra(reading);
+    // a trigger on this value crosses with its point in the window (pre-trigger)
+    if (m_state == Live && m_triggerValue.matches(reading))
+      trigger(reading.text.isEmpty() ? qQNaN() : reading.overload ? overloadValue(reading.value) : reading.value);
     return;
   }
   m_reading = reading;
@@ -572,7 +575,8 @@ void RecordingStore::setReading(const Reading &reading)
   {
     // into the window first: the pre-trigger takes the crossing reading along
     append(p);
-    trigger(value);
+    if (m_triggerValue.matches(reading))
+      trigger(value);
     return;
   }
   if (!lengthReached(p.t))
@@ -754,6 +758,14 @@ bool RecordingStore::trimExtras()
     }
   }
   return changed;
+}
+
+void RecordingStore::setTriggerValue(const ValueRef &value)
+{
+  if (value == m_triggerValue)
+    return;
+  m_triggerValue = value;
+  m_lastValValid = false;   // the last value was another one's
 }
 
 bool RecordingStore::trigger(double val)
