@@ -79,6 +79,20 @@ int main(int argc, char **argv)
     check(one(a, "1.25", "ms", "FR").port.quantity == Quantity::PulseWidth, "ms in the frequency position: pulse width");
   }
 
+  // --- time: the frame's arrival, not the time of adapting ---
+  {
+    DmmDecoder::DmmResponse r;
+    r.main().val = "1.000";
+    r.main().unit = "V";
+    r.main().special = "DC";
+    r.received = 42;
+    r.receivedWall = 1700000000000;
+    const PortSample ps = a.adapt(r, 5).first();
+    check(ps.sample.t == 42 && ps.sample.wall == 1700000000000, "sample time from the frame's arrival");
+    r.received = r.receivedWall = 0;
+    check(a.adapt(r, 5).first().sample.wall == 5, "no arrival time: the time passed in");
+  }
+
   // --- protocol: a Victron's % and min ---
   {
     ReadingAdapter v(FrameFormat::VictronBLE);

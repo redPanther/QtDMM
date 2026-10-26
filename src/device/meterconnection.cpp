@@ -419,7 +419,7 @@ void MeterConnection::timerEvent(QTimerEvent *)
 
 // A complete frame from the reader: decode it and publish the reading. Frames
 // are the heartbeat of the connection; the watchdog in timerEvent() misses them.
-void MeterConnection::readEventSLOT(const QByteArray &data, int id)
+void MeterConnection::readEventSLOT(const QByteArray &data, int id, qint64 t, qint64 wall)
 {
   if (m_consoleLogging)
   {
@@ -433,6 +433,8 @@ void MeterConnection::readEventSLOT(const QByteArray &data, int id)
   m_lastFrame.restart();
   if (auto r = m_decoder->decode(data, id); r)
   {
+    r->received = t;
+    r->receivedWall = wall;
     Q_EMIT response(*r);
     for (const DmmDecoder::DmmChannel &c : r->channels)
       Q_EMIT value(c.dval, c.val, c.unit, c.special, r->range, r->hold, r->showBar, c.id);
