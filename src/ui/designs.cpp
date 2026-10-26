@@ -8,6 +8,8 @@
 #include <QWidget>
 #include <QLinearGradient>
 #include <QPalette>
+#include <QEvent>
+#include <QPixmap>
 #include <QProxyStyle>
 #include <QStyle>
 #include <QStyleFactory>
@@ -147,6 +149,43 @@ public:
   }
 };
 
+const QPixmap &brushedMetalTexture()
+{
+  static const QPixmap texture(":/textures/brushed-metal.jpg");
+  return texture;
+}
+
+QBrush brushedMetal()
+{
+  return QBrush(brushedMetalTexture());
+}
+
+// the texture stretched over a view, anew at each size: the light across
+// it once, as on a sheet of its own (filling ignores a brush's transform,
+// so the picture itself is scaled)
+class TextureFit : public QObject
+{
+public:
+  using QObject::QObject;
+  static void fit(QWidget *view)
+  {
+    if (brushedMetalTexture().isNull() || view->size().isEmpty())
+      return;
+    QPalette pal = view->palette();
+    pal.setBrush(QPalette::Window, QBrush(brushedMetalTexture().scaled(view->size(), Qt::IgnoreAspectRatio,
+                                                                       Qt::SmoothTransformation)));
+    view->setPalette(pal);
+  }
+
+protected:
+  bool eventFilter(QObject *watched, QEvent *event) override
+  {
+    if (event->type() == QEvent::Resize)
+      fit(static_cast<QWidget *>(watched));
+    return false;
+  }
+};
+
 const char *kSilverSheet =
   "QToolBar { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
   "  stop:0 #ffffff, stop:0.45 #e4e7eb, stop:0.55 #d3d8de, stop:1 #aeb5bf);"
@@ -154,6 +193,9 @@ const char *kSilverSheet =
   "QStatusBar { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
   "  stop:0 #d9dde2, stop:1 #aab1ba); }"
   "QMdiSubWindow { background: #dfe2e6; }";
+
+// Silver, the side bar a light grey instead of white
+const char *kBrushedSheet = "DeviceSidebar { background: #e9ecee; }";
 
 // Fusion draws the frame of a text field a bit darker than the window - on
 // the dark fields it vanished, so they get a light edge of their own (not
@@ -172,6 +214,7 @@ QString Designs::name(Design d)
   {
     case Silver: return "silver";
     case Dark: return "dark";
+    case BrushedMetal: return "brushed";
     default: return "system";
   }
 }
@@ -182,6 +225,8 @@ Designs::Design Designs::fromName(const QString &name)
     return Silver;
   if (name == "dark")
     return Dark;
+  if (name == "brushed")
+    return BrushedMetal;
   return System;
 }
 
@@ -209,7 +254,10 @@ void Designs::apply(Design d)
     QStyle *fusion = QStyleFactory::create("Fusion");
     QApplication::setStyle(d == Dark ? new DarkIndicatorStyle(fusion) : fusion);
     QApplication::setPalette(d == Dark ? darkPalette() : silverPalette());
-    qApp->setStyleSheet(d == Silver ? kSilverSheet : kDarkSheet);
+    if (d == Dark)
+      qApp->setStyleSheet(kDarkSheet);
+    else
+      qApp->setStyleSheet(QString(kSilverSheet) + (d == BrushedMetal ? kBrushedSheet : ""));
   }
   applyIcons();
 }
@@ -278,6 +326,7 @@ QBrush Designs::areaBrush(Design d)
   switch (d)
   {
     case Silver:
+    case BrushedMetal:
       // plain: the area paints in pieces, and a gradient over each piece
       // drew stripes across the background
       return QColor("#9aa2ac");
@@ -290,8 +339,20 @@ QBrush Designs::areaBrush(Design d)
   }
 }
 
+void Designs::fitTexture(QWidget *view, bool on)
+{
+  static TextureFit *filter = new TextureFit(qApp);
+  view->removeEventFilter(filter);
+  if (!on)
+    return;
+  view->installEventFilter(filter);
+  TextureFit::fit(view);
+}
+
 QBrush Designs::frameBrush(Design d)
 {
+  if (d == BrushedMetal)
+    return brushedMetal();
   if (d == Silver)
     return vgrad({ { 0, QColor("#fdfdfe") }, { 0.3, QColor("#e3e6ea") }, { 0.55, QColor("#cdd2d8") },
                    { 1, QColor("#9ea6b0") } });
@@ -301,7 +362,7 @@ QBrush Designs::frameBrush(Design d)
 Designs::GraphColors Designs::graphColors(Design d)
 {
   GraphColors c;
-  if (d == Silver)
+  if (d == Silver || d == BrushedMetal)
   {
     c.background = vgrad({ { 0, QColor("#ffffff") }, { 0.6, QColor("#eceef1") }, { 1, QColor("#d2d7de") } });
     c.grid = QColor("#b8bec6");

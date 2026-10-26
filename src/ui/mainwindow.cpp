@@ -541,7 +541,8 @@ void MainWindow::createDesignMenu()
   m_designMenu = new QMenu(tr("D&esign"), this);
   auto *designGroup = new QActionGroup(this);
   for (auto [d, text] : { std::pair{Designs::System, tr("&System")}, std::pair{Designs::Silver, tr("S&ilver")},
-                          std::pair{Designs::Dark, tr("&Dark")} })
+                          std::pair{Designs::Dark, tr("&Dark")},
+                          std::pair{Designs::BrushedMetal, tr("&Brushed metal")} })
   {
     QAction *a = m_designMenu->addAction(text);
     a->setCheckable(true);
@@ -2014,7 +2015,7 @@ void MainWindow::setDesign(int design)
   empty.setBrush(QPalette::Window, Designs::areaBrush(d));
   m_emptyStart->setPalette(empty);
   // the instruments are drawn on a transparent background: the window's
-  // (brushed metal in Silver) shows around them
+  // (metal in Silver and Brushed metal) shows around them
   const QBrush frame = Designs::frameBrush(d);
   for (QWidget *view : { static_cast<QWidget *>(m_display), static_cast<QWidget *>(m_meter),
                          static_cast<QWidget *>(m_readings) })
@@ -2024,15 +2025,19 @@ void MainWindow::setDesign(int design)
     pal.setBrush(QPalette::Window, own ? frame : QApplication::palette().window());
     view->setPalette(pal);
     view->setAutoFillBackground(own);
+    Designs::fitTexture(view, frame.style() == Qt::TexturePattern);
     view->update();
   }
   updateLed();
   const Designs::GraphColors g = Designs::graphColors(d);
   m_wid->graph()->setThemeColors(g.background, g.grid, g.labels, g.data);
   // the Poincaré plot on the background around the instruments, not on the
-  // graph's: it stands next to the display and the meter
-  m_poincare->setThemeColors(frame.style() != Qt::NoBrush ? frame : QApplication::palette().window(), g.grid,
-                             g.labels, g.data);
+  // graph's: it stands next to the display and the meter. Not on a texture
+  // though, the points would get lost in it: there on the graph's
+  QBrush poincare = frame.style() != Qt::NoBrush ? frame : QApplication::palette().window();
+  if (frame.style() == Qt::TexturePattern)
+    poincare = g.background;
+  m_poincare->setThemeColors(poincare, g.grid, g.labels, g.data);
   for (QAction *a : m_designMenu->actions())
     a->setChecked(a->data().toInt() == design);
   // at once, so the settings dialog shows the design of the menu

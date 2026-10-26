@@ -7,8 +7,11 @@
 #include <QIcon>
 #include <QString>
 
+class QWidget;
+
 /// The colour designs of the main window: the system's look, "Silver"
-/// (polished aluminium, gradients only) and "Dark".
+/// (polished aluminium, gradients only), "Dark" and "Brushed metal"
+/// (Silver on a brushed metal texture).
 ///
 /// A design is more than a palette: Fusion ignores gradient brushes in the
 /// palette on most widgets, so the gradients come from a style sheet
@@ -17,9 +20,9 @@
 /// analog meter's style are settings of their own and stay as they are.
 namespace Designs
 {
-  enum Design { System, Silver, Dark };
+  enum Design { System, Silver, Dark, BrushedMetal };
 
-  /// "system", "silver", "dark" - the settings value.
+  /// "system", "silver", "dark", "brushed" - the settings value.
   QString name(Design d);
   Design fromName(const QString &name);
 
@@ -33,6 +36,9 @@ namespace Designs
   /// Background of the views (display, meter, table); Qt::NoBrush = the
   /// palette's window colour.
   QBrush frameBrush(Design d);
+  /// Brushed metal: the texture of frameBrush() stretched over @p view, at
+  /// each size anew (@p on), or no more.
+  void fitTexture(QWidget *view, bool on);
 
   /// Colours the graph uses in design @p d (System: invalid = keep the
   /// colours from the settings).
