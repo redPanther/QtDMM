@@ -75,6 +75,8 @@ public:
     bool showBar = false; ///< the meter shows a bar graph for this reading
     bool lowBat = false;  ///< low battery indicator
     QString error;    ///< non-empty when the frame was understood but flagged an error
+    qint64 received = 0;     ///< Sample::now() when the frame came in (FrameReader); 0 = not known, take the time of adapting
+    qint64 receivedWall = 0; ///< the same as ms since the epoch
 
     /// The main value, channels[0]. A meter that sends one frame per value
     /// (AirCO2ntrol) has only this one and tells which value it is by its id.

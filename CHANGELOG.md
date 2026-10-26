@@ -4,6 +4,10 @@
 
 26.3 is finished on its release branch (`release/26.3`); its fixes come here when the branch is merged into master.
 
+### Multi-meter core
+
+- **Readings take their time from when their bytes came in** — not from when they were decoded, so frames read together share one time and meters read side by side drift less against each other.
+
 ## Unreleased — 26.3 (not released yet)
 
 Changes after rc1; the release candidate below lists everything new before.
