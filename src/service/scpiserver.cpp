@@ -584,9 +584,10 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     if (!commandOnly(cmd, isQuery))
       return {};
     const QString args = cmd.args.trimmed();
-    const int end = args.lastIndexOf('"');
-    const QString name = unquote(end > 0 ? args.left(end + 1) : args);
-    const QString rest = end > 0 ? args.mid(end + 1).remove(' ') : QString();
+    // "<file>"[,RAW], or without quotes <file>[,RAW]
+    const int end = args.startsWith('"') ? int(args.lastIndexOf('"')) : int(args.lastIndexOf(',')) - 1;
+    const QString name = end >= 0 ? unquote(args.left(end + 1)).trimmed() : unquote(args);
+    const QString rest = end >= 0 ? args.mid(end + 1).remove(' ') : QString();
     const bool raw = rest.compare(",RAW", Qt::CaseInsensitive) == 0;
     if (name.isEmpty())
       return refuse(isQuery, -109, "Missing parameter");

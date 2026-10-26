@@ -155,6 +155,14 @@ int main(int argc, char **argv)
   check(ask("SYST:ERR?").startsWith("-257,"), "QTDMM:REC:SAVE: a file name only");
   ask("QTDMM:REC:SAVE \"raw.csv\", raw");
   check(ask("SYST:ERR?").startsWith("0,") && QFile::exists(dir.path() + "/rec/raw.csv"), "QTDMM:REC:SAVE ..., RAW");
+  ask("QTDMM:REC:SAVE plain,RAW");
+  check(ask("SYST:ERR?").startsWith("0,") && QFile::exists(dir.path() + "/rec/plain.csv"), "QTDMM:REC:SAVE without quotes, RAW");
+  // a name every system takes as a file name in that folder, of a format QtDMM writes
+  for (const char *name : { "x:y", "C:x", "con", "NUL.csv", "w.exe", "a,b", "end." })
+  {
+    ask(QString("QTDMM:REC:SAVE \"%1\"").arg(name).toLatin1());
+    check(ask("SYST:ERR?").startsWith("-257,"), QString("QTDMM:REC:SAVE \"%1\": -257").arg(name));
+  }
   // one not saved is overwritten, with a message
   QString replaced;
   {

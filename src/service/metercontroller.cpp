@@ -365,12 +365,27 @@ bool MeterController::mayStartRecording(QString *why) const
   return reason.isEmpty();
 }
 
+namespace
+{
+// a file name only, and one on every system: letters, digits, " _.()-";
+// no drive or stream (':'), no device name of Windows, no other format
+bool plainFileName(const QString &name)
+{
+  static const QRegularExpression chars(R"(^[\w .()-]+$)", QRegularExpression::UseUnicodePropertiesOption);
+  static const QRegularExpression device(R"(^(CON|PRN|AUX|NUL|COM\d|LPT\d)$)", QRegularExpression::CaseInsensitiveOption);
+  const QString suffix = QFileInfo(name).suffix().toLower();
+  return chars.match(name).hasMatch() && !name.startsWith('.') && !name.endsWith('.') && !name.endsWith(' ')
+         && !device.match(name.section('.', 0, 0).trimmed()).hasMatch()
+         && (suffix.isEmpty() || suffix == "csv" || suffix == "xlsx" || suffix == "ods");
+}
+}
+
 QString MeterController::saveRecording(const QString &name, bool raw)
 {
   // a client on the network names a file, no place: only into the folder
   // for recordings, and nothing there is overwritten
-  if (name.isEmpty() || name.contains('/') || name.contains('\\') || name.startsWith('.'))
-    return "-257,File name error; a file name only: " + name;
+  if (!plainFileName(name))
+    return "-257,File name error; a file name only, .csv, .xlsx or .ods: " + name;
   if (m_recorder->state() == RecordingStore::Record)
     return "-221,Settings conflict; recording, stop it first";
   if (m_recorder->state() != RecordingStore::View || m_recorder->count() == 0)
