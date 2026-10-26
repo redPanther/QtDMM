@@ -39,6 +39,7 @@ Type ofProtocol(FrameFormat::DataFormat protocol)
     case FrameFormat::AppaDmm:
     case FrameFormat::Appa500:
     case FrameFormat::ZotekBLE:
+    case FrameFormat::OwonBLE:
       return HandheldDmm;
     case FrameFormat::Voltcraft15Continuous:
     case FrameFormat::Sigrok:
@@ -115,6 +116,7 @@ const Exception kExceptions[] = {
   { "ANENG", "ST207", ClampMeter },
   { "ZOTEK", "ZT-5566SE", BenchDmm },
   { "ANENG", "AN999S", BenchDmm },
+  { "OWON", "CM2100B", ClampMeter },
   { "Generic", "DTM0660 4000 count", Generic },
   { "Generic", "DTM0660 6000 count", Generic },
   { "Generic", "DTM0660 8000 count", Generic },

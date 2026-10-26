@@ -159,7 +159,7 @@ bool ControlBar::supported(const DmmDecoder::DMMInfo &info)
 {
   return info.protocol == FrameFormat::UniTiDMM || info.protocol == FrameFormat::UniTUT61Plus
          || info.protocol == FrameFormat::UniTUT202BT || info.protocol == FrameFormat::UniTiENV
-         || info.protocol == FrameFormat::ZotekBLE;
+         || info.protocol == FrameFormat::ZotekBLE || info.protocol == FrameFormat::OwonBLE;
 }
 
 void ControlBar::setConnected(bool connected)

@@ -14,6 +14,10 @@
 - **Calculated values read the meters of the program** — by their My devices name (`UT61E Bench` is `ut61e_bench`), before instances of the same name. A formula without variables (the Simulated meter, a formula of `t`) needs no other meter.
 - **The recording trigger can watch another value** — on the Recording page, a meter with more than one value chooses which value the rising/falling threshold watches, e.g. record the voltage when the current crosses 5 A.
 
+### Devices
+
+- **OWON meters over Bluetooth LE (not tried with a real meter yet)** — B33T+, B35T+, B41T+, OW16B, OW18B, OW18E and the CM2100B clamp, with OL, NCV, HOLD, REL, MIN/MAX and low battery, and the keys of OWON's app under the display. Add device asks the meter which model it is.
+
 ### GUI
 
 - **New design: Brushed metal** — the digital display, the analog meter and the table stand on brushed metal, the sidebar is light grey, everything else (workspace, graph, Poincaré plot) is Silver's. In the Design menu and on the Appearance page of the Preferences.

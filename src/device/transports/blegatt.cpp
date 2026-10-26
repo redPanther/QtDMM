@@ -41,6 +41,10 @@ const QBluetoothUuid kFff0Write(quint16(0xFFF2));
 // ZOTEK's meters (ZOYI, BSIDE, ANENG): the same service, notify and write on
 // 0xFFF4 (dmm-tools, ZOTEK spec §2, after ZOTEK's apps)
 const QBluetoothUuid kFff4(quint16(0xFFF4));
+// OWON's meters: notify on 0xFFF4, keys to 0xFFF3, the device information
+// (model code, firmware) in 0xFFF2 (dmm-tools, OWON spec §2, §4)
+const QBluetoothUuid kFff2(quint16(0xFFF2));
+const QBluetoothUuid kFff3(quint16(0xFFF3));
 
 // AiCare's module in the HoldPeak HP-570C-APP clamp: the FS9721 frame on
 // 0xFFB2 of service 0xFFB0; 0xFFB1 is never written. It advertises the
@@ -102,6 +106,9 @@ std::optional<BleGattDevice::Profile> BleGattDevice::profile(FrameFormat::DataFo
       // chip's name, bluetoothctl)
       // Qt's search hears it on some machines only while bluetoothctl scans
       return Profile{ kFfb0Service, kFfb0Notify, { kFfb0Write }, { "FS9721" }, QByteArray(), false, true, kAicareCompany };
+    case FrameFormat::OwonBLE:
+      // "BDM" unless the user renamed the meter; the model is in 0xFFF2
+      return Profile{ kFff0Service, kFff4, { kFff3 }, { "BDM" }, QByteArray(), true, false, 0, kFff2 };
     default:
       return std::nullopt;
   }
@@ -328,6 +335,14 @@ void BleGattDevice::onServiceState()
   qCDebug(lcBle) << m_address << "service state" << m_service->state();
   if (m_service->state() != QLowEnergyService::RemoteServiceDiscovered)
     return;
+  if (!m_profile->info.isNull())
+  {
+    // discoverDetails() has read the readable values already
+    m_info = m_service->characteristic(m_profile->info).value();
+    qCDebug(lcBle) << m_address << "info" << m_info.toHex(' ');
+    if (!m_info.isEmpty())
+      Q_EMIT infoRead(m_info);
+  }
   const QLowEnergyCharacteristic notify = m_service->characteristic(m_profile->notify);
   if (!notify.isValid())
   {

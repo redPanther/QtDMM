@@ -184,7 +184,10 @@ tried on the UT333BT.
 The ZOTEK meters (ZOYI, BSIDE, ANENG) have the keys of ZOTEK's app, each
 choosing its function: on the ZT-5B and ZT-5BQ AUTO, CAP, Diode, NCV, Hz,
 °C/°F, HOLD and ZERO (in capacitance), on the ZT-300AB MIN/MAX, on the
-ZT-5566SE MIN/MAX and HOLD ([Bluetooth](bluetooth.md)).
+ZT-5566SE MIN/MAX and HOLD ([Bluetooth](bluetooth.md)). The OWON meters
+have the keys of OWON's app: SELECT, RANGE, Hz/%, REL, MIN/MAX, LIGHT and
+HOLD, as each model has them; the CM2100B SELECT, ZERO, LIGHT and HOLD
+([Bluetooth](bluetooth.md#owon)).
 
 The small triangle in the display's top right corner,
 or **Hide controls** in its right-click menu, folds the row away.

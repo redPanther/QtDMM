@@ -55,6 +55,8 @@ public:
     quint16 manufacturer = 0;      ///< a company id of its manufacturer data that tells the
                                    ///< meter too (0: none); Qt reports it also when the
                                    ///< service UUIDs come too late or not at all
+    QBluetoothUuid info;           ///< a characteristic read once on connecting, the meter's
+                                   ///< device information (info(), infoRead()); null: none
     /// True when a device seen in a scan, with @p name, @p services and the
     /// company ids of its manufacturer data, is one of these.
     bool matches(const QString &name, const QList<QBluetoothUuid> &services,
@@ -76,6 +78,10 @@ public:
   /// is sent on becoming ready.
   bool isReady() const { return m_ready; }
 
+  /// The value of the profile's info characteristic, read on connecting;
+  /// empty before that or without one.
+  QByteArray info() const { return m_info; }
+
   /// Writes @p frame once (a key of the meter), without making it the poll
   /// that write() keeps and repeats. False while the link is not ready.
   bool sendCommand(const QByteArray &frame);
@@ -94,6 +100,8 @@ public:
 Q_SIGNALS:
   /// The link is gone or could not be set up; the text says why.
   void finished(const QString &reason);
+  /// Once per link, before it is ready: the info characteristic's value.
+  void infoRead(const QByteArray &info);
 
 private:
   /// Connects to @p info (from the scan, or the bare address).
@@ -117,6 +125,7 @@ private:
   QElapsedTimer m_keySent;   ///< no poll for kKeyQuietMs after a key (sendCommand())
   QElapsedTimer m_pollSent;  ///< a poll out and not answered yet: no second one
   void sendPoll();
+  QByteArray m_info;
   bool m_serviceFound = false;
   bool m_ready = false;
 };
