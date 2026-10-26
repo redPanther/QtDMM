@@ -16,28 +16,53 @@ jobs:
       with:
         fetch-depth: 0   # tags and history: the version comes from git describe
  
+    # Qt from install-qt-action (cached between runs), not from apt: noble
+    # only has 6.4, and its packages pulled in llvm for lupdate, ~50 MB from a
+    # mirror that was sometimes very slow
+    - name: Install Qt
+      uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4
+      with:
+        version: '6.8.3'
+        modules: 'qtserialport qtcharts qtconnectivity'
+        cache: true
+
+    # the xcb libraries are what Qt's xcb platform plugin needs; linuxdeploy
+    # refuses a plugin whose libraries are missing
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y \
-          qt6-base-dev \
-          qt6-tools-dev \
-          qt6-tools-dev-tools \
-          qt6-serialport-dev \
-          qt6-connectivity-dev \
-          qt6-charts-dev \
-          qt6-svg-dev \
+        sudo apt install -y --no-install-recommends \
           libhidapi-dev \
           libhidapi-hidraw0 \
-          cmake \
-          build-essential \
+          libgl-dev \
           ninja-build \
           ccache \
           zsync \
-          libxkbcommon-x11-dev
+          libxkbcommon-x11-dev \
+          libxcb-cursor0 \
+          libxcb-icccm4 \
+          libxcb-image0 \
+          libxcb-keysyms1 \
+          libxcb-render-util0 \
+          libxcb-shape0 \
+          libxcb-xinerama0 \
+          libxcb-xkb1
+
+    # ccache kept between runs: a new key each run, the newest one restored
+    - name: Cache ccache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ccache
+        key: ccache-ubuntu-qt6.8.3-${{ github.sha }}
+        restore-keys: ccache-ubuntu-qt6.8.3-
+
+    - name: Limit ccache
+      run: ccache --max-size=500M && ccache --zero-stats
 
     - name: Configure and Build
       working-directory: ${{github.workspace}}/
+      env:
+        QMAKE: ${{ env.QT_ROOT_DIR }}/bin/qmake
       run: ./compile.sh appimage
 
     # the AppImage has to bring its Qt along: plugins inside, and the binary
@@ -50,7 +75,8 @@ jobs:
         for p in platforms/libqxcb.so iconengines/libqsvgicon.so imageformats/libqsvg.so; do
           test -f "squashfs-root/usr/plugins/$p" || { echo "::error::$p missing in the AppImage"; exit 1; }
         done
-        ldd squashfs-root/usr/bin/qtdmm | tee deps.txt
+        # without the LD_LIBRARY_PATH install-qt-action sets: it would win over the RUNPATH
+        env -u LD_LIBRARY_PATH ldd squashfs-root/usr/bin/qtdmm | tee deps.txt
         # the RUNPATH resolves as squashfs-root/usr/bin/../lib/...
         grep -E -q 'libQt6Core\.so.* => .*/squashfs-root/' deps.txt || { echo "::error::Qt does not come from the AppImage"; exit 1; }
         if grep -E -q 'libc\.so.* => .*/squashfs-root/' deps.txt; then echo "::error::glibc bundled"; exit 1; fi
@@ -59,6 +85,9 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/
       run: ./compile.sh ctest
+
+    - name: ccache statistics
+      run: ccache --show-stats
 
     - name: Upload AppImage artifact
       if: github.event_name != 'pull_request'
