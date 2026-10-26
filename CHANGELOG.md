@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — 26.4 (not released yet)
+
+26.3 is finished on its release branch (`release/26.3`); its fixes come here when the branch is merged into master.
+
 ## Unreleased — 26.3 (not released yet)
 
 Changes after rc1; the release candidate below lists everything new before.
