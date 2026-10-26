@@ -127,6 +127,7 @@ int main(int argc, char **argv)
   settle();
   check(lead->isRunning() && mine->isRunning() && ask("SYST:ERR?").startsWith("0,"), "INIT here starts the window's");
   check(waitFor([&] { return mine->count() >= 2; }, 4000), QString("readings recorded: %1").arg(mine->count()));
+  check(mine->unit() == "V", "the unit of the meter here: " + mine->unit());
   ask("ABOR");
   settle();
   check(!lead->isRunning() && mine->state() == RecordingStore::View && mine->dirty(), "ABOR here stops the window's");

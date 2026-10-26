@@ -50,6 +50,9 @@ MeterController::MeterController(QObject *parent, ServiceHost *host)
   // the recorder keeps every reading of the main value, and a gap where it
   // went stale
   connect(this, &MeterController::reading, m_recorder, &RecordingStore::setReading);
+  // in its base unit, as the values come (the graph sets the same)
+  connect(this, &MeterController::unitChanged, m_recorder,
+          [this](const QString &unit) { m_recorder->setUnit(SiPrefix::split(unit).baseUnit); });
   connect(this, &MeterController::staleChanged, m_recorder, &RecordingStore::setStale);
   connect(m_recorder, &RecordingStore::runningChanged, this, &MeterController::setRecording);
   // another function at the meter ended the recording: say so, and mark
