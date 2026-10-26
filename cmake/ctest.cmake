@@ -163,6 +163,16 @@ if (BUILD_TESTING)
 	endif()
 	add_test(NAME minmax_memory COMMAND test_minmax)
 
+	## which value of which meter a view follows: text and JSON forms, matching
+	## (header only: nothing to link but QtCore)
+	add_executable(test_valueref MACOSX_BUNDLE tests/test_valueref.cpp)
+	target_include_directories(test_valueref PRIVATE src)
+	target_link_libraries(test_valueref PRIVATE Qt6::Core)
+	if (QTDMM_WARNING_FLAGS)
+		target_compile_options(test_valueref PRIVATE ${QTDMM_WARNING_FLAGS})
+	endif()
+	add_test(NAME value_ref COMMAND test_valueref)
+
 	## the Poincaré plot's values: pairs, SD1/SD2, gaps, port changes
 	qtdmm_add_test(poincare_series test_poincare tests/test_poincare.cpp)
 
