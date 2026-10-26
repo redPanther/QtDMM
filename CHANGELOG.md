@@ -8,6 +8,11 @@
 
 - **Readings take their time from when their bytes came in** — not from when they were decoded, so frames read together share one time and meters read side by side drift less against each other.
 - **sigrok meters start and stop without holding up the program** — and when sigrok-cli fails to start or exits, the status bar says why (its own message) and QtDMM connects again, instead of a timeout without reason.
+- **More meters in one QtDMM** — besides the window's meter, entries of My devices can run without a window: `--also <id>` at start (repeatable), or over SCPI `QTDMM:DEVice:OPEN "<id>"`, `QTDMM:DEVice:CLOSe` and `QTDMM:DEVice:CATalog?`. The window for them comes with the multi-meter UI in 27.1.
+- **SCPI chooses the meter with `INSTrument`** — `INSTrument:CATalog?` names the meters of the program (the My devices name in upper case), `INSTrument <name>` or `INSTrument:NSELect <n>` chooses one, and `READ?`, `CALC`, `QTDMM:` and the other commands go to it. The first meter is chosen at start, so existing clients see no change. The network services run once per program.
+- **They record together** — when the window records (Record, trigger, start time or SCPI), the meters without a window record on the same time base and stop with it; `INITiate`/`ABORt` on one of them starts and stops them all. `QTDMM:RECord:SAVE "<file>"[,RAW]` saves the chosen meter's recording into `Documents/QtDMM` (file name only, never overwrites).
+- **Calculated values read the meters of the program** — by their My devices name (`UT61E Bench` is `ut61e_bench`), before instances of the same name. A formula without variables (the Simulated meter, a formula of `t`) needs no other meter.
+- **The recording trigger can watch another value** — on the Recording page, a meter with more than one value chooses which value the rising/falling threshold watches, e.g. record the voltage when the current crosses 5 A.
 
 ## Unreleased — 26.3 (not released yet)
 
