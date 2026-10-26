@@ -72,6 +72,7 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   m_ctl = new MeterController(this, session->host());
   session->adopt(m_ctl);
   connect(session, &DeviceSession::error, this, &InstanceWidget::error);
+  connect(session, &DeviceSession::info, this, &InstanceWidget::info);
   m_ctl->setInstanceId(instanceId.isEmpty() ? QString("default") : instanceId);
 
   m_instanceId = instanceId;

@@ -183,11 +183,14 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   ctl->dmm()->setCalcInputs(calcInputs());
   ctl->setInstanceList(m_stateMgr);
   // its messages to the status bar: a lost connection, a recording stopped
-  for (auto signal : { &MeterController::error, &MeterController::info })
-    connect(ctl, signal, this, [this, ctl](const QString &text)
-    {
-      Q_EMIT this->error(tr("%1: %2").arg(ctl->deviceName(), text));
-    });
+  connect(ctl, &MeterController::error, this, [this, ctl](const QString &text)
+  {
+    Q_EMIT this->error(tr("%1: %2").arg(ctl->deviceName(), text));
+  });
+  connect(ctl, &MeterController::info, this, [this, ctl](const QString &text)
+  {
+    Q_EMIT info(tr("%1: %2").arg(ctl->deviceName(), text));
+  });
   // no window to ask: INPut ON|OFF goes to the connection
   connect(ctl, &MeterController::connectRequested, ctl, [ctl](bool on) { ctl->connectMeter(on); });
   connect(ctl, &MeterController::recordingRequested, this, &DeviceSession::onRecordingRequested);

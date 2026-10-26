@@ -84,6 +84,8 @@ Q_SIGNALS:
   void        closed(const QString &source);
   /// For the status bar: a meter could not be opened, or was closed for the window.
   void        error(const QString &text);
+  /// For the status bar: a message of a meter here ("recording saved as ...").
+  void        info(const QString &text);
 
 private:
   void        installScpi();
