@@ -6,6 +6,7 @@ Changes after rc1; the release candidate below lists everything new before.
 
 ### Bug fixes
 
+- **A Victron device chosen in the sidebar shows its own values** — taken over straight after another Victron model (SmartShunt, then SmartSolar MPPT), it showed the values of the one before mapped onto its own (the voltage twice, an empty third value) until another kind of meter was chosen in between.
 - **The window dividers no longer react through a dialog** — over the Preferences (or another dialog of a window) lying on top of a divider, the mouse showed the split cursor and could drag the divider; Ctrl+drag in such a dialog moved the window below it.
 
 ## v26.3-rc1 — Multi-Value Meters, Time Cursors and Flatpak (2026-10-25)

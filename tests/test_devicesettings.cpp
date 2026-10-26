@@ -144,6 +144,13 @@ int main(int argc, char **argv)
     check(w.keys().value("Port settings/ble-third") == third && w.keys().value("Port settings/ble-fourth") == fourth,
           "Victron: third and fourth kept");
   }
+  // another Victron model taken over straight after: its own choice, not the
+  // one of the model before mapped onto its fields
+  w.load({{"DMM/model", "Victron SmartSolar MPPT"}, {"Port settings/device", "ble AA:BB:CC:DD:EE:01"},
+          {"Port settings/ble-address", "AA:BB:CC:DD:EE:01"}, {"Port settings/ble-key", "00112233445566778899aabbccddeeff"},
+          {"Port settings/ble-main", "PV"}, {"Port settings/ble-second", "V"},
+          {"Port settings/ble-third", "YIELD"}, {"Port settings/ble-fourth", "I"}});
+  check(w.device().section(' ', 3) == "PV V YIELD I", "Victron: MPPT after SmartShunt, got " + w.device().section(' ', 3));
 
 #ifdef QTDMM_WITH_BLE
   // 6a. APPA over Bluetooth LE: a GATT meter, the address alone; the same
