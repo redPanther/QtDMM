@@ -18,7 +18,13 @@
 # A commit that is not tagged is a development build of the next release:
 #   26.1 + 14 commits      -> 26.2-dev.14+g1234abc  (27.1-dev... once the commit is from 2027)
 #   26.1-rc1 + 3 commits   -> 26.1-rc1.3+g1234abc   (after rc1, before the release)
+#   26.4-dev + 7 commits   -> 26.4-dev.7+g1234abc   (master while 26.3 has a branch of its own)
 #   no tag at all          -> <YY of the commit>.1-dev.<commits>+g...
+#
+# A YY.N-dev tag marks where master heads for YY.N while YY.(N-1) is finished
+# on its release branch. git describe takes the nearest tag, and a merge of
+# the release branch can bring its rc tag nearer: the version is the higher
+# of the nearest release tag's and the nearest -dev tag's (qtdmm_pick_describe).
 #
 # Results (PARENT_SCOPE):
 #   QTDMM_VERSION           shown in the UI, --version, *IDN?  (26.2-dev.14+g1234abc)
@@ -50,7 +56,18 @@ function(qtdmm_parse_describe describe commit_yy count hash prefix)
 		set(_n "${count}")
 	endif()
 
-	if (_tag STREQUAL "")
+	if (_tag MATCHES "^([0-9][0-9])\\.([1-9][0-9]*)-dev$")
+		# master heading for YY.N while the release before it has a branch
+		set(_yy ${CMAKE_MATCH_1})
+		set(_minor ${CMAKE_MATCH_2})
+		if (commit_yy GREATER _yy)
+			set(_yy ${commit_yy})
+			set(_minor 1)
+		endif()
+		set(_patch 0)
+		set(_display "${_yy}.${_minor}-dev.${_n}+g${_h}")
+		set(_package "${_yy}.${_minor}~dev.${_n}.g${_h}")
+	elseif (_tag STREQUAL "")
 		# no release yet: working towards the first one of the commit's year
 		set(_yy ${commit_yy})
 		set(_minor 1)
@@ -103,6 +120,23 @@ function(qtdmm_parse_describe describe commit_yy count hash prefix)
 	set(${prefix}_ERROR "${_err}" PARENT_SCOPE)
 endfunction()
 
+## Of @p release (git describe on the release tags) and @p dev (on the -dev
+## tags), the one heading for the higher version; release when they are
+## equal (an rc on the release branch, which has the -dev tag behind it).
+## Sets <out> in the caller's scope.
+function(qtdmm_pick_describe release dev commit_yy out)
+	set(_pick "${release}")
+	if (NOT dev STREQUAL "")
+		qtdmm_parse_describe("${release}" "${commit_yy}" 0 x R)
+		qtdmm_parse_describe("${dev}" "${commit_yy}" 0 x D)
+		if (release STREQUAL "" OR NOT R_ERROR STREQUAL ""
+		    OR "${D_MAJOR}.${D_MINOR}.${D_PATCH}" VERSION_GREATER "${R_MAJOR}.${R_MINOR}.${R_PATCH}")
+			set(_pick "${dev}")
+		endif()
+	endif()
+	set(${out} "${_pick}" PARENT_SCOPE)
+endfunction()
+
 function(get_version_from_git)
 	set(_describe "")
 	set(_count 0)
@@ -122,12 +156,21 @@ function(get_version_from_git)
 		if (_r EQUAL 0)
 			set(_date "${_gitdate}")
 			execute_process(
-				COMMAND ${GIT_EXECUTABLE} describe --tags --long --abbrev=7 --match "${_match}"
+				COMMAND ${GIT_EXECUTABLE} describe --tags --long --abbrev=7 --match "${_match}" --exclude "*-dev"
 				WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 				OUTPUT_VARIABLE _describe OUTPUT_STRIP_TRAILING_WHITESPACE
 				RESULT_VARIABLE _r ERROR_QUIET)
 			if (NOT _r EQUAL 0)
 				set(_describe "")   # no version tag reachable (or a shallow clone)
+			endif()
+			execute_process(
+				COMMAND ${GIT_EXECUTABLE} describe --tags --long --abbrev=7 --match "${_match}-dev"
+				WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+				OUTPUT_VARIABLE _dev OUTPUT_STRIP_TRAILING_WHITESPACE
+				RESULT_VARIABLE _r ERROR_QUIET)
+			if (_r EQUAL 0)
+				string(SUBSTRING "${_gitdate}" 2 2 _gityy)
+				qtdmm_pick_describe("${_describe}" "${_dev}" "${_gityy}" _describe)
 			endif()
 			execute_process(
 				COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD

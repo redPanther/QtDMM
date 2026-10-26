@@ -2,9 +2,9 @@ name: Ubuntu test build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "release/**" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "release/**" ]
   workflow_call:   # from release.yml for a version tag
 
 jobs:
