@@ -64,8 +64,9 @@ Q_SIGNALS:
   /// A complete frame: exactly DmmDecoder::getPacketLength() bytes, or for a
   /// variable-length protocol (packet length 0) everything received since
   /// the previous frame, terminator included. @p t (Sample::now()) and
-  /// @p wall (ms since the epoch) are when its bytes came in, so a busy
-  /// event loop does not shift the readings of one meter against another.
+  /// @p wall (ms since the epoch) are when readyRead() came, in the main
+  /// thread: a busy event loop still shifts them, frames of one read share
+  /// them. The arrival itself would need a reader thread or the transport.
   void        readEvent(const QByteArray &, int id, qint64 t, qint64 wall);
 
 protected:

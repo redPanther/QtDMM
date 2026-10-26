@@ -99,7 +99,8 @@ void FrameReader::socketNotifierSLOT()
   char byte;
 
   const int64_t packetLength = (m_decoder == nullptr) ? 0 : m_decoder->getPacketLength();
-  // the bytes of this readyRead() arrived now, whatever waits in the event loop
+  // the time of this readyRead(), not of the adaption: frames read together
+  // share it, and the event loop may have held the bytes before
   const qint64 t = Sample::now();
   const qint64 wall = QDateTime::currentMSecsSinceEpoch();
 
