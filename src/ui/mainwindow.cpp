@@ -59,6 +59,7 @@
 #include "ui/designs.h"
 #include "ui/controlbar.h"
 #include "ui/shortcuts.h"
+#include "service/devicesession.h"
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QLoggingCategory>
@@ -148,9 +149,27 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   this->toolBarMenu->addWidget(spacer);
   this->toolBarMenu->addAction(this->action_Menu);
-  // the network services are the window's: the meters of the window take part in them
-  m_services = new ServiceHost(this);
-  m_wid = new InstanceWidget(m_configId, parser.value("config-dir"), m_services, this);
+  // the meters of the process share the network services: the window's and
+  // those opened without a window (--also, SCPI QTDMM:DEVice:OPEN)
+  m_session = new DeviceSession(this);
+  m_session->setInstanceId(m_configId.isEmpty() ? QString("default") : m_configId);
+  m_session->setStateManager(m_stateMgr);
+  m_wid = new InstanceWidget(m_configId, parser.value("config-dir"), m_session, this);
+  m_session->setConfigDir(m_wid->settings()->configDir());
+  m_session->setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
+  // --also <id>: more of "My devices", after the window's meter has its own
+  QTimer::singleShot(0, this, [this, ids = parser.values("also")]
+  {
+    for (const QString &id : ids)
+    {
+      QString error;
+      if (!m_session->open(id, &error))
+      {
+        qWarning().noquote() << "--also" << id << ":" << error.section(',', 1);
+        m_error->setText(tr("--also %1: %2").arg(id, error.section(',', 1)));
+      }
+    }
+  });
   m_wid->setFrameShape(QFrame::NoFrame);
   setConsoleLogging(parser.isSet("debug"));
 

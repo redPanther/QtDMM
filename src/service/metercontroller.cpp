@@ -11,6 +11,7 @@
 #include <QRegularExpression>
 
 #include "device/meterconnection.h"
+#include "device/metersetup.h"
 #include "ui/engnumbervalidator.h"
 #include "recording/recordingstore.h"
 #include "service/scpiserver.h"
@@ -152,6 +153,15 @@ void MeterController::setAlarms(const QList<Alarm> &alarms)
 {
   m_alarms->setAlarms(alarms);
   updateBanner();
+}
+
+void MeterController::configure(const MeterSetup &setup)
+{
+  m_dmm->setDmmInfo(setup.info);
+  m_dmm->setDevice(setup.device);
+  m_dmm->setFormat(setup.format);
+  m_dmm->setFramesPerReading(setup.info.framesPerReading);
+  setDisplayCounts(setup.info.display);
 }
 
 bool MeterController::connectMeter(bool on)
@@ -340,7 +350,9 @@ void MeterController::publish(const Reading &rd)
 bool MeterController::mayStartRecording(QString *why) const
 {
   QString reason;
-  if (m_recorder->state() == RecordingStore::Record)
+  if (!m_recordingAllowed)
+    reason = tr("start ignored, this device has no recording yet");
+  else if (m_recorder->state() == RecordingStore::Record)
     reason = tr("already recording, the recording goes on");
   else if (m_recorder->state() == RecordingStore::View && m_recorder->dirty())
     reason = tr("start ignored, the recording shown is not saved yet");

@@ -36,7 +36,7 @@
 #include "ui/dialogs/printdlg.h"
 
 class MeterController;
-class ServiceHost;
+class DeviceSession;
 class SettingsDialog;
 class LcdWidget;
 class Settings;
@@ -62,9 +62,10 @@ class InstanceWidget : public QFrame, private Ui::UIInstanceWidget
 public:
   /// @param instanceId  name of this instance for multi-instance setups (--config-id)
   /// @param configPath  directory of the settings file (--config-dir), or empty
-  /// @param host         the window's network services, which the meter takes part in
-  /// @param parent       the MainWindow
-  InstanceWidget(QString instanceId, QString configPath, ServiceHost *host, QWidget *parent = nullptr);
+  /// @param session     the meters of the process: the window's meter takes part
+  ///                    in its network services and is one of them
+  /// @param parent      the MainWindow
+  InstanceWidget(QString instanceId, QString configPath, DeviceSession *session, QWidget *parent = nullptr);
   /// Disconnects, saves the settings and asks about unsaved data. Returns
   /// false when the user cancels; MainWindow then ignores the close event.
   bool        closeWin();
@@ -235,6 +236,7 @@ protected:
   void        openConfig(int page = -1);
   void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
   MeterController *m_ctl;
+  DeviceSession   *m_session;
   SettingsDialog  *m_configDlg;
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;

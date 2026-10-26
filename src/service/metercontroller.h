@@ -19,6 +19,7 @@
 #include "service/servicehost.h"
 
 class MeterConnection;
+struct MeterSetup;
 class QProcess;
 class ScpiDevice;
 class SharedStateManager;
@@ -52,6 +53,12 @@ public:
   /// instead of starting afresh - and not over one viewed and not saved
   /// yet, which nobody could be asked about. False says why in @p why.
   bool        mayStartRecording(QString *why = nullptr) const;
+  /// The connection as @p setup says (model, port, protocol, frames per
+  /// reading) and the display count; takes effect at the next connect.
+  void        configure(const MeterSetup &setup);
+  /// False: nobody can start a recording of this meter (a meter of
+  /// DeviceSession without a window); SCPI INITiate is refused.
+  void        setRecordingAllowed(bool allowed) { m_recordingAllowed = allowed; }
   /// The meter's display count (DMMInfo::display), for the range and the
   /// bar graph of the readings.
   void        setDisplayCounts(int counts) { m_adapter.setCounts(counts); }
@@ -67,6 +74,8 @@ public:
   /// Where its readings come from (Reading::source): the "My devices" entry,
   /// else this instance, "device:<id>" or "instance:<id>".
   QString     source() const;
+  /// The name setDevice() gave, empty for none.
+  QString     deviceName() const { return m_deviceName; }
   /// The configured meter's name, for SCPI *IDN? and mDNS.
   void        setModel(const QString &model);
   QString     model() const { return m_model; }
@@ -200,6 +209,7 @@ private:
   // a SCPI start or (dis)connect checked but not run yet (it runs after the
   // command): the next command's check counts it, so "INIT;INIT" starts once
   bool                m_startPending = false;
+  bool                m_recordingAllowed = true;
   std::optional<bool> m_connectPending;
   QProcess           *m_external;     ///< an alarm's program that wanted the port: one at a time
   bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends

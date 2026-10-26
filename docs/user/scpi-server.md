@@ -105,6 +105,8 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV meters UT333BT, UT353BT, UT363BT, UT383BT, the ZOTEK Bluetooth meters), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
 | `QTDMM:CHANnel:CATalog?` | the channels of `READ? (@n)`: number, what it measures and unit - `1,"carbon_dioxide","ppm",2,"temperature","C"`; empty strings before a channel's first reading |
 | `QTDMM:INSTances?` | the running instances with their last reading: `"default",+1.234000E+00,"V","psu",9.91E+37,""` |
+| `QTDMM:DEVice:CATalog?` | the entries of *My devices*: id, name, and 1 when this QtDMM has it open - `"ab12cd34","UT61E bench",1,"9f3e01aa","SmartShunt",0` |
+| `QTDMM:DEVice:OPEN "<id>"`, `QTDMM:DEVice:CLOSe "<id>"` | opens and connects an entry of *My devices* in this QtDMM without a window, or closes it again; `INSTrument` then reaches it. Error -224 for an unknown id, -221 for one open already (or the window's, which only the window closes), -240 when it does not connect. Such a meter has no alarms and no recording yet (`INITiate` gives -213); when the window chooses it, it is closed in the background first |
 
 ```
 $ lxi scpi -a localhost -p 5025 -r "QTDMM:REC?;:CALC:AVER:MIN?;MAX?"
@@ -114,7 +116,7 @@ $ lxi scpi -a localhost -p 5025 'QTDMM:MARK "load on"'
 
 The commands that change something - `INPut`, `INITiate`, `ABORt`,
 `CALCulate:AVERage:CLEar`, `QTDMM:ALARm:ACKnowledge`, `QTDMM:MARK`,
-`QTDMM:KEY` - work for every client that reaches the port. With *This
+`QTDMM:KEY`, `QTDMM:DEVice:OPEN`/`CLOSe` - work for every client that reaches the port. With *This
 computer only* that is a program on this computer; open the port to the
 network only where everyone on it may do so.
 

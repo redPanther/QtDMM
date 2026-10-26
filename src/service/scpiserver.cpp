@@ -645,6 +645,38 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     return out.join(',');
   }
 
+  // QTDMM:DEVice:OPEN "<id>" / :CLOSe "<id>" opens and connects one of "My
+  // devices" in this process, or closes it; :CATalog? - "<id>","<name>",<0|1>
+  // for each entry, 1 when it is open
+  if (matches(sub, "DEVice") && depth == 3)
+  {
+    if (matches(leaf, "CATalog"))
+    {
+      if (!queryOnly(cmd, isQuery))
+        return {};
+      QStringList out;
+      if (m_deviceControl.catalog)
+        for (const DeviceEntry &e : m_deviceControl.catalog())
+          out << quoted(e.id) << quoted(e.name) << (e.open ? "1" : "0");
+      return out.isEmpty() ? QString("\"\"") : out.join(',');
+    }
+    const bool open = matches(leaf, "OPEN");
+    if (!open && !matches(leaf, "CLOSe"))
+      return refuse(isQuery, -113, "Undefined header");
+    if (!commandOnly(cmd, isQuery))
+      return {};
+    const QString id = unquote(cmd.args);
+    if (id.isEmpty())
+      return refuse(isQuery, -109, "Missing parameter");
+    const auto &run = open ? m_deviceControl.open : m_deviceControl.close;
+    if (!run)
+      return refuse(isQuery, -221, "Settings conflict; no devices to open in this program");
+    const QString error = run(id);
+    if (!error.isEmpty())
+      return refuse(isQuery, error.section(',', 0, 0).toInt(), error.section(',', 1));
+    return {};
+  }
+
   // QTDMM:INSTances? - "<id>",<value>,"<unit>" for each running instance
   if (matches(sub, "INSTances") && depth == 2)
   {

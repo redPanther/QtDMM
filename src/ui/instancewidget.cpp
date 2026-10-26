@@ -55,11 +55,12 @@
 #include "core/alarm.h"
 #include "core/siprefix.h"
 #include "core/settings.h"
+#include "service/devicesession.h"
 #include "service/sharedstatemanager.h"
 
 
 
-InstanceWidget::InstanceWidget(QString instanceId, QString configPath, ServiceHost *host, QWidget *parent) :  QFrame(parent),
+InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSession *session, QWidget *parent) :  QFrame(parent),
   m_display(nullptr),
   m_meter(nullptr)
 {
@@ -67,7 +68,10 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, ServiceHo
   setWindowIcon(QPixmap(":/Symbols/icon.xpm"));
 
   // the meter session: connection, min/max, alarms, SCPI
-  m_ctl = new MeterController(this, host);
+  m_session = session;
+  m_ctl = new MeterController(this, session->host());
+  session->adopt(m_ctl);
+  connect(session, &DeviceSession::error, this, &InstanceWidget::error);
   m_ctl->setInstanceId(instanceId.isEmpty() ? QString("default") : instanceId);
 
   m_instanceId = instanceId;
@@ -787,9 +791,9 @@ void InstanceWidget::readConfig()
       reopen = true;
     }
 
-    dmm->setDmmInfo(setup.info);
-    dmm->setDevice(setup.device);
-    dmm->setFormat(setup.format);
+    // a meter the session has open in the background gives up the port
+    m_session->release(m_settings->getString("DMM/my-device"));
+    m_ctl->configure(setup);
   }
 
   // the sample time first: setGraphSize() counts the window in samples, and
@@ -845,9 +849,7 @@ void InstanceWidget::readConfig()
   m_lcdTint = tint;
   m_display->setFaceColor(tint);
   m_display->setDisplayMode(setup.info.display, gui->showMinMax(), gui->showBar(), numValues());
-  dmm->setFramesPerReading(setup.info.framesPerReading);
   applyValueCount();
-  m_ctl->setDisplayCounts(setup.info.display);
 
   if (m_meter)
   {

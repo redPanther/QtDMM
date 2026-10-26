@@ -82,6 +82,9 @@ if (BUILD_TESTING)
 	## how to open a meter from its keys alone (MeterSetup), for every model as the settings page has it
 	qtdmm_add_test(meter_setup test_metersetup tests/test_metersetup.cpp)
 
+	## the meters of one process (DeviceSession): opened from My devices without a window, SCPI QTDMM:DEVice
+	qtdmm_add_test(device_session test_devicesession tests/test_devicesession.cpp)
+
 	## the assistant "Add device": pages per connection, models, name, Next, the
 	## buttons that finish it; draws the device symbols (:/devices)
 	qtdmm_add_test(add_device test_adddevice tests/test_adddevice.cpp)

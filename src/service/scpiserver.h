@@ -74,6 +74,24 @@ public:
   /// '_' as '_', "_2" for the second of a name.
   QStringList instrumentNames() const;
 
+  /// One of "My devices" for QTDMM:DEVice:CATalog?.
+  struct DeviceEntry
+  {
+    QString id;
+    QString name;
+    bool    open = false;   ///< a meter of this process uses it
+  };
+  /// What QTDMM:DEVice opens and closes the meters with (DeviceSession).
+  /// open/close return an empty text or the error "<code>,<text>"; without
+  /// them the commands are refused.
+  struct DeviceControl
+  {
+    std::function<QList<DeviceEntry>()> catalog;
+    std::function<QString(const QString &id)> open;
+    std::function<QString(const QString &id)> close;
+  };
+  void setDeviceControl(DeviceControl control) { m_deviceControl = std::move(control); }
+
   /// Largest QTDMM:RECord:DATA? answer, in readings.
   static constexpr int kMaxDataPoints = 10000;
 
@@ -154,6 +172,7 @@ private:
   QList<QPointer<ScpiDevice>> m_devices;
   int m_selected = 0;                ///< index into m_devices (INSTrument:NSELect - 1)
   ScpiDevice *m_none;                ///< answers when there is no meter
+  DeviceControl m_deviceControl;
   QList<QPair<int, QString>> m_errors;
   ScreenshotSource m_screenshot;
   QByteArray m_screenshotFormat = "PNG";
