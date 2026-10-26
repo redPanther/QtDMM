@@ -20,6 +20,7 @@
 
 class MeterConnection;
 class QProcess;
+class ScpiDevice;
 class ScpiServer;
 class HislipServer;
 class MdnsResponder;
@@ -86,9 +87,10 @@ public:
   /// Readings are published to the other instances through @p mgr.
   void        setStateManager(SharedStateManager *mgr);
   /// This instance's id (--config-id), part of the mDNS name.
-  void        setInstanceId(const QString &id) { m_instanceId = id; }
-  /// Which of "My devices" the meter is (DMM/my-device), empty when none.
-  void        setDeviceId(const QString &id) { m_deviceId = id; }
+  void        setInstanceId(const QString &id);
+  /// Which of "My devices" the meter is (DMM/my-device) and its name, both
+  /// empty when none; the name is what INSTrument:CATalog? calls it.
+  void        setDevice(const QString &id, const QString &name);
   /// Where its readings come from (Reading::source): the "My devices" entry,
   /// else this instance, "device:<id>" or "instance:<id>".
   QString     source() const;
@@ -221,6 +223,8 @@ private:
   void        onAlarmRaised(int index, const Alarm &alarm, double value);
   void        updateBanner();
   void        updateScpiStatus();
+  /// The name INSTrument:CATalog? shows: the device's, else the instance id.
+  void        updateScpiName();
   /// What the QTDMM: and CALCulate queries read (ScpiServer::Sources).
   void        installScpiSources();
   void        timerEvent(QTimerEvent *) override;
@@ -229,6 +233,7 @@ private:
   AlarmManager       *m_alarms;
   RecordingStore     *m_recorder;
   ReadingAdapter      m_adapter;
+  ScpiDevice         *m_scpiDevice;   ///< this meter in the SCPI server
   ScpiServer         *m_scpi;
   MdnsResponder      *m_mdns;
   HislipServer       *m_hislip;       ///< the same interpreter over HiSLIP
@@ -248,6 +253,7 @@ private:
   SharedStateManager *m_stateMgr = nullptr;
   QString             m_instanceId = "default";
   QString             m_deviceId;
+  QString             m_deviceName;
   QString             m_model;
 
   MinMaxMemory m_minMax;   ///< min/max of value m_minMaxId, SI, per port

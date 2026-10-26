@@ -36,7 +36,9 @@ int main(int argc, char **argv)
 {
   QCoreApplication app(argc, argv);
   ScpiServer s;
-  s.setModel("UNI-T UT61E");
+  ScpiDevice sDev;
+  s.addDevice(&sDev);
+  sDev.setModel("UNI-T UT61E");
 
   // --- 1. common commands ---
   check(ask(s, "*IDN?") == QString("QtDMM,UNI-T UT61E,0,%1").arg(APP_VERSION), "*IDN? " + ask(s, "*IDN?"));
@@ -51,8 +53,8 @@ int main(int argc, char **argv)
   check(ask(s, "SYST:ERR?").startsWith("-230,"), "(one per query)");
   check(ask(s, "SYST:ERR?") == "0,\"No error\"", "queue drained");
 
-  s.setConnected(true);
-  s.setReading(0, reading(1.2345, "V"));
+  sDev.setConnected(true);
+  sDev.setReading(0, reading(1.2345, "V"));
   check(ask(s, "READ?") == "+1.234500E+00", "READ? " + ask(s, "READ?"));
   check(ask(s, "FETC?") == "+1.234500E+00" && ask(s, "MEAS?") == "+1.234500E+00"
         && ask(s, "MEASure:VOLTage:DC?") == "+1.234500E+00" && ask(s, "SENS:DATA?") == "+1.234500E+00"
@@ -60,7 +62,7 @@ int main(int argc, char **argv)
   check(ask(s, "UNIT?") == "\"V\"", "UNIT? " + ask(s, "UNIT?"));
   check(ask(s, "CONF?") == "\"VOLT:DC AUTO\"", "CONF? " + ask(s, "CONF?"));
   check(ask(s, "READ2?") == "9.91E+37", "second value not there yet");
-  s.setReading(1, reading(0.05, "A", "current.ac"));
+  sDev.setReading(1, reading(0.05, "A", "current.ac"));
   check(ask(s, "READ2?") == "+5.000000E-02" && ask(s, "VAL2?") == "+5.000000E-02", "READ2? VAL2?");
   check(ask(s, "UNIT2?") == "\"A\"" && ask(s, "CONF2?") == "\"CURR:AC AUTO\"", "UNIT2? CONF2?");
   s.process("*CLS");
@@ -69,28 +71,28 @@ int main(int argc, char **argv)
 
   ScpiServer::Reading ol = reading(qQNaN(), "Ohm", "resistance");   // an overload has no value
   ol.overload = true;
-  s.setReading(0, ol);
+  sDev.setReading(0, ol);
   check(ask(s, "READ?") == "9.9E+37", "overload is +INF " + ask(s, "READ?"));
   ol.value = -qQNaN();   // "-OL": the adapter keeps the sign on the NaN
-  s.setReading(0, ol);
+  sDev.setReading(0, ol);
   check(ask(s, "READ?") == "-9.9E+37" && ask(s, "MEAS:RES?") == "-9.9E+37", "-OL is -INF " + ask(s, "READ?"));
   ol.value = qQNaN();
-  s.setReading(0, ol);
+  sDev.setReading(0, ol);
   check(ask(s, "CONF?") == "\"RES AUTO\"", "resistance");
   check(ask(s, "STAT:QUES?") == "1", "questionable: overload bit " + ask(s, "STAT:QUES?"));
   ScpiServer::Reading old = reading(3.3, "V");
   old.msecs -= ScpiServer::kStaleMs + 1;
-  s.setReading(0, old);
+  sDev.setReading(0, old);
   check(ask(s, "READ?") == "9.91E+37" && ask(s, "STAT:QUES:COND?") == "8", "a stale reading is NaN, bit 3");
   old.overload = true;
   old.hold = true;
-  s.setReading(0, old);
+  sDev.setReading(0, old);
   check(ask(s, "STAT:QUES?") == "8", "a stale reading's overload and hold are gone " + ask(s, "STAT:QUES?"));
-  s.setConnected(false);   // the link lost, QtDMM reconnects
+  sDev.setConnected(false);   // the link lost, QtDMM reconnects
   check(ask(s, "STAT:QUES?") == "12" && ask(s, "INP?") == "0", "lost: bit 2, INP? 0 " + ask(s, "STAT:QUES?"));
-  s.setConnected(true);
+  sDev.setConnected(true);
   s.process("*CLS");
-  s.setReading(0, reading(-2.5e-3, "V"));
+  sDev.setReading(0, reading(-2.5e-3, "V"));
   check(ask(s, "READ?") == "-2.500000E-03", "negative, small");
 
   // --- 2b. channels: a channel list picks the values, several answer in
@@ -98,15 +100,17 @@ int main(int argc, char **argv)
   //         1 and 2 always; a broken list is -104, a channel it has not -222 ---
   {
     ScpiServer c;
-    c.setConnected(true);
-    c.setChannelCount(3);
-    c.setReading(0, reading(800, "ppm", "carbon_dioxide"));
-    c.setReading(1, reading(22.5, "°C", "temperature"));
+    ScpiDevice cDev;
+    c.addDevice(&cDev);
+    cDev.setConnected(true);
+    cDev.setChannelCount(3);
+    cDev.setReading(0, reading(800, "ppm", "carbon_dioxide"));
+    cDev.setReading(1, reading(22.5, "°C", "temperature"));
     check(ask(c, "READ? (@1)") == "+8.000000E+02" && ask(c, "FETC? (@2)") == "+2.250000E+01",
           "channels: (@1) (@2) " + ask(c, "FETC? (@2)"));
     check(ask(c, "FETC? (@3)") == "9.91E+37" && ask(c, "SYST:ERR?").startsWith("-230,"),
           "channels: 3 there, no reading yet");
-    c.setReading(2, reading(45, "%", "relative_humidity"));
+    cDev.setReading(2, reading(45, "%", "relative_humidity"));
     check(ask(c, "FETC? (@1:3)") == "+8.000000E+02,+2.250000E+01,+4.500000E+01", "channels: (@1:3) " + ask(c, "FETC? (@1:3)"));
     check(ask(c, "READ? (@3,1)") == "+4.500000E+01,+8.000000E+02", "channels: (@3,1) in the list's order");
     check(ask(c, "MEAS:VOLT:DC? (@2)") == "+2.250000E+01" && ask(c, "READ3?") == "+4.500000E+01", "channels: MEAS: and READ3?");
@@ -134,11 +138,13 @@ int main(int argc, char **argv)
       check(ask(c, bad).isEmpty() && ask(c, "SYST:ERR?").startsWith("-104,"), QString("channels: %1 is -104").arg(bad));
     }
     ScpiServer one;
-    one.setChannelCount(1);
-    check(one.channelCount() == 2 && ask(one, "QTDMM:CHAN:CAT?") == "1,\"\",\"\",2,\"\",\"\"",
+    ScpiDevice oneDev;
+    one.addDevice(&oneDev);
+    oneDev.setChannelCount(1);
+    check(oneDev.channelCount() == 2 && ask(one, "QTDMM:CHAN:CAT?") == "1,\"\",\"\",2,\"\",\"\"",
           "channels: 1 and 2 always (READ2? as before) " + ask(one, "QTDMM:CHAN:CAT?"));
-    one.setReading(4, reading(1, "V"));
-    check(one.channelCount() == 5, "channels: a value that comes is a channel");
+    oneDev.setReading(4, reading(1, "V"));
+    check(oneDev.channelCount() == 5, "channels: a value that comes is a channel");
   }
 
   // --- 3. several commands in one message, the prefix rule ---
@@ -154,14 +160,14 @@ int main(int argc, char **argv)
   // --- 4. recorder and connection through signals ---
   int starts = 0, stops = 0;
   QList<bool> connects;
-  QObject::connect(&s, &ScpiServer::startRecording, [&] { ++starts; });
-  QObject::connect(&s, &ScpiServer::stopRecording, [&] { ++stops; });
-  QObject::connect(&s, &ScpiServer::connectRequested, [&](bool on) { connects << on; });
+  QObject::connect(&sDev, &ScpiDevice::startRecording, [&] { ++starts; });
+  QObject::connect(&sDev, &ScpiDevice::stopRecording, [&] { ++stops; });
+  QObject::connect(&sDev, &ScpiDevice::connectRequested, [&](bool on) { connects << on; });
   s.process("INIT");
   s.process("INITiate:IMMediate");
   s.process("ABOR");
   check(starts == 2 && stops == 1, "INIT/ABOR");
-  s.setRecording(true);
+  sDev.setRecording(true);
   check(ask(s, "STAT:OPER?") == "16", "operation: measuring while recording");
   s.process("INP OFF");
   s.process("INPut:STATe 1");
@@ -206,6 +212,8 @@ int main(int argc, char **argv)
   // --- 4b. QtDMM's own commands and CALCulate ---
   {
     ScpiServer q;
+    ScpiDevice qDev;
+    q.addDevice(&qDev);
     // nothing to ask yet: empty answers, no crash
     check(ask(q, "CALC:AVER:COUN?") == "0" && ask(q, "CALC:AVER:MIN?") == "9.91E+37", "min/max without source");
     check(ask(q, "QTDMM:REC?") == "IDLE,0.000,0,\"\"" && ask(q, "QTDMM:ALAR?") == "0", "recording, alarms without source");
@@ -249,13 +257,13 @@ int main(int argc, char **argv)
     src.keys = [] { return QStringList{ "range", "hold" }; };
     src.pressKey = [&pressed](const QString &k) { pressed << k; return k != "range"; };
     src.instances = [] { return QList<ScpiServer::Instance>{ { "u", 12.5, "V", true }, { "i", 0, "", false } }; };
-    q.setSources(src);
-    q.setChannelCount(3);
+    qDev.setSources(src);
+    qDev.setChannelCount(3);
     int clears = 0, acks = 0;
     QStringList marks;
-    QObject::connect(&q, &ScpiServer::resetMinMaxRequested, [&] { ++clears; });
-    QObject::connect(&q, &ScpiServer::acknowledgeAlarmsRequested, [&] { ++acks; });
-    QObject::connect(&q, &ScpiServer::markRequested, [&](const QString &t) { marks << t; });
+    QObject::connect(&qDev, &ScpiDevice::resetMinMaxRequested, [&] { ++clears; });
+    QObject::connect(&qDev, &ScpiDevice::acknowledgeAlarmsRequested, [&] { ++acks; });
+    QObject::connect(&qDev, &ScpiDevice::markRequested, [&](const QString &t) { marks << t; });
 
     check(ask(q, "CALC:AVER:MIN?;MAX?;AVER?;COUN?") == "+1.000000E-01;+2.500000E+00;+1.200000E+00;3",
           "CALCulate:AVERage " + ask(q, "CALC:AVER:MIN?;MAX?;AVER?;COUN?"));
@@ -332,7 +340,7 @@ int main(int argc, char **argv)
     check(ask(q, "SYST:ERR?").startsWith("-113,"), "unknown QTDMM header");
 
     src.keys = [] { return QStringList(); };
-    q.setSources(src);
+    qDev.setSources(src);
     q.process("QTDMM:KEY HOLD");
     check(ask(q, "SYST:ERR?").startsWith("-241,"), "a meter without keys");
   }
@@ -343,6 +351,8 @@ int main(int argc, char **argv)
   const bool listening = s.start(QHostAddress::LocalHost, 0);
   check(listening, "listens on localhost " + s.errorString());
   ScpiServer second;
+  ScpiDevice secondDev;
+  second.addDevice(&secondDev);
   check(second.start(QHostAddress::LocalHost, s.port()) && second.port() > s.port() && second.port() < s.port() + 10,
         QString("second instance moves to a later port: %1 after %2").arg(second.port()).arg(s.port()));
   second.stop();
@@ -416,6 +426,64 @@ int main(int argc, char **argv)
     qInfo() << "no multicast interface, responder not exercised";
   if (!qEnvironmentVariableIsSet("QTDMM_TEST_MDNS"))
     qInfo() << "mDNS announcement not sent (set QTDMM_TEST_MDNS to announce on the network)";
+
+  // --- INSTrument: several meters on one server, the commands go to the chosen one ---
+  {
+    ScpiServer m;
+    check(ask(m, "INST:CAT?") == "\"\"" && ask(m, "INST:NSEL?") == "0", "INST: no meter");
+    check(ask(m, "*IDN?").startsWith("QtDMM,no meter,"), "*IDN? without a meter");
+    ScpiDevice a, b, c;
+    a.setName("UT61E bench");
+    b.setName("SmartShunt");
+    c.setName("smartshunt");
+    a.setModel("UNI-T UT61E");
+    b.setModel("Victron SmartShunt");
+    a.setConnected(true);
+    b.setConnected(true);
+    a.setReading(0, reading(1.5, "V"));
+    b.setReading(0, reading(12.8, "V"));
+    b.setReading(1, reading(-2.5, "A", "current.dc"));
+    m.addDevice(&a);
+    m.addDevice(&b);
+    m.addDevice(&c);
+    check(ask(m, "INST:CAT?") == "\"UT61E_BENCH\",\"SMARTSHUNT\",\"SMARTSHUNT_2\"",
+          "INST:CAT? upper case, '_', a second name with _2: " + ask(m, "INST:CAT?"));
+    check(ask(m, "INST:CAT:FULL?") == "\"UT61E_BENCH\",1,\"SMARTSHUNT\",2,\"SMARTSHUNT_2\",3", "INST:CAT:FULL?");
+    check(ask(m, "INST?") == "UT61E_BENCH" && ask(m, "INST:NSEL?") == "1" && ask(m, "READ?") == "+1.500000E+00",
+          "the first meter at first");
+    m.process("INST:SEL SmartShunt");
+    check(ask(m, "INST:SEL?") == "SMARTSHUNT" && ask(m, "READ?") == "+1.280000E+01" && ask(m, "READ2?") == "-2.500000E+00"
+            && ask(m, "*IDN?").startsWith("QtDMM,Victron SmartShunt,"),
+          "INST:SEL: READ?, READ2? and *IDN? of the SmartShunt");
+    m.process("INST:NSEL 1");
+    check(ask(m, "INST?") == "UT61E_BENCH" && ask(m, "READ2?") == "9.91E+37", "INST:NSEL 1: back, its own second value");
+    m.process("INSTrument \"smartshunt_2\"");
+    check(ask(m, "INST:NSEL?") == "3", "INSTrument with a quoted name, any case");
+    m.process("*CLS");
+    m.process("INST:SEL NOSUCH");
+    check(ask(m, "SYST:ERR?").startsWith("-224,") && ask(m, "INST:NSEL?") == "3", "unknown name: -224, the choice stays");
+    m.process("INST:NSEL 4");
+    check(ask(m, "SYST:ERR?").startsWith("-224,"), "INST:NSEL beyond: -224");
+    m.process("INST:SEL");
+    check(ask(m, "SYST:ERR?").startsWith("-109,"), "INST:SEL without a name: -109");
+    // requests go to the chosen meter
+    int connA = 0, connB = 0;
+    QObject::connect(&a, &ScpiDevice::connectRequested, [&] { ++connA; });
+    QObject::connect(&b, &ScpiDevice::connectRequested, [&] { ++connB; });
+    m.process("INST:NSEL 2;:INP OFF");
+    check(connA == 0 && connB == 1, "INPut OFF goes to the chosen meter");
+    // the chosen one goes: back to the first; another one goes: the choice stays
+    m.removeDevice(&b);
+    check(ask(m, "INST?") == "UT61E_BENCH", "the chosen meter removed: the first");
+    m.process("INST:NSEL 2");
+    {
+      ScpiDevice gone;
+      gone.setName("gone");
+      m.addDevice(&gone);
+    }
+    check(ask(m, "INST:CAT?") == "\"UT61E_BENCH\",\"SMARTSHUNT\"" && ask(m, "INST?") == "SMARTSHUNT",
+          "a destroyed meter leaves the catalog, the choice stays: " + ask(m, "INST:CAT?"));
+  }
 
   if (failed)
     qWarning() << failed << "check(s) failed";

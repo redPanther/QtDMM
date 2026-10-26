@@ -33,6 +33,7 @@ MeterController::MeterController(QObject *parent)
   , m_dmm(new MeterConnection(this))
   , m_alarms(new AlarmManager(this))
   , m_recorder(new RecordingStore(this))
+  , m_scpiDevice(new ScpiDevice(this))
   , m_scpi(new ScpiServer(this))
   , m_mdns(new MdnsResponder(this))
   , m_hislip(new HislipServer(m_scpi->endpoint(), this))
@@ -42,13 +43,15 @@ MeterController::MeterController(QObject *parent)
   , m_external(new QProcess(this))
 {
   qRegisterMetaType<Reading>();
+  m_scpi->addDevice(m_scpiDevice);
+  updateScpiName();
   connect(m_dmm, &MeterConnection::response, this, &MeterController::responseSLOT);
   connect(m_dmm, &MeterConnection::error, this, &MeterController::error);
   // SCPI's "connected" (INPut?, STAT:QUES? bit 2) is the link itself: lost
   // and reconnecting (a Bluetooth meter switched off) is not connected
   connect(m_dmm, &MeterConnection::linkStateChanged, this, [this](MeterConnection::LinkState state)
   {
-    m_scpi->setConnected(state == MeterConnection::LinkState::Connected);
+    m_scpiDevice->setConnected(state == MeterConnection::LinkState::Connected);
   });
 
   // the recorder keeps every reading of the main value, and a gap where it
@@ -76,7 +79,7 @@ MeterController::MeterController(QObject *parent)
   // event loop inside the server, where the client may go away meanwhile. The
   // checks stay at once, so the error queue answers the next command; they
   // count what is checked but not run yet, and the run checks once more.
-  connect(m_scpi, &ScpiServer::startRecording, this, [this]
+  connect(m_scpiDevice, &ScpiDevice::startRecording, this, [this]
   {
     QString why;
     if (m_startPending)
@@ -100,11 +103,11 @@ MeterController::MeterController(QObject *parent)
       Q_EMIT info(tr("SCPI: %1").arg(why));
     }
   });
-  connect(m_scpi, &ScpiServer::stopRecording, this, [this]
+  connect(m_scpiDevice, &ScpiDevice::stopRecording, this, [this]
   {
     QMetaObject::invokeMethod(this, [this] { Q_EMIT recordingRequested(false); }, Qt::QueuedConnection);
   });
-  connect(m_scpi, &ScpiServer::connectRequested, this, [this](bool on)
+  connect(m_scpiDevice, &ScpiDevice::connectRequested, this, [this](bool on)
   {
     // INPut OFF also ends a connection that is lost and being reopened
     if (on == m_connectPending.value_or(m_dmm->isWanted()))
@@ -118,9 +121,9 @@ MeterController::MeterController(QObject *parent)
         m_connectPending.reset();
     }, Qt::QueuedConnection);
   });
-  connect(m_scpi, &ScpiServer::resetMinMaxRequested, this, &MeterController::resetMinMax);
-  connect(m_scpi, &ScpiServer::acknowledgeAlarmsRequested, this, &MeterController::acknowledgeAlarms);
-  connect(m_scpi, &ScpiServer::markRequested, this, [this](const QString &text)
+  connect(m_scpiDevice, &ScpiDevice::resetMinMaxRequested, this, &MeterController::resetMinMax);
+  connect(m_scpiDevice, &ScpiDevice::acknowledgeAlarmsRequested, this, &MeterController::acknowledgeAlarms);
+  connect(m_scpiDevice, &ScpiDevice::markRequested, this, [this](const QString &text)
   {
     Q_EMIT markRequested(QColor(0x1e, 0x90, 0xff), text, true, true);
   });
@@ -156,7 +159,7 @@ void MeterController::setModel(const QString &model)
 {
   m_model = model;
   m_dmm->setName(model);
-  m_scpi->setModel(model);
+  m_scpiDevice->setModel(model);
 }
 
 void MeterController::setAlarms(const QList<Alarm> &alarms)
@@ -185,7 +188,7 @@ bool MeterController::pressKey(const QString &key)
 
 void MeterController::setRecording(bool on)
 {
-  m_scpi->setRecording(on);
+  m_scpiDevice->setRecording(on);
 }
 
 void MeterController::timerEvent(QTimerEvent *)
@@ -215,6 +218,24 @@ void MeterController::responseSLOT(const DmmDecoder::DmmResponse &response)
     rd.source = from;
     publish(rd);
   }
+}
+
+void MeterController::setInstanceId(const QString &id)
+{
+  m_instanceId = id;
+  updateScpiName();
+}
+
+void MeterController::setDevice(const QString &id, const QString &name)
+{
+  m_deviceId = id;
+  m_deviceName = name;
+  updateScpiName();
+}
+
+void MeterController::updateScpiName()
+{
+  m_scpiDevice->setName(m_deviceName.isEmpty() ? m_instanceId : m_deviceName);
 }
 
 QString MeterController::source() const
@@ -327,7 +348,7 @@ void MeterController::publish(const Reading &rd)
   r.overload = overload;
   r.valid = !rd.noNumber();   // no number shown: no measurement (NaN)
   r.msecs = now;
-  m_scpi->setReading(id, r);
+  m_scpiDevice->setReading(id, r);
 }
 
 bool MeterController::mayStartRecording(QString *why) const
@@ -344,7 +365,7 @@ bool MeterController::mayStartRecording(QString *why) const
 
 void MeterController::setValueCount(int count)
 {
-  m_scpi->setChannelCount(count);
+  m_scpiDevice->setChannelCount(count);
 }
 
 void MeterController::setMinMaxValue(int id)
@@ -379,7 +400,7 @@ void MeterController::forgetUnit()
   m_lastUnit.clear();
   m_baseUnit.clear();
   m_valueUnits.clear();
-  m_scpi->clearReadings();   // CHANnel:CATalog? and UNIT? (@4) must not keep the previous meter
+  m_scpiDevice->clearReadings();   // CHANnel:CATalog? and UNIT? (@4) must not keep the previous meter
   Q_EMIT unitChanged(QString());
   Q_EMIT baseUnitChanged(QString());
 }
@@ -585,7 +606,7 @@ void MeterController::installScpiSources()
     }
     return list;
   };
-  m_scpi->setSources(std::move(s));
+  m_scpiDevice->setSources(std::move(s));
 }
 
 void MeterController::setScreenshotSource(std::function<QByteArray(const QByteArray &)> source)

@@ -105,9 +105,11 @@ int main(int argc, char **argv)
     QStringList sources;
     const auto from = QObject::connect(&ctl, &MeterController::reading, [&](const Reading &rd) { sources << rd.source; });
     frame(1, 50);
-    ctl.setDeviceId("ab12cd34");
+    ctl.setDevice("ab12cd34", "UT61E bench");
     frame(1, 50);
-    ctl.setDeviceId(QString());
+    check(query("INST:CAT?") == "\"UT61E_BENCH\"", "INST:CAT? names the device: " + query("INST:CAT?"));
+    ctl.setDevice(QString(), QString());
+    check(query("INST:CAT?") == "\"DEFAULT\"", "INST:CAT? without a device: the instance");
     QObject::disconnect(from);
     check(sources == QStringList({ "instance:default", "instance:default", "device:ab12cd34", "device:ab12cd34" }),
           "Reading::source: " + sources.join(", "));

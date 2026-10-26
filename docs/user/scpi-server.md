@@ -86,6 +86,8 @@ command after `;` continues at the level of the one before
 | `CALCulate:AVERage:CLEar` | resets min/max, like F4: the display's and those of all values |
 | `CALCulate:AVERage:CLEar (@2)` `CALCulate2:AVERage:CLEar` | resets the memory of that value alone |
 | `*RST` `*CLS` `*OPC?` `*TST?` `*ESR?` `*STB?` `SYSTem:VERSion?` | the usual IEEE 488.2 replies |
+| `INSTrument:CATalog?`, `INSTrument:CATalog:FULL?` | the meters of this QtDMM by name, `"UT61E_BENCH"`, with `FULL` also by number: `"UT61E_BENCH",1`. The name is the one in *My devices* (else the instance's), in upper case, other characters than letters and digits as `_` |
+| `INSTrument[:SELect] <name>`, `INSTrument:NSELect <n>`, `INSTrument?`, `INSTrument:NSELect?` | chooses the meter the other commands go to, by name or number, as on a multi-channel bench instrument (one choice for all clients); the first meter at first |
 
 ### QtDMM's own commands
 

@@ -675,7 +675,8 @@ void InstanceWidget::applySLOT()
   scpi.vxi11Rpc = Vxi11Server::modeFromName(m_configDlg->scpiPage()->vxi11Rpc());
   m_ctl->applyScpi(scpi);
   syncDevice();
-  m_ctl->setDeviceId(m_settings->getString("DMM/my-device"));
+  const std::optional<MyDevice> device = m_devices->find(m_settings->getString("DMM/my-device"));
+  m_ctl->setDevice(device ? device->id : QString(), device ? device->name : QString());
   Q_EMIT configChanged();
 }
 
