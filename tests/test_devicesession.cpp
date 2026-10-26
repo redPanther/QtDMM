@@ -99,6 +99,11 @@ int main(int argc, char **argv)
   check(DeviceSession::variableName("UT61E Bench") == "ut61e_bench" && DeviceSession::variableName("34465A") == "_34465a",
         "variable names");
   check(ask("INST:CAT?") == "\"WINDOW_METER\",\"BENCH_SIM\",\"POWER\"", "three meters: " + ask("INST:CAT?"));
+  // one that does not connect: the SCPI error in English
+  const QString broken = lib.add("Broken", {{"DMM/model", "QtDMM Calculated value"}, {"Port settings/device", "calc W"},
+                                            {"DMM/calc-unit", "W"}, {"DMM/calc-expression", ""}});
+  QString why;
+  check(!session.open(broken, &why) && why == "-240,Hardware error; Broken: does not connect", "does not connect: " + why);
   ask("QTDMM:DEV:OPEN \"nosuch\"");
   check(ask("SYST:ERR?").startsWith("-224,"), "QTDMM:DEV:OPEN of an unknown id");
   // a second of the same name is POWER_2, and stays so when the first closes

@@ -193,8 +193,10 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   connect(ctl, &MeterController::recordingRequested, this, &DeviceSession::onRecordingRequested);
   if (!ctl->connectMeter(true))
   {
+    // SCPI in English, the reason in the status bar in the user's language
     if (error)
-      *error = "-240,Hardware error; " + name + ": " + ctl->dmm()->errorString();
+      *error = "-240,Hardware error; " + name + ": does not connect";
+    Q_EMIT this->error(tr("%1: %2").arg(name, ctl->dmm()->errorString()));
     delete ctl;
     return nullptr;
   }
