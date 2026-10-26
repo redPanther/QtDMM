@@ -25,19 +25,21 @@ struct ValueRef
 
   /// @p r is this value: the same id, from this meter (any meter when the
   /// source is empty).
-  bool matches(const Reading &r) const { return r.id == id && (source.isEmpty() || r.source == source); }
+  bool matches(const Reading &r) const { return matches(r.id, r.source); }
+  bool matches(int valueId, const QString &from) const { return valueId == id && (source.isEmpty() || from == source); }
 
   QString toString() const { return source.isEmpty() ? QString::number(id) : QString("%1@%2").arg(id).arg(source); }
 
-  /// Reads toString(); anything else is the own meter's main value.
+  /// Reads toString(); an id beyond the values is the last one (as the
+  /// settings always did), anything unreadable the own meter's main value.
   static ValueRef fromString(const QString &text)
   {
     const qsizetype at = text.indexOf('@');
     bool ok = false;
     const int id = text.left(at).trimmed().toInt(&ok);
-    if (!ok || id < 0 || id >= kMaxValues)
+    if (!ok)
       return {};
-    return ValueRef(id, at < 0 ? QString() : text.mid(at + 1).trimmed());
+    return ValueRef(qBound(0, id, kMaxValues - 1), at < 0 ? QString() : text.mid(at + 1).trimmed());
   }
 
   /// For JSON (alarms): a number for the own meter, as before, else the text.

@@ -26,8 +26,11 @@ int main()
     check(ValueRef::fromString(v.toString()) == v, "round trip: " + v.toString());
   check(ValueRef::fromString("2") == ValueRef(2), "an old setting (2) reads as the own meter's value 2");
   check(ValueRef::fromString(" 1 @ device:x ") == ValueRef(1, "device:x"), "blanks around the parts");
-  for (const char *bad : { "", "x", "-1", "4", "1.5", "@device:x", "9@device:x" })
+  for (const char *bad : { "", "x", "1.5", "@device:x" })
     check(ValueRef::fromString(bad) == ValueRef(), QString("unreadable '%1': the main value").arg(bad));
+  check(ValueRef::fromString("-1") == ValueRef(0) && ValueRef::fromString("7") == ValueRef(3)
+          && ValueRef::fromString("9@device:x") == ValueRef(3, "device:x"),
+        "an id beyond the values: bounded, as the settings always did");
 
   // JSON (alarms): a number as before, text only for another meter
   check(ValueRef(1).toJson().isDouble() && ValueRef(1).toJson().toInt() == 1, "JSON: own meter as number");
