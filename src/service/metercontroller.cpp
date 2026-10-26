@@ -208,8 +208,18 @@ void MeterController::responseSLOT(const DmmDecoder::DmmResponse &response)
   // the one place the decoders' strings are read is ReadingAdapter
   m_adapter.setFormat(m_dmm->format());
   const qint64 now = QDateTime::currentMSecsSinceEpoch();
+  const QString from = source();
   for (const PortSample &ps : m_adapter.adapt(response, now))
-    publish(ReadingAdapter::reading(ps));
+  {
+    Reading rd = ReadingAdapter::reading(ps);
+    rd.source = from;
+    publish(rd);
+  }
+}
+
+QString MeterController::source() const
+{
+  return m_deviceId.isEmpty() ? "instance:" + m_instanceId : "device:" + m_deviceId;
 }
 
 void MeterController::publish(const Reading &rd)

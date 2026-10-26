@@ -101,6 +101,16 @@ int main(int argc, char **argv)
       s.special = "HZ";
       Q_EMIT dmm->response(r);
     };
+    // every reading names its meter: this instance, or its "My devices" entry
+    QStringList sources;
+    const auto from = QObject::connect(&ctl, &MeterController::reading, [&](const Reading &rd) { sources << rd.source; });
+    frame(1, 50);
+    ctl.setDeviceId("ab12cd34");
+    frame(1, 50);
+    ctl.setDeviceId(QString());
+    QObject::disconnect(from);
+    check(sources == QStringList({ "instance:default", "instance:default", "device:ab12cd34", "device:ab12cd34" }),
+          "Reading::source: " + sources.join(", "));
     send("CALC:AVER:CLE");
     // the memory of each value as a signal (the analog meter on another value)
     QMap<int, std::pair<double, double>> told;

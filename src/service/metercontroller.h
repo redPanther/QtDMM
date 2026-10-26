@@ -87,6 +87,11 @@ public:
   void        setStateManager(SharedStateManager *mgr);
   /// This instance's id (--config-id), part of the mDNS name.
   void        setInstanceId(const QString &id) { m_instanceId = id; }
+  /// Which of "My devices" the meter is (DMM/my-device), empty when none.
+  void        setDeviceId(const QString &id) { m_deviceId = id; }
+  /// Where its readings come from (Reading::source): the "My devices" entry,
+  /// else this instance, "device:<id>" or "instance:<id>".
+  QString     source() const;
   /// The configured meter's name, for SCPI *IDN? and mDNS.
   void        setModel(const QString &model);
   QString     model() const { return m_model; }
@@ -242,6 +247,7 @@ private:
   bool                m_externalPending = false;   ///< planned, not started yet
   SharedStateManager *m_stateMgr = nullptr;
   QString             m_instanceId = "default";
+  QString             m_deviceId;
   QString             m_model;
 
   MinMaxMemory m_minMax;   ///< min/max of value m_minMaxId, SI, per port
