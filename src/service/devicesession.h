@@ -43,7 +43,7 @@ public:
   /// The other instances' readings, which a calculated value reads after
   /// the meters of the process (calcInputs()). The meters opened here
   /// publish nothing there.
-  void        setStateManager(SharedStateManager *mgr) { m_stateMgr = mgr; }
+  void        setStateManager(SharedStateManager *mgr);
   /// sigrok-cli for the meters read through it ("Port settings/sigrok_exe").
   void        setSigrokExe(const QString &exe) { m_sigrokExe = exe; }
 

@@ -145,6 +145,7 @@ MeterController::~MeterController() = default;
 void MeterController::setStateManager(SharedStateManager *mgr)
 {
   m_stateMgr = mgr;
+  m_instanceList = mgr;
 }
 
 void MeterController::setModel(const QString &model)
@@ -631,11 +632,11 @@ void MeterController::installScpiSources()
   s.instances = [this]
   {
     QList<ScpiServer::Instance> list;
-    if (!m_stateMgr)
+    if (!m_instanceList)
       return list;
-    const auto readings = m_stateMgr->readings();
+    const auto readings = m_instanceList->readings();
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    for (const QString &id : m_stateMgr->instances())
+    for (const QString &id : m_instanceList->instances())
     {
       ScpiServer::Instance in;
       in.id = id;

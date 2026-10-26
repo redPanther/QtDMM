@@ -28,6 +28,13 @@ void DeviceSession::setConfigDir(const QString &dir)
   m_library = new DeviceLibrary(dir, this);
 }
 
+void DeviceSession::setStateManager(SharedStateManager *mgr)
+{
+  m_stateMgr = mgr;
+  for (MeterController *ctl : std::as_const(m_opened))
+    ctl->setInstanceList(mgr);
+}
+
 void DeviceSession::adopt(MeterController *ctl)
 {
   m_adopted = ctl;
@@ -174,6 +181,13 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   ctl->setFollowsWindow(true);
   ctl->configure(setup);
   ctl->dmm()->setCalcInputs(calcInputs());
+  ctl->setInstanceList(m_stateMgr);
+  // its messages to the status bar: a lost connection, a recording stopped
+  for (auto signal : { &MeterController::error, &MeterController::info })
+    connect(ctl, signal, this, [this, ctl](const QString &text)
+    {
+      Q_EMIT this->error(tr("%1: %2").arg(ctl->deviceName(), text));
+    });
   // no window to ask: INPut ON|OFF goes to the connection
   connect(ctl, &MeterController::connectRequested, ctl, [ctl](bool on) { ctl->connectMeter(on); });
   connect(ctl, &MeterController::recordingRequested, this, &DeviceSession::onRecordingRequested);

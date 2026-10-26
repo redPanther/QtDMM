@@ -78,6 +78,9 @@ public:
   void        setValueCount(int count);
   /// Readings are published to the other instances through @p mgr.
   void        setStateManager(SharedStateManager *mgr);
+  /// A meter without a window: QTDMM:INSTances? lists the instances of
+  /// @p mgr, nothing is published.
+  void        setInstanceList(SharedStateManager *mgr) { m_instanceList = mgr; }
   /// This instance's id (--config-id), part of the mDNS name.
   void        setInstanceId(const QString &id);
   /// Which of "My devices" the meter is (DMM/my-device) and its name, both
@@ -231,6 +234,7 @@ private:
   bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends
   bool                m_externalPending = false;   ///< planned, not started yet
   SharedStateManager *m_stateMgr = nullptr;
+  SharedStateManager *m_instanceList = nullptr;   ///< QTDMM:INSTances?: m_stateMgr, or the window's
   QString             m_instanceId = "default";
   QString             m_deviceId;
   QString             m_deviceName;
