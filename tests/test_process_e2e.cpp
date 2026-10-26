@@ -22,6 +22,7 @@
 
 #include <cstdlib>
 
+#include "core/settings.h"
 #include "testutil.h"
 
 namespace
@@ -134,8 +135,11 @@ Port%20settings\device=calc W sim_a * sim_b
 DMM\calc-unit=W
 DMM\calc-expression=sim_a * sim_b
 )");
-  // the window's meter is Sim A: its own keys and the entry's id
-  write(cfg + "/QtDMM_e2e.conf", QString(R"([DMM]
+  // the window's meter is Sim A: its own keys and the entry's id. Settings
+  // names the file as qtdmm does (macOS: after the native plist's name)
+  QCoreApplication::setApplicationName(APP_NAME);
+  QCoreApplication::setOrganizationName(APP_ORGANIZATION);
+  write(Settings("e2e", cfg).fileName(), QString(R"([DMM]
 my-device=a
 model=QtDMM Simulated meter
 virtual-waveform=0
@@ -157,6 +161,7 @@ vxi11=false
   QProcess qtdmm;
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
   env.insert("HOME", home);
+  env.insert("CFFIXED_USER_HOME", home);   // macOS: Documents ignores HOME
   for (const char *name : { "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME", "XDG_DOCUMENTS_DIR" })
     env.remove(name);
   env.insert("QT_QPA_PLATFORM", "offscreen");
