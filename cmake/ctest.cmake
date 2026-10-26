@@ -85,6 +85,14 @@ if (BUILD_TESTING)
 	## the meters of one process (DeviceSession): opened from My devices without a window, SCPI QTDMM:DEVice
 	qtdmm_add_test(device_session test_devicesession tests/test_devicesession.cpp)
 
+	## the program itself, offscreen: a meter in the window and two with --also, read over SCPI TCP
+	## (Unix only: the console and the end of a GUI process on Windows)
+	if(NOT WIN32)
+		qtdmm_add_test(process_e2e test_process_e2e tests/test_process_e2e.cpp $<TARGET_FILE:${PROJECT_NAME}>)
+		target_link_libraries(test_process_e2e PRIVATE Qt6::Network)
+		add_dependencies(test_process_e2e ${PROJECT_NAME})
+	endif()
+
 	## the assistant "Add device": pages per connection, models, name, Next, the
 	## buttons that finish it; draws the device symbols (:/devices)
 	qtdmm_add_test(add_device test_adddevice tests/test_adddevice.cpp)
