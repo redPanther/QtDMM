@@ -17,6 +17,9 @@ struct Alarm
 {
   enum Condition { Below, Above, Outside, Inside, Overload, NoReadings };
   enum RecorderAction { RecorderNone, RecorderStart, RecorderStop };
+  /// How often the sound plays, a second from start to start; never longer
+  /// than the alarm is raised and not acknowledged.
+  enum Repeat { Once, WhileRaised, Times };
 
   QString name;
   bool enabled = true;
@@ -35,7 +38,12 @@ struct Alarm
   QColor color = QColor(0xd8, 0x22, 0x22);
   bool banner = true;
   bool tintDisplay = true;   ///< the display and the analog meter take the colour while it is raised
-  bool beep = true;
+  /// "" none, "beep" the system's beep, a name of the built-in sounds
+  /// (alarm_warn ...), or a WAV file's path.
+  QString sound = QStringLiteral("beep");
+  Repeat repeat = Once;
+  int repeatCount = 3;       ///< Times: how often
+  bool clearSound = false;   ///< the "OK" sound once when the alarm clears
   bool popup = false;
   bool raiseWindow = false;
   QString command;           ///< program to run, %v value %u unit %n name; empty = none

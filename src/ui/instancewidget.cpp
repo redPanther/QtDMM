@@ -28,6 +28,7 @@
 #include <cmath>
 
 #include "ui/dialogs/recordlengthdlg.h"
+#include "ui/alarmsound.h"
 #include "ui/instancewidget.h"
 #include "ui/mainwindow.h"
 #include "device/transports/serial.h"
@@ -176,9 +177,17 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   m_settings->save();
   Q_EMIT sendState("UPDATE_INSTANCES_"+QString::number(QDateTime::currentMSecsSinceEpoch()));
 
-  // alarms: the controller judges every reading and runs the program; beep,
-  // popup and raising the window are UI (the banner is MainWindow's)
+  // alarms: the controller judges every reading and runs the program; sound,
+  // popup and raising the window are UI (the banner is MainWindow's). A
+  // sound goes on while its alarm is raised and not acknowledged.
+  m_alarmSound = new AlarmSound([this](int index) { return m_ctl->alarms()->state(index) == AlarmManager::Raised; },
+                                this);
   connect(m_ctl, &MeterController::alarmRaised, this, &InstanceWidget::alarmRaised);
+  connect(m_ctl, &MeterController::alarmCleared, this, [this](int, const Alarm &alarm)
+  {
+    if (alarm.clearSound)
+      m_alarmSound->play(AlarmSound::clearedSound());
+  });
   // the display and the meter in the alarm's colour, blinking if wanted;
   // the banner and the beep stay, the colour is never the only sign
   m_alertTimer = new QTimer(this);
@@ -660,7 +669,11 @@ void InstanceWidget::forgetValues()
 void InstanceWidget::applySLOT()
 {
   readConfig();
-  m_ctl->setAlarms(m_configDlg->alarmPage()->alarms());
+  // edited alarms: their places in the list may have moved, the sounds stop
+  const QList<Alarm> alarms = m_configDlg->alarmPage()->alarms();
+  if (Alarm::listToJson(alarms) != Alarm::listToJson(m_ctl->alarms()->alarms()))
+    m_alarmSound->stopAll();
+  m_ctl->setAlarms(alarms);
   m_alertBlink = m_configDlg->alarmPage()->blink();
   showAlertColor();
   ui_graph->setAlertUnsaved(m_configDlg->generalPage()->alertUnsavedData());
@@ -925,11 +938,10 @@ QString InstanceWidget::dmmTitle() const
 // ---------------------------------------------------------------- alarms
 
 // The controller has reported the alarm and run its program; what is left
-// needs the desktop: beep, raise the window, pop up a box.
-void InstanceWidget::alarmRaised(const Alarm &alarm, const QString &shown, const QString &text)
+// needs the desktop: the sound, raise the window, pop up a box.
+void InstanceWidget::alarmRaised(int index, const Alarm &alarm, const QString &shown, const QString &text)
 {
-  if (alarm.beep)
-    QApplication::beep();
+  m_alarmSound->start(index, alarm);
   if (alarm.raiseWindow && window())
   {
     window()->raise();

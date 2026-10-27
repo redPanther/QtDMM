@@ -22,13 +22,14 @@
 
 - **New designs: Light Metal and Dark Metal** — the digital display, the analog meter and the table stand on brushed metal, light or dark; the sidebar is light grey or near black, everything else (workspace, graph, Poincaré plot) is as in Light or Dark. In the Design menu and on the Appearance page of the Preferences.
 - **Recent workspaces** — the workspaces loaded or saved last, in **Arrange** > **Recent workspaces** and in the node **Workspaces** at the top of the sidebar (folded at the start, hidden while empty; a double click loads one). Shared by all windows; how many is set on the Appearance page (10 by default).
+- **Alarm sounds** — instead of the Beep box an alarm chooses its sound: none, the system's beep, Warning, High, Low, Critical, OK or a WAV file of your own, with a button to try it. It plays once, while the alarm is raised, or a number of times while it is raised, a second apart; Acknowledge ends it. Optionally "OK" sounds when the alarm clears. Alarms with Beep keep the system's beep.
 - **Silver is now called Light** — and the designs are named Light, Dark, Light Metal and Dark Metal in every language; the saved choice stays.
 
 ### Platforms and build
 
 - **The Linux AppImage brings Qt 6.8.3** — instead of Ubuntu's Qt 6.4.2; it still runs on systems with glibc 2.39 or newer.
 - **`compile.sh` builds with another Qt** — `QTDMM_QT_DIR=<Qt directory> ./compile.sh`; CMake prints the Qt version it found.
-- **Qt Multimedia for sound and video** — built in when found (`QTDMM_WITH_MULTIMEDIA`, for the coming alarm sounds); the Flatpak may play sound.
+- **Qt Multimedia for sound and video** — built in when found (`QTDMM_WITH_MULTIMEDIA`, for the alarm sounds; without it every sound is the system's beep); the Flatpak may play sound.
 
 ## Unreleased — 26.3 (not released yet)
 

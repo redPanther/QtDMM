@@ -64,9 +64,10 @@ MeterController::MeterController(QObject *parent, ServiceHost *host)
   });
 
   connect(m_alarms, &AlarmManager::raised, this, &MeterController::onAlarmRaised);
-  connect(m_alarms, &AlarmManager::cleared, this, [this](int, const Alarm &alarm)
+  connect(m_alarms, &AlarmManager::cleared, this, [this](int index, const Alarm &alarm)
   {
     Q_EMIT info(tr("%1 cleared").arg(Alarm::title(alarm.name)));
+    Q_EMIT alarmCleared(index, alarm);
     updateBanner();
   });
 
@@ -456,7 +457,7 @@ QString MeterController::valueUnit(int id) const
   return id == 0 ? m_baseUnit : m_valueUnits.value(id);
 }
 
-void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
+void MeterController::onAlarmRaised(int index, const Alarm &alarm, double value)
 {
   const QString unit = valueUnit(alarm.value.id);
   const bool overload = m_valueOverload.value(alarm.value.id);
@@ -520,7 +521,7 @@ void MeterController::onAlarmRaised(int, const Alarm &alarm, double value)
       }
     }
   }
-  Q_EMIT alarmRaised(alarm, shown, text);
+  Q_EMIT alarmRaised(index, alarm, shown, text);
   updateBanner();
 }
 
