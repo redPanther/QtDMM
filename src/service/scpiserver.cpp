@@ -634,6 +634,25 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     return refuse(isQuery, -113, "Undefined header");
   }
 
+  // QTDMM:LIMit:VERDict? PASS|HI|LO|NONE, the limit test's on the last
+  // reading of its value; :COUNt? <pass>,<high>,<low> since the last reset
+  if (matches(sub, "LIMit") && depth == 3)
+  {
+    if (!queryOnly(cmd, isQuery))
+      return {};
+    if (matches(leaf, "VERDict"))
+    {
+      static const char *const words[] = { "NONE", "PASS", "HI", "LO" };
+      return words[dev().m_sources.verdict ? dev().m_sources.verdict() : LimitTest::NoVerdict];
+    }
+    if (matches(leaf, "COUNt"))
+    {
+      const LimitTest::Count c = dev().m_sources.limitCount ? dev().m_sources.limitCount() : LimitTest::Count();
+      return QString("%1,%2,%3").arg(c.pass).arg(c.high).arg(c.low);
+    }
+    return refuse(isQuery, -113, "Undefined header");
+  }
+
   // QTDMM:MARK "text": a mark at the newest reading
   if (matches(sub, "MARK") && depth == 2)
   {
@@ -815,6 +834,10 @@ QString ScpiServer::handleText(const Command &cmd, bool &isQuery)
     return {};
   }
 
+  if (matches(head, "CALCulate") && depth >= 2
+      && (matches(cmd.path[1], "LIMit") || matches(cmd.path[1], "FUNCtion") || matches(cmd.path[1], "STATe")))
+    return handleLimit(cmd, isQuery);
+
   // CALCulate:AVERage: the min/max memory, as on Keysight's bench meters -
   // the display's; with a channel list or CALCulate2 that of the value of
   // its own, several channels answer separated by commas
@@ -957,6 +980,106 @@ QString ScpiServer::handleReading(const Command &cmd, bool &isQuery)
   return out.join(',');
 }
 
+// The PASS/FAIL limit test as Keysight's bench meters have it:
+// CALCulate:LIMit[:STATe], :LOWer[:DATA], :UPPer[:DATA], :CLEar (34465A),
+// and CALCulate:FUNCtion LIMit with CALCulate:STATe (34410A), where the limit
+// test is the only function. A limit set here makes the test "lower and
+// upper limit", the other limit staying where the test had it.
+QString ScpiServer::handleLimit(const Command &cmd, bool &isQuery)
+{
+  const int depth = cmd.path.size();
+  const ScpiDevice::Sources &src = dev().m_sources;
+  if (!src.limitTest || !src.setLimitTest)
+    return refuse(isQuery, -221, "Settings conflict; no limit test here");
+  LimitTest test = src.limitTest();
+  const QString node = cmd.path[1];
+  const QString leaf = depth > 2 ? cmd.path[2] : QString();
+  const QString arg = cmd.args.trimmed();
+
+  // FUNCtion: LIMit is all there is
+  if (matches(node, "FUNCtion") && depth == 2)
+  {
+    if (cmd.query)
+      return "LIM";
+    if (arg.isEmpty())
+      return refuse(isQuery, -109, "Missing parameter");
+    if (!matches(unquote(arg), "LIMit"))
+      return refuse(isQuery, -224, "Illegal parameter value");
+    return {};
+  }
+
+  // [:LIMit][:STATe] ON|OFF
+  if ((matches(node, "STATe") && depth == 2)
+      || (matches(node, "LIMit") && (depth == 2 || (depth == 3 && matches(leaf, "STATe")))))
+  {
+    if (cmd.query)
+      return test.enabled ? "1" : "0";
+    const QString a = arg.toUpper();
+    if (a.isEmpty())
+      return refuse(isQuery, -109, "Missing parameter");
+    if (a != "ON" && a != "1" && a != "OFF" && a != "0")
+      return refuse(isQuery, -224, "Illegal parameter value");
+    test.enabled = a == "ON" || a == "1";
+    src.setLimitTest(test);
+    return {};
+  }
+
+  if (matches(node, "LIMit") && depth == 3 && matches(leaf, "CLEar"))
+  {
+    if (commandOnly(cmd, isQuery) && src.clearLimitCount)
+      src.clearLimitCount();
+    return {};
+  }
+
+  // :LOWer[:DATA] / :UPPer[:DATA] <value>|MINimum|MAXimum|DEFault
+  const bool lower = matches(leaf, "LOWer"), upper = matches(leaf, "UPPer");
+  if (matches(node, "LIMit") && (lower || upper) && (depth == 3 || (depth == 4 && matches(cmd.path[3], "DATA"))))
+  {
+    constexpr double kLimitMax = 1.0e15;
+    auto special = [&](double &v)
+    {
+      if (matches(arg, "MINimum"))
+        v = -kLimitMax;
+      else if (matches(arg, "MAXimum"))
+        v = kLimitMax;
+      else if (matches(arg, "DEFault"))
+        v = 0;
+      else
+        return false;
+      return true;
+    };
+    double v = 0;
+    if (cmd.query)
+    {
+      if (!arg.isEmpty() && !special(v))
+        return refuse(isQuery, -224, "Illegal parameter value");
+      return number(arg.isEmpty() ? (lower ? test.low() : test.high()) : v);
+    }
+    if (arg.isEmpty())
+      return refuse(isQuery, -109, "Missing parameter");
+    if (!special(v))
+    {
+      bool ok = false;
+      v = arg.toDouble(&ok);
+      if (!ok || !std::isfinite(v))
+        return refuse(isQuery, -104, "Data type error");
+      if (std::abs(v) > kLimitMax)
+        return refuse(isQuery, -222, "Data out of range");
+    }
+    if (test.form != LimitTest::Range)
+    {
+      const double lo = test.low(), hi = test.high();
+      test.form = LimitTest::Range;
+      test.lower = lo;
+      test.upper = hi;
+    }
+    (lower ? test.lower : test.upper) = v;
+    src.setLimitTest(test);
+    return {};
+  }
+  return refuse(isQuery, -113, "Undefined header");
+}
+
 QString ScpiServer::handleStatus(const Command &cmd, bool &isQuery)
 {
   const int depth = cmd.path.size();
@@ -968,7 +1091,8 @@ QString ScpiServer::handleStatus(const Command &cmd, bool &isQuery)
   if (matches(cmd.path[1], "QUEStionable"))
   {
     // bit 0 overload, bit 1 hold, bit 2 meter not connected, bit 3 no
-    // current reading; an old reading's overload or hold is gone
+    // current reading; an old reading's overload or hold is gone; bits 11
+    // and 12 the limit test's FAIL LO and FAIL HI, as Keysight's
     int bits = 0;
     const Reading r = dev().m_readings.value(0);
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -977,6 +1101,9 @@ QString ScpiServer::handleStatus(const Command &cmd, bool &isQuery)
     if (current && r.hold) bits |= 2;
     if (!dev().m_connected) bits |= 4;
     if (!current) bits |= 8;
+    const LimitTest::Verdict verdict = dev().m_sources.verdict ? dev().m_sources.verdict() : LimitTest::NoVerdict;
+    if (verdict == LimitTest::Low) bits |= 1 << 11;
+    if (verdict == LimitTest::High) bits |= 1 << 12;
     return QString::number(bits);
   }
   if (matches(cmd.path[1], "OPERation"))

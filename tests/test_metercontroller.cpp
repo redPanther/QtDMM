@@ -179,6 +179,48 @@ int main(int argc, char **argv)
     ctl.setLimitTest(LimitTest());
     frame(5);
     check(ctl.limitCount().total() == 0, "limit test off: nothing counted");
+
+    // the same over SCPI, as on Keysight's bench meters: CALCulate:LIMit
+    // (34465A), CALCulate:FUNCtion LIMit + CALCulate:STATe (34410A)
+    QList<LimitTest> changed;
+    const auto watch = QObject::connect(&ctl, &MeterController::limitTestChanged,
+                                        [&](const LimitTest &lt) { changed << lt; });
+    LimitTest pct;
+    pct.nominal = 5;
+    pct.tolerance = 10;
+    ctl.setLimitTest(pct);
+    check(query("CALC:LIM?") == "0" && query("CALC:STAT?") == "0", "CALC:LIM? off");
+    check(query("CALC:LIM:LOW?") == "+4.500000E+00" && query("CALC:LIM:UPP:DATA?") == "+5.500000E+00",
+          "CALC:LIM:LOW?/UPP? of 5 V ± 10 %: " + query("CALC:LIM:LOW?"));
+    send("CALC:LIM:UPP 6");
+    check(ctl.limitTest().form == LimitTest::Range && ctl.limitTest().low() == 4.5 && ctl.limitTest().high() == 6,
+          "an upper limit set: lower and upper limit, the lower one kept");
+    send("CALCulate:LIMit:LOWer:DATA 4");
+    send("CALC:LIM:STAT ON");
+    check(ctl.limitTest().enabled && ctl.limitTest().low() == 4 && query("CALC:LIM:STATe?") == "1", "CALC:LIM:STAT ON");
+    check(!changed.isEmpty() && changed.last().enabled, "limitTestChanged: the window keeps it");
+    check(query("CALC:LIM:LOW? MIN") == "-1.000000E+15" && query("CALC:LIM:UPP? MAX") == "+1.000000E+15",
+          "CALC:LIM:LOW? MIN / UPP? MAX");
+    frame(7);
+    check(query("QTDMM:LIM:VERD?") == "HI" && (query("STAT:QUES?").toInt() & (1 << 12)), "FAIL HI: verdict and bit 12");
+    frame(3);
+    check(query("QTDMM:LIM:VERD?") == "LO" && (query("STAT:QUES?").toInt() & (1 << 11)), "FAIL LO: bit 11");
+    frame(5);
+    check(query("QTDMM:LIMit:VERDict?") == "PASS" && !(query("STAT:QUES?").toInt() & (3 << 11)), "PASS: neither bit");
+    check(query("QTDMM:LIM:COUN?") == "1,1,1", "QTDMM:LIM:COUN? " + query("QTDMM:LIM:COUN?"));
+    send("CALC:LIM:CLE");
+    check(query("QTDMM:LIM:COUN?") == "0,0,0", "CALC:LIM:CLE resets the count");
+    send("CALC:STAT OFF");
+    check(!ctl.limitTest().enabled && query("QTDMM:LIM:VERD?") == "NONE", "CALC:STAT OFF");
+    check(query("CALC:FUNC?") == "LIM", "CALC:FUNC? LIM");
+    send("CALC:FUNC LIM");
+    send("CALC:FUNC DB");
+    check(query("SYST:ERR?").startsWith("-224") && query("SYST:ERR?").startsWith("0"), "CALC:FUNC DB: -224, LIM: fine");
+    send("CALC:LIM:LOW abc");
+    check(query("SYST:ERR?").startsWith("-104"), "CALC:LIM:LOW abc: -104");
+    send("CALC:LIM:STAT maybe");
+    check(query("SYST:ERR?").startsWith("-224"), "CALC:LIM:STAT maybe: -224");
+    QObject::disconnect(watch);
   }
 
   // a fault word ("FUSE"): said once and marked where it began; no number

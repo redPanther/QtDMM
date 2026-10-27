@@ -36,6 +36,14 @@ and the deviation from the nominal in percent - from the middle of the
 range for *Lower and upper limit*. Without a reading (not connected, no
 number shown) the column is faint, like the unlit annunciators.
 
+The verdict is recorded with each reading: the [readings
+table](readings-table.md) gets a column *Limit*, and the
+[recorder](recorder.md)'s CSV export a column `limit`.
+
+An overload counts as FAIL HI, a negative one (-OL) as FAIL LO. There is
+no minimum duration and no hysteresis: each reading has its verdict. For
+"too long too high", use an [alarm](alarms.md).
+
 ## In the graph, on the analog meter and in the status line
 
 The [graph](recorder.md) draws the limits as two dashed green lines, faintly
@@ -50,10 +58,11 @@ The status line counts the verdicts, one per reading: `PASS 812 · FAIL
 23 (2.8 %)`, the tooltip splits FAIL into too high and too low. The
 count starts anew when the limits change and with **Reset min/max**.
 
-The verdict is recorded with each reading: the [readings
-table](readings-table.md) gets a column *Limit*, and the
-[recorder](recorder.md)'s CSV export a column `limit`.
+## Over the network
 
-An overload counts as FAIL HI, a negative one (-OL) as FAIL LO. There is
-no minimum duration and no hysteresis: each reading has its verdict. For
-"too long too high", use an [alarm](alarms.md).
+A program reads and sets the test through the [SCPI
+server](scpi-server.md) with Keysight's commands: `CALCulate:LIMit:STATe
+ON`, `CALCulate:LIMit:LOWer 4.9`, `CALCulate:LIMit:UPPer 5.1`; bits 11
+and 12 of `STATus:QUEStionable?` say FAIL LO and FAIL HI.
+`QTDMM:LIMit:VERDict?` answers `PASS`, `HI`, `LO` or `NONE`, and
+`QTDMM:LIMit:COUNt?` the count.
