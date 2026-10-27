@@ -98,7 +98,10 @@ QJsonObject LimitTest::toJson() const
   o["lower"] = lower;
   o["upper"] = upper;
   o["tint"] = tint;
-  o["fail-sound"] = failSound;
+  o["high-sound"] = highSound;
+  o["low-sound"] = lowSound;
+  o["high-repeat"] = highRepeat;
+  o["low-repeat"] = lowRepeat;
   o["pass-sound"] = passSound;
   return o;
 }
@@ -115,7 +118,10 @@ LimitTest LimitTest::fromJson(const QJsonObject &o)
   t.lower = o["lower"].toDouble();
   t.upper = o["upper"].toDouble();
   t.tint = o["tint"].toBool(true);
-  t.failSound = o["fail-sound"].toString();
+  t.highSound = o["high-sound"].toString();
+  t.lowSound = o["low-sound"].toString();
+  t.highRepeat = o["high-repeat"].toBool(false);
+  t.lowRepeat = o["low-repeat"].toBool(false);
   t.passSound = o["pass-sound"].toString();
   return t;
 }

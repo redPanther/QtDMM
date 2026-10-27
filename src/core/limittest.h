@@ -23,8 +23,11 @@ struct LimitTest
   double lower = 0;        ///< Range; base units
   double upper = 0;
   bool tint = true;        ///< the display and the analog meter green or red
-  QString failSound;       ///< Alarm::sound, once when the verdict turns FAIL; empty none
-  QString passSound;       ///< the same for PASS
+  QString highSound;       ///< Alarm::sound when the verdict turns FAIL HI; empty none
+  QString lowSound;        ///< the same for FAIL LO
+  bool highRepeat = false; ///< the sound again every second while the verdict stays HI
+  bool lowRepeat = false;  ///< the same for LO
+  QString passSound;       ///< once when the verdict turns PASS
 
   /// The limits in base units, whatever the form; the lower first.
   double low() const;

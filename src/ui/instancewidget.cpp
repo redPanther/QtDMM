@@ -190,6 +190,7 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   });
   // the limit test: the verdict to the display, green or red under an
   // alarm's colour, a sound when it turns
+  m_limitSound = new AlarmSound([this](int verdict) { return m_ctl->verdict() == verdict; }, this);
   connect(m_ctl, &MeterController::limitJudged, this, [this](LimitTest::Verdict verdict, double deviation)
   {
     if (m_display)
@@ -202,13 +203,17 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
       m_limitColor = color;
       showAlertColor();
     }
-    if (verdict != m_lastVerdict && verdict != LimitTest::NoVerdict)
+    // a new verdict: the old one's sound stops, the new one's starts (HI
+    // and LO repeated while the verdict stays, if wanted)
+    if (verdict != m_lastVerdict)
     {
-      const QString sound = verdict == LimitTest::Pass ? test.passSound : test.failSound;
-      // HI to LO is no news: still FAIL
-      const bool wasFail = m_lastVerdict == LimitTest::High || m_lastVerdict == LimitTest::Low;
-      if (!sound.isEmpty() && !(wasFail && verdict != LimitTest::Pass))
-        m_alarmSound->play(sound);
+      m_limitSound->stopAll();
+      Alarm sound;
+      sound.sound = verdict == LimitTest::Pass ? test.passSound : verdict == LimitTest::High ? test.highSound
+                    : verdict == LimitTest::Low ? test.lowSound : QString();
+      const bool repeat = verdict == LimitTest::High ? test.highRepeat : verdict == LimitTest::Low && test.lowRepeat;
+      sound.repeat = repeat ? Alarm::WhileRaised : Alarm::Once;
+      m_limitSound->start(verdict, sound);
     }
     m_lastVerdict = verdict;
   });

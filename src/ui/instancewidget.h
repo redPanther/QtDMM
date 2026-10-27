@@ -253,6 +253,7 @@ protected:
   LimitTest::Verdict m_lastVerdict = LimitTest::NoVerdict;   ///< for the sounds: only a change sounds
   QTimer     *m_alertTimer = nullptr;
   class AlarmSound *m_alarmSound = nullptr;
+  class AlarmSound *m_limitSound = nullptr;   ///< the limit test's sounds, by verdict
   /// Display and meter in the alarm's colour (or their own in the dark
   /// phase of the blinking).
   void        showAlertColor();
