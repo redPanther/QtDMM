@@ -104,6 +104,7 @@ AnalogMeterStyle AnalogMeterStyle::dark()
   s.needle = QColor(0xff, 0xff, 0xff);
   s.redZone = QColor(0xd8, 0x22, 0x22);
   s.redBand = QColor(0x8c, 0x26, 0x26);
+  s.passBand = QColor(0x2a, 0x84, 0x38);
   s.boxBg = QColor(0x2c, 0x2c, 0x2c);
   s.boxText = QColor(0xea, 0xea, 0xea);
   s.lampOff = QColor(0x4a, 0x12, 0x12);
@@ -125,6 +126,7 @@ AnalogMeterStyle AnalogMeterStyle::ivory()
   s.needle = QColor(0x10, 0x10, 0x10);
   s.redZone = QColor(0xc8, 0x18, 0x18);
   s.redBand = QColor(0xe8, 0x8c, 0x80);
+  s.passBand = QColor(0x8c, 0xd0, 0x94);
   s.boxBg = QColor(0xe4, 0xda, 0xbe);
   s.boxText = QColor(0x1e, 0x1e, 0x1e);
   s.lampOff = QColor(0x6a, 0x20, 0x20);
@@ -376,6 +378,17 @@ void AnalogMeter::setAlertColor(const QColor &color)
   update();
 }
 
+void AnalogMeter::setLimits(int id, double low, double high)
+{
+  if (id == m_limitId && low == m_limitLow && high == m_limitHigh)
+    return;
+  m_limitId = id;
+  m_limitLow = low;
+  m_limitHigh = high;
+  m_staticDirty = true;
+  update();
+}
+
 QColor AnalogMeter::dialColor() const
 {
   return m_alert.isValid() ? mixed(m_style.face, m_alert) : m_style.face;
@@ -459,6 +472,23 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
     band(from, vMax);
     if (m_bipolar)
       band(-vMax, -from);
+    // the limit test's band over it, in the unit shown, cut at the ends
+    if (limitsShown())
+    {
+      const double factor = SiPrefix::factor(SiPrefix::split(m_unitText).prefix);
+      const double lo = qMax(vMin, std::isnan(m_limitLow) ? vMin : m_limitLow / factor);
+      const double hi = qMin(vMax, std::isnan(m_limitHigh) ? vMax : m_limitHigh / factor);
+      if (hi > lo)
+      {
+        QPainterPath path;
+        addArc(path, g.pivot, R, angleOf(lo), angleOf(hi), true);
+        addArc(path, g.pivot, R * 0.94, angleOf(hi), angleOf(lo), false);
+        path.closeSubpath();
+        p.setPen(Qt::NoPen);
+        p.setBrush(m_style.passBand);
+        p.drawPath(path);
+      }
+    }
   }
 
   // main arc, with the underswing stub left of zero; over the red zone, so
@@ -806,6 +836,7 @@ void AnalogMeter::setValueId(int id)
     return;
   m_valueId = id;
   m_rangelessScale = kNaN;
+  m_staticDirty = true;   // the limit band belongs to one value
   clearMinMax();
 }
 
@@ -844,6 +875,9 @@ void AnalogMeter::showReading(const Reading &r)
   else if (!couplingText(r.flags).isEmpty())
     label += " " + couplingText(r.flags);
 
+  // another prefix moves the limit test's band
+  if (unit != m_unitText && limitsShown())
+    m_staticDirty = true;
   m_unitText = unit;
   m_neverNegative = neverNegative(unit);
   updatePolarity();

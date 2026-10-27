@@ -220,6 +220,7 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
     m_lastVerdict = verdict;
   });
   m_ctl->setLimitTest(LimitTest::fromJsonText(m_settings->getString("Limits/test")));
+  applyLimitBands();
   // the display and the meter in the alarm's colour, blinking if wanted;
   // the banner and the beep stay, the colour is never the only sign
   m_alertTimer = new QTimer(this);
@@ -313,6 +314,7 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
   // the memory of the value it shows, whichever the LCD follows
   connect(m_ctl, &MeterController::valueMinMaxChanged, meter, &AnalogMeter::showValueMinMax);
   applyValueChoice();
+  applyLimitBands();
 }
 
 void InstanceWidget::setPoincare(PoincarePlot *plot)
@@ -1017,6 +1019,16 @@ void InstanceWidget::setLimitTest(const LimitTest &test)
   m_ctl->setLimitTest(test);
   if (m_display)
     m_display->setLimitTest(test.enabled);
+  applyLimitBands();
+}
+
+void InstanceWidget::applyLimitBands()
+{
+  const LimitTest &test = m_ctl->limitTest();
+  const int id = test.enabled && ownMeter(test.value) ? test.value.id : -1;
+  ui_graph->setLimits(id, test.low(), test.high());
+  if (m_meter)
+    m_meter->setLimits(id, test.low(), test.high());
 }
 
 const LimitTest &InstanceWidget::limitTest() const

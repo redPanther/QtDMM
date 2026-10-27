@@ -209,7 +209,8 @@ were; the integration curve carries on across a gap.
   against it at a glance. The phosphor colours draw it with their fine
   scale.
   Drag the line to move it: it snaps to 0, to the mean, minimum and
-  maximum of what the graph shows and to the thresholds of the alarms; in
+  maximum of what the graph shows, to the thresholds of the alarms and to
+  the limits of the [PASS/FAIL test](limit-test.md); in
   between it takes the value where you let go. The right-click menu,
   **Reference line**, chooses the same, and **Off** hides the line. On the mean, minimum or maximum the
   line follows the readings and says what it is (`mean 1.83 A`). Where it

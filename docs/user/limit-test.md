@@ -36,6 +36,18 @@ and the deviation from the nominal in percent - from the middle of the
 range for *Lower and upper limit*. Without a reading (not connected, no
 number shown) the column is faint, like the unlit annunciators.
 
+## In the graph, on the analog meter and in the status line
+
+The [graph](recorder.md) draws the limits as two dashed green lines, faintly
+green between them, while the tested value is on its left axis. The
+reference line snaps to them. The [analog meter](analog-meter.md) shows
+the passing range as a green band on its arc while its needle shows the
+tested value; a limit beyond the scale ends the band at the scale's end.
+
+The status line counts the verdicts, one per reading: `PASS 812 · FAIL
+23 (2.8 %)`, the tooltip splits FAIL into too high and too low. The
+count starts anew when the limits change and with **Reset min/max**.
+
 The verdict is recorded with each reading: the [readings
 table](readings-table.md) gets a column *Limit*, and the
 [recorder](recorder.md)'s CSV export a column `limit`.

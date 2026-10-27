@@ -412,6 +412,36 @@ int main(int argc, char **argv)
     check(w.dialColor() == dial, "no alarm: the style's dial again");
   }
 
+  // --- the limit test's band: green on the arc for the value shown ---
+  {
+    AnalogMeter w;
+    w.setStyle(AnalogMeterStyle::dark());
+    w.setFullScale(10.0);
+    auto green = [&]
+    {
+      const QImage img = render(w, QSize(400, 300));
+      int n = 0;
+      for (int y = 0; y < img.height(); ++y)
+        for (int x = 0; x < img.width(); ++x)
+        {
+          const QColor c = img.pixelColor(x, y);
+          n += c.green() > c.red() + 40 && c.green() > c.blue() + 40;
+        }
+      return n;
+    };
+    const int none = green();
+    w.setLimits(0, 4.0, 6.0);
+    const int band = green();
+    check(w.limitsShown() && band > none + 50, QString("limits: a green band on the arc (%1 -> %2 pixels)").arg(none).arg(band));
+    w.setLimits(0, 4.0, 60.0);
+    check(green() > band, "limits beyond the scale: the band reaches its end");
+    w.setValueId(1);
+    check(!w.limitsShown() && green() == none, "another value shown: no band");
+    w.setValueId(0);
+    w.setLimits(-1);
+    check(!w.limitsShown() && green() == none, "limit test off: no band");
+  }
+
   if (failed == 0)
     qInfo() << "All analog meter tests passed.";
   else

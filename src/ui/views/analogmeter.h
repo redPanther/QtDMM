@@ -37,6 +37,7 @@ struct AnalogMeterStyle
   QColor needle;
   QColor redZone;   ///< labels in the red zone
   QColor redBand;   ///< the band on the arc, paler, so labels and marks stand out on it
+  QColor passBand;   ///< the limit test's band on the arc (setLimits())
   QColor boxBg;   ///< readout / unit boxes
   QColor boxText;
   QColor lampOff;
@@ -97,6 +98,12 @@ public:
   /// raised so scale and pointer stay readable; invalid: the style's own.
   void setAlertColor(const QColor &color);
   QColor alertColor() const { return m_alert; }
+  /// The limit test's band (PASS/FAIL) of the value @p id, in SI base
+  /// units: green on the arc from @p low to @p high while the needle shows
+  /// that value, cut at the ends of the scale. An id of -1 takes it away.
+  void setLimits(int id, double low = 0, double high = 0);
+  /// Whether the band is on the arc now (for the tests).
+  bool limitsShown() const { return m_limitId >= 0 && m_limitId == m_valueId; }
   /// The dial as painted now.
   QColor dialColor() const;
   void reset();   ///< peak and Auto-bipolar latch
@@ -216,6 +223,9 @@ private:
   double m_rangelessScale = std::numeric_limits<double>::quiet_NaN();   ///< grown scale of a temperature, NaN otherwise
   AnalogMeterStyle m_style = AnalogMeterStyle::dark();
   QColor m_alert;   ///< an alarm's colour over the dial, invalid when none
+  int    m_limitId = -1;   ///< the limit test's value, -1 = none
+  double m_limitLow = 0;   ///< SI base units
+  double m_limitHigh = 0;
   ScaleMode m_scaleMode = Auto;
   bool m_bipolar = false;   ///< the scale shown: -FS .. FS
   bool m_latched = false;   ///< Auto: a clearly negative value came since reset()

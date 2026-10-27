@@ -155,6 +155,21 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_referenceLabel->setZValue(5);
   m_referenceLabel->setData(0, QStringLiteral("reference"));
   m_referenceLabel->setVisible(false);
+  // the limit test's band: below the curve, as the min/max band
+  m_limitBand = new QGraphicsRectItem(m_chart);
+  m_limitBand->setZValue(4);
+  m_limitBand->setPen(Qt::NoPen);
+  m_limitBand->setBrush(QColor(0x3c, 0xb0, 0x4a, 28));
+  m_limitBand->setData(0, QStringLiteral("limit"));
+  m_limitBand->setVisible(false);
+  for (QGraphicsLineItem *&line : m_limitLines)
+  {
+    line = new QGraphicsLineItem(m_chart);
+    line->setZValue(5);
+    line->setPen(QPen(QColor(0x3c, 0xb0, 0x4a), 1, Qt::DashLine));
+    line->setData(0, QStringLiteral("limit"));
+    line->setVisible(false);
+  }
   m_dataSeries->attachAxis(m_yAxis);
   m_dataPoints->attachAxis(m_yAxis);
   m_intSeries->attachAxis(m_yAxis);

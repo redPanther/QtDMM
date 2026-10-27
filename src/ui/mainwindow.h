@@ -242,6 +242,7 @@ protected:
   bool        m_running;
   QLabel     *m_error;
   QLabel     *m_info;
+  QLabel     *m_limitCount;   ///< PASS/FAIL count, while the limit test is on
   QMenu      *m_menu;
   HelpDlg    *m_helpDlg;
   SharedStateManager* m_stateMgr;

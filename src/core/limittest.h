@@ -16,6 +16,24 @@ struct LimitTest
 {
   enum Form { Percent, Amount, Range };
   enum Verdict { NoVerdict, Pass, High, Low };
+  /// The verdicts since the last reset, one per reading judged.
+  struct Count
+  {
+    qint64 pass = 0;
+    qint64 high = 0;
+    qint64 low = 0;
+    qint64 fail() const { return high + low; }
+    qint64 total() const { return pass + high + low; }
+    void add(Verdict v)
+    {
+      if (v == Pass)
+        ++pass;
+      else if (v == High)
+        ++high;
+      else if (v == Low)
+        ++low;
+    }
+  };
 
   bool enabled = false;
   /// Which value it judges, as Alarm::value: of the meter's values
