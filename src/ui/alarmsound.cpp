@@ -66,7 +66,10 @@ void AlarmSound::next(int index)
     return;
   }
   play(it->sound);
-  if (it->left > 0 && --it->left == 0)
+  if (it->left < 0)
+    return;   // while raised
+  --it->left;
+  if (it->left == 0)
     stop(index);
 }
 
