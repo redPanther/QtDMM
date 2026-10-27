@@ -25,6 +25,11 @@ class DeviceLibrary;
 /// (setServices()): the SCPI server and HiSLIP, with their port or "off";
 /// a double click or the context menu opens their settings, the menu also
 /// copies the address.
+///
+/// The node "Workspaces" on top lists the workspace files used last
+/// (setWorkspaces()), folded at the start and hidden while there are none;
+/// a double click or Enter loads one, the context menu also takes it off
+/// the list or opens its folder.
 class DeviceSidebar : public QTreeWidget
 {
   Q_OBJECT
@@ -95,6 +100,12 @@ public:
   /// The node "Services".
   QTreeWidgetItem *servicesNode() const { return m_services; }
 
+  /// The workspace files used last, newest first; the node is hidden
+  /// without any. A file that is gone is grey and loads no more.
+  void        setWorkspaces(const QStringList &files);
+  /// The node "Workspaces".
+  QTreeWidgetItem *workspacesNode() const { return m_workspaces; }
+
   /// Shown at the start: as the user left it (@p stored, invalid when never
   /// set), else with two devices or more; a window without a meter shows it
   /// whenever there are devices to choose from.
@@ -117,6 +128,10 @@ Q_SIGNALS:
   void        serviceSettingsRequested();
   /// The context menu of the row of value @p id (MainWindow fills it).
   void        valueMenuRequested(int id, const QPoint &globalPos);
+  /// Load the workspace file @p path.
+  void        workspaceRequested(const QString &path);
+  /// Take @p path off the list of workspaces used last.
+  void        removeWorkspaceRequested(const QString &path);
 
 public Q_SLOTS:
   /// The entries anew from the library.
@@ -139,14 +154,19 @@ private:
   bool        instanceRunning(const QTreeWidgetItem *item) const;
   void        instanceMenu(QTreeWidgetItem *item, const QPoint &pos);
   void        serviceMenu(QTreeWidgetItem *item, const QPoint &pos);
+  void        workspaceMenu(QTreeWidgetItem *item, const QPoint &pos);
+  /// The file of a workspace row that is still there, else empty.
+  QString     workspaceOf(const QTreeWidgetItem *item) const;
 
   DeviceLibrary   *m_library = nullptr;
+  QTreeWidgetItem *m_workspaces = nullptr;
   QTreeWidgetItem *m_devices = nullptr;
   QTreeWidgetItem *m_instances = nullptr;
   QTreeWidgetItem *m_services = nullptr;
   QString          m_ownInstance;
   QList<Instance>  m_instanceList;   ///< as last set: coloured anew with another design
   QList<Service>   m_serviceList;
+  QStringList      m_workspaceList;
   QString          m_selectInstance;   ///< renamed: selected again under this name
   QString          m_current;
   bool             m_active = false;

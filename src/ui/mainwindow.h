@@ -31,6 +31,7 @@
 #include <QCommandLineParser>
 
 #include "ui_uimainwindow.h"
+#include "core/recentfiles.h"
 #include "core/valueref.h"
 #include "service/sharedstatemanager.h"
 
@@ -200,6 +201,7 @@ protected:
   QAction    *m_autoSaveLayout;   ///< Windows/auto-save: the layout is saved on exit
   bool        m_startDisplay = true;   ///< Display/show of the start layout (auto-save off)
   QMenu      *m_arrangeMenu;
+  QMenu      *m_recentMenu = nullptr;   ///< Arrange > Recent workspaces
   QMenu      *m_designMenu;
   bool        m_restoring = false;   ///< restoreWindows() is setting the actions
   ControlBar *m_controls;            ///< the meter's keys under the display
@@ -279,7 +281,13 @@ protected:
   void        applyWorkspace(const WorkspaceGet &get);
   void        storeWorkspace(const WorkspaceSet &set);
   void        loadWorkspace();
+  /// Loads the workspace @p file; false (with a message) when it is none.
+  bool        loadWorkspaceFile(const QString &file);
   void        saveWorkspace();
+  /// The workspaces used last, shared by all instances (workspaces.conf).
+  RecentFiles recentWorkspaces() const;
+  /// The sidebar's node and the menu "Recent workspaces" anew.
+  void        updateRecentWorkspaces();
   /// @}
   /// Applies a colour design (Designs::Design) to the window and the views.
   void        setDesign(int design);

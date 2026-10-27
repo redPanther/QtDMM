@@ -21,6 +21,7 @@
 ### GUI
 
 - **New designs: Light Metal and Dark Metal** — the digital display, the analog meter and the table stand on brushed metal, light or dark; the sidebar is light grey or near black, everything else (workspace, graph, Poincaré plot) is as in Light or Dark. In the Design menu and on the Appearance page of the Preferences.
+- **Recent workspaces** — the workspaces loaded or saved last, in **Arrange** > **Recent workspaces** and in the node **Workspaces** at the top of the sidebar (folded at the start, hidden while empty; a double click loads one). Shared by all windows; how many is set on the Appearance page (10 by default).
 - **Silver is now called Light** — and the designs are named Light, Dark, Light Metal and Dark Metal in every language; the saved choice stays.
 
 ### Platforms and build

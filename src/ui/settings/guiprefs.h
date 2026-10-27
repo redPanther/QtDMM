@@ -32,7 +32,7 @@ class QSpinBox;
 
 /// Settings page "Appearance": design and symbols, the LCD display (colour,
 /// bar graph, min/max) and the analog meter (scale mode, style, ballistics,
-/// red zone).
+/// red zone), the sidebar (how many recent workspaces).
 class GuiPrefs : public SettingsPage
 {
   Q_OBJECT
@@ -66,5 +66,5 @@ private:
   QComboBox   *ui_design, *ui_iconSet, *ui_meterScale, *ui_meterStyle;
   QCheckBox   *ui_textLabel, *ui_showDisplay, *ui_showBar, *ui_showMinMax, *ui_meterBallistics;
   ColorButton *ui_bgColorDisplay;
-  QSpinBox    *ui_meterRedZone;
+  QSpinBox    *ui_meterRedZone, *ui_recentWorkspaces;
 };

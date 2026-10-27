@@ -5,13 +5,17 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QContextMenuEvent>
+#include <QDesktopServices>
+#include <QDir>
 #include <QDropEvent>
+#include <QFileInfo>
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
 #include <QTimer>
+#include <QUrl>
 
 #include "core/devicelibrary.h"
 #include "device/dmmdecoder.h"
@@ -92,10 +96,17 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   setEditTriggers(QAbstractItemView::NoEditTriggers);
   // only the node takes entries: they cannot become children of each other
   invisibleRootItem()->setFlags(Qt::ItemIsEnabled);
+  // folded at the start: one look away, not in the way of the devices
+  m_workspaces = new QTreeWidgetItem(this, { tr("Workspaces") });
+  m_workspaces->setFlags(Qt::ItemIsEnabled);
+  QFont bold = m_workspaces->font(0);
+  bold.setBold(true);
+  m_workspaces->setFont(0, bold);
+  m_workspaces->setFirstColumnSpanned(true);
+  m_workspaces->setToolTip(0, tr("The workspaces used last: a double click loads one."));
+  m_workspaces->setHidden(true);
   m_devices = new QTreeWidgetItem(this, { tr("My devices") });
   m_devices->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
-  QFont bold = m_devices->font(0);
-  bold.setBold(true);
   m_devices->setFont(0, bold);
   m_devices->setFirstColumnSpanned(true);
   m_devices->setExpanded(true);
@@ -155,6 +166,11 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
     if (item && item->parent() == m_services)
     {
       Q_EMIT serviceSettingsRequested();
+      return;
+    }
+    if (const QString file = workspaceOf(item); !file.isEmpty())
+    {
+      Q_EMIT workspaceRequested(file);
       return;
     }
     const QString instance = instanceOf(item);
@@ -354,6 +370,60 @@ void DeviceSidebar::setServices(const QList<Service> &services)
   m_filling = false;
 }
 
+QString DeviceSidebar::workspaceOf(const QTreeWidgetItem *item) const
+{
+  if (!item || item->parent() != m_workspaces)
+    return QString();
+  const QString file = item->data(0, Qt::UserRole).toString();
+  return QFileInfo::exists(file) ? file : QString();
+}
+
+void DeviceSidebar::setWorkspaces(const QStringList &files)
+{
+  m_workspaceList = files;
+  m_filling = true;
+  qDeleteAll(m_workspaces->takeChildren());
+  const QColor grey = palette().color(QPalette::Disabled, QPalette::WindowText);
+  for (const QString &file : files)
+  {
+    const QFileInfo info(file);
+    auto *item = new QTreeWidgetItem(m_workspaces, { info.completeBaseName() });
+    item->setData(0, Qt::UserRole, file);
+    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    item->setFirstColumnSpanned(true);
+    const QString path = QDir::toNativeSeparators(file);
+    if (info.exists())
+      item->setToolTip(0, path);
+    else
+    {
+      item->setForeground(0, grey);
+      item->setToolTip(0, tr("%1 (not found)").arg(path));
+    }
+  }
+  m_workspaces->setHidden(files.isEmpty());
+  m_filling = false;
+}
+
+void DeviceSidebar::workspaceMenu(QTreeWidgetItem *item, const QPoint &pos)
+{
+  const QString file = item->data(0, Qt::UserRole).toString();
+  const QString dir = QFileInfo(file).absolutePath();
+  QMenu menu(this);
+  QAction *load = menu.addAction(QIcon::fromTheme("document-open"), tr("&Load"));
+  load->setEnabled(!workspaceOf(item).isEmpty());
+  QAction *folder = menu.addAction(QIcon::fromTheme("folder-open"), tr("Open &folder"));
+  folder->setEnabled(QFileInfo(dir).isDir());
+  menu.addSeparator();
+  QAction *remove = menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove from list"));
+  QAction *chosen = menu.exec(pos);
+  if (chosen == load)
+    Q_EMIT workspaceRequested(file);
+  else if (chosen == folder)
+    QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
+  else if (chosen == remove)
+    Q_EMIT removeWorkspaceRequested(file);
+}
+
 void DeviceSidebar::serviceMenu(QTreeWidgetItem *item, const QPoint &pos)
 {
   const QString address = item->data(1, Qt::UserRole).toString();
@@ -475,6 +545,7 @@ void DeviceSidebar::changeEvent(QEvent *event)
   updateMarks();
   setInstances(m_instanceList, m_ownInstance);
   setServices(m_serviceList);
+  setWorkspaces(m_workspaceList);
 }
 
 void DeviceSidebar::keyPressEvent(QKeyEvent *event)
@@ -482,6 +553,12 @@ void DeviceSidebar::keyPressEvent(QKeyEvent *event)
   // F2 renames the device or the stopped instance, also from the device
   // line below an instance
   QTreeWidgetItem *item = currentItem();
+  if ((event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) && !workspaceOf(item).isEmpty())
+  {
+    Q_EMIT workspaceRequested(workspaceOf(item));
+    event->accept();
+    return;
+  }
   if (item && item->parent() && item->parent()->parent() == m_instances)
     item = item->parent();
   if (event->key() == Qt::Key_F2 && event->modifiers() == Qt::NoModifier && item
@@ -528,6 +605,11 @@ void DeviceSidebar::instanceMenu(QTreeWidgetItem *item, const QPoint &pos)
 void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
 {
   QTreeWidgetItem *item = itemAt(event->pos());
+  if (item && item->parent() == m_workspaces)
+  {
+    workspaceMenu(item, event->globalPos());
+    return;
+  }
   if (item && (item == m_services || item->parent() == m_services))
   {
     if (item->parent() == m_services)

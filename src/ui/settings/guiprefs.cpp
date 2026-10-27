@@ -37,7 +37,7 @@
 GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
 {
   m_label = tr("Appearance");
-  m_description = tr("Design and symbols, the digital display and the analog meter.");
+  m_description = tr("Design and symbols, the digital display, the analog meter and the sidebar.");
   m_iconName = "qtdmm-display";
 
   QFormLayout *form = createForm();
@@ -117,6 +117,15 @@ GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
                                  "scale."));
   form->addRow(tr("&Red zone from:"), ui_meterRedZone);
 
+  addSection(form, tr("Sidebar"));
+  ui_recentWorkspaces = new QSpinBox(this);
+  ui_recentWorkspaces->setObjectName("ui_recentWorkspaces");
+  ui_recentWorkspaces->setRange(0, 30);
+  ui_recentWorkspaces->setSpecialValueText(tr("none"));
+  ui_recentWorkspaces->setToolTip(tr("How many of the workspaces loaded or saved last the sidebar and the menu "
+                                     "Arrange > Recent workspaces show. The list is shared by all windows."));
+  form->addRow(tr("Recent worksp&aces:"), ui_recentWorkspaces);
+
   // the fields of a section line up
   const int width = qMax(ui_meterStyle->sizeHint().width(), ui_meterScale->sizeHint().width());
   for (QWidget *w : std::initializer_list<QWidget *>{ ui_design, ui_iconSet, ui_meterScale, ui_meterStyle })
@@ -157,6 +166,7 @@ void GuiPrefs::defaultsSLOT()
   ui_meterStyle->setCurrentIndex(qBound(0, m_cfg->getInt("Meter/style", 1), 1));
   ui_meterBallistics->setChecked(m_cfg->getBool("Meter/ballistics", true));
   ui_meterRedZone->setValue(qBound(50, m_cfg->getInt("Meter/red-zone", 90), 100));
+  ui_recentWorkspaces->setValue(qBound(0, m_cfg->getInt("Sidebar/recent-workspaces", 10), 30));
   Q_EMIT ui_showDisplay->toggled(ui_showDisplay->isChecked());
 }
 
@@ -179,6 +189,7 @@ void GuiPrefs::factoryDefaultsSLOT()
   ui_meterStyle->setCurrentIndex(1);   // classic ivory
   ui_meterBallistics->setChecked(true);
   ui_meterRedZone->setValue(90);
+  ui_recentWorkspaces->setValue(10);
 }
 
 void GuiPrefs::setShowDisplay(bool show)
@@ -204,6 +215,7 @@ void GuiPrefs::applySLOT()
   m_cfg->setInt("Meter/style", meterStyle());
   m_cfg->setBool("Meter/ballistics", meterBallistics());
   m_cfg->setInt("Meter/red-zone", meterRedZone());
+  m_cfg->setInt("Sidebar/recent-workspaces", ui_recentWorkspaces->value());
 }
 
 int GuiPrefs::meterScaleMode() const
