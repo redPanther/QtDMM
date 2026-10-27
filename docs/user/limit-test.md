@@ -36,6 +36,10 @@ and the deviation from the nominal in percent - from the middle of the
 range for *Lower and upper limit*. Without a reading (not connected, no
 number shown) the column is faint, like the unlit annunciators.
 
+The verdict is recorded with each reading: the [readings
+table](readings-table.md) gets a column *Limit*, and the
+[recorder](recorder.md)'s CSV export a column `limit`.
+
 An overload counts as FAIL HI, a negative one (-OL) as FAIL LO. There is
 no minimum duration and no hysteresis: each reading has its verdict. For
 "too long too high", use an [alarm](alarms.md).

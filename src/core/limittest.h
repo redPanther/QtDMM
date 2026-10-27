@@ -54,6 +54,12 @@ struct LimitTest
   /// "PASS", "FAIL HI", "FAIL LO" or empty, as the status line and the
   /// files name it.
   static QString verdictText(Verdict v);
+  /// The verdict as SampleFlag bits on the reading, so it is recorded with
+  /// it (Limit*), and back.
+  static quint32 flags(Verdict v);
+  static Verdict fromFlags(quint32 flags);
+  /// verdictText() read back; anything else is no verdict.
+  static Verdict fromText(const QString &text);
 
   QJsonObject toJson() const;
   static LimitTest fromJson(const QJsonObject &o);

@@ -9,6 +9,7 @@
 #include <QtCore>
 
 #include "recording/recordingfile.h"
+#include "core/sampletypes.h"
 #include "testutil.h"
 
 int main(int argc, char **argv)
@@ -159,6 +160,41 @@ int main(int argc, char **argv)
       QFile o(out);
       check(o.open(QIODevice::ReadOnly | QIODevice::Text) && QString::fromUtf8(o.readLine()).trimmed().endsWith(";value 3;unit 3;status 3"),
             "value 3: the header says value 3");
+    }
+    // the limit test's columns at the end: the main value and value 3
+    {
+      const QString text = "timestamp;time (s);value;unit;status;value 3;unit 3;status 3;limit;limit 3\n"
+                           "2026-01-01T00:00:00,000;0;5;V;ok;2;A;ok;PASS;FAIL LO\n"
+                           "2026-01-01T00:00:01,000;1;6;V;ok;;;;FAIL HI;\n";
+      const QString limitPath = tmp.path() + "/limit.csv";
+      QFile lf(limitPath);
+      check(lf.open(QIODevice::WriteOnly | QIODevice::Text), "limit file opens");
+      QTextStream(&lf) << text;
+      lf.close();
+      const auto lim = RecordingFile::read(limitPath, &err);
+      check(lim && lim->extra.size() == 1 && lim->extra[0].id == 2 && lim->limits.size() == 2
+            && lim->limits[0] == SampleFlag::LimitPass && lim->limits[1] == SampleFlag::LimitHigh
+            && lim->extra[0].limits.value(0) == SampleFlag::LimitLow && lim->extra[0].limits.value(1) == 0,
+            "limit: the verdicts read, by value: " + err);
+      if (lim)
+      {
+        const QString out = tmp.path() + "/limit_out.csv";
+        check(RecordingFile::write(*lim, out, &err), "limit: write: " + err);
+        QFile o(out);
+        check(o.open(QIODevice::ReadOnly | QIODevice::Text) && QString::fromUtf8(o.readAll()) == text.section('\n', 0, 0) + '\n'
+              + "2026-01-01T00:00:00,000;0;5;V;ok;2;A;ok;PASS;FAIL LO\n2026-01-01T00:00:01,000;1;6;V;ok;;;;FAIL HI;\n",
+              "limit: written as read");
+      }
+      Recording none;
+      none.values = { 1.0 };
+      none.unit = "V";
+      none.start = QDateTime(QDate(2026, 1, 1), QTime(0, 0));
+      none.limits = { 0u };
+      const QString out = tmp.path() + "/nolimit.csv";
+      QFile o(out);
+      check(RecordingFile::write(none, out, &err) && o.open(QIODevice::ReadOnly | QIODevice::Text)
+            && QString::fromUtf8(o.readLine()).trimmed() == "timestamp;time (s);value;unit;status",
+            "limit: no verdict, no column");
     }
     const auto old = RecordingFile::read(writeCsv("old.csv", "2026-01-01T00:00:00,000;0;nan;V\n2026-01-01T00:00:01,000;1;2;V\n"), &err);
     check(old && old->stateAt(0) == CellState::Gap && old->stateAt(1) == CellState::Ok && old->extra.isEmpty(),

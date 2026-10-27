@@ -9,6 +9,7 @@
 
 #include <cmath>
 
+#include "core/limittest.h"
 #include "core/siprefix.h"
 #include "recording/spreadsheet.h"
 
@@ -130,9 +131,12 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
   int groups = 1;
   bool header = false;
   QStringList headerNames;
+  QStringList limitNames;   // the limit columns at the end: "limit", "limit 2" ...
   if (line.startsWith("timestamp"))   // the CSV header
   {
     headerNames = line.split(';');
+    while (headerNames.size() > 5 && headerNames.last().startsWith(QLatin1String("limit")))
+      limitNames.prepend(headerNames.takeLast());
     withStatus = headerNames.value(4) == QLatin1String("status");
     groups = withStatus ? qMax(1, int(headerNames.size() - 2) / 3) : 1;
     header = true;
@@ -166,6 +170,17 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
     const QStringList name = headerNames.value(2 + 3 * g).split(' ');
     rec.extra[g - 1].id = name.size() == 2 && name[0] == QLatin1String("value") ? qMax(0, name[1].toInt() - 1) : 0;
   }
+  // each limit column's group: "limit" the main value, "limit 3" value 3
+  QList<int> limitGroup;
+  for (const QString &n : std::as_const(limitNames))
+  {
+    const int number = n.section(' ', 1, 1).toInt();
+    int g = number <= 1 ? 0 : -1;
+    for (int e = 0; g < 0 && e < rec.extra.size(); ++e)
+      if ((rec.extra[e].id > 0 ? rec.extra[e].id : e + 1) + 1 == number)
+        g = e + 1;
+    limitGroup << g;
+  }
   QDateTime end;
   auto when = [](const QRegularExpressionMatch &m)
   {
@@ -197,7 +212,7 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
         const QStringList f = line.split(';');
         const QRegularExpressionMatch match = reTime.match(f.value(0));
         valid = match.hasMatch() && reDelta.match(f.value(1)).hasMatch()
-                && (withStatus ? f.size() == 2 + 3 * groups : f.size() >= 4);
+                && (withStatus ? f.size() == 2 + 3 * groups + limitNames.size() : f.size() >= 4);
         for (int g = 0; valid && g < groups; ++g)
         {
           // before the status the unit was all the rest of the row
@@ -240,6 +255,15 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
         col.values << stateValue(c.state, c.value * unitScaleFactor(c.unit, col.unit));
         col.states << c.state;
       }
+      if (!isLegacy)
+        for (int k = 0; k < limitGroup.size(); ++k)
+        {
+          const quint32 bits = LimitTest::flags(LimitTest::fromText(line.section(';', 2 + 3 * groups + k, 2 + 3 * groups + k)));
+          if (limitGroup[k] == 0)
+            rec.limits << bits;
+          else if (limitGroup[k] > 0)
+            rec.extra[limitGroup[k] - 1].limits << bits;
+        }
     }
     line = ts.readLine();
   }
@@ -266,6 +290,37 @@ QStringList columnNames(const QList<RecordingColumn> &extra, const QStringList &
       out << QString("%1 %2").arg(name).arg((extra[g].id > 0 ? extra[g].id : g + 1) + 1);
   return out;
 }
+
+bool hasVerdict(const QVector<quint32> &limits)
+{
+  for (quint32 bits : limits)
+    if (bits)
+      return true;
+  return false;
+}
+
+// the values with a limit test: -1 the main value, else the column's index
+QList<int> limitColumns(const Recording &rec)
+{
+  QList<int> out;
+  if (hasVerdict(rec.limits))
+    out << -1;
+  for (int g = 0; g < rec.extra.size(); ++g)
+    if (hasVerdict(rec.extra[g].limits))
+      out << g;
+  return out;
+}
+
+QString limitName(const Recording &rec, int column, const QString &word)
+{
+  return column < 0 ? word : QString("%1 %2").arg(word).arg((rec.extra[column].id > 0 ? rec.extra[column].id : column + 1) + 1);
+}
+
+QString limitCell(const Recording &rec, int column, int row)
+{
+  const QVector<quint32> &limits = column < 0 ? rec.limits : rec.extra[column].limits;
+  return LimitTest::verdictText(LimitTest::fromFlags(limits.value(row)));
+}
 }
 
 bool RecordingFile::write(const Recording &recording, const QString &path, QString *error)
@@ -283,7 +338,11 @@ bool RecordingFile::write(const Recording &recording, const QString &path, QStri
   }
 
   QTextStream ts(&file);
-  ts << "timestamp;time (s);" << columnNames(recording.extra, { "value", "unit", "status" }).join(';') << '\n';
+  const QList<int> limits = limitColumns(recording);
+  ts << "timestamp;time (s);" << columnNames(recording.extra, { "value", "unit", "status" }).join(';');
+  for (int c : limits)
+    ts << ';' << limitName(recording, c, QStringLiteral("limit"));
+  ts << '\n';
   auto cell = [&](double v, CellState state, const QString &unit)
   {
     if (state == CellState::None)
@@ -300,6 +359,8 @@ bool RecordingFile::write(const Recording &recording, const QString &path, QStri
        << cell(recording.values[i], recording.stateAt(i), recording.unit);
     for (const RecordingColumn &col : recording.extra)
       ts << ';' << cell(col.values.value(i, qQNaN()), col.states.value(i, CellState::None), col.unit);
+    for (int c : limits)
+      ts << ';' << limitCell(recording, c, i);
     ts << '\n';
   }
   return true;
@@ -316,7 +377,11 @@ bool RecordingFile::writeAny(const Recording &recording, const QString &path, QS
     return false;
   }
   SpreadsheetWriter sheet(tr("Recording"));
-  sheet.setHeader(QStringList{ tr("timestamp"), tr("time (s)") } + columnNames(recording.extra, { tr("value"), tr("unit"), tr("status") }));
+  const QList<int> limits = limitColumns(recording);
+  QStringList head = QStringList{ tr("timestamp"), tr("time (s)") } + columnNames(recording.extra, { tr("value"), tr("unit"), tr("status") });
+  for (int c : limits)
+    head << limitName(recording, c, tr("limit"));
+  sheet.setHeader(head);
   // a value that is no number is an empty cell: a spreadsheet has no NaN
   auto cells = [](QList<QVariant> &row, double v, CellState state, const QString &unit)
   {
@@ -331,6 +396,8 @@ bool RecordingFile::writeAny(const Recording &recording, const QString &path, QS
     cells(row, recording.values[i], recording.stateAt(i), recording.unit);
     for (const RecordingColumn &col : recording.extra)
       cells(row, col.values.value(i, qQNaN()), col.states.value(i, CellState::None), col.unit);
+    for (int c : limits)
+      row << limitCell(recording, c, i);
     sheet.addRow(row);
   }
   return sheet.write(path, *format, error);

@@ -678,6 +678,38 @@ int main(int argc, char **argv)
     }
   }
 
+  // --- 5a1. the limit test's verdict goes with the readings into the
+  //          export; a step with a PASS and a FAIL HI is FAIL HI ---
+  {
+    RecordingStore store;
+    TestClock clock;
+    clock.attach(store);
+    store.setUnit("V");
+    store.setSampleTime(10);
+    store.start();
+    auto judged = [](Reading r, quint32 verdict) { r.flags |= verdict; return r; };
+    store.setReading(clock.at(0, judged(reading(5.0, "5.000", "DC"), SampleFlag::LimitPass)));
+    store.setReading(clock.at(400, judged(reading(5.2, "5.200", "DC"), SampleFlag::LimitHigh)));
+    store.setReading(clock.at(900, judged(reading(5.0, "5.000", "DC"), SampleFlag::LimitPass)));
+    clock.now = 2000;
+    store.stop();
+    const Recording grid = store.toRecording();
+    check(grid.limits.size() == 3 && grid.limits[0] == SampleFlag::LimitPass
+          && (grid.limits[1] & SampleFlag::LimitHigh) && grid.limits[2] == SampleFlag::LimitPass,
+          "limit: on the grid, the FAIL of a step stays");
+    QTemporaryDir dir;
+    const QString raw = dir.path() + "/limit_raw.csv";
+    QString err;
+    check(store.write(raw, &err, true), "limit: raw write: " + err);
+    QFile f(raw);
+    const QStringList lines = f.open(QIODevice::ReadOnly | QIODevice::Text) ? QString::fromUtf8(f.readAll()).split('\n') : QStringList();
+    check(lines.value(0).endsWith(";status;limit") && lines.value(2).endsWith(";ok;FAIL HI"), "limit: raw rows: " + lines.join(" | "));
+    RecordingStore back;
+    if (const auto rec = RecordingFile::read(raw, &err))
+      back.load(*rec);
+    check(back.count() == 3 && (back.series().at(1).flags & SampleFlag::LimitHigh), "limit: loaded with the verdicts");
+  }
+
   // --- 5a2. the other values in the export: a column group each, on the
   //          grid and raw; empty before the value began; the status tells
   //          OL, -OL and a gap apart; import and export again the same ---

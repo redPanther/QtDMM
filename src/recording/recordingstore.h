@@ -25,6 +25,7 @@ struct GridPoint
   double  value = 0;        ///< the time-weighted mean over the step (the value at t for the first); NaN = none
   double  integral = 0;     ///< the integral at t; NaN in a gap
   Quality quality = Quality::Valid;   ///< the worst in the step
+  quint32 limit = 0;        ///< the limit test's verdicts in the step (SampleFlag::Limit*)
 };
 
 /// One row of the readings series: a reading as the meter delivered it,

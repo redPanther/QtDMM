@@ -28,6 +28,9 @@ struct RecordingColumn
   QString unit;               ///< without SI prefix
   QVector<double> values;     ///< NaN for anything but Ok
   QVector<CellState> states;  ///< one per row
+  /// The limit test's verdict per row as SampleFlag::Limit* bits (LimitTest);
+  /// empty: the value had no test.
+  QVector<quint32> limits;
 };
 
 /// A recording as it goes to and comes from a CSV file: when it started, how
@@ -45,6 +48,8 @@ struct Recording
   QVector<CellState> states;
   /// ms since start for each value; empty = value i at i x the sample time
   QVector<qint64> times;
+  /// The limit test's verdict per row, as RecordingColumn::limits.
+  QVector<quint32> limits;
   /// The other values, a column group each (value 2, value 3 ...).
   QList<RecordingColumn> extra;
 
@@ -74,7 +79,9 @@ struct Recording
 /// (`2026-09-21T14:03:05,250`), the value with an SI prefix on the unit, the
 /// status `ok`, `OL`, `-OL` or `gap` (the value then `nan`). Each other value
 /// adds `;value 2;unit 2;status 2` and so on; its cells are empty in the rows
-/// before it began.
+/// before it began. A value with a limit test adds a column `limit` (the
+/// main value) or `limit 2` ... at the end of the row: `PASS`, `FAIL HI`,
+/// `FAIL LO` or empty.
 /// Read: that format, the one before it without status
 /// (`timestamp;time (s);value;unit`, `nan` a gap), and the legacy
 /// tab-separated export of QtDMM < 0.9

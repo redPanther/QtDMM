@@ -288,6 +288,12 @@ for an overload, `gap` for a [gap](#gaps), `none` when the meter showed no
 number and `fault` for a fault word. A value that is no number is
 written as `nan` in CSV and as an empty cell in a spreadsheet.
 
+With the [PASS/FAIL limit test](limit-test.md) on, a column `limit` at the
+end of the row keeps its verdict: `PASS`, `FAIL HI`, `FAIL LO`, or empty
+where the test was off. On the grid a step with a FAIL in it is FAIL, even
+when the other readings in it passed. A file read back shows the verdicts
+again.
+
 The other values of the meter that the graph shows (see above) follow, three columns each - `value 2;unit 2;status 2`, then
 `value 3` ... - on the same rows. On the grid each is the mean over the step
 like the main value; with *CSV, every reading* there is a row at every

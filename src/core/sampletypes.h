@@ -100,6 +100,10 @@ enum : quint32
   Reference = 1u << 19,
   Unstable  = 1u << 20,
   FourWire  = 1u << 21,
+  LimitPass = 1u << 22,    ///< QtDMM: the limit test's verdict on the reading (LimitTest)
+  LimitHigh = 1u << 23,    ///< QtDMM: FAIL HI
+  LimitLow  = 1u << 24,    ///< QtDMM: FAIL LO
+  Limit     = LimitPass | LimitHigh | LimitLow,
   LowBattery = 1u << 28,   ///< QtDMM
   Peak       = 1u << 29,   ///< QtDMM
 

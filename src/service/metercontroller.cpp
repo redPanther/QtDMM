@@ -259,8 +259,17 @@ QString MeterController::source() const
   return m_deviceId.isEmpty() ? "instance:" + m_instanceId : "device:" + m_deviceId;
 }
 
-void MeterController::publish(const Reading &rd)
+void MeterController::publish(const Reading &in)
 {
+  // the limit test's verdict goes with the reading as flags, so the
+  // recording and the readings table keep it
+  Reading rd = in;
+  const bool judged = m_limitTest.enabled && m_limitTest.value.matches(rd) && !(rd.id > 0 && rd.text.isEmpty());
+  if (judged)
+  {
+    m_verdict = rd.noNumber() ? LimitTest::NoVerdict : m_limitTest.judge(rd.value, rd.overload, rd.text.trimmed().startsWith('-'));
+    rd.flags = (rd.flags & ~quint32(SampleFlag::Limit)) | LimitTest::flags(m_verdict);
+  }
   const double dval = rd.value;
   const QString &val = rd.text;
   const QString &unit = rd.unit;
@@ -356,12 +365,9 @@ void MeterController::publish(const Reading &rd)
   m_valueOverload[id] = overload;
   m_alarms->feed(dval, overload, now, id, rd.source);
 
-  // the limit test: a verdict for every reading of its value
-  if (m_limitTest.enabled && m_limitTest.value.matches(rd))
-  {
-    m_verdict = rd.noNumber() ? LimitTest::NoVerdict : m_limitTest.judge(dval, overload, rd.text.trimmed().startsWith('-'));
+  // the limit test's verdict (judged above) to the views
+  if (judged)
     Q_EMIT limitJudged(id, m_verdict, overload || m_verdict == LimitTest::NoVerdict ? std::nan("") : m_limitTest.deviation(dval));
-  }
 
   ScpiServer::Reading r;
   r.value = dval;

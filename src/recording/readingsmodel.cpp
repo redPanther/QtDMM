@@ -11,6 +11,7 @@
 
 #include <cmath>
 
+#include "core/limittest.h"
 #include "core/siprefix.h"
 #include "recording/spreadsheet.h"
 
@@ -154,15 +155,20 @@ void ReadingsModel::setValueNames(const QStringList &names)
 
 void ReadingsModel::noteValues(int first, int last)
 {
-  if (m_otherValues)
-    return;
-  for (int r = qMax(0, first); r <= last && r < m_store->readingCount(); ++r)
-    if (m_store->readingAt(r).id > 0)
+  for (int r = qMax(0, first); r <= last && r < m_store->readingCount() && !(m_otherValues && m_verdicts); ++r)
+  {
+    const LoggedReading &e = m_store->readingAt(r);
+    if (!m_otherValues && e.id > 0)
     {
       m_otherValues = true;
       Q_EMIT otherValuesChanged(true);
-      return;
     }
+    if (!m_verdicts && (e.flags & SampleFlag::Limit))
+    {
+      m_verdicts = true;
+      Q_EMIT verdictsChanged(true);
+    }
+  }
 }
 
 QString ReadingsModel::modeText(const PortKey &port, quint32 flags)
@@ -202,6 +208,9 @@ QVariant ReadingsModel::data(const QModelIndex &index, int role) const
   }
   if (role == Qt::ToolTipRole && !e.alarmName.isEmpty())
     return e.alarmName;   // the row is marked in the alarm's colour; "Alarm 1", not "Alarm Alarm 1"
+  // the verdict in its colour, as on the display
+  if (role == Qt::ForegroundRole && index.column() == Limit && (e.flags & SampleFlag::Limit))
+    return e.flags & SampleFlag::LimitPass ? QColor(0x1f, 0x8f, 0x3a) : QColor(0xc6, 0x28, 0x28);
   if (role == Qt::TextAlignmentRole)
     return int(index.column() == Value || index.column() == Number ? Qt::AlignRight | Qt::AlignVCenter
                                                                    : Qt::AlignLeft | Qt::AlignVCenter);
@@ -221,6 +230,7 @@ QVariant ReadingsModel::data(const QModelIndex &index, int role) const
     case Mode:  return modeText(e.port, e.flags);
     case Range: return e.range;
     case Hold:  return e.hold() ? tr("HOLD") : QString();
+    case Limit: return LimitTest::verdictText(LimitTest::fromFlags(e.flags));
   }
   return QVariant();
 }
@@ -240,6 +250,7 @@ QVariant ReadingsModel::headerData(int section, Qt::Orientation orientation, int
     case Mode:  return tr("Mode");
     case Range: return tr("Range");
     case Hold:  return tr("Hold");
+    case Limit: return tr("Limit");
   }
   return QVariant();
 }
@@ -342,7 +353,7 @@ QString ReadingsModel::toText(const QList<int> &rows) const
   QStringList lines;
   QStringList header;
   // the number only when the table shows it
-  auto copied = [this](int c) { return c != Number || m_otherValues; };
+  auto copied = [this](int c) { return (c != Number || m_otherValues) && (c != Limit || m_verdicts); };
   for (int c = 0; c < ColumnCount; ++c)
     if (copied(c))
       header << headerData(c, Qt::Horizontal, Qt::DisplayRole).toString();
@@ -383,13 +394,16 @@ bool ReadingsModel::write(const QString &path, QString *error) const
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     return fail(tr("Cannot open file."));
   QTextStream ts(&file);
-  ts << "timestamp;value;unit;mode;range;hold\n";
+  ts << "timestamp;value;unit;mode;range;hold" << (m_verdicts ? ";limit\n" : "\n");
   for (int i = 0; i < m_store->readingCount(); ++i)
   {
     const Entry e = entry(i);
-    ts << QString("%1;%2;%3;%4;%5;%6\n")
+    ts << QString("%1;%2;%3;%4;%5;%6")
             .arg(e.when.toString("yyyy-MM-ddTHH:mm:ss,zzz"), SiPrefix::withoutLeadingZeros(e.val), e.unit,
                  modeColumn(e.id, e.port, e.flags), e.range, e.hold ? "1" : "0");
+    if (m_verdicts)
+      ts << ';' << LimitTest::verdictText(LimitTest::fromFlags(e.flags));
+    ts << '\n';
   }
   return true;
 }
@@ -406,15 +420,21 @@ bool ReadingsModel::writeAny(const QString &path, QString *error) const
     return false;
   }
   SpreadsheetWriter sheet(tr("Readings"));
-  sheet.setHeader({tr("Time"), tr("Value"), tr("Unit"), tr("Mode"), tr("Range"), tr("Hold"), tr("Alarm")});
+  QStringList head{tr("Time"), tr("Value"), tr("Unit"), tr("Mode"), tr("Range"), tr("Hold"), tr("Alarm")};
+  if (m_verdicts)
+    head << tr("Limit");
+  sheet.setHeader(head);
   for (int i = 0; i < m_store->readingCount(); ++i)
   {
     const Entry e = entry(i);
     const QString val = SiPrefix::withoutLeadingZeros(e.val);
     bool numeric = false;
     const double number = val.toDouble(&numeric);
-    sheet.addRow({e.when, numeric ? QVariant(number) : QVariant(val), e.unit,
-                  modeColumn(e.id, e.port, e.flags), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName});
+    QList<QVariant> row{e.when, numeric ? QVariant(number) : QVariant(val), e.unit,
+                        modeColumn(e.id, e.port, e.flags), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName};
+    if (m_verdicts)
+      row << LimitTest::verdictText(LimitTest::fromFlags(e.flags));
+    sheet.addRow(row);
   }
   return sheet.write(path, *format, error);
 }

@@ -201,6 +201,13 @@ ReadingsWidget::ReadingsWidget(QWidget *parent) :
     fitColumns();
   });
   m_view->setColumnHidden(ReadingsModel::Number, !m_log->hasOtherValues());
+  // the limit test's column once a verdict has come
+  connect(m_log, &ReadingsModel::verdictsChanged, this, [this](bool on)
+  {
+    m_view->setColumnHidden(ReadingsModel::Limit, !on);
+    fitColumns();
+  });
+  m_view->setColumnHidden(ReadingsModel::Limit, !m_log->hasVerdicts());
   m_need.fill(0, ReadingsModel::ColumnCount);
   measureRows(0, -1);
   updateStats();
@@ -219,6 +226,7 @@ void ReadingsWidget::applyFilter()
   {
     m_view->setModel(model);
     m_view->setColumnHidden(ReadingsModel::Number, !m_log->hasOtherValues());
+    m_view->setColumnHidden(ReadingsModel::Limit, !m_log->hasVerdicts());
     fitColumns();
   }
   // the filter has a new row only after the model's signal: follow it from

@@ -3024,127 +3024,127 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="448"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="450"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: niezapisane dane</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="463"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="465"/>
         <source>Export data first</source>
         <translation>Najpierw eksportuj</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="439"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="441"/>
         <source>Quit without saving</source>
         <translation>Zakończ bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="372"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="374"/>
         <source>Value %1</source>
         <translation>Wartość %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="439"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="441"/>
         <source>If you quit now it will be lost.</source>
         <translation>Jeśli teraz zakończysz, zostaną utracone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="449"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="451"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. %1&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Niezapisane dane&lt;/b&gt;&lt;/font&gt;&lt;p&gt;W pamięci są jeszcze niezapisane pomiary. %1&lt;p&gt;Czy najpierw je wyeksportować?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="596"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="598"/>
         <source>Switching to %1 clears it.</source>
         <translation>Przełączenie na %1 je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="596"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="598"/>
         <source>Switch without saving</source>
         <translation>Przełącz bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="626"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="628"/>
         <source>Recording stopped: switched to %1</source>
         <translation>Nagrywanie zatrzymane: przełączono na %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="744"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="746"/>
         <source>Loading a file replaces it.</source>
         <translation>Wczytanie pliku je zastąpi.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="744"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="746"/>
         <source>Load without saving</source>
         <translation>Wczytaj bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="762"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="764"/>
         <source>Clear deletes it.</source>
         <translation>Wyczyszczenie je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="762"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="764"/>
         <source>Clear without saving</source>
         <translation>Wyczyść bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="778"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="780"/>
         <source>Live clears it.</source>
         <translation>Tryb na żywo je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="778"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="780"/>
         <source>Live without saving</source>
         <translation>Na żywo bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="788"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="790"/>
         <source>A new recording clears it.</source>
         <translation>Nowa rejestracja je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="788"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="790"/>
         <source>Record without saving</source>
         <translation>Rejestruj bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="796"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="798"/>
         <source>It starts now. A recording at %1 starts by itself from Live.</source>
         <translation>Zaczyna się teraz. Rejestracja o %1 zacznie się sama z trybu Na żywo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="798"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="800"/>
         <source>It starts now. A recording at the threshold starts by itself from Live.</source>
         <translation>Zaczyna się teraz. Rejestracja po przekroczeniu progu zacznie się sama z trybu Na żywo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="914"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="916"/>
         <source>Automatic start at %1</source>
         <translation>Automatyczny start o %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="916"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="918"/>
         <source>Raising threshold %1</source>
         <translation>Próg narastający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="918"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="920"/>
         <source>Falling threshold %1</source>
         <translation>Próg opadający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="953"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="955"/>
         <source>calculated</source>
         <translation>obliczony</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="962"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="964"/>
         <source>no meter configured</source>
         <translation>nie skonfigurowano multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="984"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="986"/>
         <source>QtDMM alarm: %1</source>
         <translation>Alarm QtDMM: %1</translation>
     </message>
@@ -3385,32 +3385,32 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>Dźwięk przy &amp;LO:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="121"/>
+        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="120"/>
         <source>Sound on &amp;PASS:</source>
         <translation>Dźwięk przy &amp;PASS:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="136"/>
+        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="135"/>
         <source>&amp;Nominal%1:</source>
         <translation>Wartość &amp;nominalna%1:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="137"/>
+        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="136"/>
         <source>&amp;Tolerance (± %):</source>
         <translation>&amp;Tolerancja (± %):</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="137"/>
+        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="136"/>
         <source>&amp;Tolerance (±)%1:</source>
         <translation>&amp;Tolerancja (±)%1:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="138"/>
+        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="137"/>
         <source>&amp;Lower limit%1:</source>
         <translation>&amp;Dolna granica%1:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="139"/>
+        <location filename="../../src/ui/dialogs/limitdlg.cpp" line="138"/>
         <source>&amp;Upper limit%1:</source>
         <translation>&amp;Górna granica%1:</translation>
     </message>
@@ -3418,7 +3418,7 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
 <context>
     <name>LimitTest</name>
     <message>
-        <location filename="../../src/core/limittest.cpp" line="67"/>
+        <location filename="../../src/core/limittest.cpp" line="68"/>
         <source>%1 to %2</source>
         <translation>%1 do %2</translation>
     </message>
@@ -4259,43 +4259,43 @@ Czy multimetr jest podłączony i włączony?</translation>
         <translation>%1 zakończył się z kodem wyjścia %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="317"/>
+        <location filename="../../src/service/metercontroller.cpp" line="326"/>
         <source>The meter shows %1</source>
         <translation>Miernik pokazuje %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="382"/>
+        <location filename="../../src/service/metercontroller.cpp" line="388"/>
         <source>already recording, the recording goes on</source>
         <translation>nagrywanie już trwa i jest kontynuowane</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="384"/>
+        <location filename="../../src/service/metercontroller.cpp" line="390"/>
         <source>start ignored, the recording shown is not saved yet</source>
         <translation>start zignorowany, wyświetlane nagranie nie jest jeszcze zapisane</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="427"/>
+        <location filename="../../src/service/metercontroller.cpp" line="433"/>
         <source>SCPI: recording saved as %1</source>
         <translation>SCPI: nagranie zapisano jako %1</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="486"/>
+        <location filename="../../src/service/metercontroller.cpp" line="492"/>
         <source>%1: %2 (%3)</source>
         <translation>%1: %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="492"/>
+        <location filename="../../src/service/metercontroller.cpp" line="498"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="508"/>
-        <location filename="../../src/service/metercontroller.cpp" line="533"/>
+        <location filename="../../src/service/metercontroller.cpp" line="514"/>
+        <location filename="../../src/service/metercontroller.cpp" line="539"/>
         <source>%1: could not run %2</source>
         <translation>%1: nie można uruchomić %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/metercontroller.cpp" line="511"/>
+        <location filename="../../src/service/metercontroller.cpp" line="517"/>
         <source>%1: %2 is still running</source>
         <translation>%1: %2 nadal działa</translation>
     </message>
@@ -4687,202 +4687,202 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
 <context>
     <name>Quantity</name>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="132"/>
+        <location filename="../../src/core/sampletypes.h" line="136"/>
         <source>Unknown</source>
         <translation>Nieznana</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="133"/>
+        <location filename="../../src/core/sampletypes.h" line="137"/>
         <source>Voltage</source>
         <translation>Napięcie</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="134"/>
+        <location filename="../../src/core/sampletypes.h" line="138"/>
         <source>Current</source>
         <translation>Prąd</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="135"/>
+        <location filename="../../src/core/sampletypes.h" line="139"/>
         <source>Resistance</source>
         <translation>Rezystancja</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="136"/>
+        <location filename="../../src/core/sampletypes.h" line="140"/>
         <source>Capacitance</source>
         <translation>Pojemność</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="137"/>
+        <location filename="../../src/core/sampletypes.h" line="141"/>
         <source>Temperature</source>
         <translation>Temperatura</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="138"/>
+        <location filename="../../src/core/sampletypes.h" line="142"/>
         <source>Frequency</source>
         <translation>Częstotliwość</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="139"/>
+        <location filename="../../src/core/sampletypes.h" line="143"/>
         <source>Duty cycle</source>
         <translation>Współczynnik wypełnienia</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="140"/>
+        <location filename="../../src/core/sampletypes.h" line="144"/>
         <source>Continuity</source>
         <translation>Ciągłość</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="141"/>
+        <location filename="../../src/core/sampletypes.h" line="145"/>
         <source>Pulse width</source>
         <translation>Szerokość impulsu</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="142"/>
+        <location filename="../../src/core/sampletypes.h" line="146"/>
         <source>Conductance</source>
         <translation>Konduktancja</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="143"/>
+        <location filename="../../src/core/sampletypes.h" line="147"/>
         <source>Power</source>
         <translation>Moc</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="144"/>
+        <location filename="../../src/core/sampletypes.h" line="148"/>
         <source>Gain</source>
         <translation>Wzmocnienie</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="145"/>
+        <location filename="../../src/core/sampletypes.h" line="149"/>
         <source>Sound pressure level</source>
         <translation>Poziom ciśnienia akustycznego</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="146"/>
+        <location filename="../../src/core/sampletypes.h" line="150"/>
         <source>Carbon monoxide</source>
         <translation>Tlenek węgla</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="147"/>
+        <location filename="../../src/core/sampletypes.h" line="151"/>
         <source>Relative humidity</source>
         <translation>Wilgotność względna</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="148"/>
+        <location filename="../../src/core/sampletypes.h" line="152"/>
         <source>Time</source>
         <translation>Czas</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="149"/>
+        <location filename="../../src/core/sampletypes.h" line="153"/>
         <source>Wind speed</source>
         <translation>Prędkość wiatru</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="150"/>
+        <location filename="../../src/core/sampletypes.h" line="154"/>
         <source>Pressure</source>
         <translation>Ciśnienie</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="151"/>
+        <location filename="../../src/core/sampletypes.h" line="155"/>
         <source>Parallel inductance</source>
         <translation>Indukcyjność równoległa</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="152"/>
+        <location filename="../../src/core/sampletypes.h" line="156"/>
         <source>Parallel capacitance</source>
         <translation>Pojemność równoległa</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="153"/>
+        <location filename="../../src/core/sampletypes.h" line="157"/>
         <source>Parallel resistance</source>
         <translation>Rezystancja równoległa</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="154"/>
+        <location filename="../../src/core/sampletypes.h" line="158"/>
         <source>Series inductance</source>
         <translation>Indukcyjność szeregowa</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="155"/>
+        <location filename="../../src/core/sampletypes.h" line="159"/>
         <source>Series capacitance</source>
         <translation>Pojemność szeregowa</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="156"/>
+        <location filename="../../src/core/sampletypes.h" line="160"/>
         <source>Series resistance</source>
         <translation>Rezystancja szeregowa</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="157"/>
+        <location filename="../../src/core/sampletypes.h" line="161"/>
         <source>Dissipation factor</source>
         <translation>Współczynnik strat</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="158"/>
+        <location filename="../../src/core/sampletypes.h" line="162"/>
         <source>Quality factor</source>
         <translation>Dobroć</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="159"/>
+        <location filename="../../src/core/sampletypes.h" line="163"/>
         <source>Phase angle</source>
         <translation>Kąt fazowy</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="160"/>
+        <location filename="../../src/core/sampletypes.h" line="164"/>
         <source>Difference</source>
         <translation>Różnica</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="161"/>
+        <location filename="../../src/core/sampletypes.h" line="165"/>
         <source>Count</source>
         <translation>Zliczenia</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="162"/>
+        <location filename="../../src/core/sampletypes.h" line="166"/>
         <source>Power factor</source>
         <translation>Współczynnik mocy</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="163"/>
+        <location filename="../../src/core/sampletypes.h" line="167"/>
         <source>Apparent power</source>
         <translation>Moc pozorna</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="164"/>
+        <location filename="../../src/core/sampletypes.h" line="168"/>
         <source>Mass</source>
         <translation>Masa</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="165"/>
+        <location filename="../../src/core/sampletypes.h" line="169"/>
         <source>Harmonic ratio</source>
         <translation>Zawartość harmonicznych</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="166"/>
+        <location filename="../../src/core/sampletypes.h" line="170"/>
         <source>Energy</source>
         <translation>Energia</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="167"/>
+        <location filename="../../src/core/sampletypes.h" line="171"/>
         <source>Electric charge</source>
         <translation>Ładunek elektryczny</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="168"/>
+        <location filename="../../src/core/sampletypes.h" line="172"/>
         <source>State of charge</source>
         <translation>Stan naładowania</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="169"/>
+        <location filename="../../src/core/sampletypes.h" line="173"/>
         <source>Time to go</source>
         <translation>Pozostały czas</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="170"/>
+        <location filename="../../src/core/sampletypes.h" line="174"/>
         <source>Carbon dioxide</source>
         <translation>Dwutlenek węgla</translation>
     </message>
     <message>
-        <location filename="../../src/core/sampletypes.h" line="171"/>
+        <location filename="../../src/core/sampletypes.h" line="175"/>
         <source>Illuminance</source>
         <translation>Natężenie oświetlenia</translation>
     </message>
@@ -4903,105 +4903,111 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
 <context>
     <name>ReadingsModel</name>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="174"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="180"/>
         <source>AC+DC</source>
         <translation>AC+DC</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="171"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="177"/>
         <source>Diode</source>
         <translation>Dioda</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="180"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="186"/>
         <source>Continuity</source>
         <translation>Ciągłość</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="181"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="187"/>
         <source>Resistance</source>
         <translation>Rezystancja</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="182"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="188"/>
         <source>Capacitance</source>
         <translation>Pojemność</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="183"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="189"/>
         <source>Frequency</source>
         <translation>Częstotliwość</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="184"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="190"/>
         <source>Temperature</source>
         <translation>Temperatura</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="223"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="417"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="232"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="434"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="236"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="409"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="246"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="423"/>
         <source>Time</source>
         <translation>Czas</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="237"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="247"/>
         <source>No.</source>
         <translation>Nr</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="238"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="409"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="248"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="423"/>
         <source>Value</source>
         <translation>Wartość</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="239"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="409"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="249"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="423"/>
         <source>Unit</source>
         <translation>Jednostka</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="240"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="409"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="250"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="423"/>
         <source>Mode</source>
         <translation>Tryb</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="241"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="409"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="251"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="423"/>
         <source>Range</source>
         <translation>Zakres</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="242"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="409"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="252"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="423"/>
         <source>Hold</source>
         <translation>Hold</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="381"/>
-        <location filename="../../src/recording/readingsmodel.cpp" line="405"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="253"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="425"/>
+        <source>Limit</source>
+        <translation>Granica</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording/readingsmodel.cpp" line="392"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="419"/>
         <source>Nothing to export.</source>
         <translation>Nie ma nic do wyeksportowania.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="384"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="395"/>
         <source>Cannot open file.</source>
         <translation>Nie można otworzyć pliku.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="408"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="422"/>
         <source>Readings</source>
         <translation>Odczyty</translation>
     </message>
     <message>
-        <location filename="../../src/recording/readingsmodel.cpp" line="409"/>
+        <location filename="../../src/recording/readingsmodel.cpp" line="423"/>
         <source>Alarm</source>
         <translation>Alarm</translation>
     </message>
@@ -5082,22 +5088,22 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <translation>Usuwa wszystkie wiersze; wykres rejestratora pozostaje bez zmian</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="347"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="355"/>
         <source>No readings yet.</source>
         <translation>Brak odczytów.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="365"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="373"/>
         <source>Value %1:</source>
         <translation>Wartość %1:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="365"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="373"/>
         <source>Value %1 (%2):</source>
         <translation>Wartość %1 (%2):</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/views/readingswidget.cpp" line="367"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="375"/>
         <source>%n reading(s)</source>
         <translation>
             <numerusform>%n odczyt</numerusform>
@@ -5106,43 +5112,43 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="369"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="377"/>
         <source>Min %1</source>
         <translation>Min %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="369"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="377"/>
         <source>Max %1</source>
         <translation>Maks %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="370"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="378"/>
         <source>Mean %1</source>
         <translation>Średnia %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="370"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="378"/>
         <source>Span %1</source>
         <translation>Rozstęp %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="381"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="389"/>
         <source>CSV (*.csv)</source>
         <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="381"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="389"/>
         <source>Excel (*.xlsx)</source>
         <translation>Excel (*.xlsx)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="381"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="389"/>
         <source>OpenDocument (*.ods)</source>
         <translation>OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/readingswidget.cpp" line="383"/>
         <location filename="../../src/ui/views/readingswidget.cpp" line="391"/>
+        <location filename="../../src/ui/views/readingswidget.cpp" line="399"/>
         <source>Export readings</source>
         <translation>Eksportuj odczyty</translation>
     </message>
@@ -5331,63 +5337,68 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
 <context>
     <name>RecordingFile</name>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="117"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="281"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="118"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="336"/>
         <source>Cannot open file.</source>
         <translation>Nie można otworzyć pliku.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="125"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="216"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="126"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="231"/>
         <source>Oops! Seems not to be a valid file</source>
         <translation>Ups! To chyba nie jest prawidłowy plik</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="142"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="146"/>
         <source>File contains only header</source>
         <translation>Plik zawiera tylko nagłówek</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="275"/>
-        <location filename="../../src/recording/recordingfile.cpp" line="315"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="330"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="376"/>
         <source>Nothing to export.</source>
         <translation>Nic do wyeksportowania.</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="318"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="379"/>
         <source>Recording</source>
         <translation>Nagranie</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="319"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="381"/>
         <source>timestamp</source>
         <translation>znacznik czasu</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="319"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="381"/>
         <source>time (s)</source>
         <translation>czas (s)</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="319"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="381"/>
         <source>value</source>
         <translation>wartość</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="319"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="381"/>
         <source>unit</source>
         <translation>jednostka</translation>
     </message>
     <message>
-        <location filename="../../src/recording/recordingfile.cpp" line="319"/>
+        <location filename="../../src/recording/recordingfile.cpp" line="381"/>
         <source>status</source>
         <translation>stan</translation>
+    </message>
+    <message>
+        <location filename="../../src/recording/recordingfile.cpp" line="383"/>
+        <source>limit</source>
+        <translation>granica</translation>
     </message>
 </context>
 <context>
     <name>RecordingStore</name>
     <message>
-        <location filename="../../src/recording/recordingstore.cpp" line="885"/>
+        <location filename="../../src/recording/recordingstore.cpp" line="893"/>
         <source>Trigger</source>
         <translation>Wyzwolenie</translation>
     </message>
