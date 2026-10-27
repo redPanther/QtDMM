@@ -30,6 +30,7 @@
 #include <QPixmap>
 
 #include "core/sampletypes.h"
+#include "core/limittest.h"
 #include "core/reading.h"   // complete for moc: a slot takes it (GCC 16 -Wsfinae-incomplete)
 
 /// The digital display: an LCD panel in the same housing as the analog
@@ -121,6 +122,15 @@ public:
   QColor faceColor() const { return m_face; }
   QColor segmentColor() const { return m_segment; }
   LcdVariant lcdVariant() const { return m_variant; }
+  /// The limit test is on: a column right of the big value with PASS or
+  /// FAIL, HI or LO, and the deviation; the panel grows wider by
+  /// kLimitWiden for it. Off, the LCD is as without the test.
+  void setLimitTest(bool on);
+  bool limitTest() const { return m_limitOn; }
+  /// The verdict on the last reading and its deviation in percent (NaN: none).
+  void setVerdict(LimitTest::Verdict verdict, double deviation);
+  LimitTest::Verdict verdict() const { return m_verdict; }
+  static constexpr double kLimitWiden = 1.25;
   /// The value is too old to stand for the present (StaleRule): the
   /// segments fade, the panel stays.
   void setStale(bool stale);
@@ -159,6 +169,7 @@ public:
   {
     QRectF bezel, face;
     QRectF flags, main, minMax, bar, extra;
+    QRectF verdict;               // the limit test's column right of main, empty without
     double digitH = 0;            // main digit height
     double smallH = 0;            // secondary digit height (MIN/MAX, second value)
     double flagsPx = 0;           // annunciator font size
@@ -187,6 +198,7 @@ private:
   void drawMinMax(QPainter &p, const Layout &l) const;
   void drawBar(QPainter &p, const Layout &l, bool staticPart) const;
   void drawExtra(QPainter &p, const Layout &l) const;
+  void drawVerdict(QPainter &p, const Layout &l) const;
 
   /// Seven-segment rendering. Returns the width used.
   double drawNumber(QPainter &p, const QPointF &origin, double h, const QString &text, int minDigits, bool lit) const;
@@ -219,6 +231,9 @@ private:
   bool m_hold = false;
   bool m_auto = false;
   bool m_stale = false;
+  bool m_limitOn = false;
+  LimitTest::Verdict m_verdict = LimitTest::NoVerdict;
+  double m_deviation = 0;   ///< NaN: none
 
   QPixmap m_static;
   bool m_staticDirty = true;

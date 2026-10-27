@@ -363,6 +363,36 @@ int main(int argc, char **argv)
     check(f.faceColor() == QColor("#d82222"), "a variant chosen during the alarm keeps the alarm's colour");
   }
 
+  // --- the limit test: a column right of the big value, the panel wider ---
+  {
+    LcdWidget t;
+    t.setDisplayMode(6000, true, true, 1);
+    t.setValue(0, "5.031");
+    t.setUnit(0, "V");
+    t.resize(900, 200);
+    const LcdWidget::Layout off = t.layout();
+    t.setLimitTest(true);
+    const LcdWidget::Layout on = t.layout();
+    check(off.verdict.isEmpty() && !on.verdict.isEmpty(), "limit test: a column only while on");
+    check(on.bezel.width() > off.bezel.width() * 1.2, "limit test: the panel grows wider");
+    check(on.main.right() <= on.verdict.left() + 0.5 && on.verdict.right() <= on.face.right(),
+          "limit test: the column beside the value, inside the face");
+    check(qAbs(on.digitH - off.digitH) < 0.5, "limit test: the digits keep their size where there is room");
+    check(t.sizeHint().width() > LcdWidget().sizeHint().width(), "limit test: a wider size hint");
+    if (!dump.isEmpty())
+    {
+      const std::pair<LimitTest::Verdict, const char *> shots[] = {
+        { LimitTest::NoVerdict, "none" }, { LimitTest::Pass, "pass" }, { LimitTest::High, "high" }, { LimitTest::Low, "low" } };
+      for (const auto &[v, name] : shots)
+      {
+        t.setVerdict(v, v == LimitTest::Pass ? 0.62 : v == LimitTest::High ? 2.84 : -2.54);
+        render(t, QSize(900, 200)).save(QDir(dump).filePath(QString("display_limit_%1.png").arg(name)));
+      }
+    }
+    t.setLimitTest(false);
+    check(t.layout().verdict.isEmpty() && t.verdict() == LimitTest::NoVerdict, "limit test off: no column, no verdict");
+  }
+
   if (failed == 0)
     qInfo() << "All digital display tests passed.";
   else

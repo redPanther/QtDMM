@@ -20,8 +20,10 @@ side, one window each, and can be combined into calculated values.
   time, mode and range; copy to a spreadsheet or export as CSV.
 - [Poincaré plot](poincare-plot.md) — each reading against the next: how
   much the value scatters, noise against drift, SD1 and SD2.
-- [Alarms](alarms.md) — a banner, beep, popup, program or the recorder when
+- [Alarms](alarms.md) — a banner, sound, popup, program or the recorder when
   the reading leaves its range or stops coming.
+- [PASS/FAIL limit test](limit-test.md) — nominal ± tolerance or lower and
+  upper limit: PASS or FAIL, HI or LO and the deviation on the display.
 - [Supported devices](supported-devices.md) — every meter QtDMM knows, with
   protocol and serial settings.
 - [Calculated values](calculated-values.md) — power from a voltage and a

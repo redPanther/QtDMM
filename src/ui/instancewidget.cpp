@@ -188,6 +188,31 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
     if (alarm.clearSound)
       m_alarmSound->play(AlarmSound::clearedSound());
   });
+  // the limit test: the verdict to the display, green or red under an
+  // alarm's colour, a sound when it turns
+  connect(m_ctl, &MeterController::limitJudged, this, [this](LimitTest::Verdict verdict, double deviation)
+  {
+    if (m_display)
+      m_display->setVerdict(verdict, deviation);
+    const LimitTest &test = m_ctl->limitTest();
+    const QColor color = !test.tint || verdict == LimitTest::NoVerdict ? QColor()
+                         : verdict == LimitTest::Pass ? QColor(0x3c, 0xb0, 0x4a) : QColor(0xd8, 0x22, 0x22);
+    if (color != m_limitColor)
+    {
+      m_limitColor = color;
+      showAlertColor();
+    }
+    if (verdict != m_lastVerdict && verdict != LimitTest::NoVerdict)
+    {
+      const QString sound = verdict == LimitTest::Pass ? test.passSound : test.failSound;
+      // HI to LO is no news: still FAIL
+      const bool wasFail = m_lastVerdict == LimitTest::High || m_lastVerdict == LimitTest::Low;
+      if (!sound.isEmpty() && !(wasFail && verdict != LimitTest::Pass))
+        m_alarmSound->play(sound);
+    }
+    m_lastVerdict = verdict;
+  });
+  m_ctl->setLimitTest(LimitTest::fromJsonText(m_settings->getString("Limits/test")));
   // the display and the meter in the alarm's colour, blinking if wanted;
   // the banner and the beep stay, the colour is never the only sign
   m_alertTimer = new QTimer(this);
@@ -270,6 +295,7 @@ void InstanceWidget::setDisplay(LcdWidget *display)
   connect(m_ctl, &MeterController::minimumChanged, display, &LcdWidget::showMinimum);
   connect(m_ctl, &MeterController::maximumChanged, display, &LcdWidget::showMaximum);
   connect(m_ctl, &MeterController::minMaxReset, display, &LcdWidget::clearMinMax);
+  display->setLimitTest(m_ctl->limitTest().enabled);
 }
 
 void InstanceWidget::setMeter(AnalogMeter *meter)
@@ -969,11 +995,26 @@ void InstanceWidget::showAlertColor()
     m_alertTimer->stop();
     m_alertPhase = true;
   }
-  const QColor shown = m_alertPhase ? m_alertColor : QColor();
+  // an alarm's colour (blinking if wanted) over the limit test's
+  const QColor shown = !m_alertColor.isValid() ? m_limitColor : m_alertPhase ? m_alertColor : QColor();
   if (m_display)
     m_display->setAlertColor(shown);
   if (m_meter)
     m_meter->setAlertColor(shown);
+}
+
+void InstanceWidget::setLimitTest(const LimitTest &test)
+{
+  m_settings->setString("Limits/test", test.toJsonText());
+  m_lastVerdict = LimitTest::NoVerdict;
+  m_ctl->setLimitTest(test);
+  if (m_display)
+    m_display->setLimitTest(test.enabled);
+}
+
+const LimitTest &InstanceWidget::limitTest() const
+{
+  return m_ctl->limitTest();
 }
 
 void InstanceWidget::setMeterStyle(int style)

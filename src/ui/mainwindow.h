@@ -269,6 +269,9 @@ protected:
   void        bindWindowAction(QAction *action, QMdiSubWindow *win);
   /// The window's context menu (from its header line).
   void        windowMenu(QMdiSubWindow *win, const QPoint &globalPos);
+  /// The limit test's dialog; @p enable ticks "Check the limits" in it
+  /// (switched on from the menu without limits yet).
+  void        editLimits(bool enable);
   /// Window layout from/to the settings (Windows/... keys).
   void        restoreWindows();
   void        saveWindows();

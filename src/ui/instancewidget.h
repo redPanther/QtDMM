@@ -31,6 +31,7 @@
 
 #include "ui_uiinstancewidget.h"
 
+#include "core/limittest.h"
 #include "core/reading.h"
 #include "core/valueref.h"
 #include "ui/dialogs/printdlg.h"
@@ -79,6 +80,9 @@ public:
   /// The analog meter's style from its context menu (0 dark, 1 ivory):
   /// shown at once, saved, and the Appearance page follows.
   void        setMeterStyle(int style);
+  /// The limit test (PASS/FAIL), kept in the settings (Limits/test).
+  void        setLimitTest(const LimitTest &test);
+  const LimitTest &limitTest() const;
   /// The analog meter to feed; created and docked by MainWindow.
   void        setMeter(AnalogMeter *);
   /// The Poincaré plot (MainWindow owns and feeds it), for its value.
@@ -245,6 +249,8 @@ protected:
   QColor      m_alertColor;   ///< the raised alarm's colour for display and meter, invalid when none
   bool        m_alertBlink = false;   ///< Alarms/blink
   bool        m_alertPhase = true;    ///< blinking: the colour shown now
+  QColor      m_limitColor;   ///< the limit test's green or red, invalid when none; under an alarm's
+  LimitTest::Verdict m_lastVerdict = LimitTest::NoVerdict;   ///< for the sounds: only a change sounds
   QTimer     *m_alertTimer = nullptr;
   class AlarmSound *m_alarmSound = nullptr;
   /// Display and meter in the alarm's colour (or their own in the dark

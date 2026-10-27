@@ -12,6 +12,7 @@
 
 #include "core/minmaxmemory.h"
 #include "core/alarm.h"
+#include "core/limittest.h"
 #include "core/readingadapter.h"
 #include "core/reading.h"
 #include "core/sampletypes.h"
@@ -99,6 +100,10 @@ public:
   QString     model() const { return m_model; }
   void        setAlarms(const QList<Alarm> &alarms);
   const AlarmManager *alarms() const { return m_alarms; }
+  /// The limit test (PASS/FAIL); a new one starts without a verdict.
+  void        setLimitTest(const LimitTest &test);
+  const LimitTest &limitTest() const { return m_limitTest; }
+  LimitTest::Verdict verdict() const { return m_verdict; }
 
   /// Connects (true) or disconnects the meter. False when the port could
   /// not be opened.
@@ -190,6 +195,10 @@ Q_SIGNALS:
   /// raised last among those raised (acknowledged or not) with
   /// Alarm::tintDisplay; invalid when there is none.
   void        alertColorChanged(const QColor &color);
+  /// The limit test judged a reading of its value (every reading, for the
+  /// deviation in percent, NaN without a nominal), or has no verdict
+  /// (off, disconnected, no number).
+  void        limitJudged(LimitTest::Verdict verdict, double deviation);
   /// An alarm wants the recorder started (true) or stopped.
   void        recordingRequested(bool start);
   /// A mark in the graph and/or the readings table: an alarm ("Alarm
@@ -254,6 +263,8 @@ private:
   QMap<int, QString> m_valueFault;   ///< the fault word each value shows now, empty for none
   bool        m_overload = false;
   QColor      m_alertColor;   ///< the colour last sent with alertColorChanged()
+  LimitTest   m_limitTest;
+  LimitTest::Verdict m_verdict = LimitTest::NoVerdict;
   QElapsedTimer m_clock;   ///< the stale check's time base, monotonic
   StaleRule   m_stale;     ///< when the main value is too old to stand for the present
   bool        m_staleShown = false;   ///< what staleChanged() said last

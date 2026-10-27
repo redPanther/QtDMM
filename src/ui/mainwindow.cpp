@@ -25,6 +25,7 @@
 #include <QtWidgets>
 #include <QTimer>
 #include <QMenu>
+#include <cmath>
 
 #include "ui/mainwindow.h"
 #include "ui/frameclock.h"
@@ -35,6 +36,7 @@
 #include "ui/valuemenu.h"
 #include "ui/tilebutton.h"
 #include "ui/dialogs/adddevicedlg.h"
+#include "ui/dialogs/limitdlg.h"
 #include "device/transport.h"
 #include "device/transports/serial.h"
 #include "core/devicelibrary.h"
@@ -1298,6 +1300,22 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
       a->setChecked(m_display->lcdVariant() == v);
       connect(a, &QAction::triggered, this, [this, v = v] { m_wid->setLcdVariant(v); });
     }
+    menu.addSeparator();
+    // the limit test: on and off here, the limits in the dialog; on without
+    // limits set yet asks for them
+    QAction *test = menu.addAction(tr("PASS/FAIL &test"));
+    test->setCheckable(true);
+    test->setChecked(m_wid->limitTest().enabled);
+    connect(test, &QAction::toggled, this, [this](bool on)
+    {
+      LimitTest t = m_wid->limitTest();
+      t.enabled = on;
+      if (on && t.low() == t.high())
+        editLimits(true);
+      else
+        m_wid->setLimitTest(t);
+    });
+    connect(menu.addAction(tr("L&imits...")), &QAction::triggered, this, [this] { editLimits(false); });
   }
   if (win == m_meterWin)
   {
@@ -1318,6 +1336,19 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
   }
   if (menu.exec(globalPos) == hide)
     win->hide();
+}
+
+void MainWindow::editLimits(bool enable)
+{
+  const MeterController *ctl = m_wid->controller();
+  const Reading &r = ctl->lastReading();
+  const double reading = r.overload || r.noNumber() || r.text.isEmpty() ? std::nan("") : r.value;
+  LimitTest t = m_wid->limitTest();
+  if (enable)
+    t.enabled = true;
+  LimitDlg dlg(t, ctl->baseUnit(), reading, this);
+  if (dlg.exec() == QDialog::Accepted)
+    m_wid->setLimitTest(dlg.limitTest());
 }
 
 void MainWindow::showSidebar(bool show)

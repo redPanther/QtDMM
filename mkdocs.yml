@@ -15,6 +15,7 @@ nav:
       - Readings table: user/readings-table.md
       - Poincaré plot: user/poincare-plot.md
       - Alarms: user/alarms.md
+      - PASS/FAIL limit test: user/limit-test.md
       - Supported devices: user/supported-devices.md
       - Calculated values: user/calculated-values.md
       - Bench meters through sigrok-cli: user/bench-meters.md
