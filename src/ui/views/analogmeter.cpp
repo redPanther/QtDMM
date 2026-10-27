@@ -104,7 +104,7 @@ AnalogMeterStyle AnalogMeterStyle::dark()
   s.needle = QColor(0xff, 0xff, 0xff);
   s.redZone = QColor(0xd8, 0x22, 0x22);
   s.redBand = QColor(0x8c, 0x26, 0x26);
-  s.passBand = QColor(0x2a, 0x84, 0x38);
+  s.passBand = QColor(0x30, 0xc0, 0x48);
   s.boxBg = QColor(0x2c, 0x2c, 0x2c);
   s.boxText = QColor(0xea, 0xea, 0xea);
   s.lampOff = QColor(0x4a, 0x12, 0x12);
@@ -126,7 +126,7 @@ AnalogMeterStyle AnalogMeterStyle::ivory()
   s.needle = QColor(0x10, 0x10, 0x10);
   s.redZone = QColor(0xc8, 0x18, 0x18);
   s.redBand = QColor(0xe8, 0x8c, 0x80);
-  s.passBand = QColor(0x8c, 0xd0, 0x94);
+  s.passBand = QColor(0x18, 0x9a, 0x34);
   s.boxBg = QColor(0xe4, 0xda, 0xbe);
   s.boxText = QColor(0x1e, 0x1e, 0x1e);
   s.lampOff = QColor(0x6a, 0x20, 0x20);
@@ -468,11 +468,15 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
       p.setBrush(m_style.redBand);
       p.drawPath(path);
     };
+    // the limit test's band instead of the red zone, in the unit shown,
+    // cut at the ends
     const double from = m_style.redZoneFrom * m_fullScale;
-    band(from, vMax);
-    if (m_bipolar)
-      band(-vMax, -from);
-    // the limit test's band over it, in the unit shown, cut at the ends
+    if (!limitsShown())
+    {
+      band(from, vMax);
+      if (m_bipolar)
+        band(-vMax, -from);
+    }
     if (limitsShown())
     {
       const double factor = SiPrefix::factor(SiPrefix::split(m_unitText).prefix);
@@ -484,9 +488,16 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
         addArc(path, g.pivot, R, angleOf(lo), angleOf(hi), true);
         addArc(path, g.pivot, R * 0.94, angleOf(hi), angleOf(lo), false);
         path.closeSubpath();
+        // saturated, with a dark inner edge: it stays apart from a dial
+        // tinted green by a PASS
         p.setPen(Qt::NoPen);
         p.setBrush(m_style.passBand);
         p.drawPath(path);
+        QPainterPath edge;
+        addArc(edge, g.pivot, R * 0.94, angleOf(lo), angleOf(hi), true);
+        p.setPen(QPen(m_style.passBand.darker(170), qMax(1.0, R * 0.008), Qt::SolidLine, Qt::FlatCap));
+        p.setBrush(Qt::NoBrush);
+        p.drawPath(edge);
       }
     }
   }
@@ -523,7 +534,7 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
     const double v = k * minor;
     const bool major = (k % minorsPerMajor) == 0;
     const double a = angleOf(v);
-    const bool inRed = std::fabs(v) >= m_style.redZoneFrom * m_fullScale - 1e-9 && v != 0.0;
+    const bool inRed = !limitsShown() && std::fabs(v) >= m_style.redZoneFrom * m_fullScale - 1e-9 && v != 0.0;
     const QColor c = inRed ? m_style.redZone.lighter(115) : m_style.scale;
     p.setPen(QPen(m_style.scale, major ? qMax(1.0, R * 0.012) : qMax(0.8, R * 0.007), Qt::SolidLine, Qt::FlatCap));
     p.drawLine(polar(g.pivot, R, a), polar(g.pivot, R - (major ? majorLen : minorLen), a));

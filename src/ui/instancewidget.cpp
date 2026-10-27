@@ -1004,12 +1004,14 @@ void InstanceWidget::showAlertColor()
     m_alertTimer->stop();
     m_alertPhase = true;
   }
-  // an alarm's colour (blinking if wanted) over the limit test's
-  const QColor shown = !m_alertColor.isValid() ? m_limitColor : m_alertPhase ? m_alertColor : QColor();
+  // an alarm's colour (blinking if wanted) over the limit test's; the
+  // analog meter takes the alarm's alone, its needle stays easy to follow
+  // against the green band
+  const QColor alarm = m_alertPhase ? m_alertColor : QColor();
   if (m_display)
-    m_display->setAlertColor(shown);
+    m_display->setAlertColor(m_alertColor.isValid() ? alarm : m_limitColor);
   if (m_meter)
-    m_meter->setAlertColor(shown);
+    m_meter->setAlertColor(alarm);
 }
 
 void InstanceWidget::setLimitTest(const LimitTest &test)

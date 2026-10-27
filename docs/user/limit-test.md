@@ -17,8 +17,8 @@ Right-click the digital display:
   - **= reading** takes the value shown now as the nominal - measure a
     good part, take its value, set the tolerance.
   - The line **PASS** shows the limits as the test uses them.
-  - **Display in green or red** (on by default): the display and the
-    analog meter take the verdict's colour. A raised
+  - **Display in green or red** (on by default): the display takes the
+    verdict's colour. A raised
     [alarm](alarms.md)'s colour comes first.
   - **Sound on HI**, **Sound on LO** and **Sound on PASS**: an alarm
     sound when the verdict turns FAIL HI, FAIL LO or PASS; with
@@ -41,8 +41,10 @@ number shown) the column is faint, like the unlit annunciators.
 The [graph](recorder.md) draws the limits as two dashed green lines, faintly
 green between them, while the tested value is on its left axis. The
 reference line snaps to them. The [analog meter](analog-meter.md) shows
-the passing range as a green band on its arc while its needle shows the
-tested value; a limit beyond the scale ends the band at the scale's end.
+the passing range as a green band on its arc, in place of the red zone,
+while its needle shows the tested value. A limit beyond the scale ends
+the band at the scale's end. The dial keeps its colour, so the needle
+stays easy to follow.
 
 The status line counts the verdicts, one per reading: `PASS 812 · FAIL
 23 (2.8 %)`, the tooltip splits FAIL into too high and too low. The

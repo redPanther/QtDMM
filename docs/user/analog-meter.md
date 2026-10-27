@@ -32,7 +32,8 @@ The **red zone** starts at 90 % of full scale by default; the same settings
 page lets you move it.
 
 While the [PASS/FAIL test](limit-test.md) is on for the value the needle
-shows, a **green band** on the arc marks the passing range.
+shows, a **green band** on the arc marks the passing range and the red
+zone is left out.
 
 ## Readouts and lamp
 

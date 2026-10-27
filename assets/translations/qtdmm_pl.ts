@@ -726,24 +726,24 @@
 <context>
     <name>AnalogMeter</name>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="611"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="622"/>
         <source>MIN</source>
         <translation>MIN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="612"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="623"/>
         <source>MAX</source>
         <translation>MAX</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="618"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="619"/>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="627"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="629"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="630"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="638"/>
         <source>OL</source>
         <translation>OL</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/analogmeter.cpp" line="705"/>
+        <location filename="../../src/ui/views/analogmeter.cpp" line="716"/>
         <source>HOLD</source>
         <translation>HOLD</translation>
     </message>
@@ -3361,8 +3361,8 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
     </message>
     <message>
         <location filename="../../src/ui/dialogs/limitdlg.cpp" line="100"/>
-        <source>The display and the analog meter take the verdict&apos;s colour; a raised alarm&apos;s colour comes first.</source>
-        <translation>Wyświetlacz i miernik wskazówkowy przyjmują kolor werdyktu; kolor aktywnego alarmu ma pierwszeństwo.</translation>
+        <source>The display takes the verdict&apos;s colour; a raised alarm&apos;s colour comes first.</source>
+        <translation>Wyświetlacz przyjmuje kolor werdyktu; kolor zgłoszonego alarmu ma pierwszeństwo.</translation>
     </message>
     <message>
         <location filename="../../src/ui/dialogs/limitdlg.cpp" line="107"/>
