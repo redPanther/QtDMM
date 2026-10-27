@@ -177,9 +177,12 @@ Q_SIGNALS:
   void        info(const QString &);
 
   /// An alarm went off. @p shown is the value as text ("12.3V" or "OL"),
-  /// @p text its message. The controller already ran its program; beep,
-  /// popup and raising the window are up to the UI.
-  void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
+  /// @p text its message, @p index its place in the list. The controller
+  /// already ran its program; the sound, popup and raising the window are
+  /// up to the UI.
+  void        alarmRaised(int index, const Alarm &alarm, const QString &shown, const QString &text);
+  /// The alarm's condition no longer holds.
+  void        alarmCleared(int index, const Alarm &alarm);
   /// The alarm banner: one line per raised, unacknowledged alarm, in the
   /// colour of the first; empty when nothing is raised.
   void        alarmBannerChanged(const QString &lines, const QColor &color);

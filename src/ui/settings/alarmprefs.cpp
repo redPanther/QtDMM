@@ -15,10 +15,12 @@
 #include <QListWidget>
 #include <QProcess>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QCheckBox>
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include "ui/alarmsound.h"
 #include "ui/engnumbervalidator.h"
 #include "core/settings.h"
 
@@ -34,7 +36,7 @@ AlarmPrefs::AlarmPrefs(QWidget *parent) : SettingsPage(parent)
   m_list->setToolTip(tr("Each alarm watches the main reading. It raises when its condition has held for the "
                         "given time and clears once the reading is back beyond the hysteresis. Untick an "
                         "alarm to keep it without it firing. An alarm can show a banner over the display, "
-                        "beep, open a popup, run a program or start a recording."));
+                        "play a sound, open a popup, run a program or start a recording."));
   layout->addWidget(m_list, 1);
   // the empty list says what to do
   m_empty = new QLabel(tr("No alarms yet. Add one with Add..."), m_list->viewport());
@@ -283,8 +285,6 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QMap<int, QString> &units, const QS
   m_tint->setToolTip(tr("While the alarm is raised, also after Acknowledge, until the reading is back. With "
                         "several alarms the one raised last gives the colour."));
   m_tint->setChecked(alarm.tintDisplay);
-  m_beep = new QCheckBox(tr("Beep"), act);
-  m_beep->setChecked(alarm.beep);
   m_popup = new QCheckBox(tr("Popup window"), act);
   m_popup->setChecked(alarm.popup);
   m_raise = new QCheckBox(tr("Bring the QtDMM window to the front"), act);
@@ -293,8 +293,64 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QMap<int, QString> &units, const QS
   m_markGraph->setChecked(alarm.markGraph);
   m_markTable = new QCheckBox(tr("Mark in the readings table"), act);
   m_markTable->setChecked(alarm.markTable);
-  for (QCheckBox *cb : {m_banner, m_tint, m_beep, m_popup, m_raise, m_markGraph, m_markTable})
+  for (QCheckBox *cb : {m_banner, m_tint, m_popup, m_raise, m_markGraph, m_markTable})
     af->addRow(QString(), cb);
+
+  // the sound: none, the system's beep, a built-in one or a WAV file
+  m_preview = new AlarmSound([](int) { return false; }, this);
+  m_sound = new QComboBox(act);
+  m_sound->setObjectName("ui_alarmSound");
+  m_sound->addItem(tr("none"), QString());
+  m_sound->addItem(tr("System beep"), QStringLiteral("beep"));
+#ifdef QTDMM_WITH_MULTIMEDIA
+  for (const auto &[name, shown] : AlarmSound::builtIn())
+    m_sound->addItem(shown, name);
+#endif
+  if (m_sound->findData(alarm.sound) < 0)
+    m_sound->addItem(QFileInfo(alarm.sound).fileName(), alarm.sound);
+#ifdef QTDMM_WITH_MULTIMEDIA
+  m_sound->addItem(tr("Choose file..."));
+#endif
+  m_sound->setCurrentIndex(m_sound->findData(alarm.sound));
+  m_soundIndex = m_sound->currentIndex();
+  auto *tryIt = new QToolButton(act);
+  tryIt->setObjectName("ui_alarmSoundPlay");
+  tryIt->setIcon(QIcon::fromTheme("media-playback-start"));
+  tryIt->setToolTip(tr("Play the sound"));
+  connect(tryIt, &QToolButton::clicked, this, [this]
+  {
+    const QString sound = m_sound->currentData().toString();
+    if (!sound.isEmpty())
+      m_preview->play(sound);
+  });
+  auto *soundRow = new QHBoxLayout;
+  soundRow->setContentsMargins(0, 0, 0, 0);
+  soundRow->addWidget(m_sound, 1);
+  soundRow->addWidget(tryIt);
+  auto *soundLabel = new QLabel(tr("S&ound:"), act);
+  soundLabel->setBuddy(m_sound);
+  af->addRow(soundLabel, soundRow);
+  m_repeat = new QComboBox(act);
+  m_repeat->addItem(tr("once"), Alarm::Once);
+  m_repeat->addItem(tr("while the alarm is raised"), Alarm::WhileRaised);
+  m_repeat->addItem(tr("times, while the alarm is raised"), Alarm::Times);
+  m_repeat->setCurrentIndex(m_repeat->findData(alarm.repeat));
+  m_repeat->setToolTip(tr("A second from start to start. Acknowledge ends it, and so does the reading coming back."));
+  m_repeatCount = new QSpinBox(act);
+  m_repeatCount->setRange(2, 99);
+  m_repeatCount->setValue(qMax(2, alarm.repeatCount));
+  auto *repeatRow = new QHBoxLayout;
+  repeatRow->setContentsMargins(0, 0, 0, 0);
+  repeatRow->addWidget(m_repeatCount);
+  repeatRow->addWidget(m_repeat, 1);
+  auto *repeatLabel = new QLabel(tr("Repe&at:"), act);
+  repeatLabel->setBuddy(m_repeat);
+  af->addRow(repeatLabel, repeatRow);
+  m_clearSound = new QCheckBox(tr("Play \"O&K\" when the alarm clears"), act);
+  m_clearSound->setChecked(alarm.clearSound);
+  af->addRow(QString(), m_clearSound);
+  connect(m_sound, qOverload<int>(&QComboBox::activated), this, &AlarmDlg::updateSound);
+  connect(m_repeat, qOverload<int>(&QComboBox::currentIndexChanged), this, &AlarmDlg::updateSound);
   m_recorder = new QComboBox(act);
   m_recorder->addItem(tr("leave alone"), Alarm::RecorderNone);
   m_recorder->addItem(tr("start"), Alarm::RecorderStart);
@@ -348,6 +404,33 @@ AlarmDlg::AlarmDlg(const Alarm &alarm, const QMap<int, QString> &units, const QS
 
   connect(m_condition, qOverload<int>(&QComboBox::currentIndexChanged), this, &AlarmDlg::updateFields);
   updateFields();
+  updateSound();
+}
+
+void AlarmDlg::updateSound()
+{
+  // the last entry without data is "Choose file...": a WAV file, before it
+  if (m_sound->currentIndex() == m_sound->count() - 1 && m_sound->currentData().isNull())
+  {
+    const QString current = m_sound->itemData(m_soundIndex).toString();
+    const QString file = QFileDialog::getOpenFileName(this, tr("Alarm sound"),
+                                                      QFileInfo(current).isAbsolute() ? QFileInfo(current).absolutePath() : QString(),
+                                                      tr("WAV files (*.wav);;All files (*)"));
+    if (file.isEmpty())
+      m_sound->setCurrentIndex(m_soundIndex);
+    else
+    {
+      if (m_sound->findData(file) < 0)
+        m_sound->insertItem(m_sound->count() - 1, QFileInfo(file).fileName(), file);
+      m_sound->setCurrentIndex(m_sound->findData(file));
+    }
+  }
+  m_soundIndex = m_sound->currentIndex();
+  m_sound->setToolTip(QFileInfo(m_sound->currentData().toString()).isAbsolute() ? m_sound->currentData().toString() : QString());
+  const bool on = !m_sound->currentData().toString().isEmpty();
+  m_repeat->setEnabled(on);
+  m_repeatCount->setVisible(m_repeat->currentData().toInt() == Alarm::Times);
+  m_repeatCount->setEnabled(on);
 }
 
 void AlarmDlg::updateFields()
@@ -397,7 +480,10 @@ Alarm AlarmDlg::alarm() const
   al.color = m_colorValue;
   al.banner = m_banner->isChecked();
   al.tintDisplay = m_tint->isChecked();
-  al.beep = m_beep->isChecked();
+  al.sound = m_sound->currentData().toString();
+  al.repeat = Alarm::Repeat(m_repeat->currentData().toInt());
+  al.repeatCount = m_repeatCount->value();
+  al.clearSound = m_clearSound->isChecked();
   al.popup = m_popup->isChecked();
   al.raiseWindow = m_raise->isChecked();
   al.markGraph = m_markGraph->isChecked();

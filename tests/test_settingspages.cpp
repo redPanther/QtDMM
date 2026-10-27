@@ -180,8 +180,8 @@ int main(int argc, char **argv)
     Alarm al;
     al.condition = Alarm::Above;
     AlarmDlg one(al, units);
-    // the condition and the recording: no third one
-    check(one.findChildren<QComboBox *>().size() == 2, "alarm: one value, no choice of value");
+    // the condition, the sound, its repeat and the recording: no fifth one
+    check(one.findChildren<QComboBox *>().size() == 4, "alarm: one value, no choice of value");
     AlarmDlg dlg(al, units, { "1: CO2 (ppm)", "2: Temperature (°C)", "3: Humidity (%)" });
     QComboBox *value = nullptr;
     for (QComboBox *c : dlg.findChildren<QComboBox *>())

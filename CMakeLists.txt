@@ -91,6 +91,16 @@ foreach(file_path IN LISTS TEXTURE_FILES)
 endforeach()
 set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
 
+## the alarms' sounds (AlarmSound; CC0 from freesound.org, assets/sounds/README.md)
+file(GLOB SOUND_FILES CONFIGURE_DEPENDS assets/sounds/*.wav)
+list(SORT SOUND_FILES)
+set(RES_CONTENT "${RES_CONTENT}    <qresource prefix=\"/sounds\">\n")
+foreach(file_path IN LISTS SOUND_FILES)
+	get_filename_component(base_name "${file_path}" NAME)
+	set(RES_CONTENT "${RES_CONTENT}        <file alias=\"${base_name}\">${file_path}</file>\n")
+endforeach()
+set(RES_CONTENT "${RES_CONTENT}    </qresource>\n")
+
 ## specification data of some meters from their manuals (dmm-tools, via
 ## tools/update_device_specs.py) for the Data tab of a device's info
 file(GLOB SPEC_FILES CONFIGURE_DEPENDS assets/specs/*.json)

@@ -164,6 +164,9 @@ if (BUILD_TESTING)
 
 	## alarms: conditions, duration, hysteresis, acknowledge, JSON
 	qtdmm_add_test(alarms test_alarm tests/test_alarm.cpp)
+	## alarm sounds: once, N times, while raised, stopping; the built-in WAVs
+	qtdmm_add_test(alarm_sound test_alarmsound tests/test_alarmsound.cpp)
+	target_link_libraries(test_alarmsound PRIVATE qtdmm_resources)
 
 	## XLSX/ODS writer, read back with LibreOffice when installed
 	qtdmm_add_test(spreadsheet test_spreadsheet tests/test_spreadsheet.cpp)

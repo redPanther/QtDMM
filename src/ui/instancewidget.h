@@ -246,6 +246,7 @@ protected:
   bool        m_alertBlink = false;   ///< Alarms/blink
   bool        m_alertPhase = true;    ///< blinking: the colour shown now
   QTimer     *m_alertTimer = nullptr;
+  class AlarmSound *m_alarmSound = nullptr;
   /// Display and meter in the alarm's colour (or their own in the dark
   /// phase of the blinking).
   void        showAlertColor();
@@ -271,8 +272,8 @@ protected:
   /// The meter's values by name: the alarm page's choice of value, the
   /// readings table's statistics line.
   void        updateValueNames();
-  /// The desktop part of an alarm: beep, raise the window, popup.
-  void        alarmRaised(const Alarm &alarm, const QString &shown, const QString &text);
+  /// The desktop part of an alarm: sound, raise the window, popup.
+  void        alarmRaised(int index, const Alarm &alarm, const QString &shown, const QString &text);
   Settings    *m_settings;
   /// Disconnects, takes over @p keys of the entry @p id, clears the graph,
   /// connects; @p name for the messages.

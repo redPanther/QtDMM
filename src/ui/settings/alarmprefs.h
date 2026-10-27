@@ -61,6 +61,11 @@ public:
 
 private:
   void updateFields();
+  /// The sound chosen, its repetitions; "Choose file..." asks for a WAV file.
+  void updateSound();
+
+  class AlarmSound *m_preview;   ///< plays the sound chosen
+  int m_soundIndex = 0;          ///< the sound before "Choose file...", back on Cancel
 
   QMap<int, QString> m_units;
   QString m_unit;   ///< the unit of the value chosen
@@ -68,8 +73,9 @@ private:
   QString m_valueSource;   ///< the meter of the value (ValueRef::source), kept as it was
   class QComboBox *m_value = nullptr;   ///< which value; none with one
   class QLineEdit *m_name, *m_a, *m_b, *m_seconds, *m_hysteresis, *m_message, *m_command;
-  class QComboBox *m_condition, *m_recorder;
-  class QCheckBox *m_enabled, *m_banner, *m_tint, *m_beep, *m_popup, *m_raise, *m_markGraph, *m_markTable, *m_disconnect;
+  class QComboBox *m_condition, *m_recorder, *m_sound, *m_repeat;
+  class QSpinBox *m_repeatCount;
+  class QCheckBox *m_enabled, *m_banner, *m_tint, *m_clearSound, *m_popup, *m_raise, *m_markGraph, *m_markTable, *m_disconnect;
   class QPushButton *m_color;
   class QLabel *m_aLabel, *m_bLabel, *m_secondsLabel, *m_hystLabel;
   QColor m_colorValue;

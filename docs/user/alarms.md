@@ -45,9 +45,17 @@ What happens when an alarm raises; tick any of them:
   reads better; the analog meter's dial takes a third of it, so scale and
   pointer stay readable. The colour stays after Acknowledge until the
   reading is back. With several alarms raised, the one raised last gives
-  the colour. The colour is never the only sign: banner, beep and the
+  the colour. The colour is never the only sign: banner, sound and the
   status line tell the same.
-- **Beep**.
+- **Sound** - none, the system's beep, one of the built-in sounds
+  (Warning, High, Low, Critical, OK) or a WAV file of your own (**Choose
+  file...**); the button next to it plays it. **Repeat** says how often:
+  **once**, **while the alarm is raised**, or a number of **times, while
+  the alarm is raised** - a second from start to start. Acknowledge ends
+  the repeating, and so does the reading coming back. **Play "OK" when the
+  alarm clears** sounds once more when it is over. Where QtDMM was built
+  without Qt Multimedia, every sound is the system's beep, repeated the
+  same way.
 - **Popup window** with message, value and time.
 - **Bring the QtDMM window to the front**.
 - **Mark in the recorder graph** - a dashed vertical line in the alarm's
@@ -86,7 +94,7 @@ voltage of a stepper motor driver with its trimmer, say to 2.00 V:
 
 - Condition **inside**, from 1.95 V to 2.05 V; duration 0, no hysteresis.
 - Colour **green**, **Display and analog meter in the alarm's colour** on.
-- **Banner**, **Beep** and the two **Mark** boxes off: the beep would sound
+- **Banner** and the two **Mark** boxes off, **Sound** none: it would sound
   every time the reading enters the range, and every entry would be a mark.
 
 Now turn the trimmer and watch the screen from the corner of your eye:

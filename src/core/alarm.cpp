@@ -59,7 +59,10 @@ QJsonObject Alarm::toJson() const
   o["color"] = color.name();
   o["banner"] = banner;
   o["tint-display"] = tintDisplay;
-  o["beep"] = beep;
+  o["sound"] = sound;
+  o["repeat"] = repeat == WhileRaised ? "while-raised" : repeat == Times ? "times" : "once";
+  o["repeat-count"] = repeatCount;
+  o["clear-sound"] = clearSound;
   o["popup"] = popup;
   o["raise-window"] = raiseWindow;
   o["command"] = command;
@@ -85,7 +88,12 @@ Alarm Alarm::fromJson(const QJsonObject &o)
   al.color = QColor(o["color"].toString(al.color.name()));
   al.banner = o["banner"].toBool(true);
   al.tintDisplay = o["tint-display"].toBool(true);
-  al.beep = o["beep"].toBool(true);
+  // before the sounds there was only "beep", on or off
+  al.sound = o.contains("sound") ? o["sound"].toString() : o["beep"].toBool(true) ? QStringLiteral("beep") : QString();
+  const QString rep = o["repeat"].toString();
+  al.repeat = rep == "while-raised" ? WhileRaised : rep == "times" ? Times : Once;
+  al.repeatCount = qMax(1, o["repeat-count"].toInt(3));
+  al.clearSound = o["clear-sound"].toBool(false);
   al.popup = o["popup"].toBool(false);
   al.raiseWindow = o["raise-window"].toBool(false);
   al.command = o["command"].toString();

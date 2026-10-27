@@ -158,7 +158,7 @@ int main(int argc, char **argv)
   // --- 7. JSON round trip and description ---
   {
     Alarm a = out; a.seconds = 2.5; a.hysteresis = 0.1; a.message = "Voltage odd"; a.color = QColor("#123456");
-    a.beep = false; a.popup = true; a.command = "notify-send %n %v%u"; a.disconnect = true; a.recorder = Alarm::RecorderStart; a.markTable = false;
+    a.sound = "alarm_crit"; a.repeat = Alarm::Times; a.repeatCount = 5; a.clearSound = true; a.popup = true; a.command = "notify-send %n %v%u"; a.disconnect = true; a.recorder = Alarm::RecorderStart; a.markTable = false;
     const QString json = Alarm::listToJson({a, low});
     const QList<Alarm> back = Alarm::listFromJson(json);
     check(back.size() == 2, "two alarms back");
@@ -166,14 +166,17 @@ int main(int argc, char **argv)
     {
       const Alarm &r = back[0];
       check(r.name == "out" && r.condition == Alarm::Outside && r.a == 11 && r.b == 13 && r.seconds == 2.5 && r.hysteresis == 0.1, "condition round trip");
-      check(r.message == "Voltage odd" && r.color == QColor("#123456") && !r.beep && r.popup && r.command == "notify-send %n %v%u" && r.disconnect
+      check(r.message == "Voltage odd" && r.color == QColor("#123456") && r.popup && r.command == "notify-send %n %v%u" && r.disconnect
             && r.recorder == Alarm::RecorderStart && !r.markTable && r.markGraph, "actions round trip");
-      check(back[1].condition == Alarm::Below && back[1].beep && back[1].banner, "defaults survive");
+      check(r.sound == "alarm_crit" && r.repeat == Alarm::Times && r.repeatCount == 5 && r.clearSound, "sound round trip");
+      check(back[1].condition == Alarm::Below && back[1].sound == "beep" && back[1].repeat == Alarm::Once && !back[1].clearSound && back[1].banner, "defaults survive");
     }
     Alarm plain = low; plain.tintDisplay = false;
     check(!Alarm::listFromJson(Alarm::listToJson({plain})).value(0).tintDisplay, "tint off round trip");
     check(Alarm::listFromJson(R"([{"name":"old","condition":"below","a":5}])").value(0).tintDisplay,
           "an alarm stored before the option colours the display");
+    check(Alarm::listFromJson(R"([{"name":"old","beep":false}])").value(0).sound.isEmpty()
+          && Alarm::listFromJson(R"([{"name":"old","beep":true}])").value(0).sound == "beep", "beep before the sounds");
     check(Alarm::listFromJson("not json").isEmpty(), "junk gives no alarms");
     check(low.describe("V") == "below 5V", "describe: " + low.describe("V"));
     check(a.describe("V") == "outside 11V to 13V for 2.5 s", "describe range+duration: " + a.describe("V"));
