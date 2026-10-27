@@ -139,6 +139,17 @@ if (QTDMM_WITH_BLE)
 	endif()
 endif()
 
+## Sound and video (alarm sounds, camera) need Qt6::Multimedia; without it
+## they are left out and everything else builds as before.
+option(QTDMM_WITH_MULTIMEDIA "Sound and video (needs Qt6 Multimedia)" ON)
+if (QTDMM_WITH_MULTIMEDIA)
+	find_package(Qt6 COMPONENTS Multimedia)
+	if (NOT Qt6Multimedia_FOUND)
+		message(STATUS "Qt6 Multimedia not found - building without sound and video")
+		set(QTDMM_WITH_MULTIMEDIA OFF)
+	endif()
+endif()
+
 if (NOT QTDMM_WITH_BLE)
 	list(FILTER SRC_FILES EXCLUDE REGEX "transports/ble(gatt)?\\.(h|cpp)$")
 endif()
@@ -280,10 +291,14 @@ target_link_libraries(qtdmm_core PUBLIC
 	Qt6::Svg
 	${HIDAPI_TARGET}
 	$<$<BOOL:${QTDMM_WITH_BLE}>:Qt6::Bluetooth>
+	$<$<BOOL:${QTDMM_WITH_MULTIMEDIA}>:Qt6::Multimedia>
 )
 
 if (QTDMM_WITH_BLE)
 	target_compile_definitions(qtdmm_core PUBLIC QTDMM_WITH_BLE)
+endif()
+if (QTDMM_WITH_MULTIMEDIA)
+	target_compile_definitions(qtdmm_core PUBLIC QTDMM_WITH_MULTIMEDIA)
 endif()
 
 add_executable(${PROJECT_NAME}

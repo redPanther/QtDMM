@@ -170,7 +170,9 @@ from `own/breeze/`. To use a new symbol, add its name to `NAMES` (or files to
 The Bluetooth LE port (`src/device/transports/ble.cpp`) needs Qt6 Bluetooth and
 is optional: CMake option `QTDMM_WITH_BLE` (on when the module is found;
 the Windows workflow installs `qtconnectivity`, Ubuntu `qt6-connectivity-dev`,
-FreeBSD `qt6-connectivity`). Platform-specific code is limited to the permission
+FreeBSD `qt6-connectivity`). Sound and video need Qt6 Multimedia, optional the
+same way: `QTDMM_WITH_MULTIMEDIA` (`qtmultimedia`, Ubuntu `qt6-multimedia-dev`,
+FreeBSD `qt6-multimedia`). Platform-specific code is limited to the permission
 hint in `src/device/meterconnection.cpp`, the process liveness check in
 `src/service/sharedstatemanager.cpp`, the serial port naming in
 `src/device/transports/serial.cpp` and the console attach in `src/main.cpp`.
