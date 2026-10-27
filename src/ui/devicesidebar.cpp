@@ -230,6 +230,7 @@ void DeviceSidebar::setInstances(const QList<Instance> &instances, const QString
 {
   if (state() == QAbstractItemView::EditingState)
     return;
+  m_instanceList = instances;
   m_filling = true;
   m_ownInstance = own;
   QStringList ids, shown;
@@ -320,6 +321,7 @@ QTreeWidgetItem *DeviceSidebar::valueItem(int id) const
 
 void DeviceSidebar::setServices(const QList<Service> &services)
 {
+  m_serviceList = services;
   m_filling = true;
   while (m_services->childCount() > services.size())
     delete m_services->takeChild(m_services->childCount() - 1);
@@ -461,6 +463,18 @@ void DeviceSidebar::dropEvent(QDropEvent *event)
   const int index = int(deviceIds().indexOf(id));
   if (!id.isEmpty() && index >= 0)
     m_library->move(id, index);
+}
+
+void DeviceSidebar::changeEvent(QEvent *event)
+{
+  QTreeWidget::changeEvent(event);
+  // the greys are set on the entries: those of the new design
+  if (event->type() != QEvent::PaletteChange || m_filling || !m_addItem)
+    return;
+  m_addItem->setForeground(0, palette().color(QPalette::Disabled, QPalette::WindowText));
+  updateMarks();
+  setInstances(m_instanceList, m_ownInstance);
+  setServices(m_serviceList);
 }
 
 void DeviceSidebar::keyPressEvent(QKeyEvent *event)
