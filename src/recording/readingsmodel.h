@@ -43,7 +43,7 @@ public:
 
   /// Number: which value of the meter (1 the main one), only shown for a
   /// meter with more than one
-  enum Column { Time, Number, Value, Unit, Mode, Range, Hold, ColumnCount };
+  enum Column { Time, Number, Value, Unit, Mode, Range, Hold, Limit, ColumnCount };
   /// Qt::UserRole on any cell gives the row's dval as double.
   static constexpr int DvalRole = Qt::UserRole;
 
@@ -101,6 +101,8 @@ public:
   void setValueHidden(int id, bool hidden);
   /// Whether a value other than the main one has come: the Number column.
   bool hasOtherValues() const { return m_otherValues; }
+  /// Whether a reading with a limit test's verdict has come: the Limit column.
+  bool hasVerdicts() const { return m_verdicts; }
   /// The names of the values, by id, for the statistics line.
   QStringList valueNames() const { return m_names; }
   void setValueNames(const QStringList &names);
@@ -108,13 +110,15 @@ public:
 Q_SIGNALS:
   void hiddenValuesChanged();
   void otherValuesChanged(bool);
+  void verdictsChanged(bool);
   void valueNamesChanged();
 
 public:
   /// Text of the rows @p rows (all shown ones when empty) - tab separated
   /// with a header, as a spreadsheet pastes it.
   QString toText(const QList<int> &rows = {}) const;
-  /// CSV export: `timestamp;value;unit;mode;range;hold`, ISO timestamps
+  /// CSV export: `timestamp;value;unit;mode;range;hold`, and `;limit` when a
+  /// reading has the limit test's verdict (PASS, FAIL HI, FAIL LO), ISO timestamps
   /// with milliseconds, the value as displayed (with the SI prefix on the
   /// unit). Returns false with @p error on failure or when empty.
   bool write(const QString &path, QString *error = nullptr) const;
@@ -141,6 +145,7 @@ private:
   bool m_singleDay = true;
   QSet<int> m_hidden;
   bool m_otherValues = false;
+  bool m_verdicts = false;
   QStringList m_names;
   std::pair<int, int> m_inserting;   ///< rows being inserted, for noteValues()
   /// Rows @p first..@p last came: whether one of them is another value.

@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "core/limittest.h"
+#include "core/sampletypes.h"
 #include "testutil.h"
 
 int main(int argc, char **argv)
@@ -54,6 +55,12 @@ int main(int argc, char **argv)
   check(rng.describe("Ohm") == QString("10Ohm to 12Ohm"), "describe range: " + rng.describe("Ohm"));
   check(LimitTest::verdictText(LimitTest::High) == "FAIL HI" && LimitTest::verdictText(LimitTest::NoVerdict).isEmpty(),
         "verdict texts");
+
+  for (LimitTest::Verdict v : { LimitTest::NoVerdict, LimitTest::Pass, LimitTest::High, LimitTest::Low })
+    check(LimitTest::fromFlags(LimitTest::flags(v)) == v && LimitTest::fromText(LimitTest::verdictText(v)) == v,
+          "verdict as flags and as text, and back: " + LimitTest::verdictText(v));
+  check(LimitTest::fromFlags(SampleFlag::LimitPass | SampleFlag::LimitLow) == LimitTest::Low, "a FAIL in a step wins over a PASS");
+  check(LimitTest::fromText("maybe") == LimitTest::NoVerdict, "an unknown word is no verdict");
 
   // --- 5. JSON ---
   LimitTest t = amt;

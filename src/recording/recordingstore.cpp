@@ -186,7 +186,7 @@ QVector<GridPoint> RecordingStore::gridOf(const RecordingSeries &series, int ten
     for (int i = 0; i < n; ++i)
     {
       const RawPoint &p = series.at(i);
-      out.append({ p.t, p.value, p.integral, p.quality });
+      out.append({ p.t, p.value, p.integral, p.quality, p.flags & SampleFlag::Limit });
     }
     return out;
   }
@@ -236,6 +236,7 @@ QVector<GridPoint> RecordingStore::gridOf(const RecordingSeries &series, int ten
       const int j = before(0);
       g.value = j < 0 ? qQNaN() : series.at(j).value;
       g.quality = j < 0 ? Quality::Stale : series.at(j).quality;
+      g.limit = j < 0 ? 0 : series.at(j).flags & SampleFlag::Limit;
     }
     else
     {
@@ -257,6 +258,7 @@ QVector<GridPoint> RecordingStore::gridOf(const RecordingSeries &series, int ten
         const qint64 from = qMax(p.t, a), to = qMin(until, b);
         if (to <= from)
           continue;
+        g.limit |= p.flags & SampleFlag::Limit;   // a FAIL in the step is not hidden by a PASS
         if (p.gap())
         {
           q = worse(q, p.quality == Quality::Valid ? Quality::Stale : p.quality);
@@ -349,12 +351,14 @@ Recording RecordingStore::toRecording(bool raw, const QList<int> &extras) const
       const RawPoint &p = m_series.at(qMax(0, m_series.holding(t)));
       rec.values << p.value;
       rec.states << cellState(p.value, p.quality);
+      rec.limits << (p.flags & SampleFlag::Limit);
       rec.times << t - t0;
       for (int c = 0; c < others.size(); ++c)
       {
         const int j = others[c]->holding(t);
         rec.extra[c].values << (j < 0 ? qQNaN() : others[c]->at(j).value);
         rec.extra[c].states << (j < 0 ? CellState::None : cellState(others[c]->at(j).value, others[c]->at(j).quality));
+        rec.extra[c].limits << (j < 0 ? 0u : others[c]->at(j).flags & SampleFlag::Limit);
       }
     }
     return rec;
@@ -367,6 +371,7 @@ Recording RecordingStore::toRecording(bool raw, const QList<int> &extras) const
   {
     rec.values << g.value;
     rec.states << cellState(g.value, g.quality);
+    rec.limits << g.limit;
   }
   // the other values on the same steps; a step before one began (all of it
   // before its first reading) has none, nor has a row a loaded file had
@@ -390,6 +395,7 @@ Recording RecordingStore::toRecording(bool raw, const QList<int> &extras) const
       const bool there = begun && j < own.size() && own[j].t == g.t;
       col.values << (there ? own[j].value : qQNaN());
       col.states << (there ? cellState(own[j].value, own[j].quality) : CellState::None);
+      col.limits << (there ? own[j].limit : 0u);
     }
   }
   return rec;
@@ -436,6 +442,7 @@ void RecordingStore::load(const Recording &rec)
     p.t = onGrid ? qint64(i) * m_sampleTime * 100 : rec.timeAt(i);
     p.value = rec.values[i];
     p.quality = quality(rec.stateAt(i));
+    p.flags = rec.limits.value(i);
     appendPoint(p);
   }
   // the other values, a series each (value 2 is id 1 ...), a point in every
@@ -454,6 +461,7 @@ void RecordingStore::load(const Recording &rec)
         p.t = onGrid ? qint64(i) * m_sampleTime * 100 : rec.timeAt(i);
         p.value = col.values.value(i, qQNaN());
         p.quality = quality(col.states[i]);
+        p.flags = col.limits.value(i);
         appendExtraPoint(int(m_extra.size()) - 1, p);
       }
     if (m_extra.last().isEmpty())

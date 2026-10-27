@@ -205,6 +205,26 @@ int main(int argc, char **argv)
   check(!empty.write(path, &error) && !error.isEmpty(), "empty log refuses to export");
   check(!log.write(tmp.filePath("no/such/dir/x.csv"), &error), "unwritable path fails");
 
+  // --- 5b. the limit test: a column once a verdict has come, also in the CSV ---
+  {
+    ReadingsModel judged;
+    judged.append(entry(1.0, "1.000", "V", 0));
+    check(!judged.hasVerdicts(), "limit: no verdict, no column");
+    bool shown = false;
+    QObject::connect(&judged, &ReadingsModel::verdictsChanged, [&](bool on) { shown = on; });
+    ReadingsModel::Entry fail = entry(5.2, "5.200", "V", 1);
+    fail.flags |= SampleFlag::LimitHigh;
+    judged.append(fail);
+    check(judged.hasVerdicts() && shown && judged.data(judged.index(1, ReadingsModel::Limit)).toString() == "FAIL HI"
+          && judged.data(judged.index(0, ReadingsModel::Limit)).toString().isEmpty(), "limit: the verdict in its column");
+    check(judged.data(judged.index(1, ReadingsModel::Limit), Qt::ForegroundRole).value<QColor>() == QColor(0xc6, 0x28, 0x28),
+          "limit: FAIL in red");
+    const QString p = tmp.filePath("judged.csv");
+    QFile jf(p);
+    check(judged.write(p, &error) && jf.open(QIODevice::ReadOnly | QIODevice::Text)
+          && QString::fromUtf8(jf.readAll()).split('\n').value(2).endsWith(";AUTO;0;FAIL HI"), "limit: the CSV has the column");
+  }
+
   // --- 6. spreadsheet export ---
   {
     log.markLast(QColor("#d82222"), "Low voltage");

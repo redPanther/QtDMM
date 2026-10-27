@@ -23,6 +23,7 @@ It opens as a window in a column right of the graph; see
 | Mode | `DC`, `AC`, `AC+DC`, `Resistance`, `Diode`, `Continuity`, `Capacitance`, `Frequency`, `Temperature` |
 | Range | `AUTO` or `MANU`, when the meter reports it |
 | Hold | `HOLD` while the meter's hold function is on |
+| Limit | `PASS`, `FAIL HI` or `FAIL LO`, in green or red - the [limit test](limit-test.md)'s verdict; the column comes with the first one |
 
 The columns are as wide as their content and never narrower, so they do
 not jump while readings come in; a table narrower than that scrolls
@@ -65,7 +66,8 @@ is of: *Value 1 (Battery voltage): 4 readings  Min ...*.
   on the clipboard as tab-separated text with a header line, ready to
   paste into a spreadsheet. Ctrl+A selects everything.
 - **Export...** writes the whole table as CSV, the values left out of it
-  too: `timestamp;value;unit;mode;range;hold`
+  too: `timestamp;value;unit;mode;range;hold`, and `;limit` with the
+  limit test's verdicts
   with ISO 8601 timestamps (`2026-09-21T14:03:05,250`), the value and unit
   exactly as displayed - or, with a `.xlsx` / `.ods` file name or the file
   type picked in the dialog, as an Excel / OpenDocument sheet with date and

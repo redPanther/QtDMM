@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <cmath>
 
+#include "core/sampletypes.h"
 #include "ui/engnumbervalidator.h"
 
 namespace
@@ -84,6 +85,36 @@ QString LimitTest::verdictText(Verdict v)
     case NoVerdict: break;
   }
   return QString();
+}
+
+quint32 LimitTest::flags(Verdict v)
+{
+  switch (v)
+  {
+    case Pass: return SampleFlag::LimitPass;
+    case High: return SampleFlag::LimitHigh;
+    case Low:  return SampleFlag::LimitLow;
+    case NoVerdict: break;
+  }
+  return 0;
+}
+
+LimitTest::Verdict LimitTest::fromFlags(quint32 flags)
+{
+  if (flags & SampleFlag::LimitHigh)
+    return High;
+  if (flags & SampleFlag::LimitLow)
+    return Low;
+  return flags & SampleFlag::LimitPass ? Pass : NoVerdict;
+}
+
+LimitTest::Verdict LimitTest::fromText(const QString &text)
+{
+  const QString t = text.trimmed();
+  for (Verdict v : { Pass, High, Low })
+    if (t == verdictText(v))
+      return v;
+  return NoVerdict;
 }
 
 QJsonObject LimitTest::toJson() const

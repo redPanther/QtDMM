@@ -222,7 +222,7 @@ private:
   void        emitValueMinMax(int id);
   void        responseSLOT(const DmmDecoder::DmmResponse &response);
   /// One value as the views get it: min/max, alarms, the other instances, SCPI.
-  void        publish(const Reading &reading);
+  void        publish(const Reading &in);
   void        onAlarmRaised(int index, const Alarm &alarm, double value);
   void        updateBanner();
   /// The name INSTrument:CATalog? shows: the device's, else the instance id.
