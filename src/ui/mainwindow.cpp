@@ -2015,9 +2015,10 @@ void MainWindow::setDesign(int design)
   empty.setBrush(QPalette::Window, Designs::areaBrush(d));
   m_emptyStart->setPalette(empty);
   // the instruments are drawn on a transparent background: the window's
-  // (metal in Silver and Brushed metal) shows around them
+  // (metal in Silver and Brushed metal) shows around them. The display's
+  // box, not the LCD: the meter's keys below it stand on the same sheet
   const QBrush frame = Designs::frameBrush(d);
-  for (QWidget *view : { static_cast<QWidget *>(m_display), static_cast<QWidget *>(m_meter),
+  for (QWidget *view : { m_display->parentWidget(), static_cast<QWidget *>(m_meter),
                          static_cast<QWidget *>(m_readings) })
   {
     const bool own = frame.style() != Qt::NoBrush;
