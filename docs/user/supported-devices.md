@@ -179,7 +179,7 @@ meter working, please report it on the
 | OWON | B33T+ ¹ | Handheld multimeter | - | `OwonBLE` | Bluetooth LE | - | 4000 |
 | OWON | B35T+ ¹ | Handheld multimeter | - | `OwonBLE` | Bluetooth LE | - | 6000 |
 | OWON | B41T+ ¹ | Handheld multimeter | - | `OwonBLE` | Bluetooth LE | - | 22000 |
-| OWON | CM2100B ¹ | Clamp meter | - | `OwonBLE` | Bluetooth LE | - | 20000 |
+| OWON | CM2100B | Clamp meter | - | `OwonBLE` | Bluetooth LE | - | 20000 |
 | OWON | OW16B ¹ | Handheld multimeter | - | `OwonBLE` | Bluetooth LE | - | 6000 |
 | OWON | OW18B ¹ | Handheld multimeter | - | `OwonBLE` | Bluetooth LE | - | 6000 |
 | OWON | OW18E ¹ | Handheld multimeter | - | `OwonBLE` | Bluetooth LE | - | 20000 |

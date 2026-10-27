@@ -16,7 +16,7 @@
 
 ### Devices
 
-- **OWON meters over Bluetooth LE (not tried with a real meter yet)** — B33T+, B35T+, B41T+, OW16B, OW18B, OW18E and the CM2100B clamp, with OL, NCV, HOLD, REL, MIN/MAX and low battery, and the keys of OWON's app under the display. Add device asks the meter which model it is.
+- **OWON meters over Bluetooth LE** — tried on the CM2100B clamp (all keys and ranges); the B33T+, B35T+, B41T+, OW16B, OW18B and OW18E are built much the same but not tried yet. All of them with OL, NCV, HOLD, REL, MIN/MAX and low battery, and the keys of OWON's app under the display. Add device asks the meter which model it is.
 
 ### GUI
 

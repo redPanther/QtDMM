@@ -7,15 +7,16 @@
 #include <cmath>
 
 static const bool registered = []() {
-  // Bluetooth LE, no baud rate. Not tried with QtDMM; dmm-tools has no meter
-  // either. Counts from OWON's manuals (dmm-tools spec §9.1)
+  // Bluetooth LE, no baud rate. Tried on the CM2100B (all keys and ranges);
+  // the others, built much the same, not yet. Counts from OWON's manuals
+  // (dmm-tools spec §9.1)
   DmmDecoder::addConfig({"OWON", "B33T+ *", "", 0, FrameFormat::OwonBLE, 8, 1, 1, 0, 4000, 0, 0, 0});
   DmmDecoder::addConfig({"OWON", "B35T+ *", "", 0, FrameFormat::OwonBLE, 8, 1, 1, 0, 6000, 0, 0, 0});
   DmmDecoder::addConfig({"OWON", "B41T+ *", "", 0, FrameFormat::OwonBLE, 8, 1, 1, 0, 22000, 0, 0, 0});
   DmmDecoder::addConfig({"OWON", "OW16B *", "", 0, FrameFormat::OwonBLE, 8, 1, 1, 0, 6000, 0, 0, 0});
   DmmDecoder::addConfig({"OWON", "OW18B *", "", 0, FrameFormat::OwonBLE, 8, 1, 1, 0, 6000, 0, 0, 0});
   DmmDecoder::addConfig({"OWON", "OW18E *", "", 0, FrameFormat::OwonBLE, 8, 1, 1, 0, 20000, 0, 0, 0});
-  DmmDecoder::addConfig({"OWON", "CM2100B *", "", 0, FrameFormat::OwonBLE, 8, 1, 1, 0, 20000, 0, 0, 0});
+  DmmDecoder::addConfig({"OWON", "CM2100B", "", 0, FrameFormat::OwonBLE, 8, 1, 1, 0, 20000, 0, 0, 0});
   return true;
 }();
 
