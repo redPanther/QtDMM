@@ -206,8 +206,11 @@ void Designs::apply(Design d)
   else
   {
     // native styles (Windows, macOS) take no palette; Fusion does
-    QStyle *fusion = QStyleFactory::create("Fusion");
-    QApplication::setStyle(d == Dark ? new DarkIndicatorStyle(fusion) : fusion);
+    // QApplication owns the style, the proxy its base style
+    if (d == Dark)
+      QApplication::setStyle(new DarkIndicatorStyle(QStringLiteral("Fusion")));
+    else
+      QApplication::setStyle(QStringLiteral("Fusion"));
     QApplication::setPalette(d == Dark ? darkPalette() : silverPalette());
     qApp->setStyleSheet(d == Silver ? kSilverSheet : kDarkSheet);
   }
