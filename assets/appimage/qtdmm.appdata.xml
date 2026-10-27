@@ -40,6 +40,12 @@
   <update_contact>hello@qtdmm.de</update_contact>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="26.3" date="2026-10-28">
+      <description>
+        <p>QtDMM 26.3: keys of your own, a hideable toolbar, alarm colours on the displays, time cursors, a reference line and an overview in the graph, meters with up to four values with a sidebar row for each, and a much larger SCPI server with channels and VXI-11. New Bluetooth meters from UNI-T, APPA, ZOTEK and HoldPeak, and a Flatpak with its own signed repository. Since the release candidate: fixes for the designs, Victron devices and the window dividers.</p>
+      </description>
+      <url>https://github.com/qtdmm/QtDMM/releases/tag/26.3</url>
+    </release>
     <release version="26.3~rc1" date="2026-10-25" type="development">
       <description>
         <p>First release candidate for QtDMM 26.3: keys of your own, a hideable toolbar, alarm colours on the displays, time cursors, a reference line and an overview in the graph, meters with up to four values with a sidebar row for each, and a much larger SCPI server with channels and VXI-11. New Bluetooth meters from UNI-T, APPA, ZOTEK and HoldPeak, and a Flatpak with its own signed repository.</p>
