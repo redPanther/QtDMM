@@ -203,15 +203,16 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
       m_limitColor = color;
       showAlertColor();
     }
-    // a new verdict: the old one's sound stops, the new one's starts (HI
-    // and LO repeated while the verdict stays, if wanted)
+    // a new verdict: the old one's sound stops, the new one's starts
+    // (repeated while the verdict stays, if wanted)
     if (verdict != m_lastVerdict)
     {
       m_limitSound->stopAll();
       Alarm sound;
       sound.sound = verdict == LimitTest::Pass ? test.passSound : verdict == LimitTest::High ? test.highSound
                     : verdict == LimitTest::Low ? test.lowSound : QString();
-      const bool repeat = verdict == LimitTest::High ? test.highRepeat : verdict == LimitTest::Low && test.lowRepeat;
+      const bool repeat = verdict == LimitTest::High ? test.highRepeat : verdict == LimitTest::Low ? test.lowRepeat
+                          : verdict == LimitTest::Pass && test.passRepeat;
       sound.repeat = repeat ? Alarm::WhileRaised : Alarm::Once;
       m_limitSound->start(verdict, sound);
     }

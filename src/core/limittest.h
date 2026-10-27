@@ -27,7 +27,8 @@ struct LimitTest
   QString lowSound;        ///< the same for FAIL LO
   bool highRepeat = false; ///< the sound again every second while the verdict stays HI
   bool lowRepeat = false;  ///< the same for LO
-  QString passSound;       ///< once when the verdict turns PASS
+  QString passSound;       ///< the same for PASS
+  bool passRepeat = false; ///< the same for PASS
 
   /// The limits in base units, whatever the form; the lower first.
   double low() const;

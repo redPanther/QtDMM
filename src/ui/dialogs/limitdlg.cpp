@@ -100,7 +100,7 @@ LimitDlg::LimitDlg(const LimitTest &test, const QString &unit, double reading, Q
   m_tint->setToolTip(tr("The display and the analog meter take the verdict's colour; a raised alarm's colour comes first."));
   m_tint->setChecked(test.tint);
   form->addRow(m_tint);
-  // HI and LO each a sound, repeated while the verdict stays if wanted
+  // HI, LO and PASS each a sound, repeated while the verdict stays if wanted
   auto soundRow = [&](const QString &label, const QString &current, bool repeat, QComboBox *&box, QCheckBox *&check)
   {
     box = soundBox(current, this);
@@ -117,8 +117,7 @@ LimitDlg::LimitDlg(const LimitTest &test, const QString &unit, double reading, Q
   };
   soundRow(tr("Sound on &HI:"), test.highSound, test.highRepeat, m_highSound, m_highRepeat);
   soundRow(tr("Sound on L&O:"), test.lowSound, test.lowRepeat, m_lowSound, m_lowRepeat);
-  m_passSound = soundBox(test.passSound, this);
-  form->addRow(tr("Sound on &PASS:"), m_passSound);
+  soundRow(tr("Sound on &PASS:"), test.passSound, test.passRepeat, m_passSound, m_passRepeat);
 
   auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
   connect(bb, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -163,5 +162,6 @@ LimitTest LimitDlg::limitTest() const
   t.highRepeat = m_highRepeat->isChecked();
   t.lowRepeat = m_lowRepeat->isChecked();
   t.passSound = m_passSound->currentData().toString();
+  t.passRepeat = m_passRepeat->isChecked();
   return t;
 }

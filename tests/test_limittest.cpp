@@ -62,11 +62,12 @@ int main(int argc, char **argv)
   t.highSound = "alarm_crit";
   t.lowSound = "alarm_low";
   t.lowRepeat = true;
+  t.passRepeat = true;
   t.passSound = "beep";
   const LimitTest back = LimitTest::fromJsonText(t.toJsonText());
   check(back.enabled && back.form == LimitTest::Amount && back.nominal == 2 && back.tolerance == -0.05 && !back.tint
         && back.highSound == "alarm_crit" && back.lowSound == "alarm_low" && !back.highRepeat && back.lowRepeat
-        && back.passSound == "beep" && back.valueId == 0, "JSON round trip");
+        && back.passSound == "beep" && back.passRepeat && back.valueId == 0, "JSON round trip");
   const LimitTest none = LimitTest::fromJsonText(QString());
   check(!none.enabled && none.tint && none.form == LimitTest::Percent, "no settings: off, coloured, percent");
 

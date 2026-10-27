@@ -20,10 +20,10 @@ Right-click the digital display:
   - **Display in green or red** (on by default): the display and the
     analog meter take the verdict's colour. A raised
     [alarm](alarms.md)'s colour comes first.
-  - **Sound on HI** and **Sound on LO**: an alarm sound when the verdict
-    turns FAIL HI or FAIL LO; with **repeat** again every second while
-    the verdict stays. A new verdict ends it.
-  - **Sound on PASS**: once when the verdict turns PASS.
+  - **Sound on HI**, **Sound on LO** and **Sound on PASS**: an alarm
+    sound when the verdict turns FAIL HI, FAIL LO or PASS; with
+    **repeat** again every second while the verdict stays - a steady
+    tick while the trimmer is right, say. A new verdict ends it.
 
 The limits are kept with the meter's settings. The limits themselves
 pass: 4.9 V passes 5 V ± 2 %.
