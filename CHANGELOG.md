@@ -4,6 +4,10 @@
 
 Changes after rc1; the release candidate below lists everything new before.
 
+### Devices
+
+- **HoldPeak HP-570C-APP confirmed** — tried by a user: it is found, connects and shows readings; no longer marked as untried (the AOPUTTRIVER AP-570C-APP twin still is).
+
 ### Bug fixes
 
 - **A design chosen in the menu stays** — OK in the Preferences afterwards, for whatever else, set the design shown there before again. Quitting did the same.
