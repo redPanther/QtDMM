@@ -181,6 +181,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   createSidebar();
   fillViewToolbar();
   const QList<QAction *> workspace = createArrangeMenu();
+  updateRecentWorkspaces();
   createDesignMenu();
 
   updateWindowTitle();
@@ -213,6 +214,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
     QTimer::singleShot(1000, action_Connect, &QAction::trigger);
   updateEmptyStart();
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateEmptyStart);
+  connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateRecentWorkspaces);
   // the sidebar as left, with two devices or more; a window without a meter
   // shows it when there are devices to choose from
   const bool sidebarSet = !m_wid->settings()->getString("Windows/sidebar").isEmpty();
@@ -414,6 +416,12 @@ void MainWindow::createSidebar()
   connect(m_sidebar, &DeviceSidebar::deleteInstanceRequested, this, &MainWindow::deleteInstance);
   connect(m_sidebar, &DeviceSidebar::addDeviceRequested, this, &MainWindow::addDevice);
   connect(m_sidebar, &DeviceSidebar::serviceSettingsRequested, m_wid, &InstanceWidget::configScpiSLOT);
+  connect(m_sidebar, &DeviceSidebar::workspaceRequested, this, &MainWindow::loadWorkspaceFile);
+  connect(m_sidebar, &DeviceSidebar::removeWorkspaceRequested, this, [this](const QString &file)
+  {
+    recentWorkspaces().remove(file);
+    updateRecentWorkspaces();
+  });
   // the readings of the others change all the time
   m_instancesTimer = new QTimer(this);
   m_instancesTimer->setInterval(1000);
@@ -509,6 +517,10 @@ QList<QAction *> MainWindow::createArrangeMenu()
                           "the arrangement, title bars, toolbar, design and the size of the main window.</p>"
                           "</body></html>"));
   connect(loadWs, &QAction::triggered, this, &MainWindow::loadWorkspace);
+  // filled from the file each time: another instance may have added one
+  m_recentMenu = m_arrangeMenu->addMenu(QIcon::fromTheme("document-open-recent"), tr("&Recent workspaces"));
+  m_recentMenu->setObjectName("menu_RecentWorkspaces");
+  connect(m_recentMenu, &QMenu::aboutToShow, this, &MainWindow::updateRecentWorkspaces);
   QAction *saveWs = m_arrangeMenu->addAction(QIcon::fromTheme("document-save-as"), tr("&Save workspace..."));
   saveWs->setObjectName("action_SaveWorkspace");
   saveWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Save workspace</span></p>"
@@ -1805,6 +1817,8 @@ void MainWindow::saveWorkspace()
     return;
   }
   cfg->setString("Windows/workspace-dir", QFileInfo(file).absolutePath());
+  recentWorkspaces().add(file);
+  updateRecentWorkspaces();
   Q_EMIT m_wid->error(tr("Workspace saved to %1").arg(QDir::toNativeSeparators(file)));
 }
 
@@ -1815,14 +1829,19 @@ void MainWindow::loadWorkspace()
                                      QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
   const QString file = QFileDialog::getOpenFileName(this, tr("Load workspace"), dir,
                                                     tr("QtDMM workspace (*.%1)").arg(kWorkspaceSuffix));
-  if (file.isEmpty())
-    return;
+  if (!file.isEmpty())
+    loadWorkspaceFile(file);
+}
+
+bool MainWindow::loadWorkspaceFile(const QString &file)
+{
+  Settings *cfg = m_wid->settings();
   QSettings ws(file, QSettings::IniFormat);
-  if (ws.status() != QSettings::NoError || ws.value("Workspace/version").toInt() < 1)
+  if (!QFileInfo::exists(file) || ws.status() != QSettings::NoError || ws.value("Workspace/version").toInt() < 1)
   {
     QMessageBox::warning(this, tr("QtDMM: Load workspace"),
                          tr("%1 is no QtDMM workspace.").arg(QDir::toNativeSeparators(file)));
-    return;
+    return false;
   }
   cfg->setString("Windows/workspace-dir", QFileInfo(file).absolutePath());
   // the size first: the arrangement fills the area it gets
@@ -1845,7 +1864,43 @@ void MainWindow::loadWorkspace()
     m_autoSaveLayout->setChecked(false);
     m_startDisplay = m_displayAction->isChecked();
   }
+  recentWorkspaces().add(file);
+  updateRecentWorkspaces();
   Q_EMIT m_wid->error(tr("Workspace loaded from %1").arg(QDir::toNativeSeparators(file)));
+  return true;
+}
+
+RecentFiles MainWindow::recentWorkspaces() const
+{
+  return RecentFiles(QDir(m_wid->settings()->configDir()).filePath("workspaces.conf"));
+}
+
+void MainWindow::updateRecentWorkspaces()
+{
+  const QStringList files = recentWorkspaces().list().mid(0, m_wid->settings()->getInt("Sidebar/recent-workspaces", 10));
+  m_sidebar->setWorkspaces(files);
+  m_recentMenu->clear();
+  for (int i = 0; i < files.size(); ++i)
+  {
+    const QString &file = files[i];
+    // 1 ... 9 as the letters, then none
+    const QString name = QFileInfo(file).completeBaseName().replace('&', "&&");
+    QAction *a = m_recentMenu->addAction(i < 9 ? QString("&%1 %2").arg(i + 1).arg(name) : name);
+    a->setToolTip(QDir::toNativeSeparators(file));
+    a->setEnabled(QFileInfo::exists(file));
+    connect(a, &QAction::triggered, this, [this, file] { loadWorkspaceFile(file); });
+  }
+  m_recentMenu->setToolTipsVisible(true);
+  m_recentMenu->menuAction()->setEnabled(!files.isEmpty());
+  if (files.isEmpty())
+    return;
+  m_recentMenu->addSeparator();
+  QAction *clear = m_recentMenu->addAction(QIcon::fromTheme("edit-clear-history"), tr("&Clear list"));
+  connect(clear, &QAction::triggered, this, [this]
+  {
+    recentWorkspaces().clear();
+    updateRecentWorkspaces();
+  });
 }
 
 // ---------------------------------------------------------------- window size

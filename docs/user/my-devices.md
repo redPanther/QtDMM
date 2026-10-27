@@ -42,6 +42,10 @@ Below My devices the node **Instances** lists the QtDMM windows (see
 to other programs: the [SCPI server and HiSLIP](scpi-server.md) with their
 port, or *off*. At the start only this window's instance is unfolded.
 
+Above My devices, folded at the start, the node **Workspaces** lists the
+window layouts loaded or saved last; a double click loads one (see
+[Window layout](connecting.md#window-layout)). Without any it is hidden.
+
 ### The meter's values
 
 For a meter with more than one value (a second display, the CO2,

@@ -243,6 +243,14 @@ the layout it had when it was closed. Switched off, it starts with the
 layout it had when the option was switched off, or with the workspace
 loaded last.
 
+**Recent workspaces** in the same menu lists the workspaces loaded or saved
+last, newest first; **Clear list** empties it. The node **Workspaces** at
+the top of the sidebar shows the same list, folded at the start: a double
+click or Enter loads one, its context menu also opens its folder or takes
+it off the list. A file that is gone is grey. The list is shared by all
+QtDMM windows; how many it shows is set under **Preferences** >
+**Appearance** > **Recent workspaces** (10, *none* hides it).
+
 **Hide title bars** (F10) takes the title bars away so the windows sit
 flush next to each other - the default for the arranged modes. Right-click
 a window for its menu: **Hide window** comes first, in the graph and the

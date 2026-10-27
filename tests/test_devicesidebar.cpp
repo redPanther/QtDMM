@@ -299,6 +299,39 @@ int main(int argc, char **argv)
     check(node->childCount() == 1, "one less");
   }
 
+  // 9. the workspaces used last: on top, folded, hidden without any; a
+  // double click or Enter loads one, not a gone one
+  {
+    QTreeWidgetItem *node = sidebar.workspacesNode();
+    check(sidebar.indexOfTopLevelItem(node) == 0, "Workspaces on top, before My devices");
+    check(node->isHidden(), "hidden without workspaces");
+    QFile file(QDir(dir.path()).filePath("Bench.qtdmm-workspace"));
+    check(file.open(QIODevice::WriteOnly), "a workspace file");
+    file.close();
+    const QString gone = QDir(dir.path()).filePath("gone.qtdmm-workspace");
+    sidebar.setWorkspaces({ file.fileName(), gone });
+    check(!node->isHidden() && !node->isExpanded(), "shown, folded");
+    check(node->childCount() == 2 && node->child(0)->text(0) == "Bench", "the name without the suffix");
+    check(node->child(0)->toolTip(0) == QDir::toNativeSeparators(file.fileName()), "the path in the tooltip");
+    check(node->child(1)->toolTip(0).contains("not found"), "a gone one says so");
+    check(!(node->flags() & Qt::ItemIsDropEnabled) && !(node->child(0)->flags() & Qt::ItemIsDragEnabled),
+          "no drag and drop");
+    QStringList loaded;
+    QObject::connect(&sidebar, &DeviceSidebar::workspaceRequested, [&](const QString &f) { loaded << f; });
+    Q_EMIT sidebar.itemDoubleClicked(node->child(1), 0);
+    check(loaded.isEmpty(), "a gone one loads no more");
+    Q_EMIT sidebar.itemDoubleClicked(node->child(0), 0);
+    check(loaded == QStringList({ file.fileName() }), "double click loads");
+    node->setExpanded(true);
+    sidebar.setCurrentItem(node->child(0));
+    QTest::keyClick(&sidebar, Qt::Key_Return);
+    check(loaded.size() == 2, "Enter loads");
+    Q_EMIT sidebar.itemClicked(node->child(0), 0);
+    check(loaded.size() == 2, "a single click does nothing");
+    sidebar.setWorkspaces({});
+    check(node->isHidden() && node->childCount() == 0, "hidden again");
+  }
+
   if (failed)
     qWarning() << failed << "check(s) failed";
   else

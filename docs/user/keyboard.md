@@ -113,4 +113,5 @@ While the table has the focus:
 ## Sidebar
 
 F8 opens the settings here too; F2 renames the selected device or stopped
-instance (also through its context menu, **Rename**).
+instance (also through its context menu, **Rename**). Enter on a workspace
+loads it.
