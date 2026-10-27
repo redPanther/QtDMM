@@ -10,6 +10,7 @@
 
 #include <functional>
 
+#include "core/limittest.h"
 #include "core/sampletypes.h"
 
 /// One meter as the SCPI server shows it: its readings, whether it is
@@ -99,6 +100,14 @@ public:
     /// Presses @p key; false when it could not (the meter not connected).
     std::function<bool(const QString &key)> pressKey;
     std::function<QList<Instance>()> instances;
+    /// The PASS/FAIL limit test (CALCulate:LIMit), its verdict on the last
+    /// reading of its value and the verdicts counted; setLimitTest() keeps
+    /// it as the dialog does.
+    std::function<LimitTest()> limitTest;
+    std::function<void(const LimitTest &test)> setLimitTest;
+    std::function<LimitTest::Verdict()> verdict;
+    std::function<LimitTest::Count()> limitCount;
+    std::function<void()> clearLimitCount;
   };
   void setSources(Sources sources) { m_sources = std::move(sources); }
 

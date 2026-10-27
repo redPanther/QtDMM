@@ -221,6 +221,15 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   });
   m_ctl->setLimitTest(LimitTest::fromJsonText(m_settings->getString("Limits/test")));
   applyLimitBands();
+  // a new limit test, from the dialog or a SCPI client: kept, and shown
+  connect(m_ctl, &MeterController::limitTestChanged, this, [this](const LimitTest &test)
+  {
+    m_settings->setString("Limits/test", test.toJsonText());
+    m_lastVerdict = LimitTest::NoVerdict;
+    if (m_display)
+      m_display->setLimitTest(test.enabled);
+    applyLimitBands();
+  });
   // the display and the meter in the alarm's colour, blinking if wanted;
   // the banner and the beep stay, the colour is never the only sign
   m_alertTimer = new QTimer(this);
@@ -1016,12 +1025,7 @@ void InstanceWidget::showAlertColor()
 
 void InstanceWidget::setLimitTest(const LimitTest &test)
 {
-  m_settings->setString("Limits/test", test.toJsonText());
-  m_lastVerdict = LimitTest::NoVerdict;
   m_ctl->setLimitTest(test);
-  if (m_display)
-    m_display->setLimitTest(test.enabled);
-  applyLimitBands();
 }
 
 void InstanceWidget::applyLimitBands()

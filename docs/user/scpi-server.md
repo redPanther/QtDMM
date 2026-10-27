@@ -75,7 +75,7 @@ command after `;` continues at the level of the one before
 | `READ2?` `FETCh2?` `VALue2?` | short for `(@2)` (Victron, Fluke 45), same rules; `READ3?` ... alike |
 | `UNIT?` `UNIT2?` `UNIT? (@1:3)` | the base unit, `"V"` |
 | `CONFigure?` `CONFigure2?` `CONFigure? (@2)` | function and range, `"VOLT:DC AUTO"` - functions `VOLT:DC`, `VOLT:AC`, `CURR:DC`, `CURR:AC`, `RES`, `CONT`, `CAP`, `FREQ`, `TEMP`, `DIOD`, `PER`, `POW` |
-| `STATus:QUEStionable?` | bit 0 overload, bit 1 hold, bit 2 meter not connected (also while QtDMM reconnects it), bit 3 no current reading |
+| `STATus:QUEStionable?` | bit 0 overload, bit 1 hold, bit 2 meter not connected (also while QtDMM reconnects it), bit 3 no current reading, bit 11 the [PASS/FAIL test](limit-test.md)'s FAIL LO, bit 12 its FAIL HI (as Keysight's) |
 | `STATus:OPERation?` | 16 while the recorder runs, plus 512 while an alarm is raised (acknowledged or not) |
 | `INITiate` / `ABORt` | starts / stops the recorder; while it records, or over a recording shown and not saved yet, `INITiate` is ignored with error -213 *Init ignored*. On a meter opened without a window (`QTDMM:DEVice:OPEN`, `--also`) they start and stop the window's recording, and with it those of all meters of this QtDMM |
 | `INPut ON|OFF`, `INPut?` | connects / disconnects the meter, asks whether it is; the connection starts after the command, so `INPut ON;INPut?` still answers 0 |
@@ -85,6 +85,9 @@ command after `;` continues at the level of the one before
 | `CALCulate:AVERage:MAXimum? (@2)` `CALCulate2:AVERage:MAXimum?` `…? (@1:3)` | the same for a value of the meter (channels as for `READ?`), its own memory whatever the display shows; several answer separated by commas |
 | `CALCulate:AVERage:CLEar` | resets min/max, like F4: the display's and those of all values |
 | `CALCulate:AVERage:CLEar (@2)` `CALCulate2:AVERage:CLEar` | resets the memory of that value alone |
+| `CALCulate:LIMit[:STATe] ON\|OFF`, `CALCulate:LIMit[:STATe]?` | the [PASS/FAIL test](limit-test.md) on or off, as the display's menu (34465A); `CALCulate:FUNCtion LIMit` with `CALCulate:STATe ON\|OFF` does the same (34410A), `CALCulate:FUNCtion?` answers `LIM` |
+| `CALCulate:LIMit:LOWer[:DATA] <value>\|MIN\|MAX\|DEF`, `…:UPPer[:DATA] …`, and `…?` | the limits in SI base units (MIN/MAX ±1.0E+15, DEF 0). Setting one turns the test into *Lower and upper limit*, the other limit kept; the queries answer the limits as the test uses them, also for nominal ± tolerance |
+| `CALCulate:LIMit:CLEar` | resets the PASS/FAIL count |
 | `*RST` `*CLS` `*OPC?` `*TST?` `*ESR?` `*STB?` `SYSTem:VERSion?` | the usual IEEE 488.2 replies |
 | `INSTrument:CATalog?`, `INSTrument:CATalog:FULL?` | the meters of this QtDMM by name, `"UT61E_BENCH"`, with `FULL` also by number: `"UT61E_BENCH",1`. The name is the one in *My devices* (else the instance's), in upper case, other characters than letters and digits as `_`; two of the same name: the later one `_2`. A name stays with its meter while it is open |
 | `INSTrument[:SELect] <name>`, `INSTrument:NSELect <n>`, `INSTrument?`, `INSTrument:NSELect?` | chooses the meter the other commands go to, by name or number, as on a multi-channel bench instrument; the first meter at first. One choice for all clients: two clients that choose in turn reach each other's meter, so send `INST SIM_B;MEAS?` in one line. When the meter chosen is closed, none is chosen: queries answer as without a meter (`9.91E+37`, `INST?` `""`), other commands error -241, until `INSTrument` chooses again |
@@ -102,6 +105,8 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | `QTDMM:ALARm?` | the number of alarms raised (acknowledged ones too) |
 | `QTDMM:ALARm:LIST?` | every alarm with its state: `"Over 5 V",RAIS,"Low",OFF` - `OFF`, `PEND` (the condition holds, not yet for its minimum duration), `RAIS`, `ACKN` |
 | `QTDMM:ALARm:ACKnowledge` | acknowledges the alarms, as the banner's button |
+| `QTDMM:LIMit:VERDict?` | the PASS/FAIL test's verdict on the last reading of its value: `PASS`, `HI`, `LO`, `NONE` (off, not connected, no number) |
+| `QTDMM:LIMit:COUNt?` | the verdicts counted since the last reset: `<pass>,<high>,<low>` |
 | `QTDMM:MARK "text"` | a mark at the newest reading, in the graph and the readings table (`SCPI` without text) |
 | `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV meters UT333BT, UT353BT, UT363BT, UT383BT, the ZOTEK and OWON Bluetooth meters), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
 | `QTDMM:CHANnel:CATalog?` | the channels of `READ? (@n)`: number, what it measures and unit - `1,"carbon_dioxide","ppm",2,"temperature","C"`; empty strings before a channel's first reading |
@@ -116,7 +121,7 @@ $ lxi scpi -a localhost -p 5025 'QTDMM:MARK "load on"'
 ```
 
 The commands that change something - `INPut`, `INITiate`, `ABORt`,
-`CALCulate:AVERage:CLEar`, `QTDMM:ALARm:ACKnowledge`, `QTDMM:MARK`,
+`CALCulate:AVERage:CLEar`, `CALCulate:LIMit`, `QTDMM:ALARm:ACKnowledge`, `QTDMM:MARK`,
 `QTDMM:KEY`, `QTDMM:DEVice:OPEN`/`CLOSe`, `QTDMM:RECord:SAVE` - work for every client that reaches the port. With *This
 computer only* that is a program on this computer; open the port to the
 network only where everyone on it may do so.

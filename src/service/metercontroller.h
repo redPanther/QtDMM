@@ -206,6 +206,8 @@ Q_SIGNALS:
   void        limitJudged(int id, LimitTest::Verdict verdict, double deviation);
   /// limitCount() has changed: a verdict more, or reset.
   void        limitCountChanged(const LimitTest::Count &count);
+  /// setLimitTest() - from the window or a SCPI client (CALCulate:LIMit).
+  void        limitTestChanged(const LimitTest &test);
   /// An alarm wants the recorder started (true) or stopped.
   void        recordingRequested(bool start);
   /// A mark in the graph and/or the readings table: an alarm ("Alarm

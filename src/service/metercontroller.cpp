@@ -166,6 +166,7 @@ void MeterController::setAlarms(const QList<Alarm> &alarms)
 void MeterController::setLimitTest(const LimitTest &test)
 {
   m_limitTest = test;
+  Q_EMIT limitTestChanged(m_limitTest);
   m_verdict = LimitTest::NoVerdict;
   Q_EMIT limitJudged(m_limitTest.value.id, m_verdict, std::nan(""));
   resetLimitCount();
@@ -691,6 +692,11 @@ void MeterController::installScpiSources()
     }
     return list;
   };
+  s.limitTest = [this] { return m_limitTest; };
+  s.setLimitTest = [this](const LimitTest &test) { setLimitTest(test); };
+  s.verdict = [this] { return m_verdict; };
+  s.limitCount = [this] { return m_limitCount; };
+  s.clearLimitCount = [this] { resetLimitCount(); };
   m_scpiDevice->setSources(std::move(s));
 }
 

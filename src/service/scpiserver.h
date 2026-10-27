@@ -141,6 +141,9 @@ private:
   QString handleCommon(const Command &cmd, bool &isQuery);
   QString handleReading(const Command &cmd, bool &isQuery);
   QString handleStatus(const Command &cmd, bool &isQuery);
+  /// CALCulate:LIMit (34465A), CALCulate:FUNCtion LIMit and CALCulate:STATe
+  /// (34410A): the PASS/FAIL limit test.
+  QString handleLimit(const Command &cmd, bool &isQuery);
   QString handleSystem(const Command &cmd, bool &isQuery);
   QString handleInstrument(const Command &cmd, bool &isQuery);
   /// The meter the commands go to: the chosen one, or an empty stand-in.
