@@ -23,7 +23,10 @@ int main()
     r.add("/x/one.qtdmm-workspace");
     r.add("/x/two.qtdmm-workspace");
     r.add("/x/three.qtdmm-workspace");
-    check(r.list() == QStringList({ "/x/three.qtdmm-workspace", "/x/two.qtdmm-workspace" }), "in memory, at most two");
+    // (made absolute: on Windows with the drive in front)
+    const QStringList l = r.list();
+    check(l.size() == 2 && l[0].endsWith("/x/three.qtdmm-workspace") && l[1].endsWith("/x/two.qtdmm-workspace"),
+          "in memory, at most two: " + l.join(", "));
   }
 
   // in a file: what one instance adds, the other reads; paths kept clean
