@@ -10,6 +10,8 @@ Requirements:
 - Qt 6 development files with the SerialPort, Charts, PrintSupport, Network
   and LinguistTools modules (Debian/Ubuntu: qt6-base-dev qt6-serialport-dev
   qt6-charts-dev qt6-tools-dev qt6-tools-dev-tools)
+- optional: Qt 6 Connectivity (Bluetooth LE meters; qt6-connectivity-dev) and
+  Multimedia (sound and video; qt6-multimedia-dev)
 - CMake version 3.16 or higher
 - hidapi (ubuntu: libhidapi-dev | fedora: hidapi-devel | FreeBSD: hidapi;
   Windows and macOS: fetched automatically)

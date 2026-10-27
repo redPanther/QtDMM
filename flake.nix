@@ -34,6 +34,7 @@
           qt6.qtbase
           qt6.qtcharts
           qt6.qtconnectivity
+          qt6.qtmultimedia
           qt6.qtserialport
           qt6.qtsvg
           qt6.qtwayland

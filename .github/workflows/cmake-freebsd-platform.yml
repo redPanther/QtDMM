@@ -24,7 +24,7 @@ jobs:
         usesh: true
         prepare: |
           pkg install -y cmake ninja ccache pkgconf git python3 \
-            qt6-base qt6-serialport qt6-charts qt6-connectivity qt6-svg qt6-tools hidapi \
+            qt6-base qt6-serialport qt6-charts qt6-connectivity qt6-multimedia qt6-svg qt6-tools hidapi \
             dejavu fontconfig
         run: |
           # ccache: no cache is kept between runs, but the tests compile many

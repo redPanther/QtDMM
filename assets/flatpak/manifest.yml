@@ -16,6 +16,9 @@ finish-args:
   - --socket=wayland
   # Bluetooth LE meters (UT60BT, UNI-T iENV, Victron) through BlueZ
   - --system-talk-name=org.bluez
+  # alarm sounds (PulseAudio, also PipeWire's); cameras (/dev/video*) come
+  # with --device=all above
+  - --socket=pulseaudio
 
 modules:
   - name: hidapi

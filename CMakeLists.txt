@@ -116,6 +116,7 @@ file(WRITE "${CMAKE_BINARY_DIR}/decoders.h" "${DRIVER_HEADER_CONTENT}")
 
 ## find external libs
 find_package(Qt6 REQUIRED COMPONENTS ${QT_COMPONENTS})
+message(STATUS "Qt ${Qt6_VERSION}: ${Qt6_DIR}")
 
 ## Bluetooth LE (Victron Instant Readout) needs Qt6::Bluetooth; without it
 ## the BLE port is left out and everything else builds as before.
@@ -135,6 +136,17 @@ if (QTDMM_WITH_BLE)
 	if (NOT Qt6Bluetooth_FOUND)
 		message(STATUS "Qt6 Bluetooth not found - building without the BLE port")
 		set(QTDMM_WITH_BLE OFF)
+	endif()
+endif()
+
+## Sound and video (alarm sounds, camera) need Qt6::Multimedia; without it
+## they are left out and everything else builds as before.
+option(QTDMM_WITH_MULTIMEDIA "Sound and video (needs Qt6 Multimedia)" ON)
+if (QTDMM_WITH_MULTIMEDIA)
+	find_package(Qt6 COMPONENTS Multimedia)
+	if (NOT Qt6Multimedia_FOUND)
+		message(STATUS "Qt6 Multimedia not found - building without sound and video")
+		set(QTDMM_WITH_MULTIMEDIA OFF)
 	endif()
 endif()
 
@@ -279,10 +291,14 @@ target_link_libraries(qtdmm_core PUBLIC
 	Qt6::Svg
 	${HIDAPI_TARGET}
 	$<$<BOOL:${QTDMM_WITH_BLE}>:Qt6::Bluetooth>
+	$<$<BOOL:${QTDMM_WITH_MULTIMEDIA}>:Qt6::Multimedia>
 )
 
 if (QTDMM_WITH_BLE)
 	target_compile_definitions(qtdmm_core PUBLIC QTDMM_WITH_BLE)
+endif()
+if (QTDMM_WITH_MULTIMEDIA)
+	target_compile_definitions(qtdmm_core PUBLIC QTDMM_WITH_MULTIMEDIA)
 endif()
 
 add_executable(${PROJECT_NAME}
