@@ -267,6 +267,13 @@ void Designs::apply(Design d)
     else
       qApp->setStyleSheet(QString(kSilverSheet) + (d == BrushedMetal ? kBrushedSheet : ""));
   }
+  // Qt does not always hand the new palette down to every widget: the
+  // docked side bar kept the last design's now and then (System after Dark
+  // on KDE). Each widget takes it from its parent afresh
+  QEvent change(QEvent::ApplicationPaletteChange);
+  const QWidgetList widgets = QApplication::allWidgets();
+  for (QWidget *w : widgets)
+    QCoreApplication::sendEvent(w, &change);
   applyIcons();
 }
 
