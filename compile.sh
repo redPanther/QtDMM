@@ -139,7 +139,7 @@ then
 	mv AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.metainfo.xml AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.appdata.xml
 	# a build host without FUSE (containers, CI) runs the tools extracted
 	export APPIMAGE_EXTRACT_AND_RUN=1
-	export QMAKE="$(command -v qmake6 || command -v qmake)"
+	export QMAKE="${QMAKE:-$(command -v qmake6 || command -v qmake)}"
 	export EXTRA_QT_PLUGINS="svg"
 	export LDAI_OUTPUT=QtDMM.AppImage
 	export LDAI_NO_APPSTREAM=1

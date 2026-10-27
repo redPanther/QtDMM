@@ -24,7 +24,9 @@ public:
 
   void close() override;
   /// Starts sigrok-cli (DMMInfo::sigrokExe, or "sigrok-cli" from the PATH)
-  /// with --continuous and opens this device for reading.
+  /// with --continuous and opens this device for reading. Does not wait for
+  /// it: a sigrok-cli that fails to start or exits emits finished(), with
+  /// the reason in errorString().
   bool init();
 
   qint64 bytesAvailable() const override;
@@ -36,6 +38,7 @@ private Q_SLOTS:
   void onProcessReadyRead();
 
 private:
+  void lost(const QString &reason);
   qint64 readData(char *data, qint64 maxSize) override;
   qint64 writeData(const char *data, qint64 len) override;
 
@@ -43,7 +46,7 @@ private:
 
   DmmDecoder::DMMInfo m_dmmInfo;
   QString m_type, m_device;
-  QProcess *m_process;
+  QProcess *m_process = nullptr;   ///< the running sigrok-cli, null when closed
   QByteArray m_buffer;
   QByteArray m_outLine;
   QString m_sigrok;

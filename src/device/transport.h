@@ -3,8 +3,7 @@
 #include <QIODevice>
 
 #include "device/dmmdecoder.h"
-
-class SharedStateManager;
+#include "device/transports/calc.h"
 
 /// Owns the QIODevice a meter is talked to through and hides which kind it is.
 ///
@@ -25,8 +24,8 @@ public:
     /// Creates the device object for @p type (closing any previous one). The
     /// port is not opened yet; call port()->open() and then init().
     bool create(const DmmDecoder::DMMInfo &spec, PortType type, QString device);
-    /// The instance coordinator a CalcDevice reads its inputs from.
-    void setStateManager(SharedStateManager *state) { m_state = state; }
+    /// Where a CalcDevice reads its inputs from.
+    void setCalcInputs(CalcDevice::Inputs inputs) { m_calcInputs = std::move(inputs); }
     /// Closes and deletes the current device, if any.
     void close();
 
@@ -49,5 +48,5 @@ private:
     QIODevice *m_port   = nullptr;
     PortType   m_type   = PortType::None;
     QString    m_device;
-    SharedStateManager *m_state = nullptr;
+    CalcDevice::Inputs m_calcInputs;
 };

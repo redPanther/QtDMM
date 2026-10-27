@@ -141,7 +141,8 @@ private:
 };
 
 /// Listens to a meter for its first frame and reports the models the frame
-/// names (DmmDecoder::modelsFromFrame()): which of the meters that share a
+/// names (DmmDecoder::modelsFromFrame()), or those its device information
+/// names (DmmDecoder::modelsFromInfo()): which of the meters that share a
 /// Bluetooth name it is. Takes the port, opens it and closes it when done.
 class FrameProbe : public QObject
 {

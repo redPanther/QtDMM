@@ -31,6 +31,7 @@
 #include "ui/devicesettings.h"
 #include "device/devicetype.h"
 #include "device/discovery/discovery.h"
+#include "device/metersetup.h"
 #include "device/protocols.h"
 #include "core/calcexpr.h"
 #include "device/victronble.h"
@@ -168,18 +169,6 @@ bool DeviceSettings::isComplete() const
 
 DeviceSettings::~DeviceSettings()
 {
-}
-
-// The persisted protocol: the name (FrameFormat::toString) since the protocol
-// table exists, the combo index (= enum value) in older configuration files.
-FrameFormat::DataFormat DeviceSettings::formatFromSetting(const QVariant &value)
-{
-  bool isNumber = false;
-  const int number = value.toInt(&isNumber);
-  if (isNumber)
-    return (number >= 0 && number < FrameFormat::EndOfList) ? static_cast<FrameFormat::DataFormat>(number) : FrameFormat::Metex14;
-  const FrameFormat::DataFormat df = FrameFormat::fromString(value.toString());
-  return df == FrameFormat::Invalid ? FrameFormat::Metex14 : df;
 }
 
 void DeviceSettings::selectFormat(FrameFormat::DataFormat df)
@@ -415,9 +404,9 @@ void DeviceSettings::load(const QVariantMap &keys)
   for (int i = 0; i < int(m_virtualRows.size()); ++i)
   {
     const QString n = QString::number(i + 2);
-    m_virtualRows[size_t(i)].unit->setText(cfgString("DMM/virtual-unit" + n, kVirtualDefaults[i][0]));
+    m_virtualRows[size_t(i)].unit->setText(cfgString("DMM/virtual-unit" + n, MeterSetup::kVirtualDefaults[i][0]));
     m_virtualRows[size_t(i)].coupling->setCurrentText(cfgString("DMM/virtual-coupling" + n, "DC"));
-    m_virtualRows[size_t(i)].formula->setText(cfgString("DMM/virtual-formula" + n, kVirtualDefaults[i][1]));
+    m_virtualRows[size_t(i)].formula->setText(cfgString("DMM/virtual-formula" + n, MeterSetup::kVirtualDefaults[i][1]));
   }
   baudRate->setCurrentText    (cfgString("Port settings/baud"));
   bitsCombo->setCurrentText   (cfgString("Port settings/bits", "7"));
@@ -429,7 +418,7 @@ void DeviceSettings::load(const QVariantMap &keys)
   uirts->setChecked(cfgBool("DMM/rts", true));
   uidtr->setChecked(cfgBool("DMM/dtr", false));
 
-  selectFormat(formatFromSetting(cfgString("DMM/data-format", "Metex14")));
+  selectFormat(MeterSetup::formatFromSetting(cfgString("DMM/data-format", "Metex14")));
   ui_framesPerReading->setValue(cfgInt("DMM/number-of-values", 1));
 
   QString model = cfgString("DMM/model");
@@ -522,12 +511,6 @@ QVariantMap DeviceSettings::keys() const
   // a Bluetooth meter has no port: the port field still held the one of the
   // meter before, and My devices showed it (the key stays in its own entry)
   const QString address = ui_bleAddress->currentText().section(' ', 0, 0).trimmed();
-  // a simulated or calculated meter has its formula there, not the port of
-  // the meter before
-  keys.insert("Port settings/device", isGatt()                        ? "blegatt " + address
-                                      : isBluetooth()                 ? "ble " + address
-                                      : isCalculated() || isVirtual() ? device()
-                                                                      : port->currentText());
   keys.insert("Port settings/sigrok-conn", ui_sigrokConn->currentText().trimmed());
   keys.insert("Port settings/sigrok-options", ui_sigrokOptions->text().trimmed());
   keys.insert("Port settings/ble-address", ui_bleAddress->currentText().trimmed());
@@ -574,6 +557,22 @@ QVariantMap DeviceSettings::keys() const
 
   keys.insert("DMM/rts", uirts->isChecked());
   keys.insert("DMM/dtr", uidtr->isChecked());
+
+  // a simulated or calculated meter has its formula there, not the port of
+  // the meter before; a sigrok meter its driver (typed or the model's)
+  if (isGatt())
+    keys.insert("Port settings/device", "blegatt " + address);
+  else if (isBluetooth())
+    keys.insert("Port settings/device", "ble " + address);
+  else if (isSigrokMeter())
+  {
+    keys.insert("Port settings/device", "SIGROK " + ui_sigrokDriver->text().trimmed());
+    keys.insert("Port settings/device", MeterSetup::fromKeys(keys).device);
+  }
+  else if (isCalculated() || isVirtual())
+    keys.insert("Port settings/device", MeterSetup::fromKeys(keys).device);
+  else
+    keys.insert("Port settings/device", port->currentText());
   return keys;
 }
 
@@ -590,44 +589,27 @@ void DeviceSettings::on_ui_externalSetup_toggled()
 
 bool DeviceSettings::isSigrokMeter() const
 {
-  return ui_vendor->currentIndex() != 0 && m_dmmInfo.protocol == FrameFormat::Sigrok && !m_dmmInfo.sigrokDriver.isEmpty();
+  return ui_vendor->currentIndex() != 0 && MeterSetup::isSigrok(m_dmmInfo);
 }
 
 bool DeviceSettings::isBluetooth() const
 {
-#ifdef QTDMM_WITH_BLE
-  return ui_vendor->currentIndex() != 0 && (m_dmmInfo.protocol == FrameFormat::VictronBLE || isGatt());
-#else
-  // no Bluetooth port in this build: still show the Bluetooth group for these
-  // models, with a hint instead of the serial settings they don't have
-  const ProtocolInfo *info = protocolInfo(m_dmmInfo.protocol);
-  return ui_vendor->currentIndex() != 0 && m_dmmInfo.baud == 0 && info
-         && QLatin1String(info->transport) == QLatin1String("Bluetooth LE");
-#endif
+  return ui_vendor->currentIndex() != 0 && MeterSetup::isBluetooth(m_dmmInfo);
 }
 
-// A meter QtDMM connects to over GATT (UT60BT): address only, no key and no
-// choice of values - unlike the Victron broadcasts
 bool DeviceSettings::isGatt() const
 {
-#ifdef QTDMM_WITH_BLE
-  // baud 0: the Bluetooth entry of a protocol that also has a cable (UT61E+
-  // with the UT-D07B adapter vs. the UT-D09 USB cable)
-  return ui_vendor->currentIndex() != 0 && m_dmmInfo.baud == 0
-         && BleGattDevice::profile(m_dmmInfo.protocol).has_value();
-#else
-  return false;
-#endif
+  return ui_vendor->currentIndex() != 0 && MeterSetup::isGatt(m_dmmInfo);
 }
 
 bool DeviceSettings::isCalculated() const
 {
-  return ui_vendor->currentIndex() != 0 && m_dmmInfo.vendor == "QtDMM" && m_dmmInfo.model == "Calculated value";
+  return ui_vendor->currentIndex() != 0 && MeterSetup::isCalculated(m_dmmInfo);
 }
 
 bool DeviceSettings::isVirtual() const
 {
-  return ui_vendor->currentIndex() != 0 && m_dmmInfo.vendor == "QtDMM" && m_dmmInfo.model == "Simulated meter";
+  return ui_vendor->currentIndex() != 0 && MeterSetup::isVirtual(m_dmmInfo);
 }
 
 void DeviceSettings::updateVirtualFormula()
@@ -647,12 +629,6 @@ void DeviceSettings::updateVirtualFormula()
   ui_virtualFormula->setStyleSheet(ok ? QString() : QStringLiteral("QLineEdit { color: #b00; }"));
   ui_virtualFormula->setToolTip(ok ? QString() : tr("Position %1: %2").arg(pos + 1).arg(error));
 }
-
-const char *const DeviceSettings::kVirtualDefaults[3][2] = {
-  { "A", "0.5 + 0.2 * sin(2 * pi * t / 13)" },
-  { "W", "v1 * v2" },
-  { "°C", "21 + 2 * sin(2 * pi * t / 300)" },
-};
 
 void DeviceSettings::updateVirtualValues()
 {
@@ -934,27 +910,7 @@ int DeviceSettings::framesPerReading() const
 
 int DeviceSettings::valueCount() const
 {
-  if (ui_vendor->currentIndex() == 0)
-    return ui_framesPerReading->value();
-  // a Victron: main and second value, and the third and fourth chosen
-  if (isBluetooth() && !isGatt())
-    return m_dmmInfo.valueCount() + bleExtraValues();
-  if (isVirtual())
-    return m_virtualValues->value();
-  return m_dmmInfo.valueCount();
-}
-
-QString DeviceSettings::bleField(const QComboBox *combo)
-{
-  const QString id = combo->currentData().toString();
-  return id.isEmpty() ? QString("-") : id;
-}
-
-int DeviceSettings::bleExtraValues() const
-{
-  if (bleField(ui_bleFourth) != "-")
-    return 2;
-  return bleField(ui_bleThird) != "-" ? 1 : 0;
+  return MeterSetup::fromKeys(keys()).valueCount;
 }
 
 FrameFormat::DataFormat DeviceSettings::format() const
@@ -1198,46 +1154,7 @@ void DeviceSettings::on_ui_bleScan_clicked()
 
 QString DeviceSettings::device() const
 {
-  if (isSigrokMeter())
-  {
-    // "SIGROK <driver>:conn=<connection>[:<options>]" - what the Special
-    // ports page would take as a custom entry
-    QString spec = ui_sigrokDriver->text().trimmed();
-    const QString conn = ui_sigrokConn->currentText().trimmed();
-    if (!conn.isEmpty())
-      spec += ":conn=" + conn;
-    const QString options = ui_sigrokOptions->text().simplified().remove(' ');
-    if (!options.isEmpty())
-      spec += ":" + options;
-    return "SIGROK " + spec;
-  }
-  if (isGatt())
-    return QString("blegatt %1").arg(ui_bleAddress->currentText().section(' ', 0, 0).trimmed());
-  if (isBluetooth())
-  {
-    QString ble = QString("ble %1 %2 %3 %4").arg(ui_bleAddress->currentText().section(' ', 0, 0).trimmed(),
-                                                 ui_bleKey->text().simplified().remove(' '),
-                                                 ui_bleMain->currentData().toString(),
-                                                 ui_bleSecond->currentData().toString());
-    // the third and fourth field only when chosen: the string of before
-    if (bleExtraValues() > 0)
-      ble += QString(" %1 %2").arg(bleField(ui_bleThird), bleField(ui_bleFourth));
-    return ble;
-  }
-  if (isCalculated())
-    return QString("calc %1 %2").arg(ui_calcUnit->text().trimmed(), ui_calcExpression->text().trimmed());
-  if (isVirtual())
-  {
-    // the other values after ';' (CalcDevice)
-    QString calc = QString("calc %1/%2 %3").arg(ui_virtualUnit->text().trimmed(), ui_virtualCoupling->currentText(),
-                                                ui_virtualFormula->text().trimmed());
-    for (int i = 0; i < m_virtualValues->value() - 1; ++i)
-      calc += QString("; %1/%2 %3").arg(m_virtualRows[size_t(i)].unit->text().trimmed(),
-                                        m_virtualRows[size_t(i)].coupling->currentText(),
-                                        m_virtualRows[size_t(i)].formula->text().trimmed());
-    return calc;
-  }
-  return port->currentText();
+  return MeterSetup::fromKeys(keys()).device;
 }
 
 void DeviceSettings::on_ui_load_clicked()
@@ -1259,7 +1176,7 @@ void DeviceSettings::on_ui_load_clicked()
     parityCombo->setCurrentIndex(cfg.value("Port settings/parity", 0).toInt());
     selectDisplay(cfg.value("DMM/display", "4000").toString());
     ui_externalSetup->setChecked(cfg.value("DMM/external-setup", false).toBool());
-    selectFormat(formatFromSetting(cfg.value("DMM/data-format", "Metex14")));
+    selectFormat(MeterSetup::formatFromSetting(cfg.value("DMM/data-format", "Metex14")));
     ui_framesPerReading->setValue(cfg.value("DMM/number-of-values", 1).toInt());
     uirts->setChecked(cfg.value("DMM/rts", true).toBool());
     uidtr->setChecked(cfg.value("DMM/dtr", false).toBool());

@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased — 26.4 (not released yet)
+
+26.3 is finished on its release branch (`release/26.3`); its fixes come here when the branch is merged into master.
+
+### Multi-meter core
+
+- **Readings take their time from when their bytes came in** — not from when they were decoded, so frames read together share one time and meters read side by side drift less against each other.
+- **sigrok meters start and stop without holding up the program** — and when sigrok-cli fails to start or exits, the status bar says why (its own message) and QtDMM connects again, instead of a timeout without reason.
+- **More meters in one QtDMM** — besides the window's meter, entries of My devices can run without a window: `--also <id>` at start (repeatable), or over SCPI `QTDMM:DEVice:OPEN "<id>"`, `QTDMM:DEVice:CLOSe` and `QTDMM:DEVice:CATalog?`. The window for them comes with the multi-meter UI in 27.1.
+- **SCPI chooses the meter with `INSTrument`** — `INSTrument:CATalog?` names the meters of the program (the My devices name in upper case), `INSTrument <name>` or `INSTrument:NSELect <n>` chooses one, and `READ?`, `CALC`, `QTDMM:` and the other commands go to it. The first meter is chosen at start, so existing clients see no change. The network services run once per program.
+- **They record together** — when the window records (Record, trigger, start time or SCPI), the meters without a window record on the same time base and stop with it; `INITiate`/`ABORt` on one of them starts and stops them all. `QTDMM:RECord:SAVE "<file>"[,RAW]` saves the chosen meter's recording into `Documents/QtDMM` (file name only, never overwrites).
+- **Calculated values read the meters of the program** — by their My devices name (`UT61E Bench` is `ut61e_bench`), before instances of the same name. A formula without variables (the Simulated meter, a formula of `t`) needs no other meter.
+- **The recording trigger can watch another value** — on the Recording page, a meter with more than one value chooses which value the rising/falling threshold watches, e.g. record the voltage when the current crosses 5 A.
+
+### Devices
+
+- **OWON meters over Bluetooth LE (not tried with a real meter yet)** — B33T+, B35T+, B41T+, OW16B, OW18B, OW18E and the CM2100B clamp, with OL, NCV, HOLD, REL, MIN/MAX and low battery, and the keys of OWON's app under the display. Add device asks the meter which model it is.
+
+### GUI
+
+- **New designs: Light Metal and Dark Metal** — the digital display, the analog meter and the table stand on brushed metal, light or dark; the sidebar is light grey or near black, everything else (workspace, graph, Poincaré plot) is as in Light or Dark. In the Design menu and on the Appearance page of the Preferences.
+- **Silver is now called Light** — and the designs are named Light, Dark, Light Metal and Dark Metal in every language; the saved choice stays.
+
+### Platforms and build
+
+- **The Linux AppImage brings Qt 6.8.3** — instead of Ubuntu's Qt 6.4.2; it still runs on systems with glibc 2.39 or newer.
+
 ## Unreleased — 26.3 (not released yet)
 
 Changes after rc1; the release candidate below lists everything new before.

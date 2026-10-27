@@ -4,20 +4,21 @@
 
 #include <QTimer>
 #include <QMap>
+#include <functional>
 
 #include "device/dmmdecoder.h"
 #include "core/calcexpr.h"
 
-class SharedStateManager;
 
-/// A virtual meter whose reading is a formula over the other instances'
-/// readings, e.g. power from a voltage and a current instance ("u * i").
+/// A virtual meter whose reading is a formula over the readings of other
+/// meters, e.g. power from a voltage and a current meter ("u * i").
 ///
-/// The inputs come from SharedStateManager::readings(); every poll interval
+/// The inputs come from a function (Inputs, DeviceSession::calcInputs():
+/// the meters of the process by name, the other instances); every poll interval
 /// the formula is evaluated and the result is offered as a sigrok-style
 /// text line ("DC 6.02 W AUTO", padded to 30 bytes like SigrokDevice does),
 /// so the ASCII decoder (FrameFormat::Sigrok) and everything after it work
-/// unchanged. Instance ids are the variables; a hyphen in an id can be
+/// unchanged. The inputs' names are the variables; a hyphen in a name can be
 /// written as an underscore in the formula. The variable t is reserved: the
 /// seconds since the device was opened, which together with sin(), rand()
 /// and friends makes a signal generator ("QtDMM / Simulated meter" is this
@@ -33,14 +34,26 @@ class CalcDevice : public BufferedDevice
 {
   Q_OBJECT
 public:
+  /// One input: the main value of a meter.
+  struct Input
+  {
+    double  value = 0;      ///< SI base units
+    QString unit;           ///< base unit, "V"
+    qint64  msecs = 0;      ///< when it arrived (ms since the epoch)
+    bool    valid = false;  ///< false for overload, hold, no numeric value
+  };
+  /// The inputs by variable name, asked at every poll.
+  using Inputs = std::function<QMap<QString, Input>()>;
+
   /// @param info   the "QtDMM / Calculated value" entry
   /// @param device "<unit>[/<coupling>] <formula>", e.g. "W u * i" or
   ///               "V/AC 12 + sin(2*pi*t/5)"; coupling defaults to DC.
   ///               Several values separated by ';'.
-  /// @param state  where the other instances' readings come from
+  /// @param inputs where the other meters' readings come from; none: only
+  ///               formulas without variables (t aside) have a result
   /// @param parent parent object
   explicit CalcDevice(const DmmDecoder::DMMInfo &info, const QString &device,
-                      SharedStateManager *state, QObject *parent = nullptr);
+                      Inputs inputs, QObject *parent = nullptr);
 
 
   /// Parses the formula; fails (see errorString()) when it does not parse
@@ -75,7 +88,7 @@ public:
 
   /// Readings older than this are treated as missing.
   static constexpr qint64 kStaleMs = 3000;
-  /// Poll interval; matches SharedStateManager's.
+  /// Poll interval; matches SharedStateManager's publishing.
   static constexpr int kIntervalMs = 250;
 
 Q_SIGNALS:
@@ -103,7 +116,7 @@ private:
   };
 
   DmmDecoder::DMMInfo m_dmmInfo;
-  SharedStateManager *m_state;
+  Inputs m_inputs;
   QVector<Value> m_values;
   qint64 m_openedMs = 0;        ///< when open() was called, for t
   QTimer m_timer;

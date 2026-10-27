@@ -230,7 +230,7 @@ int main(int argc, char **argv)
     humid.name = "humid";
     humid.condition = Alarm::Above;
     humid.a = 60;
-    humid.value = 2;
+    humid.value = ValueRef(2);
     Alarm silent;
     silent.name = "silent";
     silent.condition = Alarm::NoReadings;
@@ -254,13 +254,33 @@ int main(int argc, char **argv)
     m.feed(800, false, 9500, 0);
     check(log.events.last() == "cleared 1 silent", "no readings: ends with the main value");
   }
+  // --- an alarm on another meter's value: only that meter's readings count ---
+  {
+    AlarmManager m;
+    Log log(m);
+    Alarm far;
+    far.name = "far";
+    far.condition = Alarm::Above;
+    far.a = 10;
+    far.value = ValueRef(1, "device:ab12cd34");
+    m.setAlarms({far});
+    m.feed(20, false, 0, 1, "instance:default");
+    m.feed(20, false, 0, 1);
+    check(log.events.isEmpty(), "another meter's value 2: this meter's 20 does not raise it");
+    m.feed(20, false, 1000, 1, "device:ab12cd34");
+    check(log.events == QStringList{"raised 0 far 20"}, "its own meter's 20 raises it, got " + log.events.join(", "));
+  }
   {
     Alarm al;
-    al.value = 1;
-    check(Alarm::fromJson(al.toJson()).value == 1 && !Alarm().toJson().contains("value"),
-          "JSON: the value kept, the main one not written");
-    check(Alarm::fromJson(QJsonObject{ { "value", 3 } }).value == 3, "JSON: the fourth value kept");
-    check(Alarm::fromJson(QJsonObject{ { "value", 7 } }).value == 3, "JSON: a value beyond the fourth is the fourth");
+    al.value = ValueRef(1);
+    check(Alarm::fromJson(al.toJson()).value == ValueRef(1) && al.toJson()["value"].isDouble()
+            && !Alarm().toJson().contains("value"),
+          "JSON: the value kept as a number, the main one not written");
+    check(Alarm::fromJson(QJsonObject{ { "value", 3 } }).value == ValueRef(3), "JSON: the fourth value kept");
+    check(Alarm::fromJson(QJsonObject{ { "value", 7 } }).value == ValueRef(3), "JSON: a value beyond the fourth is the fourth");
+    al.value = ValueRef(1, "device:ab12cd34");
+    check(Alarm::fromJson(al.toJson()).value == al.value && al.toJson()["value"].toString() == "1@device:ab12cd34",
+          "JSON: another meter's value as text");
   }
 
   // --- the name in messages: default names already say "Alarm" ---

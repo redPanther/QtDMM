@@ -10,6 +10,8 @@ qtdmm \- read out and record digital multimeters
 .IR id ]
 .RB [ \-\-config\-dir
 .IR dir ]
+.RB [ \-\-also
+.IR id ]...
 .RB [ \-\-vxi11\-rpc
 .IR mode ]
 .RB [ \-\-vxi11\-portmapper\-port
@@ -57,6 +59,16 @@ Each id has its own settings file, so one meter can be set up per id; several
 instances with different ids run side by side and know about each other.
 An id of letters, digits and underscores (not starting with a digit) can be
 used in the formula of a calculated value.
+.TP
+.BI \-\-also " id"
+Open the entry
+.I id
+of My devices as well, without a window, for this run; repeat the option for
+more. Its readings reach the SCPI server
+.RB ( INSTrument:SELect ),
+and it records whenever the window records;
+.B QTDMM:DEVice:CATalog?
+lists the ids.
 .TP
 .BI \-\-config\-dir " dir"
 Keep the configuration files in

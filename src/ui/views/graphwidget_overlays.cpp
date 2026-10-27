@@ -353,7 +353,8 @@ void GraphWidget::updateReferenceLine()
 void GraphWidget::updateThresholdLinesVisibility()
 {
   // the trigger compares the main value: on its axis, hidden with it
-  m_triggerLine->setVisible((mode() == Raising || mode() == Falling) && m_mainShown);
+  // on the main value's axis: a trigger on another value has no line there
+  m_triggerLine->setVisible((mode() == Raising || mode() == Falling) && m_mainShown && m_store->triggerValue().id == 0);
   m_integrationLine->setVisible(m_showIntegration && (m_intValueId != 0 || m_mainShown));
 
   updateThresholdLinePositions();

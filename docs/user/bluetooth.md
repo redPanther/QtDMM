@@ -5,8 +5,8 @@ QtDMM reads two kinds of Bluetooth LE meters:
 - **UNI-T UT60BT** (and, untested, the UT161B/D/E and the UT61B+/D+/E+
   with the UT-D07B adapter) and, untested, the **APPA** Bluetooth meters
   and their BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram twins and the
-  **ZOTEK** meters (ZOYI, BSIDE, ANENG) and the **HoldPeak HP-570C-APP**
-  clamp - QtDMM *connects* to the meter and
+  **ZOTEK** meters (ZOYI, BSIDE, ANENG), the **OWON** Bluetooth meters and
+  the **HoldPeak HP-570C-APP** clamp - QtDMM *connects* to the meter and
   reads it, like a serial meter on a cable.
 - **Victron** SmartShunt, BMV-712, MPPT chargers and Phoenix inverters - QtDMM
   *listens* to the readings they broadcast, without a connection.
@@ -117,6 +117,35 @@ Not tried with a real meter yet: the protocol comes from the
 out from ZOTEK's apps and manuals and checked there on a ZOYI ZT-5B (its
 readings and keys); which model sends which packet layout is inferred
 except for the ZT-5B. Please report how it works for you.
+
+## OWON
+
+OWON's Bluetooth meters with the six-byte reading: the **B33T+**,
+**B35T+**, **B41T+**, **OW16B**, **OW18B**, **OW18E** and the **CM2100B**
+clamp. Switch Bluetooth on at the meter by holding its Bluetooth key
+(△/ᛒ on the B models, Hz/Duty△/ᛒ on the OW16B and OW18, ZERO/ᛒ for about
+two seconds on the CM2100B) until the Bluetooth symbol shows.
+
+They advertise as *BDM* (or the name given to them in OWON's app). **Add
+device** finds them by that name; choose the meter found and QtDMM asks it
+which model it is (the meter tells it on connecting), and page 3 has that
+model chosen. The OW18B and OW16B give the same answer: choose yours.
+
+The meter sends about three readings a second. QtDMM shows value, unit,
+AC/DC, AUTO, HOLD, REL, MIN/MAX, the low battery symbol, OL and the NCV
+display (*EF*, dashes).
+
+The keys under the display are those of OWON's app: **SELECT**, **RANGE**,
+**Hz/%**, **LIGHT** (HOLD held) and **HOLD** on all but the CM2100B; the
+B33T+, B35T+ and B41T+ also have **REL** (the B33T+ no LIGHT), the B35T+
+and B41T+ **MIN/MAX**; the CM2100B has **SELECT**, **ZERO**, **LIGHT** and
+**HOLD**.
+
+Not tried with a real meter yet: the protocol comes from the
+[dmm-tools](https://github.com/antoinecellerier/dmm-tools) project, worked
+out from OWON's app, its PC software and manuals and compared there with
+readings other projects recorded from these meters. Please report how it
+works for you.
 
 ## HoldPeak HP-570C-APP
 

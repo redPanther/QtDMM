@@ -155,6 +155,60 @@ int main(int argc, char **argv)
       zcheck(frames == 2 && values == 2, "longer notifications: two frames, two values");
     }
 
+    // the OWON meters: <code> <01 short, 00 long> on 0xFFF3 (dmm-tools OWON
+    // spec §7.1, §12.3: SELECT 01 01); HOLD held is the light
+    {
+      const FrameFormat::DataFormat owon = FrameFormat::OwonBLE;
+      auto o = DmmDecoder::getInstance(owon);
+      expect(owon, "select1", "0101");
+      expect(owon, "hold", "0301");
+      expect(owon, "lamp", "0300");
+      expect(owon, "zero", "0401");
+      expect(owon, "minmax", "0601");
+      expect(owon, "fn_ncv", "");
+      auto ocheck = [&](bool ok, const char *what)
+      {
+        if (!ok)
+        {
+          qWarning() << "OWON:" << what;
+          ++problems;
+        }
+      };
+      ocheck(o->hasKey("zero", "CM2100B *") && !o->hasKey("range", "CM2100B *") && !o->hasKey("rel", "CM2100B *"),
+             "CM2100B keys: SELECT, HOLD, ZERO, no RANGE");
+      ocheck(o->hasKey("minmax", "B41T+ *") && !o->hasKey("minmax", "OW18E *") && !o->hasKey("lamp", "B33T+ *"),
+             "MAX/MIN on the B35T+ and B41T+ only, no light key on the B33T+");
+      // the model code in byte 0 of 0xFFF2 (spec §12.2: 18; pjpa365's B41T+: 41)
+      ocheck(o->modelsFromInfo(QByteArray::fromHex("296300010200")) == QStringList({ "OWON B41T+ *" }), "code 41");
+      ocheck(o->modelsFromInfo(QByteArray::fromHex("1263040009000000")) == QStringList({ "OWON OW16B *", "OWON OW18B *" }),
+             "code 18: OW18B or OW16B");
+      ocheck(o->modelsFromInfo(QByteArray::fromHex("15")) == QStringList({ "OWON CM2100B *" }), "code 21");
+      ocheck(o->modelsFromInfo(QByteArray::fromHex("63")).isEmpty() && o->modelsFromInfo({}).isEmpty(), "no model");
+      // NCV dashes, no number; 0x6FFF is no reading; frames back in step
+      // after a lost byte
+      const auto dashes = o->decode(QByteArray::fromHex("60f300000300"), 0);
+      ocheck(dashes && dashes->main().val == "---" && dashes->main().noValue, "NCV level 3 is three dashes");
+      ocheck(!o->decode(QByteArray::fromHex("19f00400ff6f"), 0), "0x6FFF: no reading");
+      const QByteArray frame = QByteArray::fromHex("19f00400bd09");
+      const QByteArray stream = frame + frame.mid(1) + frame + frame;
+      char fifo[FIFO_LENGTH] = {};
+      size_t length = 0;
+      int values = 0;
+      for (char c : stream)
+      {
+        fifo[length] = c;
+        if (o->checkFormat(fifo, length))
+        {
+          const auto r = o->decode(QByteArray(fifo + length - 5, 6), 0);
+          values += r && r->main().val == "249.3" ? 1 : 0;
+          length = 0;
+        }
+        else
+          ++length;
+      }
+      ocheck(values == 3, "a lost byte: the two frames after it still read");
+    }
+
     // the HoldPeak HP-570C-APP: the FS9721 frame in two notifications of 7
     // bytes. A lost first half must not glue the second half of the frame
     // before to the next one; the ring wraps as the reader's does.
