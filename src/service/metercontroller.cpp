@@ -167,7 +167,7 @@ void MeterController::setLimitTest(const LimitTest &test)
 {
   m_limitTest = test;
   m_verdict = LimitTest::NoVerdict;
-  Q_EMIT limitJudged(m_verdict, std::nan(""));
+  Q_EMIT limitJudged(m_limitTest.value.id, m_verdict, std::nan(""));
 }
 
 void MeterController::configure(const MeterSetup &setup)
@@ -192,7 +192,7 @@ bool MeterController::connectMeter(bool on)
   if (!m_dmm->isOpen() && m_verdict != LimitTest::NoVerdict)
   {
     m_verdict = LimitTest::NoVerdict;
-    Q_EMIT limitJudged(m_verdict, std::nan(""));
+    Q_EMIT limitJudged(m_limitTest.value.id, m_verdict, std::nan(""));
   }
   return ok;
 }
@@ -357,10 +357,10 @@ void MeterController::publish(const Reading &rd)
   m_alarms->feed(dval, overload, now, id, rd.source);
 
   // the limit test: a verdict for every reading of its value
-  if (m_limitTest.enabled && id == m_limitTest.valueId)
+  if (m_limitTest.enabled && m_limitTest.value.matches(rd))
   {
     m_verdict = rd.noNumber() ? LimitTest::NoVerdict : m_limitTest.judge(dval, overload, rd.text.trimmed().startsWith('-'));
-    Q_EMIT limitJudged(m_verdict, overload || m_verdict == LimitTest::NoVerdict ? std::nan("") : m_limitTest.deviation(dval));
+    Q_EMIT limitJudged(id, m_verdict, overload || m_verdict == LimitTest::NoVerdict ? std::nan("") : m_limitTest.deviation(dval));
   }
 
   ScpiServer::Reading r;

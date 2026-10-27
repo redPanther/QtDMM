@@ -5,6 +5,8 @@
 #include <QJsonObject>
 #include <QString>
 
+#include "core/valueref.h"
+
 /// The limit test (PASS/FAIL): limits around a nominal value, either as
 /// nominal ± percent, nominal ± an amount, or as lower and upper limit.
 /// Each reading of the value gets a verdict, without duration or
@@ -16,7 +18,10 @@ struct LimitTest
   enum Verdict { NoVerdict, Pass, High, Low };
 
   bool enabled = false;
-  int valueId = 0;         ///< which value of the meter (Reading::id); the main one for now
+  /// Which value it judges, as Alarm::value: of the meter's values
+  /// (Reading::id) 0 the main one, with a source only that meter's. The
+  /// display's dialog sets the main value for now.
+  ValueRef value;
   Form form = Percent;
   double nominal = 0;      ///< Percent, Amount; base units
   double tolerance = 1;    ///< Percent: percent, Amount: base units

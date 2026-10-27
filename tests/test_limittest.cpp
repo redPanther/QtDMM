@@ -67,7 +67,9 @@ int main(int argc, char **argv)
   const LimitTest back = LimitTest::fromJsonText(t.toJsonText());
   check(back.enabled && back.form == LimitTest::Amount && back.nominal == 2 && back.tolerance == -0.05 && !back.tint
         && back.highSound == "alarm_crit" && back.lowSound == "alarm_low" && !back.highRepeat && back.lowRepeat
-        && back.passSound == "beep" && back.passRepeat && back.valueId == 0, "JSON round trip");
+        && back.passSound == "beep" && back.passRepeat && back.value == ValueRef(), "JSON round trip");
+  t.value = ValueRef(1, "device:ab12cd34");
+  check(LimitTest::fromJsonText(t.toJsonText()).value == t.value, "JSON: another meter's second value, as with the alarms");
   const LimitTest none = LimitTest::fromJsonText(QString());
   check(!none.enabled && none.tint && none.form == LimitTest::Percent, "no settings: off, coloured, percent");
 

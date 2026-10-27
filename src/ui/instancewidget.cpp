@@ -191,10 +191,11 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   // the limit test: the verdict to the display, green or red under an
   // alarm's colour, a sound when it turns
   m_limitSound = new AlarmSound([this](int verdict) { return m_ctl->verdict() == verdict; }, this);
-  connect(m_ctl, &MeterController::limitJudged, this, [this](LimitTest::Verdict verdict, double deviation)
+  connect(m_ctl, &MeterController::limitJudged, this, [this](int id, LimitTest::Verdict verdict, double deviation)
   {
+    // the display only for the value it shows big
     if (m_display)
-      m_display->setVerdict(verdict, deviation);
+      m_display->setVerdict(id == m_display->primaryShown() ? verdict : LimitTest::NoVerdict, deviation);
     const LimitTest &test = m_ctl->limitTest();
     const QColor color = !test.tint || verdict == LimitTest::NoVerdict ? QColor()
                          : verdict == LimitTest::Pass ? QColor(0x3c, 0xb0, 0x4a) : QColor(0xd8, 0x22, 0x22);

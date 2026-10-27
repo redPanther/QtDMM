@@ -195,10 +195,11 @@ Q_SIGNALS:
   /// raised last among those raised (acknowledged or not) with
   /// Alarm::tintDisplay; invalid when there is none.
   void        alertColorChanged(const QColor &color);
-  /// The limit test judged a reading of its value (every reading, for the
-  /// deviation in percent, NaN without a nominal), or has no verdict
-  /// (off, disconnected, no number).
-  void        limitJudged(LimitTest::Verdict verdict, double deviation);
+  /// The limit test judged a reading of its value @p id (Reading::id;
+  /// every reading, for the deviation in percent, NaN without a nominal),
+  /// or has no verdict (off, disconnected, no number). The views take it
+  /// for the value they show.
+  void        limitJudged(int id, LimitTest::Verdict verdict, double deviation);
   /// An alarm wants the recorder started (true) or stopped.
   void        recordingRequested(bool start);
   /// A mark in the graph and/or the readings table: an alarm ("Alarm

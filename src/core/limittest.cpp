@@ -90,8 +90,8 @@ QJsonObject LimitTest::toJson() const
 {
   QJsonObject o;
   o["enabled"] = enabled;
-  if (valueId != 0)
-    o["value"] = valueId;
+  if (value != ValueRef())
+    o["value"] = value.toJson();
   o["form"] = form == Amount ? "amount" : form == Range ? "range" : "percent";
   o["nominal"] = nominal;
   o["tolerance"] = tolerance;
@@ -111,7 +111,7 @@ LimitTest LimitTest::fromJson(const QJsonObject &o)
 {
   LimitTest t;
   t.enabled = o["enabled"].toBool(false);
-  t.valueId = qBound(0, o["value"].toInt(0), 3);
+  t.value = ValueRef::fromJson(o["value"]);
   const QString form = o["form"].toString();
   t.form = form == "amount" ? Amount : form == "range" ? Range : Percent;
   t.nominal = o["nominal"].toDouble();
