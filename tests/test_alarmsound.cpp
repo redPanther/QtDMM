@@ -3,7 +3,8 @@
 //
 // AlarmSound: once, N times, while raised; stops when the alarm no longer
 // sounds (cleared, acknowledged) and when the alarms are edited. The sounds
-// themselves are counted, not played. Also: every built-in sound is in the
+// themselves are counted, not played. The waits end half a second between
+// two ticks, so a busy machine may be late by that much. Also: every built-in sound is in the
 // resources.
 
 #include <QtCore>
@@ -39,11 +40,11 @@ int main(int argc, char **argv)
   sound.start(1, times);
   sound.start(2, whileRaised);
   check(played.size() == 2, "both start at once");
-  QTest::qWait(2300);
+  QTest::qWait(2500);
   check(played.count("alarm_high") == 3 && !sound.sounding(1), "three times: " + played.join(' '));
   check(played.count("beep") == 3 && sound.sounding(2), "while raised: goes on: " + played.join(' '));
   raised.remove(2);   // cleared or acknowledged
-  QTest::qWait(1100);
+  QTest::qWait(1500);
   check(played.count("beep") == 3 && !sound.sounding(2), "while raised: stops when the alarm no longer sounds");
 
   // --- 3. three times, but the alarm clears after the first ---
@@ -51,7 +52,7 @@ int main(int argc, char **argv)
   raised = { 1 };
   sound.start(1, times);
   raised.clear();
-  QTest::qWait(1100);
+  QTest::qWait(1500);
   check(played.size() == 1 && !sound.sounding(1), "times: never longer than the alarm is raised");
 
   // --- 4. edited alarms: all stop; a new raise starts over ---
@@ -59,11 +60,11 @@ int main(int argc, char **argv)
   raised = { 2 };
   sound.start(2, whileRaised);
   sound.stopAll();
-  QTest::qWait(1100);
+  QTest::qWait(1500);
   check(played.size() == 1 && !sound.sounding(2), "stopAll");
   sound.start(2, whileRaised);
   sound.start(2, whileRaised);
-  QTest::qWait(1100);
+  QTest::qWait(1500);
   check(played.size() == 4, "raised again: one timer, not two: " + QString::number(played.size()));
   sound.stopAll();
 
