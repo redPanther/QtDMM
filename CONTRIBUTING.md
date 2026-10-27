@@ -90,6 +90,10 @@ the sources, so it starts with every string of the current version.
    ./compile.sh ctest
    ```
 
+   Another Qt than the system's, e.g. one from the Qt installer:
+   `QTDMM_QT_DIR=~/Qt/6.8.3/gcc_64 ./compile.sh ctest` (switching between
+   Qts needs `clean` as well).
+
 3. Keep the change to one subject, with tests for new logic - for a
    decoder, test frames in its protocol specification under
    `docs/protocols/spec/`. The [developer documentation](docs/dev/index.md)

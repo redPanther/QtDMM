@@ -19,6 +19,9 @@ usage: compile.sh <install|clean|qt6>
  Ninja and ccache are used when installed (Ninja only for a new build
  directory: "clean" switches an existing one over).
 
+ Another Qt than the system's: QTDMM_QT_DIR=~/Qt/6.8.3/gcc_64 ./compile.sh
+ (switching between Qts needs "clean").
+
 EOF
 	exit 0
 }
@@ -55,6 +58,20 @@ else
 	CMAKE_PARAMS="-DCMAKE_PREFIX_PATH=$(brew --prefix qt@6)"
 fi
 
+# another Qt than the system's (or Homebrew's): the directory with its bin/
+# and lib/cmake/. A build directory keeps the Qt it was set up with (CMake
+# caches the paths): a switch builds afresh after "clean" only
+QT_STAMP=build/.qtdmm-qt-dir
+if [ -f build/CMakeCache.txt ] && [ "$(cat ${QT_STAMP} 2>/dev/null)" != "${QTDMM_QT_DIR}" ]
+then
+	echo "build/ was set up with another Qt (QTDMM_QT_DIR \"$(cat ${QT_STAMP} 2>/dev/null)\"): ./compile.sh clean"
+	exit 1
+fi
+if [ -n "${QTDMM_QT_DIR}" ]
+then
+	CMAKE_PARAMS="${CMAKE_PARAMS} -DCMAKE_PREFIX_PATH=${QTDMM_QT_DIR}"
+fi
+
 # Ninja and ccache when installed: the tests build many sources again, a
 # rebuild after clean or a branch switch then mostly comes from the cache. An
 # existing build directory keeps its generator (cmake refuses to change it)
@@ -68,7 +85,8 @@ then
 fi
 
 cmake ${CMAKE_PARAMS} -DBUILD_TESTING=$(${CTEST} && echo "ON" || echo "OFF") \
-	-DQTDMM_WERROR=$(${CTEST} && echo "ON" || echo "OFF") -B build
+	-DQTDMM_WERROR=$(${CTEST} && echo "ON" || echo "OFF") -B build || exit 1
+echo "${QTDMM_QT_DIR}" > ${QT_STAMP}
 cmake --build build --parallel ${JOBS} || exit 1
 
 cd build
@@ -139,6 +157,7 @@ then
 	mv AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.metainfo.xml AppDir/usr/share/metainfo/io.github.qtdmm.qtdmm.appdata.xml
 	# a build host without FUSE (containers, CI) runs the tools extracted
 	export APPIMAGE_EXTRACT_AND_RUN=1
+	[ -n "${QTDMM_QT_DIR}" ] && QMAKE="${QMAKE:-${QTDMM_QT_DIR}/bin/qmake}"
 	export QMAKE="${QMAKE:-$(command -v qmake6 || command -v qmake)}"
 	export EXTRA_QT_PLUGINS="svg"
 	export LDAI_OUTPUT=QtDMM.AppImage

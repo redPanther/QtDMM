@@ -116,6 +116,7 @@ file(WRITE "${CMAKE_BINARY_DIR}/decoders.h" "${DRIVER_HEADER_CONTENT}")
 
 ## find external libs
 find_package(Qt6 REQUIRED COMPONENTS ${QT_COMPONENTS})
+message(STATUS "Qt ${Qt6_VERSION}: ${Qt6_DIR}")
 
 ## Bluetooth LE (Victron Instant Readout) needs Qt6::Bluetooth; without it
 ## the BLE port is left out and everything else builds as before.
