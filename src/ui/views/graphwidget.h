@@ -229,6 +229,12 @@ public:
   /// The alarms' thresholds (base units): the reference line snaps to them.
   /// A line on a threshold that went stays where it is.
   void             setAlarmThresholds(const QList<double> &values);
+  /// The limit test's band (PASS/FAIL) of the value @p id, base units:
+  /// two dashed green lines at @p low and @p high, faintly green between,
+  /// while that value is on the left axis. An id of -1 takes it away; an
+  /// open side (NaN or infinite) has no line, the band reaches the edge.
+  /// The reference line snaps to the lines.
+  void             setLimits(int id, double low = 0, double high = 0);
   /// @name Time cursors
   /// A click into the graph sets cursor A, Shift+click cursor B; both can
   /// be dragged, Esc and the context menu take them away. A alone says the
@@ -664,7 +670,7 @@ protected:
   /// The statistics of the window shown, for RefMean, RefMin, RefMax.
   RecordingStore::Stats windowStats() const;
   /// The line dragged to @p y in the scene: it snaps to 0, the window's
-  /// mean, minimum and maximum and the alarm thresholds within a few
+  /// mean, minimum and maximum, the alarm thresholds and the limits within a few
   /// pixels, else takes the value there, rounded to a hundredth of the
   /// scale.
   void             dragReference(double y);
@@ -672,6 +678,15 @@ protected:
   /// inside the y range (on its edge the axis is the line).
   double           referenceY() const;
   void             updateReferenceLine();
+  /// @}
+  /// @name The limit test's band (setLimits())
+  /// @{
+  QGraphicsRectItem *m_limitBand = nullptr;
+  QGraphicsLineItem *m_limitLines[2] = { nullptr, nullptr };   ///< low, high
+  int              m_limitId = -1;
+  double           m_limitLow = 0;
+  double           m_limitHigh = 0;
+  void             updateLimitBand();
   /// @}
   /// @name Time cursors (setTimeCursor())
   /// @{

@@ -29,6 +29,7 @@
 #include <QtWidgets>
 #include <QPen>
 #include <cmath>
+#include <limits>
 #include <numeric>
 
 #include "ui/views/graphwidget.h"
@@ -283,6 +284,38 @@ void GraphWidget::setAlarmThresholds(const QList<double> &values)
   updateReferenceLine();
 }
 
+void GraphWidget::setLimits(int id, double low, double high)
+{
+  m_limitId = id;
+  m_limitLow = low;
+  m_limitHigh = high;
+  updateLimitBand();
+}
+
+void GraphWidget::updateLimitBand()
+{
+  const double min = m_yAxis->min(), max = m_yAxis->max();
+  const QRectF plot = m_chart->plotArea();
+  const bool on = m_limitId >= 0 && m_limitId == referenceId() && max > min && plot.height() > 0;
+  auto sceneY = [&](double v) { return plot.bottom() - (v - min) / (max - min) * plot.height(); };
+  const double bounds[2] = { m_limitLow, m_limitHigh };
+  for (int i = 0; i < 2; ++i)
+  {
+    const double v = bounds[i];
+    const bool shown = on && std::isfinite(v) && v > min && v < max;
+    m_limitLines[i]->setVisible(shown);
+    if (shown)
+      m_limitLines[i]->setLine(plot.left(), sceneY(v), plot.right(), sceneY(v));
+  }
+  // an open side reaches the edge; nothing of the band in the scale: none
+  const double lo = std::isfinite(m_limitLow) ? m_limitLow : -std::numeric_limits<double>::infinity();
+  const double hi = std::isfinite(m_limitHigh) ? m_limitHigh : std::numeric_limits<double>::infinity();
+  const double top = std::min(hi, max), bottom = std::max(lo, min);
+  m_limitBand->setVisible(on && top > bottom);
+  if (m_limitBand->isVisible())
+    m_limitBand->setRect(QRectF(QPointF(plot.left(), sceneY(top)), QPointF(plot.right(), sceneY(bottom))));
+}
+
 void GraphWidget::dragReference(double y)
 {
   const QRectF plot = m_chart->plotArea();
@@ -297,6 +330,10 @@ void GraphWidget::dragReference(double y)
   // the alarms drawn are the main value's
   for (double a : referenceId() == 0 ? m_alarmThresholds : QList<double>())
     snaps << std::pair{ RefAlarm, a };
+  if (m_limitLines[0]->isVisible())
+    snaps << std::pair{ RefValue, m_limitLow };
+  if (m_limitLines[1]->isVisible())
+    snaps << std::pair{ RefValue, m_limitHigh };
   for (const auto &[kind, v] : snaps)
     if (std::abs(sceneY(v) - y) <= 6)
     {
@@ -312,6 +349,8 @@ void GraphWidget::updateReferenceLine()
 {
   if (!m_referenceLine)
     return;
+  // the limit band moves with the same axis
+  updateLimitBand();
   // the window's statistics follow the readings and the window
   if (m_referenceKind == RefMean || m_referenceKind == RefMin || m_referenceKind == RefMax)
   {

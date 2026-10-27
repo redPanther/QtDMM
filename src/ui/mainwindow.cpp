@@ -602,6 +602,23 @@ void MainWindow::createStatusBar()
   statusBar()->addWidget(m_info, 10);
   m_info->setLineWidth(1);
 
+  // the limit test's count: "PASS 812 · FAIL 23 (2.8 %)", reset with min/max
+  m_limitCount = new QLabel(statusBar());
+  m_limitCount->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  m_limitCount->setLineWidth(1);
+  statusBar()->addPermanentWidget(m_limitCount);
+  auto showCount = [this](const LimitTest::Count &count)
+  {
+    m_limitCount->setVisible(m_wid->limitTest().enabled);
+    const QLocale locale;
+    const QString share = count.total() > 0 ? locale.toString(100.0 * count.fail() / count.total(), 'f', 1) : "-";
+    m_limitCount->setText(tr("PASS %1 · FAIL %2 (%3 %)").arg(count.pass).arg(count.fail()).arg(share));
+    m_limitCount->setToolTip(tr("Readings judged since the limits were set or min/max was reset: "
+                                "%1 too high, %2 too low").arg(count.high).arg(count.low));
+  };
+  connect(m_wid->controller(), &MeterController::limitCountChanged, this, showCount);
+  showCount(m_wid->controller()->limitCount());
+
   // the toolbar on and off: the way back with the mouse, always there
   m_toolbarButton = new QToolButton(statusBar());
   m_toolbarButton->setObjectName("toolbarButton");

@@ -104,6 +104,10 @@ public:
   void        setLimitTest(const LimitTest &test);
   const LimitTest &limitTest() const { return m_limitTest; }
   LimitTest::Verdict verdict() const { return m_verdict; }
+  /// The verdicts counted since the limit test was set or the count reset
+  /// (resetLimitCount(), resetMinMax()).
+  const LimitTest::Count &limitCount() const { return m_limitCount; }
+  void        resetLimitCount();
 
   /// Connects (true) or disconnects the meter. False when the port could
   /// not be opened.
@@ -200,6 +204,8 @@ Q_SIGNALS:
   /// or has no verdict (off, disconnected, no number). The views take it
   /// for the value they show.
   void        limitJudged(int id, LimitTest::Verdict verdict, double deviation);
+  /// limitCount() has changed: a verdict more, or reset.
+  void        limitCountChanged(const LimitTest::Count &count);
   /// An alarm wants the recorder started (true) or stopped.
   void        recordingRequested(bool start);
   /// A mark in the graph and/or the readings table: an alarm ("Alarm
@@ -266,6 +272,7 @@ private:
   QColor      m_alertColor;   ///< the colour last sent with alertColorChanged()
   LimitTest   m_limitTest;
   LimitTest::Verdict m_verdict = LimitTest::NoVerdict;
+  LimitTest::Count m_limitCount;
   QElapsedTimer m_clock;   ///< the stale check's time base, monotonic
   StaleRule   m_stale;     ///< when the main value is too old to stand for the present
   bool        m_staleShown = false;   ///< what staleChanged() said last

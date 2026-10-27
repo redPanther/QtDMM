@@ -412,6 +412,41 @@ int main(int argc, char **argv)
     check(w.dialColor() == dial, "no alarm: the style's dial again");
   }
 
+  // --- the limit test's band: green on the arc for the value shown ---
+  {
+    AnalogMeter w;
+    w.setStyle(AnalogMeterStyle::dark());
+    w.setFullScale(10.0);
+    auto pixels = [&](bool red)
+    {
+      const QImage img = render(w, QSize(400, 300));
+      int n = 0;
+      for (int y = 0; y < img.height(); ++y)
+        for (int x = 0; x < img.width(); ++x)
+        {
+          const QColor c = img.pixelColor(x, y);
+          const int main = red ? c.red() : c.green(), other = red ? c.green() : c.red();
+          n += main > other + 40 && main > c.blue() + 40;
+        }
+      return n;
+    };
+    auto green = [&] { return pixels(false); };
+    const int none = green();
+    const int redZone = pixels(true);
+    w.setLimits(0, 4.0, 6.0);
+    const int band = green();
+    check(w.limitsShown() && band > none + 50, QString("limits: a green band on the arc (%1 -> %2 pixels)").arg(none).arg(band));
+    // (the OL lamp and the minimum mark stay red)
+    check(pixels(true) < redZone / 2, QString("limits: no red zone (%1 -> %2 red pixels)").arg(redZone).arg(pixels(true)));
+    w.setLimits(0, 4.0, 60.0);
+    check(green() > band, "limits beyond the scale: the band reaches its end");
+    w.setValueId(1);
+    check(!w.limitsShown() && green() == none, "another value shown: no band");
+    w.setValueId(0);
+    w.setLimits(-1);
+    check(!w.limitsShown() && green() == none, "limit test off: no band");
+  }
+
   if (failed == 0)
     qInfo() << "All analog meter tests passed.";
   else

@@ -1425,6 +1425,30 @@ int main(int argc, char **argv)
     drag(yOf(graph.referenceValue()), yOf(0) - 1);
     check(graph.referenceKind() == GraphWidget::RefZero && graph.referenceSetting().isEmpty(), "reference: back to 0, setting empty");
 
+    // the limit test's band: two lines and the green between, on the left
+    // axis' value; the reference line snaps to the lines
+    {
+      auto limitItems = [&]
+      {
+        int lines = 0, bands = 0;
+        for (QGraphicsItem *item : chart->childItems())
+          if (item->data(0).toString() == "limit" && item->isVisible())
+            (dynamic_cast<QGraphicsLineItem *>(item) ? lines : bands)++;
+        return std::pair{ lines, bands };
+      };
+      check(limitItems() == std::pair{ 0, 0 }, "no limit test: no limit lines");
+      graph.setLimits(0, 4.5, 5.5);
+      check(limitItems() == std::pair{ 2, 1 }, "limits 4.5..5.5: two lines and the band");
+      drag(yOf(0), yOf(5.5) - 3);
+      check(graph.referenceKind() == GraphWidget::RefValue && graph.referenceValue() == 5.5, "reference: snaps to a limit");
+      graph.setLimits(0, 4.5, 100);
+      check(limitItems() == std::pair{ 1, 1 }, "a limit beyond the scale: one line, the band to the edge");
+      graph.setLimits(1, 4.5, 5.5);
+      check(limitItems() == std::pair{ 0, 0 }, "limits of another value: none on this axis");
+      graph.setLimits(-1);
+      graph.setReferenceSetting(QString());
+    }
+
     // the setting round-trips
     for (const QString &text : { QString("mean"), QString("min"), QString("max"), QString("alarm 4"), QString("1.25"), QString("off"),
                                  QString() })

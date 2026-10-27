@@ -118,6 +118,9 @@ public:
   int         ownValue(const ValueRef &value) const;
   /// @p value belongs to this window's meter (no source, or its own).
   bool        ownMeter(const ValueRef &value) const;
+  /// The limit test's band to the graph and the analog meter (they draw it
+  /// for the value they show).
+  void        applyLimitBands();
   /// The values the meter has: DMMInfo::valueCount(), or more when more came;
   /// at most kMaxValues.
   int         numValues() const;

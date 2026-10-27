@@ -80,5 +80,11 @@ int main(int argc, char **argv)
   const LimitTest none = LimitTest::fromJsonText(QString());
   check(!none.enabled && none.tint && none.form == LimitTest::Percent, "no settings: off, coloured, percent");
 
+  LimitTest::Count count;
+  for (LimitTest::Verdict v : { LimitTest::Pass, LimitTest::High, LimitTest::NoVerdict, LimitTest::Low, LimitTest::Pass })
+    count.add(v);
+  check(count.pass == 2 && count.high == 1 && count.low == 1 && count.fail() == 2 && count.total() == 4,
+        "count: no verdict is not counted");
+
   return failed == 0 ? 0 : 1;
 }

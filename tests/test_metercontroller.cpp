@@ -142,6 +142,45 @@ int main(int argc, char **argv)
     check(query("CALC:AVER:COUN? (@1:2)") == "0,0", "CLEar: all of them");
   }
 
+  // the limit test counts its verdicts, one per reading of its value; a
+  // new test and the min/max reset start the count anew
+  {
+    auto *dmm = ctl.findChild<MeterConnection *>();
+    auto frame = [&](double v)
+    {
+      DmmDecoder::DmmResponse r;
+      r.main().dval = v;
+      r.main().val = QString::number(v);
+      r.main().unit = "V";
+      r.main().special = "DC";
+      Q_EMIT dmm->response(r);
+    };
+    LimitTest t;
+    t.enabled = true;
+    t.form = LimitTest::Range;
+    t.lower = 4;
+    t.upper = 6;
+    ctl.setLimitTest(t);
+    QList<qint64> told;
+    const auto conn = QObject::connect(&ctl, &MeterController::limitCountChanged,
+                                       [&](const LimitTest::Count &c) { told << c.total(); });
+    for (double v : { 5.0, 7.0, 5.5, 3.0, 4.0 })
+      frame(v);
+    const LimitTest::Count c = ctl.limitCount();
+    check(c.pass == 3 && c.high == 1 && c.low == 1 && c.fail() == 2 && c.total() == 5,
+          QString("limit count: 3 PASS, 1 HI, 1 LO, got %1/%2/%3").arg(c.pass).arg(c.high).arg(c.low));
+    check(told == QList<qint64>({ 1, 2, 3, 4, 5 }), "limit count: told with every verdict");
+    ctl.resetMinMax();
+    check(ctl.limitCount().total() == 0 && told.last() == 0, "limit count: reset with min/max");
+    frame(5);
+    ctl.setLimitTest(t);
+    check(ctl.limitCount().total() == 0, "limit count: a new limit test starts at 0");
+    QObject::disconnect(conn);
+    ctl.setLimitTest(LimitTest());
+    frame(5);
+    check(ctl.limitCount().total() == 0, "limit test off: nothing counted");
+  }
+
   // a fault word ("FUSE"): said once and marked where it began; no number
   // shown ("----"): neither
   {

@@ -168,6 +168,13 @@ void MeterController::setLimitTest(const LimitTest &test)
   m_limitTest = test;
   m_verdict = LimitTest::NoVerdict;
   Q_EMIT limitJudged(m_limitTest.value.id, m_verdict, std::nan(""));
+  resetLimitCount();
+}
+
+void MeterController::resetLimitCount()
+{
+  m_limitCount = LimitTest::Count();
+  Q_EMIT limitCountChanged(m_limitCount);
 }
 
 void MeterController::configure(const MeterSetup &setup)
@@ -269,6 +276,11 @@ void MeterController::publish(const Reading &in)
   {
     m_verdict = rd.noNumber() ? LimitTest::NoVerdict : m_limitTest.judge(rd.value, rd.overload, rd.text.trimmed().startsWith('-'));
     rd.flags = (rd.flags & ~quint32(SampleFlag::Limit)) | LimitTest::flags(m_verdict);
+    if (m_verdict != LimitTest::NoVerdict)
+    {
+      m_limitCount.add(m_verdict);
+      Q_EMIT limitCountChanged(m_limitCount);
+    }
   }
   const double dval = rd.value;
   const QString &val = rd.text;
@@ -457,6 +469,7 @@ void MeterController::resetMinMax()
   Q_EMIT minMaxReset();
   for (int id = 0; id < kMaxValues; ++id)
     emitValueMinMax(id);
+  resetLimitCount();   // the counter goes with min/max
 }
 
 void MeterController::emitValueMinMax(int id)

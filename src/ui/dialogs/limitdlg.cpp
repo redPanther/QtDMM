@@ -97,7 +97,7 @@ LimitDlg::LimitDlg(const LimitTest &test, const QString &unit, double reading, Q
   form->addRow(tr("PASS:"), m_limits);
 
   m_tint = new QCheckBox(tr("Display in &green or red"), this);
-  m_tint->setToolTip(tr("The display and the analog meter take the verdict's colour; a raised alarm's colour comes first."));
+  m_tint->setToolTip(tr("The display takes the verdict's colour; a raised alarm's colour comes first."));
   m_tint->setChecked(test.tint);
   form->addRow(m_tint);
   // HI, LO and PASS each a sound, repeated while the verdict stays if wanted
