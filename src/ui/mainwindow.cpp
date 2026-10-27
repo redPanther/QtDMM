@@ -540,9 +540,9 @@ void MainWindow::createDesignMenu()
   // settings of their own)
   m_designMenu = new QMenu(tr("D&esign"), this);
   auto *designGroup = new QActionGroup(this);
-  for (auto [d, text] : { std::pair{Designs::System, tr("&System")}, std::pair{Designs::Silver, tr("S&ilver")},
-                          std::pair{Designs::Dark, tr("&Dark")},
-                          std::pair{Designs::BrushedMetal, tr("&Brushed metal")} })
+  for (auto [d, text] : { std::pair{Designs::System, tr("&System")}, std::pair{Designs::Silver, tr("&Light")},
+                          std::pair{Designs::Dark, tr("&Dark")}, std::pair{Designs::BrushedMetal, tr("Light &Metal")},
+                          std::pair{Designs::DarkMetal, tr("Dark Me&tal")} })
   {
     QAction *a = m_designMenu->addAction(text);
     a->setCheckable(true);

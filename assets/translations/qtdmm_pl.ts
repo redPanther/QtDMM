@@ -1189,130 +1189,130 @@
         <translation>Wszyscy producenci</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="629"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="644"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="728"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="630"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="645"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="729"/>
         <source>Position %1: %2</source>
         <translation>Pozycja %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="744"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="745"/>
         <source>%1: no such instance running</source>
         <translation>%1: nie działa instancja o takiej nazwie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="754"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="755"/>
         <source>Running instances: %1</source>
         <translation>Działające instancje: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="756"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="757"/>
         <source>No other instance is running.</source>
         <translation>Nie działa żadna inna instancja.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="971"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="972"/>
         <source>none</source>
         <translation>brak</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1040"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1041"/>
         <source>%1 was not found or does not run. Install sigrok-cli, or set its path in the settings, page General.</source>
         <translation>Nie znaleziono %1 lub program nie działa. Zainstaluj sigrok-cli lub podaj jego ścieżkę w ustawieniach, strona Ogólne.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1043"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1044"/>
         <source>%1 has no driver &quot;%2&quot;; see sigrok-cli --list-supported.</source>
         <translation>%1 nie ma sterownika „%2”; zobacz sigrok-cli --list-supported.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1045"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1046"/>
         <source>%1 found.</source>
         <translation>Znaleziono %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1055"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1056"/>
         <source>Running %1 --driver %2 --scan ...</source>
         <translation>Trwa %1 --driver %2 --scan…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1077"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1078"/>
         <source>No meter answered within 30 s (a serial port without a SCPI meter keeps sigrok-cli waiting).</source>
         <translation>Żaden miernik nie odpowiedział w ciągu 30 s (port szeregowy bez miernika SCPI każe sigrok-cli czekać bez końca).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1079"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1080"/>
         <source>Found: %1</source>
         <translation>Znaleziono: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1081"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1082"/>
         <source>No meter answered.</source>
         <translation>Żaden miernik nie odpowiedział.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1091"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1092"/>
         <source>This QtDMM was built without Bluetooth support, so it cannot connect to this meter.</source>
         <translation>Ten QtDMM zbudowano bez obsługi Bluetooth, więc nie może połączyć się z tym miernikiem.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1097"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1098"/>
         <source>Search for the device (a few seconds)</source>
         <translation>Wyszukaj urządzenie (kilka sekund)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1107"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1108"/>
         <source>Pick the device or type its Bluetooth address.</source>
         <translation>Wybierz urządzenie lub wpisz jego adres Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1110"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1111"/>
         <source>Switch the meter&apos;s Bluetooth on (it shows the Bluetooth symbol) before scanning or connecting.</source>
         <translation>Włącz Bluetooth miernika (pojawi się symbol Bluetooth) przed wyszukiwaniem lub łączeniem.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1115"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1116"/>
         <source>The key is the 32-digit &quot;Encryption key&quot; VictronConnect shows under Product info, Instant readout via Bluetooth.</source>
         <translation>Klucz to 32-cyfrowy „klucz szyfrowania&quot;, który VictronConnect pokazuje w Informacjach o produkcie, Natychmiastowy odczyt przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1127"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1128"/>
         <source>Scanning for %1 (%2 s)...</source>
         <translation>Wyszukiwanie %1 (%2 s)...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1128"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1129"/>
         <source>Scanning for Victron devices (%1 s)...</source>
         <translation>Wyszukiwanie urządzeń Victron (%1 s)…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1141"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1142"/>
         <source>The search failed: %1</source>
         <translation>Wyszukiwanie nie powiodło się: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1146"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1147"/>
         <source>No meter found. Is its Bluetooth switched on, and no other program connected to it?</source>
         <translation>Nie znaleziono miernika. Czy jego Bluetooth jest włączony i żaden inny program nie jest z nim połączony?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1147"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1148"/>
         <source>No Victron device found. Is Bluetooth on, and Instant readout enabled on the device?</source>
         <translation>Nie znaleziono urządzenia Victron. Czy Bluetooth jest włączony, a natychmiastowy odczyt włączony w urządzeniu?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1161"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1162"/>
         <source>Load DMM description</source>
         <translation>Wczytaj opis multimetru</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1161"/>
-        <location filename="../../src/ui/devicesettings.cpp" line="1187"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1162"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1188"/>
         <source>DMM description (*.cfg)</source>
         <translation>Opis multimetru (*.cfg)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesettings.cpp" line="1187"/>
+        <location filename="../../src/ui/devicesettings.cpp" line="1188"/>
         <source>Save DMM description</source>
         <translation>Zapisz opis multimetru</translation>
     </message>
@@ -2639,14 +2639,14 @@ a potem wyloguj się i zaloguj ponownie.</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="48"/>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="61"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="62"/>
         <source>System</source>
         <translation>Systemowy</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="49"/>
-        <source>Silver</source>
-        <translation>Srebrny</translation>
+        <source>Light</source>
+        <translation>Jasny</translation>
     </message>
     <message>
         <location filename="../../src/ui/settings/guiprefs.cpp" line="50"/>
@@ -2654,142 +2654,157 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>Ciemny</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="54"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="51"/>
+        <source>Light Metal</source>
+        <translation>Jasny metal</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="52"/>
+        <source>Dark Metal</source>
+        <translation>Ciemny metal</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="53"/>
+        <source>The look of the whole window: the colours of the desktop (System), light or dark, and both on brushed metal. The same as Design in the menu.</source>
+        <translation>Wygląd całego okna: kolory pulpitu (Systemowy), jasny lub ciemny, oba także na szczotkowanym metalu. To samo co Wygląd w menu.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="55"/>
         <source>D&amp;esign:</source>
         <translation>&amp;Wygląd:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="62"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="63"/>
         <source>&lt;b&gt;Coloured&lt;/b&gt;: QtDMM&apos;s coloured symbols (Oxygen). &lt;b&gt;Plain&lt;/b&gt;: monochrome symbols (Breeze), light or dark to match the design. &lt;b&gt;System&lt;/b&gt;: the icon theme of your desktop, where it has one; QtDMM&apos;s own symbols and what the theme lacks come from the plain set.</source>
         <translation>&lt;b&gt;Kolorowe&lt;/b&gt;: kolorowe symbole QtDMM (Oxygen). &lt;b&gt;Proste&lt;/b&gt;: jednobarwne symbole (Breeze), jasne lub ciemne zależnie od wyglądu. &lt;b&gt;Systemowy&lt;/b&gt;: motyw ikon pulpitu, jeśli istnieje; własne symbole QtDMM i to, czego brakuje w motywie, pochodzą z zestawu prostego.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="66"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="67"/>
         <source>S&amp;ymbols:</source>
         <translation>&amp;Symbole:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="67"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="68"/>
         <source>Symbols &amp;with text</source>
         <translation>Ikony z tekst&amp;em</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="69"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="70"/>
         <source>The toolbar buttons with their names under the symbols.</source>
         <translation>Przyciski pasków narzędzi z nazwą pod ikoną.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="72"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="73"/>
         <source>Digital display (LCD)</source>
         <translation>Wyświetlacz cyfrowy (LCD)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="73"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="74"/>
         <source>Sh&amp;ow</source>
         <translation>&amp;Pokaż</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="75"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="76"/>
         <source>The digital display in the window.</source>
         <translation>Wyświetlacz cyfrowy w oknie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="76"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="77"/>
         <source>&amp;Bargraph</source>
         <translation>&amp;Bargraf</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="78"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="79"/>
         <source>The bar under the digits, as on the meter.</source>
         <translation>Pasek pod cyframi, jak na mierniku.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="79"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="80"/>
         <source>&amp;Min/Max</source>
         <translation>&amp;Min/maks</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="81"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="82"/>
         <source>The smallest and largest reading beside the value.</source>
         <translation>Najmniejszy i największy odczyt obok wartości.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="84"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="85"/>
         <source>Tint of the LCD face of the digital display. The default is a classic greenish LCD.</source>
         <translation>Odcień powierzchni LCD wyświetlacza cyfrowego. Domyślnie klasyczny zielonkawy LCD.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="89"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="90"/>
         <source>LCD &amp;colour:</source>
         <translation>&amp;Kolor LCD:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="91"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="92"/>
         <source>Analog meter</source>
         <translation>Miernik analogowy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="94"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="95"/>
         <source>Automatic</source>
         <translation>Automatycznie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="94"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="95"/>
         <source>Zero left</source>
         <translation>Zero po lewej</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="94"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="95"/>
         <source>Centre zero</source>
         <translation>Zero pośrodku</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="95"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="96"/>
         <source>How the analog meter lays out its scale. &lt;b&gt;Automatic&lt;/b&gt; starts with zero at the left and switches to a centre-zero scale as soon as a clearly negative reading arrives (until the min/max memory is reset). &lt;b&gt;Zero left&lt;/b&gt; and &lt;b&gt;Centre zero&lt;/b&gt; fix one layout.</source>
         <translation>Jak miernik analogowy rozkłada skalę. &lt;b&gt;Automatycznie&lt;/b&gt; zaczyna z zerem po lewej i przechodzi na zero pośrodku, gdy pojawi się wyraźnie ujemny odczyt (do zerowania pamięci min/maks). &lt;b&gt;Zero po lewej&lt;/b&gt; i &lt;b&gt;Zero pośrodku&lt;/b&gt; ustalają jeden układ.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="99"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="100"/>
         <source>&amp;Scale:</source>
         <translation>Ska&amp;la:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="102"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="103"/>
         <source>Dark studio</source>
         <translation>Ciemne studio</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="102"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="103"/>
         <source>Classic ivory</source>
         <translation>Klasyczna kość słoniowa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="103"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="104"/>
         <source>Colour scheme of the analog meter: a dark studio dial with a white scale, or a classic ivory dial with a black scale.</source>
         <translation>Kolorystyka miernika analogowego: ciemna studyjna tarcza z białą skalą lub klasyczna tarcza w kolorze kości słoniowej z czarną skalą.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="105"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="106"/>
         <source>S&amp;tyle:</source>
         <translation>S&amp;tyl:</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="106"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="107"/>
         <source>&amp;Needle inertia</source>
         <translation>Bezwładność wskazówk&amp;i</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="108"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="109"/>
         <source>Move the needle with the inertia of a real moving-coil instrument instead of jumping to each new reading.</source>
         <translation>Poruszaj wskazówką z bezwładnością prawdziwego przyrządu zamiast przeskakiwać do każdego nowego odczytu.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="115"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="116"/>
         <source>Start of the red zone at the top end of the scale, as a percentage of full scale.</source>
         <translation>Początek strefy czerwonej na górnym końcu skali, w procentach pełnej skali.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="117"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="118"/>
         <source>&amp;Red zone from:</source>
         <translation>Strefa &amp;czerwona od:</translation>
     </message>
@@ -2799,22 +2814,12 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>Wygląd</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="51"/>
-        <source>Brushed metal</source>
-        <translation>Szczotkowany metal</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="52"/>
-        <source>The look of the whole window: the colours of the desktop (System), polished metal (Silver), dark, or Silver on brushed metal. The same as Design in the menu.</source>
-        <translation>Wygląd całego okna: kolory pulpitu (Systemowy), polerowany metal (Srebrny), ciemny lub Srebrny na szczotkowanym metalu. To samo co Wygląd w menu.</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="57"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="58"/>
         <source>Coloured</source>
         <translation>Kolorowe</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/guiprefs.cpp" line="58"/>
+        <location filename="../../src/ui/settings/guiprefs.cpp" line="59"/>
         <source>Plain</source>
         <translation>Proste</translation>
     </message>
@@ -3327,11 +3332,6 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>&amp;Systemowy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="543"/>
-        <source>S&amp;ilver</source>
-        <translation>S&amp;rebrny</translation>
-    </message>
-    <message>
         <location filename="../../src/ui/mainwindow.cpp" line="544"/>
         <source>&amp;Dark</source>
         <translation>&amp;Ciemny</translation>
@@ -3430,6 +3430,21 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <location filename="../../src/ui/mainwindow.cpp" line="514"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save workspace&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Writes the window layout to a file: which windows are shown, the arrangement, title bars, toolbar, design and the size of the main window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Zapisz obszar roboczy&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Zapisuje układ okien do pliku: które okna są widoczne, rozmieszczenie, paski tytułu, pasek narzędzi, motyw i rozmiar okna głównego.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="543"/>
+        <source>&amp;Light</source>
+        <translation>&amp;Jasny</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="544"/>
+        <source>Light &amp;Metal</source>
+        <translation>Jasny &amp;metal</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="545"/>
+        <source>Dark Me&amp;tal</source>
+        <translation>Ciemny me&amp;tal</translation>
     </message>
     <message>
         <location filename="../../src/ui/mainwindow.cpp" line="681"/>
@@ -3588,11 +3603,6 @@ Wybierz, która instancja ma rejestrować.</translation>
         <location filename="../../src/ui/mainwindow.cpp" line="171"/>
         <source>--also %1: %2</source>
         <translation>--also %1: %2</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="545"/>
-        <source>&amp;Brushed metal</source>
-        <translation>Szczotkowany &amp;metal</translation>
     </message>
     <message>
         <location filename="../../src/ui/mainwindow.cpp" line="1268"/>

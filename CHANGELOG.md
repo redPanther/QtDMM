@@ -20,7 +20,8 @@
 
 ### GUI
 
-- **New design: Brushed metal** — the digital display, the analog meter and the table stand on brushed metal, the sidebar is light grey, everything else (workspace, graph, Poincaré plot) is Silver's. In the Design menu and on the Appearance page of the Preferences.
+- **New designs: Light Metal and Dark Metal** — the digital display, the analog meter and the table stand on brushed metal, light or dark; the sidebar is light grey or near black, everything else (workspace, graph, Poincaré plot) is as in Light or Dark. In the Design menu and on the Appearance page of the Preferences.
+- **Silver is now called Light** — and the designs are named Light, Dark, Light Metal and Dark Metal in every language; the saved choice stays.
 
 ### Platforms and build
 
