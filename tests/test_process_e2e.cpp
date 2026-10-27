@@ -48,11 +48,26 @@ public:
     m_socket.waitForBytesWritten(1000);
   }
   /// The answer, a definite-length block (#<n><length><data>) as its data.
+  /// Empty after 5 s; the answer that comes later is skipped by the next
+  /// query, or each answer after it would be the one before (slow builders)
   QString ask(const QString &line)
   {
     send(line);
-    if (!waitFor([&] { return m_socket.canReadLine() || m_socket.waitForReadyRead(50); }, 3000))
-      return QString();
+    ++m_pending;
+    QString answer;
+    while (m_pending > 0)
+    {
+      if (!waitFor([&] { return m_socket.canReadLine() || m_socket.waitForReadyRead(50); }, 5000))
+        return QString();
+      answer = readAnswer();
+      --m_pending;
+    }
+    return answer;
+  }
+
+private:
+  QString readAnswer()
+  {
     if (m_socket.peek(1) != "#")
       return QString::fromUtf8(m_socket.readLine()).trimmed();
     while (m_socket.bytesAvailable() < 2 && m_socket.waitForReadyRead(1000)) { }
@@ -66,8 +81,8 @@ public:
     return data;
   }
 
-private:
   QTcpSocket m_socket;
+  int        m_pending = 0;   ///< queries sent whose answer has not been read
 };
 
 void write(const QString &path, const QString &text)
