@@ -150,6 +150,9 @@ yellow-green of most meters), *Backlight blue* (light segments on blue, the defa
 *Amber*, *High contrast* (black on white) or *Custom*, the tint from the
 *Appearance* page. Changing that tint switches the display to *Custom*.
 
+**PASS/FAIL test** and **Limits...** in the same menu judge each reading
+against limits; see [PASS/FAIL limit test](limit-test.md).
+
 For a meter with more than one value (a second display, the CO2,
 temperature and humidity of the TFA AirCO2ntrol, or the four values of a
 Metex M-3850D) the sidebar chooses the value shown big and the two at most

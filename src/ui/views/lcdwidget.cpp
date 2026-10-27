@@ -67,7 +67,7 @@ LcdWidget::LcdWidget(QWidget *parent)
 
 QSize LcdWidget::sizeHint() const
 {
-  return QSize(520, 200);
+  return QSize(m_limitOn ? int(520 * kLimitWiden) : 520, 200);
 }
 
 QSize LcdWidget::minimumSizeHint() const
@@ -200,6 +200,24 @@ void LcdWidget::setLcdVariant(LcdVariant variant)
 {
   m_variant = variant;
   applyVariant();
+}
+
+void LcdWidget::setLimitTest(bool on)
+{
+  if (on == m_limitOn)
+    return;
+  m_limitOn = on;
+  m_verdict = LimitTest::NoVerdict;
+  m_staticDirty = true;
+  updateGeometry();
+  update();
+}
+
+void LcdWidget::setVerdict(LimitTest::Verdict verdict, double deviation)
+{
+  m_verdict = verdict;
+  m_deviation = deviation;
+  update();
 }
 
 void LcdWidget::setAlertColor(const QColor &color)
@@ -579,7 +597,8 @@ void LcdWidget::drawAnnunciator(QPainter &p, const QRectF &r, const QString &tex
 LcdWidget::Layout LcdWidget::layout() const
 {
   Layout l;
-  l.bezel = PanelFrame::panelRect(QRectF(rect()).adjusted(1, 1, -1, -1), kMinAspect, kMaxAspect);
+  const double widen = m_limitOn ? kLimitWiden : 1.0;
+  l.bezel = PanelFrame::panelRect(QRectF(rect()).adjusted(1, 1, -1, -1), kMinAspect * widen, kMaxAspect * widen);
   l.face = PanelFrame::faceRect(l.bezel);
 
   const double fh = l.face.height();
@@ -599,6 +618,13 @@ LcdWidget::Layout LcdWidget::layout() const
   l.flags = QRectF(inner.left(), y, inner.width(), flagsH);
   y += flagsH;
   l.main = QRectF(inner.left(), y, inner.width(), mainH);
+  // the limit test's column takes what the panel grew by
+  if (m_limitOn)
+  {
+    const double vw = inner.width() * (1 - 1 / kLimitWiden);
+    l.verdict = QRectF(inner.right() - vw, y, vw, mainH);
+    l.main.setWidth(inner.width() - vw);
+  }
   y += mainH;
   l.minMax = QRectF(inner.left(), y, inner.width(), minMaxH);
   y += minMaxH;
@@ -611,8 +637,8 @@ LcdWidget::Layout LcdWidget::layout() const
   double h = mainH * 0.78;
   const double unitFactor = 0.62 * 2.6;     // ~ width of "mV" at 0.62 h
   const double needed = numberWidth(1.0, digits) + 0.3 + unitFactor;
-  if (h * needed > inner.width())
-    h = inner.width() / needed;
+  if (h * needed > l.main.width())
+    h = l.main.width() / needed;
   l.digitH = h;
 
   double sh = qMin(minMaxH > 0 ? minMaxH * 0.7 : extraH * 0.7, h * 0.5);
@@ -752,6 +778,61 @@ void LcdWidget::drawMain(QPainter &p, const Layout &l) const
   drawNumber(p, QPointF(x, y), h, m_value[id], digits, !m_value[id].isEmpty());
   x += numW + h * 0.3;
   drawUnit(p, QPointF(x, y), h, unit);
+}
+
+// PASS on green or FAIL on red, HI and LO below it as annunciators, the
+// deviation under them; without a verdict a ghost of PASS
+void LcdWidget::drawVerdict(QPainter &p, const Layout &l) const
+{
+  if (!m_limitOn)
+    return;
+  const QRectF &col = l.verdict;
+  const double gap = col.width() * 0.08;
+  const double w = col.width() - gap;
+  const double h = qMin(col.height() * 0.4, w * 0.42);
+  // badge, HI/LO and the deviation as one block, centred on the digits
+  const QRectF badge(col.left() + gap, col.center().y() - h * 2.2 / 2, w, h);
+  const bool fail = m_verdict == LimitTest::High || m_verdict == LimitTest::Low;
+  p.save();
+  p.setRenderHint(QPainter::Antialiasing, true);
+  if (m_verdict == LimitTest::NoVerdict)
+  {
+    p.setPen(QPen(ghost(), qMax(1.0, h * 0.05)));
+    p.setBrush(Qt::NoBrush);
+  }
+  else
+  {
+    // on a face in the verdict's (or an alarm's) colour a red badge would
+    // vanish: then it is drawn in the segments' colour, the text in the face's
+    p.setPen(Qt::NoPen);
+    p.setBrush(m_alert.isValid() ? m_segment : fail ? QColor(0xc6, 0x28, 0x28) : QColor(0x1f, 0x8f, 0x3a));
+  }
+  p.drawRoundedRect(badge, h * 0.14, h * 0.14);
+  p.setFont(sansFont(h * 0.58));
+  p.setPen(m_verdict == LimitTest::NoVerdict ? ghost() : m_alert.isValid() ? m_face : QColor(Qt::white));
+  p.drawText(badge, Qt::AlignCenter, fail ? tr("FAIL") : tr("PASS"));
+  p.restore();
+
+  // HI and LO side by side, centred under the badge
+  const double fpx = h * 0.42;
+  const QFontMetricsF fm(sansFont(fpx));
+  const QString hi = tr("HI"), lo = tr("LO");
+  const double pair = fm.horizontalAdvance(hi) + fpx * 0.9 + fm.horizontalAdvance(lo);
+  const double y = badge.bottom() + h * 0.12;
+  double x = badge.center().x() - pair / 2;
+  drawAnnunciator(p, QRectF(x, y, fm.horizontalAdvance(hi) + 2, h * 0.5), hi, m_verdict == LimitTest::High, fpx);
+  x += fm.horizontalAdvance(hi) + fpx * 0.9;
+  drawAnnunciator(p, QRectF(x, y, fm.horizontalAdvance(lo) + 2, h * 0.5), lo, m_verdict == LimitTest::Low, fpx);
+
+  if (!std::isnan(m_deviation) && m_verdict != LimitTest::NoVerdict)
+  {
+    // "+0.6 %", one decimal below 10 %, none above
+    const double d = m_deviation;
+    const QString text = QString("%1%2 %").arg(d >= 0 ? "+" : "\u2212").arg(qAbs(d), 0, 'f', qAbs(d) < 10 ? 1 : 0);
+    p.setFont(sansFont(fpx));
+    p.setPen(m_segment);
+    p.drawText(QRectF(badge.left(), y + h * 0.5, badge.width(), h * 0.55), Qt::AlignCenter, text);
+  }
 }
 
 void LcdWidget::drawMinMax(QPainter &p, const Layout &l) const
@@ -906,6 +987,7 @@ void LcdWidget::paintEvent(QPaintEvent *)
   drawMain(p, l);
   drawMinMax(p, l);
   drawExtra(p, l);
+  drawVerdict(p, l);
   drawBar(p, l, false);
 }
 

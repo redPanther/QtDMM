@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "service/metercontroller.h"
 
+#include <cmath>
 #include <limits>
 
 #include <QDateTime>
@@ -162,6 +163,13 @@ void MeterController::setAlarms(const QList<Alarm> &alarms)
   updateBanner();
 }
 
+void MeterController::setLimitTest(const LimitTest &test)
+{
+  m_limitTest = test;
+  m_verdict = LimitTest::NoVerdict;
+  Q_EMIT limitJudged(m_limitTest.value.id, m_verdict, std::nan(""));
+}
+
 void MeterController::configure(const MeterSetup &setup)
 {
   m_dmm->setDmmInfo(setup.info);
@@ -181,6 +189,11 @@ bool MeterController::connectMeter(bool on)
     m_dmm->close();
   // a "no readings" alarm watches a connected meter, so its clock starts here
   m_alarms->setConnected(m_dmm->isOpen(), QDateTime::currentMSecsSinceEpoch());
+  if (!m_dmm->isOpen() && m_verdict != LimitTest::NoVerdict)
+  {
+    m_verdict = LimitTest::NoVerdict;
+    Q_EMIT limitJudged(m_limitTest.value.id, m_verdict, std::nan(""));
+  }
   return ok;
 }
 
@@ -342,6 +355,13 @@ void MeterController::publish(const Reading &rd)
     m_valueUnits[id] = baseUnit;
   m_valueOverload[id] = overload;
   m_alarms->feed(dval, overload, now, id, rd.source);
+
+  // the limit test: a verdict for every reading of its value
+  if (m_limitTest.enabled && m_limitTest.value.matches(rd))
+  {
+    m_verdict = rd.noNumber() ? LimitTest::NoVerdict : m_limitTest.judge(dval, overload, rd.text.trimmed().startsWith('-'));
+    Q_EMIT limitJudged(id, m_verdict, overload || m_verdict == LimitTest::NoVerdict ? std::nan("") : m_limitTest.deviation(dval));
+  }
 
   ScpiServer::Reading r;
   r.value = dval;

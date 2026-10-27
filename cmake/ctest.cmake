@@ -164,6 +164,8 @@ if (BUILD_TESTING)
 
 	## alarms: conditions, duration, hysteresis, acknowledge, JSON
 	qtdmm_add_test(alarms test_alarm tests/test_alarm.cpp)
+	## limit test (PASS/FAIL): limits, verdict, deviation, JSON
+	qtdmm_add_test(limit_test test_limittest tests/test_limittest.cpp)
 	## alarm sounds: once, N times, while raised, stopping; the built-in WAVs
 	qtdmm_add_test(alarm_sound test_alarmsound tests/test_alarmsound.cpp)
 	target_link_libraries(test_alarmsound PRIVATE qtdmm_resources)
