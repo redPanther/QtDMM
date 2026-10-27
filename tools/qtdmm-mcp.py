@@ -289,6 +289,22 @@ def keys() -> dict:
     return {"keys": [k.lower() for k in items if k]}
 
 
+@mcp.tool()
+def limit_test() -> dict:
+    """The PASS/FAIL limit test (CALCulate:LIMit): on or off, the limits in SI base units, the
+    verdict on the last reading of its value (pass, high, low or none) and the verdicts counted
+    since the last reset."""
+    verdicts = {"PASS": "pass", "HI": "high", "LO": "low", "NONE": "none"}
+    with Scpi() as s:
+        on = s.query("CALCulate:LIMit:STATe?") == "1"
+        lower = float(s.query("CALCulate:LIMit:LOWer?"))
+        upper = float(s.query("CALCulate:LIMit:UPPer?"))
+        verdict = s.query("QTDMM:LIMit:VERDict?")
+        passed, high, low = (int(n) for n in s.query("QTDMM:LIMit:COUNt?").split(","))
+    return {"enabled": on, "lower": lower, "upper": upper, "verdict": verdicts.get(verdict, verdict),
+            "count": {"pass": passed, "high": high, "low": low}}
+
+
 def command(cmd):
     """Sends a command and reads the error queue once: an error there becomes the tool's error.
     The queue is shared by all clients, so an older error may show up here too."""
@@ -336,6 +352,28 @@ if args.allow_control:
     def acknowledge_alarms() -> str:
         """Acknowledges the raised alarms, like the banner's button (QTDMM:ALARm:ACKnowledge)."""
         return command("QTDMM:ALARm:ACKnowledge")
+
+    @mcp.tool()
+    def set_limit_test(enabled: bool | None = None, lower: float | None = None,
+                       upper: float | None = None) -> str:
+        """Sets the PASS/FAIL limit test (CALCulate:LIMit): limits in SI base units (a limit set
+        makes it a test of lower and upper limit), and/or switches it on or off. What is not
+        given stays."""
+        cmds = []
+        if lower is not None:
+            cmds.append(f"CALCulate:LIMit:LOWer {float(lower)!r}")
+        if upper is not None:
+            cmds.append(f"CALCulate:LIMit:UPPer {float(upper)!r}")
+        if enabled is not None:
+            cmds.append("CALCulate:LIMit:STATe " + ("ON" if enabled else "OFF"))
+        if not cmds:
+            raise ToolError("nothing to set: give enabled, lower or upper")
+        return command(";:".join(cmds))
+
+    @mcp.tool()
+    def clear_limit_count() -> str:
+        """Resets the PASS/FAIL count (CALCulate:LIMit:CLEar)."""
+        return command("CALCulate:LIMit:CLEar")
 
     @mcp.tool()
     def press_key(key: str) -> str:

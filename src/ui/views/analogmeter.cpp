@@ -104,7 +104,7 @@ AnalogMeterStyle AnalogMeterStyle::dark()
   s.needle = QColor(0xff, 0xff, 0xff);
   s.redZone = QColor(0xd8, 0x22, 0x22);
   s.redBand = QColor(0x8c, 0x26, 0x26);
-  s.passBand = QColor(0x30, 0xc0, 0x48);
+  s.passBand = QColor(0x9c, 0xec, 0xa8);
   s.boxBg = QColor(0x2c, 0x2c, 0x2c);
   s.boxText = QColor(0xea, 0xea, 0xea);
   s.lampOff = QColor(0x4a, 0x12, 0x12);
@@ -126,7 +126,7 @@ AnalogMeterStyle AnalogMeterStyle::ivory()
   s.needle = QColor(0x10, 0x10, 0x10);
   s.redZone = QColor(0xc8, 0x18, 0x18);
   s.redBand = QColor(0xe8, 0x8c, 0x80);
-  s.passBand = QColor(0x18, 0x9a, 0x34);
+  s.passBand = QColor(0xa8, 0xe4, 0xae);
   s.boxBg = QColor(0xe4, 0xda, 0xbe);
   s.boxText = QColor(0x1e, 0x1e, 0x1e);
   s.lampOff = QColor(0x6a, 0x20, 0x20);
@@ -488,14 +488,14 @@ void AnalogMeter::drawScale(QPainter &p, const Geometry &g) const
         addArc(path, g.pivot, R, angleOf(lo), angleOf(hi), true);
         addArc(path, g.pivot, R * 0.94, angleOf(hi), angleOf(lo), false);
         path.closeSubpath();
-        // saturated, with a dark inner edge: it stays apart from a dial
-        // tinted green by a PASS
+        // light, so the green MAX mark stands out on it, with a darker
+        // inner edge against the dial
         p.setPen(Qt::NoPen);
         p.setBrush(m_style.passBand);
         p.drawPath(path);
         QPainterPath edge;
         addArc(edge, g.pivot, R * 0.94, angleOf(lo), angleOf(hi), true);
-        p.setPen(QPen(m_style.passBand.darker(170), qMax(1.0, R * 0.008), Qt::SolidLine, Qt::FlatCap));
+        p.setPen(QPen(m_style.passBand.darker(140), qMax(1.0, R * 0.008), Qt::SolidLine, Qt::FlatCap));
         p.setBrush(Qt::NoBrush);
         p.drawPath(edge);
       }

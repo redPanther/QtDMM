@@ -37,7 +37,7 @@ struct AnalogMeterStyle
   QColor needle;
   QColor redZone;   ///< labels in the red zone
   QColor redBand;   ///< the band on the arc, paler, so labels and marks stand out on it
-  QColor passBand;   ///< the limit test's band on the arc (setLimits())
+  QColor passBand;   ///< the limit test's band on the arc (setLimits()), lighter than maxMark
   QColor boxBg;   ///< readout / unit boxes
   QColor boxText;
   QColor lampOff;

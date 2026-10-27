@@ -67,6 +67,7 @@ QT_QPA_PLATFORM=offscreen QTDMM_IPC_KEY=mcptest qtdmm --config-dir /tmp/qtdmm-te
 | `recording` | `QTDMM:RECord?` | `live`, `recording`, `view` or `idle`, the seconds it spans, readings, unit |
 | `recording_data` | `QTDMM:RECord:DATA? <n>,(@n)` | the last `count` readings of `channel` in the graph (1 the main value, the default; at most 10000): seconds since the start and value, `overload` or `gap` |
 | `alarms` | `QTDMM:ALARm:LIST?` | each alarm with its state: `off`, `pending`, `raised`, `acknowledged` |
+| `limit_test` | `CALCulate:LIMit:…?`, `QTDMM:LIMit:VERDict?`, `QTDMM:LIMit:COUNt?` | the PASS/FAIL test: on or off, lower and upper limit in base units, the verdict (`pass`, `high`, `low`, `none`) and the count since the last reset |
 | `instances` | `QTDMM:INSTances?` | the running instances with their last reading |
 | `keys` | `QTDMM:KEY:CATalog?` | the meter's keys QtDMM can press, empty for most meters |
 
@@ -85,6 +86,8 @@ may show up too).
 | `mark` | `QTDMM:MARK` | a mark with `text` in the graph and the readings table (one line: a line break is refused) |
 | `reset_min_max` | `CALCulate:AVERage:CLEar` | resets min/max, like F4 |
 | `acknowledge_alarms` | `QTDMM:ALARm:ACKnowledge` | acknowledges the raised alarms |
+| `set_limit_test` | `CALCulate:LIMit:LOWer`, `:UPPer`, `:STATe` | sets `lower` and/or `upper` (base units; makes it a test of lower and upper limit) and/or switches the test `enabled`; what is not given stays |
+| `clear_limit_count` | `CALCulate:LIMit:CLEar` | resets the PASS/FAIL count |
 | `press_key` | `QTDMM:KEY` | presses one of the keys `keys` lists (UNI-T Bluetooth meters) |
 
 When QtDMM is not running, its SCPI server is off or an answer takes longer

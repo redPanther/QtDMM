@@ -94,7 +94,7 @@ The range is `AUTO`, `MANUAL` or the meter's own range text.
 
 | Command | Answer | Notes |
 |---|---|---|
-| `STATus:QUEStionable?`, `STATus:QUEStionable:CONDition?`, `…:EVENt?` | integer | bit 0 (1) overload · bit 1 (2) hold · bit 2 (4) meter not connected (connecting, silent, or lost and reconnecting) · bit 3 (8) no current reading (nothing for 5 s; bits 0 and 1 are then 0) |
+| `STATus:QUEStionable?`, `STATus:QUEStionable:CONDition?`, `…:EVENt?` | integer | bit 0 (1) overload · bit 1 (2) hold · bit 2 (4) meter not connected (connecting, silent, or lost and reconnecting) · bit 3 (8) no current reading (nothing for 5 s; bits 0 and 1 are then 0) · bit 11 (2048) limit test FAIL LO · bit 12 (4096) FAIL HI (`Sources::verdict`, as Keysight's) |
 | `STATus:OPERation?`, `…:CONDition?`, `…:EVENt?` | integer | bit 4 (16) *measuring*: the recorder is running · bit 9 (512, QtDMM's own) an alarm is raised, acknowledged or not |
 | `INPut?`, `INPut:STATe?` | `1` / `0` | meter connected and sending? `0` also while QtDMM reconnects a lost meter |
 | `SYSTem:VERSion?` | `1999.0` | SCPI version |
@@ -109,6 +109,9 @@ The range is `AUTO`, `MANUAL` or the meter's own range text.
 | `INPut OFF`, `INPut 0` | disconnects the meter, also one that is lost and being reconnected |
 | `CALCulate:AVERage:CLEar` | resets the min/max memory (F4), the display's and every value's (`MeterController::valueMinMax()`) |
 | `CALCulate:AVERage:CLEar (@n)` `CALCulate<n>:AVERage:CLEar` | resets the memory of those values alone (`Sources::clearChannelStats`) |
+| `CALCulate:LIMit[:STATe] ON\|OFF\|1\|0` | the PASS/FAIL limit test on or off (34465A); `CALCulate:STATe` the same, `CALCulate:FUNCtion LIMit` accepted (34410A, other functions `-224`) |
+| `CALCulate:LIMit:LOWer[:DATA] <v>\|MIN\|MAX\|DEF`, `…:UPPer[:DATA] …` | sets a limit in SI base units (±1.0E+15, DEF 0; beyond `-222`, not a number `-104`); the test becomes `LimitTest::Range`, the other limit kept from `low()`/`high()`. Through `Sources::setLimitTest` → `MeterController::setLimitTest()` → `limitTestChanged`, which the window keeps in its settings |
+| `CALCulate:LIMit:CLEar` | resets the PASS/FAIL count (`MeterController::resetLimitCount()`) |
 | `QTDMM:ALARm:ACKnowledge` | acknowledges the raised alarms |
 | `QTDMM:MARK "text"` | a mark at the newest reading, graph and readings table; `SCPI` without text |
 | `QTDMM:KEY "hold"` | presses a key of the meter (`DmmDecoder::keyNames()` the decoder supports); `-241` for a meter without keys, `-224` for a key it lacks, `-240` when not sent |
@@ -126,6 +129,11 @@ qtdmm-mcp tool offers them only with `--allow-control`.
 | `QTDMM:RECord:DATA? [<n>\|MAX][,(@list)]` | definite-length block | CSV `seconds,value`, the last n points (100 default, `ScpiServer::kMaxDataPoints` = 10000 at most, more is cut to it); overload `9.9E+37`, gap `nan`; `-222` for n < 1 or not whole or a channel the meter has not, `-104` for not a number. A channel list picks the series (channel 1 the main one, n the last `RecordingStore::extra()` of id n-1); several give `channel,seconds,value`, the last n of each in the list's order |
 | `QTDMM:ALARm?` | integer | alarms raised or acknowledged |
 | `QTDMM:ALARm:LIST?` | `"<name>",<state>,…` | `OFF\|PEND\|RAIS\|ACKN` per alarm, `""` when none is set up; quotes in a name doubled |
+| `CALCulate:LIMit[:STATe]?`, `CALCulate:STATe?` | `1`/`0` | limit test on |
+| `CALCulate:LIMit:LOWer?` `…:UPPer?` `[MIN\|MAX]` | NR3 | the limits as the test uses them (`LimitTest::low()`/`high()`), also for nominal ± tolerance |
+| `CALCulate:FUNCtion?` | `LIM` | the only function |
+| `QTDMM:LIMit:VERDict?` | `PASS\|HI\|LO\|NONE` | `MeterController::verdict()`, on the last reading of the tested value |
+| `QTDMM:LIMit:COUNt?` | `<pass>,<high>,<low>` | `LimitTest::Count` since the last reset (new test, min/max reset, `CALC:LIM:CLE`) |
 | `QTDMM:KEY:CATalog?` | `"<KEY>",…` | upper case, `""` for none |
 | `QTDMM:CHANnel:CATalog?` | `<n>,"<port>","<unit>",…` | the channels of `READ? (@n)`: what each measures (`PortKey`: `voltage.dc`, `temperature`, `carbon_dioxide`) and its unit, empty strings before its first reading |
 | `QTDMM:INSTances?` | `"<id>",<value>,"<unit>",…` | running instances (`SharedStateManager`), `9.91E+37` without a current reading |
