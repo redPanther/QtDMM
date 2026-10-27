@@ -174,7 +174,7 @@ int main(int argc, char **argv)
           ++problems;
         }
       };
-      ocheck(o->hasKey("zero", "CM2100B *") && !o->hasKey("range", "CM2100B *") && !o->hasKey("rel", "CM2100B *"),
+      ocheck(o->hasKey("zero", "CM2100B") && !o->hasKey("range", "CM2100B") && !o->hasKey("rel", "CM2100B"),
              "CM2100B keys: SELECT, HOLD, ZERO, no RANGE");
       ocheck(o->hasKey("minmax", "B41T+ *") && !o->hasKey("minmax", "OW18E *") && !o->hasKey("lamp", "B33T+ *"),
              "MAX/MIN on the B35T+ and B41T+ only, no light key on the B33T+");
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
       ocheck(o->modelsFromInfo(QByteArray::fromHex("296300010200")) == QStringList({ "OWON B41T+ *" }), "code 41");
       ocheck(o->modelsFromInfo(QByteArray::fromHex("1263040009000000")) == QStringList({ "OWON OW16B *", "OWON OW18B *" }),
              "code 18: OW18B or OW16B");
-      ocheck(o->modelsFromInfo(QByteArray::fromHex("15")) == QStringList({ "OWON CM2100B *" }), "code 21");
+      ocheck(o->modelsFromInfo(QByteArray::fromHex("15")) == QStringList({ "OWON CM2100B" }), "code 21");
       ocheck(o->modelsFromInfo(QByteArray::fromHex("63")).isEmpty() && o->modelsFromInfo({}).isEmpty(), "no model");
       // NCV dashes, no number; 0x6FFF is no reading; frames back in step
       // after a lost byte

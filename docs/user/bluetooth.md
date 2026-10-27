@@ -3,9 +3,10 @@
 QtDMM reads two kinds of Bluetooth LE meters:
 
 - **UNI-T UT60BT** (and, untested, the UT161B/D/E and the UT61B+/D+/E+
-  with the UT-D07B adapter) and, untested, the **APPA** Bluetooth meters
+  with the UT-D07B adapter), the **OWON** Bluetooth meters (tried on the
+  CM2100B) and, untested, the **APPA** Bluetooth meters
   and their BENNING, KPS, MEGGER, METRAVI, RS PRO and Sefram twins and the
-  **ZOTEK** meters (ZOYI, BSIDE, ANENG), the **OWON** Bluetooth meters and
+  **ZOTEK** meters (ZOYI, BSIDE, ANENG), and
   the **HoldPeak HP-570C-APP** clamp - QtDMM *connects* to the meter and
   reads it, like a serial meter on a cable.
 - **Victron** SmartShunt, BMV-712, MPPT chargers and Phoenix inverters - QtDMM
@@ -141,11 +142,12 @@ B33T+, B35T+ and B41T+ also have **REL** (the B33T+ no LIGHT), the B35T+
 and B41T+ **MIN/MAX**; the CM2100B has **SELECT**, **ZERO**, **LIGHT** and
 **HOLD**.
 
-Not tried with a real meter yet: the protocol comes from the
-[dmm-tools](https://github.com/antoinecellerier/dmm-tools) project, worked
-out from OWON's app, its PC software and manuals and compared there with
-readings other projects recorded from these meters. Please report how it
-works for you.
+Tried on the CM2100B: all keys and ranges, the display as on the meter.
+The others are built much the same but not tried yet. The protocol comes
+from the [dmm-tools](https://github.com/antoinecellerier/dmm-tools)
+project, worked out from OWON's app, its PC software and manuals and
+compared there with readings other projects recorded from these meters.
+Please report how it works with yours.
 
 ## HoldPeak HP-570C-APP
 
