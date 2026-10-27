@@ -2040,8 +2040,10 @@ void MainWindow::setDesign(int design)
   m_poincare->setThemeColors(poincare, g.grid, g.labels, g.data);
   for (QAction *a : m_designMenu->actions())
     a->setChecked(a->data().toInt() == design);
-  // at once, so the settings dialog shows the design of the menu
+  // at once, so the settings dialog shows the design of the menu (and its
+  // OK does not set the one of before again)
   m_wid->settings()->setString("Windows/design", Designs::name(d));
+  m_wid->settingsDialog()->guiPage()->setDesign(Designs::name(d));
 }
 
 void MainWindow::storeDisplaySLOT()

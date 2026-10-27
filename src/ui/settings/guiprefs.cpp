@@ -186,6 +186,11 @@ void GuiPrefs::setShowDisplay(bool show)
   ui_showDisplay->setChecked(show);
 }
 
+void GuiPrefs::setDesign(const QString &name)
+{
+  ui_design->setCurrentIndex(qMax(0, ui_design->findData(name)));
+}
+
 void GuiPrefs::applySLOT()
 {
   m_cfg->setBool("Display/show", showDisplay());
