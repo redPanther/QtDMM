@@ -101,6 +101,12 @@ int main(int argc, char **argv)
       check(got == want, QString("keys: %1 came back as %2, expected %3").arg(key, got, want));
     }
 
+    // a design chosen in the menu is what OK on the page keeps
+    gui.setDesign("dark");
+    gui.applySLOT();
+    blank.save();
+    check(blank.getString("Windows/design", "-") == "dark", "gui: the menu's design after OK, got " + blank.getString("Windows/design", "-"));
+
     // what the dialog reads
     check(graph.windowSeconds() == 45 * 60 && !graph.automaticScale() && graph.scaleMax() == 7000,
           "graph: window or Y axis");

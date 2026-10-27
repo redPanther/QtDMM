@@ -48,6 +48,9 @@ public:
   QColor    displayBgColor() const;
   bool      showDisplay() const;
   void      setShowDisplay(bool show);
+  /// The design chosen in the menu (Designs::name()): the page's choice follows,
+  /// or OK here would set the one of before again.
+  void      setDesign(const QString &name);
   int       meterScaleMode() const;   ///< 0 auto, 1 unipolar, 2 bipolar
   int       meterStyle() const;   ///< 0 dark, 1 ivory
   void      setMeterStyle(int style);
