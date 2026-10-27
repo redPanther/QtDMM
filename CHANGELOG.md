@@ -20,7 +20,8 @@
 
 ### GUI
 
-- **New design: Brushed metal** — the digital display, the analog meter and the table stand on brushed metal, the sidebar is light grey, everything else (workspace, graph, Poincaré plot) is Silver's. In the Design menu and on the Appearance page of the Preferences.
+- **New designs: Light Metal and Dark Metal** — the digital display, the analog meter and the table stand on brushed metal, light or dark; the sidebar is light grey or near black, everything else (workspace, graph, Poincaré plot) is as in Light or Dark. In the Design menu and on the Appearance page of the Preferences.
+- **Silver is now called Light** — and the designs are named Light, Dark, Light Metal and Dark Metal in every language; the saved choice stays.
 
 ### Platforms and build
 
@@ -32,6 +33,8 @@ Changes after rc1; the release candidate below lists everything new before.
 
 ### Bug fixes
 
+- **A design chosen in the menu stays** — OK in the Preferences afterwards, for whatever else, set the design shown there before again. Quitting did the same.
+- **System after another design** — the device sidebar now and then kept the last design's colours, and its grey entries (services, stopped instances) kept them until they changed.
 - **A Victron device chosen in the sidebar shows its own values** — taken over straight after another Victron model (SmartShunt, then SmartSolar MPPT), it showed the values of the one before mapped onto its own (the voltage twice, an empty third value) until another kind of meter was chosen in between.
 - **The window dividers no longer react through a dialog** — over the Preferences (or another dialog of a window) lying on top of a divider, the mouse showed the split cursor and could drag the divider; Ctrl+drag in such a dialog moved the window below it.
 

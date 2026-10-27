@@ -149,15 +149,18 @@ public:
   }
 };
 
-const QPixmap &brushedMetalTexture()
+bool isDark(Designs::Design d)
 {
-  static const QPixmap texture(":/textures/brushed-metal.jpg");
-  return texture;
+  return d == Designs::Dark || d == Designs::DarkMetal;
 }
 
-QBrush brushedMetal()
+/// The texture of a metal design, a null pixmap for the others.
+const QPixmap &metalTexture(Designs::Design d)
 {
-  return QBrush(brushedMetalTexture());
+  static const QPixmap light(":/textures/brushed-metal.jpg");
+  static const QPixmap dark(":/textures/dark-metal.jpg");
+  static const QPixmap none;
+  return d == Designs::BrushedMetal ? light : d == Designs::DarkMetal ? dark : none;
 }
 
 // the texture stretched over a view, anew at each size: the light across
@@ -169,11 +172,12 @@ public:
   using QObject::QObject;
   static void fit(QWidget *view)
   {
-    if (brushedMetalTexture().isNull() || view->size().isEmpty())
+    const QPixmap &texture = metalTexture(Designs::current());
+    if (texture.isNull() || view->size().isEmpty())
       return;
     QPalette pal = view->palette();
-    pal.setBrush(QPalette::Window, QBrush(brushedMetalTexture().scaled(view->size(), Qt::IgnoreAspectRatio,
-                                                                       Qt::SmoothTransformation)));
+    pal.setBrush(QPalette::Window, QBrush(texture.scaled(view->size(), Qt::IgnoreAspectRatio,
+                                                         Qt::SmoothTransformation)));
     view->setPalette(pal);
   }
 
@@ -194,8 +198,9 @@ const char *kSilverSheet =
   "  stop:0 #d9dde2, stop:1 #aab1ba); }"
   "QMdiSubWindow { background: #dfe2e6; }";
 
-// Silver, the side bar a light grey instead of white
+// the metal designs: the side bar's colour from their mock-ups
 const char *kBrushedSheet = "DeviceSidebar { background: #e9ecee; }";
+const char *kDarkMetalSheet = "DeviceSidebar { background: #151a1f; }";
 
 // Fusion draws the frame of a text field a bit darker than the window - on
 // the dark fields it vanished, so they get a light edge of their own (not
@@ -215,6 +220,7 @@ QString Designs::name(Design d)
     case Silver: return "silver";
     case Dark: return "dark";
     case BrushedMetal: return "brushed";
+    case DarkMetal: return "dark-metal";
     default: return "system";
   }
 }
@@ -227,6 +233,8 @@ Designs::Design Designs::fromName(const QString &name)
     return Dark;
   if (name == "brushed")
     return BrushedMetal;
+  if (name == "dark-metal")
+    return DarkMetal;
   return System;
 }
 
@@ -251,14 +259,24 @@ void Designs::apply(Design d)
   else
   {
     // native styles (Windows, macOS) take no palette; Fusion does
-    QStyle *fusion = QStyleFactory::create("Fusion");
-    QApplication::setStyle(d == Dark ? new DarkIndicatorStyle(fusion) : fusion);
-    QApplication::setPalette(d == Dark ? darkPalette() : silverPalette());
-    if (d == Dark)
-      qApp->setStyleSheet(kDarkSheet);
+    // QApplication owns the style, the proxy its base style
+    if (isDark(d))
+      QApplication::setStyle(new DarkIndicatorStyle(QStringLiteral("Fusion")));
+    else
+      QApplication::setStyle(QStringLiteral("Fusion"));
+    QApplication::setPalette(isDark(d) ? darkPalette() : silverPalette());
+    if (isDark(d))
+      qApp->setStyleSheet(QString(kDarkSheet) + (d == DarkMetal ? kDarkMetalSheet : ""));
     else
       qApp->setStyleSheet(QString(kSilverSheet) + (d == BrushedMetal ? kBrushedSheet : ""));
   }
+  // Qt does not always hand the new palette down to every widget: the
+  // docked side bar kept the last design's now and then (System after Dark
+  // on KDE). Each widget takes it from its parent afresh
+  QEvent change(QEvent::ApplicationPaletteChange);
+  const QWidgetList widgets = QApplication::allWidgets();
+  for (QWidget *w : widgets)
+    QCoreApplication::sendEvent(w, &change);
   applyIcons();
 }
 
@@ -331,6 +349,7 @@ QBrush Designs::areaBrush(Design d)
       // drew stripes across the background
       return QColor("#9aa2ac");
     case Dark:
+    case DarkMetal:
       return QColor(30, 30, 32);
     default:
       // the windows' own colour: the gaps between them show no darker
@@ -351,8 +370,8 @@ void Designs::fitTexture(QWidget *view, bool on)
 
 QBrush Designs::frameBrush(Design d)
 {
-  if (d == BrushedMetal)
-    return brushedMetal();
+  if (d == BrushedMetal || d == DarkMetal)
+    return QBrush(metalTexture(d));
   if (d == Silver)
     return vgrad({ { 0, QColor("#fdfdfe") }, { 0.3, QColor("#e3e6ea") }, { 0.55, QColor("#cdd2d8") },
                    { 1, QColor("#9ea6b0") } });
@@ -368,7 +387,7 @@ Designs::GraphColors Designs::graphColors(Design d)
     c.grid = QColor("#b8bec6");
     c.labels = QColor("#20242a");
   }
-  else if (d == Dark)
+  else if (isDark(d))
   {
     c.background = QColor(36, 36, 40);
     c.grid = QColor(80, 80, 86);

@@ -126,6 +126,7 @@ protected:
   void        dropEvent(QDropEvent *event) override;
   void        contextMenuEvent(QContextMenuEvent *event) override;
   void        keyPressEvent(QKeyEvent *event) override;
+  void        changeEvent(QEvent *event) override;
 
 private:
   void        updateMarks();
@@ -144,6 +145,8 @@ private:
   QTreeWidgetItem *m_instances = nullptr;
   QTreeWidgetItem *m_services = nullptr;
   QString          m_ownInstance;
+  QList<Instance>  m_instanceList;   ///< as last set: coloured anew with another design
+  QList<Service>   m_serviceList;
   QString          m_selectInstance;   ///< renamed: selected again under this name
   QString          m_current;
   bool             m_active = false;

@@ -540,9 +540,9 @@ void MainWindow::createDesignMenu()
   // settings of their own)
   m_designMenu = new QMenu(tr("D&esign"), this);
   auto *designGroup = new QActionGroup(this);
-  for (auto [d, text] : { std::pair{Designs::System, tr("&System")}, std::pair{Designs::Silver, tr("S&ilver")},
-                          std::pair{Designs::Dark, tr("&Dark")},
-                          std::pair{Designs::BrushedMetal, tr("&Brushed metal")} })
+  for (auto [d, text] : { std::pair{Designs::System, tr("&System")}, std::pair{Designs::Silver, tr("&Light")},
+                          std::pair{Designs::Dark, tr("&Dark")}, std::pair{Designs::BrushedMetal, tr("Light &Metal")},
+                          std::pair{Designs::DarkMetal, tr("Dark Me&tal")} })
   {
     QAction *a = m_designMenu->addAction(text);
     a->setCheckable(true);
@@ -2040,8 +2040,10 @@ void MainWindow::setDesign(int design)
   m_poincare->setThemeColors(poincare, g.grid, g.labels, g.data);
   for (QAction *a : m_designMenu->actions())
     a->setChecked(a->data().toInt() == design);
-  // at once, so the settings dialog shows the design of the menu
+  // at once, so the settings dialog shows the design of the menu (and its
+  // OK does not set the one of before again)
   m_wid->settings()->setString("Windows/design", Designs::name(d));
+  m_wid->settingsDialog()->guiPage()->setDesign(Designs::name(d));
 }
 
 void MainWindow::storeDisplaySLOT()
