@@ -92,10 +92,9 @@ void ValueMenu::fill(QMenu *menu, const Target &target, const ValueRef &value)
   GraphWidget *graph = wid->graph();
   QMenu *curves = menu->addMenu(tr("&Graph"));
   auto *sides = new QActionGroup(curves);
-  const bool shown = own ? (id == 0 ? graph->mainShown() : graph->shownValues().contains(id))
-                         : graph->otherValues().contains(ref);
-  const GraphWidget::ValueAxis side = own ? graph->valueSide(id) : graph->otherValueSide(ref);
-  const GraphWidget::ValueAxis chosen = own ? graph->valueAxis(id) : graph->otherValueAxis(ref);
+  const bool shown = graph->valueShown(ref);
+  const GraphWidget::ValueAxis side = graph->valueSide(ref);
+  const GraphWidget::ValueAxis chosen = graph->valueAxis(ref);
   const std::pair<GraphWidget::ValueAxis, QString> choices[] = { { GraphWidget::AxisAuto, tr("&Off") },
                                                                  { GraphWidget::AxisLeft, tr("&Left axis") },
                                                                  { GraphWidget::AxisRight, tr("&Right axis") } };
@@ -105,30 +104,29 @@ void ValueMenu::fill(QMenu *menu, const Target &target, const ValueRef &value)
     // another meter's value without room: the axis chosen for it
     QAction *a = checkable(curves, text, off ? !shown : (side != GraphWidget::AxisAuto ? side : chosen) == axis);
     sides->addAction(a);
-    if (own && id == 0 && axis == GraphWidget::AxisRight)
+    if (graph->isBase(ref) && id == 0 && axis == GraphWidget::AxisRight)
     {
       a->setEnabled(false);
       a->setToolTip(tr("The main value is on the left axis"));
     }
-    QObject::connect(a, &QAction::triggered, menu, [graph, own, id, ref, axis = axis, off, show]
+    QObject::connect(a, &QAction::triggered, menu, [graph, ref, axis = axis, off, show]
     {
       if (off)
       {
-        if (own)
-          graph->setValueShown(id, false);
-        else
-          graph->setOtherValueShown(ref, false);
+        graph->setValueShown(ref, false);
         return;
       }
-      if (own)
+      // the graph's meter: the axis first (it makes room there); another
+      // meter's: on first, then its axis
+      if (graph->isBase(ref))
       {
-        graph->setValueAxis(id, axis);
-        graph->setValueShown(id, true);
+        graph->setValueAxis(ref, axis);
+        graph->setValueShown(ref, true);
       }
       else
       {
-        graph->setOtherValueShown(ref, true);
-        graph->setOtherValueAxis(ref, axis);
+        graph->setValueShown(ref, true);
+        graph->setValueAxis(ref, axis);
       }
       show(View::Graph, ref.source);
     });

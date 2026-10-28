@@ -390,6 +390,30 @@ public:
   QList<QPointF>   otherCurvePoints(int i) const { return m_otherCurves[size_t(i)].points; }
   /// @}
   bool             mainShown() const { return m_mainShown; }
+
+  /// @name The values, of any meter (ValueRef)
+  /// One list for the graph's own meter and the others: a value of the
+  /// meter of the store (baseSource(); an empty source is that meter too)
+  /// is its main curve or one of its other values, one of another meter a
+  /// curve from that meter's store. The graph does not choose its store:
+  /// the caller makes the meter of the first value its base (setStore(),
+  /// setBaseSource()).
+  /// @{
+  void             setBaseSource(const QString &source) { m_baseSource = source; }
+  QString          baseSource() const { return m_baseSource; }
+  bool             isBase(const ValueRef &value) const { return value.source.isEmpty() || value.source == m_baseSource; }
+  /// The values shown, the base meter's first (with its source), in order.
+  QList<ValueRef>  values() const;
+  void             setValues(const QList<ValueRef> &values);
+  bool             valueShown(const ValueRef &value) const;
+  void             setValueShown(const ValueRef &value, bool shown);
+  ValueAxis        valueAxis(const ValueRef &value) const;
+  void             setValueAxis(const ValueRef &value, ValueAxis axis);
+  /// Where it is drawn now; AxisAuto while it is not.
+  ValueAxis        valueSide(const ValueRef &value) const;
+  /// Its curve's colour while it is drawn, else invalid.
+  QColor           drawnColor(const ValueRef &value) const;
+  /// @}
   /// The unit of the left axis: the main value's, or while it is hidden
   /// the one of the lowest value shown (its newest series).
   QString          leftUnit() const;
@@ -430,6 +454,8 @@ public:
   static bool      migrateIntegralScale(Settings *cfg);
 
 Q_SIGNALS:
+  /// values() changed (setValues(), setValueShown()).
+  void             valuesChanged();
   /// Status bar text: sample time, window and remaining length.
   void             info(const QString &);
   void             error(const QString &);
@@ -789,6 +815,7 @@ protected:
   QGraphicsRectItem *m_limitBand = nullptr;
   QGraphicsLineItem *m_limitLines[2] = { nullptr, nullptr };   ///< low, high
   Control          m_control;   ///< setControl()
+  QString          m_baseSource;   ///< setBaseSource()
   ValueRef         m_limitValue{ -1 };
   ValueRef         m_lastReference{ -1 };   ///< for leftValueChanged()
   qint64           m_minimapShift = 0;      ///< where the overview's store begins on this one's time (ms)
