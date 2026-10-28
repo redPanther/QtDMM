@@ -421,8 +421,8 @@ qtdmm [options]
 
 | Option | Meaning |
 |---|---|
-| `--config-id <id>` | Use the named configuration instead of `default`. Each id has its own settings file, so one meter can be set up per id. |
-| `--also <id>` | Open the entry `<id>` of *My devices* as well, without a window, for this run; repeat it for more. Its readings reach the SCPI server (`INSTrument:SELect`), and it records whenever the window records; see [SCPI server](docs/user/scpi-server.md#qtdmms-own-commands). The ids are listed by `QTDMM:DEVice:CATalog?`. |
+| `--config-id <id>` | Use the named configuration instead of `default`. Each id has its own settings file: its window, its views and the devices it connects. |
+| `--connect <id>` | Connect the entry `<id>` of *My devices* at the start, after those connected last time; repeat it for more. Its readings reach the SCPI server (`INSTrument:SELect`), and it records with the others; see [SCPI server](docs/user/scpi-server.md#qtdmms-own-commands). The ids are listed by `QTDMM:DEVice:CATalog?`. `--also <id>` (before 26.4) does the same. |
 | `--config-dir <dir>` | Directory for the configuration files (default: the platform's user config location). |
 | `--vxi11-rpc auto\|system\|own` | For this run, where VXI-11 gets its portmapper from: the system's rpcbind, an own one on port 111, or automatically (see [SCPI server](docs/user/scpi-server.md#vxi-11)). Replaces the setting without changing it. |
 | `--vxi11-portmapper-port <port>` | For tests and development: VXI-11 with an own portmapper on this port instead of 111 (0: any free one), for this run. VISA libraries and lxi-tools ask port 111 and do not find it there; a client of your own (or a test) asks this port. |
@@ -432,16 +432,16 @@ qtdmm [options]
 
 ### Several meters at once
 
-One QtDMM reads several meters: the window's own and those opened beside
-it. *Connect* in the context menu of an entry of
-[My devices](docs/user/my-devices.md) (or *Connect* at the end of the assistant
-*Add device*) opens the device in the same QtDMM, with a front panel of
-its own; `--also <id>` does the same at the start, and over SCPI
-`QTDMM:DEVice:OPEN`. The node **Open devices** of the sidebar (F9) lists
-them with their current reading, the active device in bold; *Close* in the
-context menu closes one (see [My devices](docs/user/my-devices.md#several-meters-front-panels-and-the-active-device)). They record whenever the window records, on the
-same time base, and a [calculated value](docs/user/calculated-values.md) reads them
-by their names.
+One QtDMM reads several meters, all alike. *Connect* in the context menu
+of an entry of [My devices](docs/user/my-devices.md) (or dragging it onto
+**Connected devices**, or *Connect* at the end of the assistant *Add
+device*) connects the device in the same QtDMM, with a front panel of its
+own; `--connect <id>` does the same at the start, and over SCPI
+`QTDMM:DEVice:OPEN`. The node **Connected devices** of the sidebar (F9)
+lists them with their current reading, the active device in bold; *Close*
+in the context menu closes one (see [My devices](docs/user/my-devices.md#several-meters-front-panels-and-the-active-device)). They record together, on one
+time base, and a [calculated value](docs/user/calculated-values.md) reads them by
+their names.
 
 `--config-id` keeps a set of settings of its own (a file of its own).
 A second QtDMM started with another id runs on its own, without a link to

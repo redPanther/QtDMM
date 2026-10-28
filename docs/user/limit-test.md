@@ -8,7 +8,7 @@ voltage - without setting up alarms.
 ## Setting it up
 
 Each open device has its own test. Right-click the device's front panel
-(its digital display), or its row under *Open devices* in the sidebar:
+(its digital display), or its row under *Connected devices* in the sidebar:
 
 - **PASS/FAIL test** switches the test on and off. The limits stay when it
   is off. Switched on without limits, it asks for them.
@@ -50,9 +50,7 @@ no minimum duration and no hysteresis: each reading has its verdict. For
 ## In the graph, on the analog meter and in the status line
 
 The [graph](recorder.md) draws the limits as two dashed green lines, faintly
-green between them, while the tested value is on its left axis - also a
-device's open beside the window, when its value is the one on the left
-axis (see [the graph's values](recorder.md#looking-at-the-data)). The
+green between them, while the tested value is the one on its left axis (see [the graph's values](recorder.md#looking-at-the-data)). The
 reference line snaps to them. The [analog meter](analog-meter.md) shows
 the passing range as a green band on its arc, in place of the red zone,
 while its needle shows the tested value. A limit beyond the scale ends

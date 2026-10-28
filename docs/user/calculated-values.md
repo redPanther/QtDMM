@@ -9,10 +9,10 @@ printing all work on the calculated value exactly as on a measured one.
 
 ## Setting it up
 
-1. Put the meters into [My devices](my-devices.md) and open them in one
-   QtDMM: one in the window, the others with *Connect* in their context
-   menu in the sidebar (or *Connect* at the end of *Add device*). The
-   node **Open devices** of the sidebar (F9) lists them.
+1. Put the meters into [My devices](my-devices.md) and connect them in one
+   QtDMM: *Connect* in their context menu in the sidebar (or *Connect* at
+   the end of *Add device*). The node **Connected devices** of the sidebar
+   (F9) lists them.
 2. Each one is a variable by its name in My devices: lower case, other
    characters than letters and digits as `_`, so *UT61E Bench* is
    `ut61e_bench` (a name beginning with a digit gets a `_` in front). Short
@@ -43,9 +43,9 @@ prefix: 12 V times 0.5 mA is `6.00 mW`.
 - Functions: `sqrt(x)`, `abs(x)`, `log10(x)`, `sin(x)`, `cos(x)`, `exp(x)`,
   `floor(x)`, `min(a, b)`, `max(a, b)` and `rand()` (a new value in [0, 1)
   every time).
-- Variables are the meters open in this QtDMM, by their names in My
-  devices as above: the window's and those opened beside it (also with
-  `--also` or SCPI `QTDMM:DEVice:OPEN`, see [command line](command-line.md)).
+- Variables are the meters connected in this QtDMM, by their names in My
+  devices as above (also those connected with `--connect` or SCPI
+  `QTDMM:DEVice:OPEN`, see [command line](command-line.md)).
   A calculated value can itself be an input for another one. `t` is
   reserved: the seconds since the calculated value connected.
 

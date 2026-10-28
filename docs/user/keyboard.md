@@ -50,7 +50,7 @@ handbook window are fixed.
 
 | Key | Action |
 |---|---|
-| Ctrl+1 | Show / hide the digital display |
+| Ctrl+1 | Show / hide the front panels (digital displays) of all devices |
 | Ctrl+2 | Show / hide the analog meter |
 | Ctrl+3 | Show / hide the graph |
 | Ctrl+4 | Show / hide the readings table |

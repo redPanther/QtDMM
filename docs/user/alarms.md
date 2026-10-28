@@ -5,16 +5,15 @@ expect - a battery that sags below 12 V, a supply that drifts high, a
 sensor that stops answering. Every open device has its own list of
 alarms. They belong to the device: they are kept with its entry in
 [My devices](my-devices.md) and come along when another window or a later
-run uses it (a device of the window without an entry keeps them in the
-window's settings).
+run connects it.
 
 Where to set them up:
 
 - **Settings → Alarms**: **Device** at the top chooses whose alarms the
-  list shows (only with more than one device open); it starts on the
+  list shows (only with more than one device connected); it starts on the
   [active device](my-devices.md#several-meters-front-panels-and-the-active-device).
 - **Alarms...** in the context menu of a device's front panel or of its
-  row under *Open devices* in the sidebar opens that page on the device.
+  row under *Connected devices* in the sidebar opens that page on the device.
 - **New alarm...** in the menu of a value (the sidebar's value rows)
   starts a new alarm on that value.
 
@@ -101,8 +100,7 @@ a second. It is off by default.
 
 An alarm judges one value of its device. For a condition on several meters -
 power over a limit, say - set up a [calculated value](calculated-values.md)
-and put the alarm on it. A mark of an alarm of a device beside the window
-goes into the graph and the readings table while they show a value of it,
+and put the alarm on it. A mark of an alarm of a device goes into the graph and the readings table while they show a value of it,
 with the device's name in front.
 
 ## Example: setting a voltage
