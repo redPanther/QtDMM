@@ -85,7 +85,10 @@ public:
   /// The analog meter's style from its context menu (0 dark, 1 ivory):
   /// shown at once, saved, and the Appearance page follows.
   void        setMeterStyle(int style);
-  /// The limit test (PASS/FAIL), kept in the settings (Limits/test).
+  /// The settings' Alarms page with the alarms of the meter @p source
+  /// (MeterController::source(); empty: the window's).
+  void        openAlarms(const QString &source);
+  /// The window's meter's limit test (PASS/FAIL), kept with its rules (storeRules()).
   void        setLimitTest(const LimitTest &test);
   const LimitTest &limitTest() const;
   /// The analog meter to feed; created and docked by MainWindow.
@@ -249,17 +252,23 @@ protected:
   LcdWidget *m_display;
   FrontPanel *m_panel = nullptr;
   QColor      m_lcdTint;   ///< the Appearance page's tint last applied
-  QColor      m_alertColor;   ///< the raised alarm's colour for display and meter, invalid when none
+  QColor      m_alertColor;   ///< the raised alarm's colour for the analog meter, invalid when none
+  QMetaObject::Connection m_alertLink;   ///< the alarm colour of the analog meter's meter
+  QMetaObject::Connection m_meterLimitLink;   ///< the limit test of the analog meter's meter, not the window's
   bool        m_alertBlink = false;   ///< Alarms/blink
   bool        m_alertPhase = true;    ///< blinking: the colour shown now
-  QColor      m_limitColor;   ///< the limit test's green or red, invalid when none; under an alarm's
-  LimitTest::Verdict m_lastVerdict = LimitTest::NoVerdict;   ///< for the sounds: only a change sounds
   QTimer     *m_alertTimer = nullptr;
-  class AlarmSound *m_alarmSound = nullptr;
-  class AlarmSound *m_limitSound = nullptr;   ///< the limit test's sounds, by verdict
-  /// Display and meter in the alarm's colour (or their own in the dark
-  /// phase of the blinking).
+  QString     m_rulesDevice;   ///< the entry the window's rules were loaded from, empty: the window's settings
+  /// The analog meter in the alarm's colour (or its own in the dark phase
+  /// of the blinking).
   void        showAlertColor();
+  /// The window's meter's rules (alarms, PASS/FAIL test): those of its
+  /// entry in My devices, else the window's (Alarms/list, Limits/test).
+  /// With @p moveOld (at start) rules of the window from before 26.4 move
+  /// into its entry when that has none.
+  void        loadRules(bool moveOld = false);
+  /// The window's meter's rules into its entry, or the window's settings.
+  void        storeRules();
   AnalogMeter   *m_meter;
   PoincarePlot  *m_poincare = nullptr;
   QPointer<ReadingsModel> m_readingLog;
@@ -282,8 +291,6 @@ protected:
   /// The meter's values by name: the alarm page's choice of value, the
   /// readings table's statistics line.
   void        updateValueNames();
-  /// The desktop part of an alarm: sound, raise the window, popup.
-  void        alarmRaised(int index, const Alarm &alarm, const QString &shown, const QString &text);
   Settings    *m_settings;
   /// Disconnects, takes over @p keys of the entry @p id, clears the graph,
   /// connects; @p name for the messages.

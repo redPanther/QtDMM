@@ -105,6 +105,38 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   m_devices = new DeviceLibrary(m_settings->configDir(), this);
   m_configDlg = new SettingsDialog(m_settings, this);
   m_configDlg->hide();
+  // the Alarms page: the alarms of every open meter, each kept by its meter
+  m_configDlg->alarmPage()->setDevices([this]
+  {
+    QList<AlarmPrefs::Device> out;
+    for (const MeterController *ctl : m_session->controllers())
+    {
+      AlarmPrefs::Device d;
+      d.name = ctl->deviceName();
+      d.alarms = ctl->alarms()->alarms();
+      if (ctl != m_ctl)
+      {
+        d.source = ctl->source();
+        const int count = ctl->valueCount();
+        for (int id = 0; id < count; ++id)
+        {
+          const Reading r = ctl->lastReading(id);
+          d.units.insert(id, r.baseUnit);
+          if (count > 1)
+            d.valueNames << QString("%1: %2").arg(id + 1).arg(!r.name.isEmpty() ? r.name
+                                                               : r.baseUnit.isEmpty() ? tr("Value %1").arg(id + 1)
+                                                               : RecordingStore::describe(r.port, r.baseUnit));
+        }
+      }
+      out << d;
+    }
+    return out;
+  });
+  m_configDlg->alarmPage()->setApply([this](const QString &source, const QList<Alarm> &alarms)
+  {
+    if (MeterController *ctl = m_session->controller(ValueRef(0, source)))
+      ctl->setAlarms(alarms);
+  });
   m_configDlg->readPrinter(&m_printer);
 
   m_printDlg = new qtdmm::PrintDlg(this);
@@ -191,61 +223,21 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
 
   m_settings->save();
 
-  // alarms: the controller judges every reading and runs the program; sound,
-  // popup and raising the window are UI (the banner is MainWindow's). A
-  // sound goes on while its alarm is raised and not acknowledged.
-  m_alarmSound = new AlarmSound([this](int index) { return m_ctl->alarms()->state(index) == AlarmManager::Raised; },
-                                this);
-  connect(m_ctl, &MeterController::alarmRaised, this, &InstanceWidget::alarmRaised);
-  connect(m_ctl, &MeterController::alarmCleared, this, [this](int, const Alarm &alarm)
+  // alarms and the limit test: the controller judges every reading and runs
+  // the program. They are the meter's (its entry in My devices); the sound,
+  // the popup and raising the window are AlarmService's, the banner
+  // MainWindow's, the LCD's colour its FrontPanel's
+  loadRules(true);
+  connect(m_ctl, &MeterController::alarmsChanged, this, [this] { storeRules(); });
+  connect(m_ctl, &MeterController::limitTestChanged, this, [this]
   {
-    if (alarm.clearSound)
-      m_alarmSound->play(AlarmSound::clearedSound());
-  });
-  // the limit test: the verdict to the display, green or red under an
-  // alarm's colour, a sound when it turns
-  m_limitSound = new AlarmSound([this](int verdict) { return m_ctl->verdict() == verdict; }, this);
-  connect(m_ctl, &MeterController::limitJudged, this, [this](int id, LimitTest::Verdict verdict, double deviation)
-  {
-    // the display only for the value it shows big
-    if (m_display)
-      m_display->setVerdict(id == m_display->primaryShown() ? verdict : LimitTest::NoVerdict, deviation);
-    const LimitTest &test = m_ctl->limitTest();
-    const QColor color = !test.tint || verdict == LimitTest::NoVerdict ? QColor()
-                         : verdict == LimitTest::Pass ? QColor(0x3c, 0xb0, 0x4a) : QColor(0xd8, 0x22, 0x22);
-    if (color != m_limitColor)
-    {
-      m_limitColor = color;
-      showAlertColor();
-    }
-    // a new verdict: the old one's sound stops, the new one's starts
-    // (repeated while the verdict stays, if wanted)
-    if (verdict != m_lastVerdict)
-    {
-      m_limitSound->stopAll();
-      Alarm sound;
-      sound.sound = verdict == LimitTest::Pass ? test.passSound : verdict == LimitTest::High ? test.highSound
-                    : verdict == LimitTest::Low ? test.lowSound : QString();
-      const bool repeat = verdict == LimitTest::High ? test.highRepeat : verdict == LimitTest::Low ? test.lowRepeat
-                          : verdict == LimitTest::Pass && test.passRepeat;
-      sound.repeat = repeat ? Alarm::WhileRaised : Alarm::Once;
-      m_limitSound->start(verdict, sound);
-    }
-    m_lastVerdict = verdict;
-  });
-  m_ctl->setLimitTest(LimitTest::fromJsonText(m_settings->getString("Limits/test")));
-  applyLimitBands();
-  // a new limit test, from the dialog or a SCPI client: kept, and shown
-  connect(m_ctl, &MeterController::limitTestChanged, this, [this](const LimitTest &test)
-  {
-    m_settings->setString("Limits/test", test.toJsonText());
-    m_lastVerdict = LimitTest::NoVerdict;
-    if (m_display)
-      m_display->setLimitTest(test.enabled);
+    storeRules();
     applyLimitBands();
   });
-  // the display and the meter in the alarm's colour, blinking if wanted;
-  // the banner and the beep stay, the colour is never the only sign
+  applyLimitBands();
+  // the analog meter in the colour of an alarm of the meter it shows,
+  // blinking if wanted, with that meter's PASS/FAIL band; the banner and the beep stay, the colour is never
+  // the only sign
   m_alertTimer = new QTimer(this);
   m_alertTimer->setInterval(500);
   connect(m_alertTimer, &QTimer::timeout, this, [this]
@@ -253,12 +245,26 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
     m_alertPhase = !m_alertPhase;
     showAlertColor();
   });
-  connect(m_ctl, &MeterController::alertColorChanged, this, [this](const QColor &color)
+  auto followMeter = [this](const MeterController *ctl)
   {
-    m_alertColor = color;
+    disconnect(m_alertLink);
+    disconnect(m_meterLimitLink);
+    if (ctl && ctl != m_ctl)
+      m_meterLimitLink = connect(ctl, &MeterController::limitTestChanged, this, &InstanceWidget::applyLimitBands);
+    applyLimitBands();
+    m_alertColor = ctl ? ctl->alertColor() : QColor();
     m_alertPhase = true;
+    if (ctl)
+      m_alertLink = connect(ctl, &MeterController::alertColorChanged, this, [this](const QColor &color)
+      {
+        m_alertColor = color;
+        m_alertPhase = true;
+        showAlertColor();
+      });
     showAlertColor();
-  });
+  };
+  connect(m_meterFeed, &ValueFeed::controllerChanged, this, followMeter);
+  followMeter(m_meterFeed->controller());
   connect(m_ctl, &MeterController::recordingRequested, this, [this](bool start)
   {
     if (start)
@@ -271,8 +277,6 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
     if (graph)
       ui_graph->addMark(color, name);
   });
-  m_ctl->setAlarms(m_configDlg->alarmPage()->alarms());
-
   // SCPI server: the meter as a network instrument (applyScpi() starts it)
   connect(m_ctl, &MeterController::connectRequested, this, [this](bool on)
   {
@@ -322,7 +326,6 @@ void InstanceWidget::setPanel(FrontPanel *panel)
     lcd = m_settings->getColor("Display/display-background", LcdWidget::classicFace()) == LcdWidget::classicFace()
             ? "blue" : "custom";
   m_display->setLcdVariant(LcdWidget::lcdVariantFromName(lcd));
-  m_display->setLimitTest(m_ctl->limitTest().enabled);
   applyValueChoice();
 }
 
@@ -604,6 +607,9 @@ void InstanceWidget::openConfig(int page)
   // the meter goes on reading, and a recording on recording: the dialog
   // has no meter page any more (it disconnected for that, and stopped a
   // recording)
+  // the alarms as the meters have them now (a SCPI client, another meter opened)
+  if (!m_configDlg->isVisible())
+    m_configDlg->alarmPage()->defaultsSLOT();
   if (page >= 0)
     m_configDlg->showPage(SettingsDialog::PageType(page));
   m_configDlg->show();
@@ -714,11 +720,6 @@ void InstanceWidget::forgetValues()
 void InstanceWidget::applySLOT()
 {
   readConfig();
-  // edited alarms: their places in the list may have moved, the sounds stop
-  const QList<Alarm> alarms = m_configDlg->alarmPage()->alarms();
-  if (Alarm::listToJson(alarms) != Alarm::listToJson(m_ctl->alarms()->alarms()))
-    m_alarmSound->stopAll();
-  m_ctl->setAlarms(alarms);
   m_alertBlink = m_configDlg->alarmPage()->blink();
   showAlertColor();
   ui_graph->setAlertUnsaved(m_configDlg->generalPage()->alertUnsavedData());
@@ -740,6 +741,9 @@ void InstanceWidget::applySLOT()
   syncDevice();
   const std::optional<MyDevice> device = m_devices->find(m_settings->getString("DMM/my-device"));
   m_ctl->setDevice(device ? device->id : QString(), device ? device->name : QString());
+  // another device (switched, or the port of another entry): its rules
+  if (currentDevice() != m_rulesDevice)
+    loadRules();
   Q_EMIT configChanged();
 }
 
@@ -873,7 +877,7 @@ void InstanceWidget::readConfig()
   // the reference line snaps to the alarms' thresholds
   {
     QList<double> thresholds;
-    for (const Alarm &a : m_configDlg->alarmPage()->alarms())
+    for (const Alarm &a : m_ctl->alarms()->alarms())
     {
       // the graph's axis is the main value's
       if (!a.enabled || a.value != ValueRef() || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
@@ -984,25 +988,39 @@ QString InstanceWidget::dmmTitle() const
 
 // ---------------------------------------------------------------- alarms
 
-// The controller has reported the alarm and run its program; what is left
-// needs the desktop: the sound, raise the window, pop up a box.
-void InstanceWidget::alarmRaised(int index, const Alarm &alarm, const QString &shown, const QString &text)
+void InstanceWidget::loadRules(bool moveOld)
 {
-  m_alarmSound->start(index, alarm);
-  if (alarm.raiseWindow && window())
+  const QString id = currentDevice();
+  m_rulesDevice = id;
+  std::optional<MyDevice> entry = id.isEmpty() ? std::nullopt : m_devices->find(id);
+  const QString oldAlarms = m_settings->getString("Alarms/list");
+  const QString oldLimit = m_settings->getString("Limits/test");
+  // the rules of the window before 26.4 go to its device, once
+  if (moveOld && entry && entry->alarms.isEmpty() && entry->limitTest.isEmpty()
+      && (!oldAlarms.isEmpty() || !oldLimit.isEmpty()) && m_devices->setRules(id, oldAlarms, oldLimit))
   {
-    window()->raise();
-    window()->activateWindow();
-    QApplication::alert(window());
+    m_settings->remove("Alarms/list");
+    m_settings->remove("Limits/test");
+    entry = m_devices->find(id);
   }
-  if (alarm.popup)
+  const QString alarms = entry ? entry->alarms : oldAlarms;
+  const QString limit = entry ? entry->limitTest : oldLimit;
+  m_ctl->setAlarms(Alarm::listFromJson(alarms));
+  m_ctl->setLimitTest(LimitTest::fromJsonText(limit));
+}
+
+void InstanceWidget::storeRules()
+{
+  const QList<Alarm> &list = m_ctl->alarms()->alarms();
+  const QString alarms = list.isEmpty() ? QString() : Alarm::listToJson(list);
+  const QString limit = m_ctl->limitTest().toJsonText();
+  if (!m_rulesDevice.isEmpty() && m_devices->find(m_rulesDevice))
+    m_devices->setRules(m_rulesDevice, alarms, limit);
+  else
   {
-    auto *box = new QMessageBox(QMessageBox::Warning, tr("QtDMM alarm: %1").arg(alarm.name),
-                                QString("%1\n%2   %3").arg(text, shown, QDateTime::currentDateTime().toString("HH:mm:ss")),
-                                QMessageBox::Ok, this);
-    box->setAttribute(Qt::WA_DeleteOnClose);
-    box->setModal(false);
-    box->show();
+    m_settings->setString("Alarms/list", alarms);
+    m_settings->setString("Limits/test", limit);
+    m_settings->save();
   }
 }
 
@@ -1016,14 +1034,16 @@ void InstanceWidget::showAlertColor()
     m_alertTimer->stop();
     m_alertPhase = true;
   }
-  // an alarm's colour (blinking if wanted) over the limit test's; the
-  // analog meter takes the alarm's alone, its needle stays easy to follow
-  // against the green band
-  const QColor alarm = m_alertPhase ? m_alertColor : QColor();
-  if (m_display)
-    m_display->setAlertColor(m_alertColor.isValid() ? alarm : m_limitColor);
+  // the analog meter takes the alarm's colour alone (not the limit test's),
+  // its needle stays easy to follow against the green band
   if (m_meter)
-    m_meter->setAlertColor(alarm);
+    m_meter->setAlertColor(m_alertPhase ? m_alertColor : QColor());
+}
+
+void InstanceWidget::openAlarms(const QString &source)
+{
+  openConfig(SettingsDialog::Alarms);
+  m_configDlg->alarmPage()->setCurrentDevice(source);
 }
 
 void InstanceWidget::setLimitTest(const LimitTest &test)
@@ -1036,8 +1056,14 @@ void InstanceWidget::applyLimitBands()
   const LimitTest &test = m_ctl->limitTest();
   const int id = test.enabled && ownMeter(test.value) ? test.value.id : -1;
   ui_graph->setLimits(id, test.low(), test.high());
-  if (m_meter)
-    m_meter->setLimits(id, test.low(), test.high());
+  // the analog meter: the test of the meter whose value it shows
+  if (const MeterController *ctl = m_meterFeed->controller(); m_meter && ctl)
+  {
+    const LimitTest &shown = ctl->limitTest();
+    m_meter->setLimits(shown.enabled && shown.value.source.isEmpty() ? shown.value.id : -1, shown.low(), shown.high());
+  }
+  else if (m_meter)
+    m_meter->setLimits(-1);
 }
 
 const LimitTest &InstanceWidget::limitTest() const
