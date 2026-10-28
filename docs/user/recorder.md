@@ -86,10 +86,14 @@ Three ways to start, chosen under **Start** on the Recording page:
   from the live graph, so the recording shows how the value got to the
   threshold, and a green mark shows where it crossed. The length counts
   from the crossing.
-  A meter with more than one value shows a list in front of the edge: the
-  threshold can watch another value than the main one (start a recording
-  of the voltage when the current rises above 5 A). The recording keeps all
-  values; the line in the graph is only drawn for the main value.
+  With more than one value - of one meter, or of the devices connected
+  beside the window's - a list in front of the edge chooses the value the
+  threshold watches (start a recording of the voltage when the current
+  rises above 5 A, also of another device). Its device then leads the
+  recording: the threshold, the clock time and the length are its, and all
+  the others start and stop with it. A value of a device not connected now
+  stays chosen and is marked so. The recording keeps all values; the line
+  in the graph is only drawn for the main value.
 
 A recording started at a clock time or a threshold runs for the length
 last chosen when *Record* asked.

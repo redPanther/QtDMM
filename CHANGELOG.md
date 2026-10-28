@@ -31,6 +31,7 @@
 ### GUI
 
 - **New designs: Light Metal and Dark Metal** — the digital display, the analog meter and the table stand on brushed metal, light or dark; the sidebar is light grey or near black, everything else (workspace, graph, Poincaré plot) is as in Light or Dark. In the Design menu and on the Appearance page of the Preferences.
+- **The recording belongs to all connected devices** — *Record*, the graph's menu, an alarm's program and SCPI `INIT` start one recording of the session; the device of the value the start threshold watches leads it (threshold, clock time, length), the others start and stop with it on one time base. The threshold can now watch a value of any connected device (Recording page), not only one of the window's device. A recording keeps its lead until it ends; closing that device ends it for all.
 - **Add device: Connect or Save only** — the last page asks whether to connect the device at once or only keep it in My devices, instead of "in this window" or "beside it"; it is there for an empty window too.
 - **Open devices: a disconnected one says so** — grey, with "disconnected" instead of its last reading.
 - **My devices: a click no longer switches** — a click on a device in the sidebar does nothing; *Connect* in its context menu (formerly *Open beside*) or the new button **Connect** at the bottom left of its info (double click) connects it beside the window's device, greyed while it is connected.
