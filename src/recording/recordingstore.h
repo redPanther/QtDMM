@@ -159,6 +159,23 @@ public:
   /// the meter's values (a recording of a voltage started by its current).
   void        setTriggerValue(const ValueRef &value);
   ValueRef    triggerValue() const { return m_triggerValue; }
+  /// The recording settings of a session (the Recording page), for all its
+  /// stores at once (DeviceSession::setRecordingSetup()).
+  struct Setup
+  {
+    int       sampleTime = 10;   ///< tenths of a second
+    int       sampleLength = 0;  ///< tenths, 0 = until stopped
+    int       preTrigger = 0;    ///< ms
+    StartMode mode = Manual;
+    QTime     startTime;
+    double    falling = 0;
+    double    raising = 0;
+    ValueRef  trigger;           ///< the value the thresholds watch
+  };
+  /// Takes @p setup. The store that leads (its meter has the trigger value)
+  /// takes its start too; the others start with it (startAt()) and never on
+  /// their own: Manual.
+  void        applySetup(const Setup &setup, bool lead);
   /// Values at or below it reset the integral to 0.
   void        setIntegrationThreshold(double v) { m_integrationThreshold = v; }
   double      integrationThreshold() const { return m_integrationThreshold; }

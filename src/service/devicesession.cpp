@@ -34,51 +34,118 @@ void DeviceSession::adopt(MeterController *ctl)
 {
   m_adopted = ctl;
   ctl->dmm()->setCalcInputs(calcInputs());
-  connect(ctl->recorder(), &RecordingStore::stateChanged, this, &DeviceSession::followWindow);
+  watchRecording(ctl);
+  applySetup();
+}
+
+void DeviceSession::watchRecording(MeterController *ctl)
+{
+  // the one that leads starts, stops and clears the others
+  connect(ctl->recorder(), &RecordingStore::stateChanged, this, [this, ctl](int state)
+  {
+    if (ctl == lead())
+      followLead(state);
+  });
+  connect(ctl->recorder(), &RecordingStore::cleared, this, [this, ctl]
+  {
+    if (ctl != lead() || !ctl->recorder()->isRunning())
+      return;
+    for (MeterController *other : controllers())
+      if (other != ctl && other->recorder()->isRunning())
+        other->recorder()->clear();
+  });
   // its recording saved over SCPI: with those that recorded with it, on its time
-  ctl->setRecordedWith([this]
+  ctl->setRecordedWith([this, ctl]
   {
     QList<MeterController *> with;
-    const RecordingStore *lead = m_adopted ? m_adopted->recorder() : nullptr;
-    for (MeterController *other : std::as_const(m_opened))
-      if (lead && other->recorder()->count() > 0 && other->recorder()->startClock() == lead->startClock())
+    for (MeterController *other : controllers())
+      if (other != ctl && other->recorder()->count() > 0 && other->recorder()->startClock() == ctl->recorder()->startClock())
         with << other;
     return with;
   });
-  // cleared while it records: a new start, the others too
-  connect(ctl->recorder(), &RecordingStore::cleared, this, [this]
-  {
-    if (m_adopted && m_adopted->recorder()->isRunning())
-      for (MeterController *other : std::as_const(m_opened))
-        if (other->recorder()->isRunning())
-          other->recorder()->clear();
-  });
 }
 
-void DeviceSession::followWindow(int state)
+MeterController *DeviceSession::lead() const
 {
-  if (!m_adopted)
-    return;
-  RecordingStore *lead = m_adopted->recorder();
+  // a recording keeps the one it started with
+  if (m_running)
+    return m_running;
+  if (MeterController *ctl = controller(m_setup.trigger))
+    return ctl;
+  const QList<MeterController *> all = controllers();
+  return all.isEmpty() ? nullptr : all.first();
+}
+
+void DeviceSession::setRecordingSetup(const RecordingStore::Setup &setup)
+{
+  m_setup = setup;
+  applySetup();
+}
+
+void DeviceSession::applySetup()
+{
+  const MeterController *first = lead();
+  for (MeterController *ctl : controllers())
+    ctl->recorder()->applySetup(m_setup, ctl == first);
+}
+
+void DeviceSession::startRecording()
+{
+  if (MeterController *ctl = lead())
+    ctl->recorder()->start();
+}
+
+void DeviceSession::stopRecording()
+{
+  if (MeterController *ctl = lead())
+    ctl->recorder()->stop();
+}
+
+void DeviceSession::goLive()
+{
+  if (MeterController *ctl = lead())
+    ctl->recorder()->live();
+}
+
+void DeviceSession::clearRecording()
+{
+  if (MeterController *ctl = lead())
+    ctl->recorder()->clear();
+}
+
+bool DeviceSession::isRecording() const
+{
+  const MeterController *ctl = lead();
+  return ctl && ctl->recorder()->isRunning();
+}
+
+void DeviceSession::followLead(int state)
+{
+  MeterController *first = lead();
+  RecordingStore *lead = first->recorder();
+  QList<MeterController *> others = controllers();
+  others.removeAll(first);
   if (state == RecordingStore::Record)
   {
+    m_running = first;
     m_scope = std::exchange(m_nextScope, std::nullopt);
     // its start stays where it is, also when its first reading comes later:
     // the others record on it. Alone it begins with its first reading
-    if (std::any_of(m_opened.cbegin(), m_opened.cend(), [this](const MeterController *ctl) { return inScope(ctl); }))
+    if (std::any_of(others.cbegin(), others.cend(), [this](const MeterController *ctl) { return inScope(ctl); }))
       lead->holdOrigin();
-    for (MeterController *ctl : std::as_const(m_opened))
+    for (MeterController *ctl : std::as_const(others))
       if (inScope(ctl))
         startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
     return;
   }
   m_scope.reset();
+  m_running = nullptr;
   if (state == RecordingStore::Live)
     // live with it: a start with the pre-trigger finds their readings too
-    for (MeterController *ctl : std::as_const(m_opened))
+    for (MeterController *ctl : std::as_const(others))
       liveFollower(ctl);
   else
-    for (MeterController *ctl : std::as_const(m_opened))
+    for (MeterController *ctl : std::as_const(others))
       ctl->recorder()->stop();
 }
 
@@ -118,7 +185,7 @@ void DeviceSession::onRecordingRequested(bool start)
 {
   if (m_adopted)
   {
-    // the window's starts all, as its Record button does
+    // the window's Record button: its questions (length, unsaved data) first
     QString why;
     if (start && !m_adopted->mayStartRecording(&why))
     {
@@ -129,14 +196,10 @@ void DeviceSession::onRecordingRequested(bool start)
     m_adopted->requestRecording(start);
     return;
   }
-  // no window: those here, from now on
-  const qint64 t0 = Sample::now();
-  const QDateTime wall = QDateTime::currentDateTime();
-  for (MeterController *other : std::as_const(m_opened))
-    if (!start)
-      other->recorder()->stop();
-    else if (!other->recorder()->isRunning())
-      startFollower(other, t0, wall, 0);
+  if (start)
+    startRecording();
+  else
+    stopRecording();
 }
 
 QString DeviceSession::variableName(const QString &name)
@@ -221,15 +284,18 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
     delete ctl;
     return nullptr;
   }
+  MeterController *leading = lead();   // before it is one of them
   m_opened << ctl;
-  // opened while the window records: it joins, on the same time base
-  if (m_adopted && m_adopted->recorder()->isRunning() && inScope(ctl))
+  watchRecording(ctl);
+  applySetup();
+  // opened while the session records: it joins, on the same time base
+  if (leading && leading->recorder()->isRunning() && inScope(ctl))
   {
-    RecordingStore *lead = m_adopted->recorder();
-    lead->holdOrigin();
-    startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
+    RecordingStore *store = leading->recorder();
+    store->holdOrigin();
+    startFollower(ctl, store->startClock(), store->startDateTime(), store->sampleTime());
   }
-  else if (!m_adopted || m_adopted->recorder()->state() == RecordingStore::Live)
+  else if (!leading || leading->recorder()->state() == RecordingStore::Live)
     ctl->recorder()->live();
   Q_EMIT opened(ctl);
   return ctl;
@@ -257,9 +323,13 @@ bool DeviceSession::close(const QString &id, QString *error)
   for (MeterController *ctl : std::as_const(m_opened))
     if (ctl->source() == source)
     {
+      // the one that leads a recording ends it for all
+      if (ctl == m_running)
+        ctl->recorder()->stop();
       m_opened.removeOne(ctl);
       ctl->connectMeter(false);
       delete ctl;
+      applySetup();
       Q_EMIT closed(source);
       return true;
     }

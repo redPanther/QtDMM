@@ -12,6 +12,7 @@
 
 #include "core/valueref.h"
 #include "device/transports/calc.h"
+#include "recording/recordingstore.h"
 
 class DeviceLibrary;
 class MeterController;
@@ -23,13 +24,18 @@ class ServiceHost;
 ///
 /// A meter opened here has the rules of its entry (alarms, PASS/FAIL
 /// test; a change goes back into the entry); its readings carry its source
-/// ("device:<id>", Reading::source) and reach SCPI. Its recording follows
-/// the window's: it starts at the same moment, on one time base
-/// (RecordingStore::startAt()), with the window's sample time, and stops
-/// with it, whatever started or stopped the window's (Record, a trigger,
-/// the length, SCPI). INITiate and ABORt on it start and
-/// stop the window's; with no window they start and stop those here. A
-/// recording of it not saved (QTDMM:RECord:SAVE) is overwritten by the next.
+/// ("device:<id>", Reading::source) and reach SCPI.
+///
+/// The recording is the session's (setRecordingSetup(), startRecording()
+/// ...): the meter of the trigger value leads (lead(); without one there
+/// the window's, else the first), its store takes the start mode, the
+/// threshold and the clock time. The others start at the same moment, on
+/// one time base (RecordingStore::startAt()), with its sample time, and
+/// stop with it, whatever started or stopped it (Record, a trigger, the
+/// length, SCPI). A recording keeps its lead until it ends. INITiate and
+/// ABORt on any meter go to the window's Record (its questions first),
+/// with no window to the session. A recording not saved
+/// (QTDMM:RECord:SAVE) is overwritten by the next.
 /// A recording started from a graph takes only the meters whose values it
 /// shows (setRecordingScope()); those beside stay in Live.
 /// Each meter is open once: when the window takes one that is open here,
@@ -61,6 +67,23 @@ public:
   /// The window is about to use the entry @p id: a meter open here with it
   /// is closed (the port is the window's), with a message.
   void        release(const QString &id);
+
+  /// @name The session's recording
+  /// @{
+  /// The Recording page's settings for all stores; the lead's takes the start.
+  void        setRecordingSetup(const RecordingStore::Setup &setup);
+  const RecordingStore::Setup &recordingSetup() const { return m_setup; }
+  /// The meter whose store leads: the recording's while one runs, else the
+  /// one of the trigger value, else the first (the window's); null with none.
+  MeterController *lead() const;
+  void        startRecording();
+  void        stopRecording();
+  /// Live for all (a recording not saved is replaced).
+  void        goLive();
+  /// Clears the recording; one that runs goes on.
+  void        clearRecording();
+  bool        isRecording() const;
+  /// @}
 
   /// The next recording of the window takes, of the meters here, only those
   /// of @p sources (MeterController::source(): a graph's values), also one
@@ -101,8 +124,12 @@ private:
   void        installScpi();
   /// The rules of the entry @p id on @p ctl, and its changes back into the entry.
   void        applyRules(MeterController *ctl, const QString &id);
-  /// The window's recording started (Record), ended (View), or it went Live.
-  void        followWindow(int state);
+  /// Starts, stops and clears the others with the lead's store (watchRecording()).
+  void        watchRecording(MeterController *ctl);
+  /// The lead's recording started (Record), ended (View), or it went Live.
+  void        followLead(int state);
+  /// setRecordingSetup() on every store, the lead's with the start.
+  void        applySetup();
   /// Starts the recording of @p ctl at @p t0 on the core clock, wall clock
   /// @p start, the grid @p sampleTime (tenths, 0: its own).
   void        startFollower(MeterController *ctl, qint64 t0, const QDateTime &start, int sampleTime);
@@ -119,6 +146,8 @@ private:
   QList<MeterController *> m_opened;
   /// setRecordingScope() for the next recording, and that of the one that
   /// runs; none: all.
+  RecordingStore::Setup m_setup;
+  QPointer<MeterController> m_running;   ///< the lead of the recording that runs
   std::optional<QStringList> m_nextScope;
   std::optional<QStringList> m_scope;
   /// Whether @p ctl records with the window's recording that runs.

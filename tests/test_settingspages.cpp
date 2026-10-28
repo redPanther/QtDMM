@@ -114,14 +114,21 @@ int main(int argc, char **argv)
     check(recorder.sampleLength() == 90 * 60 * 10 && recorder.sampleMode() == GraphWidget::Falling
             && recorder.startTime() == QTime(13, 14, 15) && recorder.preTrigger() == 7 * 60 * 1000,
           "recorder: length, start or pre-trigger");
-    // the value the threshold watches: chosen among the meter's values, the meter kept
+    // the value the threshold watches: chosen among the values of every
+    // meter connected; one not connected now stays chosen
     auto *triggerValue = child<QComboBox>(recorder, "ui_triggerValue");
-    recorder.setValueNames({ "1: V", "2: A", "3: W" });
-    check(!triggerValue->isHidden() && triggerValue->currentData().toInt() == 2, "recorder: the stored value chosen");
-    triggerValue->setCurrentIndex(1);
-    Q_EMIT triggerValue->activated(1);
-    check(recorder.triggerValue() == ValueRef(1, "device:ab12cd34"), "recorder: another value, the meter kept: "
+    recorder.setTriggerChoices({ { ValueRef(0), "1: V" }, { ValueRef(1), "2: A" }, { ValueRef(0, "device:b"), "Sim B · W" } });
+    check(!triggerValue->isHidden() && triggerValue->count() == 4
+            && triggerValue->currentText().contains("not connected")
+            && recorder.triggerValue() == ValueRef::fromString(triggerValue->currentData().toString()),
+          "recorder: the stored value of a meter not connected stays chosen: " + triggerValue->currentText());
+    triggerValue->setCurrentIndex(2);
+    Q_EMIT triggerValue->activated(2);
+    check(recorder.triggerValue() == ValueRef(0, "device:b"), "recorder: another meter's value: "
             + recorder.triggerValue().toString());
+    recorder.setTriggerChoices({ { ValueRef(0), "1: V" }, { ValueRef(0, "device:b"), "Sim B · W" } });
+    check(triggerValue->count() == 2 && triggerValue->currentData().toString() == "0@device:b",
+          "recorder: still chosen when the list changes");
 
     // --- 2. what comes with a choice ---
     graph.show();

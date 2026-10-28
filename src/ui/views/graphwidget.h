@@ -345,6 +345,15 @@ public:
   /// The other values shown (ids > 0).
   QList<int>       shownValues() const;
 
+  /// Start, stop, Live and Clear of a recording of several meters
+  /// (DeviceSession): the graph's store may follow another one. Without
+  /// them they act on the graph's store.
+  struct Control
+  {
+    std::function<void()> start, stop, live, clear;
+  };
+  void             setControl(const Control &control) { m_control = control; }
+
   /// @name Values of other meters
   /// Curves of meters open beside the window's (DeviceSession), each from
   /// that meter's own store, shifted to this store's time by their starts
@@ -485,6 +494,9 @@ public Q_SLOTS:
   void             stopSLOT();
   /// The store goes Live (RecordingStore::live()), the curve viewed goes.
   void             liveSLOT();
+  /// The recording settings of the store changed (DeviceSession): the time
+  /// buttons and the threshold lines anew.
+  void             recordingSetupChanged();
   /// Export with a file dialog; returns false when cancelled or failed.
   bool             exportDataSLOT();
   void             importDataSLOT();
@@ -776,6 +788,7 @@ protected:
   /// @{
   QGraphicsRectItem *m_limitBand = nullptr;
   QGraphicsLineItem *m_limitLines[2] = { nullptr, nullptr };   ///< low, high
+  Control          m_control;   ///< setControl()
   ValueRef         m_limitValue{ -1 };
   ValueRef         m_lastReference{ -1 };   ///< for leftValueChanged()
   qint64           m_minimapShift = 0;      ///< where the overview's store begins on this one's time (ms)
