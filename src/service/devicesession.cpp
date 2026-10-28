@@ -5,6 +5,9 @@
 
 #include <QDateTime>
 
+#include <algorithm>
+#include <utility>
+
 #include "core/devicelibrary.h"
 #include "core/sampletypes.h"
 #include "device/meterconnection.h"
@@ -32,6 +35,16 @@ void DeviceSession::adopt(MeterController *ctl)
   m_adopted = ctl;
   ctl->dmm()->setCalcInputs(calcInputs());
   connect(ctl->recorder(), &RecordingStore::stateChanged, this, &DeviceSession::followWindow);
+  // its recording saved over SCPI: with those that recorded with it, on its time
+  ctl->setRecordedWith([this]
+  {
+    QList<MeterController *> with;
+    const RecordingStore *lead = m_adopted ? m_adopted->recorder() : nullptr;
+    for (MeterController *other : std::as_const(m_opened))
+      if (lead && other->recorder()->count() > 0 && other->recorder()->startClock() == lead->startClock())
+        with << other;
+    return with;
+  });
   // cleared while it records: a new start, the others too
   connect(ctl->recorder(), &RecordingStore::cleared, this, [this]
   {
@@ -49,20 +62,34 @@ void DeviceSession::followWindow(int state)
   RecordingStore *lead = m_adopted->recorder();
   if (state == RecordingStore::Record)
   {
+    m_scope = std::exchange(m_nextScope, std::nullopt);
     // its start stays where it is, also when its first reading comes later:
     // the others record on it. Alone it begins with its first reading
-    if (!m_opened.isEmpty())
+    if (std::any_of(m_opened.cbegin(), m_opened.cend(), [this](const MeterController *ctl) { return inScope(ctl); }))
       lead->holdOrigin();
     for (MeterController *ctl : std::as_const(m_opened))
-      startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
+      if (inScope(ctl))
+        startFollower(ctl, lead->startClock(), lead->startDateTime(), lead->sampleTime());
+    return;
   }
-  else if (state == RecordingStore::Live)
+  m_scope.reset();
+  if (state == RecordingStore::Live)
     // live with it: a start with the pre-trigger finds their readings too
     for (MeterController *ctl : std::as_const(m_opened))
       liveFollower(ctl);
   else
     for (MeterController *ctl : std::as_const(m_opened))
       ctl->recorder()->stop();
+}
+
+void DeviceSession::setRecordingScope(const QStringList &sources)
+{
+  m_nextScope = sources;
+}
+
+bool DeviceSession::inScope(const MeterController *ctl) const
+{
+  return !m_scope || m_scope->contains(ctl->source());
 }
 
 void DeviceSession::liveFollower(MeterController *ctl)
@@ -196,7 +223,7 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   }
   m_opened << ctl;
   // opened while the window records: it joins, on the same time base
-  if (m_adopted && m_adopted->recorder()->isRunning())
+  if (m_adopted && m_adopted->recorder()->isRunning() && inScope(ctl))
   {
     RecordingStore *lead = m_adopted->recorder();
     lead->holdOrigin();

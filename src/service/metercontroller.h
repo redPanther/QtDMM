@@ -69,6 +69,9 @@ public:
   /// a file name only, a new one; CSV without a suffix. Empty, or the SCPI
   /// error ("<code>,<text>", English) why not.
   QString     saveRecording(const QString &name, bool raw);
+  /// The meters whose recordings saveRecording() writes along (DeviceSession:
+  /// those that recorded with the window's), their names before the columns.
+  void        setRecordedWith(std::function<QList<MeterController *>()> meters) { m_recordedWith = std::move(meters); }
   /// The meter's display count (DMMInfo::display), for the range and the
   /// bar graph of the readings.
   void        setDisplayCounts(int counts) { m_adapter.setCounts(counts); }
@@ -255,6 +258,7 @@ private:
   bool                m_startPending = false;
   bool                m_followsWindow = false;
   QString             m_saveDir;
+  std::function<QList<MeterController *>()> m_recordedWith;
   std::optional<bool> m_connectPending;
   QProcess           *m_external;     ///< an alarm's program that wanted the port: one at a time
   bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends

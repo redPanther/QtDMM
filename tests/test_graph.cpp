@@ -1972,6 +1972,33 @@ int main(int argc, char **argv)
     check(!graph.otherCurveShown(0) && !graph.otherCurveShown(1) && graph.otherValues().size() == 2
             && !graph.rightAxis()->isVisible(),
           "closed: no curves, the values kept");
+
+    // the export has its values after its name; the file imported shows
+    // them as curves of their own, not among the values chosen, until Live
+    open = true;
+    graph.otherStoresChanged();
+    const QString both = tmpDir.path() + "/othermeter.csv";
+    check(graph.exportCsvFile(both, true) && readFile(both).startsWith(
+            "timestamp;time (s);value;unit;status;Sim B: value;Sim B: unit;Sim B: status;Sim B: value 2;"),
+          "export: another meter's values after its name\n" + readFile(both).section('\n', 0, 2));
+    GraphWidget viewed(nullptr, &cfg);
+    viewed.resize(800, 500);
+    viewed.show();
+    viewed.setOtherStores([&](const QString &source) { return source == "device:b" ? &other : nullptr; },
+                          [](const QString &) { return QStringLiteral("Sim B"); });
+    viewed.setOtherValues({ ValueRef(0, "device:b") });
+    check(viewed.importCsvFile(both) && viewed.otherCurveCount() == 3 && viewed.otherValues().size() == 1
+            && !viewed.otherCurveShown(0),
+          QString("import: its values as curves, %1; the meter open now not drawn").arg(viewed.otherCurveCount()));
+    QTest::qWait(50);
+    const QList<QPointF> fileAmps = viewed.otherCurvePoints(1);
+    check(viewed.otherCurveShown(1) && viewed.legendText().contains("Sim B") && !fileAmps.isEmpty()
+            && qAbs(fileAmps.first().x() - 2.0) < 0.15,
+          QString("import: drawn from 2 s on, %1; %2").arg(fileAmps.isEmpty() ? -1 : fileAmps.first().x()).arg(viewed.legendText()));
+    const QString again = tmpDir.path() + "/othermeter2.csv";
+    check(viewed.exportCsvFile(again, true) && readFile(again) == readFile(both), "import, export: the same file");
+    viewed.liveSLOT();
+    check(viewed.otherCurveCount() == 1 && viewed.otherCurveShown(0), "Live: the file's other meter gone, the open one back");
   }
 
   // --- 7l. the meter's other values: a curve each in a colour of its own;

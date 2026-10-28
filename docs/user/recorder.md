@@ -74,7 +74,10 @@ The vertical axis is in the unit that suits its range - mV for an axis up to
 Three ways to start, chosen under **Start** on the Recording page:
 
 - **By hand** — *Record* in the toolbar (Space) or the graph's right-click
-  menu.
+  menu. With devices open beside the window's, *Record* records all of them
+  on one time base; *Start recording* in the graph's menu only those whose
+  values the graph shows (the others stay Live). A device opened while it
+  records joins when the graph shows a value of it.
 - **At a clock time** — recording begins at the given time of day.
 - **At a threshold** — recording begins when the reading crosses a
   threshold, rising above it or falling below it. The threshold is drawn
@@ -307,8 +310,22 @@ timestamp;time (s);value;unit;status;value 2;unit 2;status 2
 2026-09-19T10:00:01,000;1;12.4;mV;ok;50.02;Hz;ok
 ```
 
+The values of other devices the graph shows (devices open beside the
+window's) follow the same way, their columns named after the device:
+`Sim B: value;Sim B: unit;Sim B: status`, its second value
+`Sim B: value 2` ..., its PASS/FAIL verdict `Sim B: limit`. Their recordings
+count as saved then. `QTDMM:RECord:SAVE` at the window's meter writes all
+values of the devices that recorded with it.
+
+```
+timestamp;time (s);value;unit;status;Sim B: value;Sim B: unit;Sim B: status
+2026-09-19T10:00:00,000;0;12.3;mV;ok;;;
+2026-09-19T10:00:00,500;0.5;12.3;mV;ok;1.02;A;ok
+```
+
 *Import* (Ctrl+I) reads such files back, scaling the values into base units
 again; the other values come back as curves (switch them on in the
-sidebar). It also accepts files without the status column (`nan` is a
+sidebar), another device's values as curves of their own with its name in
+the legend, until *Live* or the next recording. It also accepts files without the status column (`nan` is a
 gap there) and the tab-separated format of QtDMM versions before 0.9.5. The
 unit of the first row becomes the graph's unit.

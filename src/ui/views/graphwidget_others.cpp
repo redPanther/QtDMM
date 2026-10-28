@@ -9,6 +9,8 @@
 
 #include <cmath>
 
+#include "recording/recordingfile.h"
+
 void GraphWidget::setOtherStores(std::function<RecordingStore *(const QString &source)> store,
                                  std::function<QString(const QString &source)> name)
 {
@@ -17,10 +19,21 @@ void GraphWidget::setOtherStores(std::function<RecordingStore *(const QString &s
   otherStoresChanged();
 }
 
+namespace
+{
+// the source of another meter's value in a file viewed: "file:2"
+const QLatin1String kFileSource("file:");
+}
+
 void GraphWidget::setOtherValues(const QList<ValueRef> &values)
 {
   if (values == otherValues())
     return;
+  makeOtherCurves(values + m_fileValues);
+}
+
+void GraphWidget::makeOtherCurves(const QList<ValueRef> &values)
+{
   for (OtherCurve &c : m_otherCurves)
   {
     c.line.reset();
@@ -46,8 +59,55 @@ QList<ValueRef> GraphWidget::otherValues() const
 {
   QList<ValueRef> values;
   for (const OtherCurve &c : m_otherCurves)
-    values << c.value;
+    if (!c.value.source.startsWith(kFileSource))
+      values << c.value;
   return values;
+}
+
+RecordingStore *GraphWidget::otherStore(const QString &source) const
+{
+  if (source.startsWith(kFileSource))
+    return m_fileStores.value(source.mid(kFileSource.size()).toInt(), nullptr);
+  // a file viewed: its values only, not those of the meters open now
+  return m_otherStore && m_sourceFile.isEmpty() ? m_otherStore(source) : nullptr;
+}
+
+QString GraphWidget::otherName(const QString &source) const
+{
+  if (source.startsWith(kFileSource))
+    return m_fileDevices.value(source.mid(kFileSource.size()).toInt());
+  return m_otherName ? m_otherName(source) : QString();
+}
+
+void GraphWidget::setFileStores(const Recording &rec)
+{
+  dropFileStores();
+  const QStringList devices = RecordingFile::devices(rec);
+  for (int i = 0; i < devices.size(); ++i)
+  {
+    auto *store = new RecordingStore(this);
+    store->load(RecordingFile::devicePart(rec, devices[i]));
+    const QString source = kFileSource + QString::number(i);
+    if (store->count() > 0)
+      m_fileValues << ValueRef(0, source);
+    for (int j = 0; j < store->extraCount(); ++j)
+      if (!m_fileValues.contains(ValueRef(store->extra(j).id, source)))
+        m_fileValues << ValueRef(store->extra(j).id, source);
+    m_fileStores << store;
+    m_fileDevices << devices[i];
+  }
+  makeOtherCurves(otherValues() + m_fileValues);
+}
+
+void GraphWidget::dropFileStores()
+{
+  if (m_fileStores.isEmpty())
+    return;
+  m_fileValues.clear();
+  makeOtherCurves(otherValues());
+  qDeleteAll(m_fileStores);
+  m_fileStores.clear();
+  m_fileDevices.clear();
 }
 
 void GraphWidget::setOtherValueShown(const ValueRef &value, bool shown)
@@ -103,7 +163,7 @@ void GraphWidget::attachOtherStores()
   QSet<RecordingStore *> stores;
   for (OtherCurve &c : m_otherCurves)
   {
-    c.store = m_otherStore ? m_otherStore(c.value.source) : nullptr;
+    c.store = otherStore(c.value.source);
     if (c.store && c.store != m_store)
       stores.insert(c.store);
   }
@@ -156,8 +216,9 @@ bool GraphWidget::rebuildOtherCurves()
       if (c.value.id != 0 && !s->unit.isEmpty())
         c.unit = s->unit;
     c.name = parts.isEmpty() ? QString() : curveName(*parts.last(), c.unit);
-    if (m_otherName)
-      c.name = c.name.isEmpty() ? m_otherName(c.value.source) : m_otherName(c.value.source) + " · " + c.name;
+    const QString meter = otherName(c.value.source);
+    if (!meter.isEmpty())
+      c.name = c.name.isEmpty() ? meter : meter + " · " + c.name;
     // its axis: the one chosen if its unit fits there, else the left one
     // in its unit, else the right one when free
     const ValueAxis chosen = otherValueAxis(c.value);
@@ -174,7 +235,7 @@ bool GraphWidget::rebuildOtherCurves()
       m_unit2 = c.unit;
     c.shown = true;
     // its time on this store's clock
-    const double shift = (store->startClock() - m_store->startClock()) / 1000.0;
+    const double shift = m_store->offsetOf(*store) / 1000.0;
     QList<QPointF> points;
     for (const RecordingSeries *s : std::as_const(parts))
     {

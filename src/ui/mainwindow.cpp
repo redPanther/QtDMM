@@ -1018,13 +1018,22 @@ void MainWindow::createActions()
     m_wid->liveSLOT();
     updateRecorderActions();   // pressed again when the question was cancelled
   });
-  // the graph's context menu starts and stops like the button
+  // the graph's context menu starts and stops like the button; it records
+  // only the meters whose values it shows
   connect(m_wid->graph(), &GraphWidget::recordRequested, this, [this](bool start)
   {
     if (!start)
       action_Stop->trigger();
     else if (action_Start->isEnabled())
+    {
+      QStringList sources;
+      for (const ValueRef &v : m_wid->graph()->otherValues())
+        sources << v.source;
+      m_session->setRecordingScope(sources);
       action_Start->trigger();
+      if (!m_wid->controller()->recorder()->isRunning())
+        m_session->clearRecordingScope();   // cancelled
+    }
   });
   connect(action_Stop, &QAction::triggered, m_wid, &InstanceWidget::stopSLOT);
   connect(action_Clear, &QAction::triggered, m_wid, &InstanceWidget::clearSLOT);

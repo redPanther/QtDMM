@@ -6,7 +6,9 @@
 #include <QObject>
 #include <QPointer>
 #include <QString>
+#include <QStringList>
 #include <QVariantMap>
+#include <optional>
 
 #include "core/valueref.h"
 #include "device/transports/calc.h"
@@ -28,6 +30,8 @@ class ServiceHost;
 /// the length, SCPI). INITiate and ABORt on it start and
 /// stop the window's; with no window they start and stop those here. A
 /// recording of it not saved (QTDMM:RECord:SAVE) is overwritten by the next.
+/// A recording started from a graph takes only the meters whose values it
+/// shows (setRecordingScope()); those beside stay in Live.
 /// Each meter is open once: when the window takes one that is open here,
 /// release() closes it first, so that the port is free.
 class DeviceSession : public QObject
@@ -57,6 +61,13 @@ public:
   /// The window is about to use the entry @p id: a meter open here with it
   /// is closed (the port is the window's), with a message.
   void        release(const QString &id);
+
+  /// The next recording of the window takes, of the meters here, only those
+  /// of @p sources (MeterController::source(): a graph's values), also one
+  /// opened while it runs; the recording after takes all again.
+  void        setRecordingScope(const QStringList &sources);
+  /// The next recording takes all of them (a start that did not come).
+  void        clearRecordingScope() { m_nextScope.reset(); }
 
   /// The window's meter first, then those of open() in their order.
   QList<MeterController *> controllers() const;
@@ -106,6 +117,12 @@ private:
   DeviceLibrary *m_library = nullptr;
   QPointer<MeterController> m_adopted;
   QList<MeterController *> m_opened;
+  /// setRecordingScope() for the next recording, and that of the one that
+  /// runs; none: all.
+  std::optional<QStringList> m_nextScope;
+  std::optional<QStringList> m_scope;
+  /// Whether @p ctl records with the window's recording that runs.
+  bool        inScope(const MeterController *ctl) const;
   QString     m_instanceId = "default";
   QString     m_sigrokExe = "sigrok-cli";
 };

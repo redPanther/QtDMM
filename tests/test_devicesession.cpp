@@ -299,5 +299,56 @@ int main(int argc, char **argv)
     lib.remove(copy);
   }
 
+  // 11. a recording from a graph takes only the meters of its values, also
+  //     one opened while it runs; the next takes all again. SCPI SAVE at
+  //     the window writes the meters that recorded with it
+  {
+    MeterController *b = session.controller("device:" + sim);
+    if (!b)
+      b = session.open(sim);
+    MeterController *power = session.open(calc);
+    check(b && power, "both open");
+    if (!b || !power)
+      return 1;
+    RecordingStore *lead = window.recorder();
+    lead->live();
+    session.setRecordingScope({ b->source() });
+    lead->start();
+    check(b->recorder()->isRunning() && power->recorder()->state() == RecordingStore::Live,
+          "a graph's recording: only the meters of its values, the others stay Live");
+    lead->stop();
+    lead->start();
+    check(b->recorder()->isRunning() && power->recorder()->isRunning(), "the next recording: all again");
+    lead->stop();
+    session.close(calc);
+    session.setRecordingScope({ b->source() });
+    lead->start();
+    power = session.open(calc);
+    check(power && !power->recorder()->isRunning(), "opened while it runs, no value of it in the graph: stays out");
+    lead->stop();
+    session.close(calc);
+    session.setRecordingScope({ b->source(), "device:" + calc });
+    lead->start();
+    power = session.open(calc);
+    check(power && power->recorder()->isRunning(), "opened while it runs, a value of it in the graph: joins");
+
+    // the window's recording saved over SCPI: with theirs
+    static ReadingAdapter adapter;
+    Reading r = ReadingAdapter::reading(adapter.adaptValue(1.0, "1.000", "V", "DC", "AUTO", false, true, false, 0,
+                                                           QDateTime::currentMSecsSinceEpoch()));
+    r.t = Sample::now();
+    lead->setReading(r);
+    check(waitFor([&] { return b->recorder()->count() >= 2 && power->recorder()->count() >= 1; }, 4000), "readings recorded");
+    lead->stop();
+    window.setSaveDir(dir.path() + "/rec");
+    check(window.saveRecording("together", false).isEmpty(), "QTDMM:REC:SAVE at the window");
+    QFile f(dir.path() + "/rec/together.csv");
+    const QString head = f.open(QIODevice::ReadOnly) ? QString::fromUtf8(f.readLine()).trimmed() : QString();
+    check(head.contains(";Bench sim: value;Bench sim: unit;Bench sim: status") && head.contains(";Power: value;")
+            && !b->recorder()->dirty() && !power->recorder()->dirty(),
+          "with the meters that recorded with it, saved too: " + head);
+    session.close(calc);
+  }
+
   return failed == 0 ? 0 : 1;
 }

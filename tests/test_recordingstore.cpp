@@ -8,10 +8,12 @@
 // function per recording and the readings series.
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFile>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <cmath>
 
+#include "core/limittest.h"
 #include "core/readingadapter.h"
 #include "recording/recordingstore.h"
 #include "testutil.h"
@@ -1251,6 +1253,98 @@ int main(int argc, char **argv)
     alone.setReading(clock.at(4500, reading(1, "1", "DC")));
     check(alone.series().first().t == 0 && alone.startClock() == 4500,
           QString("alone: the first reading at %1 ms, from %2").arg(alone.series().first().t).arg(alone.startClock()));
+  }
+
+  // --- 7a. another meter's values in the export (one time base): a column
+  //          group each after its name, empty before it began; read back
+  //          as its own part, loaded and exported again the same ---
+  {
+    RecordingStore lead, follow;
+    TestClock clock;
+    clock.attach(lead);
+    clock.attach(follow);
+    lead.setUnit("V");
+    follow.setUnit("A");
+    lead.setSampleTime(10);
+    follow.setSampleTime(10);
+    clock.now = 1000;
+    lead.start();
+    lead.holdOrigin();
+    follow.startAt(lead.startClock(), lead.startDateTime());
+    lead.setReading(clock.at(1000, reading(1, "1", "DC")));
+    follow.setReading(clock.at(1500, reading(2, "2", "DC")));
+    follow.setReading(clock.at(1500, other(1, 20, "20.0", "°C")));
+    lead.setReading(clock.at(2000, reading(2, "2", "DC")));
+    follow.setReading(clock.at(2500, reading(3, "3", "DC")));
+    lead.setReading(clock.at(3000, reading(3, "3", "DC")));
+    clock.now = 3200;
+    lead.stop();
+    follow.stop();
+    const QList<RecordingStore::Foreign> sim{ { &follow, 0, "Sim B" }, { &follow, 1, "Sim B" } };
+    QTemporaryDir dir;
+    auto fileText = [](const QString &path)
+    {
+      QFile f(path);
+      return f.open(QIODevice::ReadOnly | QIODevice::Text) ? QString::fromUtf8(f.readAll()) : QString();
+    };
+    QString err;
+    const QString raw1 = dir.path() + "/raw1.csv", raw2 = dir.path() + "/raw2.csv";
+    check(follow.dirty() && lead.write(raw1, &err, true, {}, sim) && !follow.dirty(),
+          "another meter raw: written, its recording saved too: " + err);
+    const QString raw = fileText(raw1);
+    check(raw.startsWith("timestamp;time (s);value;unit;status;Sim B: value;Sim B: unit;Sim B: status;"
+                         "Sim B: value 2;Sim B: unit 2;Sim B: status 2\n"
+                         "2026-10-04T12:00:01,000;0;1;V;ok;;;;;;\n"
+                         "2026-10-04T12:00:01,500;0.5;1;V;ok;2;A;ok;20;°C;ok\n"
+                         "2026-10-04T12:00:02,000;1;2;V;ok;2;A;ok;20;°C;ok\n")
+            && raw.count('\n') == 6,
+          "another meter raw: the file is\n" + raw);
+    const QString grid1 = dir.path() + "/grid1.csv";
+    check(lead.write(grid1, &err, false, {}, sim), "another meter grid: written: " + err);
+    const QString grid = fileText(grid1);
+    check(grid.count('\n') == 4 && grid.section('\n', 1, 1) == "2026-10-04T12:00:01,000;0;1;V;ok;;;;;;"
+            && grid.section('\n', 3, 3).startsWith("2026-10-04T12:00:03,000;2;2;V;ok;2.5;A;ok;20;°C;ok"),
+          "another meter grid: empty before it began, then the mean over the step\n" + grid);
+
+    const std::optional<Recording> rec = RecordingFile::read(raw1, &err);
+    check(rec && RecordingFile::devices(*rec) == QStringList{ "Sim B" } && rec->extra.size() == 2
+            && rec->extra[0].device == "Sim B" && rec->extra[0].id == 0 && rec->extra[1].id == 1,
+          "another meter: read back by its name: " + err);
+    if (rec)
+    {
+      const Recording own = RecordingFile::devicePart(*rec, QString());
+      const Recording other = RecordingFile::devicePart(*rec, "Sim B");
+      check(own.extra.isEmpty() && own.unit == "V" && other.unit == "A" && other.extra.size() == 1
+              && other.extra[0].id == 1 && other.extra[0].device.isEmpty() && other.states.value(0) == CellState::None,
+            "another meter: its part, the main value and value 2");
+      RecordingStore back, backSim;
+      back.load(own);
+      backSim.load(other);
+      check(backSim.count() == 4 && backSim.series().first().t == 500 && back.offsetOf(backSim) == 0,
+            QString("another meter: loaded from its first row, %1 points").arg(backSim.count()));
+      check(back.write(raw2, &err, true, {}, { { &backSim, 0, "Sim B" }, { &backSim, 1, "Sim B" } }) && fileText(raw2) == raw,
+            "another meter: export, import, export the same\n" + fileText(raw2));
+    }
+    // a limit test on the other meter's value: its column after its name
+    Recording limits;
+    limits.start = TestClock::wall(0);
+    limits.unit = "V";
+    limits.values = { 1, 2 };
+    RecordingColumn col;
+    col.device = "Sim B";
+    col.unit = "A";
+    col.values = { 1, 2 };
+    col.states = { CellState::Ok, CellState::Ok };
+    col.limits = { LimitTest::flags(LimitTest::Pass), LimitTest::flags(LimitTest::High) };
+    limits.extra << col;
+    const QString lim = dir.path() + "/limit.csv";
+    check(RecordingFile::write(limits, lim, &err) && fileText(lim).section('\n', 0, 0).endsWith(";Sim B: limit")
+            && fileText(lim).section('\n', 2, 2).endsWith(";FAIL HI"),
+          "another meter's limit column\n" + fileText(lim));
+    const std::optional<Recording> limBack = RecordingFile::read(lim, &err);
+    check(limBack && limBack->extra.size() == 1 && limBack->limits.isEmpty()
+            && limBack->extra[0].limits.value(1) == LimitTest::flags(LimitTest::High),
+          "another meter's limit column read back: " + err);
   }
 
   if (failed)

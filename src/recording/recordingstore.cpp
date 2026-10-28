@@ -3,6 +3,7 @@
 #include "recording/recordingstore.h"
 
 #include <QCoreApplication>
+#include <vector>
 
 #include "core/siprefix.h"
 
@@ -297,20 +298,65 @@ CellState cellState(double value, Quality quality)
 }
 }
 
-Recording RecordingStore::toRecording(bool raw, const QList<int> &extras) const
+qint64 RecordingStore::offsetOf(const RecordingStore &other) const
+{
+  if (m_fromFile || other.m_fromFile)
+    return m_start.msecsTo(other.m_start);
+  return other.m_t0 - m_t0;
+}
+
+Recording RecordingStore::toRecording(bool raw, const QList<int> &extras, const QList<Foreign> &foreign) const
 {
   Recording rec;
   rec.sampleTimeTenths = m_sampleTime;
   rec.unit = m_unit;
   QList<const RecordingSeries *> others;
+  QStringList devices;   // of each of others; empty: this meter
   for (int e : extras)
     if (e >= 0 && e < m_extra.size() && !m_extra[e].isEmpty())
+    {
       others << &m_extra[e];
+      devices << QString();
+    }
+  // another meter's series on this time, as if they were this one's
+  std::vector<RecordingSeries> shifted;
+  for (const Foreign &f : foreign)
+  {
+    if (!f.store)
+      continue;
+    const qint64 offset = offsetOf(*f.store);
+    auto add = [&](const RecordingSeries &s, const QString &unit)
+    {
+      if (s.isEmpty())
+        return;
+      RecordingSeries copy;
+      copy.id = f.id;
+      copy.unit = unit;
+      copy.reserve(s.count());
+      for (int i = 0; i < s.count(); ++i)
+      {
+        RawPoint p = s.at(i);
+        p.t = qMax<qint64>(0, p.t + offset);
+        copy.append(p);
+      }
+      shifted.push_back(std::move(copy));
+      devices << f.device;
+    };
+    if (f.id == 0)
+      add(f.store->series(), f.store->unit());
+    else
+      for (const RecordingSeries &s : std::as_const(f.store->m_extra))
+        if (s.id == f.id)
+          add(s, s.unit);
+  }
+  for (const RecordingSeries &s : shifted)
+    others << &s;
   rec.extra.resize(others.size());
   for (int c = 0; c < others.size(); ++c)
   {
     rec.extra[c].id = others[c]->id;
     rec.extra[c].unit = others[c]->unit;
+    rec.extra[c].device = devices[c];
   }
   if (raw)
   {
@@ -401,11 +447,15 @@ Recording RecordingStore::toRecording(bool raw, const QList<int> &extras) const
   return rec;
 }
 
-bool RecordingStore::write(const QString &path, QString *error, bool raw, const QList<int> &extras)
+bool RecordingStore::write(const QString &path, QString *error, bool raw, const QList<int> &extras,
+                           const QList<Foreign> &foreign)
 {
-  if (!RecordingFile::writeAny(toRecording(raw, extras), path, error))
+  if (!RecordingFile::writeAny(toRecording(raw, extras, foreign), path, error))
     return false;
   m_dirty = false;
+  for (const Foreign &f : foreign)
+    if (f.store)
+      f.store->m_dirty = false;
   return true;
 }
 
@@ -438,6 +488,9 @@ void RecordingStore::load(const Recording &rec)
   };
   for (int i = 0; i < rec.values.size(); i++)
   {
+    // another meter's part of a file has rows before it began
+    if (rec.stateAt(i) == CellState::None)
+      continue;
     RawPoint p;
     p.t = onGrid ? qint64(i) * m_sampleTime * 100 : rec.timeAt(i);
     p.value = rec.values[i];
@@ -470,6 +523,7 @@ void RecordingStore::load(const Recording &rec)
   // a file on its own grid: each row is already the mean over the step
   // before it
   m_loadedGrid = onGrid ? m_sampleTime : 0;
+  m_fromFile = true;
   m_stopT = -1;
   m_dirty = false;
   Q_EMIT marksChanged();
@@ -1056,6 +1110,7 @@ void RecordingStore::clear()
   m_start = m_wall();
   m_stopT = m_state != View ? -1 : 0;
   m_loadedGrid = 0;
+  m_fromFile = false;
   m_integral = 0;
   m_dirty = false;
   Q_EMIT cleared();
