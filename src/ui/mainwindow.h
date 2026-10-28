@@ -44,8 +44,7 @@ class ReadingsWidget;
 class PoincarePlot;
 class AlarmBar;
 class ShortcutRegistry;
-class ControlBar;
-class FoldButton;
+class FrontPanel;
 class MdiArranger;
 class QMdiArea;
 class QToolButton;
@@ -123,7 +122,7 @@ protected:
 
   DeviceSession     *m_session;   ///< the meters of this process and their network services
   InstanceWidget    *m_wid;
-  LcdWidget *m_display;
+  FrontPanel *m_panel;   ///< the window's meter's LCD and keys
   AnalogMeter   *m_meter;
   ReadingsWidget *m_readings;
   PoincarePlot *m_poincare;
@@ -192,13 +191,10 @@ protected:
   QMenu      *m_recentMenu = nullptr;   ///< Arrange > Recent workspaces
   QMenu      *m_designMenu;
   bool        m_restoring = false;   ///< restoreWindows() is setting the actions
-  ControlBar *m_controls;            ///< the meter's keys under the display
-  FoldButton *m_fold;
-  bool        m_controlsSupported = false;
   /// Folds the keys away (Display/controls-hidden), from the fold button
   /// or "Hide controls" in the display's menu.
   void        setControlsFolded(bool folded);
-  /// Keys and fold button shown for a meter that has keys, not folded.
+  /// The display window makes room for the keys (FrontPanel::keysHeight()).
   void        updateControls();
   // Window size (package 26.2, 4a): the window starts at the size its
   // content needs and grows when a view is shown for the first time, up to

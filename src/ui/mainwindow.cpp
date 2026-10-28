@@ -59,6 +59,7 @@
 #include "device/meterconnection.h"
 #include "ui/designs.h"
 #include "ui/controlbar.h"
+#include "ui/frontpanel.h"
 #include "ui/shortcuts.h"
 #include "service/devicesession.h"
 #include <QMdiArea>
@@ -262,36 +263,20 @@ void MainWindow::createViews()
 
   // the four views; none of them knows another, they all hang off the
   // controller (see InstanceWidget)
-  m_display = new LcdWidget(this);
-  m_wid->setDisplay(m_display);
-  // the display with the meter's keys below it (only for meters that have
-  // them) and the fold button in its corner
-  auto *displayBox = new QWidget(this);
-  auto *displayLayout = new QVBoxLayout(displayBox);
-  displayLayout->setContentsMargins(0, 0, 0, 0);
-  displayLayout->setSpacing(4);
-  displayLayout->addWidget(m_display, 1);
-  m_controls = new ControlBar(displayBox);
-  displayLayout->addWidget(m_controls);
-  m_fold = new FoldButton(m_display);
-  m_fold->setFolded(m_wid->settings()->getBool("Display/controls-hidden", false));
-  m_display->installEventFilter(this);   // keeps the fold button in the corner
-  connect(m_fold, &FoldButton::toggled, this, [this](bool folded) { setControlsFolded(folded); });
-  connect(m_wid->controller(), &MeterController::reading, m_controls, &ControlBar::showReading);
-  connect(m_controls, &ControlBar::keyPressed, this, [this](const QString &key)
+  // the window's meter's front: the LCD with its keys below (only for
+  // meters that have them) and the fold button in its corner
+  m_panel = new FrontPanel(m_session, this);
+  m_panel->setFolded(m_wid->settings()->getBool("Display/controls-hidden", false));
+  m_wid->setPanel(m_panel);
+  connect(m_panel, &FrontPanel::foldToggled, this, [this](bool folded) { setControlsFolded(folded); });
+  connect(m_panel, &FrontPanel::keysChanged, this, [this] { updateControls(); });
+  connect(m_panel, &FrontPanel::keyFailed, this, [this]
   {
-    // a Bluetooth link takes a few seconds before it takes keys
-    if (!m_wid->controller()->pressKey(key))
-      statusBar()->showMessage(tr("The key did not reach the meter: it is not connected yet."), 4000);
+    statusBar()->showMessage(tr("The key did not reach the meter: it is not connected yet."), 4000);
   });
-  connect(m_wid, &InstanceWidget::remoteControl, this, [this](bool supported)
-  {
-    m_controlsSupported = supported;
-    // readConfig() has set the protocol: the keys this meter has
-    m_controls->setProtocol(m_wid->controller()->dmm()->format(), m_wid->controller()->dmm()->dmmInfo().model);
-    updateControls();
-  });
-  m_displayWin = addView(displayBox, tr("Display"), MdiArranger::Instrument, "display");
+  // readConfig() has set the protocol: the keys this meter has
+  connect(m_wid, &InstanceWidget::remoteControl, m_panel, &FrontPanel::updateKeys);
+  m_displayWin = addView(m_panel, tr("Display"), MdiArranger::Instrument, "display");
 
   m_meter = new AnalogMeter(this);
   m_wid->setMeter(m_meter);
@@ -317,7 +302,7 @@ void MainWindow::createViews()
   m_wid->setPoincare(m_poincare);
 
   // right-click on display or meter: the window's menu (also without title bar)
-  for (auto [view, win] : { std::pair<QWidget *, QMdiSubWindow *>{m_display, m_displayWin},
+  for (auto [view, win] : { std::pair<QWidget *, QMdiSubWindow *>{m_panel->display(), m_displayWin},
                             std::pair<QWidget *, QMdiSubWindow *>{m_meter, m_meterWin},
                             std::pair<QWidget *, QMdiSubWindow *>{m_poincare, m_poincareWin} })
   {
@@ -663,8 +648,8 @@ void MainWindow::placeWindow()
   for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin, m_poincareWin })
     if (!w->isHidden())
       m_grown.insert(w);
-  if (!m_controls->isHidden())
-    m_grown.insert(m_controls);
+  if (m_panel->keysShown())
+    m_grown.insert(m_panel);
   if (m_grown.contains(m_readingsWin) || m_grown.contains(m_poincareWin))
     m_arranger->setTableWidth(growthFor(m_readingsWin).width());
   if (stored && m_wid->settingsDialog()->generalPage()->saveWindowSize())
@@ -681,7 +666,7 @@ void MainWindow::placeWindow()
     for (QMdiSubWindow *w : { m_graphWin, m_readingsWin, m_poincareWin })
       if (m_grown.contains(w))
         start += growthFor(w);
-    if (!m_controls->isHidden())
+    if (m_panel->keysShown())
       start += QSize(0, 2 * em());
     const QRect av = screen()->availableGeometry();
     resize(qMin(start.width(), int(av.width() * 0.84)), qMin(start.height(), int(av.height() * 0.84)));
@@ -1165,8 +1150,6 @@ void MainWindow::bindWindowAction(QAction *action, QMdiSubWindow *win)
 // A window was closed with its title bar button, or shown: its action follows.
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
-  if (watched == m_display && event->type() == QEvent::Resize)
-    m_fold->move(m_display->width() - m_fold->width() - 6, 6);
   if (watched == m_mdi && event->type() == QEvent::Resize)
     m_emptyStart->setGeometry(m_mdi->rect());
   // closing a window (its title bar button, Ctrl+F4) only hides it: a real
@@ -1202,11 +1185,11 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
 {
   QMenu menu(this);
   QAction *hide = menu.addAction(tr("&Hide window"));
-  if (win == m_displayWin && m_controlsSupported)
+  if (win == m_displayWin && m_panel->keysSupported())
   {
     QAction *hideControls = menu.addAction(tr("Hide &controls"));
     hideControls->setCheckable(true);
-    hideControls->setChecked(m_fold->isFolded());
+    hideControls->setChecked(m_panel->isFolded());
     connect(hideControls, &QAction::toggled, this, [this](bool on) { setControlsFolded(on); });
   }
   if (win == m_displayWin)
@@ -1222,7 +1205,7 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
         lcd->addSeparator();
       QAction *a = lcd->addAction(text);
       a->setCheckable(true);
-      a->setChecked(m_display->lcdVariant() == v);
+      a->setChecked(m_panel->display()->lcdVariant() == v);
       connect(a, &QAction::triggered, this, [this, v = v] { m_wid->setLcdVariant(v); });
     }
     menu.addSeparator();
@@ -1932,23 +1915,19 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::setControlsFolded(bool folded)
 {
-  m_fold->setFolded(folded);
+  m_panel->setFolded(folded);
   m_wid->settings()->setBool("Display/controls-hidden", folded);
   updateControls();
 }
 
 void MainWindow::updateControls()
 {
-  m_fold->setVisible(m_controlsSupported);
-  const bool show = m_controlsSupported && !m_fold->isFolded();
-  m_controls->setVisible(show);
   // the keys below the LCD are part of its window
-  m_arranger->setContentAspect(m_displayWin, LcdWidget::kMinAspect, LcdWidget::kMaxAspect,
-                               show ? m_controls->sizeHint().height() + 4 : 0);
+  m_arranger->setContentAspect(m_displayWin, LcdWidget::kMinAspect, LcdWidget::kMaxAspect, m_panel->keysHeight());
   // the first time the keys appear, the window grows for them
-  if (show && !m_grown.contains(m_controls))
+  if (m_panel->keysShown() && !m_grown.contains(m_panel))
   {
-    m_grown.insert(m_controls);
+    m_grown.insert(m_panel);
     autoGrow(QSize(0, 2 * em()));
   }
   m_arranger->arrange();
@@ -1967,7 +1946,7 @@ void MainWindow::setDesign(int design)
   // (metal in Silver and Brushed metal) shows around them. The display's
   // box, not the LCD: the meter's keys below it stand on the same sheet
   const QBrush frame = Designs::frameBrush(d);
-  for (QWidget *view : { m_display->parentWidget(), static_cast<QWidget *>(m_meter),
+  for (QWidget *view : { static_cast<QWidget *>(m_panel), static_cast<QWidget *>(m_meter),
                          static_cast<QWidget *>(m_readings) })
   {
     const bool own = frame.style() != Qt::NoBrush;
@@ -2027,7 +2006,6 @@ void MainWindow::setupIcons()
   this->action_Connect->setIcon(iconConnectOff);
   connect(this->action_Connect, &QAction::toggled, this, [ = ](bool checked)
   {
-    m_controls->setConnected(checked);
     this->action_Connect->setIcon(checked ? iconConnectOn : iconConnectOff);
   });
 }
