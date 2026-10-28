@@ -354,7 +354,7 @@ int main(int argc, char **argv)
   ScpiDevice secondDev;
   second.addDevice(&secondDev);
   check(second.start(QHostAddress::LocalHost, s.port()) && second.port() > s.port() && second.port() < s.port() + 10,
-        QString("second instance moves to a later port: %1 after %2").arg(second.port()).arg(s.port()));
+        QString("second instance moves to a later port: %1 after %2 (%3)").arg(second.port()).arg(s.port()).arg(second.errorString()));
   second.stop();
   {
     QTcpSocket c;

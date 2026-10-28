@@ -208,6 +208,9 @@ if (BUILD_TESTING)
 	## "My devices": the meter keys, devices.conf, the stable port name
 	qtdmm_add_test(device_library test_devicelibrary tests/test_devicelibrary.cpp)
 
+	## workspace files: version 2 (JSON) and 1 (ini), refused ones, unknown keys kept
+	qtdmm_add_test(workspace_file test_workspacefile tests/test_workspacefile.cpp)
+
 	## the workspaces used last: newest first, once each, shared through a file
 	qtdmm_add_test(recent_files test_recentfiles tests/test_recentfiles.cpp)
 

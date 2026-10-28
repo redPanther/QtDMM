@@ -8,6 +8,7 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QThread>
+#include <QRegularExpression>
 #include <QUuid>
 #include <algorithm>
 
@@ -320,10 +321,13 @@ QString DeviceLibrary::uniqueName(const QString &base) const
   return name;
 }
 
-QString DeviceLibrary::add(const QString &name, const QVariantMap &keys)
+QString DeviceLibrary::add(const QString &name, const QVariantMap &keys, const QString &wanted)
 {
   const QList<MyDevice> before = list();
-  const QString id = QUuid::createUuid().toString(QUuid::Id128).left(8);
+  // an id from a file: only what a group name in devices.conf takes
+  static const QRegularExpression plain(QStringLiteral("^[A-Za-z0-9_-]{1,32}$"));
+  const bool take = plain.match(wanted).hasMatch() && !find(wanted);
+  const QString id = take ? wanted : QUuid::createUuid().toString(QUuid::Id128).left(8);
   const QVariantMap own = entryKeys(keys);
   const bool ok = write([&](QSettings &s)
   {

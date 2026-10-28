@@ -20,7 +20,8 @@ the change at once.
 ## The sidebar
 
 **Devices** in the toolbar shows and hides the sidebar at the left of the
-window, with the node **My devices**. Each entry has a small picture of its
+window, with the node **My devices** (folded at the start: the devices in
+use are under **Open devices**; unfold it to choose another). Each entry has a small picture of its
 kind of instrument (handheld, clamp, bench meter, ...) in its maker's
 colours. The device in use is bold, with a dot
 that blinks green while its readings come in and turns grey when none has
@@ -62,7 +63,8 @@ programs: the [SCPI server and HiSLIP](scpi-server.md) with their port, or
 *off*.
 
 Above My devices, folded at the start, the node **Workspaces** lists the
-window layouts loaded or saved last; a double click loads one (see
+workspaces loaded or saved last by their names, the one in use at its right;
+a double click loads one (see
 [Window layout](connecting.md#window-layout)). Without any it is hidden.
 
 ### The meter's values

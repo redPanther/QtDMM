@@ -33,9 +33,10 @@ class DeviceLibrary;
 /// copies the address.
 ///
 /// The node "Workspaces" on top lists the workspace files used last
-/// (setWorkspaces()), folded at the start and hidden while there are none;
-/// a double click or Enter loads one, the context menu also takes it off
-/// the list or opens its folder.
+/// (setWorkspaces()) by their names, folded at the start and hidden while
+/// there are none; at its right the name of the workspace in use
+/// (setCurrentWorkspace()). A double click or Enter loads one, the context
+/// menu also takes it off the list or opens its folder.
 class DeviceSidebar : public QTreeWidget
 {
   Q_OBJECT
@@ -63,6 +64,13 @@ public:
   };
 
   /// One row of the node "Services".
+  /// A workspace used last.
+  struct Workspace
+  {
+    QString file;
+    QString name;           ///< empty: the file's name without the suffix
+    QString tooltip;        ///< empty: the path
+  };
   struct Service
   {
     QString id;             ///< "scpi", "hislip"
@@ -114,9 +122,11 @@ public:
   /// The node "Services".
   QTreeWidgetItem *servicesNode() const { return m_services; }
 
-  /// The workspace files used last, newest first; the node is hidden
-  /// without any. A file that is gone is grey and loads no more.
-  void        setWorkspaces(const QStringList &files);
+  /// The workspaces used last, newest first; the node is hidden without
+  /// any. A file that is gone is grey and loads no more.
+  void        setWorkspaces(const QList<Workspace> &workspaces);
+  /// The name of the workspace in use, at the right of the node; empty: none.
+  void        setCurrentWorkspace(const QString &name, const QString &tooltip = QString());
   /// The node "Workspaces".
   QTreeWidgetItem *workspacesNode() const { return m_workspaces; }
 
@@ -186,7 +196,7 @@ private:
   QList<OpenDevice> m_openList;   ///< as last set: coloured anew with another design
   std::function<void(QMenu *, const ValueRef &)> m_valueFiller;   ///< setValueMenuFiller()
   QList<Service>   m_serviceList;
-  QStringList      m_workspaceList;
+  QList<Workspace> m_workspaceList;
   QString          m_current;
   bool             m_active = false;
   bool             m_blink = false;   ///< the other green, flipped with each reading

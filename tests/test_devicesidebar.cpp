@@ -301,10 +301,17 @@ int main(int argc, char **argv)
     check(file.open(QIODevice::WriteOnly), "a workspace file");
     file.close();
     const QString gone = QDir(dir.path()).filePath("gone.qtdmm-workspace");
-    sidebar.setWorkspaces({ file.fileName(), gone });
+    sidebar.setWorkspaces({ { file.fileName(), {}, {} }, { gone, {}, {} } });
     check(!node->isHidden() && !node->isExpanded(), "shown, folded");
     check(node->childCount() == 2 && node->child(0)->text(0) == "Bench", "the name without the suffix");
     check(node->child(0)->toolTip(0) == QDir::toNativeSeparators(file.fileName()), "the path in the tooltip");
+    sidebar.setWorkspaces({ { file.fileName(), "Bench test", "<b>Bench test</b>" }, { gone, {}, {} } });
+    check(node->child(0)->text(0) == "Bench test" && node->child(0)->toolTip(0) == "<b>Bench test</b>",
+          "a workspace's name and its tooltip");
+    sidebar.setCurrentWorkspace("Bench test");
+    check(node->text(1) == "Bench test" && !node->isFirstColumnSpanned(), "the workspace in use at the right of the node");
+    sidebar.setCurrentWorkspace(QString());
+    check(node->text(1).isEmpty() && node->isFirstColumnSpanned(), "none in use: the node across");
     check(node->child(1)->toolTip(0).contains("not found"), "a gone one says so");
     check(!(node->flags() & Qt::ItemIsDropEnabled) && !(node->child(0)->flags() & Qt::ItemIsDragEnabled),
           "no drag and drop");
