@@ -108,7 +108,9 @@ public:
   DeviceLibrary *devices() const { return m_devices; }
   /// The entry of My devices a window from before 26.4 had as its own meter
   /// (DMM/my-device), once: its rules from the window go into the entry and
-  /// the key goes. Empty when there is none.
+  /// the key goes. A meter set up in the window without an entry (Manual)
+  /// gets one, or takes the entry at its place with its model. Empty when
+  /// the window had none.
   QString     takeOldDevice();
   /// Before a new recording: unsaved readings viewed are exported or
   /// dropped, or the user cancels (false). True at once in Live.

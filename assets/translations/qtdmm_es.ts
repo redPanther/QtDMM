@@ -3170,6 +3170,11 @@ No permission? The sensor needs a udev rule for USB ID %1:%2.</source>
         <source>Falling threshold %1</source>
         <translation>Umbral descendente %1</translation>
     </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="788"/>
+        <source>Meter</source>
+        <translation>Medidor</translation>
+    </message>
 </context>
 <context>
     <name>KeyboardPrefs</name>

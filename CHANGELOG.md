@@ -45,7 +45,7 @@
 
 ### Please note when updating from 26.3
 
-- **The window's meter becomes one of My devices.** The device a window used is connected at the first start like the others, with the alarms set up for the window; a window with *Manual* settings and no entry in My devices has to add its meter again with *Add device*. The big display is gone: each device has its front panel.
+- **The window's meter becomes one of My devices.** The device a window used is connected at the first start like the others, with the alarms set up for the window; a meter set up in the window alone (*Manual* settings, no entry) becomes an entry named after its model (*Meter* for Manual), or takes the entry at its place with its model. The window's settings keep no meter keys any more. The big display is gone: each device has its front panel.
 - **Instances are gone, and they are not taken over.** The settings files of other instances (`QtDMM_<id>.conf`) stay where they are and are not read. Add their devices again with *Add device* (their alarms and PASS/FAIL test do not come along) and connect them; *Save workspace* keeps such a set-up. `--config-id <id>` still starts an old instance as a QtDMM of its own, without a link to the others. A Victron with more than four values at once took two instances; four are the most now.
 - **SCPI:** `QTDMM:INSTances?` is gone (error -113), and with it the qtdmm-mcp tool `instances`; `INSTrument:CATalog?` names the meters of the program.
 

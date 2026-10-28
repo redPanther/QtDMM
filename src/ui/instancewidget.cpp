@@ -770,10 +770,35 @@ void InstanceWidget::applyMeterStyle()
 
 QString InstanceWidget::takeOldDevice()
 {
-  const QString id = m_settings->getString("DMM/my-device");
+  QString id = m_settings->getString("DMM/my-device");
   std::optional<MyDevice> entry = id.isEmpty() ? std::nullopt : m_devices->find(id);
+  // a meter set up in the window alone (Manual, or chosen before My
+  // devices): an entry of its own, or the one at its place for that model.
+  // DMM/configured as before 26.4: "Manual" alone proves nothing, it was
+  // written at every exit
+  const QString model = m_settings->getString("DMM/model");
+  if (!entry && (m_settings->getBool("DMM/configured", false) || (!model.isEmpty() && model != "Manual")))
+  {
+    QVariantMap keys = m_settings->meterKeys();
+    keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
+    id = m_devices->findByPlace(keys);
+    entry = m_devices->find(id);
+    if (!entry || !DmmDecoder::sameModel(entry->model(), model))
+    {
+      id = m_devices->add(model.isEmpty() || model == "Manual" ? tr("Meter") : model, keys);
+      entry = m_devices->find(id);
+    }
+  }
+  // the window keeps no meter: its keys go, also those of a window without one
+  for (const QString &key : m_settings->meterKeys().keys())
+    m_settings->remove(key);
+  m_settings->remove("DMM/configured");
   if (!entry)
+  {
+    m_settings->remove("DMM/my-device");
+    m_settings->save();
     return QString();
+  }
   // the rules of the window before 26.4 go to its device, once
   const QString oldAlarms = m_settings->getString("Alarms/list");
   const QString oldLimit = m_settings->getString("Limits/test");

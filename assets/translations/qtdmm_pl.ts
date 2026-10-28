@@ -3170,6 +3170,11 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <source>Falling threshold %1</source>
         <translation>Próg opadający %1</translation>
     </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="788"/>
+        <source>Meter</source>
+        <translation>Miernik</translation>
+    </message>
 </context>
 <context>
     <name>KeyboardPrefs</name>

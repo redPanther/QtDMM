@@ -3170,6 +3170,11 @@ Keine Berechtigung? Der Sensor braucht eine udev-Regel für die USB-ID %1:%2.</t
         <source>Falling threshold %1</source>
         <translation>Grenzwert fallend %1</translation>
     </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="788"/>
+        <source>Meter</source>
+        <translation>Messgerät</translation>
+    </message>
 </context>
 <context>
     <name>KeyboardPrefs</name>

@@ -163,7 +163,9 @@ The list is kept in `devices.conf` next to the settings file, the same for
 every `--config-id`. An entry keeps the device's rules too: its alarms and
 its PASS/FAIL test. A window of a version before 26.4 had a meter of its
 own: at the first start that entry is connected like the others, and alarms
-set up for the window move into it. A port is read by one meter at a time:
+set up for the window move into it. A meter set up in the window alone
+(*Manual settings*, no entry) becomes an entry of its own first, named
+after its model (*Meter* for Manual settings) - rename it in the sidebar. A port is read by one meter at a time:
 a device whose port another device connected uses is not opened again, and
 another program (or another QtDMM) using it says the port is busy.
 
