@@ -283,7 +283,7 @@ opens with F7 at the top right of the window, and the other keys keep working.
 
 **Design** in the menu, or on the *Appearance* settings page, sets the colours
 of the window: *System* (the look of your desktop), *Light* (polished
-aluminium), *Dark* (the default), or *Light Metal* and *Dark Metal*, the two
+aluminium), *Dark*, or *Light Metal* and *Dark Metal* (the default), the two
 with the instruments on brushed metal. The readings table
 and a graph in the colours *Neutral* follow; the LCD colours, the graph's
 colours and the style of the analog meter are chosen separately.

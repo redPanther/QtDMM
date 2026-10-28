@@ -39,6 +39,10 @@ public:
   /// What the Info tab says of the device's state, rich text; asked at
   /// once and every second while the dialog is open.
   void        setStatus(const std::function<QString()> &status);
+  /// The button Connect at the bottom left: @p connect connects the device,
+  /// greyed while @p connected (asked every second as the state).
+  void        setConnect(const std::function<bool()> &connected, const std::function<void()> &connect);
+  QPushButton *connectButton() const { return m_connect; }
   /// The Info tab's text of the state and the links (for the tests).
   QString     statusText() const;
   QString     linksText() const;
@@ -63,6 +67,8 @@ private:
   QLabel         *m_links = nullptr;
   DeviceSettings *m_settings = nullptr;
   QPushButton    *m_ok = nullptr;
+  QPushButton    *m_connect = nullptr;
+  std::function<bool()> m_connected;
   std::function<QString()> m_statusText;
   QTimer          m_tick;
 };

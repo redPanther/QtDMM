@@ -1898,10 +1898,27 @@ int main(int argc, char **argv)
     feed.now += 1500;
     graph.store()->setStale(true);
     feed.now += 20000;
+    const qint64 resumed = feed.now;
     for (int i = 0; i < 100; ++i)
       feed.value(1.0 + (i % 2));
     check(graph.envelopePath().toSubpathPolygons().size() == 2,
           QString("band: the gap parts it, %1 pieces").arg(graph.envelopePath().toSubpathPolygons().size()));
+    // Live runs on between the readings (FrameClock): the band goes along
+    // with the curve, its shape the same (it lagged and flickered)
+    {
+      FrameClock *clock = FrameClock::instance();
+      clock->tickNow();
+      const QRectF before = graph.envelopePath().boundingRect();
+      feed.now += 430;   // some pixels and a part of one
+      clock->tickNow();
+      const QPainterPath moved = graph.envelopePath();
+      // the piece after the gap begins at its first reading, now some pixels further left
+      const QPointF begin = at(resumed, 1.5);
+      check(moved.contains(begin + QPointF(2, 0)) && !moved.contains(begin - QPointF(3, 0)),
+            QString("band: Live moved on without a reading, the band with the curve (begins at %1)").arg(begin.x()));
+      check(std::abs(moved.boundingRect().height() - before.height()) < 0.5,
+            QString("band: its shape stays (height %1 -> %2)").arg(before.height()).arg(moved.boundingRect().height()));
+    }
     graph.setEnvelopeVisible(false);
     check(graph.envelopePath().isEmpty(), "band: off again");
   }

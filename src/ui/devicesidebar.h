@@ -134,14 +134,16 @@ public:
   /// set), else with two devices or more; a window without a meter shows it
   /// whenever there are devices to choose from.
   static bool shownAtStart(const QVariant &stored, int devices, bool configured);
+  /// The entry @p id is the window's or open beside it.
+  bool        isConnected(const QString &id) const;
   /// The assistant added an entry: the sidebar opens with the second device.
   static bool opensAfterAdd(int devicesBefore, int devicesAfter);
 
 Q_SIGNALS:
-  void        switchRequested(const QString &id);
   /// Info and settings of the entry @p id: its double click, its menu.
   void        settingsRequested(const QString &id);
-  /// Open the entry @p id beside this window's device (DeviceSession::open()).
+  /// Connect the entry @p id beside this window's device (its menu,
+  /// DeviceSession::open()).
   void        openBesideRequested(const QString &id);
   /// Close the open device @p id (OpenDevice::id), not this window's.
   void        closeRequested(const QString &id);
@@ -200,8 +202,5 @@ private:
   QString          m_current;
   bool             m_active = false;
   bool             m_blink = false;   ///< the other green, flipped with each reading
-  QTimer           m_switchDelay;     ///< a click switches after the double-click time
-  QString          m_pendingSwitch;   ///< to this entry
-  bool             m_doubleClicked = false;   ///< just now: the clicks that follow switch nothing
   bool             m_filling = false;
 };

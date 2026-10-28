@@ -53,33 +53,18 @@ int main(int argc, char **argv)
     sidebar.setCurrent(tfa, true);
   }
 
-  // 2. a click switches, but not to the one in use
-  QStringList switched;
-  QObject::connect(&sidebar, &DeviceSidebar::switchRequested, [&](const QString &id) { switched << id; });
-  // after the double-click time: a double click would be Info instead
-  const int wait = QApplication::doubleClickInterval() + 100;
-  // (waiting, the sidebar may fill anew from the library's file: the items
-  // are looked up again after it)
+  // 2. a click on a device does nothing (its menu connects it); a double
+  //    click is info and settings
+  QStringList info;
+  QObject::connect(&sidebar, &DeviceSidebar::settingsRequested, [&](const QString &id) { info << id; });
   Q_EMIT sidebar.itemClicked(bench, 0);
-  check(switched.isEmpty(), "a click switches not at once");
-  QTest::qWait(wait);
-  Q_EMIT sidebar.itemClicked(sidebar.deviceItem(tfa), 0);
-  Q_EMIT sidebar.itemClicked(sidebar.devicesNode(), 0);
-  QTest::qWait(wait);
-  bench = sidebar.deviceItem(ut61e);
-  check(switched == QStringList({ ut61e }), "click switches: " + switched.join(','));
+  QTest::qWait(QApplication::doubleClickInterval() + 100);
+  bench = sidebar.deviceItem(ut61e);   // the sidebar may fill anew from the library's file
+  check(info.isEmpty() && !sidebar.isConnected(ut61e) && sidebar.isConnected(tfa),
+        "a click does nothing; the one in use is connected, the other not");
   {
-    // a double click: info and settings, no switch
-    QStringList info;
-    const auto conn = QObject::connect(&sidebar, &DeviceSidebar::settingsRequested, [&](const QString &id) { info << id; });
-    Q_EMIT sidebar.itemClicked(bench, 0);
     Q_EMIT sidebar.itemDoubleClicked(bench, 0);
-    Q_EMIT sidebar.itemClicked(bench, 0);   // the release of the second click
-    QTest::qWait(wait);
-    bench = sidebar.deviceItem(ut61e);
-    check(info == QStringList({ ut61e }) && switched.size() == 1,
-          QString("double click: info, no switch (%1 / %2)").arg(info.join(',')).arg(switched.size()));
-    QObject::disconnect(conn);
+    check(info == QStringList({ ut61e }), "double click: info and settings " + info.join(','));
     check(sidebar.deviceItem(tfa)->toolTip(0).contains("In use in this window")
             && sidebar.deviceItem(tfa)->toolTip(0).contains("Double-click")
             && !bench->toolTip(0).contains("In use"),
@@ -91,7 +76,7 @@ int main(int argc, char **argv)
   int adds = 0;
   QObject::connect(&sidebar, &DeviceSidebar::addDeviceRequested, [&] { adds++; });
   Q_EMIT sidebar.itemClicked(add, 0);
-  check(add->text(0).startsWith('+') && adds == 1 && switched.size() == 1, "the last row asks for Add device");
+  check(add->text(0).startsWith('+') && adds == 1 && info.size() == 1, "the last row asks for Add device");
   check(!(add->flags() & (Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable)), "the add row stays put");
 
   // 3. rename in place; an empty name is not taken
@@ -179,6 +164,14 @@ int main(int argc, char **argv)
             && DeviceSpecs::html(hp).contains("FCC ID") && !DeviceSpecs::html(hp).contains("dmm-tools"),
           "HP-570C-APP: from its manual, not dmm-tools");
     check(DeviceSpecs::html(DeviceSpecs::find("CMT", "3503 *")).contains("Cosinus"), "CMT 3503: from its data sheet");
+    // Connect at the bottom left: only once set up, greyed while connected
+    check(dlg.connectButton()->isHidden(), "no Connect without setConnect()");
+    bool connected = false;
+    int connects = 0;
+    dlg.setConnect([&] { return connected; }, [&] { ++connects; connected = true; });
+    check(!dlg.connectButton()->isHidden() && dlg.connectButton()->isEnabled(), "Connect: there, enabled");
+    dlg.connectButton()->click();
+    check(connects == 1 && !dlg.connectButton()->isEnabled(), "Connect: connects, then greyed");
   }
 
   // 7. the open devices: the active one bold, one not connected grey, a double

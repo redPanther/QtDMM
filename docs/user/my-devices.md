@@ -2,8 +2,8 @@
 
 If you own several meters and use them one at a time - a UT61E on the
 bench, a Brymen for the car, a Victron shunt in the van - **My devices**
-keeps each of them with its connection, so switching is one click in the
-sidebar instead of filling in the meter page again.
+keeps each of them with its connection, so connecting one is its context
+menu in the sidebar instead of filling in the meter page again.
 
 An entry holds the meter and its connection only, and of the connection
 what its way needs: model and protocol, the port with its line settings, a
@@ -26,12 +26,9 @@ kind of instrument (handheld, clamp, bench meter, ...) in its maker's
 colours. The device in use is bold, with a dot
 that blinks green while its readings come in and turns grey when none has
 come for three seconds; where a device is connected shows
-when the mouse rests on it. Click another one - QtDMM waits the double-click
-time first, a double click opens its info instead -: QtDMM disconnects, takes over
-its settings and connects again. A running recording stops and the graph
-starts empty - another meter is another measurement; readings not exported
-yet are offered for export first, and **Cancel** stays with the current
-device. Minimum and maximum start afresh.
+when the mouse rests on it. A click on a device does nothing: **Connect**
+in its context menu, or the button **Connect** in its info (a double click),
+connects it beside the window's device (see below).
 
 With a single device the sidebar stays closed; adding the second one opens
 it, and the window remembers whether you leave it open. A window without a
@@ -40,7 +37,7 @@ a new one with the big **Add device** button.
 
 Below My devices the node **Open devices** lists the meters this QtDMM
 reads with their current reading: this window's own, then those opened
-beside it (**Open beside**, see below). The active device is in bold, one
+beside it (**Connect**, see below). The active device is in bold, one
 not connected is grey. A double click or *Show front panel* in the context
 menu brings its front panel back; *Connect*/*Disconnect* there connects or
 disconnects it, *Close* closes one opened beside.
@@ -128,11 +125,12 @@ The context menu of a device:
   - **Settings**: the meter's settings as in the assistant; with **OK** the
     device in use takes them at once.
 - **Rename** - in place.
-- **Open beside** - opens the device in this QtDMM beside the window's
-  device, with a front panel of its own: it shows its reading there and in
+- **Connect** (also the button at the bottom left of its info) - opens
+  the device in this QtDMM beside the window's device, with a front panel of its own: it shows its reading there and in
   **Open devices**, records whenever the window records, is a variable in
   [calculated values](calculated-values.md) and answers over SCPI
-  (`INSTrument`). A device whose port the window uses is not opened twice.
+  (`INSTrument`). Greyed while the device is connected; a device whose port
+  the window uses is not opened twice.
 - **Remove from My devices** - after a question; a window using it keeps its
   meter.
 
@@ -145,7 +143,7 @@ or **+ Add device...** at the end of My devices in the sidebar) asks step
 by step: how the meter is connected - *Cable*, *Bluetooth*, *Network*,
 *sigrok* or *Simulated / calculated* -, which meter it is, with a name, and
 where it goes: **In this window** as the current device, or **Beside it**,
-opened beside the current device as with *Open beside*. Either way it is
+opened beside the current device as with *Connect*. Either way it is
 kept in My devices. The page of the meter offers only the models of that
 connection; *Next* waits until what the meter needs is filled in (the port,
 the key of a Victron device, a formula that works).

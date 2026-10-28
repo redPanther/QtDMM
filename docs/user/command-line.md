@@ -18,7 +18,7 @@ qtdmm [options]
 ## Several meters at once
 
 One QtDMM reads several meters: the window's own and those opened beside
-it. *Open beside* in the context menu of an entry of
+it. *Connect* in the context menu of an entry of
 [My devices](my-devices.md) (or *Beside it* at the end of the assistant
 *Add device*) opens the device in the same QtDMM, with a front panel of
 its own; `--also <id>` does the same at the start, and over SCPI

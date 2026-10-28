@@ -4,6 +4,7 @@
 
 #include <QDesktopServices>
 #include <QDialogButtonBox>
+#include <QHBoxLayout>
 #include <QFrame>
 #include <QLabel>
 #include <QPushButton>
@@ -69,6 +70,11 @@ DeviceSettingsDlg::DeviceSettingsDlg(const QString &name, QWidget *parent)
 
   auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
   m_ok = buttons->button(QDialogButtonBox::Ok);
+  // Connect at the bottom left, set up by setConnect()
+  m_connect = new QPushButton(QIcon::fromTheme("network-connect"), tr("&Connect"), this);
+  m_connect->setObjectName("ui_connect");
+  m_connect->setToolTip(tr("Reads it beside this window's device: recorded with it, in formulas and over SCPI"));
+  m_connect->hide();
   connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
   connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
   connect(m_settings, &DeviceSettings::changed, this, [this]
@@ -76,7 +82,11 @@ DeviceSettingsDlg::DeviceSettingsDlg(const QString &name, QWidget *parent)
     m_ok->setEnabled(m_settings->isComplete());
     updateInfo();
   });
-  layout->addWidget(buttons);
+  auto *row = new QHBoxLayout;
+  row->addWidget(m_connect);
+  row->addStretch(1);
+  row->addWidget(buttons);
+  layout->addLayout(row);
 
   m_tick.setInterval(1000);
   connect(&m_tick, &QTimer::timeout, this, &DeviceSettingsDlg::updateStatus);
@@ -123,6 +133,19 @@ void DeviceSettingsDlg::setStatus(const std::function<QString()> &status)
     m_tick.stop();
 }
 
+void DeviceSettingsDlg::setConnect(const std::function<bool()> &connected, const std::function<void()> &connect)
+{
+  m_connected = connected;
+  m_connect->disconnect(this);
+  QObject::connect(m_connect, &QPushButton::clicked, this, [this, connect]
+  {
+    connect();
+    m_connect->setEnabled(!m_connected());
+  });
+  m_connect->setVisible(true);
+  m_connect->setEnabled(!m_connected());
+}
+
 QString DeviceSettingsDlg::statusText() const
 {
   return m_status->text();
@@ -155,5 +178,7 @@ void DeviceSettingsDlg::updateInfo()
 
 void DeviceSettingsDlg::updateStatus()
 {
+  if (m_connected)
+    m_connect->setEnabled(!m_connected());
   m_status->setText(m_statusText ? m_statusText() : QString());
 }
