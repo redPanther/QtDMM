@@ -3170,6 +3170,11 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <source>Falling threshold %1</source>
         <translation>Seuil descendant %1</translation>
     </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="788"/>
+        <source>Meter</source>
+        <translation>Multimètre</translation>
+    </message>
 </context>
 <context>
     <name>KeyboardPrefs</name>

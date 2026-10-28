@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The window's meter before 26.4 (InstanceWidget::takeOldDevice()): its entry
-// of My devices, once; the window keeps no meter of its own, the entry stays
+// of My devices, once, or a new one for a meter set up in the window alone; the window keeps no meter of its own, the entry stays
 // as it is. And which keys an entry keeps (DeviceLibrary::isEntryKey()).
 #include <QApplication>
 #include <QDebug>
@@ -59,7 +59,34 @@ int main(int argc, char **argv)
     gone.sync();
   }
   InstanceWidget none("gone", dir.path(), &session);
-  check(none.takeOldDevice().isEmpty(), "an entry gone: none");
+  check(none.takeOldDevice().isEmpty(), "an entry gone, no meter set up: none");
+
+  // a meter set up in the window alone: an entry of its own, once; one at
+  // the place of an entry with its model takes that entry; "Manual" alone
+  // (written at every exit before 26.4) is no meter
+  auto oldWindow = [&](const QString &id, const QVariantMap &keys, bool configured)
+  {
+    Settings old(id, dir.path());
+    old.setValues(keys);
+    if (configured)
+      old.setBool("DMM/configured", true);
+    old.save();
+    old.sync();
+  };
+  oldWindow("manual", { {"DMM/model", "Manual"}, {"Port settings/device", "calc V/DC 2"} }, true);
+  InstanceWidget manual("manual", dir.path(), &session);
+  const QString made = manual.takeOldDevice();
+  check(!made.isEmpty() && lib.find(made) && lib.find(made)->name == "Meter"
+          && lib.find(made)->keys.value("Port settings/device") == "calc V/DC 2",
+        "Manual: an entry of its own, named Meter");
+  check(manual.takeOldDevice().isEmpty(), "Manual: once");
+  oldWindow("sima", keysA, false);
+  InstanceWidget sima("sima", dir.path(), &session);
+  check(sima.takeOldDevice() == a, "a model at an entry's place: that entry");
+  oldWindow("plain", { {"DMM/model", "Manual"} }, false);
+  InstanceWidget plain("plain", dir.path(), &session);
+  const int entries = int(lib.list().size());
+  check(plain.takeOldDevice().isEmpty() && lib.list().size() == entries, "Manual alone: no meter");
 
   if (failed)
   {
