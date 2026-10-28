@@ -279,6 +279,19 @@ int main(int argc, char **argv)
   }
 #endif
 
+  // an entry brought back by a workspace keeps its id; one taken or not a
+  // plain word gets a new one
+  {
+    QTemporaryDir own;
+    DeviceLibrary lib(own.path());
+    const QVariantMap sim{ { "DMM/model", "QtDMM Simulated meter" } };
+    check(lib.add("Back", sim, "ab12cd34") == "ab12cd34" && lib.find("ab12cd34")->name == "Back", "add() with its id");
+    const QString again = lib.add("Twice", sim, "ab12cd34");
+    check(!again.isEmpty() && again != "ab12cd34", "the id taken: a new one");
+    const QString odd = lib.add("Odd", sim, "x/y]");
+    check(!odd.isEmpty() && odd != "x/y]" && lib.find(odd), "no plain word: a new one");
+  }
+
   if (failed)
   {
     qWarning() << failed << "device library check(s) failed";

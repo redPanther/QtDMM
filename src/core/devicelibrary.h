@@ -60,8 +60,9 @@ public:
   /// @p base, or with " (2)", " (3)", ... when an entry has that name.
   QString     uniqueName(const QString &base) const;
 
-  /// A new entry at the end; returns its id.
-  QString     add(const QString &name, const QVariantMap &keys);
+  /// A new entry at the end; returns its id. With @p id that one (a
+  /// workspace brings back an entry gone), unless an entry has it.
+  QString     add(const QString &name, const QVariantMap &keys, const QString &id = QString());
   bool        update(const QString &id, const QVariantMap &keys);
   bool        rename(const QString &id, const QString &name);
   bool        remove(const QString &id);

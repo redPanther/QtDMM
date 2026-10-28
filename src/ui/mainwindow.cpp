@@ -66,7 +66,11 @@
 #include "ui/frontpanel.h"
 #include "ui/shortcuts.h"
 #include "service/devicesession.h"
+#include "core/workspacefile.h"
+#include "ui/dialogs/workspacedlg.h"
+#include <QBuffer>
 #include <QMdiArea>
+#include <QRegularExpression>
 #include <QMdiSubWindow>
 #include <QLoggingCategory>
 #include <QIconEngine>
@@ -184,6 +188,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   fillViewToolbar();
   const QList<QAction *> workspace = createArrangeMenu();
   updateRecentWorkspaces();
+  setCurrentWorkspace(m_wid->settings()->getString("Windows/workspace-current"));
   createDesignMenu();
 
   updateWindowTitle();
@@ -694,9 +699,10 @@ QList<QAction *> MainWindow::createArrangeMenu()
   QAction *loadWs = m_arrangeMenu->addAction(QIcon::fromTheme("document-open"), tr("L&oad workspace..."));
   loadWs->setObjectName("action_LoadWorkspace");
   loadWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Load workspace</span></p>"
-                          "<p>Takes a window layout saved with <i>Save workspace</i>: which windows are shown, "
-                          "the arrangement, title bars, toolbar, design and the size of the main window.</p>"
-                          "</body></html>"));
+                          "<p>Takes a set-up saved with <i>Save workspace</i>: the window's device and the "
+                          "devices open beside it (others close), which windows are shown with which values, the "
+                          "arrangement, title bars, toolbar, design and the size of the main window. A device "
+                          "missing in My devices is added back from the file.</p></body></html>"));
   connect(loadWs, &QAction::triggered, this, &MainWindow::loadWorkspace);
   // filled from the file each time: another QtDMM may have added one
   m_recentMenu = m_arrangeMenu->addMenu(QIcon::fromTheme("document-open-recent"), tr("&Recent workspaces"));
@@ -705,7 +711,9 @@ QList<QAction *> MainWindow::createArrangeMenu()
   QAction *saveWs = m_arrangeMenu->addAction(QIcon::fromTheme("document-save-as"), tr("&Save workspace..."));
   saveWs->setObjectName("action_SaveWorkspace");
   saveWs->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Save workspace</span></p>"
-                          "<p>Writes the window layout to a file: which windows are shown, the arrangement, "
+                          "<p>Writes the set-up to a file, under a name and a description, with a picture of "
+                          "the windows: the window's device and the devices open beside it (a copy of their "
+                          "entries in My devices), which windows are shown with which values, the arrangement, "
                           "title bars, toolbar, design and the size of the main window.</p></body></html>"));
   connect(saveWs, &QAction::triggered, this, &MainWindow::saveWorkspace);
   m_autoSaveLayout = m_arrangeMenu->addAction(tr("Save layout on e&xit"));
@@ -2304,34 +2312,59 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/graph-value-axes", axes.join(' '));
 }
 
-// A workspace file is an ini file with the same keys as the settings, plus
-// the size of the main window.
+// A workspace file (WorkspaceFile): the window's keys, its device and those
+// beside it, a name, a description and a picture.
 static const char *kWorkspaceSuffix = "qtdmm-workspace";
 
 void MainWindow::saveWorkspace()
 {
   Settings *cfg = m_wid->settings();
+  // the picture: the windows as they stand
+  const QPixmap shot = m_mdi->grab().scaledToWidth(480, Qt::SmoothTransformation);
+  WorkspaceDlg dlg(m_workspaceName, m_workspaceDescription, shot, this);
+  if (dlg.exec() != QDialog::Accepted)
+    return;
   const QString dir = cfg->getString("Windows/workspace-dir",
                                      QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-  QString file = QFileDialog::getSaveFileName(this, tr("Save workspace"), dir,
+  // the file of the workspace in use, else one named after it
+  QString base = dlg.name();
+  base.replace(QRegularExpression(R"([/\\:*?"<>|])"), "_");
+  const QString proposal = !m_workspaceFile.isEmpty() && (dlg.name() == m_workspaceName || base.isEmpty())
+                             ? m_workspaceFile
+                             : QDir(dir).filePath((base.isEmpty() ? QString("untitled") : base) + "." + kWorkspaceSuffix);
+  QString file = QFileDialog::getSaveFileName(this, tr("Save workspace"), proposal,
                                               tr("QtDMM workspace (*.%1)").arg(kWorkspaceSuffix));
   if (file.isEmpty())
     return;
   if (QFileInfo(file).suffix().isEmpty())
     file += QString(".") + kWorkspaceSuffix;
-  QFile::remove(file);   // only our keys in it
-  QSettings ws(file, QSettings::IniFormat);
-  ws.setValue("Workspace/version", 1);
-  ws.setValue("Workspace/size", QString("%1 %2").arg(width()).arg(height()));
-  storeWorkspace([&ws](const QString &key, const QVariant &value) { ws.setValue(key, value); });
-  ws.sync();
-  if (ws.status() != QSettings::NoError)
+
+  WorkspaceFile ws;
+  ws.name = dlg.name().isEmpty() ? QFileInfo(file).completeBaseName() : dlg.name();
+  ws.description = dlg.description();
+  ws.width = width();
+  ws.height = height();
+  storeWorkspace([&ws](const QString &key, const QVariant &value) { ws.keys.insert(key, value); });
+  // the devices as My devices has them: a copy goes with the file
+  const DeviceLibrary *lib = m_wid->devices();
+  if (lib->find(m_wid->currentDevice()))
+    ws.windowDevice = m_wid->currentDevice();
+  for (const QString &id : QStringList{ ws.windowDevice } + ws.keys.value("Windows/open-devices").toString().split(' '))
+    if (const std::optional<MyDevice> d = lib->find(id))
+      ws.devices << *d;
+  // JPEG: a screenshot of gradients takes a fifth of a PNG's room
+  QBuffer jpeg(&ws.thumbnail);
+  jpeg.open(QIODevice::WriteOnly);
+  shot.save(&jpeg, "JPG", 80);
+  QString error;
+  if (!ws.write(file, &error))
   {
     QMessageBox::warning(this, tr("QtDMM: Save workspace"), tr("Could not write %1.").arg(QDir::toNativeSeparators(file)));
     return;
   }
   cfg->setString("Windows/workspace-dir", QFileInfo(file).absolutePath());
   recentWorkspaces().add(file);
+  setCurrentWorkspace(file);
   updateRecentWorkspaces();
   Q_EMIT m_wid->error(tr("Workspace saved to %1").arg(QDir::toNativeSeparators(file)));
 }
@@ -2350,24 +2383,61 @@ void MainWindow::loadWorkspace()
 bool MainWindow::loadWorkspaceFile(const QString &file)
 {
   Settings *cfg = m_wid->settings();
-  QSettings ws(file, QSettings::IniFormat);
-  if (!QFileInfo::exists(file) || ws.status() != QSettings::NoError || ws.value("Workspace/version").toInt() < 1)
+  QString error;
+  const std::optional<WorkspaceFile> ws = WorkspaceFile::read(file, &error);
+  if (!ws)
   {
-    QMessageBox::warning(this, tr("QtDMM: Load workspace"),
-                         tr("%1 is no QtDMM workspace.").arg(QDir::toNativeSeparators(file)));
+    QMessageBox::warning(this, tr("QtDMM: Load workspace"), tr("%1: %2").arg(QDir::toNativeSeparators(file), error));
     return false;
   }
+  DeviceLibrary *lib = m_wid->devices();
+  // the set-up of the file: the devices open beside that it does not have
+  // close (version 1 only opened its own)
+  const QStringList beside = ws->keys.value("Windows/open-devices").toString().split(' ', Qt::SkipEmptyParts);
+  QList<MeterController *> closing;
+  if (ws->version >= 2)
+    for (MeterController *ctl : m_session->controllers())
+      if (ctl != m_wid->controller() && !beside.contains(ctl->deviceId()) && ctl->deviceId() != ws->windowDevice)
+        closing << ctl;
+  QStringList unsaved;
+  for (const MeterController *ctl : std::as_const(closing))
+    if (ctl->recorder()->state() == RecordingStore::View && ctl->recorder()->dirty())
+      unsaved << ctl->deviceName();
+  if (!unsaved.isEmpty()
+      && QMessageBox::question(this, tr("QtDMM: Load workspace"),
+                               tr("The workspace closes %1, its recording is not saved.").arg(unsaved.join(", ")),
+                               QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel) != QMessageBox::Discard)
+    return false;
+  // a device gone from My devices comes back from the copy, under its id:
+  // the views name it so
+  QStringList restored;
+  for (const MyDevice &d : ws->devices)
+    if (!lib->find(d.id) && lib->add(d.name, d.keys, d.id) == d.id)
+    {
+      lib->setRules(d.id, d.alarms, d.limitTest);
+      restored << d.name;
+    }
+  // the window's device, asking for a recording not saved
+  if (!ws->windowDevice.isEmpty() && ws->windowDevice != m_wid->currentDevice() && lib->find(ws->windowDevice))
+  {
+    if (!m_wid->switchDevice(ws->windowDevice))
+      return false;
+    m_sidebar->setCurrentItem(m_sidebar->deviceItem(m_wid->currentDevice()));
+  }
+  for (const MeterController *ctl : std::as_const(closing))
+    m_session->close(ctl->deviceId());
+
   cfg->setString("Windows/workspace-dir", QFileInfo(file).absolutePath());
   // the size first: the arrangement fills the area it gets
-  const QStringList size = ws.value("Workspace/size").toString().split(' ');
-  if (size.size() == 2 && !isMaximized() && !isFullScreen())
+  if (ws->width > 0 && ws->height > 0 && !isMaximized() && !isFullScreen())
   {
-    resize(size[0].toInt(), size[1].toInt());
+    resize(ws->width, ws->height);
     m_userSized = true;   // a size chosen on purpose: no growing
   }
-  applyWorkspace([&ws](const QString &key, const QVariant &def) -> QVariant
+  const QVariantMap keys = ws->keys;
+  applyWorkspace([&keys](const QString &key, const QVariant &def) -> QVariant
   {
-    const QVariant v = ws.value(key, def);
+    const QVariant v = keys.value(key, def);
     return def.typeId() == QMetaType::Bool ? QVariant(v.toBool()) : QVariant(v.toString());
   });
   // without auto-save the loaded workspace is the one to start with next time
@@ -2380,9 +2450,34 @@ bool MainWindow::loadWorkspaceFile(const QString &file)
   }
   openPending();
   recentWorkspaces().add(file);
+  setCurrentWorkspace(file);
   updateRecentWorkspaces();
-  Q_EMIT m_wid->error(tr("Workspace loaded from %1").arg(QDir::toNativeSeparators(file)));
+  QString text = tr("Workspace loaded from %1").arg(QDir::toNativeSeparators(file));
+  if (!restored.isEmpty())
+    text += "; " + tr("back in My devices: %1").arg(restored.join(", "));
+  Q_EMIT m_wid->error(text);
   return true;
+}
+
+void MainWindow::setCurrentWorkspace(const QString &file)
+{
+  const std::optional<WorkspaceFile> ws = file.isEmpty() ? std::nullopt : WorkspaceFile::read(file);
+  m_workspaceFile = ws ? file : QString();
+  m_workspaceName = ws ? ws->name : QString();
+  m_workspaceDescription = ws ? ws->description : QString();
+  m_wid->settings()->setString("Windows/workspace-current", m_workspaceFile);
+  m_sidebar->setCurrentWorkspace(m_workspaceName, ws ? workspaceTooltip(file, *ws) : QString());
+}
+
+QString MainWindow::workspaceTooltip(const QString &file, const WorkspaceFile &ws)
+{
+  QString tip = "<b>" + ws.name.toHtmlEscaped() + "</b>";
+  if (!ws.description.isEmpty())
+    tip += "<br>" + ws.description.toHtmlEscaped().replace('\n', "<br>");
+  if (!ws.thumbnail.isEmpty())
+    tip += QString("<br><img src=\"data:image/%1;base64,%2\" width=\"240\">")
+             .arg(ws.thumbnail.startsWith("\x89PNG") ? "png" : "jpeg", QString::fromLatin1(ws.thumbnail.toBase64()));
+  return tip + "<br><small>" + QDir::toNativeSeparators(file).toHtmlEscaped() + "</small>";
 }
 
 RecentFiles MainWindow::recentWorkspaces() const
@@ -2393,15 +2488,22 @@ RecentFiles MainWindow::recentWorkspaces() const
 void MainWindow::updateRecentWorkspaces()
 {
   const QStringList files = recentWorkspaces().list().mid(0, m_wid->settings()->getInt("Sidebar/recent-workspaces", 10));
-  m_sidebar->setWorkspaces(files);
+  // their names and pictures from the files
+  QList<DeviceSidebar::Workspace> rows;
+  for (const QString &file : files)
+  {
+    const std::optional<WorkspaceFile> ws = QFileInfo::exists(file) ? WorkspaceFile::read(file) : std::nullopt;
+    rows.append({ file, ws ? ws->name : QString(), ws ? workspaceTooltip(file, *ws) : QString() });
+  }
+  m_sidebar->setWorkspaces(rows);
   m_recentMenu->clear();
-  for (int i = 0; i < files.size(); ++i)
+  for (int i = 0; i < rows.size(); ++i)
   {
     const QString &file = files[i];
     // 1 ... 9 as the letters, then none
-    const QString name = QFileInfo(file).completeBaseName().replace('&', "&&");
+    const QString name = (rows[i].name.isEmpty() ? QFileInfo(file).completeBaseName() : rows[i].name).replace('&', "&&");
     QAction *a = m_recentMenu->addAction(i < 9 ? QString("&%1 %2").arg(i + 1).arg(name) : name);
-    a->setToolTip(QDir::toNativeSeparators(file));
+    a->setToolTip(rows[i].tooltip.isEmpty() ? QDir::toNativeSeparators(file) : rows[i].tooltip);
     a->setEnabled(QFileInfo::exists(file));
     connect(a, &QAction::triggered, this, [this, file] { loadWorkspaceFile(file); });
   }

@@ -39,6 +39,7 @@
 
 class InstanceWidget;
 class DeviceSession;
+class WorkspaceFile;
 class MeterController;
 class LcdWidget;
 class HelpDlg;
@@ -361,6 +362,13 @@ protected:
   RecentFiles recentWorkspaces() const;
   /// The sidebar's node and the menu "Recent workspaces" anew.
   void        updateRecentWorkspaces();
+  /// The workspace in use: loaded or saved last (Windows/workspace-current).
+  void        setCurrentWorkspace(const QString &file);
+  /// For a tooltip: name, description, picture and path of @p file.
+  static QString workspaceTooltip(const QString &file, const WorkspaceFile &ws);
+  QString     m_workspaceFile;          ///< setCurrentWorkspace()
+  QString     m_workspaceName;
+  QString     m_workspaceDescription;
   /// @}
   /// Applies a colour design (Designs::Design) to the window and the views.
   void        setDesign(int design);

@@ -106,7 +106,8 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   m_devices->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
   m_devices->setFont(0, bold);
   m_devices->setFirstColumnSpanned(true);
-  m_devices->setExpanded(true);
+  // folded at the start: the devices in use are under "Open devices"
+  m_devices->setExpanded(false);
   m_open = new QTreeWidgetItem(this, { tr("Open devices") });
   m_open->setFlags(Qt::ItemIsEnabled);
   m_open->setFont(0, bold);
@@ -349,30 +350,37 @@ QString DeviceSidebar::workspaceOf(const QTreeWidgetItem *item) const
   return QFileInfo::exists(file) ? file : QString();
 }
 
-void DeviceSidebar::setWorkspaces(const QStringList &files)
+void DeviceSidebar::setWorkspaces(const QList<Workspace> &workspaces)
 {
-  m_workspaceList = files;
+  m_workspaceList = workspaces;
   m_filling = true;
   qDeleteAll(m_workspaces->takeChildren());
   const QColor grey = palette().color(QPalette::Disabled, QPalette::WindowText);
-  for (const QString &file : files)
+  for (const Workspace &ws : workspaces)
   {
-    const QFileInfo info(file);
-    auto *item = new QTreeWidgetItem(m_workspaces, { info.completeBaseName() });
-    item->setData(0, Qt::UserRole, file);
+    const QFileInfo info(ws.file);
+    auto *item = new QTreeWidgetItem(m_workspaces, { ws.name.isEmpty() ? info.completeBaseName() : ws.name });
+    item->setData(0, Qt::UserRole, ws.file);
     item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     item->setFirstColumnSpanned(true);
-    const QString path = QDir::toNativeSeparators(file);
+    const QString path = QDir::toNativeSeparators(ws.file);
     if (info.exists())
-      item->setToolTip(0, path);
+      item->setToolTip(0, ws.tooltip.isEmpty() ? path : ws.tooltip);
     else
     {
       item->setForeground(0, grey);
       item->setToolTip(0, tr("%1 (not found)").arg(path));
     }
   }
-  m_workspaces->setHidden(files.isEmpty());
+  m_workspaces->setHidden(workspaces.isEmpty());
   m_filling = false;
+}
+
+void DeviceSidebar::setCurrentWorkspace(const QString &name, const QString &tooltip)
+{
+  m_workspaces->setText(1, name);
+  m_workspaces->setToolTip(1, tooltip);
+  m_workspaces->setFirstColumnSpanned(name.isEmpty());
 }
 
 void DeviceSidebar::workspaceMenu(QTreeWidgetItem *item, const QPoint &pos)
@@ -439,7 +447,9 @@ void DeviceSidebar::fill()
   m_addItem->setForeground(0, palette().color(QPalette::Disabled, QPalette::WindowText));
   m_addItem->setToolTip(0, tr("Set up another meter (the assistant)."));
   m_addItem->setIcon(0, dot(QColor(), devicePixelRatioF()));   // its text where the names are
-  m_devices->setExpanded(true);
+  // folded as the user left it; without devices the row to add one shows
+  if (m_devices->childCount() == 1)
+    m_devices->setExpanded(true);
   updateMarks();
   m_filling = false;
 }
