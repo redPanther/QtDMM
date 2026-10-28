@@ -10,7 +10,9 @@
 #include <QFile>
 #include <QTemporaryDir>
 
+#include "core/alarm.h"
 #include "core/devicelibrary.h"
+#include "core/limittest.h"
 #include "core/reading.h"
 #include "core/readingadapter.h"
 #include "core/sampletypes.h"
@@ -253,6 +255,48 @@ int main(int argc, char **argv)
     session.open(sim);
     check(feed.controller() && waitFor([&] { return !got.isEmpty() && !got.last().noNumber(); }, 4000),
           "open again: its readings again");
+  }
+
+  // 10. rules with the entry: set when opened, a change (also over SCPI)
+  //     goes back into it; the meter keys and their tidying leave them
+  {
+    session.close(sim);
+    Alarm high;
+    high.name = "High";
+    high.condition = Alarm::Above;
+    high.a = 2;
+    LimitTest test;
+    test.enabled = true;
+    test.form = LimitTest::Range;
+    test.lower = 1;
+    test.upper = 2;
+    check(lib.setRules(sim, Alarm::listToJson({ high }), test.toJsonText()), "rules into the entry");
+    MeterController *b = session.open(sim);
+    check(b && b->alarms()->alarms().size() == 1 && b->alarms()->alarms().first().name == "High"
+            && b->limitTest().enabled && b->limitTest().upper == 2,
+          "opened with the entry's rules");
+    if (b)
+    {
+      Alarm low = high;
+      low.name = "Low";
+      low.condition = Alarm::Below;
+      b->setAlarms({ high, low });
+      check(Alarm::listFromJson(lib.find(sim)->alarms).size() == 2, "a new alarm list into the entry");
+      ask("INST BENCH_SIM");
+      ask("CALC:LIM:UPP 3");
+      check(LimitTest::fromJsonText(lib.find(sim)->limitTest).upper == 3,
+            "a limit set over SCPI into the entry: " + lib.find(sim)->limitTest);
+    }
+    QVariantMap keys = lib.find(sim)->keys;
+    keys.insert("DMM/virtual-max", "1.6");
+    lib.update(sim, keys);
+    check(!lib.find(sim)->alarms.isEmpty() && !lib.find(sim)->limitTest.isEmpty() && !lib.find(sim)->keys.contains("Alarms/list"),
+          "update() of the meter keys keeps the rules, apart from them");
+    DeviceLibrary again(dir.path());   // tidies the file
+    check(Alarm::listFromJson(again.find(sim)->alarms).size() == 2, "tidying keeps them");
+    const QString copy = lib.duplicate(sim);
+    check(Alarm::listFromJson(lib.find(copy)->alarms).size() == 2, "a copy has them too");
+    lib.remove(copy);
   }
 
   return failed == 0 ? 0 : 1;

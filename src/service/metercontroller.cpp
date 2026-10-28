@@ -152,8 +152,11 @@ void MeterController::setModel(const QString &model)
 
 void MeterController::setAlarms(const QList<Alarm> &alarms)
 {
+  const bool other = Alarm::listToJson(alarms) != Alarm::listToJson(m_alarms->alarms());
   m_alarms->setAlarms(alarms);
   updateBanner();
+  if (other)
+    Q_EMIT alarmsChanged(alarms);
 }
 
 void MeterController::setLimitTest(const LimitTest &test)

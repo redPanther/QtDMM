@@ -182,6 +182,9 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   // no window to ask: INPut ON|OFF goes to the connection
   connect(ctl, &MeterController::connectRequested, ctl, [ctl](bool on) { ctl->connectMeter(on); });
   connect(ctl, &MeterController::recordingRequested, this, &DeviceSession::onRecordingRequested);
+  // an alarm's program with "Disconnect first" has the port for a while
+  connect(ctl, &MeterController::portReleased, ctl, [ctl](bool released) { ctl->connectMeter(!released); });
+  applyRules(ctl, id);
   if (!ctl->connectMeter(true))
   {
     // SCPI in English, the reason in the status bar in the user's language
@@ -203,6 +206,22 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
     ctl->recorder()->live();
   Q_EMIT opened(ctl);
   return ctl;
+}
+
+void DeviceSession::applyRules(MeterController *ctl, const QString &id)
+{
+  const std::optional<MyDevice> entry = m_library ? m_library->find(id) : std::nullopt;
+  ctl->setAlarms(Alarm::listFromJson(entry ? entry->alarms : QString()));
+  ctl->setLimitTest(LimitTest::fromJsonText(entry ? entry->limitTest : QString()));
+  // a change, from the window or a SCPI client, goes to the entry
+  auto store = [this, ctl, id]
+  {
+    if (m_library)
+      m_library->setRules(id, ctl->alarms()->alarms().isEmpty() ? QString() : Alarm::listToJson(ctl->alarms()->alarms()),
+                          ctl->limitTest().toJsonText());
+  };
+  connect(ctl, &MeterController::alarmsChanged, this, store);
+  connect(ctl, &MeterController::limitTestChanged, this, store);
 }
 
 bool DeviceSession::close(const QString &id, QString *error)

@@ -97,8 +97,11 @@ public:
   /// The configured meter's name, for SCPI *IDN? and mDNS.
   void        setModel(const QString &model);
   QString     model() const { return m_model; }
+  /// The meter's alarms; a list other than before is announced (alarmsChanged()).
   void        setAlarms(const QList<Alarm> &alarms);
   const AlarmManager *alarms() const { return m_alarms; }
+  /// The colour of alertColorChanged(), invalid when none.
+  QColor      alertColor() const { return m_alertColor; }
   /// The limit test (PASS/FAIL); a new one starts without a verdict.
   void        setLimitTest(const LimitTest &test);
   const LimitTest &limitTest() const { return m_limitTest; }
@@ -191,6 +194,9 @@ Q_SIGNALS:
   void        alarmRaised(int index, const Alarm &alarm, const QString &shown, const QString &text);
   /// The alarm's condition no longer holds.
   void        alarmCleared(int index, const Alarm &alarm);
+  /// setAlarms() with another list: kept with the device, the sounds of
+  /// the list before stop (the places may have moved).
+  void        alarmsChanged(const QList<Alarm> &alarms);
   /// The alarm banner: one line per raised, unacknowledged alarm, in the
   /// colour of the first; empty when nothing is raised.
   void        alarmBannerChanged(const QString &lines, const QColor &color);

@@ -17,6 +17,8 @@ struct MyDevice
   QString     name;
   int         order = 0;
   QVariantMap keys;    ///< the meter keys that belong to it (DeviceLibrary::entryKeys())
+  QString     alarms;     ///< its alarms (Alarm::listToJson()), empty when none were set
+  QString     limitTest;  ///< its PASS/FAIL test (LimitTest::toJsonText()), empty when none was set
 
   QString model() const { return keys.value("DMM/model").toString(); }
   /// Where it is connected, for a menu: the port, the Bluetooth address, the formula.
@@ -37,7 +39,9 @@ struct MyDevice
 /// comes back as changed(). Only QtCore.
 ///
 /// Which entry an instance uses is its key DMM/my-device (the id), not a
-/// comparison of keys.
+/// comparison of keys. Besides its meter keys an entry keeps the device's
+/// rules (Alarms/list, Limits/test): they go with the device, not with a
+/// window.
 class DeviceLibrary : public QObject
 {
   Q_OBJECT
@@ -65,6 +69,10 @@ public:
   bool        move(const QString &id, int index);
   /// A copy right after it, named "<name> (2)"; returns the new id.
   QString     duplicate(const QString &id);
+  /// The device's rules: its alarms and its PASS/FAIL test as JSON
+  /// (MyDevice::alarms, limitTest; empty removes them). They are not meter
+  /// keys: update() and tidy() keep them.
+  bool        setRules(const QString &id, const QString &alarms, const QString &limitTest);
 
   /// Of the meter keys @p keys those that belong to a device: model, data
   /// format, display and the place always, then what the way of connecting

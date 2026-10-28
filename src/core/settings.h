@@ -66,6 +66,8 @@ public:
   void           save();
   /// Drops staged writes.
   void           clear();
+  /// Removes @p name from the file at once (and a staged write of it).
+  void           remove(const QString &name);
   /// Writes the saved values to the file and reads what other processes
   /// changed there meanwhile; without it
   /// QSettings keeps answering from its cache.

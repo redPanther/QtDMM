@@ -19,7 +19,8 @@ class ServiceHost;
 /// "My devices" without a window (open(): --also, SCPI QTDMM:DEVice:OPEN).
 /// They share the network services (host()); INSTrument chooses among them.
 ///
-/// A meter opened here has no alarms; its readings carry its source
+/// A meter opened here has the rules of its entry (alarms, PASS/FAIL
+/// test; a change goes back into the entry); its readings carry its source
 /// ("device:<id>", Reading::source) and reach SCPI. Its recording follows
 /// the window's: it starts at the same moment, on one time base
 /// (RecordingStore::startAt()), with the window's sample time, and stops
@@ -87,6 +88,8 @@ Q_SIGNALS:
 
 private:
   void        installScpi();
+  /// The rules of the entry @p id on @p ctl, and its changes back into the entry.
+  void        applyRules(MeterController *ctl, const QString &id);
   /// The window's recording started (Record), ended (View), or it went Live.
   void        followWindow(int state);
   /// Starts the recording of @p ctl at @p t0 on the core clock, wall clock
