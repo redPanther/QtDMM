@@ -119,6 +119,22 @@ int main(int argc, char **argv)
     delete menu;
   }
 
+  // 5. the rules on a value: a new alarm, the limits, by its ValueRef
+  {
+    QList<ValueRef> alarmFor, limitsFor;
+    target.addAlarm = [&](const ValueRef &v) { alarmFor << v; };
+    target.editLimits = [&](const ValueRef &v) { limitsFor << v; };
+    QMenu *menu = menuFor(ValueRef(1, source));
+    action(menu, { "&New alarm..." })->trigger();
+    action(menu, { "Li&mits..." })->trigger();
+    check(alarmFor == QList<ValueRef>{ ValueRef(1, source) } && limitsFor == alarmFor, "another meter's value");
+    delete menu;
+    menu = menuFor(ValueRef(0, wid.controller()->source()));
+    action(menu, { "&New alarm..." })->trigger();
+    check(alarmFor.last() == ValueRef(0), "the window's by an empty source");
+    delete menu;
+  }
+
   if (failed)
   {
     qWarning() << failed << "ValueMenu check(s) failed";

@@ -39,6 +39,10 @@ public:
     std::function<void(const ValueRef &, bool)> setTableShown;
     /// Opens the window of a view; for the LCD the meter's front panel (@p source).
     std::function<void(View, const QString &source)> show;
+    /// The rules on a value: a new alarm on it, the PASS/FAIL test's limits
+    /// for it (at the end of the menu, when given).
+    std::function<void(const ValueRef &)> addAlarm;
+    std::function<void(const ValueRef &)> editLimits;
   };
 
   /// Fills @p menu for @p value of an open meter.

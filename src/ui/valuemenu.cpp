@@ -150,4 +150,13 @@ void ValueMenu::fill(QMenu *menu, const Target &target, const ValueRef &value)
     if (on)
       show(View::Table, ref.source);
   });
+  // the rules on it, kept with its meter
+  if (target.addAlarm || target.editLimits)
+    menu->addSeparator();
+  if (target.addAlarm)
+    QObject::connect(menu->addAction(tr("&New alarm...")), &QAction::triggered, menu,
+                     [add = target.addAlarm, ref] { add(ref); });
+  if (target.editLimits)
+    QObject::connect(menu->addAction(tr("Li&mits...")), &QAction::triggered, menu,
+                     [edit = target.editLimits, ref] { edit(ref); });
 }

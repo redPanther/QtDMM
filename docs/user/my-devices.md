@@ -52,7 +52,10 @@ meter stays open and keeps recording. The meter of the front panel clicked
 last is the **active device**: *Connect*, *Reset* (min/max) and the device
 settings (Shift+F8) act on it. The status bar shows its name while more
 than one meter is open. All front panels share the LCD colours of the
-window's display. The window layout remembers the meters open beside and
+window's display. Each device has its own [alarms](alarms.md) and
+[PASS/FAIL test](limit-test.md); its front panel takes their colours, and
+*PASS/FAIL test*, *Limits...* and *Alarms...* are in the context menu of
+its front panel and of its row. The window layout remembers the meters open beside and
 opens them again at the next start, after the window's own; a workspace
 file does the same when it is loaded. **Services** shows what this window offers to other
 programs: the [SCPI server and HiSLIP](scpi-server.md) with their port, or
@@ -152,7 +155,9 @@ A serial port is saved under its stable name on Linux, the link in
 ## Where the list is kept
 
 The list is kept in `devices.conf` next to the settings file, the same for
-every `--config-id`. A port is read by one meter at a time: a device whose
+every `--config-id`. An entry keeps the device's rules too: its alarms and
+its PASS/FAIL test. Alarms set up for the window before 26.4 move into the
+entry of the window's device at the first start. A port is read by one meter at a time: a device whose
 port is in use in this window or beside it is not opened again, and
 another program (or another QtDMM) using it says the port is busy.
 

@@ -160,6 +160,12 @@ void Settings::clear()
   m_tmpConfig->clear();
 }
 
+void Settings::remove(const QString &name)
+{
+  m_tmpConfig->remove(name);
+  m_qsettings->remove(name);
+}
+
 void Settings::sync()
 {
   m_qsettings->sync();

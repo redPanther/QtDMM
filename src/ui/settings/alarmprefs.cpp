@@ -32,8 +32,23 @@ AlarmPrefs::AlarmPrefs(QWidget *parent) : SettingsPage(parent)
 
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
+  // which meter's alarms, with more than one open
+  auto *deviceRow = new QHBoxLayout;
+  m_deviceLabel = new QLabel(tr("&Device:"), this);
+  m_device = new QComboBox(this);
+  m_device->setObjectName("ui_alarmDevice");
+  m_deviceLabel->setBuddy(m_device);
+  deviceRow->addWidget(m_deviceLabel);
+  deviceRow->addWidget(m_device, 1);
+  layout->addLayout(deviceRow);
+  connect(m_device, qOverload<int>(&QComboBox::activated), this, [this](int index)
+  {
+    m_current = qBound(0, index, int(m_devices.size()) - 1);
+    refresh();
+  });
+  m_devices << Device();
   m_list = new QListWidget(this);
-  m_list->setToolTip(tr("Each alarm watches the main reading. It raises when its condition has held for the "
+  m_list->setToolTip(tr("Each alarm watches a reading of the device. It raises when its condition has held for the "
                         "given time and clears once the reading is back beyond the hysteresis. Untick an "
                         "alarm to keep it without it firing. An alarm can show a banner over the display, "
                         "play a sound, open a popup, run a program or start a recording."));
@@ -88,46 +103,110 @@ void AlarmPrefs::setValueUnit(int id, const QString &unit)
   if (m_units.value(id) == unit && m_units.contains(id))
     return;
   m_units[id] = unit;
+  m_devices[0].units = m_units;
   refresh();
 }
 
 void AlarmPrefs::setValueNames(const QStringList &names)
 {
   m_valueNames = names;
+  m_devices[0].valueNames = names;
   refresh();
+}
+
+AlarmPrefs::Device AlarmPrefs::device(const QString &source) const
+{
+  const QList<Device> all = m_source ? m_source() : QList<Device>{ Device() };
+  for (Device d : all)
+    if (d.source == source)
+    {
+      if (source.isEmpty())
+      {
+        d.units = m_units;
+        d.valueNames = m_valueNames;
+      }
+      return d;
+    }
+  return Device();
+}
+
+void AlarmPrefs::setCurrentDevice(const QString &source)
+{
+  for (int i = 0; i < m_devices.size(); ++i)
+    if (m_devices[i].source == source)
+    {
+      m_current = i;
+      m_device->setCurrentIndex(i);
+      refresh();
+      return;
+    }
 }
 
 void AlarmPrefs::defaultsSLOT()
 {
-  m_alarms = Alarm::listFromJson(m_cfg->getString("Alarms/list"));
+  // the meter shown stays, if it is still open
+  const QString shown = m_devices.value(m_current).source;
+  if (m_source)
+    m_devices = m_source();
+  if (m_devices.isEmpty() || !m_source)
+  {
+    m_devices = { Device() };
+    m_devices[0].alarms = Alarm::listFromJson(m_cfg->getString("Alarms/list"));
+  }
+  m_devices[0].units = m_units;
+  m_devices[0].valueNames = m_valueNames;
+  m_changed.clear();
+  m_device->clear();
+  for (const Device &d : std::as_const(m_devices))
+    m_device->addItem(d.name.isEmpty() ? tr("This window's device") : d.name);
+  m_device->setVisible(m_devices.size() > 1);
+  m_deviceLabel->setVisible(m_devices.size() > 1);
+  m_current = 0;
+  setCurrentDevice(shown);
   m_blink->setChecked(m_cfg->getBool("Alarms/blink", false));
   refresh();
 }
 
 void AlarmPrefs::factoryDefaultsSLOT()
 {
-  m_alarms.clear();
+  for (Device &d : m_devices)
+  {
+    if (!d.alarms.isEmpty())
+      m_changed.insert(d.source);
+    d.alarms.clear();
+  }
   m_blink->setChecked(false);
   refresh();
 }
 
 void AlarmPrefs::applySLOT()
 {
-  m_cfg->setString("Alarms/list", Alarm::listToJson(m_alarms));
+  // the alarms go to the meters, which keep them
+  for (const Device &d : std::as_const(m_devices))
+  {
+    if (!m_changed.contains(d.source))
+      continue;
+    if (m_apply)
+      m_apply(d.source, d.alarms);
+    else if (d.source.isEmpty())
+      m_cfg->setString("Alarms/list", Alarm::listToJson(d.alarms));
+  }
+  m_changed.clear();
   m_cfg->setBool("Alarms/blink", m_blink->isChecked());
 }
 
 void AlarmPrefs::refresh()
 {
-  const int current = m_list->currentRow();
+  const Device &dev = current();
+  const int row = m_list->currentRow();
   m_list->blockSignals(true);
   m_list->clear();
-  for (const Alarm &al : m_alarms)
+  for (const Alarm &al : dev.alarms)
   {
     // with more than one value: which one it watches
-    const QString what = m_valueNames.size() > 1 && al.condition != Alarm::NoReadings
+    const QString what = dev.valueNames.size() > 1 && al.condition != Alarm::NoReadings
                            ? tr("value %1: ").arg(al.value.id + 1) : QString();
-    auto *item = new QListWidgetItem(QString("%1  —  %2%3").arg(al.name, what, al.describe(m_units.value(al.value.id))),
+    auto *item = new QListWidgetItem(QString("%1  —  %2%3").arg(al.name, what, al.describe(dev.units.value(al.value.id))),
                                      m_list);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(al.enabled ? Qt::Checked : Qt::Unchecked);
@@ -136,50 +215,60 @@ void AlarmPrefs::refresh()
     item->setIcon(QIcon(swatch));
   }
   m_list->blockSignals(false);
-  m_empty->setVisible(m_alarms.isEmpty());
-  if (current >= 0 && current < m_list->count())
-    m_list->setCurrentRow(current);
+  m_empty->setVisible(dev.alarms.isEmpty());
+  if (row >= 0 && row < m_list->count())
+    m_list->setCurrentRow(row);
 }
 
 void AlarmPrefs::add()
 {
+  Device &dev = current();
   Alarm al;
-  al.name = tr("Alarm %1").arg(m_alarms.size() + 1);
-  AlarmDlg dlg(al, m_units, m_valueNames, this);
+  al.name = alarmName(int(dev.alarms.size()) + 1);
+  AlarmDlg dlg(al, dev.units, dev.valueNames, this);
   if (dlg.exec() == QDialog::Accepted)
   {
-    m_alarms << dlg.alarm();
+    dev.alarms << dlg.alarm();
+    m_changed.insert(dev.source);
     refresh();
-    m_list->setCurrentRow(m_alarms.size() - 1);
+    m_list->setCurrentRow(int(dev.alarms.size()) - 1);
   }
 }
 
 void AlarmPrefs::edit()
 {
+  Device &dev = current();
   const int row = m_list->currentRow();
-  if (row < 0 || row >= m_alarms.size())
+  if (row < 0 || row >= dev.alarms.size())
     return;
-  AlarmDlg dlg(m_alarms[row], m_units, m_valueNames, this);
+  AlarmDlg dlg(dev.alarms[row], dev.units, dev.valueNames, this);
   if (dlg.exec() == QDialog::Accepted)
   {
-    m_alarms[row] = dlg.alarm();
+    dev.alarms[row] = dlg.alarm();
+    m_changed.insert(dev.source);
     refresh();
   }
 }
 
 void AlarmPrefs::remove()
 {
+  Device &dev = current();
   const int row = m_list->currentRow();
-  if (row < 0 || row >= m_alarms.size())
+  if (row < 0 || row >= dev.alarms.size())
     return;
-  m_alarms.removeAt(row);
+  dev.alarms.removeAt(row);
+  m_changed.insert(dev.source);
   refresh();
 }
 
 void AlarmPrefs::toggle(int row, bool on)
 {
-  if (row >= 0 && row < m_alarms.size())
-    m_alarms[row].enabled = on;
+  Device &dev = current();
+  if (row >= 0 && row < dev.alarms.size())
+  {
+    dev.alarms[row].enabled = on;
+    m_changed.insert(dev.source);
+  }
 }
 
 // ---------------------------------------------------------------------------

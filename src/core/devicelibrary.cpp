@@ -15,10 +15,13 @@ namespace
 {
 const QString kPrefix = QStringLiteral("device-");
 
-// the keys of an entry that are its own, not the meter's
+const QString kAlarmsKey = QStringLiteral("Alarms/list");
+const QString kLimitKey = QStringLiteral("Limits/test");
+
+// the keys of an entry that are its own, not the meter's: also its rules
 bool ownKey(const QString &key)
 {
-  return key == QLatin1String("name") || key == QLatin1String("order");
+  return key == QLatin1String("name") || key == QLatin1String("order") || key == kAlarmsKey || key == kLimitKey;
 }
 
 std::function<QString(const QString &)> g_modelTransport;
@@ -282,6 +285,8 @@ QList<MyDevice> DeviceLibrary::entries(QSettings &s)
     d.id = group.mid(kPrefix.size());
     d.name = s.value("name").toString();
     d.order = s.value("order", 0).toInt();
+    d.alarms = s.value(kAlarmsKey).toString();
+    d.limitTest = s.value(kLimitKey).toString();
     for (const QString &key : s.allKeys())
       if (!ownKey(key))
         d.keys.insert(key, s.value(key));
@@ -332,6 +337,34 @@ QString DeviceLibrary::add(const QString &name, const QVariantMap &keys)
   watch();
   Q_EMIT changed();
   return ok ? id : QString();
+}
+
+bool DeviceLibrary::setRules(const QString &id, const QString &alarms, const QString &limitTest)
+{
+  const std::optional<MyDevice> d = find(id);
+  if (!d)
+    return false;
+  if (d->alarms == alarms && d->limitTest == limitTest)
+    return true;
+  const bool ok = write([&](QSettings &s)
+  {
+    s.beginGroup(kPrefix + id);
+    const std::pair<QString, QString> rules[] = { { kAlarmsKey, alarms }, { kLimitKey, limitTest } };
+    for (const auto &[key, json] : rules)
+    {
+      if (json.isEmpty())
+        s.remove(key);
+      else
+        s.setValue(key, json);
+    }
+    s.endGroup();
+  }, [&](const QList<MyDevice> &disk)
+  {
+    const std::optional<MyDevice> e = findIn(disk, id);
+    return e && e->alarms == alarms && e->limitTest == limitTest;
+  });
+  Q_EMIT changed();
+  return ok;
 }
 
 bool DeviceLibrary::update(const QString &id, const QVariantMap &keys)
@@ -417,6 +450,8 @@ QString DeviceLibrary::duplicate(const QString &id)
   if (!d)
     return QString();
   const QString copy = add(uniqueName(d->name), d->keys);
+  if (!copy.isEmpty() && (!d->alarms.isEmpty() || !d->limitTest.isEmpty()))
+    setRules(copy, d->alarms, d->limitTest);
   // right after the original
   QStringList ids;
   for (const MyDevice &e : list())

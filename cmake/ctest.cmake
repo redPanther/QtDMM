@@ -171,6 +171,10 @@ if (BUILD_TESTING)
 	## alarm sounds: once, N times, while raised, stopping; the built-in WAVs
 	qtdmm_add_test(alarm_sound test_alarmsound tests/test_alarmsound.cpp)
 	target_link_libraries(test_alarmsound PRIVATE qtdmm_resources)
+	## the rules of every open meter: sounds, one banner, Acknowledge for all, the
+	## front panel's colour, the window's rules moving into its entry
+	qtdmm_add_test(alarm_service test_alarmservice tests/test_alarmservice.cpp)
+	target_link_libraries(test_alarmservice PRIVATE qtdmm_resources)
 
 	## XLSX/ODS writer, read back with LibreOffice when installed
 	qtdmm_add_test(spreadsheet test_spreadsheet tests/test_spreadsheet.cpp)

@@ -552,6 +552,10 @@ void DeviceSidebar::openMenu(QTreeWidgetItem *item, const QPoint &pos)
   if (const ValueRef value = valueOf(item); value.source != "-" && m_valueFiller)
     m_valueFiller(menu.addMenu(tr("&Value")), value);
   QAction *link = menu.addAction(connected ? tr("&Disconnect") : tr("Co&nnect"));
+  // its rules, kept with it
+  menu.addSeparator();
+  QAction *alarms = menu.addAction(tr("&Alarms..."));
+  QAction *limits = menu.addAction(tr("L&imits..."));
   QAction *close = nullptr;
   if (id != m_own)
   {
@@ -563,6 +567,10 @@ void DeviceSidebar::openMenu(QTreeWidgetItem *item, const QPoint &pos)
     Q_EMIT frontPanelRequested(id);
   else if (chosen == link)
     Q_EMIT connectRequested(id, !connected);
+  else if (chosen == alarms)
+    Q_EMIT alarmsRequested(id);
+  else if (chosen == limits)
+    Q_EMIT limitsRequested(id);
   else if (chosen && chosen == close)
     Q_EMIT closeRequested(id);
 }

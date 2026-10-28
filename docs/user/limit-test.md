@@ -1,13 +1,14 @@
 # PASS/FAIL limit test
 
-The limit test judges every reading of the meter's main value against
+The limit test judges every reading of a value of a device against
 limits: **PASS** inside, **FAIL** outside, with **HI** or **LO** for the
 side. For checking parts on the bench - resistors, batteries, a supply
 voltage - without setting up alarms.
 
 ## Setting it up
 
-Right-click the digital display:
+Each open device has its own test. Right-click the device's front panel
+(its digital display), or its row under *Open devices* in the sidebar:
 
 - **PASS/FAIL test** switches the test on and off. The limits stay when it
   is off. Switched on without limits, it asks for them.
@@ -25,7 +26,9 @@ Right-click the digital display:
     **repeat** again every second while the verdict stays - a steady
     tick while the trimmer is right, say. A new verdict ends it.
 
-The limits are kept with the meter's settings. The limits themselves
+The test belongs to the device: it is kept with its entry in
+[My devices](my-devices.md), also when it is set over SCPI. **Limits...**
+in the menu of a value judges that value instead of the main one. The limits themselves
 pass: 4.9 V passes 5 V ± 2 %.
 
 ## On the display

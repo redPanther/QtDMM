@@ -182,6 +182,7 @@ protected:
   ReadingsWidget *m_readings;
   PoincarePlot *m_poincare;
   AlarmBar   *m_alarmBar;
+  class AlarmService *m_alarmService;
   QMdiArea   *m_mdi;
   MdiArranger *m_arranger;
   QToolButton *m_toolbarButton = nullptr;   ///< toolbar on/off, at the end of the status line
@@ -333,9 +334,14 @@ protected:
   void        bindWindowAction(QAction *action, QMdiSubWindow *win);
   /// The window's context menu (from its header line).
   void        windowMenu(QMdiSubWindow *win, const QPoint &globalPos);
-  /// The limit test's dialog; @p enable ticks "Check the limits" in it
-  /// (switched on from the menu without limits yet).
-  void        editLimits(bool enable);
+  /// The limit test's dialog for the meter @p ctl; @p enable ticks "Check
+  /// the limits" in it (switched on from the menu without limits yet),
+  /// @p id >= 0 sets the value it judges.
+  void        editLimits(MeterController *ctl, bool enable, int id = -1);
+  /// The rules of the meter @p ctl in @p menu: PASS/FAIL test, limits, alarms.
+  void        addRulesMenu(QMenu *menu, MeterController *ctl);
+  /// A new alarm on @p value, edited in AlarmDlg and given to its meter.
+  void        addAlarm(const ValueRef &value);
   /// Window layout from/to the settings (Windows/... keys).
   void        restoreWindows();
   void        saveWindows();

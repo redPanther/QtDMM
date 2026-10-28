@@ -7,6 +7,7 @@
 #include <QPointer>
 #include <QWidget>
 
+#include "core/limittest.h"
 #include "core/valueref.h"
 
 class ControlBar;
@@ -22,8 +23,9 @@ class ValueFeed;
 /// The panel shows the meter of value() (ValueFeed): its readings, min/max
 /// and staleness on the LCD, its key states on the keys; a click on a key
 /// goes to that meter. Each meter open in the process has one (MainWindow),
-/// the window's meter the one InstanceWidget feeds further (the limit test,
-/// the alarm colour, the value choice).
+/// the window's meter the one InstanceWidget feeds further (the value
+/// choice). The LCD takes the colour of its meter's raised alarm, under it
+/// the PASS/FAIL test's green or red, and the verdict on the value it shows.
 class FrontPanel : public QWidget
 {
   Q_OBJECT
@@ -54,6 +56,8 @@ public:
   int         keysHeight() const;
   /// Reads the meter's keys anew (after its settings were applied).
   void        updateKeys();
+  /// An alarm's colour blinks (Alarms/blink).
+  void        setBlink(bool blink);
 
 Q_SIGNALS:
   /// Folded or unfolded by the user (the fold button).
@@ -72,6 +76,11 @@ private:
   void        attach(MeterController *ctl);
   /// The keys enabled while the meter's connection is wanted.
   void        updateConnected();
+  /// The verdict of the limit test on value @p id: on the LCD for the value
+  /// it shows big, its colour under an alarm's.
+  void        showVerdict(int id, LimitTest::Verdict verdict, double deviation);
+  /// The alarm's colour (blinking if wanted) or the limit test's on the LCD.
+  void        showAlert();
 
   ValueFeed  *m_feed;
   LcdWidget  *m_display;
@@ -81,4 +90,10 @@ private:
   bool        m_secondariesChosen = false;
   QPointer<MeterController> m_ctl;
   QMetaObject::Connection m_link;   ///< the meter's connection state, for the keys
+  QList<QMetaObject::Connection> m_rules;   ///< the meter's alarm colour and limit test
+  QColor      m_alertColor;   ///< the raised alarm's colour, invalid when none
+  QColor      m_limitColor;   ///< the limit test's green or red, invalid when none
+  bool        m_blink = false;
+  bool        m_phase = true;   ///< blinking: the colour shown now
+  class QTimer *m_blinkTimer;
 };

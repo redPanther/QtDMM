@@ -139,6 +139,10 @@ Q_SIGNALS:
   void        frontPanelRequested(const QString &id);
   /// Connect (@p on) or disconnect the open device @p id.
   void        connectRequested(const QString &id, bool on);
+  /// The alarms of the open device @p id.
+  void        alarmsRequested(const QString &id);
+  /// The PASS/FAIL test's limits of the open device @p id.
+  void        limitsRequested(const QString &id);
   /// The row "+ Add device..." at the end of My devices.
   void        addDeviceRequested();
   /// The settings of the services (Settings, SCPI server).

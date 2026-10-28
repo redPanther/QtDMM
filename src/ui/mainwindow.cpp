@@ -48,6 +48,7 @@
 #include "ui/views/lcdwidget.h"
 #include "ui/views/poincareplot.h"
 #include "ui/settings/settingsdialog.h"
+#include "ui/settings/alarmprefs.h"
 #include "ui/settings/generalprefs.h"
 #include "ui/settings/guiprefs.h"
 #include "ui/settings/keyboardprefs.h"
@@ -56,6 +57,7 @@
 #include "ui/dialogs/sourcesdlg.h"
 #include "core/settings.h"
 #include "ui/alarmbar.h"
+#include "ui/alarmservice.h"
 #include "ui/mdiarranger.h"
 #include "service/metercontroller.h"
 #include "device/meterconnection.h"
@@ -222,6 +224,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateEmptyStart);
   connect(m_wid, &InstanceWidget::configChanged, this, [this]
   {
+    applyLcdLook(m_panel);
     for (QMdiSubWindow *win : std::as_const(m_panelWins))
       applyLcdLook(panelOf(win));
   });
@@ -271,9 +274,10 @@ void MainWindow::createViews()
   m_mdi->installEventFilter(this);
   connect(addButton, &QToolButton::clicked, this, &MainWindow::addDevice);
 
-  MeterController *ctl = m_wid->controller();
-  connect(ctl, &MeterController::alarmBannerChanged, m_alarmBar, &AlarmBar::setAlarms);
-  connect(m_alarmBar, &AlarmBar::acknowledged, ctl, &MeterController::acknowledgeAlarms);
+  // the alarms of every open meter: sounds, popups, one banner
+  m_alarmService = new AlarmService(m_session, this, this);
+  connect(m_alarmService, &AlarmService::bannerChanged, m_alarmBar, &AlarmBar::setAlarms);
+  connect(m_alarmBar, &AlarmBar::acknowledged, m_alarmService, &AlarmService::acknowledgeAll);
 
   // the four views; none of them knows another, they all hang off the
   // controller (see InstanceWidget)
@@ -313,6 +317,8 @@ void MainWindow::createViews()
   m_poincare = new PoincarePlot(this);
   m_poincare->setSettings(m_wid->settings());
   connect(m_wid, &InstanceWidget::meterChanged, m_poincare, &PoincarePlot::clear);
+  // the window's device switched or renamed: the active device's name anew
+  connect(m_wid, &InstanceWidget::meterChanged, this, [this] { setActive(activeController()); });
   m_poincareWin = addView(m_poincare, tr("Poincaré plot"), MdiArranger::Table, "poincare");
   m_wid->setPoincare(m_poincare);
 
@@ -458,6 +464,7 @@ FrontPanel *MainWindow::panelOf(const QMdiSubWindow *win)
 
 void MainWindow::applyLcdLook(FrontPanel *panel)
 {
+  panel->setBlink(m_wid->settingsDialog()->alarmPage()->blink());
   if (panel == m_panel)
     return;   // InstanceWidget sets the window's (readConfig())
   const GuiPrefs *gui = m_wid->settingsDialog()->guiPage();
@@ -560,6 +567,31 @@ void MainWindow::createSidebar()
         action_Connect->setChecked(ctl->dmm()->isWanted());
     }
     updateOpenDevices();
+  });
+  // an open device by the sidebar's id (OpenDevice::id)
+  auto openController = [this](const QString &id)
+  {
+    return id == m_wid->controller()->source() ? m_wid->controller() : m_session->controller("device:" + id);
+  };
+  connect(m_sidebar, &DeviceSidebar::alarmsRequested, this, [this, openController](const QString &id)
+  {
+    if (const MeterController *ctl = openController(id))
+      m_wid->openAlarms(ctl == m_wid->controller() ? QString() : ctl->source());
+  });
+  connect(m_sidebar, &DeviceSidebar::limitsRequested, this, [this, openController](const QString &id)
+  {
+    if (MeterController *ctl = openController(id))
+      editLimits(ctl, false);
+  });
+  // an alarm of a meter beside marks the graph while it shows a value of it
+  connect(m_session, &DeviceSession::opened, this, [this](MeterController *ctl)
+  {
+    connect(ctl, &MeterController::markRequested, this, [this, ctl](const QColor &color, const QString &name, bool graph, bool)
+    {
+      const QList<ValueRef> shown = m_wid->graph()->otherValues();
+      if (graph && std::any_of(shown.cbegin(), shown.cend(), [ctl](const ValueRef &v) { return v.source == ctl->source(); }))
+        m_wid->graph()->addMark(color, tr("%1: %2").arg(ctl->deviceName(), name));
+    });
   });
   connect(m_session, &DeviceSession::opened, this, &MainWindow::updateOpenDevices);
   connect(m_session, &DeviceSession::closed, this, &MainWindow::updateOpenDevices);
@@ -1425,24 +1457,10 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
       });
     }
   }
-  if (win == m_displayWin)
+  if (panel && panel->controller())
   {
     menu.addSeparator();
-    // the limit test: on and off here, the limits in the dialog; on without
-    // limits set yet asks for them
-    QAction *test = menu.addAction(tr("PASS/FAIL &test"));
-    test->setCheckable(true);
-    test->setChecked(m_wid->limitTest().enabled);
-    connect(test, &QAction::toggled, this, [this](bool on)
-    {
-      LimitTest t = m_wid->limitTest();
-      t.enabled = on;
-      if (on && t.low() == t.high())
-        editLimits(true);
-      else
-        m_wid->setLimitTest(t);
-    });
-    connect(menu.addAction(tr("L&imits...")), &QAction::triggered, this, [this] { editLimits(false); });
+    addRulesMenu(&menu, panel->controller());
   }
   // the value of an open meter it shows
   if ((win == m_meterWin || win == m_poincareWin) && m_session->controllers().size() > 1)
@@ -1471,17 +1489,73 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     win->hide();
 }
 
-void MainWindow::editLimits(bool enable)
+void MainWindow::addRulesMenu(QMenu *menu, MeterController *ctl)
 {
-  const MeterController *ctl = m_wid->controller();
-  const Reading &r = ctl->lastReading();
-  const double reading = r.overload || r.noNumber() || r.text.isEmpty() ? std::nan("") : r.value;
-  LimitTest t = m_wid->limitTest();
+  // the limit test: on and off here, the limits in the dialog; on without
+  // limits set yet asks for them
+  QAction *test = menu->addAction(tr("PASS/FAIL &test"));
+  test->setCheckable(true);
+  test->setChecked(ctl->limitTest().enabled);
+  QPointer<MeterController> meter(ctl);
+  connect(test, &QAction::toggled, this, [this, meter](bool on)
+  {
+    if (!meter)
+      return;
+    LimitTest t = meter->limitTest();
+    t.enabled = on;
+    if (on && t.low() == t.high())
+      editLimits(meter, true);
+    else
+      meter->setLimitTest(t);
+  });
+  connect(menu->addAction(tr("L&imits...")), &QAction::triggered, this, [this, meter]
+  {
+    if (meter)
+      editLimits(meter, false);
+  });
+  connect(menu->addAction(tr("&Alarms...")), &QAction::triggered, this, [this, meter]
+  {
+    if (meter)
+      m_wid->openAlarms(meter == m_wid->controller() ? QString() : meter->source());
+  });
+}
+
+void MainWindow::editLimits(MeterController *ctl, bool enable, int id)
+{
+  LimitTest t = ctl->limitTest();
   if (enable)
     t.enabled = true;
-  LimitDlg dlg(t, ctl->baseUnit(), reading, this);
-  if (dlg.exec() == QDialog::Accepted)
-    m_wid->setLimitTest(dlg.limitTest());
+  if (id >= 0)
+    t.value = ValueRef(id);
+  const Reading r = ctl->lastReading(t.value.id);
+  const double reading = r.overload || r.noNumber() || r.text.isEmpty() ? std::nan("") : r.value;
+  LimitDlg dlg(t, r.baseUnit.isEmpty() && t.value.id == 0 ? ctl->baseUnit() : r.baseUnit, reading, this);
+  QPointer<MeterController> meter(ctl);   // it may close meanwhile
+  if (dlg.exec() == QDialog::Accepted && meter)
+  {
+    LimitTest chosen = dlg.limitTest();
+    chosen.value = t.value;
+    meter->setLimitTest(chosen);
+  }
+}
+
+void MainWindow::addAlarm(const ValueRef &value)
+{
+  MeterController *ctl = m_session->controller(value);
+  if (!ctl)
+    return;
+  AlarmPrefs *page = m_wid->settingsDialog()->alarmPage();
+  const AlarmPrefs::Device device = page->device(ctl == m_wid->controller() ? QString() : ctl->source());
+  QList<Alarm> alarms = ctl->alarms()->alarms();
+  Alarm al;
+  al.name = AlarmPrefs::alarmName(int(alarms.size()) + 1);
+  al.value = ValueRef(value.id);
+  AlarmDlg dlg(al, device.units, device.valueNames, this);
+  QPointer<MeterController> meter(ctl);
+  if (dlg.exec() != QDialog::Accepted || !meter)
+    return;
+  alarms << dlg.alarm();
+  meter->setAlarms(alarms);
 }
 
 void MainWindow::showSidebar(bool show)
@@ -1722,7 +1796,17 @@ void MainWindow::connectTableSources()
   ReadingsModel *log = m_readings->log();
   for (MeterController *ctl : m_session->controllers())
     if (ctl == m_wid->controller() || m_tableOthers.contains(ctl->source()))
+    {
       m_tableLinks << connect(ctl, &MeterController::reading, log, &ReadingsModel::appendReading);
+      // its alarms mark the table too (the window's meter's do already)
+      if (ctl != m_wid->controller())
+        m_tableLinks << connect(ctl, &MeterController::markRequested, log,
+                                [log, ctl](const QColor &color, const QString &name, bool, bool table)
+        {
+          if (table)
+            log->markLast(color, tr("%1: %2").arg(ctl->deviceName(), name));
+        });
+    }
 }
 
 DeviceSidebar::Value MainWindow::otherValueRow(const MeterController *ctl, int id) const
@@ -1802,6 +1886,12 @@ void MainWindow::fillValueMenu(QMenu *menu, const ValueRef &value)
   target.panel = [this](const QString &source) { return panelOf(m_panelWins.value(source)); };
   target.tableShown = [this](const ValueRef &v) { return tableShows(v); };
   target.setTableShown = [this](const ValueRef &v, bool on) { setTableShown(v, on); };
+  target.addAlarm = [this](const ValueRef &v) { addAlarm(v); };
+  target.editLimits = [this](const ValueRef &v)
+  {
+    if (MeterController *ctl = m_session->controller(v))
+      editLimits(ctl, false, v.id);
+  };
   target.show = [this](ValueMenu::View view, const QString &source)
   {
     QMdiSubWindow *panel = m_panelWins.value(source);
@@ -2564,6 +2654,8 @@ void MainWindow::setActive(MeterController *ctl)
     m_activeOther = ctl != nullptr;
     action_Connect->setChecked(ctl ? ctl->dmm()->isWanted() : m_windowConnect);
   }
+  // the settings' Alarms page opens on its alarms
+  m_wid->setActiveSource(m_activeOther && m_active ? m_active->source() : QString());
   if (!m_activeName)
     return;
   const QList<MeterController *> meters = m_session->controllers();

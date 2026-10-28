@@ -3,7 +3,10 @@
 #include "ui/frontpanel.h"
 
 #include <QEvent>
+#include <QTimer>
 #include <QVBoxLayout>
+
+#include <cmath>
 
 #include "core/reading.h"
 #include "device/meterconnection.h"
@@ -18,6 +21,7 @@ FrontPanel::FrontPanel(DeviceSession *session, QWidget *parent)
   , m_display(new LcdWidget(this))
   , m_controls(new ControlBar(this))
   , m_fold(new FoldButton(m_display))
+  , m_blinkTimer(new QTimer(this))
 {
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
@@ -35,6 +39,12 @@ FrontPanel::FrontPanel(DeviceSession *session, QWidget *parent)
   connect(m_feed, &ValueFeed::maximumChanged, m_display, &LcdWidget::showMaximum);
   connect(m_feed, &ValueFeed::minMaxReset, m_display, &LcdWidget::clearMinMax);
   connect(m_feed, &ValueFeed::controllerChanged, this, &FrontPanel::attach);
+  m_blinkTimer->setInterval(500);
+  connect(m_blinkTimer, &QTimer::timeout, this, [this]
+  {
+    m_phase = !m_phase;
+    showAlert();
+  });
   connect(m_fold, &FoldButton::toggled, this, [this](bool folded)
   {
     setFolded(folded);
@@ -88,10 +98,59 @@ void FrontPanel::attach(MeterController *ctl)
     m_display->showReading(none);
   }
   disconnect(m_link);
+  for (const QMetaObject::Connection &c : std::as_const(m_rules))
+    disconnect(c);
+  m_rules.clear();
   m_ctl = ctl;
+  m_alertColor = ctl ? ctl->alertColor() : QColor();
+  m_display->setLimitTest(ctl && ctl->limitTest().enabled);
+  showVerdict(ctl ? ctl->limitTest().value.id : 0, ctl ? ctl->verdict() : LimitTest::NoVerdict, std::nan(""));
   if (ctl)
+  {
     m_link = connect(ctl->dmm(), &MeterConnection::linkStateChanged, this, &FrontPanel::updateConnected);
+    m_rules << connect(ctl, &MeterController::alertColorChanged, this, [this](const QColor &color)
+    {
+      m_alertColor = color;
+      m_phase = true;
+      showAlert();
+    });
+    m_rules << connect(ctl, &MeterController::limitJudged, this, &FrontPanel::showVerdict);
+    m_rules << connect(ctl, &MeterController::limitTestChanged, this, [this](const LimitTest &test)
+    {
+      m_display->setLimitTest(test.enabled);
+    });
+  }
   updateKeys();
+}
+
+void FrontPanel::setBlink(bool blink)
+{
+  m_blink = blink;
+  showAlert();
+}
+
+void FrontPanel::showVerdict(int id, LimitTest::Verdict v, double deviation)
+{
+  m_display->setVerdict(id == m_display->primaryShown() ? v : LimitTest::NoVerdict, deviation);
+  const bool tint = m_ctl && m_ctl->limitTest().tint;
+  m_limitColor = !tint || v == LimitTest::NoVerdict ? QColor()
+                 : v == LimitTest::Pass ? QColor(0x3c, 0xb0, 0x4a) : QColor(0xd8, 0x22, 0x22);
+  showAlert();
+}
+
+void FrontPanel::showAlert()
+{
+  const bool blinking = m_alertColor.isValid() && m_blink;
+  if (blinking && !m_blinkTimer->isActive())
+    m_blinkTimer->start();
+  else if (!blinking)
+  {
+    m_blinkTimer->stop();
+    m_phase = true;
+  }
+  // the alarm's colour over the limit test's; the colour is never the only
+  // sign (banner, sound)
+  m_display->setAlertColor(m_alertColor.isValid() ? (m_phase ? m_alertColor : QColor()) : m_limitColor);
 }
 
 void FrontPanel::updateKeys()
