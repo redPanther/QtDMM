@@ -515,20 +515,14 @@ void MainWindow::createSidebar()
   sidebar->setToolTip(tr("Devices: show or hide the sidebar with My devices and the open devices"));
   addAction(sidebar);   // F9 also with the toolbar hidden
   sidebar->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Devices</span></p>"
-                           "<p>The sidebar with My devices: click one to switch to it, its context menu has its "
-                           "settings, rename, a new window and remove. Drag an entry to change the order."
+                           "<p>The sidebar with My devices: the context menu of one connects it, has its settings, "
+                           "rename and remove; a double click shows its info and settings. Drag an entry to change "
+                           "the order."
                            "</p></body></html>"));
   connect(sidebar, &QAction::triggered, this, [this](bool on)
   {
     showSidebar(on);
     m_wid->settings()->setBool("Windows/sidebar", on);
-  });
-  connect(m_sidebar, &DeviceSidebar::switchRequested, m_wid, [this](const QString &id)
-  {
-    // the selection is the device in use: the new one, or after Cancel at
-    // the question about unsaved data the one before
-    m_wid->switchDevice(id);
-    m_sidebar->setCurrentItem(m_sidebar->deviceItem(m_wid->currentDevice()));
   });
   connect(m_sidebar, &DeviceSidebar::settingsRequested, this, [this](const QString &id) { deviceSettings(id); });
   connect(m_sidebar, &DeviceSidebar::valueMenuRequested, this, &MainWindow::valueMenu);
@@ -1940,6 +1934,8 @@ void MainWindow::deviceSettings(const QString &id, bool settingsTab)
   dlg.settings()->setCalcInputs(m_session->calcInputs());
   dlg.load(device->keys);
   dlg.setStatus([this, id] { return deviceStatus(id); });
+  // Connect, as the sidebar's menu: beside this window's device
+  dlg.setConnect([this, id] { return m_sidebar->isConnected(id); }, [this, id] { openBeside(id); });
   if (settingsTab)
     dlg.showTab(DeviceSettingsDlg::SettingsTab);
   // the help beside the dialog: a child of it, the dialog blocks the others

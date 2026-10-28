@@ -121,39 +121,18 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   m_services->setToolTip(0, tr("What this window offers to other programs over the network."));
   m_services->setExpanded(true);
 
+  // a click on a device does nothing (its context menu connects it), on the
+  // last row it adds one
   connect(this, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item)
   {
     if (item && item == m_addItem)
-    {
       Q_EMIT addDeviceRequested();
-      return;
-    }
-    // another device: after the double-click time, a double click is Info
-    // and switches nothing (the click before it would)
-    const QString id = idOf(item);
-    if (!id.isEmpty() && id != m_current && !m_doubleClicked)
-    {
-      m_pendingSwitch = id;
-      m_switchDelay.start(QApplication::doubleClickInterval());
-    }
-  });
-  m_switchDelay.setSingleShot(true);
-  connect(&m_switchDelay, &QTimer::timeout, this, [this]
-  {
-    if (m_library->find(m_pendingSwitch) && m_pendingSwitch != m_current)
-      Q_EMIT switchRequested(m_pendingSwitch);
-    m_pendingSwitch.clear();
   });
   connect(this, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item)
   {
     const QString id = idOf(item);
     if (!id.isEmpty())
     {
-      m_switchDelay.stop();
-      m_pendingSwitch.clear();
-      // the release of the second click may come as a click again
-      m_doubleClicked = true;
-      QTimer::singleShot(QApplication::doubleClickInterval(), this, [this] { m_doubleClicked = false; });
       Q_EMIT settingsRequested(id);
       return;
     }
@@ -616,9 +595,9 @@ void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
   QMenu menu(this);
   QAction *settings = menu.addAction(QIcon::fromTheme("configure"), tr("&Info and settings..."));
   QAction *rename = menu.addAction(tr("&Rename"));
-  QAction *beside = menu.addAction(QIcon::fromTheme("window-new"), tr("Open &beside"));
+  QAction *beside = menu.addAction(QIcon::fromTheme("network-connect"), tr("&Connect"));
   beside->setToolTip(tr("Reads it beside this window's device: recorded with it, in formulas and over SCPI"));
-  beside->setEnabled(id != m_current);
+  beside->setEnabled(!isConnected(id));
   menu.addSeparator();
   QAction *remove = menu.addAction(QIcon::fromTheme("list-remove"), tr("Re&move from My devices"));
   menu.setToolTipsVisible(true);
@@ -633,6 +612,16 @@ void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
            && QMessageBox::question(this, tr("Remove device"), tr("Remove \"%1\" from My devices?").arg(d->name))
                 == QMessageBox::Yes)
     m_library->remove(id);
+}
+
+bool DeviceSidebar::isConnected(const QString &id) const
+{
+  if (id == m_current)
+    return true;
+  for (const OpenDevice &device : m_openList)
+    if (device.id == id)
+      return true;
+  return false;
 }
 
 bool DeviceSidebar::shownAtStart(const QVariant &stored, int devices, bool configured)
