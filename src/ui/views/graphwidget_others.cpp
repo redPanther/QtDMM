@@ -1,0 +1,203 @@
+// Copyright (c) 2026 The QtDMM developers
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// GraphWidget: the curves of values of other meters (setOtherValues()),
+// each from that meter's store.
+
+#include "ui/views/graphwidget.h"
+#include "ui/views/graphwidget_p.h"
+
+#include <cmath>
+
+void GraphWidget::setOtherStores(std::function<RecordingStore *(const QString &source)> store,
+                                 std::function<QString(const QString &source)> name)
+{
+  m_otherStore = std::move(store);
+  m_otherName = std::move(name);
+  otherStoresChanged();
+}
+
+void GraphWidget::setOtherValues(const QList<ValueRef> &values)
+{
+  if (values == otherValues())
+    return;
+  for (OtherCurve &c : m_otherCurves)
+  {
+    c.line.reset();
+    m_chart->removeSeries(c.series);
+    delete c.series;
+  }
+  m_otherCurves.clear();
+  for (const ValueRef &value : values)
+  {
+    OtherCurve c;
+    c.value = value;
+    c.series = new QLineSeries();
+    m_chart->addSeries(c.series);
+    c.series->attachAxis(m_xAxis);
+    c.series->attachAxis(m_yAxis);
+    c.line = std::make_unique<GapLine>(c.series);
+    m_otherCurves.push_back(std::move(c));
+  }
+  otherStoresChanged();
+}
+
+QList<ValueRef> GraphWidget::otherValues() const
+{
+  QList<ValueRef> values;
+  for (const OtherCurve &c : m_otherCurves)
+    values << c.value;
+  return values;
+}
+
+void GraphWidget::otherStoresChanged()
+{
+  attachOtherStores();
+  refreshValues();   // the axes may change: rebuildExtras(), then rebuildOtherCurves()
+}
+
+void GraphWidget::attachOtherStores()
+{
+  QSet<RecordingStore *> stores;
+  for (OtherCurve &c : m_otherCurves)
+  {
+    c.store = m_otherStore ? m_otherStore(c.value.source) : nullptr;
+    if (c.store && c.store != m_store)
+      stores.insert(c.store);
+  }
+  for (const QPointer<RecordingStore> &old : std::as_const(m_otherConnected))
+    if (old)
+      old->disconnect(this);
+  m_otherConnected.clear();
+  // their readings at the drawing pace, not one rebuild each
+  auto later = [this]
+  {
+    if (!m_otherTimer.isActive())
+      m_otherTimer.start();
+  };
+  for (RecordingStore *store : std::as_const(stores))
+  {
+    connect(store, &RecordingStore::appended, this, later);
+    connect(store, &RecordingStore::extraAppended, this, later);
+    connect(store, &RecordingStore::extrasChanged, this, later);
+    connect(store, &RecordingStore::cleared, this, later);
+    m_otherConnected << store;
+  }
+}
+
+bool GraphWidget::rebuildOtherCurves()
+{
+  const QString left = leftUnit();
+  bool leftGrew = false;
+  for (int i = 0; i < int(m_otherCurves.size()); ++i)
+  {
+    OtherCurve &c = m_otherCurves[size_t(i)];
+    c.points.clear();
+    c.line->clear();
+    c.shown = false;
+    const RecordingStore *store = c.store;
+    if (!store)
+    {
+      c.line->setVisible(false);
+      continue;
+    }
+    // its series of the value, oldest first; the newest names the unit
+    QList<const RecordingSeries *> parts;
+    if (c.value.id == 0)
+      parts << &store->series();
+    else
+      for (int j = 0; j < store->extraCount(); ++j)
+        if (store->extra(j).id == c.value.id)
+          parts << &store->extra(j);
+    c.unit = c.value.id == 0 ? store->unit() : QString();
+    for (const RecordingSeries *s : std::as_const(parts))
+      if (c.value.id != 0 && !s->unit.isEmpty())
+        c.unit = s->unit;
+    c.name = parts.isEmpty() ? QString() : curveName(*parts.last(), c.unit);
+    if (m_otherName)
+      c.name = c.name.isEmpty() ? m_otherName(c.value.source) : m_otherName(c.value.source) + " · " + c.name;
+    // its axis: the left one in its unit, else the right one when free
+    if (c.unit.isEmpty() || c.unit == left)
+      c.right = false;
+    else if (m_unit2.isEmpty() || m_unit2 == c.unit)
+    {
+      c.right = true;
+      m_unit2 = c.unit;
+    }
+    else
+    {
+      c.line->setVisible(false);
+      continue;
+    }
+    c.shown = true;
+    // its time on this store's clock
+    const double shift = (store->startClock() - m_store->startClock()) / 1000.0;
+    QList<QPointF> points;
+    for (const RecordingSeries *s : std::as_const(parts))
+    {
+      if (s->isEmpty())
+        continue;
+      if (!points.isEmpty())
+        points << QPointF(s->first().t / 1000.0, qQNaN());
+      for (int first = 0; first < s->count();)
+      {
+        const qint64 end = (s->at(first).t / m_bucket + 1) * m_bucket;
+        const int last = qMin(s->lowerBound(end), s->count()) - 1;
+        pointsOf(*s, first, last, false, points);
+        first = last + 1;
+      }
+    }
+    for (QPointF &p : points)
+    {
+      p.rx() += shift;
+      if (!std::isfinite(p.y()))
+        continue;
+      if (c.right)
+        growScale(p.y(), m_scale2Min, m_scale2Max);
+      else if (m_autoScale)
+        leftGrew = growScale(p.y(), m_scaleMin, m_scaleMax) || leftGrew;
+    }
+    c.line->setAxes({ m_xAxis, c.right ? m_yAxis2 : m_yAxis });
+    c.line->setPen(otherPen(i));
+    c.line->setVisible(true);
+    c.line->replace(points);
+    c.line->setSpan(m_xAxis->min(), m_xAxis->max());
+    c.points = points;
+  }
+  return leftGrew;
+}
+
+void GraphWidget::onOtherReadings()
+{
+  if (rebuildOtherCurves())
+  {
+    setYRange(m_scaleMin, m_scaleMax);
+    updateThresholdLinePositions();
+  }
+  updateRightAxis();
+  updateLegend();
+}
+
+QPen GraphWidget::otherPen(int i) const
+{
+  return QPen(otherColor(i), qMax(1.0, m_lineWidth * 0.75), valueStyle(m_otherCurves[size_t(i)].value.id), Qt::RoundCap,
+              Qt::RoundJoin);
+}
+
+// Colours of their own, apart from the window meter's values: another
+// meter, another hue; the line style still says which of its values.
+QColor GraphWidget::otherColor(int i) const
+{
+  switch (m_variant)
+  {
+    case ScopeBlue:     return QColor(QList<const char *>{ "#5ce1e6", "#ff7eb6", "#e8e8e8", "#c6ff5c" }[i % 4]);
+    case PhosphorGreen:
+    case PhosphorAmber: return extraColor(i + 1);
+    case ChartRecorder: return QColor(QList<const char *>{ "#1565c0", "#ad1457", "#00838f", "#6d4c41" }[i % 4]);
+    default: break;
+  }
+  const bool dark = m_xLabelColor.isValid() && m_xLabelColor.lightness() > 128;
+  static const char *light[] = { "#2f6fde", "#c2185b", "#00897b", "#8a6d3b" };
+  static const char *darkSteps[] = { "#5b8def", "#e0568f", "#26a69a", "#b39060" };
+  return QColor(dark ? darkSteps[i % 4] : light[i % 4]);
+}

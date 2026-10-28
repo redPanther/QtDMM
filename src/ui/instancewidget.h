@@ -38,6 +38,7 @@
 
 class MeterController;
 class DeviceSession;
+class ValueFeed;
 class SettingsDialog;
 class LcdWidget;
 class Settings;
@@ -93,8 +94,8 @@ public:
   /// kept with the window layout. A value the meter does not have
   /// (numValues()) gives the main value. The LCD's primary value is also the
   /// one of the min/max memory; the recording stays the main value's.
-  /// A ValueRef of another meter is kept (and saved) but shows the main
-  /// value until that meter's readings reach this window.
+  /// A ValueRef of another meter shows that meter's value (ValueFeed),
+  /// "no value" while it is not open.
   /// @{
   void        setLcdValue(const ValueRef &value);
   /// The LCD's small line (LcdWidget::setSecondaries()); std::nullopt: the
@@ -235,6 +236,9 @@ protected:
   void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
   MeterController *m_ctl;
   DeviceSession   *m_session;
+  ValueFeed       *m_lcdFeed = nullptr;       ///< the LCD's meter: the window's or one open beside it
+  ValueFeed       *m_meterFeed = nullptr;     ///< the analog meter's
+  ValueFeed       *m_poincareFeed = nullptr;  ///< the Poincaré plot's
   SettingsDialog  *m_configDlg;
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;

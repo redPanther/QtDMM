@@ -123,7 +123,6 @@ protected:
 
   DeviceSession     *m_session;   ///< the meters of this process and their network services
   InstanceWidget    *m_wid;
-  QList<ValueRef>    m_graphOtherValues;   ///< graph values of another meter from the layout, saved back as they were
   LcdWidget *m_display;
   AnalogMeter   *m_meter;
   ReadingsWidget *m_readings;

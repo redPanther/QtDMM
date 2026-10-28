@@ -150,6 +150,8 @@ void GraphWidget::updateLineSpans()
     c.line->setSpan(min, max);
     c.line->setHold(now);
   }
+  for (OtherCurve &c : m_otherCurves)
+    c.line->setSpan(min, max);
 }
 
 double GraphWidget::timeStep(double v)
@@ -449,6 +451,10 @@ void GraphWidget::setScale(bool autoScale, bool includeZero, double min, double 
         if (std::isfinite(x.at(j).value))
           growScale(x.at(j).value, m_scaleMin, m_scaleMax);
     }
+    for (const OtherCurve &c : m_otherCurves)
+      for (const QPointF &p : c.points)
+        if (c.shown && !c.right && std::isfinite(p.y()))
+          growScale(p.y(), m_scaleMin, m_scaleMax);
   }
 
   setYRange(m_scaleMin, m_scaleMax);

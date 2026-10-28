@@ -19,6 +19,7 @@
 #include "service/metercontroller.h"
 #include "service/scpiserver.h"
 #include "service/servicehost.h"
+#include "service/valuefeed.h"
 #include "testutil.h"
 
 int main(int argc, char **argv)
@@ -225,6 +226,33 @@ int main(int argc, char **argv)
       check(a->recorder()->state() == RecordingStore::View && b->recorder()->state() == RecordingStore::View,
             "no window: ABOR stops both");
     }
+  }
+
+  // 9. a view's value of a meter open beside the window (ValueFeed): its
+  //    readings; closed, "no value" and the value kept; open again, back
+  {
+    if (!session.controller("device:" + sim))
+      session.open(sim);
+    ValueFeed feed(&session);
+    QList<Reading> got;
+    int changes = 0;
+    QObject::connect(&feed, &ValueFeed::reading, [&got](const Reading &r) { got << r; });
+    QObject::connect(&feed, &ValueFeed::controllerChanged, [&changes](MeterController *) { ++changes; });
+    feed.setValue(ValueRef(0));
+    check(feed.controller() == &window, "an empty source: the window's meter");
+    feed.setValue(ValueRef(0, "device:" + sim));
+    check(feed.controller() == session.controller("device:" + sim) && changes == 2, "another meter's value");
+    check(waitFor([&] { return !got.isEmpty() && got.last().source == "device:" + sim && !got.last().noNumber(); }, 4000),
+          "its readings come");
+    got.clear();
+    session.close(sim);
+    check(!feed.controller() && !got.isEmpty() && got.last().quality == Quality::NoValue
+            && feed.value() == ValueRef(0, "device:" + sim),
+          "closed: no value, the value kept");
+    got.clear();
+    session.open(sim);
+    check(feed.controller() && waitFor([&] { return !got.isEmpty() && !got.last().noNumber(); }, 4000),
+          "open again: its readings again");
   }
 
   return failed == 0 ? 0 : 1;
