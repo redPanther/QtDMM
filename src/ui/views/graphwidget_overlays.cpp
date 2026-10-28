@@ -46,10 +46,10 @@ void GraphWidget::hideCrosshair()
     m_cursorLabel->hide();
 }
 
-double GraphWidget::valueAt(const RecordingSeries *series, qint64 t) const
+double GraphWidget::valueAt(const RecordingSeries *series, qint64 t, const RecordingStore *store) const
 {
   const int i = series ? series->holding(t) : -1;
-  if (i < 0 || t > m_store->duration() || series->at(i).gap())
+  if (i < 0 || t > (store ? store : m_store)->duration() || series->at(i).gap())
     return std::nan("");
   return series->at(i).value;
 }
@@ -75,13 +75,41 @@ int GraphWidget::drawnExtra(int id, qint64 t, bool leftOnly) const
   return best;
 }
 
-const RecordingSeries *GraphWidget::referenceSeries(qint64 t) const
+GraphWidget::RefSeries GraphWidget::refSeries(qint64 t) const
 {
+  RefSeries r;
   const int id = referenceId();
-  if (id == 0)
-    return &m_store->series();
-  const int i = id > 0 ? drawnExtra(id, t, true) : -1;
-  return i < 0 ? nullptr : &m_store->extra(i);
+  if (id >= 0)
+  {
+    r.store = m_store;
+    const int i = id > 0 ? drawnExtra(id, t, true) : -1;
+    r.series = id == 0 ? &m_store->series() : i < 0 ? nullptr : &m_store->extra(i);
+    return r;
+  }
+  // another meter's on the left: its series that holds at t, on its time
+  const int other = referenceOther();
+  if (other < 0)
+    return r;
+  const OtherCurve &c = m_otherCurves[size_t(other)];
+  r.store = c.store;
+  r.shift = m_store->offsetOf(*c.store);
+  if (c.value.id == 0)
+    r.series = &c.store->series();
+  else
+  {
+    qint64 latest = -1;
+    for (int j = 0; j < c.store->extraCount(); ++j)
+    {
+      const RecordingSeries &s = c.store->extra(j);
+      const int k = s.id == c.value.id ? s.holding(t - r.shift) : -1;
+      if (k >= 0 && s.at(k).t >= latest)
+      {
+        r.series = &s;
+        latest = s.at(k).t;
+      }
+    }
+  }
+  return r;
 }
 
 void GraphWidget::setTimeCursor(int which, qint64 t)
@@ -176,7 +204,8 @@ void GraphWidget::updateTimeCursors()
     m_cursorLine[i]->setVisible(shown);
     m_cursorName[i]->setVisible(false);   // placed below, with the other flag
     // the level: only for a value inside the scale (none in a gap)
-    const double v = shown ? valueAt(referenceSeries(m_cursorT[i]), m_cursorT[i]) : qQNaN();
+    const RefSeries r = shown ? refSeries(m_cursorT[i]) : RefSeries();
+    const double v = r.series ? valueAt(r.series, m_cursorT[i] - r.shift, r.store) : qQNaN();
     const bool level = std::isfinite(v) && yMax > yMin && v >= yMin && v <= yMax;
     m_cursorLevel[i]->setVisible(level);
     if (level)
@@ -208,7 +237,7 @@ double GraphWidget::referenceY() const
 {
   const double min = m_yAxis->min(), max = m_yAxis->max();
   const QRectF plot = m_chart->plotArea();
-  if (m_referenceKind == RefOff || referenceId() < 0 || !(m_reference > min && m_reference < max) || plot.height() <= 0)
+  if (m_referenceKind == RefOff || leftValue().id < 0 || !(m_reference > min && m_reference < max) || plot.height() <= 0)
     return std::nan("");
   return plot.bottom() - (m_reference - min) / (max - min) * plot.height();
 }
@@ -222,8 +251,8 @@ RecordingStore::Stats GraphWidget::windowStats() const
 {
   // the reference's series at the end of the window
   const qint64 from = qRound64(m_xAxis->min() * 1000), to = qRound64(m_xAxis->max() * 1000);
-  const RecordingSeries *series = referenceSeries(qMin(to, m_store->duration()));
-  return series ? m_store->statsOf(*series, from, to) : RecordingStore::Stats();
+  const RefSeries r = refSeries(qMin(to, m_store->duration()));
+  return r.series ? r.store->statsOf(*r.series, from - r.shift, to - r.shift) : RecordingStore::Stats();
 }
 
 void GraphWidget::setReference(ReferenceKind kind, double value)
@@ -284,9 +313,9 @@ void GraphWidget::setAlarmThresholds(const QList<double> &values)
   updateReferenceLine();
 }
 
-void GraphWidget::setLimits(int id, double low, double high)
+void GraphWidget::setLimits(const ValueRef &value, double low, double high)
 {
-  m_limitId = id;
+  m_limitValue = value;
   m_limitLow = low;
   m_limitHigh = high;
   updateLimitBand();
@@ -296,7 +325,14 @@ void GraphWidget::updateLimitBand()
 {
   const double min = m_yAxis->min(), max = m_yAxis->max();
   const QRectF plot = m_chart->plotArea();
-  const bool on = m_limitId >= 0 && m_limitId == referenceId() && max > min && plot.height() > 0;
+  const ValueRef ref = leftValue();
+  // another value on the left axis: its limit band, if it has one
+  if (ref != m_lastReference)
+  {
+    m_lastReference = ref;
+    Q_EMIT leftValueChanged(ref);
+  }
+  const bool on = m_limitValue.id >= 0 && m_limitValue == m_lastReference && max > min && plot.height() > 0;
   auto sceneY = [&](double v) { return plot.bottom() - (v - min) / (max - min) * plot.height(); };
   const double bounds[2] = { m_limitLow, m_limitHigh };
   for (int i = 0; i < 2; ++i)

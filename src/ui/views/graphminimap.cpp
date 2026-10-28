@@ -18,6 +18,8 @@ GraphMinimap::GraphMinimap(QWidget *parent) :
 
 void GraphMinimap::setStore(RecordingStore *store)
 {
+  if (store == m_store && store)
+    return;
   if (m_store)
     m_store->disconnect(this);
   m_store = store;

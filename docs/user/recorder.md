@@ -190,7 +190,10 @@ were; the integration curve carries on across a gap.
   the window layout. They are recorded either way. The time cursors show
   every value drawn, with a line of statistics each; the overview shows
   the value of the left axis (with none there the first one on the right),
-  in its colour; the triggers are the main value's; the integration curve can
+  in its colour. With none of the window's device on the left axis, the
+  first value of a device open beside it there is the left axis' value:
+  the overview, the reference line, the cursor levels and the PASS/FAIL
+  band are then that device's; the triggers are the main value's; the integration curve can
   take value 2 (see *Integration* below). The export has the values that
   are switched on (see [Export and import](#export-and-import)).
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the

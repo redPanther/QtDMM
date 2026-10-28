@@ -1964,6 +1964,36 @@ int main(int argc, char **argv)
     check(graph.otherValueSide(ValueRef(1, "device:b")) == GraphWidget::AxisLeft
             && graph.otherValueColor(ValueRef(1, "device:b")).isValid(),
           "its V chosen on the left: drawn there, with its colour");
+    // the main value off, nothing of this meter on the left: the other
+    // meter's V there is the left axis' value - the overview draws it from
+    // its store, the limit band is its meter's
+    {
+      QSignalSpy left(&graph, &GraphWidget::leftValueChanged);
+      graph.setValueShown(0, false);
+      QTest::qWait(50);
+      check(graph.leftValue() == ValueRef(1, "device:b") && !left.isEmpty(),
+            QString("main value off: the other meter's V on the left is the axis' value (%1)").arg(graph.leftValue().toString()));
+      // its store began 2 s after the graph's: the window there 2 s earlier
+      check(graph.minimap()->value() == 1 && graph.minimap()->column(1000) && graph.minimap()->column(1000)->any
+              && graph.minimap()->viewStart() <= -1500,
+            QString("the overview draws it from its store, on its time (window from %1 ms)").arg(graph.minimap()->viewStart()));
+      int bands = 0;
+      auto countBands = [&]
+      {
+        bands = 0;
+        for (QGraphicsItem *item : graph.findChild<QChartView *>()->chart()->childItems())
+          if (item->data(0).toString() == "limit" && item->isVisible() && !dynamic_cast<QGraphicsLineItem *>(item))
+            ++bands;
+        return bands;
+      };
+      graph.setLimits(ValueRef(1, "device:b"), 2.5, 3.5);
+      check(countBands() == 1, "its limit band on the axis");
+      graph.setLimits(ValueRef(1), 2.5, 3.5);
+      check(countBands() == 0, "this meter's value 2: not the left axis' value, no band");
+      graph.setLimits(-1);
+      graph.setValueShown(0, true);
+      check(graph.leftValue() == ValueRef(0) && graph.minimap()->value() == 0, "main value back: its axis, its overview");
+    }
     graph.setOtherValueShown(ValueRef(1, "device:b"), false);
     check(graph.otherValues() == QList<ValueRef>{ ValueRef(0, "device:b") }, "one hidden: one kept");
     graph.setOtherValueShown(ValueRef(1, "device:b"), true);

@@ -77,9 +77,13 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   // the overview in place of the scroll bar: it asks, the graph moves
   m_minimap = new GraphMinimap(this);
   m_minimap->setStore(m_store);
-  connect(m_minimap, &GraphMinimap::moveRequested, this, &GraphWidget::showFrom);
+  // its times are those of the store it draws: another meter's is shifted
+  connect(m_minimap, &GraphMinimap::moveRequested, this, [this](qint64 start) { showFrom(start + m_minimapShift); });
   connect(m_minimap, &GraphMinimap::endRequested, this, &GraphWidget::followEnd);
-  connect(m_minimap, &GraphMinimap::widthRequested, this, &GraphWidget::showSpan);
+  connect(m_minimap, &GraphMinimap::widthRequested, this, [this](qint64 start, qint64 width, bool toEnd)
+  {
+    showSpan(start + m_minimapShift, width, toEnd);
+  });
 
   emitInfo();
 
@@ -421,7 +425,8 @@ void GraphWidget::setEnvelopeVisible(bool on)
 void GraphWidget::updateMinimapView()
 {
   const qint64 width = stretching() ? qint64(stretchedSeconds() * 1000) : qint64(qMax(1, m_windowSeconds)) * 1000;
-  m_minimap->setView(windowStart(), width);
+  // on the time of the store it draws
+  m_minimap->setView(windowStart() - m_minimapShift, width);
 }
 
 void GraphWidget::showFrom(qint64 start)
