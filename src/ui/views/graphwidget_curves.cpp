@@ -61,9 +61,13 @@ void GraphWidget::updateEnvelope()
     return;
   }
   const int k = kEnvelopeColumns;
-  const int columns = int(plot.width()) + 2 * k;
+  // the columns counted from time 0, not from the left edge: Live moving
+  // on by a part of a pixel leaves each point in its column, the band only
+  // moves along (else it flickers, its columns cut anew every frame)
   const double perColumn = (x1 - x0) / plot.width();
-  const double from = x0 - k * perColumn, to = x1 + k * perColumn;
+  const double first = std::floor(x0 / perColumn) - k;
+  const int columns = int(plot.width()) + 2 * k + 2;
+  const double from = first * perColumn, to = from + columns * perColumn;
   struct Column
   {
     double lo = qInf(), hi = -qInf();
@@ -115,7 +119,7 @@ void GraphWidget::updateEnvelope()
     prev = &*it;
   }
   auto yOf = [&](double v) { return plot.bottom() - (v - y0) / (y1 - y0) * plot.height(); };
-  auto xOf = [&](int c) { return plot.left() + (c - k + 0.5); };
+  auto xOf = [&](int c) { return plot.left() + (first + c + 0.5) - x0 / perColumn; };
   QPainterPath path;
   QList<QPointF> upper, lower;
   auto flush = [&]

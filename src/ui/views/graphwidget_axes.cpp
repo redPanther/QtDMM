@@ -85,6 +85,9 @@ void GraphWidget::frameTick()
     return;
   updateTimeAxis();
   updateMarkPositions();
+  // the min/max band is drawn in pixels: along with the time axis
+  if (m_envelopeOn)
+    updateEnvelope();
 }
 
 void GraphWidget::updateXAxisRange()
