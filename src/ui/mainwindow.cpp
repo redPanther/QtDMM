@@ -390,8 +390,27 @@ void MainWindow::createViews()
   // opened before the window (--also)
   connect(m_session, &DeviceSession::opened, this, &MainWindow::addPanel);
   // a meter of the table opened again: its readings come in again
-  connect(m_session, &DeviceSession::opened, this, &MainWindow::connectTableSources);
-  connect(m_session, &DeviceSession::closed, this, &MainWindow::connectTableSources);
+  // an empty view takes the meter connected: the graph its main value, the
+  // analog meter and the Poincaré plot it when theirs is not connected
+  connect(m_session, &DeviceSession::opened, this, [this](MeterController *ctl)
+  {
+    if (m_wid->graph()->values().isEmpty())
+      m_wid->graph()->setValues({ ValueRef(0, ctl->source()) });
+    if (!m_session->controller(m_wid->meterValue()))
+      m_wid->setMeterValue(ValueRef(0, ctl->source()));
+    if (!m_session->controller(m_wid->poincareValue()))
+      m_wid->setPoincareValue(ValueRef(0, ctl->source()));
+  });
+  // a meter opened or closed: in the table when it shows all, else only its readings to it
+  auto tableFollows = [this]
+  {
+    if (m_tableMeters.isEmpty())
+      applyTableSources();
+    else
+      connectTableSources();
+  };
+  connect(m_session, &DeviceSession::opened, this, tableFollows);
+  connect(m_session, &DeviceSession::closed, this, tableFollows);
   connect(m_session, &DeviceSession::closed, this, &MainWindow::removePanel);
   for (MeterController *ctl : m_session->controllers())
     addPanel(ctl);
@@ -1678,17 +1697,19 @@ void MainWindow::editSources(ValueMenu::View view)
       break;
     case ValueMenu::View::Table:
     {
+      // the meters of the values picked, the window's like the others
       ReadingsModel *log = m_readings->log();
-      QStringList others;
+      QStringList sources;
       for (const ValueRef &v : std::as_const(all))
       {
         log->setValueHidden(v, !picked.contains(v));
-        if (!v.source.isEmpty() && picked.contains(v) && !others.contains(v.source))
-          others << v.source;
+        const QString source = v.source.isEmpty() ? m_wid->controller()->source() : v.source;
+        if (picked.contains(v) && !sources.contains(source))
+          sources << source;
       }
-      if (others != m_tableOthers)
+      if (sources != tableSources())
       {
-        m_tableOthers = others;
+        m_tableMeters = sources;
         applyTableSources();
       }
       m_readingsAction->setChecked(true);
@@ -1714,43 +1735,53 @@ QString MainWindow::sourceName(const QString &source) const
   return source == m_wid->controller()->source() ? m_wid->dmmTitle() : source;
 }
 
+QStringList MainWindow::tableSources() const
+{
+  if (!m_tableMeters.isEmpty())
+    return m_tableMeters;
+  QStringList all;
+  for (const MeterController *ctl : m_session->controllers())
+    all << ctl->source();
+  return all;
+}
+
 bool MainWindow::tableShows(const ValueRef &value) const
 {
-  const ValueRef ref = m_wid->ownMeter(value) ? ValueRef(value.id) : value;
-  const ReadingsModel *log = m_readings->log();
-  return (ref.source.isEmpty() || m_tableOthers.contains(ref.source)) && !log->hiddenValues().contains(ref);
+  // the window's values by an empty source in the table, as its rows have it
+  const bool own = m_wid->ownMeter(value);
+  const QString source = own ? m_wid->controller()->source() : value.source;
+  return tableSources().contains(source) && !m_readings->log()->hiddenValues().contains(own ? ValueRef(value.id) : value);
 }
 
 void MainWindow::setTableShown(const ValueRef &value, bool shown)
 {
-  const ValueRef ref = m_wid->ownMeter(value) ? ValueRef(value.id) : value;
+  const bool own = m_wid->ownMeter(value);
+  const QString source = own ? m_wid->controller()->source() : value.source;
+  auto refOf = [own, source](int id) { return own ? ValueRef(id) : ValueRef(id, source); };
   ReadingsModel *log = m_readings->log();
-  if (ref.source.isEmpty())
-  {
-    log->setValueHidden(ref, !shown);
-    return;
-  }
-  const MeterController *ctl = m_session->controller(ref.source);
+  const MeterController *ctl = m_session->controller(source);
   const int count = ctl ? ctl->valueCount() : kMaxValues;
-  if (shown && !m_tableOthers.contains(ref.source))
+  QStringList sources = tableSources();
+  if (shown && !sources.contains(source))
   {
-    // another meter comes in with this value only
+    // a meter comes in with this value only
     for (int id = 0; id < count; ++id)
-      log->setValueHidden(ValueRef(id, ref.source), id != ref.id);
-    m_tableOthers << ref.source;
+      log->setValueHidden(refOf(id), id != value.id);
+    m_tableMeters = sources << source;
     applyTableSources();
     return;
   }
-  log->setValueHidden(ref, !shown);
+  log->setValueHidden(refOf(value.id), !shown);
   // none of its values left: it goes out of the table
   bool any = false;
   for (int id = 0; id < count; ++id)
-    any = any || !log->hiddenValues().contains(ValueRef(id, ref.source));
+    any = any || !log->hiddenValues().contains(refOf(id));
   if (!any)
   {
     for (int id = 0; id < kMaxValues; ++id)
-      log->setValueHidden(ValueRef(id, ref.source), false);
-    m_tableOthers.removeAll(ref.source);
+      log->setValueHidden(refOf(id), false);
+    sources.removeAll(source);
+    m_tableMeters = sources;
     applyTableSources();
   }
 }
@@ -1760,8 +1791,9 @@ void MainWindow::applyTableSources()
   ReadingsModel *log = m_readings->log();
   const int rows = log->maxRows();
   const QString own = m_wid->controller()->source();
-  log->setDevices(!m_tableOthers.isEmpty(), own, [this](const QString &source) { return sourceName(source); });
-  if (m_tableOthers.isEmpty())
+  const QStringList sources = tableSources();
+  log->setDevices(sources != QStringList{ own }, own, [this](const QString &source) { return sourceName(source); });
+  if (sources == QStringList{ own })
   {
     // the window's recorder's readings, as always
     log->setStore(m_wid->controller()->recorder());
@@ -1771,7 +1803,7 @@ void MainWindow::applyTableSources()
   // the rows the meters' recorders hold, merged by time, into the table's own store
   QList<LoggedReading> merged;
   for (const MeterController *ctl : m_session->controllers())
-    if (ctl == m_wid->controller() || m_tableOthers.contains(ctl->source()))
+    if (sources.contains(ctl->source()))
       for (int i = 0; i < ctl->recorder()->readingCount(); ++i)
       {
         LoggedReading row = ctl->recorder()->readingAt(i);
@@ -1792,11 +1824,12 @@ void MainWindow::connectTableSources()
   for (const QMetaObject::Connection &c : std::as_const(m_tableLinks))
     disconnect(c);
   m_tableLinks.clear();
-  if (m_tableOthers.isEmpty())
+  const QStringList sources = tableSources();
+  if (sources == QStringList{ m_wid->controller()->source() })
     return;   // the window's recorder feeds the table
   ReadingsModel *log = m_readings->log();
   for (MeterController *ctl : m_session->controllers())
-    if (ctl == m_wid->controller() || m_tableOthers.contains(ctl->source()))
+    if (sources.contains(ctl->source()))
     {
       m_tableLinks << connect(ctl, &MeterController::reading, log, &ReadingsModel::appendReading);
       // its alarms mark the table too (the window's meter's do already)
@@ -2206,7 +2239,14 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
       log->setValueHidden(v, false);
     for (const QString &text : hidden)
       log->setValueHidden(ValueRef::fromString(text), true);
-    m_tableOthers = get("Windows/table-sources", QString()).toString().split(' ', Qt::SkipEmptyParts);
+    // the meters in it, the window's like the others; none: all connected.
+    // Before 26.4 the window's always and the others apart (table-sources)
+    const QString devices = get("Windows/table-devices", QStringLiteral("-")).toString();
+    if (devices != QLatin1String("-"))
+      m_tableMeters = devices.split(' ', Qt::SkipEmptyParts);
+    else
+      m_tableMeters = QStringList{ m_wid->controller()->source() }
+                       + get("Windows/table-sources", QString()).toString().split(' ', Qt::SkipEmptyParts);
     applyTableSources();
   }
   // an unchecked action did not toggle: hide its window explicitly
@@ -2259,9 +2299,14 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/graph-reference", m_wid->graph()->referenceSetting());
   set("Windows/graph-minimap", m_wid->graph()->minimapVisible());
   set("Windows/graph-envelope", m_wid->graph()->envelopeVisible());
-  set("Windows/lcd-value", m_wid->lcdValue().toString());
-  set("Windows/meter-value", m_wid->meterValue().toString());
-  set("Windows/poincare-value", m_wid->poincareValue().toString());
+  // the values with their meter, the window's too
+  auto qualified = [this](const ValueRef &v)
+  {
+    return (m_wid->ownMeter(v) ? ValueRef(v.id, m_wid->controller()->source()) : v).toString();
+  };
+  set("Windows/lcd-value", qualified(m_wid->lcdValue()));
+  set("Windows/meter-value", qualified(m_wid->meterValue()));
+  set("Windows/poincare-value", qualified(m_wid->poincareValue()));
   GraphWidget *graph = m_wid->graph();
   QStringList shown;
   for (const ValueRef &v : graph->values())
@@ -2272,7 +2317,7 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
     tableHidden << v.toString();
   tableHidden.sort();
   set("Windows/table-hidden-values", tableHidden.join(' '));
-  set("Windows/table-sources", m_tableOthers.join(' '));
+  set("Windows/table-devices", m_tableMeters.join(' '));
   if (m_wid->lcdSecondariesChosen())
   {
     QStringList small;

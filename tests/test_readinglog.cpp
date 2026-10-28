@@ -384,6 +384,27 @@ int main(int argc, char **argv)
     check(!multi.hasDevices() && multi.toText().split('\n').value(0).startsWith("Time\tNo."), "one meter: no Device column");
   }
 
+  // a table without the window's meter: the stats of the first value another
+  // meter's rows show
+  {
+    ReadingsModel others;
+    others.setStore(nullptr);
+    others.setDevices(true, "device:a", [](const QString &) { return QStringLiteral("Sim B"); });
+    for (int i = 0; i < 3; ++i)
+    {
+      Reading r;
+      r.value = 2.0 + i;
+      r.text = QString::number(r.value, 'f', 3);
+      r.unit = "V";
+      r.source = "device:b";
+      r.msecs = QDateTime(QDate(2026, 10, 28), QTime(12, 0)).toMSecsSinceEpoch() + i * 100;
+      others.appendReading(r);
+    }
+    const ReadingsModel::Stats st = others.stats();
+    check(st.source == "device:b" && st.id == 0 && st.count == 3 && qAbs(st.mean - 3.0) < 1e-9,
+          QString("another meter's stats: %1 readings of %2").arg(st.count).arg(st.source));
+  }
+
   if (failed == 0)
     qInfo() << "All reading log tests passed.";
   else

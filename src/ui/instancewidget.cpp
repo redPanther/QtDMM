@@ -147,13 +147,15 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   // the recorder belongs to the controller; the graph shows it, and the
   // values of meters open beside it from their stores
   ui_graph->setStore(m_ctl->recorder());
+  ui_graph->setOwnSource(m_ctl->source());
+  ui_graph->setBaseSource(m_ctl->source());
   // the recording is the session's: the graph's store may follow another meter's
   ui_graph->setControl({ [this] { m_session->startRecording(); }, [this] { m_session->stopRecording(); },
                          [this] { m_session->goLive(); }, [this] { m_session->clearRecording(); } });
   ui_graph->setOtherStores([this](const QString &source) -> RecordingStore *
   {
     MeterController *ctl = m_session->controller(source);
-    return ctl && ctl != m_ctl ? ctl->recorder() : nullptr;
+    return ctl ? ctl->recorder() : nullptr;
   },
   [this](const QString &source)
   {
@@ -162,7 +164,16 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   });
   connect(m_session, &DeviceSession::opened, ui_graph, &GraphWidget::otherStoresChanged);
   connect(m_session, &DeviceSession::closed, ui_graph, &GraphWidget::otherStoresChanged);
-  connect(m_ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
+  m_graphUnit = connect(m_ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
+  // the graph's store: of the meter of its first value while it shows none
+  // of the meter before; that meter closed, the window's again
+  connect(ui_graph, &GraphWidget::valuesChanged, this, &InstanceWidget::followGraphBase);
+  connect(m_session, &DeviceSession::opened, this, &InstanceWidget::followGraphBase);
+  connect(m_session, &DeviceSession::closing, this, [this](MeterController *ctl)
+  {
+    if (ctl == m_graphBase)
+      setGraphBase(m_ctl);
+  });
   // what each value measures, for the views' choice of value
   connect(m_ctl, &MeterController::reading, this, [this](const Reading &r)
   {
@@ -601,6 +612,24 @@ void InstanceWidget::updateValueNames()
     m_readingLog->setValueNames(plain);
 }
 
+void InstanceWidget::followGraphBase()
+{
+  const QList<ValueRef> values = ui_graph->values();
+  MeterController *base = m_graphBase ? m_graphBase.data() : m_ctl;
+  if (values.isEmpty() || std::any_of(values.cbegin(), values.cend(), [this](const ValueRef &v) { return ui_graph->isBase(v); }))
+    return;
+  if (MeterController *next = m_session->controller(values.first()); next && next != base)
+    setGraphBase(next);
+}
+
+void InstanceWidget::setGraphBase(MeterController *ctl)
+{
+  disconnect(m_graphUnit);
+  m_graphBase = ctl == m_ctl ? nullptr : ctl;
+  ui_graph->setBase(ctl->recorder(), ctl->source());
+  m_graphUnit = connect(ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
+}
+
 QList<RecorderPrefs::TriggerChoice> InstanceWidget::triggerChoices() const
 {
   // the values of every meter connected; with others the meter's name in front
@@ -783,7 +812,9 @@ void InstanceWidget::applySLOT()
   syncDevice();
   const std::optional<MyDevice> device = m_devices->find(m_settings->getString("DMM/my-device"));
   m_ctl->setDevice(device ? device->id : QString(), device ? device->name : QString());
-  ui_graph->setBaseSource(m_ctl->source());
+  ui_graph->setOwnSource(m_ctl->source());
+  if (!m_graphBase)
+    ui_graph->setBaseSource(m_ctl->source());
   // another device (switched, or the port of another entry): its rules
   if (currentDevice() != m_rulesDevice)
     loadRules();

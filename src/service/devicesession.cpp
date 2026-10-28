@@ -326,6 +326,7 @@ bool DeviceSession::close(const QString &id, QString *error)
       // the one that leads a recording ends it for all
       if (ctl == m_running)
         ctl->recorder()->stop();
+      Q_EMIT closing(ctl);
       m_opened.removeOne(ctl);
       ctl->connectMeter(false);
       delete ctl;

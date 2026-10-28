@@ -11,6 +11,7 @@
 #include <QTemporaryDir>
 
 #include "core/devicelibrary.h"
+#include "recording/recordingstore.h"
 #include "service/devicesession.h"
 #include "service/metercontroller.h"
 #include "ui/frontpanel.h"
@@ -133,6 +134,25 @@ int main(int argc, char **argv)
     action(menu, { "&New alarm..." })->trigger();
     check(alarmFor.last() == ValueRef(0), "the window's by an empty source");
     delete menu;
+  }
+
+  // 6. the graph's store follows its values: none of the window's meter
+  //    left, Sim B's store is the graph's (its value the main curve); the
+  //    window's back, still Sim B's while it shows one of it; Sim B closed:
+  //    the window's again, its value kept without a curve
+  {
+    GraphWidget *graph = wid.graph();
+    RecordingStore *own = graph->store();
+    graph->setValues({ ValueRef(0, source) });
+    check(graph->store() == ctl->recorder() && graph->baseSource() == source && graph->mainShown()
+            && graph->otherValues().isEmpty(),
+          "only Sim B's value: its store is the graph's, the value its main curve");
+    graph->setValueShown(ValueRef(0), true);
+    check(graph->store() == ctl->recorder() && graph->values().size() == 2,
+          "the window's value back: Sim B's store stays while the graph shows one of it");
+    session.close(b);
+    check(graph->store() == own && graph->values().contains(ValueRef(0, source)),
+          "Sim B closed: the window's store again, its value kept");
   }
 
   if (failed)

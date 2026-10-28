@@ -263,6 +263,11 @@ protected:
   QColor      m_alertColor;   ///< the raised alarm's colour for the analog meter, invalid when none
   QMetaObject::Connection m_alertLink;   ///< the alarm colour of the analog meter's meter
   QMetaObject::Connection m_meterLimitLink;   ///< the limit test of the analog meter's meter, not the window's
+  QPointer<MeterController> m_graphBase;   ///< the meter of the graph's store when not the window's
+  QMetaObject::Connection m_graphUnit;      ///< its unit to the graph
+  /// The graph shows none of its store's meter's values: the meter of its first.
+  void        followGraphBase();
+  void        setGraphBase(MeterController *ctl);
   QMetaObject::Connection m_graphLimitLink;   ///< of the meter of the graph's left axis, not the window's
   bool        m_alertBlink = false;   ///< Alarms/blink
   bool        m_alertPhase = true;    ///< blinking: the colour shown now

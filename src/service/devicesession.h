@@ -113,6 +113,8 @@ public:
 
 Q_SIGNALS:
   void        opened(MeterController *ctl);
+  /// Before a meter opened here is closed: its store goes with it.
+  void        closing(MeterController *ctl);
   /// After the controller is gone.
   void        closed(const QString &source);
   /// For the status bar: a meter could not be opened, or was closed for the window.
