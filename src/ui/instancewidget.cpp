@@ -333,10 +333,13 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
   connect(m_meterFeed, &ValueFeed::staleChanged, meter, &AnalogMeter::setStale);
   // the memory of the value it shows, whichever the LCD follows
   connect(m_meterFeed, &ValueFeed::valueMinMaxChanged, meter, &AnalogMeter::showValueMinMax);
-  connect(m_meterFeed, &ValueFeed::controllerChanged, meter, [meter]
+  connect(m_meterFeed, &ValueFeed::controllerChanged, meter, [meter](const MeterController *ctl)
   {
     meter->reset();
     meter->clearMinMax();
+    // the scale of the meter that has the value
+    if (ctl)
+      meter->setDisplayCounts(ctl->dmm()->dmmInfo().display);
   });
   applyValueChoice();
   applyLimitBands();
@@ -909,7 +912,9 @@ void InstanceWidget::readConfig()
 
   if (m_meter)
   {
-    m_meter->setDisplayCounts(setup.info.display);
+    // the scale of the meter that has the value: another one's its own
+    const MeterController *shown = m_meterFeed->controller();
+    m_meter->setDisplayCounts(shown && shown != m_ctl ? shown->dmm()->dmmInfo().display : setup.info.display);
     applyMeterStyle();
     m_meter->setScaleMode(static_cast<AnalogMeter::ScaleMode>(
       gui->meterScaleMode() == 1 ? AnalogMeter::Unipolar :

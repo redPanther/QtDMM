@@ -161,6 +161,11 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
       Q_EMIT serviceSettingsRequested();
       return;
     }
+    if (const QString open = openOf(item); !open.isEmpty())
+    {
+      Q_EMIT frontPanelRequested(open);
+      return;
+    }
     if (const QString file = workspaceOf(item); !file.isEmpty())
     {
       Q_EMIT workspaceRequested(file);
@@ -240,10 +245,13 @@ void DeviceSidebar::setOpenDevices(const QList<OpenDevice> &devices, const QStri
     item->setText(0, device.name);
     item->setText(1, device.value);
     item->setToolTip(0, device.id == own ? tr("%1 - in this window").arg(device.name)
-                                         : tr("%1 - beside this window, without a view").arg(device.name));
+                                         : tr("%1 - beside this window's device").arg(device.name));
     QFont font = item->font(0);
-    font.setBold(device.id == own);
+    font.setBold(device.current);
     item->setFont(0, font);
+    const QBrush text = device.connected ? palette().text() : palette().brush(QPalette::Disabled, QPalette::Text);
+    item->setForeground(0, text);
+    item->setForeground(1, text);
     item->setIcon(0, dot(device.active ? QColor(0x22, 0xaa, 0x22) : QColor(), devicePixelRatioF()));
     fillValues(item, 0, device.id == own ? device.values : QList<Value>());
   }
@@ -521,11 +529,25 @@ void DeviceSidebar::keyPressEvent(QKeyEvent *event)
 void DeviceSidebar::openMenu(QTreeWidgetItem *item, const QPoint &pos)
 {
   const QString id = openOf(item);
-  if (id == m_own)
-    return;
+  bool connected = true;
+  for (const OpenDevice &device : std::as_const(m_openList))
+    if (device.id == id)
+      connected = device.connected;
   QMenu menu(this);
-  QAction *close = menu.addAction(QIcon::fromTheme("window-close"), tr("&Close"));
-  if (menu.exec(pos) == close)
+  QAction *panel = menu.addAction(QIcon::fromTheme("qtdmm-display"), tr("Show &front panel"));
+  QAction *link = menu.addAction(connected ? tr("&Disconnect") : tr("Co&nnect"));
+  QAction *close = nullptr;
+  if (id != m_own)
+  {
+    menu.addSeparator();
+    close = menu.addAction(QIcon::fromTheme("window-close"), tr("&Close"));
+  }
+  QAction *chosen = menu.exec(pos);
+  if (chosen == panel)
+    Q_EMIT frontPanelRequested(id);
+  else if (chosen == link)
+    Q_EMIT connectRequested(id, !connected);
+  else if (chosen && chosen == close)
     Q_EMIT closeRequested(id);
 }
 
