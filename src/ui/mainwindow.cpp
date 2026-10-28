@@ -280,6 +280,7 @@ void MainWindow::createViews()
   // the window's meter's front: the LCD with its keys below (only for
   // meters that have them) and the fold button in its corner
   m_panel = new FrontPanel(m_session, this);
+  m_panel->display()->installEventFilter(this);   // a click: the active device
   m_panel->setFolded(m_wid->settings()->getBool("Display/controls-hidden", false));
   m_wid->setPanel(m_panel);
   connect(m_panel, &FrontPanel::foldToggled, this, [this](bool folded) { setControlsFolded(folded); });
@@ -391,6 +392,7 @@ void MainWindow::addPanel(MeterController *ctl)
     return;
   const QString id = ctl->deviceId();
   auto *panel = new FrontPanel(m_session, this);
+  panel->display()->installEventFilter(this);   // a click: the active device
   panel->setValue(ValueRef(0, ctl->source()));
   applyLcdLook(panel);
   applyFrame(panel);
@@ -472,15 +474,9 @@ void MainWindow::applyLcdLook(FrontPanel *panel)
 void MainWindow::openPending()
 {
   const QStringList ids = std::exchange(m_pendingOpen, {});
-  // a panel added becomes the active window: the one before stays active
-  QMdiSubWindow *active = m_mdi->activeSubWindow();
   for (const QString &id : ids)
     if (!m_session->controller("device:" + id))
       openBeside(id);
-  // none yet at the start: the window's meter, and a click on a panel makes it active
-  m_mdi->setActiveSubWindow(active);
-  if (!active)
-    setActive(m_wid->controller());
   // a layout naming panels takes once they are there
   if (!m_pendingLayout.isEmpty() && m_arranger->setLayoutText(m_pendingLayout))
     m_arranger->arrange();
@@ -547,6 +543,7 @@ void MainWindow::createSidebar()
       growFor(win);
     }
     m_mdi->setActiveSubWindow(win);
+    setActive(win == m_displayWin ? m_wid->controller() : panelOf(win)->controller());
     m_arranger->arrange();
   });
   connect(m_sidebar, &DeviceSidebar::connectRequested, this, [this](const QString &id, bool on)
@@ -759,13 +756,8 @@ void MainWindow::createStatusBar()
   m_activeName->setLineWidth(1);
   statusBar()->addWidget(m_activeName);
   m_activeName->hide();
-  connect(m_mdi, &QMdiArea::subWindowActivated, this, [this](QMdiSubWindow *win)
-  {
-    if (win == m_displayWin)
-      setActive(m_wid->controller());
-    else if (FrontPanel *panel = panelOf(win))
-      setActive(panel->controller());
-  });
+  // a click on a front panel makes its meter the active one (eventFilter());
+  // Qt activates windows on its own too (one shown, one added): not that
   connect(m_session, &DeviceSession::opened, this, [this] { setActive(m_active); });
   // the active one closed: the window's again
   connect(m_session, &DeviceSession::closed, this, [this] { setActive(m_active); });
@@ -1354,6 +1346,10 @@ void MainWindow::bindWindowAction(QAction *action, QMdiSubWindow *win)
 // A window was closed with its title bar button, or shown: its action follows.
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
+  if (event->type() == QEvent::MouseButtonPress)
+    if (auto *panel = qobject_cast<FrontPanel *>(watched->parent() ? watched->parent() : watched);
+        panel && watched == panel->display())
+      setActive(panel == m_panel ? m_wid->controller() : panel->controller());
   if (watched == m_mdi && event->type() == QEvent::Resize)
     m_emptyStart->setGeometry(m_mdi->rect());
   // closing a window (its title bar button, Ctrl+F4) only hides it: a real
