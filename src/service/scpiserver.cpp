@@ -43,7 +43,9 @@ bool ScpiServer::start(const QHostAddress &address, quint16 port, int tries)
       return true;
     }
     m_error = m_server->errorString();
-    if (m_server->serverError() != QAbstractSocket::AddressInUseError)
+    // taken: the next one. Windows says "access denied" for a port another
+    // socket holds exclusively or that is reserved (Hyper-V's ranges)
+    if (m_server->serverError() != QAbstractSocket::AddressInUseError && m_server->serverError() != QAbstractSocket::SocketAccessError)
       break;
   }
   return false;
