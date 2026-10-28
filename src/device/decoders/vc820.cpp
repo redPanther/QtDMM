@@ -69,9 +69,9 @@ static const bool registered = []() {
   // the same frame over Bluetooth LE, as two notifications of 7 bytes
   // (ablage/holdpeak: AiCare's "INTELLIGENT CLAMP METER" app, decompiled; the
   // FS9721-LP3 per lygte-info's review of the BTMeter BT-570C-APP twin); the
-  // HoldPeak tried by a user, the AOPUTTRIVER twin not yet
+  // HoldPeak tried by a user, the AOPUTTRIVER is the same meter
   DmmDecoder::addConfig({"HoldPeak", "HP-570C-APP", "", 0, FrameFormat::VC820BLE, 8, 1, 1, 0, 4000, 0, 0, 0});
-  DmmDecoder::addConfig({"AOPUTTRIVER", "AP-570C-APP *", "", 0, FrameFormat::VC820BLE, 8, 1, 1, 0, 4000, 0, 0, 0});
+  DmmDecoder::addConfig({"AOPUTTRIVER", "AP-570C-APP", "", 0, FrameFormat::VC820BLE, 8, 1, 1, 0, 4000, 0, 0, 0});
   return true;
 }();
 

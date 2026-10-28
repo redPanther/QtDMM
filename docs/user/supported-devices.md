@@ -47,7 +47,7 @@ meter working, please report it on the
 | ANENG | AN999S ¹ | Bench multimeter | - | `ZotekBLE` | Bluetooth LE | - | 20000 |
 | ANENG | ST207 ¹ | Clamp meter | - | `ZotekBLE` | Bluetooth LE | - | 6000 |
 | ANENG | V05B ¹ | Handheld multimeter | - | `ZotekBLE` | Bluetooth LE | - | 6000 |
-| AOPUTTRIVER | AP-570C-APP ¹ | Clamp meter | FS9721 LP3 | `VC820BLE` | Bluetooth LE | - | 4000 |
+| AOPUTTRIVER | AP-570C-APP | Clamp meter | FS9721 LP3 | `VC820BLE` | Bluetooth LE | - | 4000 |
 | APPA | 155B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | APPA | 156B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |
 | APPA | 157B ¹ | Handheld multimeter | - | `AppaDmm` | Bluetooth LE | - | 50000 |

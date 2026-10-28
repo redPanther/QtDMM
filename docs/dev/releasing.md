@@ -67,10 +67,12 @@ A clone needs its tags: `git fetch --tags`. The CI checkouts use `fetch-depth: 0
    `-p -e rcN` and sets `%global tag %{version}` again.
 3. Merge that as a normal PR.
 4. Before tagging, try the macOS release path once: *Actions → macOS test
-   build → Run workflow* on `master` with **release** ticked. It builds the
+   build → Run workflow* on the release branch (`release/26.3`) with
+   **release** ticked; a push to the branch builds the `.dmg` only for one
+   architecture. It builds the
    universal `.dmg` exactly as the tag will; a failure shows up here instead
    of in the release.
-5. Tag the merge commit on `master` and push the tag:
+5. Tag the merge commit on the release branch and push the tag:
 
    ```bash
    git tag -a 26.1-rc1 -m "QtDMM 26.1-rc1"

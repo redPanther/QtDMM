@@ -2,13 +2,11 @@
 
 ## Unreleased — 26.4 (not released yet)
 
-26.3 is finished on its release branch (`release/26.3`); its fixes come here when the branch is merged into master.
-
 ### Multi-meter core
 
 - **Readings take their time from when their bytes came in** — not from when they were decoded, so frames read together share one time and meters read side by side drift less against each other.
 - **sigrok meters start and stop without holding up the program** — and when sigrok-cli fails to start or exits, the status bar says why (its own message) and QtDMM connects again, instead of a timeout without reason.
-- **More meters in one QtDMM** — besides the window's meter, entries of My devices can run without a window: `--also <id>` at start (repeatable), or over SCPI `QTDMM:DEVice:OPEN "<id>"`, `QTDMM:DEVice:CLOSe` and `QTDMM:DEVice:CATalog?`. The window for them comes with the multi-meter UI in 27.1.
+- **More meters in one QtDMM** — besides the window's meter, entries of My devices can run without a window: `--also <id>` at start (repeatable), or over SCPI `QTDMM:DEVice:OPEN "<id>"`, `QTDMM:DEVice:CLOSe` and `QTDMM:DEVice:CATalog?`. The window for them comes with the multi-meter UI.
 - **SCPI chooses the meter with `INSTrument`** — `INSTrument:CATalog?` names the meters of the program (the My devices name in upper case), `INSTrument <name>` or `INSTrument:NSELect <n>` chooses one, and `READ?`, `CALC`, `QTDMM:` and the other commands go to it. The first meter is chosen at start, so existing clients see no change. The network services run once per program.
 - **They record together** — when the window records (Record, trigger, start time or SCPI), the meters without a window record on the same time base and stop with it; `INITiate`/`ABORt` on one of them starts and stops them all. `QTDMM:RECord:SAVE "<file>"[,RAW]` saves the chosen meter's recording into `Documents/QtDMM` (file name only, never overwrites).
 - **Calculated values read the meters of the program** — by their My devices name (`UT61E Bench` is `ut61e_bench`), before instances of the same name. A formula without variables (the Simulated meter, a formula of `t`) needs no other meter.
@@ -16,6 +14,7 @@
 
 ### Devices
 
+- **AOPUTTRIVER AP-570C-APP no longer marked as untried** — it is the HoldPeak HP-570C-APP under another name, which a user confirmed in 26.3.
 - **OWON meters over Bluetooth LE** — tried on the CM2100B clamp (all keys and ranges); the B33T+, B35T+, B41T+, OW16B, OW18B and OW18E are built much the same but not tried yet. All of them with OL, NCV, HOLD, REL, MIN/MAX and low battery, and the keys of OWON's app under the display. Add device asks the meter which model it is.
 
 ### GUI
