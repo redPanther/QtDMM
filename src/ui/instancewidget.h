@@ -35,6 +35,7 @@
 #include "core/reading.h"
 #include "core/valueref.h"
 #include "ui/dialogs/printdlg.h"
+#include "ui/settings/recorderprefs.h"
 
 class MeterController;
 class DeviceSession;
@@ -179,6 +180,10 @@ public:
   /// Before a recording started by hand: asks for its length, the last
   /// one ready (RecordLengthDlg); false when the user cancels.
   bool        askRecordingLength();
+  /// The Recording page's settings to the session (DeviceSession::setRecordingSetup()).
+  void        applyRecordingSetup();
+  /// The values the recording's threshold can watch: of every meter connected.
+  QList<RecorderPrefs::TriggerChoice> triggerChoices() const;
   /// --config-dir as given (empty: the default), for the instances started from here.
   QString     configPath() const { return m_configPath; }
 

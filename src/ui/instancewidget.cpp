@@ -147,6 +147,9 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   // the recorder belongs to the controller; the graph shows it, and the
   // values of meters open beside it from their stores
   ui_graph->setStore(m_ctl->recorder());
+  // the recording is the session's: the graph's store may follow another meter's
+  ui_graph->setControl({ [this] { m_session->startRecording(); }, [this] { m_session->stopRecording(); },
+                         [this] { m_session->goLive(); }, [this] { m_session->clearRecording(); } });
   ui_graph->setOtherStores([this](const QString &source) -> RecordingStore *
   {
     MeterController *ctl = m_session->controller(source);
@@ -593,9 +596,31 @@ void InstanceWidget::updateValueNames()
     plain << valueName(id);
   }
   m_configDlg->alarmPage()->setValueNames(names);
-  m_configDlg->recorderPage()->setValueNames(names);
+  m_configDlg->recorderPage()->setTriggerChoices(triggerChoices());
   if (m_readingLog)
     m_readingLog->setValueNames(plain);
+}
+
+QList<RecorderPrefs::TriggerChoice> InstanceWidget::triggerChoices() const
+{
+  // the values of every meter connected; with others the meter's name in front
+  QList<RecorderPrefs::TriggerChoice> out;
+  const QList<MeterController *> all = m_session->controllers();
+  for (int id = 0; id < numValues(); ++id)
+  {
+    const QString name = numValues() > 1 ? QString("%1: %2").arg(id + 1).arg(valueName(id)) : valueName(id);
+    out.append({ ValueRef(id), all.size() > 1 ? tr("%1 · %2").arg(dmmTitle(), name) : name });
+  }
+  for (const MeterController *ctl : all)
+    if (ctl != m_ctl)
+      for (int id = 0; id < ctl->valueCount(); ++id)
+      {
+        const Reading r = ctl->lastReading(id);
+        const QString what = !r.name.isEmpty() ? r.name : r.baseUnit.isEmpty() ? tr("Value %1").arg(id + 1)
+                                                                                : RecordingStore::describe(r.port, r.baseUnit);
+        out.append({ ValueRef(id, ctl->source()), tr("%1 · %2").arg(ctl->deviceName(), what) });
+      }
+  return out;
 }
 
 bool InstanceWidget::tableValueShown(int id) const
@@ -835,8 +860,25 @@ bool InstanceWidget::askRecordingLength()
   if (dlg.exec() != QDialog::Accepted)
     return false;
   m_configDlg->setRecordingLength(dlg.value(), dlg.unit());
-  ui_graph->setSampleLength(m_configDlg->recorderPage()->sampleLength());
+  applyRecordingSetup();
   return true;
+}
+
+void InstanceWidget::applyRecordingSetup()
+{
+  // the session's: every meter's store, the one of the trigger value leads
+  const RecorderPrefs *recorder = m_configDlg->recorderPage();
+  RecordingStore::Setup setup;
+  setup.sampleTime = recorder->sampleStep();
+  setup.sampleLength = recorder->sampleLength();
+  setup.preTrigger = recorder->preTrigger();
+  setup.mode = RecordingStore::StartMode(recorder->sampleMode());
+  setup.startTime = recorder->startTime();
+  setup.falling = recorder->fallingThreshold();
+  setup.raising = recorder->raisingThreshold();
+  setup.trigger = recorder->triggerValue();
+  m_session->setRecordingSetup(setup);
+  ui_graph->recordingSetupChanged();
 }
 
 void InstanceWidget::startSLOT()
@@ -878,18 +920,9 @@ void InstanceWidget::readConfig()
 
   // the sample time first: setGraphSize() counts the window in samples, and
   // the x axis converts them back with the sample time
-  ui_graph->setSampleTime(recorder->sampleStep());
-  ui_graph->setSampleLength(recorder->sampleLength());
-  ui_graph->store()->setPreTrigger(recorder->preTrigger());
+  applyRecordingSetup();
   ui_graph->setGraphSize(graph->windowSeconds());
-  ui_graph->setStartTime(recorder->startTime());
-  ui_graph->setMode(recorder->sampleMode());
-
   ui_graph->setCrosshair(graph->crosshair());
-
-  // the value first: the graph shows the trigger line only for the main value
-  ui_graph->store()->setTriggerValue(recorder->triggerValue());
-  ui_graph->setThresholds(recorder->fallingThreshold(), recorder->raisingThreshold());
 
   // the reference line snaps to the alarms' thresholds
   {

@@ -65,9 +65,16 @@ public:
   void        setThreshold(double);
   /// The value the threshold watches (Start/trigger-value), the main one at first.
   ValueRef    triggerValue() const;
-  /// The names of the meter's values ("1: CO2 (ppm)" ...); with more than one
-  /// the threshold chooses the value it watches.
-  void        setValueNames(const QStringList &names);
+  /// A value the threshold can watch, of any meter connected.
+  struct TriggerChoice
+  {
+    ValueRef value;
+    QString  name;   ///< "1: CO2 (ppm)", another meter's "Sim B · Voltage DC (V)"
+  };
+  /// The values of the meters connected; with more than one the threshold
+  /// chooses the value it watches. One chosen before that is not connected
+  /// now stays chosen.
+  void        setTriggerChoices(const QList<TriggerChoice> &choices);
 
 public Q_SLOTS:
   virtual void  defaultsSLOT()Q_DECL_OVERRIDE;

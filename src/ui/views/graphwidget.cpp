@@ -563,18 +563,33 @@ void GraphWidget::setSampleTime(int v)
 
 void GraphWidget::startSLOT()
 {
-  m_store->start();
+  if (m_control.start)
+    m_control.start();
+  else
+    m_store->start();
 }
 
 void GraphWidget::stopSLOT()
 {
-  m_store->stop();
+  if (m_control.stop)
+    m_control.stop();
+  else
+    m_store->stop();
+}
+
+void GraphWidget::recordingSetupChanged()
+{
+  updateTimeButtons();
+  updateThresholdLinesVisibility();
 }
 
 void GraphWidget::liveSLOT()
 {
   followEnd();
-  m_store->live();
+  if (m_control.live)
+    m_control.live();
+  else
+    m_store->live();
 }
 
 void GraphWidget::onStateChanged()
@@ -660,7 +675,10 @@ void GraphWidget::updateStateLabel()
 
 void GraphWidget::clearSLOT()
 {
-  m_store->clear();
+  if (m_control.clear)
+    m_control.clear();
+  else
+    m_store->clear();
 }
 
 void GraphWidget::onCleared()

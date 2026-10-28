@@ -350,5 +350,39 @@ int main(int argc, char **argv)
     session.close(calc);
   }
 
+  // 12. the session's recording: the meter of the trigger value leads and
+  //     starts the window's too; a recording keeps its lead; closed while it
+  //     leads, the recording ends for all and the window's leads again
+  {
+    MeterController *b = session.controller("device:" + sim);
+    if (!b)
+      b = session.open(sim);
+    check(b != nullptr, "Bench sim open");
+    if (!b)
+      return 1;
+    RecordingStore *lead = window.recorder();
+    lead->live();
+    RecordingStore::Setup setup;
+    setup.sampleTime = 5;
+    setup.trigger = ValueRef(0, b->source());
+    session.setRecordingSetup(setup);
+    check(session.lead() == b && b->recorder()->sampleTime() == 5 && lead->sampleTime() == 5,
+          "the trigger value's meter leads; the sample time for all");
+    session.startRecording();
+    check(b->recorder()->isRunning() && lead->isRunning() && lead->startClock() == b->recorder()->startClock()
+            && session.isRecording(),
+          "its start starts the window's, on one time base");
+    setup.trigger = ValueRef(0);
+    session.setRecordingSetup(setup);
+    check(session.lead() == b, "a recording keeps its lead while the trigger value changes");
+    session.close(sim);
+    check(!lead->isRunning() && !session.isRecording() && session.lead() == &window,
+          "the lead closed: the recording ends for all, the window's leads again");
+    session.startRecording();
+    check(lead->isRunning(), "the window's leads its own");
+    session.stopRecording();
+    check(lead->state() == RecordingStore::View, "stopped");
+  }
+
   return failed == 0 ? 0 : 1;
 }

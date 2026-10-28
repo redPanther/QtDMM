@@ -1229,25 +1229,25 @@
 <context>
     <name>DeviceSession</name>
     <message>
-        <location filename="../../src/service/devicesession.cpp" line="105"/>
+        <location filename="../../src/service/devicesession.cpp" line="172"/>
         <source>%1: the recording was not saved, the new one replaces it</source>
         <translation>%1: nagranie nie było zapisane, nowe je zastępuje</translation>
     </message>
     <message>
-        <location filename="../../src/service/devicesession.cpp" line="126"/>
-        <location filename="../../src/service/devicesession.cpp" line="203"/>
-        <location filename="../../src/service/devicesession.cpp" line="207"/>
-        <location filename="../../src/service/devicesession.cpp" line="220"/>
+        <location filename="../../src/service/devicesession.cpp" line="193"/>
+        <location filename="../../src/service/devicesession.cpp" line="266"/>
+        <location filename="../../src/service/devicesession.cpp" line="270"/>
+        <location filename="../../src/service/devicesession.cpp" line="283"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/service/devicesession.cpp" line="126"/>
+        <location filename="../../src/service/devicesession.cpp" line="193"/>
         <source>Window</source>
         <translation>Okno</translation>
     </message>
     <message>
-        <location filename="../../src/service/devicesession.cpp" line="280"/>
+        <location filename="../../src/service/devicesession.cpp" line="350"/>
         <source>%1 closed in the background: the window uses it now</source>
         <translation>%1 zamknięto w tle: teraz używa go okno</translation>
     </message>
@@ -2471,43 +2471,43 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>[min]</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="622"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="637"/>
         <source>● REC %1</source>
         <translation>● REC %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="623"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="638"/>
         <source>● REC %1 / %2</source>
         <translation>● REC %1 / %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="632"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="647"/>
         <source>%1 · %2</source>
         <translation>%1 · %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="633"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="648"/>
         <source>Recording of %1 · %2</source>
         <translation>Rejestracja z %1 · %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="707"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="725"/>
         <source>%1 left</source>
         <translation>pozostało %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="711"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="729"/>
         <location filename="../../src/ui/views/graphwidget_input.cpp" line="113"/>
         <source>Live</source>
         <translation>Na żywo</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="717"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="735"/>
         <source>Stopped</source>
         <translation>Zatrzymany</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="714"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="732"/>
         <source>Recording</source>
         <translation>Nagrywanie</translation>
     </message>
@@ -2537,7 +2537,7 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>alarm</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget.cpp" line="616"/>
+        <location filename="../../src/ui/views/graphwidget.cpp" line="631"/>
         <source>Live paused</source>
         <translation>Na żywo wstrzymane</translation>
     </message>
@@ -3080,123 +3080,130 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
 <context>
     <name>InstanceWidget</name>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="499"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="502"/>
         <source>QtDMM: Unsaved data</source>
         <translation>QtDMM: niezapisane dane</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="514"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="517"/>
         <source>Export data first</source>
         <translation>Najpierw eksportuj</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="490"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="493"/>
         <source>Quit without saving</source>
         <translation>Zakończ bez zapisywania</translation>
     </message>
     <message>
         <location filename="../../src/ui/instancewidget.cpp" line="127"/>
-        <location filename="../../src/ui/instancewidget.cpp" line="418"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="421"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="619"/>
         <source>Value %1</source>
         <translation>Wartość %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="490"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="493"/>
         <source>If you quit now it will be lost.</source>
         <translation>Jeśli teraz zakończysz, zostaną utracone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="500"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="503"/>
         <source>&lt;font size=+2&gt;&lt;b&gt;Unsaved data&lt;/b&gt;&lt;/font&gt;&lt;p&gt;You still have unsaved measured data in memory. %1&lt;p&gt;Do you want to export your unsaved data first?</source>
         <translation>&lt;font size=+2&gt;&lt;b&gt;Niezapisane dane&lt;/b&gt;&lt;/font&gt;&lt;p&gt;W pamięci są jeszcze niezapisane pomiary. %1&lt;p&gt;Czy najpierw je wyeksportować?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="648"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="612"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="621"/>
+        <source>%1 · %2</source>
+        <translation>%1 · %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/instancewidget.cpp" line="673"/>
         <source>Switching to %1 clears it.</source>
         <translation>Przełączenie na %1 je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="648"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="673"/>
         <source>Switch without saving</source>
         <translation>Przełącz bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="657"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="682"/>
         <source>Recording stopped: switched to %1</source>
         <translation>Nagrywanie zatrzymane: przełączono na %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="779"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="804"/>
         <source>Loading a file replaces it.</source>
         <translation>Wczytanie pliku je zastąpi.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="779"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="804"/>
         <source>Load without saving</source>
         <translation>Wczytaj bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="797"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="822"/>
         <source>Clear deletes it.</source>
         <translation>Wyczyszczenie je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="797"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="822"/>
         <source>Clear without saving</source>
         <translation>Wyczyść bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="813"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="838"/>
         <source>Live clears it.</source>
         <translation>Tryb na żywo je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="813"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="838"/>
         <source>Live without saving</source>
         <translation>Na żywo bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="823"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="848"/>
         <source>A new recording clears it.</source>
         <translation>Nowa rejestracja je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="823"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="848"/>
         <source>Record without saving</source>
         <translation>Rejestruj bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="831"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="856"/>
         <source>It starts now. A recording at %1 starts by itself from Live.</source>
         <translation>Zaczyna się teraz. Rejestracja o %1 zacznie się sama z trybu Na żywo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="833"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="858"/>
         <source>It starts now. A recording at the threshold starts by itself from Live.</source>
         <translation>Zaczyna się teraz. Rejestracja po przekroczeniu progu zacznie się sama z trybu Na żywo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="951"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="984"/>
         <source>Automatic start at %1</source>
         <translation>Automatyczny start o %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="953"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="986"/>
         <source>Raising threshold %1</source>
         <translation>Próg narastający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="955"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="988"/>
         <source>Falling threshold %1</source>
         <translation>Próg opadający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="990"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="1023"/>
         <source>calculated</source>
         <translation>obliczony</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="999"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="1032"/>
         <source>no meter configured</source>
         <translation>nie skonfigurowano multimetru</translation>
     </message>
@@ -5394,9 +5401,9 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
         <translation>Nagranie uruchomione progiem sięga o ten czas wstecz: QtDMM przechowuje odczyty podczas oczekiwania, a zielony znacznik pokazuje miejsce wyzwolenia.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/settings/recorderprefs.cpp" line="229"/>
-        <source>Value %1</source>
-        <translation>Wartość %1</translation>
+        <location filename="../../src/ui/settings/recorderprefs.cpp" line="231"/>
+        <source>%1 (not connected)</source>
+        <translation>%1 (niepołączone)</translation>
     </message>
 </context>
 <context>
@@ -5463,7 +5470,7 @@ Następnie wyloguj się i zaloguj ponownie, aby członkostwo w grupie zaczęło 
 <context>
     <name>RecordingStore</name>
     <message>
-        <location filename="../../src/recording/recordingstore.cpp" line="947"/>
+        <location filename="../../src/recording/recordingstore.cpp" line="958"/>
         <source>Trigger</source>
         <translation>Wyzwolenie</translation>
     </message>

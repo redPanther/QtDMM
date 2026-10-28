@@ -822,6 +822,17 @@ bool RecordingStore::trimExtras()
   return changed;
 }
 
+void RecordingStore::applySetup(const Setup &setup, bool lead)
+{
+  setSampleTime(setup.sampleTime);
+  setSampleLength(setup.sampleLength);
+  setPreTrigger(setup.preTrigger);
+  setStartMode(lead ? setup.mode : Manual);
+  setStartTime(setup.startTime);
+  setThresholds(setup.falling, setup.raising);
+  setTriggerValue(lead ? setup.trigger : ValueRef(-1));
+}
+
 void RecordingStore::setTriggerValue(const ValueRef &value)
 {
   if (value == m_triggerValue)
