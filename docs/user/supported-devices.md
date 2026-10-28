@@ -132,7 +132,7 @@ meter working, please report it on the
 | Greenlee | DM-830A ¹ | Handheld multimeter | Brymen BM82x (BU-86X) | `BrymenBM82x` | USB-HID (BU-86X) | - | 6000 |
 | Greenlee | DM-860A ¹ | Handheld multimeter | Brymen BM86x (BU-86X) | `BrymenBM86x` | USB-HID (BU-86X) | - | 50000 |
 | GW Instek | GDM-397 ¹ | Handheld multimeter | FS9922-DMM4 | `QM1537Continuous` | 2400 8N1 | DTR | 4000 |
-| HoldPeak | HP-570C-APP ¹ | Clamp meter | FS9721 LP3 | `VC820BLE` | Bluetooth LE | - | 4000 |
+| HoldPeak | HP-570C-APP | Clamp meter | FS9721 LP3 | `VC820BLE` | Bluetooth LE | - | 4000 |
 | HoldPeak | HP-90EPC | Handheld multimeter | FS9721 LP3 | `VC820Continuous` | 2400 8N1 | DTR | 4000 |
 | HP | 34401A (sigrok) ¹ | Bench multimeter | - | `Sigrok` | sigrok-cli | - | 1000000 |
 | Iso-Tech | IDM 503 ¹ | Handheld multimeter | - | `Appa500` | 9600 8N1 | - | 50000 |
