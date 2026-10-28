@@ -59,6 +59,7 @@
 #include "device/meterconnection.h"
 #include "ui/designs.h"
 #include "ui/controlbar.h"
+#include "ui/frontpanel.h"
 #include "ui/shortcuts.h"
 #include "service/devicesession.h"
 #include <QMdiArea>
@@ -206,10 +207,22 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   // auto-connect at start, but not before a meter was ever chosen: a fresh
   // window would otherwise try the first serial port it finds; without
   // one the window starts empty
+  // (the window's meter, not the active one)
   if (m_wid->dmmConfigured())
-    QTimer::singleShot(1000, action_Connect, &QAction::trigger);
+    QTimer::singleShot(1000, this, [this]
+    {
+      windowConnected(true);
+      m_wid->connectSLOT(true);   // may set it back to off (setConnect())
+    });
+  // the meters open beside it last time, after it
+  QTimer::singleShot(1000, this, &MainWindow::openPending);
   updateEmptyStart();
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateEmptyStart);
+  connect(m_wid, &InstanceWidget::configChanged, this, [this]
+  {
+    for (QMdiSubWindow *win : std::as_const(m_panelWins))
+      applyLcdLook(panelOf(win));
+  });
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateRecentWorkspaces);
   // the sidebar as left, with two devices or more; a window without a meter
   // shows it when there are devices to choose from
@@ -262,36 +275,20 @@ void MainWindow::createViews()
 
   // the four views; none of them knows another, they all hang off the
   // controller (see InstanceWidget)
-  m_display = new LcdWidget(this);
-  m_wid->setDisplay(m_display);
-  // the display with the meter's keys below it (only for meters that have
-  // them) and the fold button in its corner
-  auto *displayBox = new QWidget(this);
-  auto *displayLayout = new QVBoxLayout(displayBox);
-  displayLayout->setContentsMargins(0, 0, 0, 0);
-  displayLayout->setSpacing(4);
-  displayLayout->addWidget(m_display, 1);
-  m_controls = new ControlBar(displayBox);
-  displayLayout->addWidget(m_controls);
-  m_fold = new FoldButton(m_display);
-  m_fold->setFolded(m_wid->settings()->getBool("Display/controls-hidden", false));
-  m_display->installEventFilter(this);   // keeps the fold button in the corner
-  connect(m_fold, &FoldButton::toggled, this, [this](bool folded) { setControlsFolded(folded); });
-  connect(m_wid->controller(), &MeterController::reading, m_controls, &ControlBar::showReading);
-  connect(m_controls, &ControlBar::keyPressed, this, [this](const QString &key)
+  // the window's meter's front: the LCD with its keys below (only for
+  // meters that have them) and the fold button in its corner
+  m_panel = new FrontPanel(m_session, this);
+  m_panel->setFolded(m_wid->settings()->getBool("Display/controls-hidden", false));
+  m_wid->setPanel(m_panel);
+  connect(m_panel, &FrontPanel::foldToggled, this, [this](bool folded) { setControlsFolded(folded); });
+  connect(m_panel, &FrontPanel::keysChanged, this, [this] { updateControls(); });
+  connect(m_panel, &FrontPanel::keyFailed, this, [this]
   {
-    // a Bluetooth link takes a few seconds before it takes keys
-    if (!m_wid->controller()->pressKey(key))
-      statusBar()->showMessage(tr("The key did not reach the meter: it is not connected yet."), 4000);
+    statusBar()->showMessage(tr("The key did not reach the meter: it is not connected yet."), 4000);
   });
-  connect(m_wid, &InstanceWidget::remoteControl, this, [this](bool supported)
-  {
-    m_controlsSupported = supported;
-    // readConfig() has set the protocol: the keys this meter has
-    m_controls->setProtocol(m_wid->controller()->dmm()->format(), m_wid->controller()->dmm()->dmmInfo().model);
-    updateControls();
-  });
-  m_displayWin = addView(displayBox, tr("Display"), MdiArranger::Instrument, "display");
+  // readConfig() has set the protocol: the keys this meter has
+  connect(m_wid, &InstanceWidget::remoteControl, m_panel, &FrontPanel::updateKeys);
+  m_displayWin = addView(m_panel, tr("Display"), MdiArranger::Instrument, "display");
 
   m_meter = new AnalogMeter(this);
   m_wid->setMeter(m_meter);
@@ -317,7 +314,7 @@ void MainWindow::createViews()
   m_wid->setPoincare(m_poincare);
 
   // right-click on display or meter: the window's menu (also without title bar)
-  for (auto [view, win] : { std::pair<QWidget *, QMdiSubWindow *>{m_display, m_displayWin},
+  for (auto [view, win] : { std::pair<QWidget *, QMdiSubWindow *>{m_panel->display(), m_displayWin},
                             std::pair<QWidget *, QMdiSubWindow *>{m_meter, m_meterWin},
                             std::pair<QWidget *, QMdiSubWindow *>{m_poincare, m_poincareWin} })
   {
@@ -360,6 +357,113 @@ void MainWindow::createViews()
   m_meterAction->setObjectName("action_WindowMeter");
   m_readingsAction->setObjectName("action_WindowReadings");
   m_poincareAction->setObjectName("action_WindowPoincare");
+
+  // a front panel for each meter open beside the window's, also those
+  // opened before the window (--also)
+  connect(m_session, &DeviceSession::opened, this, &MainWindow::addPanel);
+  connect(m_session, &DeviceSession::closed, this, &MainWindow::removePanel);
+  for (MeterController *ctl : m_session->controllers())
+    addPanel(ctl);
+}
+
+void MainWindow::addPanel(MeterController *ctl)
+{
+  if (ctl == m_wid->controller() || m_panelWins.contains(ctl->source()))
+    return;
+  const QString id = ctl->deviceId();
+  auto *panel = new FrontPanel(m_session, this);
+  panel->setValue(ValueRef(0, ctl->source()));
+  applyLcdLook(panel);
+  applyFrame(panel);
+  QMdiSubWindow *win = addView(panel, ctl->deviceName(), MdiArranger::Instrument, "panel-" + id);
+  m_panelWins.insert(ctl->source(), win);
+  connect(panel, &FrontPanel::foldToggled, this, [this] { updateControls(); });
+  connect(panel, &FrontPanel::keysChanged, this, [this] { updateControls(); });
+  connect(panel, &FrontPanel::keyFailed, this, [this, panel]
+  {
+    statusBar()->showMessage(tr("%1: the key did not reach the meter: it is not connected yet.")
+                             .arg(panel->controller() ? panel->controller()->deviceName() : QString()), 4000);
+  });
+  panel->display()->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(panel->display(), &QWidget::customContextMenuRequested, this, [this, panel, win](const QPoint &pos)
+  {
+    windowMenu(win, panel->display()->mapToGlobal(pos));
+  });
+  const PanelState state = m_panelStates.take(id);
+  applyPanelState(win, state);
+  if (state.shown && !m_restoring)
+    growFor(win);
+}
+
+void MainWindow::applyPanelState(QMdiSubWindow *win, const PanelState &state)
+{
+  FrontPanel *panel = panelOf(win);
+  MeterController *ctl = panel->controller();
+  if (ctl)
+  {
+    panel->setValue(ValueRef(state.value.id, ctl->source()));
+    ctl->setMinMaxValue(state.value.id);
+  }
+  panel->setFolded(state.folded);
+  const QStringList g = state.geometry.split(' ');
+  if (m_arranger->mode() == MdiArranger::Free && g.size() == 4)
+    win->setGeometry(g[0].toInt(), g[1].toInt(), g[2].toInt(), g[3].toInt());
+  win->setVisible(state.shown);
+  updateControls();
+}
+
+void MainWindow::removePanel(const QString &source)
+{
+  QMdiSubWindow *win = m_panelWins.take(source);
+  if (!win)
+    return;
+  m_grown.remove(win->widget());
+  m_grown.remove(win);
+  delete win;
+  m_arranger->arrange();
+}
+
+QList<QMdiSubWindow *> MainWindow::panelWindows() const
+{
+  return QList<QMdiSubWindow *>{ m_displayWin } + m_panelWins.values();
+}
+
+FrontPanel *MainWindow::panelOf(const QMdiSubWindow *win)
+{
+  return win ? qobject_cast<FrontPanel *>(win->widget()) : nullptr;
+}
+
+void MainWindow::applyLcdLook(FrontPanel *panel)
+{
+  if (panel == m_panel)
+    return;   // InstanceWidget sets the window's (readConfig())
+  const GuiPrefs *gui = m_wid->settingsDialog()->guiPage();
+  LcdWidget *lcd = panel->display();
+  lcd->setFaceColor(gui->displayBgColor());
+  lcd->setLcdVariant(m_panel->display()->lcdVariant());
+  if (const MeterController *ctl = panel->controller())
+  {
+    const DmmDecoder::DMMInfo &info = ctl->dmm()->dmmInfo();
+    lcd->setDisplayMode(info.display, gui->showMinMax(), gui->showBar(), info.valueCount());
+  }
+}
+
+void MainWindow::openPending()
+{
+  const QStringList ids = std::exchange(m_pendingOpen, {});
+  // a panel added becomes the active window: the one before stays active
+  QMdiSubWindow *active = m_mdi->activeSubWindow();
+  for (const QString &id : ids)
+    if (!m_session->controller("device:" + id))
+      openBeside(id);
+  // none yet at the start: the window's meter, and a click on a panel makes it active
+  m_mdi->setActiveSubWindow(active);
+  if (!active)
+    setActive(m_wid->controller());
+  // a layout naming panels takes once they are there
+  if (!m_pendingLayout.isEmpty() && m_arranger->setLayoutText(m_pendingLayout))
+    m_arranger->arrange();
+  m_pendingLayout.clear();
 }
 
 // The sidebar Devices: My devices, the open devices, the services.
@@ -407,6 +511,36 @@ void MainWindow::createSidebar()
   connect(m_sidebar, &DeviceSidebar::closeRequested, this, [this](const QString &id)
   {
     m_session->close(id);
+  });
+  connect(m_sidebar, &DeviceSidebar::frontPanelRequested, this, [this](const QString &id)
+  {
+    QMdiSubWindow *win = id == m_wid->controller()->source() ? m_displayWin : m_panelWins.value("device:" + id);
+    if (!win)
+      return;
+    if (win == m_displayWin)
+      m_displayAction->setChecked(true);
+    else if (win->isHidden())
+    {
+      win->show();
+      growFor(win);
+    }
+    m_mdi->setActiveSubWindow(win);
+    m_arranger->arrange();
+  });
+  connect(m_sidebar, &DeviceSidebar::connectRequested, this, [this](const QString &id, bool on)
+  {
+    if (id == m_wid->controller()->source())
+    {
+      m_wid->connectSLOT(on);
+      windowConnected(on);
+    }
+    else if (MeterController *ctl = m_session->controller("device:" + id))
+    {
+      ctl->connectMeter(on);
+      if (ctl == m_active)
+        action_Connect->setChecked(ctl->dmm()->isWanted());
+    }
+    updateOpenDevices();
   });
   connect(m_session, &DeviceSession::opened, this, &MainWindow::updateOpenDevices);
   connect(m_session, &DeviceSession::closed, this, &MainWindow::updateOpenDevices);
@@ -596,6 +730,24 @@ void MainWindow::createStatusBar()
   statusBar()->addWidget(m_info, 10);
   m_info->setLineWidth(1);
 
+  // the active device, while there is more than one
+  m_activeName = new QLabel(statusBar());
+  m_activeName->setObjectName("activeDevice");
+  m_activeName->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  m_activeName->setLineWidth(1);
+  statusBar()->addWidget(m_activeName);
+  m_activeName->hide();
+  connect(m_mdi, &QMdiArea::subWindowActivated, this, [this](QMdiSubWindow *win)
+  {
+    if (win == m_displayWin)
+      setActive(m_wid->controller());
+    else if (FrontPanel *panel = panelOf(win))
+      setActive(panel->controller());
+  });
+  connect(m_session, &DeviceSession::opened, this, [this] { setActive(m_active); });
+  // the active one closed: the window's again
+  connect(m_session, &DeviceSession::closed, this, [this] { setActive(m_active); });
+
   // the limit test's count: "PASS 812 · FAIL 23 (2.8 %)", reset with min/max
   m_limitCount = new QLabel(statusBar());
   m_limitCount->setFrameStyle(QFrame::Panel | QFrame::Sunken);
@@ -637,8 +789,8 @@ void MainWindow::createStatusBar()
   connect(m_wid, &InstanceWidget::useTextLabel, this, &MainWindow::setUseTextLabel);
   connect(m_wid, &InstanceWidget::iconSet, this, [](const QString &set)
           { Designs::setIconSet(Designs::iconSetFromName(set)); });
-  connect(m_wid, &InstanceWidget::setConnect, this, &MainWindow::setConnectSLOT);
-  connect(m_wid, &InstanceWidget::connectDMM, action_Connect, &QAction::setChecked);
+  connect(m_wid, &InstanceWidget::setConnect, this, &MainWindow::windowConnected);
+  connect(m_wid, &InstanceWidget::connectDMM, this, &MainWindow::windowConnected);
   connect(m_wid, &InstanceWidget::showDisplay, this, &MainWindow::showDisplaySLOT);
 }
 
@@ -663,8 +815,8 @@ void MainWindow::placeWindow()
   for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin, m_poincareWin })
     if (!w->isHidden())
       m_grown.insert(w);
-  if (!m_controls->isHidden())
-    m_grown.insert(m_controls);
+  if (m_panel->keysShown())
+    m_grown.insert(m_panel);
   if (m_grown.contains(m_readingsWin) || m_grown.contains(m_poincareWin))
     m_arranger->setTableWidth(growthFor(m_readingsWin).width());
   if (stored && m_wid->settingsDialog()->generalPage()->saveWindowSize())
@@ -681,7 +833,7 @@ void MainWindow::placeWindow()
     for (QMdiSubWindow *w : { m_graphWin, m_readingsWin, m_poincareWin })
       if (m_grown.contains(w))
         start += growthFor(w);
-    if (!m_controls->isHidden())
+    if (m_panel->keysShown())
       start += QSize(0, 2 * em());
     const QRect av = screen()->availableGeometry();
     resize(qMin(start.width(), int(av.width() * 0.84)), qMin(start.height(), int(av.height() * 0.84)));
@@ -794,11 +946,24 @@ void MainWindow::setUseTextLabel(bool on)
 
 void MainWindow::createActions()
 {
-  connect(action_Connect, &QAction::triggered, m_wid, &InstanceWidget::connectSLOT);
+  // Connect and Reset act on the active device
+  connect(action_Connect, &QAction::triggered, this, [this](bool on)
+  {
+    MeterController *ctl = activeController();
+    if (ctl == m_wid->controller())
+      m_wid->connectSLOT(on);
+    else if (!ctl->connectMeter(on))
+      action_Connect->setChecked(false);
+  });
   // toggled, not triggered: a connection made by the program (Add device, the
-  // sidebar, the start, SCPI) sets the check mark only - Record stayed off
-  connect(action_Connect, &QAction::toggled, this, &MainWindow::connectSLOT);
-  connect(action_Reset, &QAction::triggered, m_wid, &InstanceWidget::resetSLOT);
+  // sidebar, the start, SCPI) sets the check mark only - Record stayed off.
+  // Record follows the window's meter only
+  connect(action_Connect, &QAction::toggled, this, [this](bool on)
+  {
+    if (!m_activeOther)
+      connectSLOT(on);
+  });
+  connect(action_Reset, &QAction::triggered, this, [this] { activeController()->resetMinMax(); });
   connect(action_Start, &QAction::triggered, this, &MainWindow::startSLOT);
   // one button for both: a grey dot starts, the red square stops
   connect(action_Record, &QAction::triggered, this, &MainWindow::toggleRecordingSLOT);
@@ -824,7 +989,9 @@ void MainWindow::createActions()
   // Shift+F8: the settings of the device in use, as its context menu in the sidebar
   connect(action_ConfigureDMM, &QAction::triggered, this, [this]
   {
-    if (m_wid->devices()->find(m_wid->currentDevice()))
+    if (m_activeOther && m_active)
+      deviceSettings(m_active->deviceId(), true);
+    else if (m_wid->devices()->find(m_wid->currentDevice()))
       deviceSettings(m_wid->currentDevice(), true);
     else
       addDevice();
@@ -1165,8 +1332,6 @@ void MainWindow::bindWindowAction(QAction *action, QMdiSubWindow *win)
 // A window was closed with its title bar button, or shown: its action follows.
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
-  if (watched == m_display && event->type() == QEvent::Resize)
-    m_fold->move(m_display->width() - m_fold->width() - 6, 6);
   if (watched == m_mdi && event->type() == QEvent::Resize)
     m_emptyStart->setGeometry(m_mdi->rect());
   // closing a window (its title bar button, Ctrl+F4) only hides it: a real
@@ -1202,14 +1367,24 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
 {
   QMenu menu(this);
   QAction *hide = menu.addAction(tr("&Hide window"));
-  if (win == m_displayWin && m_controlsSupported)
+  FrontPanel *panel = panelOf(win);
+  if (panel && panel->keysSupported())
   {
     QAction *hideControls = menu.addAction(tr("Hide &controls"));
     hideControls->setCheckable(true);
-    hideControls->setChecked(m_fold->isFolded());
-    connect(hideControls, &QAction::toggled, this, [this](bool on) { setControlsFolded(on); });
+    hideControls->setChecked(panel->isFolded());
+    connect(hideControls, &QAction::toggled, this, [this, panel](bool on)
+    {
+      if (panel == m_panel)
+        setControlsFolded(on);
+      else
+      {
+        panel->setFolded(on);
+        updateControls();
+      }
+    });
   }
-  if (win == m_displayWin)
+  if (panel)
   {
     QMenu *lcd = menu.addMenu(tr("&LCD colours"));
     const std::pair<LcdWidget::LcdVariant, QString> variants[] = {
@@ -1222,9 +1397,18 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
         lcd->addSeparator();
       QAction *a = lcd->addAction(text);
       a->setCheckable(true);
-      a->setChecked(m_display->lcdVariant() == v);
-      connect(a, &QAction::triggered, this, [this, v = v] { m_wid->setLcdVariant(v); });
+      a->setChecked(m_panel->display()->lcdVariant() == v);
+      // one look for all panels
+      connect(a, &QAction::triggered, this, [this, v = v]
+      {
+        m_wid->setLcdVariant(v);
+        for (QMdiSubWindow *w : std::as_const(m_panelWins))
+          applyLcdLook(panelOf(w));
+      });
     }
+  }
+  if (win == m_displayWin)
+  {
     menu.addSeparator();
     // the limit test: on and off here, the limits in the dialog; on without
     // limits set yet asks for them
@@ -1314,6 +1498,9 @@ void MainWindow::updateServices()
 
 void MainWindow::updateOpenDevices()
 {
+  // the active one connected or disconnected elsewhere (SCPI, an error)
+  if (m_activeOther && m_active && action_Connect->isChecked() != m_active->dmm()->isWanted())
+    action_Connect->setChecked(m_active->dmm()->isWanted());
   if (!m_sidebarDock->isVisible())
     return;
   const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -1326,6 +1513,8 @@ void MainWindow::updateOpenDevices()
     row.id = here ? own : ctl->deviceId();
     // the window's by its name in My devices too, else its model
     row.name = here && ctl->deviceName().isEmpty() ? m_wid->dmmTitle() : ctl->deviceName();
+    row.current = ctl == activeController();
+    row.connected = here ? (m_activeOther ? m_windowConnect : action_Connect->isChecked()) : ctl->dmm()->isWanted();
     const Reading &r = ctl->lastReading();
     if (r.msecs > 0)
     {
@@ -1541,8 +1730,30 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
     m_arranger->setMode(MdiArranger::DisplaysOnTop);
   m_arranger->setMode(mode);
   // the layout the user made (dividers, swaps); none or a broken one: the rule
-  if (!m_arranger->setLayoutText(get("Windows/layout", QString()).toString()))
+  // the meters the workspace had open beside, with their panels: opened
+  // now, at the start with the window's meter (openPending())
+  m_pendingOpen = get("Windows/open-devices", QString()).toString().split(' ', Qt::SkipEmptyParts);
+  for (const QString &id : std::as_const(m_pendingOpen))
+  {
+    const QString key = "Windows/panel-" + id;
+    PanelState state;
+    state.value = ValueRef::fromString(get(key + "-value", QString("0")).toString());
+    state.folded = get(key + "-folded", false).toBool();
+    state.shown = get(key + "-shown", true).toBool();
+    state.geometry = get("Windows/geometry-panel-" + id, QString()).toString();
+    if (QMdiSubWindow *win = m_panelWins.value("device:" + id))
+      applyPanelState(win, state);
+    else
+      m_panelStates.insert(id, state);
+  }
+  const QString layout = get("Windows/layout", QString()).toString();
+  if (!m_arranger->setLayoutText(layout))
+  {
     m_arranger->setLayoutText(QString());   // a broken one: the rule
+    // or one naming panels not there yet
+    if (!m_pendingOpen.isEmpty())
+      m_pendingLayout = layout;
+  }
   m_arranger->setTitleBarsHidden(get("Windows/title-bars-hidden", !free).toBool());
   m_toolbars->setChecked(get("Windows/toolbar-hidden", false).toBool());
   if (free)
@@ -1641,12 +1852,24 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/toolbar-hidden", m_toolbars->isChecked());
   set("Windows/design", Designs::name(Designs::current()));
   if (m_arranger->mode() == MdiArranger::Free)
-    for (QMdiSubWindow *w : { m_displayWin, m_meterWin, m_graphWin, m_readingsWin, m_poincareWin })
+    for (QMdiSubWindow *w : QList<QMdiSubWindow *>{ m_meterWin, m_graphWin, m_readingsWin, m_poincareWin }
+                            + panelWindows())
     {
       const QRect g = w->geometry();
       set("Windows/geometry-" + w->objectName(),
           QString("%1 %2 %3 %4").arg(g.x()).arg(g.y()).arg(g.width()).arg(g.height()));
     }
+  QStringList open;
+  for (QMdiSubWindow *win : std::as_const(m_panelWins))
+  {
+    const QString id = win->objectName().mid(QStringLiteral("panel-").size());
+    const QString key = "Windows/panel-" + id;
+    open << id;
+    set(key + "-value", ValueRef(panelOf(win)->value().id).toString());
+    set(key + "-folded", panelOf(win)->isFolded());
+    set(key + "-shown", !win->isHidden());
+  }
+  set("Windows/open-devices", open.join(' '));
   set("Display/show", m_displayAction->isChecked());
   set("Windows/meter", m_meterAction->isChecked());
   set("Windows/readings", m_readingsAction->isChecked());
@@ -1758,6 +1981,7 @@ bool MainWindow::loadWorkspaceFile(const QString &file)
     m_autoSaveLayout->setChecked(false);
     m_startDisplay = m_displayAction->isChecked();
   }
+  openPending();
   recentWorkspaces().add(file);
   updateRecentWorkspaces();
   Q_EMIT m_wid->error(tr("Workspace loaded from %1").arg(QDir::toNativeSeparators(file)));
@@ -1932,24 +2156,24 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::setControlsFolded(bool folded)
 {
-  m_fold->setFolded(folded);
+  m_panel->setFolded(folded);
   m_wid->settings()->setBool("Display/controls-hidden", folded);
   updateControls();
 }
 
 void MainWindow::updateControls()
 {
-  m_fold->setVisible(m_controlsSupported);
-  const bool show = m_controlsSupported && !m_fold->isFolded();
-  m_controls->setVisible(show);
-  // the keys below the LCD are part of its window
-  m_arranger->setContentAspect(m_displayWin, LcdWidget::kMinAspect, LcdWidget::kMaxAspect,
-                               show ? m_controls->sizeHint().height() + 4 : 0);
-  // the first time the keys appear, the window grows for them
-  if (show && !m_grown.contains(m_controls))
+  for (QMdiSubWindow *win : panelWindows())
   {
-    m_grown.insert(m_controls);
-    autoGrow(QSize(0, 2 * em()));
+    // the keys below the LCD are part of its window
+    FrontPanel *panel = panelOf(win);
+    m_arranger->setContentAspect(win, LcdWidget::kMinAspect, LcdWidget::kMaxAspect, panel->keysHeight());
+    // the first time a panel's keys appear, the window grows for them
+    if (panel->keysShown() && !m_grown.contains(panel))
+    {
+      m_grown.insert(panel);
+      autoGrow(QSize(0, 2 * em()));
+    }
   }
   m_arranger->arrange();
 }
@@ -1964,20 +2188,14 @@ void MainWindow::setDesign(int design)
   empty.setBrush(QPalette::Window, Designs::areaBrush(d));
   m_emptyStart->setPalette(empty);
   // the instruments are drawn on a transparent background: the window's
-  // (metal in Silver and Brushed metal) shows around them. The display's
-  // box, not the LCD: the meter's keys below it stand on the same sheet
+  // (metal in Silver and Brushed metal) shows around them. The front
+  // panels, not the LCDs: the meters' keys below them stand on the same sheet
   const QBrush frame = Designs::frameBrush(d);
-  for (QWidget *view : { m_display->parentWidget(), static_cast<QWidget *>(m_meter),
+  for (QWidget *view : { static_cast<QWidget *>(m_panel), static_cast<QWidget *>(m_meter),
                          static_cast<QWidget *>(m_readings) })
-  {
-    const bool own = frame.style() != Qt::NoBrush;
-    QPalette pal = view->palette();
-    pal.setBrush(QPalette::Window, own ? frame : QApplication::palette().window());
-    view->setPalette(pal);
-    view->setAutoFillBackground(own);
-    Designs::fitTexture(view, frame.style() == Qt::TexturePattern);
-    view->update();
-  }
+    applyFrame(view);
+  for (QMdiSubWindow *win : std::as_const(m_panelWins))
+    applyFrame(win->widget());
   updateLed();
   const Designs::GraphColors g = Designs::graphColors(d);
   m_wid->graph()->setThemeColors(g.background, g.grid, g.labels, g.data);
@@ -1996,6 +2214,18 @@ void MainWindow::setDesign(int design)
   m_wid->settingsDialog()->guiPage()->setDesign(Designs::name(d));
 }
 
+void MainWindow::applyFrame(QWidget *view)
+{
+  const QBrush frame = Designs::frameBrush(Designs::current());
+  const bool own = frame.style() != Qt::NoBrush;
+  QPalette pal = view->palette();
+  pal.setBrush(QPalette::Window, own ? frame : QApplication::palette().window());
+  view->setPalette(pal);
+  view->setAutoFillBackground(own);
+  Designs::fitTexture(view, frame.style() == Qt::TexturePattern);
+  view->update();
+}
+
 void MainWindow::storeDisplaySLOT()
 {
   m_wid->settingsDialog()->guiPage()->setShowDisplay(m_displayAction->isChecked());
@@ -2003,7 +2233,50 @@ void MainWindow::storeDisplaySLOT()
 
 void MainWindow::setConnectSLOT(bool on)
 {
-  action_Connect->setChecked(on);
+  windowConnected(on);
+}
+
+void MainWindow::windowConnected(bool on)
+{
+  if (!m_activeOther)
+  {
+    action_Connect->setChecked(on);
+    return;
+  }
+  // another meter's state is shown: Record follows the window's all the same
+  m_windowConnect = on;
+  connectSLOT(on);
+}
+
+MeterController *MainWindow::activeController() const
+{
+  return m_active ? m_active.data() : m_wid->controller();
+}
+
+void MainWindow::setActive(MeterController *ctl)
+{
+  if (ctl == m_wid->controller())
+    ctl = nullptr;
+  if (ctl || m_activeOther)
+  {
+    // the window's state kept while another one is shown
+    if (!m_activeOther)
+      m_windowConnect = action_Connect->isChecked();
+    m_active = ctl;
+    m_activeOther = ctl != nullptr;
+    action_Connect->setChecked(ctl ? ctl->dmm()->isWanted() : m_windowConnect);
+  }
+  if (!m_activeName)
+    return;
+  const QList<MeterController *> meters = m_session->controllers();
+  const MeterController *active = activeController();
+  const QString name = active == m_wid->controller() && active->deviceName().isEmpty() ? m_wid->dmmTitle()
+                                                                                       : active->deviceName();
+  m_activeName->setText(tr("Active: %1").arg(name));
+  m_activeName->setToolTip(tr("Connect, Reset and the device settings act on this device; "
+                              "a click on another front panel makes that one active"));
+  m_activeName->setVisible(meters.size() > 1);
+  updateOpenDevices();
 }
 
 void MainWindow::showDisplaySLOT(bool show)
@@ -2027,7 +2300,6 @@ void MainWindow::setupIcons()
   this->action_Connect->setIcon(iconConnectOff);
   connect(this->action_Connect, &QAction::toggled, this, [ = ](bool checked)
   {
-    m_controls->setConnected(checked);
     this->action_Connect->setIcon(checked ? iconConnectOn : iconConnectOff);
   });
 }

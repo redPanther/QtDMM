@@ -10,6 +10,7 @@
 #include <QtWidgets>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QSignalSpy>
 
 #include "core/devicelibrary.h"
 #include "ui/devicesettings.h"
@@ -180,17 +181,30 @@ int main(int argc, char **argv)
     check(DeviceSpecs::html(DeviceSpecs::find("CMT", "3503 *")).contains("Cosinus"), "CMT 3503: from its data sheet");
   }
 
-  // 7. the open devices: this window's bold, the others closed by their menu
+  // 7. the open devices: the active one bold, one not connected grey, a double
+  //    click shows the front panel, the others closed by their menu
   {
     QList<DeviceSidebar::OpenDevice> rows;
     rows << DeviceSidebar::OpenDevice { "device:w", "Bench UT61E", "12.01 V DC", true }
          << DeviceSidebar::OpenDevice { "p", "Power", "", false }
          << DeviceSidebar::OpenDevice { "u", "PSU", "OL", true };
+    rows[0].current = true;
+    rows[1].connected = false;
     sidebar.setOpenDevices(rows, "device:w");
     check(sidebar.openNode()->childCount() == 3, "three open devices");
     QTreeWidgetItem *own = sidebar.openItem("device:w");
     QTreeWidgetItem *p = sidebar.openItem("p");
-    check(own && own->font(0).bold() && !p->font(0).bold(), "this window's is bold");
+    check(own && own->font(0).bold() && !p->font(0).bold(), "the active one is bold");
+    check(p->foreground(0).color() != own->foreground(0).color(), "one not connected greyed");
+    // another one active: it is bold
+    rows[0].current = false;
+    rows[2].current = true;
+    sidebar.setOpenDevices(rows, "device:w");
+    check(!own->font(0).bold() && sidebar.openItem("u")->font(0).bold(), "another active one bold");
+    // a double click shows its front panel
+    QSignalSpy panel(&sidebar, &DeviceSidebar::frontPanelRequested);
+    Q_EMIT sidebar.itemDoubleClicked(sidebar.openItem("u"), 0);
+    check(panel.size() == 1 && panel.first().first().toString() == "u", "double click: its front panel");
     check(own && own->text(0) == "Bench UT61E" && own->text(1) == "12.01 V DC", "name and reading");
     check(p && !(p->flags() & Qt::ItemIsEditable) && !(own->flags() & Qt::ItemIsEditable), "not renamed here");
     check(!(sidebar.openNode()->flags() & Qt::ItemIsDropEnabled), "no device dropped into the open devices");

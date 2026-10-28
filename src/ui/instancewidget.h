@@ -41,6 +41,7 @@ class DeviceSession;
 class ValueFeed;
 class SettingsDialog;
 class LcdWidget;
+class FrontPanel;
 class Settings;
 class AnalogMeter;
 class PoincarePlot;
@@ -54,7 +55,9 @@ class DeviceLibrary;
 /// The meter session itself - connection, min/max memory, alarms, SCPI
 /// server, the alarms' programs - is a MeterController, which InstanceWidget creates.
 /// The views (display, analog meter, readings table, graph) are connected to
-/// its signals here and know nothing of each other. MainWindow provides the
+/// its signals here and know nothing of each other. The display is the
+/// window's FrontPanel; the meters open beside have front panels of their
+/// own, which MainWindow keeps (without alarms and limit test so far). MainWindow provides the
 /// frame (menus, toolbars, docks, status bar) and hooks its actions up to
 /// the *SLOT members here.
 class InstanceWidget : public QFrame, private Ui::UIInstanceWidget
@@ -73,8 +76,10 @@ public:
   /// The settings dialog: its pages hold what MainWindow reads (the window
   /// at exit, the analog meter's style, the shown display, the keys).
   SettingsDialog *settingsDialog() const { return m_configDlg; }
-  /// The LCD panel to feed; created and docked by MainWindow.
-  void        setDisplay(LcdWidget *);
+  /// The window's front panel (LCD and keys) to feed; created by MainWindow.
+  /// It shows the LCD's value (setLcdValue()); the limit test and the alarm
+  /// colour are set here.
+  void        setPanel(FrontPanel *panel);
   /// The LCD's colours (LcdWidget::LcdVariant), stored as Display/lcd.
   void        setLcdVariant(int variant);
   /// The analog meter's style from its context menu (0 dark, 1 ivory):
@@ -236,13 +241,13 @@ protected:
   void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
   MeterController *m_ctl;
   DeviceSession   *m_session;
-  ValueFeed       *m_lcdFeed = nullptr;       ///< the LCD's meter: the window's or one open beside it
   ValueFeed       *m_meterFeed = nullptr;     ///< the analog meter's
   ValueFeed       *m_poincareFeed = nullptr;  ///< the Poincaré plot's
   SettingsDialog  *m_configDlg;
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;
   LcdWidget *m_display;
+  FrontPanel *m_panel = nullptr;
   QColor      m_lcdTint;   ///< the Appearance page's tint last applied
   QColor      m_alertColor;   ///< the raised alarm's colour for display and meter, invalid when none
   bool        m_alertBlink = false;   ///< Alarms/blink

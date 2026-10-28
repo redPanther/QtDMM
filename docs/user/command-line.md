@@ -20,11 +20,11 @@ qtdmm [options]
 One QtDMM reads several meters: the window's own and those opened beside
 it. *Open beside* in the context menu of an entry of
 [My devices](my-devices.md) (or *Beside it* at the end of the assistant
-*Add device*) opens the device in the same QtDMM, without a view of its
-own for now; `--also <id>` does the same at the start, and over SCPI
+*Add device*) opens the device in the same QtDMM, with a front panel of
+its own; `--also <id>` does the same at the start, and over SCPI
 `QTDMM:DEVice:OPEN`. The node **Open devices** of the sidebar (F9) lists
-them with their current reading, this window's own in bold; *Close* in the
-context menu closes one. They record whenever the window records, on the
+them with their current reading, the active device in bold; *Close* in the
+context menu closes one (see [My devices](my-devices.md#several-meters-front-panels-and-the-active-device)). They record whenever the window records, on the
 same time base, and a [calculated value](calculated-values.md) reads them
 by their names.
 

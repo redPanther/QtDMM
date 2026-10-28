@@ -15,9 +15,11 @@ class DeviceLibrary;
 /// Open beside and Remove; dragging an entry changes the order.
 ///
 /// The node "Open devices" lists the meters of the process (MainWindow
-/// gives them with setOpenDevices()) with their reading: this window's own
-/// in bold, then those opened beside it (DeviceSession::open()), which
-/// their context menu closes. Below this window's own, for a meter with
+/// gives them with setOpenDevices()) with their reading: this window's own,
+/// then those opened beside it (DeviceSession::open()); the active one (the
+/// meter of the front panel used last) in bold, one not connected greyed.
+/// Their context menu shows the front panel (also a double click), connects
+/// or disconnects, and closes those beside. Below this window's own, for a meter with
 /// more than one value, a row for each value with its reading; its context
 /// menu says which window shows it where.
 ///
@@ -52,6 +54,8 @@ public:
     QString value;          ///< its reading, "OL", "" before one
     bool    active = false; ///< readings come in
     QList<Value> values;    ///< this window's own only, with more than one
+    bool    current = false; ///< the active device: the toolbar acts on it
+    bool    connected = true; ///< its connection is wanted (MeterConnection::isWanted())
   };
 
   /// One row of the node "Services".
@@ -120,6 +124,10 @@ Q_SIGNALS:
   void        openBesideRequested(const QString &id);
   /// Close the open device @p id (OpenDevice::id), not this window's.
   void        closeRequested(const QString &id);
+  /// Show the front panel of the open device @p id (OpenDevice::id).
+  void        frontPanelRequested(const QString &id);
+  /// Connect (@p on) or disconnect the open device @p id.
+  void        connectRequested(const QString &id, bool on);
   /// The row "+ Add device..." at the end of My devices.
   void        addDeviceRequested();
   /// The settings of the services (Settings, SCPI server).

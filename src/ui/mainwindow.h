@@ -44,8 +44,7 @@ class ReadingsWidget;
 class PoincarePlot;
 class AlarmBar;
 class ShortcutRegistry;
-class ControlBar;
-class FoldButton;
+class FrontPanel;
 class MdiArranger;
 class QMdiArea;
 class QToolButton;
@@ -123,7 +122,58 @@ protected:
 
   DeviceSession     *m_session;   ///< the meters of this process and their network services
   InstanceWidget    *m_wid;
-  LcdWidget *m_display;
+  FrontPanel *m_panel;   ///< the window's meter's LCD and keys
+  /// @name The front panels of the meters open beside the window's
+  /// One MDI window each (role Instrument), by MeterController::source();
+  /// the window's meter has m_panel. Its X hides it, the meter stays open.
+  /// @{
+  QMap<QString, QMdiSubWindow *> m_panelWins;
+  /// What a workspace said of a panel, by the entry of My devices, until
+  /// its meter is open.
+  struct PanelState
+  {
+    ValueRef value;
+    bool     folded = false;
+    bool     shown = true;
+    QString  geometry;   ///< "x y w h" in Free mode
+  };
+  QMap<QString, PanelState> m_panelStates;
+  /// The entries a workspace had open beside, to open (openPending()).
+  QStringList m_pendingOpen;
+  /// The layout tree of the workspace, set again once its panels are there.
+  QString     m_pendingLayout;
+  /// A front panel for @p ctl (not the window's), in its state of the workspace.
+  void        addPanel(MeterController *ctl);
+  void        removePanel(const QString &source);
+  /// The workspace's @p state of a panel on its window @p win.
+  void        applyPanelState(QMdiSubWindow *win, const PanelState &state);
+  /// The LCD's look of the window's on @p panel: variant, tint, its meter's
+  /// display (one look for all, [E 28.10.]).
+  void        applyLcdLook(FrontPanel *panel);
+  /// Opens the entries of m_pendingOpen beside (connecting as the window's meter does).
+  void        openPending();
+  /// The front panel windows, the window's first.
+  QList<QMdiSubWindow *> panelWindows() const;
+  /// @name The active device: the meter of the front panel used last
+  /// Connect, Reset min/max and Device settings act on it; the window's
+  /// meter while no panel of another one was used.
+  /// @{
+  QPointer<MeterController> m_active;   ///< null: the window's meter
+  bool        m_activeOther = false;    ///< another meter was active (m_active may be gone since)
+  bool        m_windowConnect = false;  ///< Connect of the window's meter while another one is active
+  QLabel     *m_activeName = nullptr;   ///< "Active: <name>" in the status bar, with more than one meter
+  MeterController *activeController() const;
+  /// Makes @p ctl the active device; Connect shows its state.
+  void        setActive(MeterController *ctl);
+  /// The window's meter was connected or disconnected (@p on) by the program:
+  /// Connect shows it while the window's meter is the active one.
+  void        windowConnected(bool on);
+  /// @}
+  /// The panel in @p win, nullptr for another view.
+  static FrontPanel *panelOf(const QMdiSubWindow *win);
+  /// The window's background behind @p view: the design's frame (metal) or the palette's.
+  void        applyFrame(QWidget *view);
+  /// @}
   AnalogMeter   *m_meter;
   ReadingsWidget *m_readings;
   PoincarePlot *m_poincare;
@@ -192,13 +242,10 @@ protected:
   QMenu      *m_recentMenu = nullptr;   ///< Arrange > Recent workspaces
   QMenu      *m_designMenu;
   bool        m_restoring = false;   ///< restoreWindows() is setting the actions
-  ControlBar *m_controls;            ///< the meter's keys under the display
-  FoldButton *m_fold;
-  bool        m_controlsSupported = false;
   /// Folds the keys away (Display/controls-hidden), from the fold button
   /// or "Hide controls" in the display's menu.
   void        setControlsFolded(bool folded);
-  /// Keys and fold button shown for a meter that has keys, not folded.
+  /// The display window makes room for the keys (FrontPanel::keysHeight()).
   void        updateControls();
   // Window size (package 26.2, 4a): the window starts at the size its
   // content needs and grows when a view is shown for the first time, up to

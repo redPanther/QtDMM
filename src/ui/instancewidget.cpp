@@ -35,6 +35,7 @@
 #include "device/dmmdecoder.h"
 #include "device/protocols.h"
 #include "ui/controlbar.h"
+#include "ui/frontpanel.h"
 #include "ui/views/graphwidget.h"
 #include "ui/settings/settingsdialog.h"
 #include "ui/devicesettings.h"
@@ -72,10 +73,8 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   m_ctl = new MeterController(this, session->host());
   session->adopt(m_ctl);
   // the views' values: of the window's meter or of another one open here
-  m_lcdFeed = new ValueFeed(session, this);
   m_meterFeed = new ValueFeed(session, this);
   m_poincareFeed = new ValueFeed(session, this);
-  m_lcdFeed->setValue(ValueRef());
   m_meterFeed->setValue(ValueRef());
   m_poincareFeed->setValue(ValueRef());
   connect(session, &DeviceSession::error, this, &InstanceWidget::error);
@@ -312,34 +311,19 @@ void InstanceWidget::setConsoleLogging(bool on)
   m_ctl->dmm()->setConsoleLogging(on);
 }
 
-void InstanceWidget::setDisplay(LcdWidget *display)
+void InstanceWidget::setPanel(FrontPanel *panel)
 {
-  m_display = display;
+  m_panel = panel;
+  m_display = panel->display();
   // the LCD's colours: backlight blue unless chosen otherwise; a config
   // from before the variants with a tint of its own lands on Custom
   QString lcd = m_settings->getString("Display/lcd");
   if (lcd.isEmpty())
     lcd = m_settings->getColor("Display/display-background", LcdWidget::classicFace()) == LcdWidget::classicFace()
             ? "blue" : "custom";
-  display->setLcdVariant(LcdWidget::lcdVariantFromName(lcd));
-  connect(m_lcdFeed, &ValueFeed::reading, display, &LcdWidget::showReading);
-  connect(m_lcdFeed, &ValueFeed::staleChanged, display, &LcdWidget::setStale);
-  connect(m_lcdFeed, &ValueFeed::minimumChanged, display, &LcdWidget::showMinimum);
-  connect(m_lcdFeed, &ValueFeed::maximumChanged, display, &LcdWidget::showMaximum);
-  connect(m_lcdFeed, &ValueFeed::minMaxReset, display, &LcdWidget::clearMinMax);
-  // another meter: its lines afresh, none of the one before
-  connect(m_lcdFeed, &ValueFeed::controllerChanged, display, [display]
-  {
-    display->clearMinMax();
-    for (int id = 0; id < kMaxValues; ++id)
-    {
-      Reading none;
-      none.id = id;
-      none.quality = Quality::NoValue;
-      display->showReading(none);
-    }
-  });
-  display->setLimitTest(m_ctl->limitTest().enabled);
+  m_display->setLcdVariant(LcdWidget::lcdVariantFromName(lcd));
+  m_display->setLimitTest(m_ctl->limitTest().enabled);
+  applyValueChoice();
 }
 
 void InstanceWidget::setMeter(AnalogMeter *meter)
@@ -349,10 +333,13 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
   connect(m_meterFeed, &ValueFeed::staleChanged, meter, &AnalogMeter::setStale);
   // the memory of the value it shows, whichever the LCD follows
   connect(m_meterFeed, &ValueFeed::valueMinMaxChanged, meter, &AnalogMeter::showValueMinMax);
-  connect(m_meterFeed, &ValueFeed::controllerChanged, meter, [meter]
+  connect(m_meterFeed, &ValueFeed::controllerChanged, meter, [meter](const MeterController *ctl)
   {
     meter->reset();
     meter->clearMinMax();
+    // the scale of the meter that has the value
+    if (ctl)
+      meter->setDisplayCounts(ctl->dmm()->dmmInfo().display);
   });
   applyValueChoice();
   applyLimitBands();
@@ -451,12 +438,10 @@ void InstanceWidget::applyValueChoice()
   {
     return ownMeter(value) ? ValueRef(ownValue(value)) : value;
   };
-  m_lcdFeed->setValue(feedValue(m_lcdValue));
+  if (m_panel)
+    m_panel->setValue(feedValue(m_lcdValue));
   m_meterFeed->setValue(feedValue(m_meterValue));
   m_poincareFeed->setValue(feedValue(m_poincareValue));
-  // the LCD itself falls back while the meter has fewer values (primaryShown())
-  if (m_display)
-    m_display->setPrimary(m_lcdValue.id);
   m_ctl->setMinMaxValue(ownValue(m_lcdValue));
   if (m_meter)
   {
@@ -927,7 +912,9 @@ void InstanceWidget::readConfig()
 
   if (m_meter)
   {
-    m_meter->setDisplayCounts(setup.info.display);
+    // the scale of the meter that has the value: another one's its own
+    const MeterController *shown = m_meterFeed->controller();
+    m_meter->setDisplayCounts(shown && shown != m_ctl ? shown->dmm()->dmmInfo().display : setup.info.display);
     applyMeterStyle();
     m_meter->setScaleMode(static_cast<AnalogMeter::ScaleMode>(
       gui->meterScaleMode() == 1 ? AnalogMeter::Unipolar :
