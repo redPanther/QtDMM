@@ -19,13 +19,10 @@
 #include "service/metercontroller.h"
 #include "service/scpiserver.h"
 #include "service/servicehost.h"
-#include "service/sharedstatemanager.h"
 #include "testutil.h"
 
 int main(int argc, char **argv)
 {
-  // shared memory of its own (test_calc_device does the same)
-  qputenv("QTDMM_IPC_KEY", "qtdmm_test_session_" + QByteArray::number(QCoreApplication::applicationPid()));
   QCoreApplication app(argc, argv);
   QTemporaryDir dir;
   DeviceLibrary lib(dir.path());
@@ -37,10 +34,6 @@ int main(int argc, char **argv)
   DeviceSession session;
   session.setInstanceId("test");
   session.setConfigDir(dir.path());
-  // the other instances, after the meters of the process
-  SharedStateManager state("test"), other("bench_sim"), third("psu");
-  check(state.registerInstance() && other.registerInstance() && third.registerInstance(), "instances register");
-  session.setStateManager(&state);
   MeterController window(nullptr, session.host());
   window.setInstanceId("test");
   window.setDevice("w1", "Window meter");
@@ -80,21 +73,11 @@ int main(int argc, char **argv)
     QObject::connect(power, &MeterController::reading, [&value](const Reading &r) { value = r.value; });
     check(waitFor([&] { return qAbs(value - 3.0) < 1e-9; }, 4000), QString("bench_sim * 2 = 3: %1").arg(value));
   }
-  // a meter of the process wins over an instance of the same name; the
-  // others are there as before
+  // the meters of the process only, by their names
   {
-    SharedStateManager::Reading r;
-    r.value = 9;
-    r.unit = "V";
-    r.msecs = QDateTime::currentMSecsSinceEpoch();
-    r.valid = true;
-    other.publishReading(r);
-    third.publishReading(r);
-    state.checkForChanges();
     const QMap<QString, CalcDevice::Input> in = session.calcInputs()();
-    check(in.contains("bench_sim") && qAbs(in.value("bench_sim").value - 1.5) < 1e-9 && in.contains("psu")
-            && qAbs(in.value("psu").value - 9) < 1e-9,
-          QString("process before instances: bench_sim %1, psu %2").arg(in.value("bench_sim").value).arg(in.value("psu").value));
+    check(in.contains("bench_sim") && qAbs(in.value("bench_sim").value - 1.5) < 1e-9 && !in.contains("test"),
+          QString("the meters of the process: bench_sim %1").arg(in.value("bench_sim").value));
   }
   check(DeviceSession::variableName("UT61E Bench") == "ut61e_bench" && DeviceSession::variableName("34465A") == "_34465a",
         "variable names");

@@ -33,10 +33,10 @@
 #include "ui_uimainwindow.h"
 #include "core/recentfiles.h"
 #include "core/valueref.h"
-#include "service/sharedstatemanager.h"
 
 class InstanceWidget;
 class DeviceSession;
+class MeterController;
 class LcdWidget;
 class HelpDlg;
 class AnalogMeter;
@@ -57,10 +57,9 @@ class QMdiSubWindow;
 /// MDI area with four windows - LCD display, analog meter, graph (InstanceWidget)
 /// and readings table - placed by an MdiArranger.
 ///
-/// Also the place where several QtDMM instances talk to each other: the
-/// SharedStateManager's state changes ("RECORD_<ms>", "STOP_<ms>", "RAISE_<id>") are
-/// turned into actions here, and a second instance with the same id is
-/// refused.
+/// The meters of the process are in a DeviceSession: the window's and those
+/// opened beside it (sidebar "Open devices", --also, SCPI); they record
+/// together.
 class MainWindow : public QMainWindow, private Ui::UIMainWindow
 {
   Q_OBJECT
@@ -71,18 +70,13 @@ public:
   /// --debug: frame dump and the qtdmm.hid logging category.
   void      setConsoleLogging(bool);
 
-public Q_SLOTS:
-  /// Writes a state string for the other instances (InstanceWidget::sendState()).
-  void      sendStateSLOT(const QString &);
-
 protected Q_SLOTS:
   /// Recording state changed; enables/disables Start/Stop.
   void      runningSLOT(bool);
   /// The Connect action was toggled.
   void      connectSLOT(bool);
-  /// Start action: records locally and tells the other instances.
+  /// Start action: asks about a recording not saved and its length, then records.
   void      startSLOT();
-  void      stopSLOT();
   void      on_action_About_triggered();
   void      on_action_Help_triggered();
   /// Shows the popup menu (the window has no menu bar).
@@ -125,7 +119,6 @@ protected:
   void      createDesignMenu();
   void      createStatusBar();
   void      placeWindow();
-  void      connectInstances();
   /// @}
 
   DeviceSession     *m_session;   ///< the meters of this process and their network services
@@ -166,28 +159,24 @@ protected:
   /// The Info tab's state of the entry @p id: in use where, connected,
   /// the last reading, the values; rich text.
   QString     deviceStatus(const QString &id) const;
-  /// The entry @p id in a new window (instance) of its own; a device that a
-  /// running instance uses brings that one to the front instead.
-  void        openInNewWindow(const QString &id);
+  /// Opens the entry @p id beside this window's device (DeviceSession::open()),
+  /// unless its port is in use.
+  void        openBeside(const QString &id);
   void        showSidebar(bool show);
-  /// The node "Instances" anew: the configured and running instances with
-  /// their devices and readings (each second while the sidebar is shown).
-  void        updateInstances();
+  /// The node "Open devices" anew: the meters of the session with their
+  /// readings (each second while the sidebar is shown).
+  void        updateOpenDevices();
   /// The node "Services": the SCPI server and HiSLIP of this window.
   void        updateServices();
-  /// A click on an instance: a running one comes to the front, a stopped one starts.
-  void        openInstance(const QString &id);
-  void        renameInstance(const QString &from, const QString &to);
-  void        deleteInstance(const QString &id);
-  QTimer     *m_instancesTimer = nullptr;
-  /// The places (DeviceLibrary::place()) the running instances use, with
-  /// the instance that uses each.
-  QMap<QString, QString> placeOwners() const;
-  /// The places (DeviceLibrary::place()) the running instances use, with
-  /// "In use here" / "In use by the instance x" for the assistant's cards.
+  QTimer     *m_openTimer = nullptr;
+  /// The places (DeviceLibrary::place()) the open devices use, with the
+  /// meter that uses each.
+  QMap<QString, const MeterController *> placeOwners() const;
+  /// The places (DeviceLibrary::place()) the open devices use, with
+  /// "In use here" / "Open beside: x" for the assistant's cards.
   QMap<QString, QString> placesInUse() const;
   /// The assistant "Add device": the device into My devices, then into
-  /// this window or a new one.
+  /// this window or beside its device.
   void        addDevice();
   /// The empty start: a window without a meter shows the big button "Add
   /// device" over the area instead of the views.
@@ -245,11 +234,7 @@ protected:
   QLabel     *m_limitCount;   ///< PASS/FAIL count, while the limit test is on
   QMenu      *m_menu;
   HelpDlg    *m_helpDlg;
-  SharedStateManager* m_stateMgr;
   QString     m_configId;
-  bool        m_localRecord;
-  bool        m_remoteStop = false;   ///< stopping on another instance's STOP
-  QString     m_ownRecord;   ///< the RECORD_ this window sent ("All instances"): asked about already
 
   void        setupIcons();
   void        createActions();

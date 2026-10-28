@@ -17,27 +17,22 @@ qtdmm [options]
 
 ## Several meters at once
 
-Every QtDMM window is one *instance*, identified by its `--config-id`. A
-device of [My devices](my-devices.md) opens in an instance of its own with
-*Open in a new window* in its context menu in the sidebar, and the
-assistant *Add device* offers *In a new window* as well. The new instance
-starts with a copy of the current one's settings (graph, display, alarms,
-…) and the device; its window does not take over the position, and an SCPI
-server stays off until you enable it with a free port.
+One QtDMM reads several meters: the window's own and those opened beside
+it. *Open beside* in the context menu of an entry of
+[My devices](my-devices.md) (or *Beside it* at the end of the assistant
+*Add device*) opens the device in the same QtDMM, without a view of its
+own for now; `--also <id>` does the same at the start, and over SCPI
+`QTDMM:DEVice:OPEN`. The node **Open devices** of the sidebar (F9) lists
+them with their current reading, this window's own in bold; *Close* in the
+context menu closes one. They record whenever the window records, on the
+same time base, and a [calculated value](calculated-values.md) reads them
+by their names.
 
-The node **Instances** of the sidebar (F9) lists the configured and the
-running instances with what each one currently reads and, below it, its
-device; this window's own is bold. A click brings a running instance to
-the front; a double click (or **Start** in its context menu) starts a
-stopped one. A stopped instance can be renamed and deleted through its
-context menu. Renaming also changes the formulas that use
-the old name, in the other instances and in My devices (see
-[Calculated values](calculated-values.md)); an instance that is running
-uses the new formula after a restart. Running
-instances know about each other through shared memory — the same mechanism
-that stops two windows from using the `default` id at once. An instance can
-also compute its value from the others' readings, see
-[Calculated values](calculated-values.md).
+`--config-id` keeps a set of settings of its own (a file of its own).
+A second QtDMM started with another id runs on its own, without a link to
+the first; started with the same id it says that this one runs already.
+The settings files of the instances of QtDMM 26.3 and earlier stay where
+they are.
 
 ## Debug output
 

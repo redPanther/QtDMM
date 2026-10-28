@@ -45,7 +45,6 @@ public:
   using RecordingState = ScpiDevice::RecordingState;
   using Point = ScpiDevice::Point;
   using AlarmState = ScpiDevice::AlarmState;
-  using Instance = ScpiDevice::Instance;
   using Sources = ScpiDevice::Sources;
 
   explicit ScpiServer(QObject *parent = nullptr);

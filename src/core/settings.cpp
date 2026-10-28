@@ -166,15 +166,6 @@ void Settings::sync()
 }
 
 
-void Settings::deleteConfig(QString instanceId)
-{
-  if(instanceId.isEmpty())
-    return;
-
-  QFile configFile(m_configPath+"/"+m_configBaseFileName+"_"+instanceId+"."+m_configFileNameSuffix);
-  configFile.remove();
-}
-
 QStringList Settings::customPorts() const
 {
   QStringList ports;
@@ -185,20 +176,6 @@ QStringList Settings::customPorts() const
       ports << dev;
   }
   return ports;
-}
-
-bool Settings::renameConfig(const QString &from, const QString &to)
-{
-  if (from.isEmpty() || to.isEmpty() || from == QLatin1String("default") || to == QLatin1String("default"))
-    return false;
-  const auto file = [this](const QString &id)
-  { return m_configPath + "/" + m_configBaseFileName + "_" + id + "." + m_configFileNameSuffix; };
-  // only the case changes: on Windows and macOS that is the same file, and
-  // QFile::rename() knows that case
-  const bool caseOnly = from.compare(to, Qt::CaseInsensitive) == 0;
-  if (!caseOnly && QFile::exists(file(to)))
-    return false;
-  return QFile::rename(file(from), file(to));
 }
 
 bool Settings::isMeterKey(const QString &key)
@@ -234,21 +211,5 @@ void Settings::setValues(const QVariantMap &keys)
 {
   for (auto it = keys.cbegin(); it != keys.cend(); ++it)
     m_tmpConfig->insert(it.key(), it.value());
-}
-
-QString Settings::copyConfig(const QString &instanceId) const
-{
-  Settings target(instanceId, m_configPath);
-  for (const QString &key : m_qsettings->allKeys())
-  {
-    const bool meter = isMeterKey(key);
-    // the new window would open exactly over this one, and the second SCPI
-    // server would find its port taken
-    const bool clash = key == "Position/x" || key == "Position/y" || key == "Scpi/enabled";
-    if (!meter && !clash)
-      target.m_qsettings->setValue(key, m_qsettings->value(key));
-  }
-  target.m_qsettings->sync();
-  return target.fileName();
 }
 

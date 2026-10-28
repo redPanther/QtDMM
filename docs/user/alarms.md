@@ -2,8 +2,8 @@
 
 An alarm watches the reading and tells you when it leaves the range you
 expect - a battery that sags below 12 V, a supply that drifts high, a
-sensor that stops answering. Each QtDMM instance has its own list of
-alarms under **Settings → Alarms**.
+sensor that stops answering. The window's meter has its list of alarms
+under **Settings → Alarms**; a meter opened beside it has none yet.
 
 ## Conditions
 
@@ -85,7 +85,7 @@ a second. It is off by default.
 
 An alarm judges one value of one meter. For a condition on several meters -
 power over a limit, say - set up a [calculated value](calculated-values.md)
-and put the alarm on that instance.
+and put the alarm on it in the window.
 
 ## Example: setting a voltage
 

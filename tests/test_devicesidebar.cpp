@@ -4,8 +4,8 @@
 // The sidebar "Devices" without a main window: My devices in their order,
 // the one in use marked, a click to switch, rename in place, a change of
 // the library shown; when the sidebar is shown at the start and after the
-// assistant; the dialog "Settings..." of an entry; the node "Instances"
-// with its readings, clicks, rename and delete only for stopped ones.
+// assistant; the dialog "Settings..." of an entry; the node "Open devices"
+// with its readings and this window's values.
 
 #include <QtWidgets>
 #include <QTemporaryDir>
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
   sidebar.deviceItem(shunt)->setText(0, "  ");
   check(library.find(shunt)->name == "House battery", "an empty name is not taken");
 
-  // 4. a change of the library (here or another instance) is shown
+  // 4. a change of the library (here or another QtDMM) is shown
   library.move(shunt, 0);
   QCoreApplication::processEvents();
   check(sidebar.deviceIds() == QStringList({ shunt, ut61e, tfa }), "new order shown");
@@ -180,82 +180,54 @@ int main(int argc, char **argv)
     check(DeviceSpecs::html(DeviceSpecs::find("CMT", "3503 *")).contains("Cosinus"), "CMT 3503: from its data sheet");
   }
 
-  // 7. the instances: this window's bold, a click raises another, a double click starts it
+  // 7. the open devices: this window's bold, the others closed by their menu
   {
-    QList<DeviceSidebar::Instance> rows;
-    rows << DeviceSidebar::Instance { "default", "Bench UT61E", "12.01 V DC", true, true }
-         << DeviceSidebar::Instance { "p", "= u * i", "stopped", false, false }
-         << DeviceSidebar::Instance { "u", "", "OL", true, false };
-    sidebar.setInstances(rows, "default");
-    check(sidebar.instancesNode()->childCount() == 3, "three instances");
-    QTreeWidgetItem *own = sidebar.instanceItem("default");
-    QTreeWidgetItem *p = sidebar.instanceItem("p");
-    QTreeWidgetItem *u = sidebar.instanceItem("u");
+    QList<DeviceSidebar::OpenDevice> rows;
+    rows << DeviceSidebar::OpenDevice { "device:w", "Bench UT61E", "12.01 V DC", true }
+         << DeviceSidebar::OpenDevice { "p", "Power", "", false }
+         << DeviceSidebar::OpenDevice { "u", "PSU", "OL", true };
+    sidebar.setOpenDevices(rows, "device:w");
+    check(sidebar.openNode()->childCount() == 3, "three open devices");
+    QTreeWidgetItem *own = sidebar.openItem("device:w");
+    QTreeWidgetItem *p = sidebar.openItem("p");
     check(own && own->font(0).bold() && !p->font(0).bold(), "this window's is bold");
-    check(own && own->isExpanded() && !p->isExpanded() && !u->isExpanded(), "at first only this window's is open");
-    check(own && own->text(1) == "12.01 V DC", "the reading");
-    check(own && own->child(0)->text(0) == "Bench UT61E", "the device below");
-    check(u && u->child(0)->isHidden(), "no device, no line");
-    check(p && (p->flags() & Qt::ItemIsEditable), "a stopped one can be renamed");
-    check(u && !(u->flags() & Qt::ItemIsEditable), "a running one cannot");
-    check(own && !(own->flags() & Qt::ItemIsEditable), "nor this one");
-    check(!(sidebar.instancesNode()->flags() & Qt::ItemIsDropEnabled), "no device dropped into the instances");
-
-    QStringList opened;
-    QObject::connect(&sidebar, &DeviceSidebar::instanceRequested, [&](const QString &id) { opened << id; });
-    Q_EMIT sidebar.itemClicked(own, 0);
-    Q_EMIT sidebar.itemClicked(p->child(0), 0);
-    Q_EMIT sidebar.itemClicked(u, 0);
-    check(opened == QStringList({ "u" }), "a click brings a running one to the front, starts none: "
-                                           + opened.join(','));
-    opened.clear();
-    Q_EMIT sidebar.itemDoubleClicked(own, 0);
-    Q_EMIT sidebar.itemDoubleClicked(p->child(0), 0);
-    Q_EMIT sidebar.itemDoubleClicked(u, 0);
-    check(opened == QStringList({ "p" }), "a double click starts a stopped one: " + opened.join(','));
-
-    // the new name goes to MainWindow; the item keeps the old one till then
-    QStringList renamed;
-    QObject::connect(&sidebar, &DeviceSidebar::renameInstanceRequested,
-                     [&](const QString &from, const QString &to) { renamed << from + ">" + to; });
-    p->setText(0, " power ");
-    check(renamed == QStringList({ "p>power" }), "rename asked: " + renamed.join(','));
-    check(p->text(0) == "p", "old name until renamed");
+    check(own && own->text(0) == "Bench UT61E" && own->text(1) == "12.01 V DC", "name and reading");
+    check(p && !(p->flags() & Qt::ItemIsEditable) && !(own->flags() & Qt::ItemIsEditable), "not renamed here");
+    check(!(sidebar.openNode()->flags() & Qt::ItemIsDropEnabled), "no device dropped into the open devices");
 
     // the values change in place, the items stay
     rows[0].value = "12.02 V DC";
-    sidebar.setInstances(rows, "default");
-    check(sidebar.instanceItem("p") == p && own->text(1) == "12.02 V DC", "updated in place");
+    sidebar.setOpenDevices(rows, "device:w");
+    check(sidebar.openItem("p") == p && own->text(1) == "12.02 V DC", "updated in place");
     rows.removeAt(1);
-    sidebar.setInstances(rows, "default");
-    check(!sidebar.instanceItem("p") && sidebar.instancesNode()->childCount() == 2, "deleted one gone");
+    sidebar.setOpenDevices(rows, "device:w");
+    check(!sidebar.openItem("p") && sidebar.openNode()->childCount() == 2, "closed one gone");
   }
 
-  // 7b. this window's values below its instance: a row each with the reading,
+  // 7b. this window's values below its device: a row each with the reading,
   //     the curve's colour while in the graph, the menu per value
   {
-    QList<DeviceSidebar::Instance> rows;
-    rows << DeviceSidebar::Instance { "default", "Victron SmartShunt", "13.29 V DC", true, true, {} }
-         << DeviceSidebar::Instance { "u", "Bench", "OL", true, false, {} };
+    QList<DeviceSidebar::OpenDevice> rows;
+    rows << DeviceSidebar::OpenDevice { "device:w", "Victron SmartShunt", "13.29 V DC", true, {} }
+         << DeviceSidebar::OpenDevice { "u", "Bench", "OL", false, {} };
     const QList<DeviceSidebar::Value> values { { 0, "Voltage DC", "13.29 V", QColor("#3b82f6") },
                                                { 1, "Current DC", "-14.9 A", QColor() },
                                                { 2, "Value 3", "", QColor() } };
     rows[0].values = values;
-    rows[1].values = values;   // another window's: not shown here
-    sidebar.setInstances(rows, "default");
-    QTreeWidgetItem *own = sidebar.instanceItem("default");
-    check(own && own->childCount() == 4 && own->child(0)->text(0) == "Victron SmartShunt",
-          QString("the device, then three values, got %1 rows").arg(own ? own->childCount() : -1));
-    check(sidebar.instanceItem("u")->childCount() == 1, "another window's values are not here");
+    rows[1].values = values;   // one beside it: not shown here
+    sidebar.setOpenDevices(rows, "device:w");
+    QTreeWidgetItem *own = sidebar.openItem("device:w");
+    check(own && own->childCount() == 3, QString("three values, got %1 rows").arg(own ? own->childCount() : -1));
+    check(sidebar.openItem("u")->childCount() == 0, "the values of one beside it are not here");
     QTreeWidgetItem *current = sidebar.valueItem(1);
     check(current && current->text(0) == "2  Current DC" && current->text(1) == "-14.9 A", "the row of value 2");
     check(sidebar.valueItem(0)->toolTip(0).contains("graph") && !current->toolTip(0).contains("graph"),
           "the graph's values say so");
     rows[0].values[1].text = "-15.0 A";
-    sidebar.setInstances(rows, "default");
+    sidebar.setOpenDevices(rows, "device:w");
     check(sidebar.valueItem(1) == current && current->text(1) == "-15.0 A", "the reading in place");
     own->setExpanded(false);
-    sidebar.setInstances(rows, "default");
+    sidebar.setOpenDevices(rows, "device:w");
     check(!own->isExpanded(), "folded away it stays so");
     own->setExpanded(true);
     int menuFor = -1;
@@ -265,12 +237,12 @@ int main(int argc, char **argv)
     QCoreApplication::sendEvent(sidebar.viewport(), &menu);
     check(menuFor == 1, QString("the menu of value 2, got %1").arg(menuFor));
     rows[0].values = values.mid(0, 1);
-    sidebar.setInstances(rows, "default");
-    check(own->childCount() == 1 && !sidebar.valueItem(0), "one value: no rows");
+    sidebar.setOpenDevices(rows, "device:w");
+    check(own->childCount() == 0 && !sidebar.valueItem(0), "one value: no rows");
     // where the row is short: unit and coupling, the full name in the tooltip
     rows[0].values = values;
     rows[0].values[1].shortName = "A DC";
-    sidebar.setInstances(rows, "default");
+    sidebar.setOpenDevices(rows, "device:w");
     check(sidebar.valueItem(1)->text(0) == "2  A DC" && sidebar.valueItem(1)->toolTip(0) == "Current DC",
           "the short name in the row, the full one in the tooltip");
   }

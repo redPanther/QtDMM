@@ -32,7 +32,6 @@
 #include "device/metersetup.h"
 
 class Settings;
-class SharedStateManager;
 class DeviceLibrary;
 class QPrinter;
 class RecorderPrefs;

@@ -37,10 +37,12 @@ it, and the window remembers whether you leave it open. A window without a
 meter shows it whenever there are devices to choose from - pick one, or add
 a new one with the big **Add device** button.
 
-Below My devices the node **Instances** lists the QtDMM windows (see
-[Command line](command-line.md)), and **Services** what this window offers
-to other programs: the [SCPI server and HiSLIP](scpi-server.md) with their
-port, or *off*. At the start only this window's instance is unfolded.
+Below My devices the node **Open devices** lists the meters this QtDMM
+reads with their current reading: this window's own in bold, then those
+opened beside it (**Open beside**, see below); *Close* in the context menu
+of one closes it. **Services** shows what this window offers to other
+programs: the [SCPI server and HiSLIP](scpi-server.md) with their port, or
+*off*.
 
 Above My devices, folded at the start, the node **Workspaces** lists the
 window layouts loaded or saved last; a double click loads one (see
@@ -50,8 +52,8 @@ window layouts loaded or saved last; a double click loads one (see
 
 For a meter with more than one value (a second display, the CO2,
 temperature and humidity of the TFA AirCO2ntrol, the voltage, current and
-state of charge of a Victron) this window's instance has a row for each
-value below its device: its number, its name and its reading. The name is
+state of charge of a Victron) this window's device has a row for each
+value below it in **Open devices**: its number, its name and its reading. The name is
 the one the meter gives the value (a Victron's *Battery voltage*), else
 unit and coupling (*V DC*); the tooltip has the full one. A
 coloured dot shows that the graph draws it, in the colour of its curve, so
@@ -80,7 +82,7 @@ The context menu of a device:
 - **Info and settings...** (also a double click) - two or three tabs:
   - **Info**: the device at a glance as on the assistant's last page
     (picture, name, model, type, protocol, connection); whether it is in use
-    in this window, in another instance or not at all; in this window
+    in this window, open beside it or not at all; in this window
     whether it is connected, how long ago the last reading came, a low
     battery, and its values with their readings, updated every second. Below
     a link to the maker's website (in the browser) and to the list of
@@ -97,9 +99,11 @@ The context menu of a device:
   - **Settings**: the meter's settings as in the assistant; with **OK** the
     device in use takes them at once.
 - **Rename** - in place.
-- **Open in a new window** - a new instance with the settings of this one
-  and the device. A device another window already uses brings that window
-  to the front instead.
+- **Open beside** - opens the device in this QtDMM beside the window's
+  device, without a view of its own for now: it shows its reading in
+  **Open devices**, records whenever the window records, is a variable in
+  [calculated values](calculated-values.md) and answers over SCPI
+  (`INSTrument`). A device whose port the window uses is not opened twice.
 - **Remove from My devices** - after a question; a window using it keeps its
   meter.
 
@@ -111,8 +115,8 @@ Drag a device to change the order.
 or **+ Add device...** at the end of My devices in the sidebar) asks step
 by step: how the meter is connected - *Cable*, *Bluetooth*, *Network*,
 *sigrok* or *Simulated / calculated* -, which meter it is, with a name, and
-where it goes: **In this window** as the current device, or **In a new
-window**, a new instance with the settings of this one. Either way it is
+where it goes: **In this window** as the current device, or **Beside it**,
+opened beside the current device as with *Open beside*. Either way it is
 kept in My devices. The page of the meter offers only the models of that
 connection; *Next* waits until what the meter needs is filled in (the port,
 the key of a Victron device, a formula that works).
@@ -121,12 +125,12 @@ A serial port is saved under its stable name on Linux, the link in
 `/dev/serial/by-id/` (`usb-WCH.CN_USB_Quad_Serial_…`): `/dev/ttyUSB0` may be
 `/dev/ttyUSB1` after plugging the cable in again, the by-id name stays.
 
-## Several windows
+## Where the list is kept
 
-The list is the same for all instances: it is kept in `devices.conf` next
-to their settings files. *Open in a new window* starts a new instance
-with the device; the node **Instances** of the sidebar shows them all. Two windows cannot use the same serial port at
-the same time; the second one says the port is busy.
+The list is kept in `devices.conf` next to the settings file, the same for
+every `--config-id`. A port is read by one meter at a time: a device whose
+port is in use in this window or beside it is not opened again, and
+another program (or another QtDMM) using it says the port is busy.
 
 A Victron key is kept in `devices.conf` in plain text, as in the settings
 of the window: whoever gets the file gets the key.

@@ -53,9 +53,9 @@ connects, the bridge applies the model's baud rate, data bits, parity and
 DTR/RTS to the device; the status line shows *Connected 192.168.1.20:4000*
 once readings arrive.
 
-Several QtDMM instances can use several bridge ports at once — one meter per
-instance, as always — and [calculated values](calculated-values.md) work
-across them just like with local meters.
+One QtDMM can read several bridge ports at once — one in the window, the
+others opened beside it — and [calculated values](calculated-values.md)
+work across them just like with local meters.
 
 ## Running it as a service
 

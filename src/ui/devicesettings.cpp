@@ -39,7 +39,6 @@
 #include "device/transports/ble.h"
 #include "device/transports/blegatt.h"
 #endif
-#include "service/sharedstatemanager.h"
 #include "core/sampletypes.h"
 #include "core/siprefix.h"
 #include "decoders.h"
@@ -106,7 +105,7 @@ DeviceSettings::DeviceSettings(QWidget *parent) : QWidget(parent)
   for (QGroupBox *group : findChildren<QGroupBox *>())
     sectionTitle(group);
   showPortParameters(false);
-  m_calcHintTimer.setInterval(1000);   // live values of the input instances
+  m_calcHintTimer.setInterval(1000);   // live values of the input meters
   connect(&m_calcHintTimer, &QTimer::timeout, this, &DeviceSettings::updateCalcHint);
 
   // any edit may complete the fields or break them (isComplete())
@@ -646,9 +645,9 @@ void DeviceSettings::updateVirtualValues()
   }
 }
 
-void DeviceSettings::setStateManager(SharedStateManager *state)
+void DeviceSettings::setCalcInputs(const CalcDevice::Inputs &inputs)
 {
-  m_state = state;
+  m_inputs = inputs;
 }
 
 // A calculated value has no port and no protocol to set up; the formula
@@ -723,38 +722,31 @@ void DeviceSettings::updateCalcHint()
   const auto expr = CalcExpr::parse(ui_calcExpression->text(), &error, &pos);
   QStringList lines;
 
+  // the variables are the meters open in this program, by their names
+  const QMap<QString, CalcDevice::Input> readings = m_inputs ? m_inputs() : QMap<QString, CalcDevice::Input>();
   if (!expr)
   {
     if (!ui_calcExpression->text().trimmed().isEmpty())
       lines << QString("<span style=\"color:#b00\">%1</span>").arg(tr("Position %1: %2").arg(pos + 1).arg(error.toHtmlEscaped()));
   }
-  else if (m_state)
-  {
-    const auto readings = m_state->readings();
+  else
     for (const QString &var : expr->variables())
     {
-      QString id = var;
-      for (auto it = readings.constBegin(); it != readings.constEnd(); ++it)
-        if (it.key() == var || QString(it.key()).replace('-', '_') == var)
-          id = it.key();
-      if (readings.contains(id) && readings[id].valid)
-        lines << QString("%1 = %2 %3").arg(var.toHtmlEscaped(), SiPrefix::format(readings[id].value), readings[id].unit.toHtmlEscaped());
-      else if (readings.contains(id))
+      if (var == QLatin1String("t"))
+        continue;
+      const auto it = readings.constFind(var);
+      if (it != readings.constEnd() && it->valid)
+        lines << QString("%1 = %2 %3").arg(var.toHtmlEscaped(), SiPrefix::format(it->value), it->unit.toHtmlEscaped());
+      else if (it != readings.constEnd())
         lines << QString("%1 = OL").arg(var.toHtmlEscaped());
       else
-        lines << QString("<span style=\"color:#b00\">%1</span>").arg(tr("%1: no such instance running").arg(var.toHtmlEscaped()));
+        lines << QString("<span style=\"color:#b00\">%1</span>").arg(tr("%1: no such device open").arg(var.toHtmlEscaped()));
     }
-  }
 
-  QStringList others;
-  if (m_state)
-    for (const QString &id : m_state->instances())
-      if (id != m_state->id())
-        others << id;
-  if (!others.isEmpty())
-    lines << tr("Running instances: %1").arg(others.join(", ").toHtmlEscaped());
+  if (!readings.isEmpty())
+    lines << tr("Open devices: %1").arg(readings.keys().join(", ").toHtmlEscaped());
   else
-    lines << tr("No other instance is running.");
+    lines << tr("No other device is open.");
 
   ui_calcHint->setText(lines.join("<br>"));
 }

@@ -50,12 +50,6 @@ int main(int argc, char **argv)
           && !keys.contains("Port settings/custom_device0") && !keys.contains("Port settings/sigrok_exe")
           && !keys.contains("Graph/sample-time"),
         "meter keys: " + QStringList(keys.keys()).join(", "));
-  {
-    ut61e.copyConfig("copied");
-    Settings copied("copied", dir.path());
-    check(copied.meterKeys().isEmpty() && copied.getInt("Graph/sample-time") == 5,
-          "copyConfig: no meter key, the rest copied");
-  }
 
   // --- 2. the library: add, list, apply into another instance and back ---
   DeviceLibrary lib(dir.path());
@@ -85,10 +79,6 @@ int main(int argc, char **argv)
   other.setString("DMM/my-device", id);
   other.save();
   check(lib.findByPlace(other.meterKeys()) == id, "findByPlace: the same port, whatever the baud rate");
-  {
-    other.copyConfig("copied2");
-    check(Settings("copied2", dir.path()).getString("DMM/my-device").isEmpty(), "copyConfig: not which device");
-  }
 
   // --- 3. names, order, duplicate, rename, remove ---
   check(lib.uniqueName(name) == name + " (2)" && lib.uniqueName("BM869s") == "BM869s", "uniqueName");
@@ -288,15 +278,6 @@ int main(int argc, char **argv)
     QFile::setPermissions(ro.path(), QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
   }
 #endif
-
-  // 9. instance names for "In a new window": identifiers, unique, not "default"
-  check(DeviceLibrary::instanceId("Uni-Trend UT61E", {}) == "Uni_Trend_UT61E", "instanceId: " + DeviceLibrary::instanceId("Uni-Trend UT61E", {}));
-  check(DeviceLibrary::instanceId("Uni-Trend UT61E", { "default", "uni_trend_ut61e" }) == "Uni_Trend_UT61E_2", "instanceId: taken in another case");
-  check(DeviceLibrary::instanceId("Uni-Trend UT61E", { "Uni_Trend_UT61E", "Uni_Trend_UT61E_2" }) == "Uni_Trend_UT61E_3", "instanceId: third");
-  check(DeviceLibrary::instanceId("34465A (sigrok)", {}) == "m_34465A_sigrok", "instanceId: digit first");
-  check(DeviceLibrary::instanceId("Default", {}) == "Default_2", "instanceId: not default");
-  check(DeviceLibrary::instanceId("Gerät für Öl", {}) == "Ger_t_f_r_l", "instanceId: ASCII only " + DeviceLibrary::instanceId("Gerät für Öl", {}));
-  check(DeviceLibrary::instanceId("  ", {}) == "meter", "instanceId: empty name");
 
   if (failed)
   {

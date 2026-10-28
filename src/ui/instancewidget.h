@@ -45,7 +45,6 @@ class AnalogMeter;
 class PoincarePlot;
 class ReadingsModel;
 struct Alarm;
-class SharedStateManager;
 class DeviceLibrary;
 
 /// The recorder graph (shown in its own MDI window), plus the settings and
@@ -133,8 +132,6 @@ public:
   /// Its last reading as shown: "-14.9 A", "OL"; empty before one came.
   QString     valueText(int id) const { return m_lastText.value(id); }
   /// @}
-  /// The instance coordinator; readings are published through it.
-  void        setStateManager(SharedStateManager *);
   /// --debug: pass on to MeterConnection::setConsoleLogging().
   void        setConsoleLogging(bool);
   /// The recorder graph (for the zoom/pan shortcuts in MainWindow).
@@ -164,10 +161,6 @@ public:
   /// Before a switch to the device @p name: unsaved readings are exported
   /// or dropped, or the user cancels (false).
   bool        confirmSwitch(const QString &name);
-  /// Starts a new instance with this one's settings and the device @p id of
-  /// "My devices", named after the device (DeviceLibrary::instanceId());
-  /// returns the instance name, empty when there is no such entry.
-  QString     openInNewWindow(const QString &id);
   /// Before a new recording: unsaved readings viewed are exported or
   /// dropped, or the user cancels (false). True at once in Live.
   bool        confirmRecording();
@@ -200,8 +193,6 @@ Q_SIGNALS:
   void        connectDMM(bool);
   /// The settings were applied; the meter shown in the title may have changed.
   void        configChanged();
-  /// A state string for the other instances (SharedStateManager).
-  void        sendState(const QString&);
   /// The SCPI server or HiSLIP started, stopped or got a client
   /// (controller()->services()).
   void        servicesChanged();

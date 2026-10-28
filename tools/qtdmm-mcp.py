@@ -273,15 +273,6 @@ def alarms() -> dict:
 
 
 @mcp.tool()
-def instances() -> dict:
-    """The running QtDMM instances with their last reading (QTDMM:INSTances?)."""
-    with Scpi() as s:
-        items = split_list(s.query("QTDMM:INSTances?"))
-    triples = [] if items == [""] else list(zip(items[0::3], items[1::3], items[2::3]))
-    return {"instances": [{"id": i, "value": value(v), "unit": u} for i, v, u in triples]}
-
-
-@mcp.tool()
 def keys() -> dict:
     """The meter's keys QtDMM can press (QTDMM:KEY:CATalog?); empty for a meter without."""
     with Scpi() as s:

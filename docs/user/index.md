@@ -27,7 +27,7 @@ side, one window each, and can be combined into calculated values.
 - [Supported devices](supported-devices.md) — every meter QtDMM knows, with
   protocol and serial settings.
 - [Calculated values](calculated-values.md) — power from a voltage and a
-  current instance: formulas over the readings of other instances; the
+  current meter: formulas over the readings of the open devices; the
   simulated meter for demos without hardware.
 - [Bench meters through sigrok-cli](bench-meters.md) — Keysight, Agilent, HP
   and Siglent SCPI meters over USB-TMC, LAN or serial, with sigrok-cli doing
@@ -38,11 +38,11 @@ side, one window each, and can be combined into calculated values.
   serial and HID meters over RFC 2217, running it as a service.
 - [SCPI server](scpi-server.md) — the meter as a network instrument: `*IDN?`,
   `READ?` over TCP for lxi-tools, Python or LabVIEW, announced by mDNS.
-- [Command line](command-line.md) — options, multiple instances, debug output.
+- [Command line](command-line.md) — options, several meters at once, debug output.
 - [Keyboard and mouse](keyboard.md) — shortcuts in the main window and the
   graph, and how to give a command a key of your own.
-- [Troubleshooting](troubleshooting.md) — permission errors, "another instance
-  is running", HID devices.
+- [Troubleshooting](troubleshooting.md) — permission errors, "QtDMM is
+  running already", HID devices.
 
 Press **Shift+F1** in QtDMM and click any control to get a short explanation
 of it right where it is.

@@ -23,13 +23,11 @@ class MeterConnection;
 struct MeterSetup;
 class QProcess;
 class ScpiDevice;
-class SharedStateManager;
 class RecordingStore;
 
 /// The meter session without any user interface: the connection (MeterConnection), the
 /// min/max memory, the alarms, its part in the SCPI server (ScpiDevice in a ServiceHost),
-/// the alarms' programs and the publishing of readings to the other
-/// instances.
+/// and the alarms' programs.
 ///
 /// Views (LCD, analog meter, graph, readings table) and the window hang off
 /// its signals; none of them talks to another. Whatever needs a question to
@@ -49,8 +47,7 @@ public:
   /// The recorder: the readings feed it from here on, views (the graph)
   /// show it. SCPI learns when it starts or stops.
   RecordingStore *recorder() const { return m_recorder; }
-  /// Whether a start nobody clicked (an alarm, SCPI, another instance's
-  /// RECORD_) may begin a recording: not while one runs - it goes on
+  /// Whether a start nobody clicked (an alarm, SCPI) may begin a recording: not while one runs - it goes on
   /// instead of starting afresh - and not over one viewed and not saved
   /// yet, which nobody could be asked about. False says why in @p why.
   bool        mayStartRecording(QString *why = nullptr) const;
@@ -77,11 +74,6 @@ public:
   void        setDisplayCounts(int counts) { m_adapter.setCounts(counts); }
   /// How many values the meter has (DMMInfo::valueCount()): the SCPI channels.
   void        setValueCount(int count);
-  /// Readings are published to the other instances through @p mgr.
-  void        setStateManager(SharedStateManager *mgr);
-  /// A meter without a window: QTDMM:INSTances? lists the instances of
-  /// @p mgr, nothing is published.
-  void        setInstanceList(SharedStateManager *mgr) { m_instanceList = mgr; }
   /// This instance's id (--config-id), part of the mDNS name.
   void        setInstanceId(const QString &id);
   /// Which of "My devices" the meter is (DMM/my-device) and its name, both
@@ -93,6 +85,8 @@ public:
   /// The last reading of the main value (a calculated value's input), an
   /// empty Reading before the first.
   const Reading &lastReading() const { return m_lastMain; }
+  /// The entry of My devices setDevice() gave, empty for none.
+  QString     deviceId() const { return m_deviceId; }
   /// The name setDevice() gave, empty for none.
   QString     deviceName() const { return m_deviceName; }
   /// The configured meter's name, for SCPI *IDN? and mDNS.
@@ -229,7 +223,7 @@ private:
   /// valueMinMaxChanged() with the memory of value @p id as it is.
   void        emitValueMinMax(int id);
   void        responseSLOT(const DmmDecoder::DmmResponse &response);
-  /// One value as the views get it: min/max, alarms, the other instances, SCPI.
+  /// One value as the views get it: min/max, alarms, SCPI.
   void        publish(const Reading &in);
   void        onAlarmRaised(int index, const Alarm &alarm, double value);
   void        updateBanner();
@@ -254,8 +248,6 @@ private:
   QProcess           *m_external;     ///< an alarm's program that wanted the port: one at a time
   bool                m_reopenAfter = false;   ///< it closed an open port: open it again when it ends
   bool                m_externalPending = false;   ///< planned, not started yet
-  SharedStateManager *m_stateMgr = nullptr;
-  SharedStateManager *m_instanceList = nullptr;   ///< QTDMM:INSTances?: m_stateMgr, or the window's
   QString             m_instanceId = "default";
   QString             m_deviceId;
   QString             m_deviceName;

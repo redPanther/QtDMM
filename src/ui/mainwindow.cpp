@@ -40,7 +40,6 @@
 #include "device/transport.h"
 #include "device/transports/serial.h"
 #include "core/devicelibrary.h"
-#include "core/instances.h"
 #include "core/sampletypes.h"
 #include "core/siprefix.h"
 #include "ui/instancewidget.h"
@@ -139,13 +138,10 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   , m_running(false)
   , m_menu(nullptr)
   , m_helpDlg(nullptr)
-  , m_localRecord(true)
 {
   setupUi(this);
   setupIcons();
   m_configId = parser.value("config-id");
-
-  m_stateMgr = new SharedStateManager(m_configId.isEmpty()?"default":m_configId,this);
 
   QWidget* spacer = new QWidget();
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -155,7 +151,6 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   // those opened without a window (--also, SCPI QTDMM:DEVice:OPEN)
   m_session = new DeviceSession(this);
   m_session->setInstanceId(m_configId.isEmpty() ? QString("default") : m_configId);
-  m_session->setStateManager(m_stateMgr);
   m_wid = new InstanceWidget(m_configId, parser.value("config-dir"), m_session, this);
   m_session->setConfigDir(m_wid->settings()->configDir());
   m_session->setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
@@ -207,12 +202,11 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
 
   createStatusBar();
   placeWindow();
-  connectInstances();
 
   // auto-connect at start, but not before a meter was ever chosen: a fresh
-  // instance would otherwise try the first serial port it finds; without
+  // window would otherwise try the first serial port it finds; without
   // one the window starts empty
-  if (m_stateMgr->registerInstance() && m_wid->dmmConfigured())
+  if (m_wid->dmmConfigured())
     QTimer::singleShot(1000, action_Connect, &QAction::trigger);
   updateEmptyStart();
   connect(m_wid, &InstanceWidget::configChanged, this, &MainWindow::updateEmptyStart);
@@ -305,7 +299,6 @@ void MainWindow::createViews()
   // no cell bigger than the instruments can fill
   m_arranger->setContentAspect(m_displayWin, LcdWidget::kMinAspect, LcdWidget::kMaxAspect);
   m_arranger->setContentAspect(m_meterWin, AnalogMeter::kMinAspect, AnalogMeter::kMaxAspect);
-  m_wid->setStateManager(m_stateMgr);
 
   m_graphWin = addView(m_wid, tr("Graph"), MdiArranger::Graph, "graph");
   // the drawing clock of the views; 0 = off, the graph moves with each reading only
@@ -371,7 +364,7 @@ void MainWindow::createViews()
   m_poincareAction->setObjectName("action_WindowPoincare");
 }
 
-// The sidebar Devices: My devices, the instances, the services.
+// The sidebar Devices: My devices, the open devices, the services.
 void MainWindow::createSidebar()
 {
   // the sidebar "Devices" at the left: My devices, a click switches
@@ -388,7 +381,7 @@ void MainWindow::createSidebar()
   m_sidebarAction->setCheckable(true);
   m_sidebarAction->setShortcut(QKeySequence("F9"));   // as the sidebars of KDE's file managers
   QAction *sidebar = m_sidebarAction;
-  sidebar->setToolTip(tr("Devices: show or hide the sidebar with My devices and the instances"));
+  sidebar->setToolTip(tr("Devices: show or hide the sidebar with My devices and the open devices"));
   addAction(sidebar);   // F9 also with the toolbar hidden
   sidebar->setWhatsThis(tr("<html><head/><body><p><span style=\" font-weight:600;\">Devices</span></p>"
                            "<p>The sidebar with My devices: click one to switch to it, its context menu has its "
@@ -412,10 +405,13 @@ void MainWindow::createSidebar()
   {
     statusBar()->showMessage(text, 5000);
   });
-  connect(m_sidebar, &DeviceSidebar::newWindowRequested, this, &MainWindow::openInNewWindow);
-  connect(m_sidebar, &DeviceSidebar::instanceRequested, this, &MainWindow::openInstance);
-  connect(m_sidebar, &DeviceSidebar::renameInstanceRequested, this, &MainWindow::renameInstance);
-  connect(m_sidebar, &DeviceSidebar::deleteInstanceRequested, this, &MainWindow::deleteInstance);
+  connect(m_sidebar, &DeviceSidebar::openBesideRequested, this, &MainWindow::openBeside);
+  connect(m_sidebar, &DeviceSidebar::closeRequested, this, [this](const QString &id)
+  {
+    m_session->close(id);
+  });
+  connect(m_session, &DeviceSession::opened, this, &MainWindow::updateOpenDevices);
+  connect(m_session, &DeviceSession::closed, this, &MainWindow::updateOpenDevices);
   connect(m_sidebar, &DeviceSidebar::addDeviceRequested, this, &MainWindow::addDevice);
   connect(m_sidebar, &DeviceSidebar::serviceSettingsRequested, m_wid, &InstanceWidget::configScpiSLOT);
   connect(m_sidebar, &DeviceSidebar::workspaceRequested, this, &MainWindow::loadWorkspaceFile);
@@ -425,10 +421,10 @@ void MainWindow::createSidebar()
     updateRecentWorkspaces();
   });
   // the readings of the others change all the time
-  m_instancesTimer = new QTimer(this);
-  m_instancesTimer->setInterval(1000);
-  connect(m_instancesTimer, &QTimer::timeout, this, &MainWindow::updateInstances);
-  m_instancesTimer->start();
+  m_openTimer = new QTimer(this);
+  m_openTimer->setInterval(1000);
+  connect(m_openTimer, &QTimer::timeout, this, &MainWindow::updateOpenDevices);
+  m_openTimer->start();
 }
 
 // Add device, Devices and the views on the toolbar.
@@ -519,7 +515,7 @@ QList<QAction *> MainWindow::createArrangeMenu()
                           "the arrangement, title bars, toolbar, design and the size of the main window.</p>"
                           "</body></html>"));
   connect(loadWs, &QAction::triggered, this, &MainWindow::loadWorkspace);
-  // filled from the file each time: another instance may have added one
+  // filled from the file each time: another QtDMM may have added one
   m_recentMenu = m_arrangeMenu->addMenu(QIcon::fromTheme("document-open-recent"), tr("&Recent workspaces"));
   m_recentMenu->setObjectName("menu_RecentWorkspaces");
   connect(m_recentMenu, &QMenu::aboutToShow, this, &MainWindow::updateRecentWorkspaces);
@@ -695,49 +691,6 @@ void MainWindow::placeWindow()
   m_expectSize = size();
 }
 
-// The commands of the other instances (record, stop, raise).
-void MainWindow::connectInstances()
-{
-  connect(m_stateMgr, &SharedStateManager::stateChanged, this, [=](const QString& state){
-    // RECORD_<ms> / STOP_<ms>: a command is new each time - a plain "RECORD"
-    // after a recording that ended without Stop (its length, another
-    // device) was the same state again, and no instance started
-    if (state.startsWith("RECORD_"))
-    {
-      // another instance's start: nobody here to ask (review R9-01) - a
-      // recording running goes on, one not saved stays
-      QString why;
-      if (state != m_ownRecord && !m_wid->controller()->mayStartRecording(&why))
-      {
-        m_info->setText(tr("Another instance: %1").arg(why));
-        return;
-      }
-      m_wid->startSLOT();
-      m_localRecord = false;
-    }
-    else if (state.startsWith("STOP_"))
-    {
-      // the others stop too, without sending a STOP of their own
-      if (!m_localRecord)
-      {
-        m_remoteStop = true;
-        action_Stop->trigger();
-        m_remoteStop = false;
-      }
-    }
-    else if (state == "RAISE_"+(m_configId.isEmpty()?"default":m_configId))
-    {
-      bringMainWindowToFront();
-      m_stateMgr->writeState("IDLE");
-    }
-  });
-
-  connect(m_stateMgr, &SharedStateManager::instanceIdAlreadyInUse, this, [=](){
-    QMessageBox::critical(this, APP_NAME,tr("Another instance is running."));
-    qApp->quit();
-  });
-}
-
 void MainWindow::updateEmptyStart()
 {
   const bool empty = !m_wid->dmmConfigured();
@@ -754,7 +707,7 @@ void MainWindow::addDevice()
   AddDeviceDlg dlg(m_wid->devices(), this);
   dlg.setPorts(Transport::availablePorts() + m_wid->settings()->customPorts());
   dlg.setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
-  dlg.setStateManager(m_stateMgr);
+  dlg.setCalcInputs(m_session->calcInputs());
   dlg.setPlacesInUse(placesInUse());
   if (m_wid->dmmConfigured())
     dlg.setCurrentDevice(m_wid->dmmTitle());
@@ -774,8 +727,8 @@ void MainWindow::addDevice()
     m_wid->devices()->update(id, keys);
     m_wid->devices()->rename(id, dlg.name());
   }
-  if (dlg.target() == AddDeviceDlg::NewWindow)
-    openInNewWindow(id);
+  if (dlg.target() == AddDeviceDlg::Beside)
+    openBeside(id);
   else
     m_wid->switchDevice(id);
   // the second device: from now on there is a choice
@@ -786,32 +739,35 @@ void MainWindow::addDevice()
   }
 }
 
-QMap<QString, QString> MainWindow::placeOwners() const
+QMap<QString, const MeterController *> MainWindow::placeOwners() const
 {
-  QMap<QString, QString> owners;
-  for (const QString &instance : m_stateMgr->instances())
+  QMap<QString, const MeterController *> owners;
+  auto add = [&owners](const QVariantMap &keys, const MeterController *ctl)
   {
-    const bool here = instance == m_stateMgr->id();
-    const Settings other(instance == QLatin1String("default") ? QString() : instance, m_wid->settings()->configDir());
-    const QString place = DeviceLibrary::place(here ? m_wid->settings()->meterKeys() : other.meterKeys());
-    // a formula is no port: any number of windows may compute it
+    // a formula is no port: any number of meters may compute it
+    const QString place = DeviceLibrary::place(keys);
     if (!place.isEmpty() && !place.startsWith(QLatin1String("calc ")))
-      owners.insert(place, instance);
-  }
+      owners.insert(place, ctl);
+  };
+  add(m_wid->settings()->meterKeys(), m_wid->controller());
+  for (const MeterController *ctl : m_session->controllers())
+    if (ctl != m_wid->controller())
+      if (const std::optional<MyDevice> device = m_wid->devices()->find(ctl->deviceId()))
+        add(device->keys, ctl);
   return owners;
 }
 
 QMap<QString, QString> MainWindow::placesInUse() const
 {
   QMap<QString, QString> inUse;
-  const QMap<QString, QString> owners = placeOwners();
+  const QMap<QString, const MeterController *> owners = placeOwners();
   for (auto it = owners.constBegin(); it != owners.constEnd(); ++it)
-    inUse.insert(it.key(), it.value() == m_stateMgr->id() ? tr("In use here")
-                                                          : tr("In use by the instance %1").arg(it.value()));
+    inUse.insert(it.key(), it.value() == m_wid->controller() ? tr("In use here")
+                                                             : tr("Open beside: %1").arg(it.value()->deviceName()));
   return inUse;
 }
 
-// "QtDMM: UNI-T UT61E", with the instance id for non-default instances
+// "QtDMM: UNI-T UT61E", with the --config-id when one is given
 void MainWindow::updateWindowTitle()
 {
   QString title = APP_NAME;
@@ -819,12 +775,6 @@ void MainWindow::updateWindowTitle()
     title += QString(" [%1]").arg(m_configId);
   setWindowTitle(QString("%1: %2").arg(title, m_wid->dmmTitle()));
 }
-
-void MainWindow::sendStateSLOT(const QString & state)
-{
-  m_stateMgr->writeState(state);
-}
-
 
 void MainWindow::setConsoleLogging(bool on)
 {
@@ -868,7 +818,6 @@ void MainWindow::createActions()
       action_Start->trigger();
   });
   connect(action_Stop, &QAction::triggered, m_wid, &InstanceWidget::stopSLOT);
-  connect(action_Stop, &QAction::triggered, this, &MainWindow::stopSLOT);
   connect(action_Clear, &QAction::triggered, m_wid, &InstanceWidget::clearSLOT);
   connect(action_Print, &QAction::triggered, m_wid, &InstanceWidget::printSLOT);
   connect(action_Import, &QAction::triggered, m_wid, &InstanceWidget::importSLOT);
@@ -887,8 +836,6 @@ void MainWindow::createActions()
   connect(action_Quit, &QAction::triggered, m_wid, &InstanceWidget::quitSLOT);
   connect(action_Direct_help, &QAction::triggered, m_wid, &InstanceWidget::helpSLOT);
 
-
-  connect(m_stateMgr, &SharedStateManager::instancesChanged, this, &MainWindow::updateInstances);
 
 }
 
@@ -1029,45 +976,8 @@ void MainWindow::startSLOT()
     return;
   if (!m_wid->askRecordingLength())
     return;
-  if (m_stateMgr->instances().count()<=1)
-  {
-    m_wid->startSLOT();
-    m_localRecord = true;
-  }
-  else
-  {
-    QMessageBox question(
-      QMessageBox::Question,
-      tr("Record DMM data"),
-      tr("Multiple instances of QtDMM have been detected.\n"
-         "Please choose which instance should record."),
-      QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    question.button(QMessageBox::Yes)->setText(tr("This instance"));
-    question.button(QMessageBox::No)->setText(tr("All instances"));
-    question.setEscapeButton(QMessageBox::Cancel);
-
-    switch (question.exec())
-    {
-      case QMessageBox::Yes:
-        m_wid->startSLOT();
-        m_localRecord = true;
-        return;
-      case QMessageBox::No:
-        m_ownRecord = "RECORD_" + QString::number(QDateTime::currentMSecsSinceEpoch());
-        m_stateMgr->writeState(m_ownRecord);
-        m_localRecord = false;
-        return;
-    }
-  }
-}
-
-void MainWindow::stopSLOT()
-{
-  qInfo() << "stop" << m_localRecord;
-  if (!m_localRecord && !m_remoteStop)
-    m_stateMgr->writeState("STOP_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
-  m_localRecord = false;
-
+  // the meters open beside it follow (DeviceSession)
+  m_wid->startSLOT();
 }
 
 void MainWindow::runningSLOT(bool on)
@@ -1372,7 +1282,7 @@ void MainWindow::showSidebar(bool show)
 {
   m_sidebarDock->setVisible(show);
   m_sidebarAction->setChecked(show);
-  updateInstances();
+  updateOpenDevices();
 }
 
 void MainWindow::updateServices()
@@ -1404,54 +1314,35 @@ void MainWindow::updateServices()
   m_sidebar->setServices(rows);
 }
 
-void MainWindow::updateInstances()
+void MainWindow::updateOpenDevices()
 {
   if (!m_sidebarDock->isVisible())
     return;
-  const QString own = m_stateMgr->id();
-  const QStringList running = m_stateMgr->instances();
-  QStringList ids = m_wid->settings()->getConfigInstances();
-  for (const QString &id : running)
-    if (!ids.contains(id))
-      ids << id;
-  const auto readings = m_stateMgr->readings();
   const qint64 now = QDateTime::currentMSecsSinceEpoch();
-  QList<DeviceSidebar::Instance> rows;
-  for (const QString &id : ids)
+  const QString own = m_wid->controller()->source();
+  QList<DeviceSidebar::OpenDevice> rows;
+  for (const MeterController *ctl : m_session->controllers())
   {
-    DeviceSidebar::Instance row;
-    row.id = id;
-    row.running = id == own || running.contains(id);
-    // its device: the entry of My devices, else the model or the formula
-    const Settings other(id == QLatin1String("default") ? QString() : id, m_wid->settings()->configDir());
-    const QVariantMap keys = id == own ? m_wid->settings()->meterKeys() : other.meterKeys();
-    const std::optional<MyDevice> device = m_wid->devices()->find(keys.value("DMM/my-device").toString());
-    const QString model = keys.value("DMM/model").toString();
-    if (device)
-      row.device = device->name;
-    else if (!keys.value("DMM/calc-expression").toString().isEmpty())
-      row.device = "= " + keys.value("DMM/calc-expression").toString();
-    else if (model != QLatin1String("Manual"))
-      row.device = model;
-    // its reading as the old instances dialog showed it
-    if (readings.contains(id) && row.running)
+    DeviceSidebar::OpenDevice row;
+    const bool here = ctl == m_wid->controller();
+    row.id = here ? own : ctl->deviceId();
+    // the window's by its name in My devices too, else its model
+    row.name = here && ctl->deviceName().isEmpty() ? m_wid->dmmTitle() : ctl->deviceName();
+    const Reading &r = ctl->lastReading();
+    if (r.msecs > 0)
     {
-      const SharedStateManager::Reading &r = readings[id];
-      if (r.valid)
+      if (r.overload)
+        row.value = QStringLiteral("OL");
+      else if (!r.noNumber())
       {
         QString prefix;
-        const QString value = SiPrefix::format(r.value, r.unit, &prefix);
-        row.value = QString("%1 %2%3 %4").arg(value.left(8), prefix, r.unit,
-                                              couplingText(PortKey::fromString(r.port).defining)).trimmed();
+        const QString value = SiPrefix::format(r.value, r.baseUnit, &prefix);
+        row.value = QString("%1 %2%3 %4").arg(value.left(8), prefix, r.baseUnit, couplingText(r.port.defining)).trimmed();
       }
-      else
-        row.value = QStringLiteral("OL");
       row.active = now - r.msecs < 3000;
     }
-    else if (!row.running)
-      row.value = tr("stopped");
     // this window's values, with what the graph shows
-    if (id == own)
+    if (here)
       for (int value = 0; value < m_wid->numValues(); ++value)
       {
         const QString text = m_wid->valueText(value);
@@ -1462,7 +1353,7 @@ void MainWindow::updateInstances()
       }
     rows << row;
   }
-  m_sidebar->setInstances(rows, own);
+  m_sidebar->setOpenDevices(rows, own);
 }
 
 void MainWindow::valueMenu(int id, const QPoint &globalPos)
@@ -1478,54 +1369,7 @@ void MainWindow::valueMenu(int id, const QPoint &globalPos)
     action->setChecked(true);
   });
   menu.exec(globalPos);
-  updateInstances();
-}
-
-void MainWindow::openInstance(const QString &id)
-{
-  if (m_stateMgr->instances().contains(id))
-  {
-    m_stateMgr->writeState("RAISE_" + id);
-    return;
-  }
-  QStringList args;
-  if (id != QLatin1String("default"))
-    args << "--config-id" << id;
-  if (!m_wid->configPath().isEmpty())
-    args << "--config-dir" << m_wid->configPath();
-  QProcess::startDetached(QCoreApplication::applicationFilePath(), args);
-  statusBar()->showMessage(tr("The instance %1 starts").arg(id), 4000);
-}
-
-void MainWindow::renameInstance(const QString &from, const QString &to)
-{
-  QString error;
-  const QStringList changed = Instances::rename(*m_wid->settings(), m_wid->devices(), from, to, &error);
-  if (!error.isEmpty())
-  {
-    QMessageBox::warning(this, tr("Rename instance"), error);
-    return;
-  }
-  m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
-  updateInstances();
-  // the running ones still compute with the formula they started with
-  QStringList runningChanged;
-  for (const QString &id : changed)
-    if (m_stateMgr->instances().contains(id))
-      runningChanged << id;
-  if (!runningChanged.isEmpty())
-    QMessageBox::information(this, tr("Rename instance"),
-                             tr("The formulas now use \"%1\". The running instances %2 use it after a restart.")
-                               .arg(to, runningChanged.join(", ")));
-}
-
-void MainWindow::deleteInstance(const QString &id)
-{
-  if (m_stateMgr->instances().contains(id) || id == QLatin1String("default"))
-    return;
-  m_wid->settings()->deleteConfig(id);
-  m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
-  updateInstances();
+  updateOpenDevices();
 }
 
 void MainWindow::deviceSettings(const QString &id, bool settingsTab)
@@ -1536,7 +1380,7 @@ void MainWindow::deviceSettings(const QString &id, bool settingsTab)
   DeviceSettingsDlg dlg(device->name, this);
   dlg.settings()->setPorts(Transport::availablePorts() + m_wid->settings()->customPorts());
   dlg.settings()->setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
-  dlg.settings()->setStateManager(m_stateMgr);
+  dlg.settings()->setCalcInputs(m_session->calcInputs());
   dlg.load(device->keys);
   dlg.setStatus([this, id] { return deviceStatus(id); });
   if (settingsTab)
@@ -1572,9 +1416,10 @@ QString MainWindow::deviceStatus(const QString &id) const
   auto para = [](const QString &text) { return QString("<p>%1</p>").arg(text.toHtmlEscaped()); };
   if (id != m_wid->currentDevice())
   {
-    const QString owner = placeOwners().value(DeviceLibrary::place(device->keys));
-    return para(owner.isEmpty() ? tr("Not in use. A click on it in My devices takes it into this window.")
-                                : tr("In use in the instance %1.").arg(owner));
+    const MeterController *owner = placeOwners().value(DeviceLibrary::place(device->keys));
+    return para(!owner                         ? tr("Not in use. A click on it in My devices takes it into this window.")
+                : owner == m_wid->controller() ? tr("Its port is in use in this window.")
+                                               : tr("Open beside this window's device."));
   }
   QString state;
   const qint64 ago = m_lastReadingAt > 0 ? (QDateTime::currentMSecsSinceEpoch() - m_lastReadingAt) / 1000 : -1;
@@ -1603,27 +1448,29 @@ QString MainWindow::deviceStatus(const QString &id) const
   return html;
 }
 
-void MainWindow::openInNewWindow(const QString &id)
+void MainWindow::openBeside(const QString &id)
 {
   const std::optional<MyDevice> device = m_wid->devices()->find(id);
   if (!device)
     return;
-  // one port, one reader: the window that has it comes to the front
-  const QString owner = placeOwners().value(DeviceLibrary::place(device->keys));
-  if (owner == m_stateMgr->id())
+  // one port, one reader
+  const MeterController *owner = placeOwners().value(DeviceLibrary::place(device->keys));
+  if (id == m_wid->currentDevice() || owner == m_wid->controller())
   {
     statusBar()->showMessage(tr("%1 is in use in this window").arg(device->name), 4000);
     return;
   }
-  if (!owner.isEmpty())
+  if (owner)
   {
-    m_stateMgr->writeState("RAISE_" + owner);
-    statusBar()->showMessage(tr("%1 is in use by the instance %2").arg(device->name, owner), 4000);
+    statusBar()->showMessage(tr("%1 is open already").arg(device->name), 4000);
     return;
   }
-  const QString instance = m_wid->openInNewWindow(id);
-  m_stateMgr->writeState("UPDATE_INSTANCES_" + QString::number(QDateTime::currentMSecsSinceEpoch()));
-  statusBar()->showMessage(tr("%1 opens in the new window %2").arg(device->name, instance), 4000);
+  QString error;
+  if (m_session->open(id, &error))
+    statusBar()->showMessage(tr("%1 opened beside this window's device").arg(device->name), 4000);
+  // one that does not connect said why in the status bar already
+  else if (!error.startsWith("-240,"))
+    m_error->setText(error.section(',', 1));
 }
 
 void MainWindow::syncArrangeActions()

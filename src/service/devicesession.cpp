@@ -13,7 +13,6 @@
 #include "service/metercontroller.h"
 #include "service/scpiserver.h"
 #include "service/servicehost.h"
-#include "service/sharedstatemanager.h"
 
 DeviceSession::DeviceSession(QObject *parent)
   : QObject(parent)
@@ -26,13 +25,6 @@ void DeviceSession::setConfigDir(const QString &dir)
 {
   delete m_library;
   m_library = new DeviceLibrary(dir, this);
-}
-
-void DeviceSession::setStateManager(SharedStateManager *mgr)
-{
-  m_stateMgr = mgr;
-  for (MeterController *ctl : std::as_const(m_opened))
-    ctl->setInstanceList(mgr);
 }
 
 void DeviceSession::adopt(MeterController *ctl)
@@ -135,12 +127,6 @@ CalcDevice::Inputs DeviceSession::calcInputs() const
   return [this]
   {
     QMap<QString, CalcDevice::Input> out;
-    if (m_stateMgr)
-    {
-      const auto readings = m_stateMgr->readings();
-      for (auto it = readings.cbegin(); it != readings.cend(); ++it)
-        out.insert(it.key(), { it->value, it->unit, it->msecs, it->valid });
-    }
     for (const MeterController *ctl : controllers())
     {
       const Reading &r = ctl->lastReading();
@@ -181,7 +167,6 @@ MeterController *DeviceSession::open(const QString &id, const QVariantMap &keys,
   ctl->setFollowsWindow(true);
   ctl->configure(setup);
   ctl->dmm()->setCalcInputs(calcInputs());
-  ctl->setInstanceList(m_stateMgr);
   // its messages to the status bar: a lost connection, a recording stopped
   connect(ctl, &MeterController::error, this, [this, ctl](const QString &text)
   {

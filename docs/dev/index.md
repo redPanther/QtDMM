@@ -8,7 +8,7 @@ Documentation for people working on QtDMM itself. Planned pages:
 - **Architecture** — the path from `Transport` and the `QIODevice` backends
   through `FrameReader` and the `DmmDecoder` subclasses to `MeterConnection`, `InstanceWidget`,
   `LcdWidget` and `GraphWidget`; the `DmmChannel` value contract; the
-  `SharedStateManager` used for multiple instances.
+  `DeviceSession` with the meters of one process.
 - **Adding a protocol** — the `DmmDecoder` subclass, a value in the
   `FrameFormat::DataFormat` enum (before `EndOfList`), one row in the table in
   `src/device/protocols.cpp` (name, combo text, chip, factory - the settings combo,
@@ -78,7 +78,7 @@ screenshot - through the SCPI server.
 
 The headers under `src/` carry Doxygen comments; the class descriptions of
 `MeterConnection`, `Transport`, `FrameReader`, `DmmDecoder`, `InstanceWidget`, `GraphWidget`
-and `SharedStateManager` together describe the architecture. Generate the
+and `DeviceSession` together describe the architecture. Generate the
 HTML with
 
 ```
@@ -173,8 +173,7 @@ the Windows workflow installs `qtconnectivity`, Ubuntu `qt6-connectivity-dev`,
 FreeBSD `qt6-connectivity`). Sound and video need Qt6 Multimedia, optional the
 same way: `QTDMM_WITH_MULTIMEDIA` (`qtmultimedia`, Ubuntu `qt6-multimedia-dev`,
 FreeBSD `qt6-multimedia`). Platform-specific code is limited to the permission
-hint in `src/device/meterconnection.cpp`, the process liveness check in
-`src/service/sharedstatemanager.cpp`, the serial port naming in
+hint in `src/device/meterconnection.cpp`, the serial port naming in
 `src/device/transports/serial.cpp` and the console attach in `src/main.cpp`.
 
 Longer-term idea from the original README: split measuring and recording into

@@ -177,7 +177,7 @@ bool Vxi11Server::registerWithRpcbind()
       const quint16 other = m_rpcbind.getPort(reg.prog, reg.vers);
       if (other != 0 && portAnswers(other))
       {
-        m_error = tr("another program or QtDMM instance offers VXI-11 already (port %1); "
+        m_error = tr("another program or QtDMM offers VXI-11 already (port %1); "
                      "there can be only one per computer").arg(other);
       }
       else if (other != 0)

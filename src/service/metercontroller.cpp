@@ -20,7 +20,6 @@
 #include "recording/recordingstore.h"
 #include "service/scpiserver.h"
 #include "service/servicehost.h"
-#include "service/sharedstatemanager.h"
 #include "core/siprefix.h"
 
 
@@ -143,12 +142,6 @@ MeterController::MeterController(QObject *parent, ServiceHost *host)
 }
 
 MeterController::~MeterController() = default;
-
-void MeterController::setStateManager(SharedStateManager *mgr)
-{
-  m_stateMgr = mgr;
-  m_instanceList = mgr;
-}
 
 void MeterController::setModel(const QString &model)
 {
@@ -357,18 +350,6 @@ void MeterController::publish(const Reading &in)
     {
       m_baseUnit = baseUnit;
       Q_EMIT baseUnitChanged(baseUnit);
-    }
-
-    // let the other instances see this value (calculated values, P = U * I)
-    if (m_stateMgr)
-    {
-      SharedStateManager::Reading r;
-      r.value = dval;
-      r.unit = baseUnit;
-      r.port = rd.port.toString();
-      r.msecs = now;
-      r.valid = !hold && !overload && !rd.noNumber();
-      m_stateMgr->publishReading(r);
     }
   }
 
@@ -601,7 +582,7 @@ void MeterController::updateBanner()
 // ---------------------------------------------------------------- SCPI
 
 // What the QTDMM: and CALCulate queries read: the min/max memory, the
-// recording, the alarms, the meter's keys and the other instances
+// recording, the alarms and the meter's keys
 void MeterController::installScpiSources()
 {
   ScpiServer::Sources s;
@@ -670,28 +651,6 @@ void MeterController::installScpiSources()
   };
   s.keys = [this] { return m_dmm->keys(); };
   s.pressKey = [this](const QString &key) { return pressKey(key); };
-  s.instances = [this]
-  {
-    QList<ScpiServer::Instance> list;
-    if (!m_instanceList)
-      return list;
-    const auto readings = m_instanceList->readings();
-    const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    for (const QString &id : m_instanceList->instances())
-    {
-      ScpiServer::Instance in;
-      in.id = id;
-      const auto it = readings.constFind(id);
-      if (it != readings.constEnd())
-      {
-        in.value = it->value;
-        in.unit = it->unit;
-        in.valid = it->valid && now - it->msecs <= ScpiServer::kStaleMs;
-      }
-      list << in;
-    }
-    return list;
-  };
   s.limitTest = [this] { return m_limitTest; };
   s.setLimitTest = [this](const LimitTest &test) { setLimitTest(test); };
   s.verdict = [this] { return m_verdict; };
