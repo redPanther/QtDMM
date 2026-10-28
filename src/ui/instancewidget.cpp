@@ -235,6 +235,14 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
     applyLimitBands();
   });
   applyLimitBands();
+  // the graph's band: the test of the meter whose value is on its left axis
+  connect(ui_graph, &GraphWidget::leftValueChanged, this, [this](const ValueRef &value)
+  {
+    disconnect(m_graphLimitLink);
+    if (const MeterController *ctl = value.source.isEmpty() ? nullptr : m_session->controller(value.source))
+      m_graphLimitLink = connect(ctl, &MeterController::limitTestChanged, this, &InstanceWidget::applyLimitBands);
+    applyLimitBands();
+  });
   // the analog meter in the colour of an alarm of the meter it shows,
   // blinking if wanted, with that meter's PASS/FAIL band; the banner and the beep stay, the colour is never
   // the only sign
@@ -1062,9 +1070,17 @@ void InstanceWidget::setLimitTest(const LimitTest &test)
 
 void InstanceWidget::applyLimitBands()
 {
-  const LimitTest &test = m_ctl->limitTest();
-  const int id = test.enabled && ownMeter(test.value) ? test.value.id : -1;
-  ui_graph->setLimits(id, test.low(), test.high());
+  // the graph: the test of the meter of its left axis, when it tests that value
+  const ValueRef ref = ui_graph->leftValue();
+  const MeterController *graphCtl = ref.id < 0 ? nullptr : ref.source.isEmpty() ? m_ctl : m_session->controller(ref.source);
+  if (graphCtl && graphCtl->limitTest().enabled
+      && (graphCtl->limitTest().value.source.isEmpty() || graphCtl->limitTest().value.source == graphCtl->source()))
+  {
+    const LimitTest &test = graphCtl->limitTest();
+    ui_graph->setLimits(ValueRef(test.value.id, ref.source), test.low(), test.high());
+  }
+  else
+    ui_graph->setLimits(-1);
   // the analog meter: the test of the meter whose value it shows
   if (const MeterController *ctl = m_meterFeed->controller(); m_meter && ctl)
   {

@@ -726,9 +726,24 @@ void GraphWidget::updateMinimapValue()
 {
   if (!m_minimap)
     return;
-  const int id = minimapValue();
-  m_minimap->setValue(id);
-  m_minimap->setCurveColor(valueColor(id));
+  // another meter's value on the left axis: from its store, on its time
+  if (const int other = referenceId() < 0 ? referenceOther() : -1; other >= 0)
+  {
+    const OtherCurve &c = m_otherCurves[size_t(other)];
+    m_minimapShift = m_store->offsetOf(*c.store);
+    m_minimap->setStore(c.store);
+    m_minimap->setValue(c.value.id);
+    m_minimap->setCurveColor(otherColor(other));
+  }
+  else
+  {
+    const int id = minimapValue();
+    m_minimapShift = 0;
+    m_minimap->setStore(m_store);
+    m_minimap->setValue(id);
+    m_minimap->setCurveColor(valueColor(id));
+  }
+  updateMinimapView();
 }
 
 GraphWidget::ValueAxis GraphWidget::valueSide(int id) const
@@ -816,6 +831,24 @@ int GraphWidget::referenceId() const
   return lowest;
 }
 
+ValueRef GraphWidget::leftValue() const
+{
+  if (const int id = referenceId(); id >= 0)
+    return ValueRef(id);
+  const int other = referenceOther();
+  return other >= 0 ? m_otherCurves[size_t(other)].value : ValueRef(-1);
+}
+
+int GraphWidget::referenceOther() const
+{
+  if (referenceId() >= 0)
+    return -1;
+  for (int i = 0; i < int(m_otherCurves.size()); ++i)
+    if (m_otherCurves[size_t(i)].shown && !m_otherCurves[size_t(i)].right && m_otherCurves[size_t(i)].store)
+      return i;
+  return -1;
+}
+
 QString GraphWidget::leftUnit() const
 {
   // the newest series of the value has the say
@@ -831,6 +864,8 @@ QList<QPointF> GraphWidget::referencePoints() const
   const int id = referenceId();
   if (id == 0)
     return m_curvePts;
+  if (const int other = id < 0 ? referenceOther() : -1; other >= 0)
+    return m_otherCurves[size_t(other)].points;
   // the curves of the value on the left (Hz, then % again: two), in time,
   // a gap between them
   QList<const QList<QPointF> *> parts;

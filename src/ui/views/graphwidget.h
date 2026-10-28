@@ -233,12 +233,13 @@ public:
   /// The alarms' thresholds (base units): the reference line snaps to them.
   /// A line on a threshold that went stays where it is.
   void             setAlarmThresholds(const QList<double> &values);
-  /// The limit test's band (PASS/FAIL) of the value @p id, base units:
+  /// The limit test's band (PASS/FAIL) of the value @p value, base units:
   /// two dashed green lines at @p low and @p high, faintly green between,
-  /// while that value is on the left axis. An id of -1 takes it away; an
-  /// open side (NaN or infinite) has no line, the band reaches the edge.
-  /// The reference line snaps to the lines.
-  void             setLimits(int id, double low = 0, double high = 0);
+  /// while that value is the left axis' (leftValue()). An id of -1
+  /// takes it away; an open side (NaN or infinite) has no line, the band
+  /// reaches the edge. The reference line snaps to the lines.
+  void             setLimits(const ValueRef &value, double low = 0, double high = 0);
+  void             setLimits(int id, double low = 0, double high = 0) { setLimits(ValueRef(id), low, high); }
   /// @name Time cursors
   /// A click into the graph sets cursor A, Shift+click cursor B; both can
   /// be dragged, Esc and the context menu take them away. A alone says the
@@ -331,9 +332,16 @@ public:
   QColor           valueColor(int id) const { return id <= 0 ? dataColor() : extraColor(id); }
   /// The axis value @p id is drawn on, AxisAuto while it is not drawn.
   ValueAxis        valueSide(int id) const;
-  /// The value the overview draws: the one of the left axis (referenceId()),
-  /// with none there the lowest on the right, with none drawn the main value.
+  /// The value of this meter the overview draws: the one of the left axis
+  /// (referenceId()), with none there the lowest on the right, with none
+  /// drawn the main value. Another meter's value on the left axis comes
+  /// before one of this meter's on the right (leftValue()).
   int              minimapValue() const;
+  /// The value of the left axis: this meter's (referenceId()), with none
+  /// of them there the first other meter's curve on it; id -1 with none.
+  /// Reference line, band, cursor levels, the limit band and the overview
+  /// go by it.
+  ValueRef         leftValue() const;
   /// The other values shown (ids > 0).
   QList<int>       shownValues() const;
 
@@ -437,6 +445,8 @@ Q_SIGNALS:
   void             thresholdChanged(GraphWidget::CursorMode, double);
   /// The reference line was dragged or chosen in the context menu.
   void             referenceChanged();
+  /// leftValue() is another one (the limit band to show).
+  void             leftValueChanged(const ValueRef &value);
   /// @name Context menu requests, handled by InstanceWidget
   /// @{
   void             connectDMM(bool);
@@ -766,7 +776,9 @@ protected:
   /// @{
   QGraphicsRectItem *m_limitBand = nullptr;
   QGraphicsLineItem *m_limitLines[2] = { nullptr, nullptr };   ///< low, high
-  int              m_limitId = -1;
+  ValueRef         m_limitValue{ -1 };
+  ValueRef         m_lastReference{ -1 };   ///< for leftValueChanged()
+  qint64           m_minimapShift = 0;      ///< where the overview's store begins on this one's time (ms)
   double           m_limitLow = 0;
   double           m_limitHigh = 0;
   void             updateLimitBand();
@@ -786,14 +798,23 @@ protected:
   /// Places the lines and the text anew.
   void             updateTimeCursors();
   /// The value of @p series that holds at @p t; NaN in a gap, outside or
-  /// without a series.
-  double           valueAt(const RecordingSeries *series, qint64 t) const;
+  /// without a series. @p store: the one it belongs to, null this one.
+  double           valueAt(const RecordingSeries *series, qint64 t, const RecordingStore *store = nullptr) const;
   /// The series of value @p id (> 0) drawn that holds at @p t (Hz, then %:
   /// the one of the time), with @p leftOnly one on the left axis; -1 with none.
   int              drawnExtra(int id, qint64 t, bool leftOnly) const;
-  /// The series of referenceId() at @p t, nullptr with none.
-  const RecordingSeries *referenceSeries(qint64 t) const;
-  /// The points of referenceId()'s curve as drawn, for the band.
+  /// The series of leftValue() at @p t, its store and where that
+  /// store's time 0 lies on this one's (ms); no series with none.
+  struct RefSeries
+  {
+    const RecordingStore *store = nullptr;
+    const RecordingSeries *series = nullptr;
+    qint64 shift = 0;
+  };
+  RefSeries        refSeries(qint64 t) const;
+  /// The curve of another meter that is leftValue(), -1 with none.
+  int              referenceOther() const;
+  /// The points of leftValue()'s curve as drawn, for the band.
   QList<QPointF>   referencePoints() const;
   /// @}
   QColor           m_defaultAxisLine;   ///< the chart's own axis line colour

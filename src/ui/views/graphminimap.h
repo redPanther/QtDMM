@@ -50,6 +50,8 @@ public:
 
   explicit GraphMinimap(QWidget *parent = nullptr);
 
+  /// The store it draws (the graph's, or another meter's whose value is
+  /// on the left axis); the same one again changes nothing.
   void             setStore(RecordingStore *store);
   /// The window the graph shows, in ms since the start of the recording.
   void             setView(qint64 start, qint64 width);
