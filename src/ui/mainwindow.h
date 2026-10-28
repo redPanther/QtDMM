@@ -35,6 +35,7 @@
 #include "core/recentfiles.h"
 #include "core/valueref.h"
 #include "ui/devicesidebar.h"
+#include "ui/valuemenu.h"
 
 class InstanceWidget;
 class DeviceSession;
@@ -315,6 +316,10 @@ protected:
   /// Shows or hides @p value in the table; another meter's first value
   /// shown brings it in (its other values hidden), its last one hidden takes it out.
   void        setTableShown(const ValueRef &value, bool shown);
+  /// "Sources..." of a view: the values of the open meters it shows.
+  void        editSources(ValueMenu::View view);
+  QAction    *m_graphSources = nullptr;   ///< in the graph's menu, with more than one meter
+  QAction    *m_tableSources = nullptr;   ///< in the table's menu, the same
   /// A meter's name by its source, also after it was closed.
   QString     sourceName(const QString &source) const;
   /// @}
