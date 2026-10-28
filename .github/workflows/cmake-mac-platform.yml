@@ -20,6 +20,10 @@ on:
         type: boolean
         default: false
 
+# the token reads the repository only; release.yml publishes
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: macos-latest

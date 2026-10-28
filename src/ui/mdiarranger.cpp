@@ -576,7 +576,7 @@ MdiArranger::Node MdiArranger::ruleTree(const QRect &area, const QList<Role> &ro
   };
   std::vector<Node> lines;
   for (int l = 0; l < bestLines; ++l)
-    lines.push_back(fittedLine(inst.mid(l * per, per)));
+    lines.push_back(fittedLine(inst.mid(qsizetype(l) * per, per)));
   const Qt::Orientation outer = left ? Qt::Horizontal : Qt::Vertical;
   Node strip = splitNode(outer, std::move(lines));
   if (onlyInst)

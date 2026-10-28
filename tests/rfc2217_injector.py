@@ -7,7 +7,9 @@ import threading
 import time
 import curses
 
-HOST = '0.0.0.0'
+# this computer only; a QtDMM on another one: give the address to listen on
+# as the second argument (e.g. 0.0.0.0, all interfaces)
+HOST = '127.0.0.1'
 PORT = 4000
 SEND_INTERVAL = 0.5  # Sekunden
 
@@ -139,8 +141,11 @@ def run_ui(data, server):
 
 def main():
     if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <json_file>")
+        print(f"Usage: {sys.argv[0]} <json_file> [listen_address]")
         sys.exit(1)
+    if len(sys.argv) > 2:
+        global HOST
+        HOST = sys.argv[2]
 
     data = loadData(sys.argv[1])
     if not data:

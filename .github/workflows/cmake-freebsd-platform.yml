@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "master", "release/**" ]
 
+# the token reads the repository only; release.yml publishes
+permissions:
+  contents: read
+
 jobs:
   build:
     # GitHub has no FreeBSD runner; this boots a FreeBSD VM on the Ubuntu runner
