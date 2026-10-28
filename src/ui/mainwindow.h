@@ -298,6 +298,26 @@ protected:
   QMdiSubWindow *addView(QWidget *view, const QString &title, int role, const QString &name);
   /// The context menu of the sidebar's row of @p value (ValueMenu).
   void        valueMenu(const ValueRef &value, const QPoint &globalPos);
+  /// @name The readings table's meters
+  /// The window's meter always, the meters beside in m_tableOthers too: then
+  /// the table logs the readings of all of them in its own store, in the
+  /// order they come, with the Device column; without them it is the window
+  /// meter's recorder's readings, as always.
+  /// @{
+  QStringList m_tableOthers;   ///< sources ("device:<id>") of other meters in the table
+  QList<QMetaObject::Connection> m_tableLinks;
+  /// The table anew for m_tableOthers: its rows from before, merged by time.
+  void        applyTableSources();
+  /// The readings of the meters in the table to it (the open ones of them).
+  void        connectTableSources();
+  /// The table shows @p value (its meter is in it, the value not hidden).
+  bool        tableShows(const ValueRef &value) const;
+  /// Shows or hides @p value in the table; another meter's first value
+  /// shown brings it in (its other values hidden), its last one hidden takes it out.
+  void        setTableShown(const ValueRef &value, bool shown);
+  /// A meter's name by its source, also after it was closed.
+  QString     sourceName(const QString &source) const;
+  /// @}
   /// The sidebar's row of value @p id of a meter open beside.
   DeviceSidebar::Value otherValueRow(const MeterController *ctl, int id) const;
   /// Fills @p menu for @p value of an open meter (ValueMenu).

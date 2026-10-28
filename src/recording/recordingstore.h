@@ -43,6 +43,7 @@ struct LoggedReading
   int     id = 0;           ///< 0 = main value, 1.. = secondary values
   quint32 alarmArgb = 0;    ///< an alarm raised on this reading (QColor::rgba()), 0 = none
   QString alarmName;
+  QString source;           ///< Reading::source: the meter it came from
 
   bool    hold() const { return flags & SampleFlag::Hold; }
 };
@@ -287,6 +288,8 @@ public:
 public Q_SLOTS:
   /// Adds @p reading to the readings series only (dropped while paused).
   void        logReading(const Reading &reading);
+  /// Adds a row as another store logged it (dropped while paused).
+  void        logRow(const LoggedReading &row);
   /// Empties the readings series.
   void        clearReadings();
   /// A reading from the MeterController: every one goes into the readings

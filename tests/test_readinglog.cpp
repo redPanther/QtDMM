@@ -10,7 +10,9 @@
 #include <QAbstractItemModelTester>
 #include <QApplication>
 #include <QLabel>
+#include <QSignalSpy>
 #include <QTableView>
+#include <QTemporaryDir>
 
 #include "recording/readingsmodel.h"
 #include "core/reading.h"
@@ -334,6 +336,52 @@ int main(int argc, char **argv)
           "value 1 left out: the line is of value 2: " + stats->text());
     model->setValueHidden(0, false);
     check(view->model() == model && view->model()->rowCount() == 6, "all shown: the table on the model again");
+  }
+
+  // several meters: their readings in one table with the Device column, the
+  // window's meter's values by an empty source, the others' by theirs
+  {
+    ReadingsModel multi;
+    QAbstractItemModelTester tester(&multi);
+    multi.setStore(nullptr);
+    QSignalSpy devices(&multi, &ReadingsModel::devicesChanged);
+    multi.setDevices(true, "device:a", [](const QString &source) { return source == "device:a" ? "Sim A" : "Sim B"; });
+    check(devices.size() == 1 && multi.hasDevices(), "Device column on");
+    auto reading = [](double v, const QString &source, int id, int ms)
+    {
+      Reading r;
+      r.value = v;
+      r.text = QString::number(v, 'f', 3);
+      r.unit = "V";
+      r.id = id;
+      r.source = source;
+      r.msecs = QDateTime(QDate(2026, 10, 28), QTime(12, 0)).toMSecsSinceEpoch() + ms;
+      return r;
+    };
+    multi.appendReading(reading(1.5, "device:a", 0, 0));
+    multi.appendReading(reading(2.5, "device:b", 0, 100));
+    multi.appendReading(reading(1.6, "device:a", 0, 200));
+    multi.appendReading(reading(0.3, "device:b", 1, 300));
+    check(multi.rowCount() == 4 && multi.data(multi.index(1, ReadingsModel::Device)).toString() == "Sim B"
+            && multi.data(multi.index(0, ReadingsModel::Device)).toString() == "Sim A",
+          "the meter of each row");
+    check(multi.valueOf(0) == ValueRef(0) && multi.valueOf(3) == ValueRef(1, "device:b"),
+          "the window's by an empty source, the other's by its own");
+    const ReadingsModel::Stats st = multi.stats();
+    check(st.numeric == 2 && qAbs(st.mean - 1.55) < 1e-9, QString("stats of the window's main value only: %1").arg(st.mean));
+    multi.setValueHidden(ValueRef(0, "device:b"), true);
+    check(!multi.rowShown(1) && multi.rowShown(0) && multi.rowShown(3), "another meter's value hidden");
+    const QStringList lines = multi.toText().split('\n', Qt::SkipEmptyParts);
+    check(lines.size() == 4 && lines[0].startsWith("Time\tDevice\t") && lines[2].contains("\tSim A\t"),
+          "copied with the Device column: " + lines.value(0));
+    QTemporaryDir dir;
+    const QString csv = dir.filePath("multi.csv");
+    check(multi.write(csv), "csv written");
+    QFile f(csv);
+    f.open(QIODevice::ReadOnly);
+    check(QString::fromUtf8(f.readLine()).startsWith("device;timestamp;"), "csv with the device first");
+    multi.setDevices(false, "device:a", {});
+    check(!multi.hasDevices() && multi.toText().split('\n').value(0).startsWith("Time\tNo."), "one meter: no Device column");
   }
 
   if (failed == 0)

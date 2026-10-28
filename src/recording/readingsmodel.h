@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
+#include <functional>
+
 #include <QAbstractTableModel>
 #include <QColor>
 #include <QDateTime>
@@ -9,6 +11,7 @@
 #include <QStringList>
 #include <QVector>
 
+#include "core/valueref.h"
 #include "core/sampletypes.h"
 #include "core/reading.h"   // complete for moc: a slot takes it (GCC 16 -Wsfinae-incomplete)
 
@@ -43,7 +46,7 @@ public:
 
   /// Number: which value of the meter (1 the main one), only shown for a
   /// meter with more than one
-  enum Column { Time, Number, Value, Unit, Mode, Range, Hold, Limit, ColumnCount };
+  enum Column { Time, Device, Number, Value, Unit, Mode, Range, Hold, Limit, ColumnCount };
   /// Qt::UserRole on any cell gives the row's dval as double.
   static constexpr int DvalRole = Qt::UserRole;
 
@@ -63,7 +66,18 @@ public:
   /// Shows the readings of @p store (the MeterController's recorder). The
   /// row limit and the pause are the store's: set maxRows() after this. Not
   /// owned; should it be deleted first, the log shows its own empty store again.
+  /// nullptr: its own store, emptied (the readings of several meters, which
+  /// the caller logs into it).
   void setStore(RecordingStore *store);
+  /// The Device column: the rows' meters (LoggedReading::source) by @p name,
+  /// shown while @p on (readings of more than one meter). @p own is the
+  /// window's meter: its values are those of an empty source (ValueRef).
+  void setDevices(bool on, const QString &own, std::function<QString(const QString &source)> name);
+  bool hasDevices() const { return m_devices; }
+  /// The value of row @p row; the window's meter's by an empty source.
+  ValueRef valueOf(int row) const;
+  /// The table shows row @p row: its value is not hidden.
+  bool rowShown(int row) const { return !m_hidden.contains(valueOf(row)); }
   RecordingStore *store() const { return m_store; }
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -97,8 +111,10 @@ public:
 
   /// The values the table leaves out (by Reading::id); copying leaves them
   /// out too, the export and the store keep them.
-  QSet<int> hiddenValues() const { return m_hidden; }
-  void setValueHidden(int id, bool hidden);
+  QSet<ValueRef> hiddenValues() const { return m_hidden; }
+  void setValueHidden(const ValueRef &value, bool hidden);
+  /// The window's meter's value @p id.
+  void setValueHidden(int id, bool hidden) { setValueHidden(ValueRef(id), hidden); }
   /// Whether a value other than the main one has come: the Number column.
   bool hasOtherValues() const { return m_otherValues; }
   /// Whether a reading with a limit test's verdict has come: the Limit column.
@@ -109,6 +125,8 @@ public:
 
 Q_SIGNALS:
   void hiddenValuesChanged();
+  /// The Device column came or went (setDevices()).
+  void devicesChanged(bool on);
   void otherValuesChanged(bool);
   void verdictsChanged(bool);
   void valueNamesChanged();
@@ -143,7 +161,10 @@ private:
   RecordingStore *m_own;     ///< used until setStore(), and after that store is gone
   RecordingStore *m_store;
   bool m_singleDay = true;
-  QSet<int> m_hidden;
+  QSet<ValueRef> m_hidden;
+  bool m_devices = false;   ///< setDevices()
+  QString m_ownSource;
+  std::function<QString(const QString &)> m_deviceName;
   bool m_otherValues = false;
   bool m_verdicts = false;
   QStringList m_names;

@@ -589,7 +589,7 @@ void InstanceWidget::updateValueNames()
 
 bool InstanceWidget::tableValueShown(int id) const
 {
-  return !m_readingLog || !m_readingLog->hiddenValues().contains(id);
+  return !m_readingLog || !m_readingLog->hiddenValues().contains(ValueRef(id));
 }
 
 void InstanceWidget::setTableValueShown(int id, bool shown)

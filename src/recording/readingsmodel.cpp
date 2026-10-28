@@ -64,7 +64,12 @@ void ReadingsModel::connectStore()
 
 void ReadingsModel::setStore(RecordingStore *store)
 {
-  if (!store || store == m_store)
+  if (!store)
+  {
+    store = m_own;
+    m_own->clearReadings();
+  }
+  if (store == m_store)
     return;
   beginResetModel();
   m_store->disconnect(this);
@@ -134,15 +139,31 @@ QString ReadingsModel::modeColumn(int id, const PortKey &port, quint32 flags)
   return (QString::fromLatin1(ordinals[qMin(id, kMaxValues - 1) - 1]) + ' ' + mode).trimmed();
 }
 
-void ReadingsModel::setValueHidden(int id, bool hidden)
+void ReadingsModel::setValueHidden(const ValueRef &value, bool hidden)
 {
-  if (hidden == m_hidden.contains(id))
+  if (hidden == m_hidden.contains(value))
     return;
   if (hidden)
-    m_hidden.insert(id);
+    m_hidden.insert(value);
   else
-    m_hidden.remove(id);
+    m_hidden.remove(value);
   Q_EMIT hiddenValuesChanged();
+}
+
+void ReadingsModel::setDevices(bool on, const QString &own, std::function<QString(const QString &)> name)
+{
+  m_ownSource = own;
+  m_deviceName = std::move(name);
+  if (on == m_devices)
+    return;
+  m_devices = on;
+  Q_EMIT devicesChanged(on);
+}
+
+ValueRef ReadingsModel::valueOf(int row) const
+{
+  const LoggedReading &e = m_store->readingAt(row);
+  return ValueRef(e.id, e.source == m_ownSource ? QString() : e.source);
 }
 
 void ReadingsModel::setValueNames(const QStringList &names)
@@ -224,6 +245,7 @@ QVariant ReadingsModel::data(const QModelIndex &index, int role) const
       const QDateTime when = QDateTime::fromMSecsSinceEpoch(e.when);
       return m_singleDay ? when.toString("HH:mm:ss.zzz") : formatTime(when);
     }
+    case Device: return m_deviceName ? m_deviceName(e.source) : e.source;
     case Number: return e.id + 1;
     case Value: return SiPrefix::withoutLeadingZeros(e.text);   // "000.00" -> "0.00", as the meter shows it
     case Unit:  return SiPrefix::displayText(e.unit);   // "°C", "kΩ" as on the display
@@ -244,6 +266,7 @@ QVariant ReadingsModel::headerData(int section, Qt::Orientation orientation, int
   switch (section)
   {
     case Time:  return tr("Time");
+    case Device: return tr("Device");
     case Number: return tr("No.");
     case Value: return tr("Value");
     case Unit:  return tr("Unit");
@@ -312,17 +335,17 @@ ReadingsModel::Stats ReadingsModel::stats(int id) const
   if (id < 0)
   {
     id = 0;
-    while (m_hidden.contains(id) && id < kMaxValues - 1)
+    while (m_hidden.contains(ValueRef(id)) && id < kMaxValues - 1)
       ++id;
   }
   s.id = id;
   for (int i = 0; i < m_store->readingCount(); ++i)
-    if (m_store->readingAt(i).id == id)
+    if (valueOf(i) == ValueRef(id))
       ++s.count;
   // the function of the value's newest reading: the numbers are over its
   // readings only - a table that holds volts and ohms has no minimum of both
   int newest = m_store->readingCount() - 1;
-  while (newest >= 0 && m_store->readingAt(newest).id != id)
+  while (newest >= 0 && valueOf(newest) != ValueRef(id))
     --newest;
   if (newest < 0)
     return s;
@@ -332,7 +355,7 @@ ReadingsModel::Stats ReadingsModel::stats(int id) const
   for (int i = 0; i <= newest; ++i)
   {
     const LoggedReading &e = m_store->readingAt(i);
-    if (e.id != id || e.text.contains(letters) || !std::isfinite(e.value))   // other values, OL
+    if (valueOf(i) != ValueRef(id) || e.text.contains(letters) || !std::isfinite(e.value))   // other values, OL
       continue;
     if (e.port != port || SiPrefix::split(e.unit).baseUnit != s.unit)
       continue;
@@ -353,7 +376,10 @@ QString ReadingsModel::toText(const QList<int> &rows) const
   QStringList lines;
   QStringList header;
   // the number only when the table shows it
-  auto copied = [this](int c) { return (c != Number || m_otherValues) && (c != Limit || m_verdicts); };
+  auto copied = [this](int c)
+  {
+    return (c != Number || m_otherValues) && (c != Limit || m_verdicts) && (c != Device || m_devices);
+  };
   for (int c = 0; c < ColumnCount; ++c)
     if (copied(c))
       header << headerData(c, Qt::Horizontal, Qt::DisplayRole).toString();
@@ -362,7 +388,7 @@ QString ReadingsModel::toText(const QList<int> &rows) const
   QList<int> which = rows;
   if (which.isEmpty())
     for (int r = 0; r < m_store->readingCount(); ++r)
-      if (!m_hidden.contains(m_store->readingAt(r).id))
+      if (rowShown(r))
         which << r;
   std::sort(which.begin(), which.end());
   for (int r : which)
@@ -394,10 +420,12 @@ bool ReadingsModel::write(const QString &path, QString *error) const
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     return fail(tr("Cannot open file."));
   QTextStream ts(&file);
-  ts << "timestamp;value;unit;mode;range;hold" << (m_verdicts ? ";limit\n" : "\n");
+  ts << (m_devices ? "device;" : "") << "timestamp;value;unit;mode;range;hold" << (m_verdicts ? ";limit\n" : "\n");
   for (int i = 0; i < m_store->readingCount(); ++i)
   {
     const Entry e = entry(i);
+    if (m_devices)
+      ts << data(index(i, Device)).toString() << ';';
     ts << QString("%1;%2;%3;%4;%5;%6")
             .arg(e.when.toString("yyyy-MM-ddTHH:mm:ss,zzz"), SiPrefix::withoutLeadingZeros(e.val), e.unit,
                  modeColumn(e.id, e.port, e.flags), e.range, e.hold ? "1" : "0");
@@ -421,6 +449,8 @@ bool ReadingsModel::writeAny(const QString &path, QString *error) const
   }
   SpreadsheetWriter sheet(tr("Readings"));
   QStringList head{tr("Time"), tr("Value"), tr("Unit"), tr("Mode"), tr("Range"), tr("Hold"), tr("Alarm")};
+  if (m_devices)
+    head.prepend(tr("Device"));
   if (m_verdicts)
     head << tr("Limit");
   sheet.setHeader(head);
@@ -432,6 +462,8 @@ bool ReadingsModel::writeAny(const QString &path, QString *error) const
     const double number = val.toDouble(&numeric);
     QList<QVariant> row{e.when, numeric ? QVariant(number) : QVariant(val), e.unit,
                         modeColumn(e.id, e.port, e.flags), e.range, e.hold ? tr("HOLD") : QString(), e.alarmName};
+    if (m_devices)
+      row.prepend(data(index(i, Device)));
     if (m_verdicts)
       row << LimitTest::verdictText(LimitTest::fromFlags(e.flags));
     sheet.addRow(row);

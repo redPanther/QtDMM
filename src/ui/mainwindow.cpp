@@ -362,6 +362,9 @@ void MainWindow::createViews()
   // a front panel for each meter open beside the window's, also those
   // opened before the window (--also)
   connect(m_session, &DeviceSession::opened, this, &MainWindow::addPanel);
+  // a meter of the table opened again: its readings come in again
+  connect(m_session, &DeviceSession::opened, this, &MainWindow::connectTableSources);
+  connect(m_session, &DeviceSession::closed, this, &MainWindow::connectTableSources);
   connect(m_session, &DeviceSession::closed, this, &MainWindow::removePanel);
   for (MeterController *ctl : m_session->controllers())
     addPanel(ctl);
@@ -1512,6 +1515,100 @@ static QString readingText(const Reading &r)
   return QString("%1 %2%3 %4").arg(value.left(8), prefix, r.baseUnit, couplingText(r.port.defining)).trimmed();
 }
 
+QString MainWindow::sourceName(const QString &source) const
+{
+  const QString id = source.startsWith("device:") ? source.mid(7) : QString();
+  if (const std::optional<MyDevice> device = m_wid->devices()->find(id))
+    return device->name;
+  return source == m_wid->controller()->source() ? m_wid->dmmTitle() : source;
+}
+
+bool MainWindow::tableShows(const ValueRef &value) const
+{
+  const ValueRef ref = m_wid->ownMeter(value) ? ValueRef(value.id) : value;
+  const ReadingsModel *log = m_readings->log();
+  return (ref.source.isEmpty() || m_tableOthers.contains(ref.source)) && !log->hiddenValues().contains(ref);
+}
+
+void MainWindow::setTableShown(const ValueRef &value, bool shown)
+{
+  const ValueRef ref = m_wid->ownMeter(value) ? ValueRef(value.id) : value;
+  ReadingsModel *log = m_readings->log();
+  if (ref.source.isEmpty())
+  {
+    log->setValueHidden(ref, !shown);
+    return;
+  }
+  const MeterController *ctl = m_session->controller(ref.source);
+  const int count = ctl ? ctl->valueCount() : kMaxValues;
+  if (shown && !m_tableOthers.contains(ref.source))
+  {
+    // another meter comes in with this value only
+    for (int id = 0; id < count; ++id)
+      log->setValueHidden(ValueRef(id, ref.source), id != ref.id);
+    m_tableOthers << ref.source;
+    applyTableSources();
+    return;
+  }
+  log->setValueHidden(ref, !shown);
+  // none of its values left: it goes out of the table
+  bool any = false;
+  for (int id = 0; id < count; ++id)
+    any = any || !log->hiddenValues().contains(ValueRef(id, ref.source));
+  if (!any)
+  {
+    for (int id = 0; id < kMaxValues; ++id)
+      log->setValueHidden(ValueRef(id, ref.source), false);
+    m_tableOthers.removeAll(ref.source);
+    applyTableSources();
+  }
+}
+
+void MainWindow::applyTableSources()
+{
+  ReadingsModel *log = m_readings->log();
+  const int rows = log->maxRows();
+  const QString own = m_wid->controller()->source();
+  log->setDevices(!m_tableOthers.isEmpty(), own, [this](const QString &source) { return sourceName(source); });
+  if (m_tableOthers.isEmpty())
+  {
+    // the window's recorder's readings, as always
+    log->setStore(m_wid->controller()->recorder());
+    connectTableSources();
+    return;
+  }
+  // the rows the meters' recorders hold, merged by time, into the table's own store
+  QList<LoggedReading> merged;
+  for (const MeterController *ctl : m_session->controllers())
+    if (ctl == m_wid->controller() || m_tableOthers.contains(ctl->source()))
+      for (int i = 0; i < ctl->recorder()->readingCount(); ++i)
+      {
+        LoggedReading row = ctl->recorder()->readingAt(i);
+        row.source = ctl->source();
+        merged << row;
+      }
+  std::stable_sort(merged.begin(), merged.end(),
+                   [](const LoggedReading &a, const LoggedReading &b) { return a.when < b.when; });
+  log->setStore(nullptr);
+  log->setMaxRows(rows);
+  for (const LoggedReading &row : std::as_const(merged).mid(qMax(qsizetype(0), merged.size() - rows)))
+    log->store()->logRow(row);
+  connectTableSources();
+}
+
+void MainWindow::connectTableSources()
+{
+  for (const QMetaObject::Connection &c : std::as_const(m_tableLinks))
+    disconnect(c);
+  m_tableLinks.clear();
+  if (m_tableOthers.isEmpty())
+    return;   // the window's recorder feeds the table
+  ReadingsModel *log = m_readings->log();
+  for (MeterController *ctl : m_session->controllers())
+    if (ctl == m_wid->controller() || m_tableOthers.contains(ctl->source()))
+      m_tableLinks << connect(ctl, &MeterController::reading, log, &ReadingsModel::appendReading);
+}
+
 DeviceSidebar::Value MainWindow::otherValueRow(const MeterController *ctl, int id) const
 {
   const Reading r = ctl->lastReading(id);
@@ -1587,12 +1684,8 @@ void MainWindow::fillValueMenu(QMenu *menu, const ValueRef &value)
   ValueMenu::Target target;
   target.wid = m_wid;
   target.panel = [this](const QString &source) { return panelOf(m_panelWins.value(source)); };
-  target.tableShown = [this](const ValueRef &v) { return m_wid->ownMeter(v) && m_wid->tableValueShown(v.id); };
-  target.setTableShown = [this](const ValueRef &v, bool on)
-  {
-    if (m_wid->ownMeter(v))
-      m_wid->setTableValueShown(v.id, on);
-  };
+  target.tableShown = [this](const ValueRef &v) { return tableShows(v); };
+  target.setTableShown = [this](const ValueRef &v, bool on) { setTableShown(v, on); };
   target.show = [this](ValueMenu::View view, const QString &source)
   {
     QMdiSubWindow *panel = m_panelWins.value(source);
@@ -1901,11 +1994,17 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
       m_wid->graph()->setValueShown(id, own.contains(id));
     m_wid->graph()->setValueShown(0, get("Windows/graph-main-shown", true).toBool());
   }
-  // the values the readings table leaves out, "1 2"; none at first
+  // the values the readings table leaves out, "1 2", another meter's
+  // "1@device:ab12cd34"; none at first. The other meters in it, by source
   {
     const QStringList hidden = get("Windows/table-hidden-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
-    for (int id = 0; id < kMaxValues; ++id)
-      m_wid->setTableValueShown(id, !hidden.contains(QString::number(id)));
+    ReadingsModel *log = m_readings->log();
+    for (const ValueRef &v : log->hiddenValues())
+      log->setValueHidden(v, false);
+    for (const QString &text : hidden)
+      log->setValueHidden(ValueRef::fromString(text), true);
+    m_tableOthers = get("Windows/table-sources", QString()).toString().split(' ', Qt::SkipEmptyParts);
+    applyTableSources();
   }
   // an unchecked action did not toggle: hide its window explicitly
   for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction, m_poincareAction })
@@ -1968,10 +2067,11 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/graph-shown-values", shown.join(' '));
   set("Windows/graph-main-shown", m_wid->graph()->mainShown());
   QStringList tableHidden;
-  for (int id = 0; id < kMaxValues; ++id)
-    if (!m_wid->tableValueShown(id))
-      tableHidden << QString::number(id);
+  for (const ValueRef &v : m_readings->log()->hiddenValues())
+    tableHidden << v.toString();
+  tableHidden.sort();
   set("Windows/table-hidden-values", tableHidden.join(' '));
+  set("Windows/table-sources", m_tableOthers.join(' '));
   if (m_wid->lcdSecondariesChosen())
   {
     QStringList small;
