@@ -7,6 +7,7 @@
 #include "ui/views/graphwidget.h"
 #include "ui/views/graphwidget_p.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "recording/recordingfile.h"
@@ -189,9 +190,21 @@ void GraphWidget::attachOtherStores()
 
 bool GraphWidget::rebuildOtherCurves()
 {
-  const QString left = leftUnit();
-  bool leftGrew = false;
+  // nothing of the graph's meter on the left: the axis is free, the first
+  // value chosen there gives its unit, else the first one there by itself
+  const bool free = referenceId() < 0;
+  QString left = free ? QString() : leftUnit();
+  QList<int> order;
   for (int i = 0; i < int(m_otherCurves.size()); ++i)
+    order << i;
+  if (free)
+    std::stable_sort(order.begin(), order.end(), [this](int a, int b)
+    {
+      return (otherValueAxis(m_otherCurves[size_t(a)].value) == AxisLeft)
+             > (otherValueAxis(m_otherCurves[size_t(b)].value) == AxisLeft);
+    });
+  bool leftGrew = false;
+  for (int i : std::as_const(order))
   {
     OtherCurve &c = m_otherCurves[size_t(i)];
     c.points.clear();
@@ -222,7 +235,7 @@ bool GraphWidget::rebuildOtherCurves()
     // its axis: the one chosen if its unit fits there, else the left one
     // in its unit, else the right one when free
     const ValueAxis chosen = otherValueAxis(c.value);
-    const bool fitsLeft = c.unit.isEmpty() || c.unit == left;
+    const bool fitsLeft = c.unit.isEmpty() || c.unit == left || (free && left.isEmpty());
     const bool fitsRight = !c.unit.isEmpty() && (m_unit2.isEmpty() || m_unit2 == c.unit);
     if (chosen == AxisLeft ? fitsLeft : chosen == AxisRight ? fitsRight : fitsLeft || fitsRight)
       c.right = chosen == AxisRight || (chosen == AxisAuto && !fitsLeft);
@@ -233,6 +246,8 @@ bool GraphWidget::rebuildOtherCurves()
     }
     if (c.right)
       m_unit2 = c.unit;
+    else if (left.isEmpty())
+      left = c.unit;
     c.shown = true;
     // its time on this store's clock
     const double shift = m_store->offsetOf(*store) / 1000.0;
@@ -383,8 +398,10 @@ void GraphWidget::setBase(RecordingStore *store, const QString &source)
     return;
   const QList<ValueRef> values = this->values();
   QHash<ValueRef, ValueAxis> axes;
+  // the main value's left axis is no choice: another meter's it is free
   for (const ValueRef &v : values)
-    axes.insert(v, valueAxis(v));
+    if (!(isBase(v) && v.id == 0))
+      axes.insert(v, valueAxis(v));
   // all off, then on again with the new meter's split
   makeOtherCurves(m_fileValues);
   m_mainShown = false;

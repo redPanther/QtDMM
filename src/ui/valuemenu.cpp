@@ -89,7 +89,7 @@ void ValueMenu::fill(QMenu *menu, const Target &target, const ValueRef &value)
   {
     const bool off = axis == GraphWidget::AxisAuto;
     // another meter's value without room: the axis chosen for it
-    QAction *a = checkable(curves, text, off ? !shown : (side != GraphWidget::AxisAuto ? side : chosen) == axis);
+    QAction *a = checkable(curves, text, off ? !shown : shown && (side != GraphWidget::AxisAuto ? side : chosen) == axis);
     sides->addAction(a);
     if (graph->isBase(ref) && id == 0 && axis == GraphWidget::AxisRight)
     {

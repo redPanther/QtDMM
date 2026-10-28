@@ -2008,6 +2008,14 @@ int main(int argc, char **argv)
       graph.setLimits(ValueRef(1), 2.5, 3.5);
       check(countBands() == 0, "this meter's value 2: not the left axis' value, no band");
       graph.setLimits(-1);
+      // the left axis free: the other meter's A chosen there takes it, its V gives way
+      graph.setOtherValueAxis(ValueRef(0, "device:b"), GraphWidget::AxisLeft);
+      check(graph.otherCurveShown(0) && !graph.otherCurveOnRight(0) && !graph.otherCurveShown(1)
+              && graph.leftAxisTitle().endsWith("A]"),
+            "main value off: another meter's A chosen on the left is drawn there, " + graph.leftAxisTitle());
+      graph.setOtherValueAxis(ValueRef(0, "device:b"), GraphWidget::AxisAuto);
+      check(graph.otherCurveOnRight(0) && graph.otherCurveShown(1) && !graph.otherCurveOnRight(1),
+            "its A by itself again: on the right, its V on the left");
       graph.setValueShown(0, true);
       check(graph.leftValue() == ValueRef(0) && graph.minimap()->value() == 0, "main value back: its axis, its overview");
     }

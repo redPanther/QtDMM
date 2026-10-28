@@ -439,8 +439,14 @@ void InstanceWidget::followGraphBase()
   MeterController *base = m_graphBase.data();
   if (values.isEmpty() || std::any_of(values.cbegin(), values.cend(), [this](const ValueRef &v) { return ui_graph->isBase(v); }))
     return;
-  if (MeterController *next = m_session->controller(values.first()); next && next != base && next != m_closing)
-    setGraphBase(next);
+  // the first value whose meter is open: one not connected (yet) is none
+  for (const ValueRef &v : values)
+    if (MeterController *next = m_session->controller(v); next && next != m_closing)
+    {
+      if (next != base)
+        setGraphBase(next);
+      return;
+    }
 }
 
 void InstanceWidget::setGraphBase(MeterController *ctl)

@@ -855,8 +855,11 @@ int GraphWidget::referenceOther() const
 
 QString GraphWidget::leftUnit() const
 {
-  // the newest series of the value has the say
+  // the newest series of the value has the say; nothing of this meter on
+  // the left: another meter's value there
   const int id = referenceId();
+  if (const int other = id < 0 ? referenceOther() : -1; other >= 0 && !m_otherCurves[size_t(other)].unit.isEmpty())
+    return m_otherCurves[size_t(other)].unit;
   for (int i = m_store->extraCount() - 1; id > 0 && i >= 0; --i)
     if (m_store->extra(i).id == id && !m_store->extra(i).unit.isEmpty())
       return m_store->extra(i).unit;

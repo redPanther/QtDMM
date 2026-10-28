@@ -96,6 +96,11 @@ int main(int argc, char **argv)
     action(menu, { "&Graph", "&Off" })->trigger();
     check(!wid.graph()->valueShown(ValueRef(0, source)), "off the graph");
     delete menu;
+    menu = menuFor(ValueRef(0, source));
+    check(action(menu, { "&Graph", "&Off" })->isChecked() && !action(menu, { "&Graph", "&Right axis" })->isChecked()
+            && !action(menu, { "&Graph", "&Left axis" })->isChecked(),
+          "off: the menu says off, no axis beside it");
+    delete menu;
   }
   // 3. the analog meter and the Poincaré plot by its ValueRef
   {
