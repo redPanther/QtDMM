@@ -83,6 +83,10 @@ public:
   /// calculated value. A Bluetooth meter that QtDMM connects to (GATT) needs
   /// its address only.
   static QVariantMap entryKeys(const QVariantMap &keys);
+  /// Whether an entry of some meter can keep @p key (entryKeys() for any way
+  /// of connecting): switching to another entry drops such a key of the
+  /// meter before when the new entry has none.
+  static bool isEntryKey(const QString &key);
   /// Where a device is, as one string to compare: "serial <port>" (a
   /// /dev/serial/by-id name and its ttyUSB are the same place while the
   /// cable is plugged in), "hid <vid>:<pid>" (the hidraw number changes when

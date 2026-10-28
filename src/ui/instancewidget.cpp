@@ -652,6 +652,12 @@ void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, cons
   Q_EMIT connectDMM(false);
   connectSLOT(false);
 
+  // exactly the entry's keys: a key of the meter before that this one has
+  // none of would stay, and syncDevice() would write it into this entry
+  const QVariantMap before = m_settings->meterKeys(true);
+  for (auto it = before.cbegin(); it != before.cend(); ++it)
+    if (DeviceLibrary::isEntryKey(it.key()) && !keys.contains(it.key()))
+      m_settings->remove(it.key());
   m_settings->setValues(keys);
   m_settings->setString("DMM/my-device", id);
   m_settings->setBool("DMM/configured", true);

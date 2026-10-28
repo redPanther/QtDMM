@@ -27,6 +27,17 @@ bool ownKey(const QString &key)
 
 std::function<QString(const QString &)> g_modelTransport;
 
+// what entryKeys() keeps, per way of connecting; a simulated meter keeps its DMM/virtual-* keys
+const QStringList kBaseKeys { "DMM/model", "DMM/data-format", "DMM/display", "DMM/number-of-values",
+                              "Port settings/device" };
+const QStringList kBleKeys { "Port settings/ble-address", "Port settings/ble-key", "Port settings/ble-main",
+                             "Port settings/ble-second", "Port settings/ble-third", "Port settings/ble-fourth" };
+const QStringList kSigrokKeys { "Port settings/sigrok-conn", "Port settings/sigrok-options" };
+const QStringList kCalcKeys { "DMM/calc-unit", "DMM/calc-expression" };
+const QStringList kSerialKeys { "Port settings/baud", "Port settings/bits", "Port settings/parity",
+                                "Port settings/stop-bits", "DMM/rts", "DMM/dtr", "DMM/external-setup" };
+const QLatin1String kVirtualPrefix("DMM/virtual-");
+
 // "SERIAL /dev/ttyUSB0" -> "serial"; a port without type is a serial port
 QString deviceType(const QString &device)
 {
@@ -54,36 +65,40 @@ void DeviceLibrary::setModelTransport(std::function<QString(const QString &)> tr
 
 QVariantMap DeviceLibrary::entryKeys(const QVariantMap &keys)
 {
-  QStringList wanted { "DMM/model", "DMM/data-format", "DMM/display", "DMM/number-of-values", "Port settings/device" };
+  QStringList wanted = kBaseKeys;
   const QString device = keys.value("Port settings/device").toString();
   const QString model = keys.value("DMM/model").toString();
   const QString byModel = g_modelTransport ? g_modelTransport(model) : QString();
   const QString type = byModel.isEmpty() ? deviceType(device) : byModel;
   if (type == QLatin1String("ble"))
-    wanted << "Port settings/ble-address" << "Port settings/ble-key" << "Port settings/ble-main"
-           << "Port settings/ble-second" << "Port settings/ble-third" << "Port settings/ble-fourth";
+    wanted << kBleKeys;
   else if (type == QLatin1String("blegatt"))
     wanted << "Port settings/ble-address";
   else if (type == QLatin1String("sigrok"))
-    wanted << "Port settings/sigrok-conn" << "Port settings/sigrok-options";
+    wanted << kSigrokKeys;
   // the simulated meter, "Virtual meter" before 26.2 (DmmDecoder::canonicalModel())
   else if (type == QLatin1String("calc")
            && (model.endsWith(QLatin1String("Simulated meter")) || model.endsWith(QLatin1String("Virtual meter"))))
   {
     for (auto it = keys.cbegin(); it != keys.cend(); ++it)
-      if (it.key().startsWith(QLatin1String("DMM/virtual-")))
+      if (it.key().startsWith(kVirtualPrefix))
         wanted << it.key();
   }
   else if (type == QLatin1String("calc"))
-    wanted << "DMM/calc-unit" << "DMM/calc-expression";
+    wanted << kCalcKeys;
   else
-    wanted << "Port settings/baud" << "Port settings/bits" << "Port settings/parity" << "Port settings/stop-bits"
-           << "DMM/rts" << "DMM/dtr" << "DMM/external-setup";
+    wanted << kSerialKeys;
   QVariantMap out;
   for (const QString &key : wanted)
     if (keys.contains(key))
       out.insert(key, keys.value(key));
   return out;
+}
+
+bool DeviceLibrary::isEntryKey(const QString &key)
+{
+  return kBaseKeys.contains(key) || kBleKeys.contains(key) || kSigrokKeys.contains(key) || kCalcKeys.contains(key)
+         || kSerialKeys.contains(key) || key.startsWith(kVirtualPrefix);
 }
 
 QString DeviceLibrary::place(const QVariantMap &keys)
