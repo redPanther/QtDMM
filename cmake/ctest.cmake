@@ -175,6 +175,9 @@ if (BUILD_TESTING)
 	## front panel's colour, the window's rules moving into its entry
 	qtdmm_add_test(alarm_service test_alarmservice tests/test_alarmservice.cpp)
 	target_link_libraries(test_alarmservice PRIVATE qtdmm_resources)
+	## a window switching between two of My devices takes over exactly the entry's keys
+	qtdmm_add_test(switch_device test_switchdevice tests/test_switchdevice.cpp)
+	target_link_libraries(test_switchdevice PRIVATE qtdmm_resources)
 
 	## XLSX/ODS writer, read back with LibreOffice when installed
 	qtdmm_add_test(spreadsheet test_spreadsheet tests/test_spreadsheet.cpp)
