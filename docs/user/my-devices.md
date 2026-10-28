@@ -66,8 +66,9 @@ window layouts loaded or saved last; a double click loads one (see
 
 For a meter with more than one value (a second display, the CO2,
 temperature and humidity of the TFA AirCO2ntrol, the voltage, current and
-state of charge of a Victron) this window's device has a row for each
-value below it in **Open devices**: its number, its name and its reading. The name is
+state of charge of a Victron) each open device has a row for each
+value below it in **Open devices**: its number, its name and its reading.
+A device with one value has the same menu in its own row, under **Value**. The name is
 the one the meter gives the value (a Victron's *Battery voltage*), else
 unit and coupling (*V DC*); the tooltip has the full one. A
 coloured dot shows that the graph draws it, in the colour of its curve, so
@@ -75,21 +76,30 @@ the rows are the graph's legend as well. This is where you say which window
 shows which value - right-click a value:
 
 - **LCD** ▸ **Main value**, **Secondary value left**, **Secondary value
-  right** - the place on the display: big (the min/max memory follows it)
-  or on the small line below it. The value that had the place goes where
+  right** - the place on the device's front panel: big (the min/max memory
+  follows it) or on the small line below it. The value that had the place goes where
   this one was, or off the display when this one was not on it.
 - **Analog meter** - the value the needle shows (one).
 - **Graph** ▸ **Off**, **Left axis**, **Right axis** - the value's curve
   off or on that axis. A value in the unit the axis has already joins it
   (two voltages on the left, a current on the right); one in another unit
   takes the axis over, and the curves of the old unit there go off - the
-  status line says which. The main value is always on the left.
+  status line says which. The main value is always on the left. A value of
+  a device opened beside joins an axis in its unit; one with no room there
+  is not drawn, and the status line says so.
 - **Poincaré plot** - the value the plot takes (one).
 - **Readings table** - whether the [readings table](readings-table.md)
-  lists it (all values at first).
+  lists it (all values of this window's device at first; another device
+  comes in with the value chosen).
 
 A choice opens the window it is for, also when the toolbar is hidden. The
 choices are kept with the window layout.
+
+With more than one device open, the context menus of the graph, the
+readings table, the analog meter and the Poincaré plot have **Sources...**:
+all open devices with their values, to tick those the view shows - several
+for the graph and the table, one for the analog meter and the Poincaré
+plot. A newly opened device changes nothing by itself.
 
 The context menu of a device:
 

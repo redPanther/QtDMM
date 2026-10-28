@@ -17,6 +17,7 @@ It opens as a window in a column right of the graph; see
 | Column | Content |
 |---|---|
 | Time | when the reading arrived, to the millisecond; the date is added once the rows span more than one day |
+| Device | which open device the row is from - only while the table shows more than one |
 | No. | which value of the meter, 1 the main one - only for a meter with more than one |
 | Value | the value as shown on the meter, `OL` for overload |
 | Unit | with its SI prefix, as on the display (`mV`, `kOhm`) |
@@ -36,6 +37,13 @@ Victron) have 3 and 4. Four rows for each reading are a lot: **Readings
 table** in the menu of a value in the sidebar (see
 [The meter's values](my-devices.md#the-meters-values)) leaves a value out
 of the table and switches it on again. Kept with the window layout.
+
+The table can also list the readings of devices opened beside this
+window's: a value of theirs in the table (its value menu, or **Sources...**
+in the table's context menu) brings the device in. Their rows come in time
+order with this device's, the Device column names each row's device, and
+copying and the export carry it as well (`device;timestamp;...`). The
+statistics line stays with this window's device.
 
 ## Following, keeping, clearing
 
