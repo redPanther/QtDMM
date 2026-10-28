@@ -87,6 +87,9 @@ void ScpiServer::addDevice(ScpiDevice *device)
   if (!device || m_devices.contains(device))
     return;
   m_devices << device;
+  // the first after none: chosen, as at the start
+  if (m_devices.size() == 1)
+    m_selected = 0;
   connect(device, &QObject::destroyed, this, [this] { removeDevice(nullptr); });
 }
 

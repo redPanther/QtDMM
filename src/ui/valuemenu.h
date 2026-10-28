@@ -20,8 +20,8 @@ class InstanceWidget;
 /// value), Graph shown or not and on which axis, Poincaré plot (one value),
 /// Readings table. A choice opens the window it is for.
 ///
-/// The window's meter's values go to InstanceWidget, another meter's to its
-/// FrontPanel and to the views by their ValueRef.
+/// The LCD places go to the meter's FrontPanel, the other views get the
+/// value by its ValueRef (InstanceWidget).
 class ValueMenu
 {
   Q_DECLARE_TR_FUNCTIONS(ValueMenu)

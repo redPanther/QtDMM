@@ -32,6 +32,7 @@
 #include <QCommandLineParser>
 
 #include "ui_uimainwindow.h"
+#include "core/limittest.h"
 #include "core/recentfiles.h"
 #include "core/valueref.h"
 #include "ui/devicesidebar.h"
@@ -52,6 +53,7 @@ class FrontPanel;
 class MdiArranger;
 class QMdiArea;
 class QToolButton;
+class QPushButton;
 class QDockWidget;
 class DeviceSidebar;
 class QMdiSubWindow;
@@ -76,7 +78,7 @@ public:
 protected Q_SLOTS:
   /// Recording state changed; enables/disables Start/Stop.
   void      runningSLOT(bool);
-  /// The Connect action was toggled.
+  /// Record and Start are there while a meter is connected (@p on).
   void      connectSLOT(bool);
   /// Start action: asks about a recording not saved and its length, then records.
   void      startSLOT();
@@ -84,11 +86,9 @@ protected Q_SLOTS:
   void      on_action_Help_triggered();
   /// Shows the popup menu (the window has no menu bar).
   void      on_action_Menu_triggered();
-  /// Checks the Connect action without triggering it.
-  void      setConnectSLOT(bool);
-  /// Shows the display as the settings say.
+  /// Shows the front panels as the settings say.
   void      showDisplaySLOT(bool show);
-  /// The display was shown/hidden: the settings keep it.
+  /// The front panels were shown/hidden: the settings keep it.
   void      storeDisplaySLOT();
   /// Toolbar button style: icons only or icons with text.
   void      setUseTextLabel(bool on);
@@ -106,9 +106,6 @@ protected Q_SLOTS:
   void      toolbarHiddenHint();   ///< after hiding the toolbar by hand: how it comes back (until switched off)
   /// Arrange actions and the title-bar action follow the arranger.
   void      syncArrangeActions();
-  /// The dot of the device in My devices: green while readings come in,
-  /// blinking with them, grey when they stop.
-  void      updateLed();
   /// The arrow of the toolbar button at the end of the status line.
   void      updateToolbarButton();
 
@@ -126,10 +123,10 @@ protected:
 
   DeviceSession     *m_session;   ///< the meters of this process and their network services
   InstanceWidget    *m_wid;
-  FrontPanel *m_panel;   ///< the window's meter's LCD and keys
-  /// @name The front panels of the meters open beside the window's
-  /// One MDI window each (role Instrument), by MeterController::source();
-  /// the window's meter has m_panel. Its X hides it, the meter stays open.
+  /// @name The front panels of the meters connected
+  /// One MDI window each (role Instrument), by MeterController::source().
+  /// Its X hides it, the meter stays connected. Display (Ctrl+1) shows and
+  /// hides them all.
   /// @{
   QMap<QString, QMdiSubWindow *> m_panelWins;
   /// What a workspace said of a panel, by the entry of My devices, until
@@ -143,36 +140,43 @@ protected:
     QString  geometry;   ///< "x y w h" in Free mode
   };
   QMap<QString, PanelState> m_panelStates;
-  /// The entries a workspace had open beside, to open (openPending()).
+  /// The entries a workspace had connected, to open (openPending()).
   QStringList m_pendingOpen;
+  /// The entry of My devices that was the window's meter before 26.4
+  /// (InstanceWidget::takeOldDevice(), WorkspaceFile::windowDevice): the
+  /// next applyWorkspace() connects it first, values without a source are its.
+  QString     m_oldDevice;
   /// The layout tree of the workspace, set again once its panels are there.
   QString     m_pendingLayout;
-  /// A front panel for @p ctl (not the window's), in its state of the workspace.
+  /// A front panel for @p ctl, in its state of the workspace.
   void        addPanel(MeterController *ctl);
   void        removePanel(const QString &source);
   /// The workspace's @p state of a panel on its window @p win.
   void        applyPanelState(QMdiSubWindow *win, const PanelState &state);
-  /// The LCD's look of the window's on @p panel: variant, tint, its meter's
-  /// display (one look for all, [E 28.10.]).
+  /// The LCDs' look on @p panel: variant, tint, its meter's display (one
+  /// look for all, [E 28.10.]).
   void        applyLcdLook(FrontPanel *panel);
-  /// Opens the entries of m_pendingOpen beside (connecting as the window's meter does).
+  /// The LCDs' colours (LcdWidget::LcdVariant) for all panels, stored as Display/lcd.
+  void        setLcdVariant(int variant);
+  int         m_lcdVariant = 0;   ///< LcdWidget::LcdVariant, setLcdVariant()
+  QColor      m_lcdTint;          ///< the Appearance page's tint last applied
+  /// Opens the entries of m_pendingOpen.
   void        openPending();
-  /// The front panel windows, the window's first.
-  QList<QMdiSubWindow *> panelWindows() const;
+  /// The front panel windows.
+  QList<QMdiSubWindow *> panelWindows() const { return m_panelWins.values(); }
+  /// Whether @p win shows an instrument: a front panel or the analog meter.
+  bool        isInstrument(const QMdiSubWindow *win) const;
   /// @name The active device: the meter of the front panel used last
-  /// Connect, Reset min/max and Device settings act on it; the window's
-  /// meter while no panel of another one was used.
+  /// Connect, Reset min/max and Device settings act on it; the first meter
+  /// connected while no panel was used, none without a meter.
   /// @{
-  QPointer<MeterController> m_active;   ///< null: the window's meter
-  bool        m_activeOther = false;    ///< another meter was active (m_active may be gone since)
-  bool        m_windowConnect = false;  ///< Connect of the window's meter while another one is active
+  QPointer<MeterController> m_active;   ///< null: the first meter
   QLabel     *m_activeName = nullptr;   ///< "Active: <name>" in the status bar, with more than one meter
+  QMetaObject::Connection m_limitCountLink;   ///< the active device's limit test count
+  std::function<void(const LimitTest::Count &)> m_showLimitCount;   ///< into the status bar
   MeterController *activeController() const;
   /// Makes @p ctl the active device; Connect shows its state.
   void        setActive(MeterController *ctl);
-  /// The window's meter was connected or disconnected (@p on) by the program:
-  /// Connect shows it while the window's meter is the active one.
-  void        windowConnected(bool on);
   /// @}
   /// The panel in @p win, nullptr for another view.
   static FrontPanel *panelOf(const QMdiSubWindow *win);
@@ -187,12 +191,6 @@ protected:
   QMdiArea   *m_mdi;
   MdiArranger *m_arranger;
   QToolButton *m_toolbarButton = nullptr;   ///< toolbar on/off, at the end of the status line
-  QTimer     *m_ledIdle;
-  bool        m_ledActive = false;
-  bool        m_ledBlink = false;
-  qint64      m_lastReadingAt = 0;   ///< ms since the epoch, the newest main reading
-  bool        m_lowBattery = false;  ///< its low battery annunciator
-  QMdiSubWindow *m_displayWin;
   QMdiSubWindow *m_meterWin;
   QMdiSubWindow *m_graphWin;
   QMdiSubWindow *m_readingsWin;
@@ -207,15 +205,14 @@ protected:
   bool           m_designPending = false;  ///< the desktop switched: setDesign() on its way
   QAction       *m_sidebarAction = nullptr; ///< shows and hides the sidebar
   DeviceSidebar *m_sidebar = nullptr;     ///< "My devices" at the left
-  /// "Settings..." of an entry: its meter's settings; the device in use
-  /// takes them at once (unsaved readings first), unchanged ones change nothing.
+  /// "Settings..." of an entry: its meter's settings; a device connected
+  /// takes them at once (connected anew), unchanged ones change nothing.
   /// Info and settings of the entry @p id, on its Info tab or the Settings tab.
   void        deviceSettings(const QString &id, bool settingsTab = false);
   /// The Info tab's state of the entry @p id: in use where, connected,
   /// the last reading, the values; rich text.
   QString     deviceStatus(const QString &id) const;
-  /// Opens the entry @p id beside this window's device (DeviceSession::open()),
-  /// unless its port is in use.
+  /// Connects the entry @p id (DeviceSession::open()), unless its port is in use.
   void        openBeside(const QString &id);
   void        showSidebar(bool show);
   /// The node "Open devices" anew: the meters of the session with their
@@ -228,15 +225,17 @@ protected:
   /// meter that uses each.
   QMap<QString, const MeterController *> placeOwners() const;
   /// The places (DeviceLibrary::place()) the open devices use, with
-  /// "In use here" / "Open beside: x" for the assistant's cards.
+  /// "Connected: x" for the assistant's cards.
   QMap<QString, QString> placesInUse() const;
-  /// The assistant "Add device": the device into My devices, then into
-  /// this window or beside its device.
+  /// The assistant "Add device": the device into My devices, connected
+  /// unless "Save only".
   void        addDevice();
-  /// The empty start: a window without a meter shows the big button "Add
-  /// device" over the area instead of the views.
+  /// The empty start: without a meter connected (or about to be) the window
+  /// shows the big button "Add device", and "Connect from My devices" when
+  /// it has entries, over the area instead of the views.
   void        updateEmptyStart();
-  QWidget    *m_emptyStart = nullptr;   ///< covers the area, with the button
+  QWidget    *m_emptyStart = nullptr;   ///< covers the area, with the buttons
+  QPushButton *m_emptyConnect = nullptr;   ///< "Connect a device from My devices"
   QAction    *m_arrangeTop;
   QAction    *m_arrangeLeft;
   QAction    *m_arrangeFixed;
@@ -248,10 +247,7 @@ protected:
   QMenu      *m_recentMenu = nullptr;   ///< Arrange > Recent workspaces
   QMenu      *m_designMenu;
   bool        m_restoring = false;   ///< restoreWindows() is setting the actions
-  /// Folds the keys away (Display/controls-hidden), from the fold button
-  /// or "Hide controls" in the display's menu.
-  void        setControlsFolded(bool folded);
-  /// The display window makes room for the keys (FrontPanel::keysHeight()).
+  /// The panel windows make room for the keys (FrontPanel::keysHeight()).
   void        updateControls();
   // Window size (package 26.2, 4a): the window starts at the size its
   // content needs and grows when a view is shown for the first time, up to

@@ -26,7 +26,6 @@
 
 #include "ui/settings/settingsdialog.h"
 #include "ui/settings/settingspageitem.h"
-#include "ui/devicesettings.h"
 #include "ui/settings/alarmprefs.h"
 #include "ui/settings/scpiprefs.h"
 #include "ui/settings/keyboardprefs.h"
@@ -62,11 +61,6 @@ SettingsDialog::SettingsDialog(Settings* settings, QWidget *parent)
   pageShortcut(QKeySequence("Ctrl+PgDown"), 1);
 
   // CREATE PAGES, in the order the list shows them
-
-  // the meter has no page: the assistant and the sidebar set it up; its
-  // fields still turn the keys into the connection
-  m_meter = new DeviceSettings(this);
-  m_meter->hide();
 
   m_general = new GeneralPrefs(ui_stack);
   m_gui = new GuiPrefs(ui_stack);
@@ -195,11 +189,6 @@ void SettingsDialog::showEvent(QShowEvent *event)
     move(r.topLeft());
 }
 
-void SettingsDialog::reloadMeter()
-{
-  m_meter->load(m_settings->meterKeys());
-}
-
 void SettingsDialog::showPage(SettingsDialog::PageType page)
 {
   SettingsPage *wid = nullptr;
@@ -299,7 +288,6 @@ void SettingsDialog::reloadSettings()
     QColorDialog::setCustomColor(i, m_settings->getColor(QString("Custom colors/color_%1").arg(i)));
   for (int i = 0; i < NumItems; ++i)
     page(i)->defaultsSLOT();
-  reloadMeter();
 }
 
 void SettingsDialog::on_ui_buttonBox_rejected()
@@ -414,15 +402,6 @@ void SettingsDialog::thresholdChangedSLOT(GraphWidget::CursorMode mode, double v
 /////////////////////////////////////////////////////////////////
 // INTEGRATION
 //
-
-/////////////////////////////////////////////////////////////////
-// DMM
-//
-
-MeterSetup SettingsDialog::meterSetup() const
-{
-  return MeterSetup::fromKeys(m_meter->keys(), m_settings->getString("Port settings/sigrok_exe", "sigrok-cli"));
-}
 
 /////////////////////////////////////////////////////////////////
 // GRAPH

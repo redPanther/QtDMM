@@ -29,9 +29,6 @@ int main(int argc, char **argv)
   DeviceSession session;
   session.setInstanceId("test");
   session.setConfigDir(dir.path());
-  MeterController window(nullptr, session.host());
-  window.setDevice("w1", "Window meter");
-  session.adopt(&window);
 
   FrontPanel panel(&session);
   panel.show();
@@ -61,9 +58,10 @@ int main(int argc, char **argv)
   check(panel.controller() == nullptr && panel.value().source == "device:" + sim, "closed: no meter, value kept");
   check(!panel.display()->lineValue(0).contains("1.5"), "closed: the last reading gone");
 
-  // 5. the window's meter by an empty source
+  // 5. an empty source: no meter (the window has none of its own)
+  session.open(sim);
   panel.setValue(ValueRef(0));
-  check(panel.controller() == &window, "empty source: the window's meter");
+  check(panel.controller() == nullptr, "empty source: no meter");
 
   if (failed)
   {

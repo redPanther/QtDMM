@@ -400,12 +400,10 @@ public:
   /// setBaseSource()).
   /// @{
   void             setBaseSource(const QString &source) { m_baseSource = source; }
-  /// The meter an empty source means (the window's); none set: the base.
-  void             setOwnSource(const QString &source) { m_ownSource = source; }
-  /// @p value with the meter an empty source means.
+  /// @p value with the meter an empty source means: the base.
   ValueRef         resolved(const ValueRef &value) const
   {
-    return value.source.isEmpty() ? ValueRef(value.id, m_ownSource.isEmpty() ? m_baseSource : m_ownSource) : value;
+    return value.source.isEmpty() ? ValueRef(value.id, m_baseSource) : value;
   }
   /// Another meter's store becomes the graph's (@p source its meter): the
   /// values and their axes stay, its values become the main curve and the
@@ -644,6 +642,7 @@ protected:
   QLabel          *m_stateLabel = nullptr;
   QColor           m_stateColor;          ///< the lettering colour, for View
   QString          m_sourceFile;          ///< the file viewed (importCsvFile()), empty = a recording
+  QString          m_sourceDevice;        ///< the meter of its main value (Recording::device)
   void             updateStateLabel();
   /// @}
   /// The mark lines anew from the store's marks.
@@ -827,7 +826,6 @@ protected:
   QGraphicsLineItem *m_limitLines[2] = { nullptr, nullptr };   ///< low, high
   Control          m_control;   ///< setControl()
   QString          m_baseSource;   ///< setBaseSource()
-  QString          m_ownSource;    ///< setOwnSource()
   ValueRef         m_limitValue{ -1 };
   ValueRef         m_lastReference{ -1 };   ///< for leftValueChanged()
   qint64           m_minimapShift = 0;      ///< where the overview's store begins on this one's time (ms)

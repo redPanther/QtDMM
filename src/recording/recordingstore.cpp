@@ -305,18 +305,20 @@ qint64 RecordingStore::offsetOf(const RecordingStore &other) const
   return other.m_t0 - m_t0;
 }
 
-Recording RecordingStore::toRecording(bool raw, const QList<int> &extras, const QList<Foreign> &foreign) const
+Recording RecordingStore::toRecording(bool raw, const QList<int> &extras, const QList<Foreign> &foreign,
+                                       const QString &device) const
 {
   Recording rec;
   rec.sampleTimeTenths = m_sampleTime;
   rec.unit = m_unit;
+  rec.device = device;
   QList<const RecordingSeries *> others;
-  QStringList devices;   // of each of others; empty: this meter
+  QStringList devices;   // of each of others
   for (int e : extras)
     if (e >= 0 && e < m_extra.size() && !m_extra[e].isEmpty())
     {
       others << &m_extra[e];
-      devices << QString();
+      devices << device;
     }
   // another meter's series on this time, as if they were this one's
   std::vector<RecordingSeries> shifted;
@@ -448,9 +450,9 @@ Recording RecordingStore::toRecording(bool raw, const QList<int> &extras, const 
 }
 
 bool RecordingStore::write(const QString &path, QString *error, bool raw, const QList<int> &extras,
-                           const QList<Foreign> &foreign)
+                           const QList<Foreign> &foreign, const QString &device)
 {
-  if (!RecordingFile::writeAny(toRecording(raw, extras, foreign), path, error))
+  if (!RecordingFile::writeAny(toRecording(raw, extras, foreign, device), path, error))
     return false;
   m_dirty = false;
   for (const Foreign &f : foreign)

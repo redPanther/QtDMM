@@ -284,13 +284,14 @@ public:
   /// a row at every reading of any of them, each value holding until its
   /// next. Before a value began its cells are empty (CellState::None).
   /// With @p foreign values of other meters the same way, on this time
-  /// (offsetOf()).
-  Recording   toRecording(bool raw = false, const QList<int> &extras = {}, const QList<Foreign> &foreign = {}) const;
+  /// (offsetOf()). @p device names this meter's columns (Recording::device).
+  Recording   toRecording(bool raw = false, const QList<int> &extras = {}, const QList<Foreign> &foreign = {},
+                          const QString &device = QString()) const;
   /// Writes the recording (CSV, .xlsx or .ods by suffix), on the grid or
   /// with @p raw every reading; clears dirty(), also of the @p foreign
   /// stores. In Live: the live window up to now.
   bool        write(const QString &path, QString *error = nullptr, bool raw = false, const QList<int> &extras = {},
-                    const QList<Foreign> &foreign = {});
+                    const QList<Foreign> &foreign = {}, const QString &device = QString());
   /// Replaces the recording by @p rec: start, sample time and values, each
   /// at its time, and its other values as extra() (value 2 is id 1 ...);
   /// the store is in View then. A recording on the grid of its

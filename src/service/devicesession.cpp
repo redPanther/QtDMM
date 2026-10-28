@@ -30,14 +30,6 @@ void DeviceSession::setConfigDir(const QString &dir)
   m_library = new DeviceLibrary(dir, this);
 }
 
-void DeviceSession::adopt(MeterController *ctl)
-{
-  m_adopted = ctl;
-  ctl->dmm()->setCalcInputs(calcInputs());
-  watchRecording(ctl);
-  applySetup();
-}
-
 void DeviceSession::watchRecording(MeterController *ctl)
 {
   // the one that leads starts, stops and clears the others
@@ -183,17 +175,21 @@ void DeviceSession::startFollower(MeterController *ctl, qint64 t0, const QDateTi
 
 void DeviceSession::onRecordingRequested(bool start)
 {
-  if (m_adopted)
+  if (m_requests)
   {
     // the window's Record button: its questions (length, unsaved data) first
     QString why;
-    if (start && !m_adopted->mayStartRecording(&why))
+    MeterController *by = lead();
+    // the recording it shows not saved: nobody could be asked about it
+    if (start && by && by->recorder()->state() == RecordingStore::View && by->recorder()->dirty())
+      why = tr("start ignored, the recording shown is not saved yet");
+    if (start && by && (!why.isEmpty() || !by->mayStartRecording(&why)))
     {
       m_host->scpi()->pushError(-213, "Init ignored");
-      Q_EMIT error(tr("%1: %2").arg(m_adopted->deviceName().isEmpty() ? tr("Window") : m_adopted->deviceName(), why));
+      Q_EMIT error(tr("%1: %2").arg(by->deviceName(), why));
       return;
     }
-    m_adopted->requestRecording(start);
+    m_requests(start);
     return;
   }
   if (start)
@@ -335,29 +331,13 @@ bool DeviceSession::close(const QString &id, QString *error)
       return true;
     }
   if (error)
-    *error = m_adopted && m_adopted->source() == source ? QString("-221,Settings conflict; the window's device")
-                                                        : "-224,Illegal parameter value; not open: " + id;
+    *error = "-224,Illegal parameter value; not open: " + id;
   return false;
-}
-
-void DeviceSession::release(const QString &id)
-{
-  if (id.isEmpty())
-    return;
-  if (MeterController *ctl = controller("device:" + id); ctl && ctl != m_adopted)
-  {
-    const QString name = ctl->deviceName();
-    close(id);
-    Q_EMIT error(tr("%1 closed in the background: the window uses it now").arg(name));
-  }
 }
 
 QList<MeterController *> DeviceSession::controllers() const
 {
-  QList<MeterController *> all;
-  if (m_adopted)
-    all << m_adopted.data();
-  return all + m_opened;
+  return m_opened;
 }
 
 MeterController *DeviceSession::controller(const QString &source) const
@@ -370,7 +350,7 @@ MeterController *DeviceSession::controller(const QString &source) const
 
 MeterController *DeviceSession::controller(const ValueRef &value) const
 {
-  return value.source.isEmpty() ? m_adopted.data() : controller(value.source);
+  return value.source.isEmpty() ? nullptr : controller(value.source);
 }
 
 void DeviceSession::installScpi()

@@ -11,6 +11,8 @@
 #include <QTemporaryDir>
 #include <QTest>
 #include <QSignalSpy>
+#include <QDropEvent>
+#include <QMimeData>
 
 #include "core/devicelibrary.h"
 #include "ui/devicesettings.h"
@@ -31,7 +33,7 @@ int main(int argc, char **argv)
   const QString tfa = library.add("TFA", { { "DMM/model", "TFA AIRCO2NTROL MINI" } });
   const QString shunt = library.add("Battery", { { "DMM/model", "Victron SmartShunt" } });
 
-  // 1. the entries in their order, the one in use marked
+  // 1. the entries in their order, the ones connected marked
   DeviceSidebar sidebar(&library);
   check(sidebar.deviceIds() == QStringList({ ut61e, tfa, shunt }), "entries in their order");
   check(sidebar.devicesNode()->text(0) == "My devices", "the node");
@@ -39,18 +41,16 @@ int main(int argc, char **argv)
   check(bench && bench->text(0) == "Bench UT61E", "the name");
   check(bench && bench->toolTip(0).contains("/dev/ttyUSB0"), "the place in the tooltip: " + bench->toolTip(0));
   check(bench && !(bench->flags() & Qt::ItemIsDropEnabled), "an entry takes no other");
-  sidebar.setCurrent(tfa, true);
-  check(sidebar.deviceItem(tfa)->font(0).bold() && !bench->font(0).bold(), "the one in use is bold");
-  check(!sidebar.deviceItem(tfa)->icon(0).isNull(), "the one in use has its state");
+  const QImage plain = sidebar.deviceItem(tfa)->icon(0).pixmap(16).toImage();
+  sidebar.setOpenDevices({ DeviceSidebar::OpenDevice { tfa, "TFA", "800 ppm", true } });
+  check(sidebar.deviceItem(tfa)->font(0).bold() && !bench->font(0).bold(), "the one connected is bold");
   {
-    // the dot blinks with the readings: the other green each time
+    // the dot: green while readings come in, grey when they stop
     const QImage on = sidebar.deviceItem(tfa)->icon(0).pixmap(16).toImage();
-    sidebar.setCurrent(tfa, true, true);
-    const QImage blink = sidebar.deviceItem(tfa)->icon(0).pixmap(16).toImage();
-    sidebar.setCurrent(tfa, false);
+    sidebar.setOpenDevices({ DeviceSidebar::OpenDevice { tfa, "TFA", "800 ppm", false } });
     const QImage off = sidebar.deviceItem(tfa)->icon(0).pixmap(16).toImage();
-    check(on != blink && on != off && blink != off, "the dot: green, the other green, grey");
-    sidebar.setCurrent(tfa, true);
+    check(on != plain && on != off && off != plain, "the dot: green, grey, none when not connected");
+    sidebar.setOpenDevices({ DeviceSidebar::OpenDevice { tfa, "TFA", "800 ppm", true } });
   }
 
   // 2. a click on a device does nothing (its menu connects it); a double
@@ -61,14 +61,14 @@ int main(int argc, char **argv)
   QTest::qWait(QApplication::doubleClickInterval() + 100);
   bench = sidebar.deviceItem(ut61e);   // the sidebar may fill anew from the library's file
   check(info.isEmpty() && !sidebar.isConnected(ut61e) && sidebar.isConnected(tfa),
-        "a click does nothing; the one in use is connected, the other not");
+        "a click does nothing; the one connected is, the other not");
   {
     Q_EMIT sidebar.itemDoubleClicked(bench, 0);
     check(info == QStringList({ ut61e }), "double click: info and settings " + info.join(','));
-    check(sidebar.deviceItem(tfa)->toolTip(0).contains("In use in this window")
+    check(sidebar.deviceItem(tfa)->toolTip(0).contains("Connected")
             && sidebar.deviceItem(tfa)->toolTip(0).contains("Double-click")
-            && !bench->toolTip(0).contains("In use"),
-          "the tooltip: in use here, how to read more: " + sidebar.deviceItem(tfa)->toolTip(0));
+            && !bench->toolTip(0).contains("Connected"),
+          "the tooltip: connected, how to read more: " + sidebar.deviceItem(tfa)->toolTip(0));
   }
 
   // the last row adds a device; it is no device itself
@@ -95,12 +95,10 @@ int main(int argc, char **argv)
   check(sidebar.deviceItem(shunt)->text(0) == "House battery", "new name shown");
 
   // 5. when it is shown
-  check(!DeviceSidebar::shownAtStart(QVariant(), 1, true), "one device: closed");
-  check(DeviceSidebar::shownAtStart(QVariant(), 2, true), "two devices, never set: open");
-  check(!DeviceSidebar::shownAtStart(QVariant(false), 3, true), "closed by the user: stays closed");
-  check(DeviceSidebar::shownAtStart(QVariant(true), 1, true), "opened by the user: stays open");
-  check(DeviceSidebar::shownAtStart(QVariant(false), 1, false), "a window without a meter, devices there: open");
-  check(!DeviceSidebar::shownAtStart(QVariant(), 0, false), "a window without a meter, no devices: closed");
+  check(!DeviceSidebar::shownAtStart(QVariant(), 1), "one device: closed");
+  check(DeviceSidebar::shownAtStart(QVariant(), 2), "two devices, never set: open");
+  check(!DeviceSidebar::shownAtStart(QVariant(false), 3), "closed by the user: stays closed");
+  check(DeviceSidebar::shownAtStart(QVariant(true), 1), "opened by the user: stays open");
   check(DeviceSidebar::opensAfterAdd(1, 2), "the second device opens it");
   check(!DeviceSidebar::opensAfterAdd(0, 1), "the first does not");
   check(!DeviceSidebar::opensAfterAdd(2, 3), "the third does not");
@@ -178,21 +176,21 @@ int main(int argc, char **argv)
   //    click shows the front panel, the others closed by their menu
   {
     QList<DeviceSidebar::OpenDevice> rows;
-    rows << DeviceSidebar::OpenDevice { "device:w", "Bench UT61E", "12.01 V DC", true }
+    rows << DeviceSidebar::OpenDevice { "w", "Bench UT61E", "12.01 V DC", true }
          << DeviceSidebar::OpenDevice { "p", "Power", "", false }
          << DeviceSidebar::OpenDevice { "u", "PSU", "OL", true };
     rows[0].current = true;
     rows[1].connected = false;
-    sidebar.setOpenDevices(rows, "device:w");
+    sidebar.setOpenDevices(rows);
     check(sidebar.openNode()->childCount() == 3, "three open devices");
-    QTreeWidgetItem *own = sidebar.openItem("device:w");
+    QTreeWidgetItem *own = sidebar.openItem("w");
     QTreeWidgetItem *p = sidebar.openItem("p");
     check(own && own->font(0).bold() && !p->font(0).bold(), "the active one is bold");
     check(p->foreground(0).color() != own->foreground(0).color(), "one not connected greyed");
     // another one active: it is bold
     rows[0].current = false;
     rows[2].current = true;
-    sidebar.setOpenDevices(rows, "device:w");
+    sidebar.setOpenDevices(rows);
     check(!own->font(0).bold() && sidebar.openItem("u")->font(0).bold(), "another active one bold");
     // a double click shows its front panel
     QSignalSpy panel(&sidebar, &DeviceSidebar::frontPanelRequested);
@@ -200,14 +198,14 @@ int main(int argc, char **argv)
     check(panel.size() == 1 && panel.first().first().toString() == "u", "double click: its front panel");
     check(own && own->text(0) == "Bench UT61E" && own->text(1) == "12.01 V DC", "name and reading");
     check(p && !(p->flags() & Qt::ItemIsEditable) && !(own->flags() & Qt::ItemIsEditable), "not renamed here");
-    check(!(sidebar.openNode()->flags() & Qt::ItemIsDropEnabled), "no device dropped into the open devices");
+    check(sidebar.openNode()->flags() & Qt::ItemIsDropEnabled, "an entry may be dropped onto the open devices");
 
     // the values change in place, the items stay
     rows[0].value = "12.02 V DC";
-    sidebar.setOpenDevices(rows, "device:w");
+    sidebar.setOpenDevices(rows);
     check(sidebar.openItem("p") == p && own->text(1) == "12.02 V DC", "updated in place");
     rows.removeAt(1);
-    sidebar.setOpenDevices(rows, "device:w");
+    sidebar.setOpenDevices(rows);
     check(!sidebar.openItem("p") && sidebar.openNode()->childCount() == 2, "closed one gone");
   }
 
@@ -215,30 +213,30 @@ int main(int argc, char **argv)
   //     the curve's colour while in the graph, the menu per value
   {
     QList<DeviceSidebar::OpenDevice> rows;
-    rows << DeviceSidebar::OpenDevice { "device:w", "Victron SmartShunt", "13.29 V DC", true, {} }
+    rows << DeviceSidebar::OpenDevice { "w", "Victron SmartShunt", "13.29 V DC", true, {} }
          << DeviceSidebar::OpenDevice { "u", "Bench", "OL", false, {} };
     const QList<DeviceSidebar::Value> values { { 0, "Voltage DC", "13.29 V", QColor("#3b82f6") },
                                                { 1, "Current DC", "-14.9 A", QColor() },
                                                { 2, "Value 3", "", QColor() } };
     rows[0].values = values;
     rows[1].values = values;
-    sidebar.setOpenDevices(rows, "device:w");
-    QTreeWidgetItem *own = sidebar.openItem("device:w");
+    sidebar.setOpenDevices(rows);
+    QTreeWidgetItem *own = sidebar.openItem("w");
     check(own && own->childCount() == 3, QString("three values, got %1 rows").arg(own ? own->childCount() : -1));
     check(sidebar.openItem("u")->childCount() == 3, "the values of one beside it too");
     const ValueRef beside = sidebar.valueOf(sidebar.valueItem(2, "u"));
     check(beside == ValueRef(2, "device:u"), "a value beside it by its source: " + beside.toString());
-    check(sidebar.valueOf(sidebar.valueItem(1)) == ValueRef(1), "the window's by an empty source");
+    check(sidebar.valueOf(sidebar.valueItem(1, "w")) == ValueRef(1, "device:w"), "each by its source");
     check(sidebar.valueOf(own).source == "-", "a device row with value rows is no value");
-    QTreeWidgetItem *current = sidebar.valueItem(1);
+    QTreeWidgetItem *current = sidebar.valueItem(1, "w");
     check(current && current->text(0) == "2  Current DC" && current->text(1) == "-14.9 A", "the row of value 2");
-    check(sidebar.valueItem(0)->toolTip(0).contains("graph") && !current->toolTip(0).contains("graph"),
+    check(sidebar.valueItem(0, "w")->toolTip(0).contains("graph") && !current->toolTip(0).contains("graph"),
           "the graph's values say so");
     rows[0].values[1].text = "-15.0 A";
-    sidebar.setOpenDevices(rows, "device:w");
-    check(sidebar.valueItem(1) == current && current->text(1) == "-15.0 A", "the reading in place");
+    sidebar.setOpenDevices(rows);
+    check(sidebar.valueItem(1, "w") == current && current->text(1) == "-15.0 A", "the reading in place");
     own->setExpanded(false);
-    sidebar.setOpenDevices(rows, "device:w");
+    sidebar.setOpenDevices(rows);
     check(!own->isExpanded(), "folded away it stays so");
     own->setExpanded(true);
     int menuFor = -1;
@@ -249,15 +247,45 @@ int main(int argc, char **argv)
     QCoreApplication::sendEvent(sidebar.viewport(), &menu);
     check(menuFor == 1, QString("the menu of value 2, got %1").arg(menuFor));
     rows[0].values = values.mid(0, 1);
-    sidebar.setOpenDevices(rows, "device:w");
-    check(own->childCount() == 0 && !sidebar.valueItem(0), "one value: no rows");
-    check(sidebar.valueOf(own) == ValueRef(0), "one value: the device row is its main value");
+    sidebar.setOpenDevices(rows);
+    check(own->childCount() == 0 && !sidebar.valueItem(0, "w"), "one value: no rows");
+    check(sidebar.valueOf(own) == ValueRef(0, "device:w"), "one value: the device row is its main value");
     // where the row is short: unit and coupling, the full name in the tooltip
     rows[0].values = values;
     rows[0].values[1].shortName = "A DC";
-    sidebar.setOpenDevices(rows, "device:w");
-    check(sidebar.valueItem(1)->text(0) == "2  A DC" && sidebar.valueItem(1)->toolTip(0) == "Current DC",
+    sidebar.setOpenDevices(rows);
+    check(sidebar.valueItem(1, "w")->text(0) == "2  A DC" && sidebar.valueItem(1, "w")->toolTip(0) == "Current DC",
           "the short name in the row, the full one in the tooltip");
+  }
+
+  // 7c. dragged between the nodes: an entry onto the connected devices
+  //     connects it, a connected one back onto My devices closes it
+  {
+    struct DropSidebar : DeviceSidebar
+    {
+      using DeviceSidebar::DeviceSidebar;
+      using DeviceSidebar::dropEvent;
+    };
+    DropSidebar drops(&library);
+    drops.setOpenDevices({ DeviceSidebar::OpenDevice { "u", "PSU", "OL", true } });
+    drops.devicesNode()->setExpanded(true);
+    drops.resize(400, 800);
+    drops.show();
+    QSignalSpy opened(&drops, &DeviceSidebar::openBesideRequested);
+    QSignalSpy closed(&drops, &DeviceSidebar::closeRequested);
+    auto dropOnto = [&](QTreeWidgetItem *from, QTreeWidgetItem *onto)
+    {
+      drops.setCurrentItem(from);
+      QMimeData mime;
+      QDropEvent drop(drops.visualItemRect(onto).center(), Qt::MoveAction, &mime, Qt::LeftButton, Qt::NoModifier);
+      drops.dropEvent(&drop);
+    };
+    const QStringList order = drops.deviceIds();
+    dropOnto(drops.deviceItem(ut61e), drops.openNode());
+    check(opened.size() == 1 && opened.first().first().toString() == ut61e, "an entry dropped there connects");
+    dropOnto(drops.openItem("u"), drops.devicesNode());
+    check(closed.size() == 1 && closed.first().first().toString() == "u", "a connected one dropped back closes");
+    check(drops.deviceIds() == order && drops.openItem("u"), "the items stay where they are");
   }
 
   // 8. the services: port or off, the address to copy, settings by a double click

@@ -18,9 +18,10 @@ class DeviceLibrary;
 class MeterController;
 class ServiceHost;
 
-/// The meters of one process: the window's (adopt()) and those opened from
-/// "My devices" without a window (open(): --also, SCPI QTDMM:DEVice:OPEN).
-/// They share the network services (host()); INSTrument chooses among them.
+/// The meters of one process, each opened from "My devices" (open():
+/// Connect, --connect, SCPI QTDMM:DEVice:OPEN). The window has none of its
+/// own. They share the network services (host()); INSTrument chooses among
+/// them, starting with the first.
 ///
 /// A meter opened here has the rules of its entry (alarms, PASS/FAIL
 /// test; a change goes back into the entry); its readings carry its source
@@ -28,18 +29,16 @@ class ServiceHost;
 ///
 /// The recording is the session's (setRecordingSetup(), startRecording()
 /// ...): the meter of the trigger value leads (lead(); without one there
-/// the window's, else the first), its store takes the start mode, the
+/// the first), its store takes the start mode, the
 /// threshold and the clock time. The others start at the same moment, on
 /// one time base (RecordingStore::startAt()), with its sample time, and
 /// stop with it, whatever started or stopped it (Record, a trigger, the
 /// length, SCPI). A recording keeps its lead until it ends. INITiate and
-/// ABORt on any meter go to the window's Record (its questions first),
-/// with no window to the session. A recording not saved
+/// ABORt on any meter go to the window's Record (setRecordingRequests(),
+/// its questions first), with no window to the session. A recording not saved
 /// (QTDMM:RECord:SAVE) is overwritten by the next.
 /// A recording started from a graph takes only the meters whose values it
-/// shows (setRecordingScope()); those beside stay in Live.
-/// Each meter is open once: when the window takes one that is open here,
-/// release() closes it first, so that the port is free.
+/// shows (setRecordingScope()); the others stay in Live.
 class DeviceSession : public QObject
 {
   Q_OBJECT
@@ -55,7 +54,6 @@ public:
   void        setSigrokExe(const QString &exe) { m_sigrokExe = exe; }
 
   /// The window's meter: counted as open, never closed here.
-  void        adopt(MeterController *ctl);
   /// Opens and connects the entry @p id of "My devices". Null and the
   /// reason in @p error (a SCPI error, "<code>,<text>", in English) when it
   /// is unknown, already open or does not connect.
@@ -66,11 +64,14 @@ public:
   bool        close(const QString &id, QString *error = nullptr);
   /// The window is about to use the entry @p id: a meter open here with it
   /// is closed (the port is the window's), with a message.
-  void        release(const QString &id);
 
   /// @name The session's recording
   /// @{
   /// The Recording page's settings for all stores; the lead's takes the start.
+  /// Where a meter's request to start or stop the recording goes (SCPI
+  /// INITiate, an alarm's program): the window's Record button with its
+  /// questions; none set, the session starts and stops at once.
+  void        setRecordingRequests(std::function<void(bool start)> handler) { m_requests = std::move(handler); }
   void        setRecordingSetup(const RecordingStore::Setup &setup);
   const RecordingStore::Setup &recordingSetup() const { return m_setup; }
   /// The meter whose store leads: the recording's while one runs, else the
@@ -144,7 +145,7 @@ private:
 
   ServiceHost *m_host;
   DeviceLibrary *m_library = nullptr;
-  QPointer<MeterController> m_adopted;
+  std::function<void(bool start)> m_requests;   ///< setRecordingRequests()
   QList<MeterController *> m_opened;
   /// setRecordingScope() for the next recording, and that of the one that
   /// runs; none: all.

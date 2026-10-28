@@ -88,14 +88,13 @@ int main(int argc, char **argv)
   {
     QMenu *menu = menuFor(ValueRef(0, source));
     action(menu, { "&Graph", "&Right axis" })->trigger();
-    check(wid.graph()->otherValues().contains(ValueRef(0, source))
-            && wid.graph()->otherValueAxis(ValueRef(0, source)) == GraphWidget::AxisRight,
+    check(wid.graph()->valueShown(ValueRef(0, source)) && wid.graph()->valueAxis(ValueRef(0, source)) == GraphWidget::AxisRight,
           "in the graph on the right axis");
     delete menu;
     menu = menuFor(ValueRef(0, source));
     check(action(menu, { "&Graph", "&Right axis" })->isChecked(), "the menu says right");
     action(menu, { "&Graph", "&Off" })->trigger();
-    check(!wid.graph()->otherValues().contains(ValueRef(0, source)), "off the graph");
+    check(!wid.graph()->valueShown(ValueRef(0, source)), "off the graph");
     delete menu;
   }
   // 3. the analog meter and the Poincaré plot by its ValueRef
@@ -110,16 +109,6 @@ int main(int argc, char **argv)
     check(action(menu, { "&Analog meter" })->isChecked(), "the menu says so");
     delete menu;
   }
-  // 4. the window's meter's value: to InstanceWidget, by an empty source
-  {
-    QMenu *menu = menuFor(ValueRef(0, wid.controller()->source()));
-    action(menu, { "&Analog meter" })->trigger();
-    check(wid.meterValue() == ValueRef(0), "the window's by an empty source: " + wid.meterValue().toString());
-    action(menu, { "Readings &table" })->trigger();
-    check(table == QList<ValueRef>{ ValueRef(0) }, "the table by an empty source");
-    delete menu;
-  }
-
   // 5. the rules on a value: a new alarm, the limits, by its ValueRef
   {
     QList<ValueRef> alarmFor, limitsFor;
@@ -128,31 +117,33 @@ int main(int argc, char **argv)
     QMenu *menu = menuFor(ValueRef(1, source));
     action(menu, { "&New alarm..." })->trigger();
     action(menu, { "Li&mits..." })->trigger();
-    check(alarmFor == QList<ValueRef>{ ValueRef(1, source) } && limitsFor == alarmFor, "another meter's value");
-    delete menu;
-    menu = menuFor(ValueRef(0, wid.controller()->source()));
-    action(menu, { "&New alarm..." })->trigger();
-    check(alarmFor.last() == ValueRef(0), "the window's by an empty source");
+    check(alarmFor == QList<ValueRef>{ ValueRef(1, source) } && limitsFor == alarmFor, "the meter's value");
     delete menu;
   }
 
-  // 6. the graph's store follows its values: none of the window's meter
-  //    left, Sim B's store is the graph's (its value the main curve); the
-  //    window's back, still Sim B's while it shows one of it; Sim B closed:
-  //    the window's again, its value kept without a curve
+  // 4. the graph's store follows its values: Sim B's value, Sim B's store
+  //    (its value the main curve); another meter's value first, its store;
+  //    Sim B closed, the next value's meter; none left, the empty store
   {
+    const QString c = lib.add("Sim C", {{"DMM/model", "QtDMM Simulated meter"}, {"Port settings/device", "calc V/DC 3"}});
+    MeterController *other = session.open(c);
+    check(other != nullptr, "Sim C open");
+    if (!other)
+      return 1;
     GraphWidget *graph = wid.graph();
-    RecordingStore *own = graph->store();
     graph->setValues({ ValueRef(0, source) });
     check(graph->store() == ctl->recorder() && graph->baseSource() == source && graph->mainShown()
             && graph->otherValues().isEmpty(),
           "only Sim B's value: its store is the graph's, the value its main curve");
-    graph->setValueShown(ValueRef(0), true);
-    check(graph->store() == ctl->recorder() && graph->values().size() == 2,
-          "the window's value back: Sim B's store stays while the graph shows one of it");
+    graph->setValues({ ValueRef(0, source), ValueRef(0, other->source()) });
+    check(graph->store() == ctl->recorder() && graph->otherValues() == QList<ValueRef>{ ValueRef(0, other->source()) },
+          "Sim C's value beside: a curve from its store");
     session.close(b);
-    check(graph->store() == own && graph->values().contains(ValueRef(0, source)),
-          "Sim B closed: the window's store again, its value kept");
+    check(graph->store() == other->recorder() && graph->values().contains(ValueRef(0, source)),
+          "Sim B closed: Sim C's store, Sim B's value kept");
+    session.close(c);
+    check(graph->baseSource().isEmpty() && graph->store()->count() == 0,
+          QString("none left: the empty store, got %1 with %2").arg(graph->baseSource()).arg(graph->store()->count()));
   }
 
   if (failed)

@@ -21,35 +21,31 @@ void ValueMenu::fill(QMenu *menu, const Target &target, const ValueRef &value)
     a->setChecked(on);
     return a;
   };
-  // the window's meter's values by an empty source, as the views keep them
-  const bool own = wid->ownMeter(value);
-  const ValueRef ref = own ? ValueRef(value.id) : value;
+  const ValueRef ref = value;
   const int id = value.id;
   const auto show = target.show;
   const QString source = ref.source;
-  FrontPanel *panel = own ? nullptr : (target.panel ? target.panel(source) : nullptr);
+  FrontPanel *panel = target.panel ? target.panel(source) : nullptr;
 
   // the LCD of the meter's front panel: three places, big and the two on
   // the small line. A choice takes the place; the value there goes where
   // this one was, or off the display when it had none
   QMenu *lcd = menu->addMenu(tr("&LCD"));
   auto *places = new QActionGroup(lcd);
-  // the window's LCD may show another meter's value: none of this one's
-  auto ownId = [wid](const ValueRef &v) { return wid->ownMeter(v) ? v.id : -1; };
-  auto mainOf = [wid, panel, ownId]() { return panel ? panel->value().id : ownId(wid->lcdValue()); };
-  auto smallOf = [wid, panel]() { return panel ? panel->secondaries() : wid->lcdSecondaries(); };
-  const int values = panel ? (panel->controller() ? panel->controller()->valueCount() : 1) : wid->numValues();
+  auto mainOf = [panel]() { return panel ? panel->value().id : -1; };
+  auto smallOf = [panel]() { return panel ? panel->secondaries() : QList<int>(); };
+  const int values = panel && panel->controller() ? panel->controller()->valueCount() : 1;
   const QList<int> small = smallOf();
   const int taken[] = { mainOf(), int(small.value(0, -1)), int(small.value(1, -1)) };
   const QString texts[] = { tr("&Main value"), tr("Secondary value &left"), tr("Secondary value &right") };
-  lcd->setEnabled(own || panel);
+  lcd->setEnabled(panel);
   for (int place = 0; place < 3; ++place)
   {
     QAction *a = checkable(lcd, texts[place], taken[place] == id);
     places->addAction(a);
     // a meter with two values has one place on the small line
     a->setEnabled(place == 0 || place < values);
-    QObject::connect(a, &QAction::triggered, menu, [wid, panel, id, place, show, source, mainOf, smallOf]
+    QObject::connect(a, &QAction::triggered, menu, [panel, id, place, show, source, mainOf, smallOf]
     {
       const QList<int> small = smallOf();
       QList<int> now { mainOf(), int(small.value(0, -1)), int(small.value(1, -1)) };
@@ -61,23 +57,14 @@ void ValueMenu::fill(QMenu *menu, const Target &target, const ValueRef &value)
       for (int i = 1; i < 3; ++i)
         if (now[i] >= 0)
           line << now[i];
-      if (panel)
+      if (now[0] >= 0)
       {
-        if (now[0] >= 0)
-        {
-          panel->setValue(ValueRef(now[0], source));
-          // its min/max memory follows the big line, as the window's does
-          if (MeterController *ctl = panel->controller())
-            ctl->setMinMaxValue(now[0]);
-        }
-        panel->setSecondaries(line);
+        panel->setValue(ValueRef(now[0], source));
+        // its min/max memory follows the big line
+        if (MeterController *ctl = panel->controller())
+          ctl->setMinMaxValue(now[0]);
       }
-      else
-      {
-        if (now[0] >= 0)
-          wid->setLcdValue(ValueRef(now[0]));
-        wid->setLcdSecondaries(line);
-      }
+      panel->setSecondaries(line);
       show(View::Lcd, source);
     });
   }
