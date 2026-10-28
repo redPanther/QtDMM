@@ -197,7 +197,7 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   // the design can be chosen in the settings (General), too
   connect(m_wid, &InstanceWidget::configChanged, this, [this]
   {
-    const Designs::Design d = Designs::fromName(m_wid->settings()->getString("Windows/design", "dark"));
+    const Designs::Design d = Designs::fromName(m_wid->settings()->getString("Windows/design", "dark-metal"));
     if (d != Designs::current())
       setDesign(d);
   });
@@ -2088,7 +2088,7 @@ void MainWindow::saveWindows()
 
 void MainWindow::applyWorkspace(const WorkspaceGet &get)
 {
-  setDesign(Designs::fromName(get("Windows/design", QString("dark")).toString()));
+  setDesign(Designs::fromName(get("Windows/design", QString("dark-metal")).toString()));
   m_restoring = true;
   const QString arrange = get("Windows/arrange", QString("left")).toString();
   const bool free = arrange == "free";

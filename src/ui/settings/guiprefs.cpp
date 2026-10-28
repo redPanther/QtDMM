@@ -146,7 +146,7 @@ GuiPrefs::~GuiPrefs()
 
 void GuiPrefs::defaultsSLOT()
 {
-  ui_design->setCurrentIndex(qMax(0, ui_design->findData(m_cfg->getString("Windows/design", "dark"))));
+  ui_design->setCurrentIndex(qMax(0, ui_design->findData(m_cfg->getString("Windows/design", "dark-metal"))));
 
   ui_textLabel->setChecked(m_cfg->getBool("Icons/text-label", false));
   ui_showDisplay->setChecked(m_cfg->getBool("Display/show", true));
@@ -172,7 +172,7 @@ void GuiPrefs::defaultsSLOT()
 
 void GuiPrefs::factoryDefaultsSLOT()
 {
-  ui_design->setCurrentIndex(ui_design->findData(QString("dark")));
+  ui_design->setCurrentIndex(ui_design->findData(QString("dark-metal")));
 
   ui_textLabel->setChecked(false);
   ui_showDisplay->setChecked(true);
