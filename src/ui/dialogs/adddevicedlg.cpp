@@ -194,15 +194,15 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
   m_thisWindow = tile("go-next", QString(), QString());
   m_thisWindow->setObjectName("ui_thisWindow");
   m_thisWindow->setFixedSize(kTargetSize);
-  m_newWindow = tile("window-new", tr("In a ne&w window") + '\n' + tr("with the settings of this one"),
-                     tr("A new window of its own for the device; this one keeps its meter"));
-  m_newWindow->setObjectName("ui_newWindow");
-  m_newWindow->setFixedSize(kTargetSize);
+  m_beside = tile("window-new", tr("B&eside it") + '\n' + tr("without a view of its own"),
+                  tr("Reads it beside the current device: recorded with it, in formulas and over SCPI"));
+  m_beside->setObjectName("ui_beside");
+  m_beside->setFixedSize(kTargetSize);
   connect(m_thisWindow, &QToolButton::clicked, this, [this] { finish(ThisWindow); });
-  connect(m_newWindow, &QToolButton::clicked, this, [this] { finish(NewWindow); });
+  connect(m_beside, &QToolButton::clicked, this, [this] { finish(Beside); });
   targets->addStretch();
   targets->addWidget(m_thisWindow);
-  targets->addWidget(m_newWindow);
+  targets->addWidget(m_beside);
   targets->addStretch();
   m_pages->addWidget(target);
   setCurrentDevice(QString());
@@ -242,9 +242,9 @@ void AddDeviceDlg::setSigrokExe(const QString &exe)
   m_settings->setSigrokExe(exe);
 }
 
-void AddDeviceDlg::setStateManager(SharedStateManager *state)
+void AddDeviceDlg::setCalcInputs(const CalcDevice::Inputs &inputs)
 {
-  m_settings->setStateManager(state);
+  m_settings->setCalcInputs(inputs);
 }
 
 void AddDeviceDlg::setCurrentDevice(const QString &name)

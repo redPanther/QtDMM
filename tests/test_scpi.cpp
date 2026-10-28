@@ -217,7 +217,7 @@ int main(int argc, char **argv)
     // nothing to ask yet: empty answers, no crash
     check(ask(q, "CALC:AVER:COUN?") == "0" && ask(q, "CALC:AVER:MIN?") == "9.91E+37", "min/max without source");
     check(ask(q, "QTDMM:REC?") == "IDLE,0.000,0,\"\"" && ask(q, "QTDMM:ALAR?") == "0", "recording, alarms without source");
-    check(ask(q, "QTDMM:INST?") == "\"\"" && ask(q, "QTDMM:KEY:CAT?") == "\"\"", "instances, keys without source");
+    check(ask(q, "QTDMM:KEY:CAT?") == "\"\"", "keys without source");
 
     ScpiServer::Sources src;
     src.stats = [] { return ScpiServer::Stats{ 3, 0.1, 2.5, 1.2 }; };
@@ -256,7 +256,6 @@ int main(int argc, char **argv)
     QStringList pressed;
     src.keys = [] { return QStringList{ "range", "hold" }; };
     src.pressKey = [&pressed](const QString &k) { pressed << k; return k != "range"; };
-    src.instances = [] { return QList<ScpiServer::Instance>{ { "u", 12.5, "V", true }, { "i", 0, "", false } }; };
     qDev.setSources(src);
     qDev.setChannelCount(3);
     int clears = 0, acks = 0;
@@ -335,7 +334,8 @@ int main(int argc, char **argv)
     q.process("QTDMM:KEY");
     check(ask(q, "SYST:ERR?").startsWith("-109,"), "KEY without key");
 
-    check(ask(q, "QTDMM:INSTances?") == "\"u\",+1.250000E+01,\"V\",\"i\",9.91E+37,\"\"", "instances " + ask(q, "QTDMM:INST?"));
+    q.process("QTDMM:INSTances?");
+    check(ask(q, "SYST:ERR?").startsWith("-113,"), "QTDMM:INSTances? is gone");
     q.process("QTDMM:NOPE?");
     check(ask(q, "SYST:ERR?").startsWith("-113,"), "unknown QTDMM header");
 

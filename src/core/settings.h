@@ -44,15 +44,6 @@ public:
   const bool    &fileExists() const { return m_fileExists; }
   const QString &fileName() const { return m_filename; }
 
-  /// Removes the settings file of another instance.
-  void           deleteConfig(QString instanceId);
-  /// Renames the settings file of another (stopped) instance; false when
-  /// there is none or @p to already has one. "default" is not renamed.
-  bool           renameConfig(const QString &from, const QString &to);
-  /// Writes this instance's settings as the file of a new instance, without
-  /// the meter and its connection (DMM/, Port settings/), the window position
-  /// and the SCPI server switch. Returns the file written.
-  QString        copyConfig(const QString &instanceId) const;
 
   /// The ports set up by hand on the former page "Special ports"
   /// (custom_device0..9, "<type> <address>"): still offered, no new ones.
@@ -76,7 +67,7 @@ public:
   /// Drops staged writes.
   void           clear();
   /// Writes the saved values to the file and reads what other processes
-  /// changed there meanwhile (a renamed instance in a formula); without it
+  /// changed there meanwhile; without it
   /// QSettings keeps answering from its cache.
   void           sync();
 

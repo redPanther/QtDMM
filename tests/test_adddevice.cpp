@@ -73,8 +73,8 @@ int main(int argc, char **argv)
     dlg.back();
     check(dlg.page() == AddDeviceDlg::DevicePage, "back to page 3");
     dlg.next();
-    dlg.findChild<QToolButton *>("ui_newWindow")->click();
-    check(dlg.result() == QDialog::Accepted && dlg.target() == AddDeviceDlg::NewWindow, "new window finishes");
+    dlg.findChild<QToolButton *>("ui_beside")->click();
+    check(dlg.result() == QDialog::Accepted && dlg.target() == AddDeviceDlg::Beside, "beside finishes");
     check(dlg.keys().value("DMM/model") == "QtDMM Simulated meter", "keys: the model");
   }
 

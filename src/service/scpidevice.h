@@ -66,14 +66,6 @@ public:
     QString name;
     Level level = Off;
   };
-  /// A running QtDMM instance with its last reading (QTDMM:INSTances?).
-  struct Instance
-  {
-    QString id;
-    double value = 0;
-    QString unit;
-    bool valid = false;   ///< a current reading, neither held nor overload
-  };
   /// Where the QTDMM: queries get what the server does not hold itself. A
   /// source not set answers as if there were nothing.
   struct Sources
@@ -99,7 +91,6 @@ public:
     std::function<QStringList()> keys;
     /// Presses @p key; false when it could not (the meter not connected).
     std::function<bool(const QString &key)> pressKey;
-    std::function<QList<Instance>()> instances;
     /// The PASS/FAIL limit test (CALCulate:LIMit), its verdict on the last
     /// reading of its value and the verdicts counted; setLimitTest() keeps
     /// it as the dialog does.

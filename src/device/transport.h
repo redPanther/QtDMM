@@ -11,7 +11,7 @@
 /// (SerialDevice), a USB HID cable (HIDSerialDevice), a Holtek HID sensor
 /// (HidHoltekDevice), a serial port shared
 /// over the network (RFC2217SerialDevice), sigrok-cli as a data source
-/// (SigrokDevice) and a formula over other instances' readings
+/// (SigrokDevice) and a formula over other meters' readings
 /// (CalcDevice). MeterConnection only ever sees the QIODevice returned by port().
 class Transport : public QObject
 {

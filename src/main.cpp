@@ -20,6 +20,7 @@
 //----------------------------------------------------------------------
 // Copyright (c) 2001 Matthias Toussaint
 //======================================================================
+#include <QLockFile>
 #include <QMessageBox>
 #include <QtGui>
 #include <iostream>
@@ -189,6 +190,25 @@ int main(int argc, char **argv)
       cfg.setInt("QtDMM/revision", 84);
       cfg.save();
     }
+  }
+
+  // one QtDMM per settings file: a second would write over the first one's
+  // settings. Another --config-id runs on its own, without a link to this one.
+  const QString configFile = Settings(parser.value("config-id"), parser.value("config-dir")).fileName();
+  QDir().mkpath(QFileInfo(configFile).absolutePath());
+  // not ".lock": QSettings locks the file with that name while it writes
+  QLockFile lock(configFile + ".running");
+  lock.setStaleLockTime(0);
+  if (!lock.tryLock(500))
+  {
+    qint64 pid = 0;
+    QString host, name;
+    lock.getLockInfo(&pid, &host, &name);
+    const QString text = QObject::tr("QtDMM is running already with these settings (process %1).").arg(pid);
+    std::cerr << qPrintable(text) << std::endl;
+    if (!parser.isSet(checkMnemonics))
+      QMessageBox::critical(nullptr, APP_NAME, text);
+    return 1;
   }
 
   MainWindow mainWin(parser);

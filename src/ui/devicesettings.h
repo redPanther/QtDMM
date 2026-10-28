@@ -31,11 +31,11 @@ class QGroupBox;
 #include "ui_uidevicesettings.h"
 #include "device/frameformat.h"
 #include "device/dmmdecoder.h"
+#include "device/transports/calc.h"
 #include <QTimer>
 #include <array>
 #include <functional>
 
-class SharedStateManager;
 
 /// The settings of one meter: vendor/model choice (from the registered
 /// DmmDecoder::DMMInfo entries), port and the serial parameters, which
@@ -115,8 +115,9 @@ public:
   bool           isGatt() const;
   /// A bench meter read through sigrok-cli: the sigrok group replaces the port.
   bool           isSigrokMeter() const;
-  /// Source of the other instances' readings, shown as a hint below the formula.
-  void           setStateManager(SharedStateManager *state);
+  /// The readings of the meters open here (DeviceSession::calcInputs()),
+  /// shown as a hint below the formula.
+  void           setCalcInputs(const CalcDevice::Inputs &inputs);
 
 Q_SIGNALS:
   /// A field was edited or another model chosen.
@@ -171,7 +172,7 @@ protected:
   /// Shows the formula group instead of the port/protocol groups, or back.
   void updateCalcMode();
 
-  SharedStateManager *m_state = nullptr;
+  CalcDevice::Inputs m_inputs;
   QTimer m_calcHintTimer;
 
 private:

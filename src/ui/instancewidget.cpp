@@ -30,7 +30,6 @@
 #include "ui/dialogs/recordlengthdlg.h"
 #include "ui/alarmsound.h"
 #include "ui/instancewidget.h"
-#include "ui/mainwindow.h"
 #include "device/transports/serial.h"
 #include "core/devicelibrary.h"
 #include "device/dmmdecoder.h"
@@ -57,7 +56,6 @@
 #include "core/siprefix.h"
 #include "core/settings.h"
 #include "service/devicesession.h"
-#include "service/sharedstatemanager.h"
 
 
 
@@ -105,9 +103,6 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   m_printDlg = new qtdmm::PrintDlg(this);
   m_printDlg->hide();
 
-  // to the other instances; emitted below already, so connected here
-  if (auto *win = qobject_cast<MainWindow *>(parent))
-    connect(this, &InstanceWidget::sendState, win, &MainWindow::sendStateSLOT);
   connect(m_ctl, &MeterController::error, this, &InstanceWidget::error);
   connect(m_ctl, &MeterController::info, this, &InstanceWidget::info);
   // the recorder belongs to the controller; the graph shows it
@@ -175,7 +170,6 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   ui_graph->setSettings(m_settings);
 
   m_settings->save();
-  Q_EMIT sendState("UPDATE_INSTANCES_"+QString::number(QDateTime::currentMSecsSinceEpoch()));
 
   // alarms: the controller judges every reading and runs the program; sound,
   // popup and raising the window are UI (the banner is MainWindow's). A
@@ -503,11 +497,6 @@ QRect InstanceWidget::parentRect() const
   return QRect(fRect.x(), fRect.y(), rect.width(), rect.height());
 }
 
-void InstanceWidget::setStateManager(SharedStateManager *mgr)
-{
-  m_ctl->setStateManager(mgr);
-}
-
 void InstanceWidget::resetSLOT()
 {
   m_ctl->resetMinMax();
@@ -607,27 +596,6 @@ bool InstanceWidget::confirmSwitch(const QString &name)
 {
   // the readings of the meter before are another function: export or drop them
   return keepUnsavedData(tr("Switching to %1 clears it.").arg(name), tr("Switch without saving"));
-}
-
-QString InstanceWidget::openInNewWindow(const QString &id)
-{
-  const std::optional<MyDevice> device = m_devices->find(id);
-  if (!device)
-    return QString();
-  const QString instance = DeviceLibrary::instanceId(device->name, m_settings->getConfigInstances());
-  // this instance's settings, the device's meter
-  m_settings->copyConfig(instance);
-  Settings created(instance, m_settings->configDir());
-  created.setValues(device->keys);
-  created.setString("DMM/my-device", device->id);
-  created.setBool("DMM/configured", true);   // connects at its start
-  created.save();
-
-  QStringList args { "--config-id", instance };
-  if (!m_configPath.isEmpty())
-    args << "--config-dir" << m_configPath;
-  QProcess::startDetached(QCoreApplication::applicationFilePath(), args);
-  return instance;
 }
 
 void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, const QString &id)

@@ -12,7 +12,6 @@
 
 class DeviceLibrary;
 class MeterController;
-class SharedStateManager;
 class ServiceHost;
 
 /// The meters of one process: the window's (adopt()) and those opened from
@@ -24,7 +23,7 @@ class ServiceHost;
 /// the window's: it starts at the same moment, on one time base
 /// (RecordingStore::startAt()), with the window's sample time, and stops
 /// with it, whatever started or stopped the window's (Record, a trigger,
-/// the length, SCPI, another instance). INITiate and ABORt on it start and
+/// the length, SCPI). INITiate and ABORt on it start and
 /// stop the window's; with no window they start and stop those here. A
 /// recording of it not saved (QTDMM:RECord:SAVE) is overwritten by the next.
 /// Each meter is open once: when the window takes one that is open here,
@@ -40,10 +39,6 @@ public:
   void        setConfigDir(const QString &dir);
   /// This instance's id (--config-id), for the meters' mDNS and SCPI names.
   void        setInstanceId(const QString &id) { m_instanceId = id; }
-  /// The other instances' readings, which a calculated value reads after
-  /// the meters of the process (calcInputs()). The meters opened here
-  /// publish nothing there.
-  void        setStateManager(SharedStateManager *mgr);
   /// sigrok-cli for the meters read through it ("Port settings/sigrok_exe").
   void        setSigrokExe(const QString &exe) { m_sigrokExe = exe; }
 
@@ -67,8 +62,7 @@ public:
   MeterController *controller(const QString &source) const;
   /// What a calculated value of this process reads (CalcDevice): the main
   /// value of each meter here by its name in My devices, as a variable
-  /// ("UT61E Bench": ut61e_bench), then the other instances by id; a
-  /// meter here wins over an instance of the same name.
+  /// ("UT61E Bench": ut61e_bench).
   CalcDevice::Inputs calcInputs() const;
   /// The variable of a meter named @p name in a formula: lower case,
   /// other characters than letters, digits and '_' as '_', a '_' before a
@@ -104,7 +98,6 @@ private:
   ServiceHost *m_host;
   DeviceLibrary *m_library = nullptr;
   QPointer<MeterController> m_adopted;
-  SharedStateManager *m_stateMgr = nullptr;
   QList<MeterController *> m_opened;
   QString     m_instanceId = "default";
   QString     m_sigrokExe = "sigrok-cli";

@@ -6,7 +6,7 @@
 // the SCPI server's TCP port. Two simulated meters and a calculated value of
 // both: INSTrument reaches each, the calculated value is right, the three
 // record together on one time base, a recording is saved, a meter closes and
-// opens again. Its own config, home and shared memory: nothing of a QtDMM
+// opens again. Its own config and home: nothing of a QtDMM
 // running here is touched. Unix only (the console and the end of a GUI
 // process on Windows).
 //
@@ -180,7 +180,6 @@ vxi11=false
   for (const char *name : { "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME", "XDG_DOCUMENTS_DIR" })
     env.remove(name);
   env.insert("QT_QPA_PLATFORM", "offscreen");
-  env.insert("QTDMM_IPC_KEY", "qtdmm_test_e2e_" + QString::number(QCoreApplication::applicationPid()));
   qtdmm.setProcessEnvironment(env);
   qtdmm.setProcessChannelMode(QProcess::ForwardedChannels);
   qtdmm.start(QString::fromLocal8Bit(argv[1]), { "--config-dir", cfg, "--config-id", "e2e", "--also", "b", "--also", "p" });

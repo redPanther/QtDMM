@@ -23,7 +23,7 @@ QString keyText(const QList<QKeySequence> &keys)
 KeyboardPrefs::KeyboardPrefs(QWidget *parent) : SettingsPage(parent)
 {
   m_label = tr("Keyboard");
-  m_description = tr("The keys of the main window's commands, the same in all instances.");
+  m_description = tr("The keys of the main window's commands, the same for every configuration.");
   m_iconName = "input-keyboard";
 
   auto *layout = new QVBoxLayout(this);

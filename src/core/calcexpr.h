@@ -6,14 +6,14 @@
 #include <optional>
 #include <vector>
 
-/// A small arithmetic expression: what a calculated instance evaluates from
-/// the readings of the other instances, e.g. "u * i" or "sqrt(a^2 + b^2)".
+/// A small arithmetic expression: what a calculated value evaluates from
+/// the readings of the other meters, e.g. "u * i" or "sqrt(a^2 + b^2)".
 ///
 /// Grammar: the operators + - * / ^ (^ binds tightest and is right
 /// associative, unary minus binds weaker than ^ so -2^2 is -4),
 /// parentheses, numbers in decimal or exponent form with an optional SI
-/// suffix ("1.5k", "22u", "4.7n"), variables (identifiers, in QtDMM the ids
-/// of the running instances), the constant pi and the functions sqrt, abs,
+/// suffix ("1.5k", "22u", "4.7n"), variables (identifiers, in QtDMM the
+/// names of the open meters), the constant pi and the functions sqrt, abs,
 /// log10, sin, cos, exp, floor, min(a,b), max(a,b) and rand() (uniform in
 /// [0, 1), new value per evaluation). Names are case-sensitive.
 ///

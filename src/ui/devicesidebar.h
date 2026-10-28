@@ -12,14 +12,14 @@ class DeviceLibrary;
 /// DeviceLibrary in their order. A click switches to an entry, the one in
 /// use is bold with the state of its readings; where a device is connected
 /// shows in its tooltip. The context menu has Settings, Rename (in place),
-/// Open in a new window and Remove; dragging an entry changes the order.
+/// Open beside and Remove; dragging an entry changes the order.
 ///
-/// The node "Instances" lists the instances (MainWindow gives them with
-/// setInstances()) with their reading and, below each, its device; this
-/// window's own is bold. A click brings a running one to the front or starts
-/// a stopped one; a stopped one can be renamed and deleted. Below this
-/// window's own, for a meter with more than one value, a row for each value
-/// with its reading; its context menu says which window shows it where.
+/// The node "Open devices" lists the meters of the process (MainWindow
+/// gives them with setOpenDevices()) with their reading: this window's own
+/// in bold, then those opened beside it (DeviceSession::open()), which
+/// their context menu closes. Below this window's own, for a meter with
+/// more than one value, a row for each value with its reading; its context
+/// menu says which window shows it where.
 ///
 /// The node "Services" shows what this window offers to other programs
 /// (setServices()): the SCPI server and HiSLIP, with their port or "off";
@@ -34,7 +34,7 @@ class DeviceSidebar : public QTreeWidget
 {
   Q_OBJECT
 public:
-  /// One of the meter's values, a row below its instance (fillValues()).
+  /// One of the meter's values, a row below its open device (fillValues()).
   struct Value
   {
     int     id = 0;         ///< Reading::id, 0 the main value
@@ -44,13 +44,12 @@ public:
     QString shortName;      ///< shown in the row ("A DC"); name when empty
   };
 
-  /// One row of the node "Instances".
-  struct Instance
+  /// One row of the node "Open devices".
+  struct OpenDevice
   {
-    QString id;
-    QString device;         ///< the device below it ("" = none)
-    QString value;          ///< its reading, "OL", or "stopped"
-    bool    running = false;
+    QString id;             ///< the entry of My devices, or MeterController::source()
+    QString name;
+    QString value;          ///< its reading, "OL", "" before one
     bool    active = false; ///< readings come in
     QList<Value> values;    ///< this window's own only, with more than one
   };
@@ -80,19 +79,19 @@ public:
   /// The ids of the entries, in the order shown.
   QStringList deviceIds() const;
 
-  /// The instances, @p own is this window's. Rebuilds only when the list
-  /// changed, else updates the values; nothing while a name is edited.
-  void        setInstances(const QList<Instance> &instances, const QString &own);
-  /// The node "Instances".
-  QTreeWidgetItem *instancesNode() const { return m_instances; }
-  /// The item of the instance @p id, nullptr when there is none.
-  QTreeWidgetItem *instanceItem(const QString &id) const;
+  /// The open devices, @p own is this window's. Rebuilds only when the
+  /// list changed, else updates the readings.
+  void        setOpenDevices(const QList<OpenDevice> &devices, const QString &own);
+  /// The node "Open devices".
+  QTreeWidgetItem *openNode() const { return m_open; }
+  /// The item of the open device @p id, nullptr when there is none.
+  QTreeWidgetItem *openItem(const QString &id) const;
 
   /// The rows of the meter's values below @p parent, after its first
-  /// @p first children (an instance's device row); none for one value.
+  /// @p first children; none for one value.
   /// Their context menu is valueMenuRequested().
   void        fillValues(QTreeWidgetItem *parent, int first, const QList<Value> &values);
-  /// The row of value @p id of this window's instance, nullptr when there is none.
+  /// The row of value @p id of this window's device, nullptr when there is none.
   QTreeWidgetItem *valueItem(int id) const;
 
   /// The services of this window, in this order.
@@ -117,11 +116,10 @@ Q_SIGNALS:
   void        switchRequested(const QString &id);
   /// Info and settings of the entry @p id: its double click, its menu.
   void        settingsRequested(const QString &id);
-  void        newWindowRequested(const QString &id);
-  /// Bring the instance @p id to the front, or start it.
-  void        instanceRequested(const QString &id);
-  void        renameInstanceRequested(const QString &from, const QString &to);
-  void        deleteInstanceRequested(const QString &id);
+  /// Open the entry @p id beside this window's device (DeviceSession::open()).
+  void        openBesideRequested(const QString &id);
+  /// Close the open device @p id (OpenDevice::id), not this window's.
+  void        closeRequested(const QString &id);
   /// The row "+ Add device..." at the end of My devices.
   void        addDeviceRequested();
   /// The settings of the services (Settings, SCPI server).
@@ -148,11 +146,9 @@ private:
   QString     idOf(const QTreeWidgetItem *item) const;
   /// The last row of My devices, which adds one.
   QTreeWidgetItem *m_addItem = nullptr;
-  /// The instance of an instance item or of the device below it.
-  QString     instanceOf(const QTreeWidgetItem *item) const;
-  /// Whether the instance of @p item (its row or its device row) runs.
-  bool        instanceRunning(const QTreeWidgetItem *item) const;
-  void        instanceMenu(QTreeWidgetItem *item, const QPoint &pos);
+  /// The id of an open device's row, else empty.
+  QString     openOf(const QTreeWidgetItem *item) const;
+  void        openMenu(QTreeWidgetItem *item, const QPoint &pos);
   void        serviceMenu(QTreeWidgetItem *item, const QPoint &pos);
   void        workspaceMenu(QTreeWidgetItem *item, const QPoint &pos);
   /// The file of a workspace row that is still there, else empty.
@@ -161,13 +157,12 @@ private:
   DeviceLibrary   *m_library = nullptr;
   QTreeWidgetItem *m_workspaces = nullptr;
   QTreeWidgetItem *m_devices = nullptr;
-  QTreeWidgetItem *m_instances = nullptr;
+  QTreeWidgetItem *m_open = nullptr;
   QTreeWidgetItem *m_services = nullptr;
-  QString          m_ownInstance;
-  QList<Instance>  m_instanceList;   ///< as last set: coloured anew with another design
+  QString          m_own;
+  QList<OpenDevice> m_openList;   ///< as last set: coloured anew with another design
   QList<Service>   m_serviceList;
   QStringList      m_workspaceList;
-  QString          m_selectInstance;   ///< renamed: selected again under this name
   QString          m_current;
   bool             m_active = false;
   bool             m_blink = false;   ///< the other green, flipped with each reading

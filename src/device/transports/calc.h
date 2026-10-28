@@ -14,7 +14,7 @@
 /// meters, e.g. power from a voltage and a current meter ("u * i").
 ///
 /// The inputs come from a function (Inputs, DeviceSession::calcInputs():
-/// the meters of the process by name, the other instances); every poll interval
+/// the meters of the process by name); every poll interval
 /// the formula is evaluated and the result is offered as a sigrok-style
 /// text line ("DC 6.02 W AUTO", padded to 30 bytes like SigrokDevice does),
 /// so the ASCII decoder (FrameFormat::Sigrok) and everything after it work
@@ -88,7 +88,7 @@ public:
 
   /// Readings older than this are treated as missing.
   static constexpr qint64 kStaleMs = 3000;
-  /// Poll interval; matches SharedStateManager's publishing.
+  /// Poll interval.
   static constexpr int kIntervalMs = 250;
 
 Q_SIGNALS:

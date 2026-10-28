@@ -559,7 +559,7 @@ QString quoted(const QString &s)
 }
 
 // The commands of QtDMM's own: what a bench meter does not have - the
-// recording, the alarms, marks, the meter's keys and the other instances
+// recording, the alarms, marks, the meter's keys and the other meters
 QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
 {
   const int depth = cmd.path.size();
@@ -740,18 +740,6 @@ QString ScpiServer::handleQtdmm(const Command &cmd, bool &isQuery)
     if (!error.isEmpty())
       return refuse(isQuery, error.section(',', 0, 0).toInt(), error.section(',', 1));
     return {};
-  }
-
-  // QTDMM:INSTances? - "<id>",<value>,"<unit>" for each running instance
-  if (matches(sub, "INSTances") && depth == 2)
-  {
-    if (!queryOnly(cmd, isQuery))
-      return {};
-    QStringList out;
-    if (dev().m_sources.instances)
-      for (const Instance &i : dev().m_sources.instances())
-        out << quoted(i.id) << (i.valid ? number(i.value) : QString(kNotANumber)) << quoted(unit(i.unit));
-    return out.isEmpty() ? QString("\"\"") : out.join(',');
   }
 
   return refuse(isQuery, -113, "Undefined header");

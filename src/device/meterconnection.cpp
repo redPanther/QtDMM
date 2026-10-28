@@ -251,7 +251,7 @@ bool MeterConnection::openPort()
   QIODevice *port = m_portHandler->port();
   if (auto *calc = dynamic_cast<CalcDevice *>(port))
   {
-    // which input instance is missing or silent; shown in the status bar
+    // which input meter is missing or silent; shown in the status bar
     // instead of "Connected" until all inputs deliver
     connect(calc, &CalcDevice::status, this, [this](const QString &message)
     {

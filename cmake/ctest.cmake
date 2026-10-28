@@ -69,13 +69,6 @@ if (BUILD_TESTING)
 	## the digital display: glyph table and a headless render check
 	qtdmm_add_test(digital_display test_display tests/test_display.cpp)
 
-	## instance coordination over shared memory: registration, state channel
-	## and published readings
-	qtdmm_add_test(shared_state test_sharedstate tests/test_sharedstate.cpp)
-
-	## instances: names, renaming one with the formulas that use it, a new one copies all but the meter
-	qtdmm_add_test(instances test_instances tests/test_instances.cpp)
-
 	## the meter's settings widget (DeviceSettings): keys in and out, "Advanced", groups per kind of meter
 	qtdmm_add_test(device_settings test_devicesettings tests/test_devicesettings.cpp)
 
@@ -251,7 +244,7 @@ if (BUILD_TESTING)
 		file(MAKE_DIRECTORY "${_dir}")
 		add_test(NAME mnemonics_${lang} COMMAND ${PROJECT_NAME} --check-mnemonics --config-dir "${_dir}" --config-id check)
 		set_tests_properties(mnemonics_${lang} PROPERTIES TIMEOUT 120 ENVIRONMENT
-			"QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;QT_QPA_PLATFORM=offscreen;LANG=${lang}.UTF-8;LC_ALL=${lang}.UTF-8;LANGUAGE=;QTDMM_IPC_KEY=qtdmm_mnemonics_${lang}")
+			"QT_FORCE_STDERR_LOGGING=1;QT_LOGGING_TO_CONSOLE=1;QT_QPA_PLATFORM=offscreen;LANG=${lang}.UTF-8;LC_ALL=${lang}.UTF-8;LANGUAGE=")
 	endforeach()
 
 	## the tests report through qWarning()/qInfo(); on Windows Qt sends those
