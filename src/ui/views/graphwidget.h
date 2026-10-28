@@ -43,6 +43,7 @@ class GraphFlagItem;
 class GraphLegend;
 class GraphMinimap;
 class Settings;
+struct Recording;
 
 /// The recorder's view: plots the curve a RecordingStore keeps.
 ///
@@ -339,10 +340,12 @@ public:
   /// @name Values of other meters
   /// Curves of meters open beside the window's (DeviceSession), each from
   /// that meter's own store, shifted to this store's time by their starts
-  /// (RecordingStore::startClock()). On the left axis in its unit, else on
+  /// (RecordingStore::offsetOf()). On the left axis in its unit, else on
   /// the right one while that is free or has its unit; otherwise not
   /// drawn. A value of a meter not open is kept without a curve. Minimap,
   /// envelope, integral and the cursors' figures stay with this store's.
+  /// A file viewed (importCsvFile()) shows the other meters in it instead,
+  /// as curves of their own, until Live or a recording.
   /// @{
   /// Where they are: the store of a meter by its source (Reading::source),
   /// nullptr while it is not open, and its name for the legend.
@@ -653,6 +656,21 @@ protected:
   QList<QPointer<RecordingStore>> m_otherConnected;   ///< the stores connected to
   std::function<RecordingStore *(const QString &)> m_otherStore;
   std::function<QString(const QString &)> m_otherName;
+  /// The other meters of a file viewed (importCsvFile()), a store each, and
+  /// their values among the curves (source "file:<index>"), not in otherValues().
+  QList<RecordingStore *> m_fileStores;
+  QStringList      m_fileDevices;   ///< their names, as m_fileStores
+  QList<ValueRef>  m_fileValues;
+  /// The curves of @p values anew.
+  void             makeOtherCurves(const QList<ValueRef> &values);
+  /// The store of another meter's value: of the file viewed, or open beside
+  /// (not while a file is viewed).
+  RecordingStore  *otherStore(const QString &source) const;
+  QString          otherName(const QString &source) const;
+  /// The other meters of the file viewed go (Live, a recording, another file).
+  void             dropFileStores();
+  /// The other meters of the file @p rec, as curves.
+  void             setFileStores(const Recording &rec);
   QTimer           m_otherTimer;   ///< their new readings, drawn together
   /// Their stores, connections and curves anew.
   void             attachOtherStores();

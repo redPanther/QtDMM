@@ -27,6 +27,55 @@ void setError(QString *error, const QString &text)
 }
 }
 
+QStringList RecordingFile::devices(const Recording &recording)
+{
+  QStringList out;
+  for (const RecordingColumn &col : recording.extra)
+    if (!col.device.isEmpty() && !out.contains(col.device))
+      out << col.device;
+  return out;
+}
+
+Recording RecordingFile::devicePart(const Recording &recording, const QString &device)
+{
+  Recording part;
+  part.start = recording.start;
+  part.sampleTimeTenths = recording.sampleTimeTenths;
+  part.times = recording.times;
+  bool haveMain = device.isEmpty();
+  if (haveMain)
+  {
+    part.unit = recording.unit;
+    part.values = recording.values;
+    part.states = recording.states;
+    part.limits = recording.limits;
+  }
+  for (const RecordingColumn &col : recording.extra)
+  {
+    if (col.device != device)
+      continue;
+    if (!haveMain && col.id == 0)
+    {
+      part.unit = col.unit;
+      part.values = col.values;
+      part.states = col.states;
+      part.limits = col.limits;
+      haveMain = true;
+      continue;
+    }
+    RecordingColumn own = col;
+    own.device.clear();
+    part.extra << own;
+  }
+  // only other values of it: no main value in any row
+  if (!haveMain)
+  {
+    part.values.fill(qQNaN(), recording.values.size());
+    part.states.fill(CellState::None, recording.values.size());
+  }
+  return part;
+}
+
 double RecordingFile::unitScaleFactor(const QString &unit, const QString &baseUnit)
 {
   if (unit != baseUnit && unit.endsWith(baseUnit))
@@ -49,6 +98,31 @@ const char *stateText(CellState state)
     case CellState::None:             break;
   }
   return "";
+}
+
+// a column's name read back: "Sim B: value 2" is the meter "Sim B" (empty:
+// this one), the word "value" and the number 2 (0: none)
+struct ColumnName
+{
+  QString device;
+  QString word;
+  int number = 0;
+};
+
+ColumnName columnName(const QString &text)
+{
+  ColumnName name;
+  QString rest = text;
+  const qsizetype colon = text.lastIndexOf(QLatin1String(": "));
+  if (colon >= 0)
+  {
+    name.device = text.left(colon);
+    rest = text.mid(colon + 2);
+  }
+  const QStringList parts = rest.split(' ');
+  name.word = parts.value(0);
+  name.number = parts.size() == 2 ? parts[1].toInt() : 0;
+  return name;
 }
 
 std::optional<CellState> stateFrom(const QString &text)
@@ -135,7 +209,7 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
   if (line.startsWith("timestamp"))   // the CSV header
   {
     headerNames = line.split(';');
-    while (headerNames.size() > 5 && headerNames.last().startsWith(QLatin1String("limit")))
+    while (headerNames.size() > 5 && columnName(headerNames.last()).word == QLatin1String("limit"))
       limitNames.prepend(headerNames.takeLast());
     withStatus = headerNames.value(4) == QLatin1String("status");
     groups = withStatus ? qMax(1, int(headerNames.size() - 2) / 3) : 1;
@@ -164,21 +238,28 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
   }
   Recording rec;
   rec.extra.resize(groups - 1);
-  // "value 3": the column group is value 3 (id 2)
+  // "value 3": the column group is value 3 (id 2); "Sim B: value" another
+  // meter's main value
   for (int g = 1; g < groups; ++g)
   {
-    const QStringList name = headerNames.value(2 + 3 * g).split(' ');
-    rec.extra[g - 1].id = name.size() == 2 && name[0] == QLatin1String("value") ? qMax(0, name[1].toInt() - 1) : 0;
+    const ColumnName name = columnName(headerNames.value(2 + 3 * g));
+    rec.extra[g - 1].device = name.device;
+    rec.extra[g - 1].id = name.word == QLatin1String("value") ? qMax(0, name.number - 1) : 0;
   }
-  // each limit column's group: "limit" the main value, "limit 3" value 3
+  // each limit column's group: "limit" the main value, "limit 3" value 3,
+  // "Sim B: limit" another meter's main value
   QList<int> limitGroup;
-  for (const QString &n : std::as_const(limitNames))
+  for (const QString &text : std::as_const(limitNames))
   {
-    const int number = n.section(' ', 1, 1).toInt();
-    int g = number <= 1 ? 0 : -1;
+    const ColumnName name = columnName(text);
+    int g = name.device.isEmpty() && name.number <= 1 ? 0 : -1;
     for (int e = 0; g < 0 && e < rec.extra.size(); ++e)
-      if ((rec.extra[e].id > 0 ? rec.extra[e].id : e + 1) + 1 == number)
+    {
+      const RecordingColumn &col = rec.extra[e];
+      if (col.device == name.device
+          && (col.device.isEmpty() ? (col.id > 0 ? col.id : e + 1) + 1 == name.number : col.id == qMax(0, name.number - 1)))
         g = e + 1;
+    }
     limitGroup << g;
   }
   QDateTime end;
@@ -280,14 +361,25 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
 
 namespace
 {
+// the name of a column of the other value @p col (group @p g): "value 2"
+// ..., numbered by the value, so that a file with only value 3 says so;
+// another meter's after its name, "Sim B: value", "Sim B: value 2"
+QString columnName(const QString &word, const RecordingColumn &col, int g)
+{
+  if (col.device.isEmpty())
+    return QString("%1 %2").arg(word).arg((col.id > 0 ? col.id : g + 1) + 1);
+  QString device = col.device;
+  device.replace(';', ',');   // the CSV's separator
+  return col.id > 0 ? QString("%1: %2 %3").arg(device, word).arg(col.id + 1) : QString("%1: %2").arg(device, word);
+}
+
 // the header of the columns of each value: value, unit, status, then value 2 ...
-// numbered by the value, so that a file with only value 3 says so
 QStringList columnNames(const QList<RecordingColumn> &extra, const QStringList &names)
 {
   QStringList out = names;
   for (int g = 0; g < extra.size(); ++g)
     for (const QString &name : names)
-      out << QString("%1 %2").arg(name).arg((extra[g].id > 0 ? extra[g].id : g + 1) + 1);
+      out << columnName(name, extra[g], g);
   return out;
 }
 
@@ -313,7 +405,7 @@ QList<int> limitColumns(const Recording &rec)
 
 QString limitName(const Recording &rec, int column, const QString &word)
 {
-  return column < 0 ? word : QString("%1 %2").arg(word).arg((rec.extra[column].id > 0 ? rec.extra[column].id : column + 1) + 1);
+  return column < 0 ? word : columnName(word, rec.extra[column], column);
 }
 
 QString limitCell(const Recording &rec, int column, int row)

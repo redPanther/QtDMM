@@ -425,8 +425,20 @@ QString MeterController::saveRecording(const QString &name, bool raw)
   QList<int> extras;
   for (int i = 0; i < m_recorder->extraCount(); ++i)
     extras << i;
+  // all values of the meters that recorded with it
+  QList<RecordingStore::Foreign> foreign;
+  for (MeterController *other : m_recordedWith ? m_recordedWith() : QList<MeterController *>())
+  {
+    RecordingStore *store = other->recorder();
+    QList<int> ids{ 0 };
+    for (int i = 0; i < store->extraCount(); ++i)
+      if (!ids.contains(store->extra(i).id))
+        ids << store->extra(i).id;
+    for (int id : std::as_const(ids))
+      foreign << RecordingStore::Foreign{ store, id, other->deviceName() };
+  }
   QString error;
-  if (!QDir().mkpath(dir) || !m_recorder->write(path, &error, raw, extras))
+  if (!QDir().mkpath(dir) || !m_recorder->write(path, &error, raw, extras, foreign))
     return "-250,Mass storage error; " + (error.isEmpty() ? dir : error);
   Q_EMIT info(tr("SCPI: recording saved as %1").arg(QDir::toNativeSeparators(path)));
   return {};

@@ -220,6 +220,10 @@ public:
   QDateTime   startDateTime() const { return m_start; }
   /// The start on the core clock (ms, Sample::now()), for startAt().
   qint64      startClock() const { return m_t0; }
+  /// Where the time 0 of @p other lies on this store's time, ms: on the
+  /// core clock (the meters of one process record on one time base), by
+  /// the wall clock when either came from a file.
+  qint64      offsetOf(const RecordingStore &other) const;
   State       state() const { return m_state; }
   /// Recording (not Live).
   bool        isRunning() const { return m_state == Record; }
@@ -247,6 +251,14 @@ public:
   /// is NaN. A loaded recording that is on the grid already comes back as it
   /// was.
   QVector<GridPoint> grid(int tenths) const;
+  /// A value of another meter for the export, a column group of its own
+  /// (RecordingColumn::device).
+  struct Foreign
+  {
+    RecordingStore *store = nullptr;
+    int     id = 0;    ///< its value: 0 the main one, else extra() of that id
+    QString device;    ///< the meter's name
+  };
   /// The values for the CSV/spreadsheet export: the grid of the sample time,
   /// or with @p raw every reading at its time (a gap a NaN of its own),
   /// starting at the first.
@@ -254,11 +266,14 @@ public:
   /// group each on the same rows: on the grid their mean over the step, raw
   /// a row at every reading of any of them, each value holding until its
   /// next. Before a value began its cells are empty (CellState::None).
-  Recording   toRecording(bool raw = false, const QList<int> &extras = {}) const;
+  /// With @p foreign values of other meters the same way, on this time
+  /// (offsetOf()).
+  Recording   toRecording(bool raw = false, const QList<int> &extras = {}, const QList<Foreign> &foreign = {}) const;
   /// Writes the recording (CSV, .xlsx or .ods by suffix), on the grid or
-  /// with @p raw every reading; clears dirty(). In Live: the live window up
-  /// to now.
-  bool        write(const QString &path, QString *error = nullptr, bool raw = false, const QList<int> &extras = {});
+  /// with @p raw every reading; clears dirty(), also of the @p foreign
+  /// stores. In Live: the live window up to now.
+  bool        write(const QString &path, QString *error = nullptr, bool raw = false, const QList<int> &extras = {},
+                    const QList<Foreign> &foreign = {});
   /// Replaces the recording by @p rec: start, sample time and values, each
   /// at its time, and its other values as extra() (value 2 is id 1 ...);
   /// the store is in View then. A recording on the grid of its
@@ -437,6 +452,7 @@ private:
   qint64      m_liveWidthMs = 600 * 1000;
   qint64      m_floorMs = 0;      ///< a recording beyond m_maxPoints: the time of the first reading kept
   int         m_maxPoints = kMaxPoints;
+  bool        m_fromFile = false;   ///< load(): the time base is the file's
   int         m_loadedGrid = 0;   ///< load(): the points are the steps of this grid (tenths); 0 = readings
   QList<Mark> m_marks;
   QTimer      m_poll;

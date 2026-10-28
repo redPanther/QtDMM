@@ -122,8 +122,13 @@ bool GraphWidget::exportCsvFile(const QString &fileName, bool raw)
   for (int i = 0; i < m_store->extraCount(); ++i)
     if (m_shownValues.contains(m_store->extra(i).id))
       extras << i;
+  // and the values of other meters it shows, a column group each
+  QList<RecordingStore::Foreign> foreign;
+  for (const OtherCurve &c : m_otherCurves)
+    if (c.store)
+      foreign << RecordingStore::Foreign{ c.store, c.value.id, otherName(c.value.source) };
   QString err;
-  if (!m_store->write(fileName, &err, raw, extras))
+  if (!m_store->write(fileName, &err, raw, extras, foreign))
   {
     Q_EMIT error(err);
     return false;
@@ -162,7 +167,9 @@ bool GraphWidget::importCsvFile(const QString &fileName)
   m_scaleMax = -1e40;
 
   m_sourceFile = QFileInfo(fileName).fileName();
-  m_store->load(*rec);
+  // this meter's columns into the store, another meter's into one of its own
+  m_store->load(RecordingFile::devicePart(*rec, QString()));
+  setFileStores(*rec);
   updateStateLabel();
 
   setScale(true, true, 0, 0);

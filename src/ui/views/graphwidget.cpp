@@ -577,8 +577,12 @@ void GraphWidget::onStateChanged()
   const bool live = m_store->state() == RecordingStore::Live;
   m_liveHold = false;
   // a file viewed is gone with Live or a recording
-  if (m_store->state() != RecordingStore::View)
+  if (m_store->state() != RecordingStore::View && !m_sourceFile.isEmpty())
+  {
     m_sourceFile.clear();
+    dropFileStores();
+    otherStoresChanged();   // the meters open now again
+  }
   // Live follows the newest reading: nothing to scroll; it starts with
   // "All", so the graph fills with what there is instead of a needle at the
   // left of a long window

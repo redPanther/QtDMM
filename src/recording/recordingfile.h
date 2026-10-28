@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QList>
 #include <QString>
+#include <QStringList>
 #include <QVector>
 #include <optional>
 
@@ -20,11 +21,15 @@ enum class CellState : quint8
   None                ///< the value is not there yet in this row (empty cells)
 };
 
-/// Another value of the meter in a recording (a second display): its
-/// unit and, row by row as Recording::values, its values and states.
+/// Another value in a recording: of the meter (a second display) or of
+/// another meter recorded with it (device); its unit and, row by row as
+/// Recording::values, its values and states.
 struct RecordingColumn
 {
-  int id = 0;                 ///< the value (1 = value 2 ...); 0 = by its place
+  /// The value (1 = value 2 ...); of the meter 0 = by its place, of
+  /// another meter 0 = its main value.
+  int id = 0;
+  QString device;             ///< the other meter's name; empty: this meter
   QString unit;               ///< without SI prefix
   QVector<double> values;     ///< NaN for anything but Ok
   QVector<CellState> states;  ///< one per row
@@ -81,7 +86,9 @@ struct Recording
 /// adds `;value 2;unit 2;status 2` and so on; its cells are empty in the rows
 /// before it began. A value with a limit test adds a column `limit` (the
 /// main value) or `limit 2` ... at the end of the row: `PASS`, `FAIL HI`,
-/// `FAIL LO` or empty.
+/// `FAIL LO` or empty. The values of other meters recorded with it follow,
+/// their columns named after the meter: `Sim B: value;Sim B: unit;Sim B:
+/// status`, `Sim B: value 2` ..., `Sim B: limit`.
 /// Read: that format, the one before it without status
 /// (`timestamp;time (s);value;unit`, `nan` a gap), and the legacy
 /// tab-separated export of QtDMM < 0.9
@@ -99,6 +106,13 @@ bool write(const Recording &recording, const QString &path, QString *error = nul
 /// real date and number cells (SpreadsheetWriter); the format follows the
 /// suffix. Falls back to CSV for any other suffix.
 bool writeAny(const Recording &recording, const QString &path, QString *error = nullptr);
+
+/// The other meters in @p recording (RecordingColumn::device), in order.
+QStringList devices(const Recording &recording);
+/// The part of @p recording of the meter @p device (empty: this meter):
+/// its main value as the values, its other values as the extra columns,
+/// on the same rows and times.
+Recording devicePart(const Recording &recording, const QString &device);
 
 /// Factor that brings a value in @p unit to @p baseUnit: 1e-3 for "mV" and
 /// "V", 1.0 when the units are the same or unrelated. Older exports wrote the
