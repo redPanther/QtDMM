@@ -378,7 +378,7 @@ int main(int argc, char **argv)
     const QString csv = dir.filePath("multi.csv");
     check(multi.write(csv), "csv written");
     QFile f(csv);
-    f.open(QIODevice::ReadOnly);
+    check(f.open(QIODevice::ReadOnly), "csv opens");
     check(QString::fromUtf8(f.readLine()).startsWith("device;timestamp;"), "csv with the device first");
     multi.setDevices(false, "device:a", {});
     check(!multi.hasDevices() && multi.toText().split('\n').value(0).startsWith("Time\tNo."), "one meter: no Device column");
