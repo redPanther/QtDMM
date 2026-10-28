@@ -85,6 +85,9 @@ public:
   /// The analog meter's style from its context menu (0 dark, 1 ivory):
   /// shown at once, saved, and the Appearance page follows.
   void        setMeterStyle(int style);
+  /// The active device (MainWindow), the one the settings' Alarms page
+  /// shows first: its source, empty for the window's.
+  void        setActiveSource(const QString &source) { m_activeSource = source; }
   /// The settings' Alarms page with the alarms of the meter @p source
   /// (MeterController::source(); empty: the window's).
   void        openAlarms(const QString &source);
@@ -258,6 +261,7 @@ protected:
   bool        m_alertBlink = false;   ///< Alarms/blink
   bool        m_alertPhase = true;    ///< blinking: the colour shown now
   QTimer     *m_alertTimer = nullptr;
+  QString     m_activeSource;   ///< setActiveSource()
   QString     m_rulesDevice;   ///< the entry the window's rules were loaded from, empty: the window's settings
   /// The analog meter in the alarm's colour (or its own in the dark phase
   /// of the blinking).

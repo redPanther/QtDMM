@@ -317,6 +317,8 @@ void MainWindow::createViews()
   m_poincare = new PoincarePlot(this);
   m_poincare->setSettings(m_wid->settings());
   connect(m_wid, &InstanceWidget::meterChanged, m_poincare, &PoincarePlot::clear);
+  // the window's device switched or renamed: the active device's name anew
+  connect(m_wid, &InstanceWidget::meterChanged, this, [this] { setActive(activeController()); });
   m_poincareWin = addView(m_poincare, tr("Poincaré plot"), MdiArranger::Table, "poincare");
   m_wid->setPoincare(m_poincare);
 
@@ -2652,6 +2654,8 @@ void MainWindow::setActive(MeterController *ctl)
     m_activeOther = ctl != nullptr;
     action_Connect->setChecked(ctl ? ctl->dmm()->isWanted() : m_windowConnect);
   }
+  // the settings' Alarms page opens on its alarms
+  m_wid->setActiveSource(m_activeOther && m_active ? m_active->source() : QString());
   if (!m_activeName)
     return;
   const QList<MeterController *> meters = m_session->controllers();

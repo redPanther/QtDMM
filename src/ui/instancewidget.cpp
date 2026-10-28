@@ -609,7 +609,10 @@ void InstanceWidget::openConfig(int page)
   // recording)
   // the alarms as the meters have them now (a SCPI client, another meter opened)
   if (!m_configDlg->isVisible())
+  {
     m_configDlg->alarmPage()->defaultsSLOT();
+    m_configDlg->alarmPage()->setCurrentDevice(m_activeSource);
+  }
   if (page >= 0)
     m_configDlg->showPage(SettingsDialog::PageType(page));
   m_configDlg->show();
