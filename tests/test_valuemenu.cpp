@@ -1,0 +1,129 @@
+// Copyright (c) 2026 The QtDMM developers
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// ValueMenu, where a value of an open meter is shown: the window's meter's
+// values go to InstanceWidget, another meter's LCD places to its front
+// panel, its graph curve on the axis chosen, the analog meter and the
+// Poincaré plot by its ValueRef.
+#include <QApplication>
+#include <QDebug>
+#include <QMenu>
+#include <QTemporaryDir>
+
+#include "core/devicelibrary.h"
+#include "service/devicesession.h"
+#include "service/metercontroller.h"
+#include "ui/frontpanel.h"
+#include "ui/instancewidget.h"
+#include "ui/valuemenu.h"
+#include "ui/views/graphwidget.h"
+#include "ui/views/lcdwidget.h"
+#include "testutil.h"
+
+// The action @p path ("&Graph/&Right axis") of @p menu, nullptr when none.
+static QAction *action(QMenu *menu, const QStringList &path)
+{
+  for (QAction *a : menu->actions())
+    if (a->text() == path.first())
+    {
+      if (path.size() == 1)
+        return a;
+      return a->menu() ? action(a->menu(), path.mid(1)) : nullptr;
+    }
+  return nullptr;
+}
+
+int main(int argc, char **argv)
+{
+  if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
+    qputenv("QT_QPA_PLATFORM", "offscreen");
+  QApplication app(argc, argv);
+  QTemporaryDir dir;
+  DeviceLibrary lib(dir.path());
+  const QString b = lib.add("Sim B", {{"DMM/model", "QtDMM Simulated meter"}, {"Port settings/device", "calc A/DC 2"},
+                                      {"DMM/virtual-waveform", 0}, {"DMM/virtual-min", "0.25"},
+                                      {"DMM/virtual-max", "0.25"}, {"DMM/virtual-values", 2}});
+  DeviceSession session;
+  session.setConfigDir(dir.path());
+  InstanceWidget wid("vm", dir.path(), &session);
+  MeterController *ctl = session.open(b);
+  check(ctl != nullptr, "Sim B open");
+  if (!ctl)
+    return 1;
+  const QString source = ctl->source();
+  FrontPanel panel(&session);
+  panel.setValue(ValueRef(0, source));
+  panel.display()->setValueCount(2);   // MainWindow::applyLcdLook() does so
+
+  QList<std::pair<ValueMenu::View, QString>> shown;
+  QList<ValueRef> table;
+  ValueMenu::Target target;
+  target.wid = &wid;
+  target.panel = [&](const QString &s) { return s == source ? &panel : nullptr; };
+  target.tableShown = [&](const ValueRef &v) { return table.contains(v); };
+  target.setTableShown = [&](const ValueRef &v, bool on) { on ? table.append(v) : void(table.removeAll(v)); };
+  target.show = [&](ValueMenu::View view, const QString &s) { shown.append({ view, s }); };
+  auto menuFor = [&](const ValueRef &v)
+  {
+    auto *menu = new QMenu;
+    ValueMenu::fill(menu, target, v);
+    return menu;
+  };
+
+  // 1. another meter's value 2 as the main value of its front panel
+  {
+    QMenu *menu = menuFor(ValueRef(1, source));
+    QAction *main = action(menu, { "&LCD", "&Main value" });
+    check(main && main->isEnabled() && !main->isChecked(), "LCD main value offered");
+    if (main)
+      main->trigger();
+    check(panel.value() == ValueRef(1, source), "its front panel shows value 2: " + panel.value().toString());
+    check(panel.secondaries() == QList<int>{ 0 }, "the main one went to the small line");
+    check(!shown.isEmpty() && shown.last().first == ValueMenu::View::Lcd && shown.last().second == source,
+          "its front panel opened");
+    delete menu;
+  }
+  // 2. on the graph's right axis, then off
+  {
+    QMenu *menu = menuFor(ValueRef(0, source));
+    action(menu, { "&Graph", "&Right axis" })->trigger();
+    check(wid.graph()->otherValues().contains(ValueRef(0, source))
+            && wid.graph()->otherValueAxis(ValueRef(0, source)) == GraphWidget::AxisRight,
+          "in the graph on the right axis");
+    delete menu;
+    menu = menuFor(ValueRef(0, source));
+    check(action(menu, { "&Graph", "&Right axis" })->isChecked(), "the menu says right");
+    action(menu, { "&Graph", "&Off" })->trigger();
+    check(!wid.graph()->otherValues().contains(ValueRef(0, source)), "off the graph");
+    delete menu;
+  }
+  // 3. the analog meter and the Poincaré plot by its ValueRef
+  {
+    QMenu *menu = menuFor(ValueRef(1, source));
+    action(menu, { "&Analog meter" })->trigger();
+    action(menu, { "&Poincaré plot" })->trigger();
+    check(wid.meterValue() == ValueRef(1, source) && wid.poincareValue() == ValueRef(1, source),
+          "analog meter and Poincaré plot show it");
+    delete menu;
+    menu = menuFor(ValueRef(1, source));
+    check(action(menu, { "&Analog meter" })->isChecked(), "the menu says so");
+    delete menu;
+  }
+  // 4. the window's meter's value: to InstanceWidget, by an empty source
+  {
+    QMenu *menu = menuFor(ValueRef(0, wid.controller()->source()));
+    action(menu, { "&Analog meter" })->trigger();
+    check(wid.meterValue() == ValueRef(0), "the window's by an empty source: " + wid.meterValue().toString());
+    action(menu, { "Readings &table" })->trigger();
+    check(table == QList<ValueRef>{ ValueRef(0) }, "the table by an empty source");
+    delete menu;
+  }
+
+  if (failed)
+  {
+    qWarning() << failed << "ValueMenu check(s) failed";
+    return 1;
+  }
+  qInfo() << "All ValueMenu tests passed.";
+  return 0;
+}

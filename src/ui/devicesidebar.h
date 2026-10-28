@@ -2,9 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
+#include <functional>
+
 #include <QTimer>
 #include <QTreeWidget>
 #include <QVariant>
+
+#include "core/valueref.h"
 
 class DeviceLibrary;
 
@@ -53,7 +57,7 @@ public:
     QString name;
     QString value;          ///< its reading, "OL", "" before one
     bool    active = false; ///< readings come in
-    QList<Value> values;    ///< this window's own only, with more than one
+    QList<Value> values;    ///< with more than one: a row each below the device
     bool    current = false; ///< the active device: the toolbar acts on it
     bool    connected = true; ///< its connection is wanted (MeterConnection::isWanted())
   };
@@ -95,8 +99,15 @@ public:
   /// @p first children; none for one value.
   /// Their context menu is valueMenuRequested().
   void        fillValues(QTreeWidgetItem *parent, int first, const QList<Value> &values);
-  /// The row of value @p id of this window's device, nullptr when there is none.
-  QTreeWidgetItem *valueItem(int id) const;
+  /// The row of value @p id of the open device @p device (OpenDevice::id;
+  /// empty: this window's), nullptr when there is none.
+  QTreeWidgetItem *valueItem(int id, const QString &device = QString()) const;
+  /// The value a row of the open devices stands for: a value row, or the row
+  /// of a device with one value (its main value). The window's device's by an
+  /// empty source, another one's by "device:<id>". Invalid source "-" for none.
+  ValueRef    valueOf(const QTreeWidgetItem *item) const;
+  /// Fills the submenu "Value" of a device with one value (ValueMenu).
+  void        setValueMenuFiller(std::function<void(QMenu *, const ValueRef &)> filler) { m_valueFiller = std::move(filler); }
 
   /// The services of this window, in this order.
   void        setServices(const QList<Service> &services);
@@ -133,7 +144,7 @@ Q_SIGNALS:
   /// The settings of the services (Settings, SCPI server).
   void        serviceSettingsRequested();
   /// The context menu of the row of value @p id (MainWindow fills it).
-  void        valueMenuRequested(int id, const QPoint &globalPos);
+  void        valueMenuRequested(const ValueRef &value, const QPoint &globalPos);
   /// Load the workspace file @p path.
   void        workspaceRequested(const QString &path);
   /// Take @p path off the list of workspaces used last.
@@ -169,6 +180,7 @@ private:
   QTreeWidgetItem *m_services = nullptr;
   QString          m_own;
   QList<OpenDevice> m_openList;   ///< as last set: coloured anew with another design
+  std::function<void(QMenu *, const ValueRef &)> m_valueFiller;   ///< setValueMenuFiller()
   QList<Service>   m_serviceList;
   QStringList      m_workspaceList;
   QString          m_current;

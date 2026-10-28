@@ -5,12 +5,15 @@
 #include <QActionGroup>
 #include <QMenu>
 
+#include "service/metercontroller.h"
+#include "ui/frontpanel.h"
 #include "ui/instancewidget.h"
 #include "ui/views/graphwidget.h"
 
-void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::function<void(View)> &show)
+void ValueMenu::fill(QMenu *menu, const Target &target, const ValueRef &value)
 {
   menu->setToolTipsVisible(true);
+  InstanceWidget *wid = target.wid;
   auto checkable = [](QMenu *m, const QString &text, bool on)
   {
     QAction *a = m->addAction(text);
@@ -18,27 +21,38 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
     a->setChecked(on);
     return a;
   };
+  // the window's meter's values by an empty source, as the views keep them
+  const bool own = wid->ownMeter(value);
+  const ValueRef ref = own ? ValueRef(value.id) : value;
+  const int id = value.id;
+  const auto show = target.show;
+  const QString source = ref.source;
+  FrontPanel *panel = own ? nullptr : (target.panel ? target.panel(source) : nullptr);
 
-  // the LCD: three places, big and the two on the small line. A choice
-  // takes the place; the value there goes where this one was, or off the
-  // display when it had none
+  // the LCD of the meter's front panel: three places, big and the two on
+  // the small line. A choice takes the place; the value there goes where
+  // this one was, or off the display when it had none
   QMenu *lcd = menu->addMenu(tr("&LCD"));
   auto *places = new QActionGroup(lcd);
-  // the menu is of this meter's values: another meter's choice is none of them
-  auto own = [wid](const ValueRef &v) { return wid->ownMeter(v) ? v.id : -1; };
-  const QList<int> small = wid->lcdSecondaries();
-  const int taken[] = { own(wid->lcdValue()), int(small.value(0, -1)), int(small.value(1, -1)) };
+  // the window's LCD may show another meter's value: none of this one's
+  auto ownId = [wid](const ValueRef &v) { return wid->ownMeter(v) ? v.id : -1; };
+  auto mainOf = [wid, panel, ownId]() { return panel ? panel->value().id : ownId(wid->lcdValue()); };
+  auto smallOf = [wid, panel]() { return panel ? panel->secondaries() : wid->lcdSecondaries(); };
+  const int values = panel ? (panel->controller() ? panel->controller()->valueCount() : 1) : wid->numValues();
+  const QList<int> small = smallOf();
+  const int taken[] = { mainOf(), int(small.value(0, -1)), int(small.value(1, -1)) };
   const QString texts[] = { tr("&Main value"), tr("Secondary value &left"), tr("Secondary value &right") };
+  lcd->setEnabled(own || panel);
   for (int place = 0; place < 3; ++place)
   {
     QAction *a = checkable(lcd, texts[place], taken[place] == id);
     places->addAction(a);
     // a meter with two values has one place on the small line
-    a->setEnabled(place == 0 || place < wid->numValues());
-    QObject::connect(a, &QAction::triggered, menu, [wid, id, place, show, own]
+    a->setEnabled(place == 0 || place < values);
+    QObject::connect(a, &QAction::triggered, menu, [wid, panel, id, place, show, source, mainOf, smallOf]
     {
-      const QList<int> small = wid->lcdSecondaries();
-      QList<int> now { own(wid->lcdValue()), int(small.value(0, -1)), int(small.value(1, -1)) };
+      const QList<int> small = smallOf();
+      QList<int> now { mainOf(), int(small.value(0, -1)), int(small.value(1, -1)) };
       const qsizetype from = now.indexOf(id);
       if (from >= 0)
         now[from] = now[place];
@@ -47,65 +61,93 @@ void ValueMenu::fill(QMenu *menu, InstanceWidget *wid, int id, const std::functi
       for (int i = 1; i < 3; ++i)
         if (now[i] >= 0)
           line << now[i];
-      if (now[0] >= 0)
-        wid->setLcdValue(ValueRef(now[0]));
-      wid->setLcdSecondaries(line);
-      show(View::Lcd);
+      if (panel)
+      {
+        if (now[0] >= 0)
+        {
+          panel->setValue(ValueRef(now[0], source));
+          // its min/max memory follows the big line, as the window's does
+          if (MeterController *ctl = panel->controller())
+            ctl->setMinMaxValue(now[0]);
+        }
+        panel->setSecondaries(line);
+      }
+      else
+      {
+        if (now[0] >= 0)
+          wid->setLcdValue(ValueRef(now[0]));
+        wid->setLcdSecondaries(line);
+      }
+      show(View::Lcd, source);
     });
   }
-  QObject::connect(checkable(menu, tr("&Analog meter"), own(wid->meterValue()) == id), &QAction::triggered, menu,
-                   [wid, id, show]
+  QObject::connect(checkable(menu, tr("&Analog meter"), wid->meterValue() == ref), &QAction::triggered, menu,
+                   [wid, ref, show]
   {
-    wid->setMeterValue(ValueRef(id));
-    show(View::Meter);
+    wid->setMeterValue(ref);
+    show(View::Meter, ref.source);
   });
   // the graph: off, or on an axis. A unit the axis has already joins it,
   // another one takes its place there (GraphWidget::setValueAxis())
   GraphWidget *graph = wid->graph();
   QMenu *curves = menu->addMenu(tr("&Graph"));
   auto *sides = new QActionGroup(curves);
-  const bool shown = id == 0 ? graph->mainShown() : graph->shownValues().contains(id);
-  const GraphWidget::ValueAxis side = graph->valueSide(id);
+  const bool shown = own ? (id == 0 ? graph->mainShown() : graph->shownValues().contains(id))
+                         : graph->otherValues().contains(ref);
+  const GraphWidget::ValueAxis side = own ? graph->valueSide(id) : graph->otherValueSide(ref);
+  const GraphWidget::ValueAxis chosen = own ? graph->valueAxis(id) : graph->otherValueAxis(ref);
   const std::pair<GraphWidget::ValueAxis, QString> choices[] = { { GraphWidget::AxisAuto, tr("&Off") },
                                                                  { GraphWidget::AxisLeft, tr("&Left axis") },
                                                                  { GraphWidget::AxisRight, tr("&Right axis") } };
   for (const auto &[axis, text] : choices)
   {
     const bool off = axis == GraphWidget::AxisAuto;
-    QAction *a = checkable(curves, text, off ? !shown : side == axis);
+    // another meter's value without room: the axis chosen for it
+    QAction *a = checkable(curves, text, off ? !shown : (side != GraphWidget::AxisAuto ? side : chosen) == axis);
     sides->addAction(a);
-    if (id == 0 && axis == GraphWidget::AxisRight)
+    if (own && id == 0 && axis == GraphWidget::AxisRight)
     {
       a->setEnabled(false);
       a->setToolTip(tr("The main value is on the left axis"));
     }
-    QObject::connect(a, &QAction::triggered, menu, [graph, id, axis = axis, off, show]
+    QObject::connect(a, &QAction::triggered, menu, [graph, own, id, ref, axis = axis, off, show]
     {
       if (off)
       {
-        graph->setValueShown(id, false);
+        if (own)
+          graph->setValueShown(id, false);
+        else
+          graph->setOtherValueShown(ref, false);
         return;
       }
-      graph->setValueAxis(id, axis);
-      graph->setValueShown(id, true);
-      show(View::Graph);
+      if (own)
+      {
+        graph->setValueAxis(id, axis);
+        graph->setValueShown(id, true);
+      }
+      else
+      {
+        graph->setOtherValueShown(ref, true);
+        graph->setOtherValueAxis(ref, axis);
+      }
+      show(View::Graph, ref.source);
     });
   }
-  QObject::connect(checkable(menu, tr("&Poincaré plot"), own(wid->poincareValue()) == id), &QAction::triggered, menu,
-                   [wid, id, show]
+  QObject::connect(checkable(menu, tr("&Poincaré plot"), wid->poincareValue() == ref), &QAction::triggered, menu,
+                   [wid, ref, show]
   {
-    wid->setPoincareValue(ValueRef(id));
-    show(View::Poincare);
+    wid->setPoincareValue(ref);
+    show(View::Poincare, ref.source);
   });
   // the readings table: all values at first; copying follows it, the
   // export keeps them all
   menu->addSeparator();
-  QAction *table = checkable(menu, tr("Readings &table"), wid->tableValueShown(id));
+  QAction *table = checkable(menu, tr("Readings &table"), target.tableShown(ref));
   table->setToolTip(tr("Show this value's readings in the readings table"));
-  QObject::connect(table, &QAction::triggered, menu, [wid, id, show](bool on)
+  QObject::connect(table, &QAction::triggered, menu, [set = target.setTableShown, ref, show](bool on)
   {
-    wid->setTableValueShown(id, on);
+    set(ref, on);
     if (on)
-      show(View::Table);
+      show(View::Table, ref.source);
   });
 }

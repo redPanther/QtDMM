@@ -24,6 +24,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 
 #include <QtGui>
 #include <QtWidgets>
@@ -33,6 +34,7 @@
 #include "ui_uimainwindow.h"
 #include "core/recentfiles.h"
 #include "core/valueref.h"
+#include "ui/devicesidebar.h"
 
 class InstanceWidget;
 class DeviceSession;
@@ -134,6 +136,7 @@ protected:
   {
     ValueRef value;
     bool     folded = false;
+    std::optional<QList<int>> secondaries;   ///< the LCD's small line, unset: not chosen
     bool     shown = true;
     QString  geometry;   ///< "x y w h" in Free mode
   };
@@ -293,8 +296,12 @@ protected:
   /// Adds @p view as an MDI window with @p title (@p role: MdiArranger::Role;
   /// @p name identifies it in the settings).
   QMdiSubWindow *addView(QWidget *view, const QString &title, int role, const QString &name);
-  /// The context menu of the sidebar's row of value @p id (ValueMenu).
-  void        valueMenu(int id, const QPoint &globalPos);
+  /// The context menu of the sidebar's row of @p value (ValueMenu).
+  void        valueMenu(const ValueRef &value, const QPoint &globalPos);
+  /// The sidebar's row of value @p id of a meter open beside.
+  DeviceSidebar::Value otherValueRow(const MeterController *ctl, int id) const;
+  /// Fills @p menu for @p value of an open meter (ValueMenu).
+  void        fillValueMenu(QMenu *menu, const ValueRef &value);
   /// A checkable action that shows/hides @p win.
   QAction    *windowAction(QMdiSubWindow *win, const QString &text, const char *shortcut,
                            const char *icon, const QString &whatsThis);

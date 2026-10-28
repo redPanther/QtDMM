@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
+#include <optional>
+
 #include <QPointer>
 #include <QWidget>
 
@@ -33,6 +35,12 @@ public:
   /// meter (or none) clears the LCD.
   void        setValue(const ValueRef &value);
   ValueRef    value() const;
+  /// The LCD's small line (LcdWidget::setSecondaries()); std::nullopt: the
+  /// first values after the big one.
+  void        setSecondaries(const std::optional<QList<int>> &ids);
+  QList<int>  secondaries() const;
+  /// Whether the small line was chosen (else it is not saved).
+  bool        secondariesChosen() const { return m_secondariesChosen; }
   /// The meter shown, nullptr while it is not open.
   MeterController *controller() const;
   /// The keys folded away (the fold button, "Hide controls").
@@ -70,6 +78,7 @@ private:
   ControlBar *m_controls;
   FoldButton *m_fold;
   bool        m_keysSupported = false;
+  bool        m_secondariesChosen = false;
   QPointer<MeterController> m_ctl;
   QMetaObject::Connection m_link;   ///< the meter's connection state, for the keys
 };

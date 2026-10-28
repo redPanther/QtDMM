@@ -341,6 +341,7 @@ void MeterController::publish(const Reading &in)
   if (valueMinMaxNew)
     emitValueMinMax(id);
 
+  m_lastReadings[id] = rd;
   if (id == 0)
   {
     m_lastMain = rd;
@@ -426,6 +427,12 @@ QString MeterController::saveRecording(const QString &name, bool raw)
     return "-250,Mass storage error; " + (error.isEmpty() ? dir : error);
   Q_EMIT info(tr("SCPI: recording saved as %1").arg(QDir::toNativeSeparators(path)));
   return {};
+}
+
+int MeterController::valueCount() const
+{
+  const int seen = m_lastReadings.isEmpty() ? 0 : m_lastReadings.lastKey() + 1;
+  return qBound(1, qMax(seen, m_dmm->dmmInfo().valueCount()), kMaxValues);
 }
 
 void MeterController::setValueCount(int count)

@@ -350,6 +350,17 @@ public:
                                   std::function<QString(const QString &source)> name);
   void             setOtherValues(const QList<ValueRef> &values);
   QList<ValueRef>  otherValues() const;
+  /// Shows or hides one of them (at the end of otherValues()).
+  void             setOtherValueShown(const ValueRef &value, bool shown);
+  /// The axis chosen for another meter's value; AxisAuto: left in its unit,
+  /// else right while free. A chosen axis with another unit leaves the curve
+  /// out, with a notice().
+  void             setOtherValueAxis(const ValueRef &value, ValueAxis axis);
+  ValueAxis        otherValueAxis(const ValueRef &value) const { return m_otherAxes.value(value, AxisAuto); }
+  /// Where it is drawn now; AxisAuto while it is not.
+  ValueAxis        otherValueSide(const ValueRef &value) const;
+  /// Its curve's colour while it is drawn, else invalid.
+  QColor           otherValueColor(const ValueRef &value) const;
   /// A meter was opened or closed: the stores anew.
   void             otherStoresChanged();
   int              otherCurveCount() const { return int(m_otherCurves.size()); }
@@ -638,6 +649,7 @@ protected:
     QList<QPointF> points;
   };
   std::vector<OtherCurve> m_otherCurves;
+  QHash<ValueRef, ValueAxis> m_otherAxes;   ///< setOtherValueAxis(), missing: AxisAuto
   QList<QPointer<RecordingStore>> m_otherConnected;   ///< the stores connected to
   std::function<RecordingStore *(const QString &)> m_otherStore;
   std::function<QString(const QString &)> m_otherName;

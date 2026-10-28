@@ -42,6 +42,7 @@
 #include "core/devicelibrary.h"
 #include "core/sampletypes.h"
 #include "core/siprefix.h"
+#include "recording/recordingstore.h"
 #include "ui/instancewidget.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/lcdwidget.h"
@@ -405,6 +406,8 @@ void MainWindow::applyPanelState(QMdiSubWindow *win, const PanelState &state)
     ctl->setMinMaxValue(state.value.id);
   }
   panel->setFolded(state.folded);
+  if (state.secondaries)
+    panel->setSecondaries(state.secondaries);
   const QStringList g = state.geometry.split(' ');
   if (m_arranger->mode() == MdiArranger::Free && g.size() == 4)
     win->setGeometry(g[0].toInt(), g[1].toInt(), g[2].toInt(), g[3].toInt());
@@ -503,6 +506,7 @@ void MainWindow::createSidebar()
   });
   connect(m_sidebar, &DeviceSidebar::settingsRequested, this, [this](const QString &id) { deviceSettings(id); });
   connect(m_sidebar, &DeviceSidebar::valueMenuRequested, this, &MainWindow::valueMenu);
+  m_sidebar->setValueMenuFiller([this](QMenu *menu, const ValueRef &value) { fillValueMenu(menu, value); });
   connect(m_wid->graph(), &GraphWidget::notice, this, [this](const QString &text)
   {
     statusBar()->showMessage(text, 5000);
@@ -1496,6 +1500,37 @@ void MainWindow::updateServices()
   m_sidebar->setServices(rows);
 }
 
+// A reading as the sidebar shows it: "1.5 V DC", "OL", "" without a number.
+static QString readingText(const Reading &r)
+{
+  if (r.overload)
+    return QStringLiteral("OL");
+  if (r.noNumber())
+    return QString();
+  QString prefix;
+  const QString value = SiPrefix::format(r.value, r.baseUnit, &prefix);
+  return QString("%1 %2%3 %4").arg(value.left(8), prefix, r.baseUnit, couplingText(r.port.defining)).trimmed();
+}
+
+DeviceSidebar::Value MainWindow::otherValueRow(const MeterController *ctl, int id) const
+{
+  const Reading r = ctl->lastReading(id);
+  DeviceSidebar::Value row;
+  row.id = id;
+  if (r.msecs <= 0)
+    row.name = tr("Value %1").arg(id + 1);
+  else
+  {
+    row.name = r.name.isEmpty() ? RecordingStore::describe(r.port, r.baseUnit) : r.name;
+    row.text = readingText(r);
+    const QString unit = SiPrefix::displayText(r.baseUnit);
+    if (r.name.isEmpty() && !unit.isEmpty())
+      row.shortName = QString("%1 %2").arg(unit, couplingText(r.port.defining)).trimmed();
+  }
+  row.color = m_wid->graph()->otherValueColor(ValueRef(id, ctl->source()));
+  return row;
+}
+
 void MainWindow::updateOpenDevices()
 {
   // the active one connected or disconnected elsewhere (SCPI, an error)
@@ -1518,17 +1553,10 @@ void MainWindow::updateOpenDevices()
     const Reading &r = ctl->lastReading();
     if (r.msecs > 0)
     {
-      if (r.overload)
-        row.value = QStringLiteral("OL");
-      else if (!r.noNumber())
-      {
-        QString prefix;
-        const QString value = SiPrefix::format(r.value, r.baseUnit, &prefix);
-        row.value = QString("%1 %2%3 %4").arg(value.left(8), prefix, r.baseUnit, couplingText(r.port.defining)).trimmed();
-      }
+      row.value = readingText(r);
       row.active = now - r.msecs < 3000;
     }
-    // this window's values, with what the graph shows
+    // its values, with what the graph shows
     if (here)
       for (int value = 0; value < m_wid->numValues(); ++value)
       {
@@ -1538,25 +1566,51 @@ void MainWindow::updateOpenDevices()
                                             drawn ? m_wid->graph()->valueColor(value) : QColor(),
                                             m_wid->valueShortName(value) };
       }
+    else
+      for (int value = 0; value < ctl->valueCount(); ++value)
+        row.values << otherValueRow(ctl, value);
     rows << row;
   }
   m_sidebar->setOpenDevices(rows, own);
 }
 
-void MainWindow::valueMenu(int id, const QPoint &globalPos)
+void MainWindow::valueMenu(const ValueRef &value, const QPoint &globalPos)
 {
   QMenu menu(this);
-  ValueMenu::fill(&menu, m_wid, id, [this](ValueMenu::View view)
+  fillValueMenu(&menu, value);
+  menu.exec(globalPos);
+  updateOpenDevices();
+}
+
+void MainWindow::fillValueMenu(QMenu *menu, const ValueRef &value)
+{
+  ValueMenu::Target target;
+  target.wid = m_wid;
+  target.panel = [this](const QString &source) { return panelOf(m_panelWins.value(source)); };
+  target.tableShown = [this](const ValueRef &v) { return m_wid->ownMeter(v) && m_wid->tableValueShown(v.id); };
+  target.setTableShown = [this](const ValueRef &v, bool on)
   {
+    if (m_wid->ownMeter(v))
+      m_wid->setTableValueShown(v.id, on);
+  };
+  target.show = [this](ValueMenu::View view, const QString &source)
+  {
+    QMdiSubWindow *panel = m_panelWins.value(source);
+    if (view == ValueMenu::View::Lcd && panel)
+    {
+      panel->show();
+      m_mdi->setActiveSubWindow(panel);
+      m_arranger->arrange();
+      return;
+    }
     QAction *action = view == ValueMenu::View::Lcd     ? m_displayAction
                     : view == ValueMenu::View::Meter   ? m_meterAction
                     : view == ValueMenu::View::Poincare ? m_poincareAction
                     : view == ValueMenu::View::Table   ? m_readingsAction
                                                         : action_Graph;
     action->setChecked(true);
-  });
-  menu.exec(globalPos);
-  updateOpenDevices();
+  };
+  ValueMenu::fill(menu, target, value);
 }
 
 void MainWindow::deviceSettings(const QString &id, bool settingsTab)
@@ -1739,6 +1793,13 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
     PanelState state;
     state.value = ValueRef::fromString(get(key + "-value", QString("0")).toString());
     state.folded = get(key + "-folded", false).toBool();
+    const QString small = get(key + "-secondary-values", QStringLiteral("-")).toString();
+    if (small != QLatin1String("-"))
+    {
+      state.secondaries = QList<int>();
+      for (const QString &v : small.split(' ', Qt::SkipEmptyParts))
+        state.secondaries->append(v.toInt());
+    }
     state.shown = get(key + "-shown", true).toBool();
     state.geometry = get("Windows/geometry-panel-" + id, QString()).toString();
     if (QMdiSubWindow *win = m_panelWins.value("device:" + id))
@@ -1810,6 +1871,17 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
         axis = GraphWidget::AxisRight;
       m_wid->graph()->setValueAxis(id, axis);
     }
+    // another meter's: "1@device:ab12cd34:right"
+    for (const QString &entry : axes)
+    {
+      const qsizetype colon = entry.lastIndexOf(':');
+      if (!entry.contains('@') || colon < 0)
+        continue;
+      const QString side = entry.mid(colon + 1);
+      m_wid->graph()->setOtherValueAxis(ValueRef::fromString(entry.left(colon)),
+                                        side == "left" ? GraphWidget::AxisLeft
+                                        : side == "right" ? GraphWidget::AxisRight : GraphWidget::AxisAuto);
+    }
   }
   // the meter's other values shown in the graph: their ids, "1 2"; none at
   // first. Another meter's ("1@device:ab12cd34") is drawn from its store.
@@ -1867,6 +1939,13 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
     open << id;
     set(key + "-value", ValueRef(panelOf(win)->value().id).toString());
     set(key + "-folded", panelOf(win)->isFolded());
+    if (panelOf(win)->secondariesChosen())
+    {
+      QStringList small;
+      for (int v : panelOf(win)->secondaries())
+        small << QString::number(v);
+      set(key + "-secondary-values", small.join(' '));
+    }
     set(key + "-shown", !win->isHidden());
   }
   set("Windows/open-devices", open.join(' '));
@@ -1904,6 +1983,9 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   for (int id = 1; id <= 3; ++id)
     if (m_wid->graph()->valueAxis(id) != GraphWidget::AxisAuto)
       axes << QString("%1:%2").arg(id).arg(m_wid->graph()->valueAxis(id) == GraphWidget::AxisLeft ? "left" : "right");
+  for (const ValueRef &v : m_wid->graph()->otherValues())
+    if (m_wid->graph()->otherValueAxis(v) != GraphWidget::AxisAuto)
+      axes << QString("%1:%2").arg(v.toString(), m_wid->graph()->otherValueAxis(v) == GraphWidget::AxisLeft ? "left" : "right");
   set("Windows/graph-value-axes", axes.join(' '));
 }
 

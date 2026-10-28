@@ -253,7 +253,7 @@ void DeviceSidebar::setOpenDevices(const QList<OpenDevice> &devices, const QStri
     item->setForeground(0, text);
     item->setForeground(1, text);
     item->setIcon(0, dot(device.active ? QColor(0x22, 0xaa, 0x22) : QColor(), devicePixelRatioF()));
-    fillValues(item, 0, device.id == own ? device.values : QList<Value>());
+    fillValues(item, 0, device.values);
   }
   m_filling = false;
 }
@@ -284,9 +284,22 @@ void DeviceSidebar::fillValues(QTreeWidgetItem *parent, int first, const QList<V
   m_filling = filling;
 }
 
-QTreeWidgetItem *DeviceSidebar::valueItem(int id) const
+ValueRef DeviceSidebar::valueOf(const QTreeWidgetItem *item) const
 {
-  const QTreeWidgetItem *own = openItem(m_own);
+  const QTreeWidgetItem *row = item && item->data(0, kValueId).isValid() ? item->parent() : item;
+  if (!row || row->parent() != m_open)
+    return ValueRef(0, "-");
+  const QString device = row->data(0, Qt::UserRole).toString();
+  const QString source = device == m_own ? QString() : "device:" + device;
+  if (item != row)
+    return ValueRef(item->data(0, kValueId).toInt(), source);
+  // a device row stands for its value only while it has no value rows
+  return row->childCount() == 0 ? ValueRef(0, source) : ValueRef(0, "-");
+}
+
+QTreeWidgetItem *DeviceSidebar::valueItem(int id, const QString &device) const
+{
+  const QTreeWidgetItem *own = openItem(device.isEmpty() ? m_own : device);
   for (int i = 0; own && i < own->childCount(); ++i)
     if (own->child(i)->data(0, kValueId).isValid() && own->child(i)->data(0, kValueId).toInt() == id)
       return own->child(i);
@@ -535,6 +548,9 @@ void DeviceSidebar::openMenu(QTreeWidgetItem *item, const QPoint &pos)
       connected = device.connected;
   QMenu menu(this);
   QAction *panel = menu.addAction(QIcon::fromTheme("qtdmm-display"), tr("Show &front panel"));
+  // a device with one value: where it is shown, here
+  if (const ValueRef value = valueOf(item); value.source != "-" && m_valueFiller)
+    m_valueFiller(menu.addMenu(tr("&Value")), value);
   QAction *link = menu.addAction(connected ? tr("&Disconnect") : tr("Co&nnect"));
   QAction *close = nullptr;
   if (id != m_own)
@@ -567,7 +583,7 @@ void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
   }
   if (item && item->data(0, kValueId).isValid())
   {
-    Q_EMIT valueMenuRequested(item->data(0, kValueId).toInt(), event->globalPos());
+    Q_EMIT valueMenuRequested(valueOf(item), event->globalPos());
     return;
   }
   if (item && !openOf(item).isEmpty())

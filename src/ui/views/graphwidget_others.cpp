@@ -50,6 +50,48 @@ QList<ValueRef> GraphWidget::otherValues() const
   return values;
 }
 
+void GraphWidget::setOtherValueShown(const ValueRef &value, bool shown)
+{
+  QList<ValueRef> values = otherValues();
+  if (shown == values.contains(value))
+    return;
+  if (shown)
+    values << value;
+  else
+    values.removeAll(value);
+  setOtherValues(values);
+}
+
+void GraphWidget::setOtherValueAxis(const ValueRef &value, ValueAxis axis)
+{
+  if (axis == otherValueAxis(value))
+    return;
+  if (axis == AxisAuto)
+    m_otherAxes.remove(value);
+  else
+    m_otherAxes.insert(value, axis);
+  refreshValues();
+  for (const OtherCurve &c : m_otherCurves)
+    if (c.value == value && c.store && !c.shown)
+      Q_EMIT notice(tr("%1: its unit %2 has no room on that axis").arg(c.name, c.unit));
+}
+
+GraphWidget::ValueAxis GraphWidget::otherValueSide(const ValueRef &value) const
+{
+  for (const OtherCurve &c : m_otherCurves)
+    if (c.value == value && c.shown)
+      return c.right ? AxisRight : AxisLeft;
+  return AxisAuto;
+}
+
+QColor GraphWidget::otherValueColor(const ValueRef &value) const
+{
+  for (size_t i = 0; i < m_otherCurves.size(); ++i)
+    if (m_otherCurves[i].value == value && m_otherCurves[i].shown)
+      return otherColor(int(i));
+  return QColor();
+}
+
 void GraphWidget::otherStoresChanged()
 {
   attachOtherStores();
@@ -116,19 +158,20 @@ bool GraphWidget::rebuildOtherCurves()
     c.name = parts.isEmpty() ? QString() : curveName(*parts.last(), c.unit);
     if (m_otherName)
       c.name = c.name.isEmpty() ? m_otherName(c.value.source) : m_otherName(c.value.source) + " · " + c.name;
-    // its axis: the left one in its unit, else the right one when free
-    if (c.unit.isEmpty() || c.unit == left)
-      c.right = false;
-    else if (m_unit2.isEmpty() || m_unit2 == c.unit)
-    {
-      c.right = true;
-      m_unit2 = c.unit;
-    }
+    // its axis: the one chosen if its unit fits there, else the left one
+    // in its unit, else the right one when free
+    const ValueAxis chosen = otherValueAxis(c.value);
+    const bool fitsLeft = c.unit.isEmpty() || c.unit == left;
+    const bool fitsRight = !c.unit.isEmpty() && (m_unit2.isEmpty() || m_unit2 == c.unit);
+    if (chosen == AxisLeft ? fitsLeft : chosen == AxisRight ? fitsRight : fitsLeft || fitsRight)
+      c.right = chosen == AxisRight || (chosen == AxisAuto && !fitsLeft);
     else
     {
       c.line->setVisible(false);
       continue;
     }
+    if (c.right)
+      m_unit2 = c.unit;
     c.shown = true;
     // its time on this store's clock
     const double shift = (store->startClock() - m_store->startClock()) / 1000.0;
