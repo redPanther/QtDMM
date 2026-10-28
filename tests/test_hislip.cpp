@@ -301,10 +301,11 @@ int main(int argc, char **argv)
     check(waitFor([&] { return !others.empty(); }), "the command ran");
     QObject::disconnect(conn);
     delete s;
-    check(waitFor([&] { return server.sessionCount() == int(others.size()); }), "the gone client's session removed");
+    // a busy runner (macOS on CI) needs more than the default for the sockets to close
+    check(waitFor([&] { return server.sessionCount() == int(others.size()); }, 10000), "the gone client's session removed");
     check(others.back()->query("*IDN?\n").size() == 1, "the others still answer");
     qDeleteAll(others);
-    check(waitFor([&] { return server.sessionCount() == 0; }), "all closed after the dialog");
+    check(waitFor([&] { return server.sessionCount() == 0; }, 10000), "all closed after the dialog");
 
     // the same over SCPI raw
     const bool rawStarted = scpi.start(QHostAddress::LocalHost, 0);
