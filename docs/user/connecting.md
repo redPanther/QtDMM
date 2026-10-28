@@ -30,9 +30,9 @@ meter - the first start - shows nothing but a big **Add device** button.
    behind a serial port, a UT-D04 cable or a bridge port QtDMM cannot tell yet: choose
    yours. A Victron device needs its key here. One of My devices comes with
    its own name and model: it is changed, not added a second time.
-4. **Where should it go?** *In this window* as the current device, or
-   *Beside it* - opened beside the current device (see
-   [My devices](my-devices.md)). A window without a meter skips this: **Add** on step 3 puts the device into it.
+4. **Connect it now?** *Connect* keeps it in My devices and connects it at
+   once, *Save only* keeps it in My devices without connecting - *Connect*
+   in its context menu reads it later (see [My devices](my-devices.md)).
 
 sigrok and *Simulated / calculated* skip step 2.
 

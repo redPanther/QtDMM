@@ -114,163 +114,152 @@
         <translation>No&amp;m :</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="197"/>
-        <source>B&amp;eside it</source>
-        <translation>À &amp;côté</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="197"/>
-        <source>without a view of its own</source>
-        <translation>sans vue propre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="198"/>
-        <source>Reads it beside the current device: recorded with it, in formulas and over SCPI</source>
-        <translation>Le lit à côté de l’appareil actuel : enregistré avec lui, dans les formules et par SCPI</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="254"/>
-        <source>as the current device</source>
-        <translation>comme appareil actuel</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="255"/>
-        <source>The device takes the place of the one in this window</source>
-        <translation>L&apos;appareil prend la place de celui de cette fenêtre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="256"/>
-        <source>The device takes the place of %1 in this window</source>
-        <translation>L&apos;appareil prend la place de %1 dans cette fenêtre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="332"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="318"/>
         <source>Bluetooth cannot be used: %1</source>
         <translation>Bluetooth n&apos;est pas utilisable : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="454"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="440"/>
         <source>Listening to the meter: its first reading tells which model it is ...</source>
         <translation>Écoute du multimètre : sa première mesure indique de quel modèle il s&apos;agit ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="462"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="448"/>
         <source>No reading came, so the model is not known: choose it on the next page.</source>
         <translation>Aucune mesure reçue, le modèle n&apos;est pas connu : choisissez-le à la page suivante.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="473"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="459"/>
         <source>Its first reading says: %1.</source>
         <translation>Sa première mesure indique : %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="473"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="459"/>
         <source> or </source>
         <translation> ou </translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="533"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="519"/>
         <source>The search failed (%1). Or type the address.</source>
         <translation>La recherche a échoué (%1). Ou saisissez l&apos;adresse.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="698"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="653"/>
+        <source>Connect it now?</source>
+        <translation>Le connecter maintenant ?</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="680"/>
         <source>Simulated meter</source>
         <translation>Appareil simulé</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="211"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="212"/>
         <source>&lt; &amp;Back</source>
         <translation>&lt; &amp;Précédent</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="212"/>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="685"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="194"/>
+        <source>&amp;Connect</source>
+        <translation>&amp;Connecter</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="194"/>
+        <source>into My devices and connect at once</source>
+        <translation>dans Mes appareils et connecter tout de suite</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="195"/>
+        <source>Keeps it in My devices and reads it at once: with a front panel, recorded, in formulas and over SCPI</source>
+        <translation>Le garde dans Mes appareils et le lit tout de suite : avec façade, enregistré, dans les formules et via SCPI</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="199"/>
+        <source>&amp;Save only</source>
+        <translation>&amp;Enregistrer seulement</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="199"/>
+        <source>into My devices, without connecting</source>
+        <translation>dans Mes appareils, sans connecter</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="200"/>
+        <source>Keeps it in My devices; Connect in its context menu reads it later</source>
+        <translation>Le garde dans Mes appareils ; Connecter dans son menu contextuel le lit plus tard</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="213"/>
         <source>&amp;Next &gt;</source>
         <translation>&amp;Suivant &gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="254"/>
-        <source>In &amp;this window</source>
-        <translation>Dans ce&amp;tte fenêtre</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="306"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="292"/>
         <source>Bluetooth address, e.g. AA:BB:CC:DD:EE:FF</source>
         <translation>Adresse Bluetooth, p. ex. AA:BB:CC:DD:EE:FF</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="307"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="293"/>
         <source>host:port, e.g. 192.168.1.20:4711</source>
         <translation>hôte:port, p. ex. 192.168.1.20:4711</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="308"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="294"/>
         <source>e.g. /dev/ttyUSB0 or COM3</source>
         <translation>p. ex. /dev/ttyUSB0 ou COM3</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="402"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="388"/>
         <source>Already in My devices: %1</source>
         <translation>Déjà dans Mes appareils : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="526"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="512"/>
         <source>This is &quot;%1&quot; of My devices: the next page changes it, no second entry.</source>
         <translation>C&apos;est « %1 » de Mes appareils : la page suivante le modifie, sans seconde entrée.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="531"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="517"/>
         <source>Searching ...</source>
         <translation>Recherche ...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="536"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="522"/>
         <source>Nothing found. Is the meter&apos;s Bluetooth on and no other program connected to it? Or type its address.</source>
         <translation>Rien trouvé. Le Bluetooth du multimètre est-il activé et aucun autre programme n&apos;y est-il connecté ? Ou saisissez son adresse.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="539"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="525"/>
         <source>No bridge found. Is qtdmm-bridge running with --mdns in this network? Or type host:port of the bridge or another RFC 2217 server.</source>
         <translation>Aucun pont trouvé. qtdmm-bridge tourne-t-il avec --mdns sur ce réseau ? Ou saisissez hôte:port du pont ou d’un autre serveur RFC 2217.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="541"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="527"/>
         <source>Nothing found. Is the meter switched on and its cable plugged in? Or type the port.</source>
         <translation>Rien trouvé. Le multimètre est-il allumé et son câble branché ? Ou saisissez le port.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="543"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="529"/>
         <source>Choose where the meter is, or type the port.</source>
         <translation>Choisissez où se trouve le multimètre, ou saisissez le port.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="666"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="650"/>
         <source>How is the meter connected?</source>
         <translation>Comment le multimètre est-il connecté ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="667"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="651"/>
         <source>Where is it connected?</source>
         <translation>Où est-il connecté ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="668"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="652"/>
         <source>Which meter is it?</source>
         <translation>Quel multimètre est-ce ?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="669"/>
-        <source>Where should it go?</source>
-        <translation>Où doit-il aller ?</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="685"/>
-        <source>A&amp;dd</source>
-        <translation>A&amp;jouter</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="697"/>
+        <location filename="../../src/ui/dialogs/adddevicedlg.cpp" line="679"/>
         <source>Meter</source>
         <translation>Multimètre</translation>
     </message>
@@ -3700,17 +3689,17 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <translation>&lt;h2&gt;QtDMM %1&lt;/h2&gt;&lt;p&gt;Affichage et enregistreur de transitoires pour multimètres numériques.&lt;/p&gt;&lt;p&gt;Construit avec &lt;b&gt;Qt&lt;/b&gt; %2. Sous licence &lt;b&gt;GNU GPL 3 ou ultérieure&lt;/b&gt; (versions antérieures à 0.9.0 sous GPL 2 ou ultérieure).&lt;/p&gt;&lt;p&gt;À partir de 0.9.5 : tuxmaster et contributeurs, voir le fichier AUTHORS.&lt;br&gt;0.9.3 et antérieures : &amp;copy; 2001-2016 M. Toussaint &amp;lt;&lt;a href=&apos;mailto:qtdmm@mtoussaint.de&apos;&gt;qtdmm@mtoussaint.de&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;p&gt;Site web : &lt;a href=&apos;https://qtdmm.de&apos;&gt;qtdmm.de&lt;/a&gt; &amp;middot; Contact : &lt;a href=&apos;mailto:hello@qtdmm.de&apos;&gt;hello@qtdmm.de&lt;/a&gt;&lt;br&gt;Sources et rapports de bogues : &lt;a href=&apos;https://github.com/qtdmm/QtDMM&apos;&gt;github.com/qtdmm/QtDMM&lt;/a&gt;&lt;br&gt;Les symboles proviennent des thèmes d&apos;icônes &lt;b&gt;Oxygen&lt;/b&gt; et &lt;b&gt;Breeze&lt;/b&gt; de la communauté KDE (LGPL 3) ; les symboles propres à QtDMM sont dessinés dans son style.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2013"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2016"/>
         <source>%1 is in use in this window</source>
         <translation>%1 est utilisé dans cette fenêtre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2049"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2052"/>
         <source>Show the toolbar</source>
         <translation>Afficher la barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2049"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2052"/>
         <source>Hide the toolbar</source>
         <translation>Masquer la barre d&apos;outils</translation>
     </message>
@@ -3749,7 +3738,7 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
     <message>
         <location filename="../../src/ui/mainwindow.cpp" line="592"/>
         <location filename="../../src/ui/mainwindow.cpp" line="1818"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="2386"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2389"/>
         <source>%1: %2</source>
         <translation>%1 : %2</translation>
     </message>
@@ -3894,22 +3883,27 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <translation>Valeur %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2404"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1864"/>
+        <source>disconnected</source>
+        <translation>déconnecté</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/mainwindow.cpp" line="2407"/>
         <source>The workspace closes %1, its recording is not saved.</source>
         <translation>L&apos;espace de travail ferme %1, son enregistrement n&apos;est pas sauvegardé.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2453"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2456"/>
         <source>back in My devices: %1</source>
         <translation>de retour dans Mes appareils : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2772"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2775"/>
         <source>Active: %1</source>
         <translation>Actif : %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2773"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2776"/>
         <source>Connect, Reset and the device settings act on this device; a click on another front panel makes that one active</source>
         <translation>Connecter, Réinitialiser et les réglages de l&apos;appareil agissent sur cet appareil ; un clic sur une autre face avant la rend active</translation>
     </message>
@@ -4060,47 +4054,47 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         <translation>Tableau des mesures</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1974"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1977"/>
         <source>Its port is in use in this window.</source>
         <translation>Son port est utilisé dans cette fenêtre.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1975"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1978"/>
         <source>Open beside this window&apos;s device.</source>
         <translation>Ouvert à côté de l’appareil de cette fenêtre.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1973"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1976"/>
         <source>Not in use. A click on it in My devices takes it into this window.</source>
         <translation>Non utilisé. Un clic dessus dans Mes appareils l&apos;amène dans cette fenêtre.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1981"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1984"/>
         <source>Not connected.</source>
         <translation>Non connecté.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1982"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1985"/>
         <source>Connecting ...</source>
         <translation>Connexion …</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1983"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1986"/>
         <source>Connected, but the meter sends nothing.</source>
         <translation>Connecté, mais l&apos;appareil n&apos;envoie rien.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1984"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1987"/>
         <source>The connection went away; QtDMM tries again.</source>
         <translation>La connexion a été perdue ; QtDMM réessaie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1986"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1989"/>
         <source>Connected, readings are coming in.</source>
         <translation>Connecté, les mesures arrivent.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/mainwindow.cpp" line="1986"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1989"/>
         <source>Connected, no reading for %n s.</source>
         <translation>
             <numerusform>Connecté, aucune mesure depuis %n s.</numerusform>
@@ -4108,12 +4102,12 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1989"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1992"/>
         <source>In use in this window.</source>
         <translation>Utilisé dans cette fenêtre.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/mainwindow.cpp" line="1991"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1994"/>
         <source>Last reading %n s ago.</source>
         <translation>
             <numerusform>Dernière mesure il y a %n s.</numerusform>
@@ -4121,64 +4115,64 @@ Pas de permission ? Le capteur a besoin d’une règle udev pour l’ID USB %1:%
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="1993"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="1996"/>
         <source>The meter&apos;s battery is low.</source>
         <translation>La pile de l&apos;appareil est faible.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2018"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2021"/>
         <source>%1 is open already</source>
         <translation>%1 est déjà ouvert</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2023"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2026"/>
         <source>%1 opened beside this window&apos;s device</source>
         <translation>%1 ouvert à côté de l’appareil de cette fenêtre</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2331"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2334"/>
         <source>Save workspace</source>
         <translation>Enregistrer l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2332"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="2374"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2335"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2377"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Espace de travail QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2358"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2361"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM : Enregistrer l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2358"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2361"/>
         <source>Could not write %1.</source>
         <translation>Impossible d&apos;écrire %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2365"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2368"/>
         <source>Workspace saved to %1</source>
         <translation>Espace de travail enregistré dans %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2373"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2376"/>
         <source>Load workspace</source>
         <translation>Charger l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2386"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="2403"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2389"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2406"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM : Charger l&apos;espace de travail</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2451"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2454"/>
         <source>Workspace loaded from %1</source>
         <translation>Espace de travail chargé depuis %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2511"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2514"/>
         <source>&amp;Clear list</source>
         <translation>&amp;Vider la liste</translation>
     </message>

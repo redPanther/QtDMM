@@ -191,21 +191,22 @@ AddDeviceDlg::AddDeviceDlg(DeviceLibrary *library, QWidget *parent)
   targetLayout->addStretch(1);
   targetLayout->addLayout(targets);
   targetLayout->addStretch(1);
-  m_thisWindow = tile("go-next", QString(), QString());
-  m_thisWindow->setObjectName("ui_thisWindow");
-  m_thisWindow->setFixedSize(kTargetSize);
-  m_beside = tile("window-new", tr("B&eside it") + '\n' + tr("without a view of its own"),
-                  tr("Reads it beside the current device: recorded with it, in formulas and over SCPI"));
-  m_beside->setObjectName("ui_beside");
-  m_beside->setFixedSize(kTargetSize);
-  connect(m_thisWindow, &QToolButton::clicked, this, [this] { finish(ThisWindow); });
-  connect(m_beside, &QToolButton::clicked, this, [this] { finish(Beside); });
+  m_connect = tile("network-connect", tr("&Connect") + '\n' + tr("into My devices and connect at once"),
+                   tr("Keeps it in My devices and reads it at once: with a front panel, recorded, in formulas "
+                      "and over SCPI"));
+  m_connect->setObjectName("ui_connect");
+  m_connect->setFixedSize(kTargetSize);
+  m_saveOnly = tile("document-save", tr("&Save only") + '\n' + tr("into My devices, without connecting"),
+                    tr("Keeps it in My devices; Connect in its context menu reads it later"));
+  m_saveOnly->setObjectName("ui_saveOnly");
+  m_saveOnly->setFixedSize(kTargetSize);
+  connect(m_connect, &QToolButton::clicked, this, [this] { finish(Connect); });
+  connect(m_saveOnly, &QToolButton::clicked, this, [this] { finish(SaveOnly); });
   targets->addStretch();
-  targets->addWidget(m_thisWindow);
-  targets->addWidget(m_beside);
+  targets->addWidget(m_connect);
+  targets->addWidget(m_saveOnly);
   targets->addStretch();
   m_pages->addWidget(target);
-  setCurrentDevice(QString());
 
   auto *buttons = new QDialogButtonBox(this);
   m_back = buttons->addButton(tr("< &Back"), QDialogButtonBox::ActionRole);
@@ -245,21 +246,6 @@ void AddDeviceDlg::setSigrokExe(const QString &exe)
 void AddDeviceDlg::setCalcInputs(const CalcDevice::Inputs &inputs)
 {
   m_settings->setCalcInputs(inputs);
-}
-
-void AddDeviceDlg::setCurrentDevice(const QString &name)
-{
-  m_currentDevice = name;
-  // a long name or a formula made the tile wide: the name in the tooltip only
-  m_thisWindow->setText(tr("In &this window") + '\n' + tr("as the current device"));
-  m_thisWindow->setToolTip(name.isEmpty() ? tr("The device takes the place of the one in this window")
-                                          : tr("The device takes the place of %1 in this window").arg(name));
-}
-
-void AddDeviceDlg::setTargetChoice(bool choice)
-{
-  m_targetChoice = choice;
-  updateButtons();
 }
 
 bool AddDeviceDlg::offers(Connection connection, const DmmDecoder::DMMInfo &info)
@@ -652,8 +638,6 @@ void AddDeviceDlg::next()
     takePort();
     showPage(DevicePage);
   }
-  else if (!m_targetChoice)
-    finish(ThisWindow);
   else
     showPage(TargetPage);
 }
@@ -666,7 +650,7 @@ void AddDeviceDlg::showPage(Page page)
     case ConnectionPage: m_title->setText(tr("How is the meter connected?")); break;
     case PortPage:       m_title->setText(tr("Where is it connected?")); break;
     case DevicePage:     m_title->setText(tr("Which meter is it?")); break;
-    case TargetPage:     m_title->setText(tr("Where should it go?")); break;
+    case TargetPage:     m_title->setText(tr("Connect it now?")); break;
   }
   if (page == TargetPage)
     updateDeviceInfo();
@@ -681,8 +665,6 @@ void AddDeviceDlg::updateButtons()
 {
   m_back->setEnabled(page() != ConnectionPage);
   m_next->setVisible(page() == PortPage || page() == DevicePage);
-  // without page 4 the last page finishes
-  m_next->setText(page() == DevicePage && !m_targetChoice ? tr("A&dd") : tr("&Next >"));
   m_next->setEnabled(canGoNext());
 }
 

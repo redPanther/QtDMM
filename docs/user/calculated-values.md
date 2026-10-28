@@ -11,7 +11,7 @@ printing all work on the calculated value exactly as on a measured one.
 
 1. Put the meters into [My devices](my-devices.md) and open them in one
    QtDMM: one in the window, the others with *Connect* in their context
-   menu in the sidebar (or *Beside it* at the end of *Add device*). The
+   menu in the sidebar (or *Connect* at the end of *Add device*). The
    node **Open devices** of the sidebar (F9) lists them.
 2. Each one is a variable by its name in My devices: lower case, other
    characters than letters and digits as `_`, so *UT61E Bench* is
@@ -27,7 +27,7 @@ printing all work on the calculated value exactly as on a measured one.
       the values the open devices currently deliver, and which devices are
       open; a formula that does not parse is shown in red with the
       position of the error.
-4. *In this window* (or *Beside it*): it connects at once. The status line
+4. *Connect*: it connects at once. The status line
    reads *Calculating u * i* and the display shows the power.
 
 Values are combined in their base units (volts, amperes, ohms), whatever

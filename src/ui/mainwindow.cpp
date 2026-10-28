@@ -907,10 +907,6 @@ void MainWindow::addDevice()
   dlg.setSigrokExe(m_wid->settings()->getString("Port settings/sigrok_exe", "sigrok-cli"));
   dlg.setCalcInputs(m_session->calcInputs());
   dlg.setPlacesInUse(placesInUse());
-  if (m_wid->dmmConfigured())
-    dlg.setCurrentDevice(m_wid->dmmTitle());
-  else
-    dlg.setTargetChoice(false);   // an empty window: the device goes into it
   if (dlg.exec() != QDialog::Accepted)
     return;
   QVariantMap keys = dlg.keys();
@@ -925,10 +921,14 @@ void MainWindow::addDevice()
     m_wid->devices()->update(id, keys);
     m_wid->devices()->rename(id, dlg.name());
   }
-  if (dlg.target() == AddDeviceDlg::Beside)
-    openBeside(id);
-  else
-    m_wid->switchDevice(id);
+  // Connect: beside the window's device, into an empty window; Save only: My devices alone
+  if (dlg.target() == AddDeviceDlg::Connect)
+  {
+    if (m_wid->dmmConfigured())
+      openBeside(id);
+    else
+      m_wid->switchDevice(id);
+  }
   // the second device: from now on there is a choice
   if (DeviceSidebar::opensAfterAdd(before, int(m_wid->devices()->list().size())))
   {
@@ -1858,8 +1858,11 @@ void MainWindow::updateOpenDevices()
     row.name = here && ctl->deviceName().isEmpty() ? m_wid->dmmTitle() : ctl->deviceName();
     row.current = ctl == activeController();
     row.connected = here ? (m_activeOther ? m_windowConnect : action_Connect->isChecked()) : ctl->dmm()->isWanted();
+    // disconnected: says so, not its last reading
     const Reading &r = ctl->lastReading();
-    if (r.msecs > 0)
+    if (!row.connected)
+      row.value = tr("disconnected");
+    else if (r.msecs > 0)
     {
       row.value = readingText(r);
       row.active = now - r.msecs < 3000;

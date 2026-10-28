@@ -142,9 +142,8 @@ Drag a device to change the order.
 or **+ Add device...** at the end of My devices in the sidebar) asks step
 by step: how the meter is connected - *Cable*, *Bluetooth*, *Network*,
 *sigrok* or *Simulated / calculated* -, which meter it is, with a name, and
-where it goes: **In this window** as the current device, or **Beside it**,
-opened beside the current device as with *Connect*. Either way it is
-kept in My devices. The page of the meter offers only the models of that
+whether to connect it now: **Connect** keeps it in My devices and connects
+it at once, **Save only** keeps it in My devices without connecting. The page of the meter offers only the models of that
 connection; *Next* waits until what the meter needs is filled in (the port,
 the key of a Victron device, a formula that works).
 

@@ -73,8 +73,8 @@ int main(int argc, char **argv)
     dlg.back();
     check(dlg.page() == AddDeviceDlg::DevicePage, "back to page 3");
     dlg.next();
-    dlg.findChild<QToolButton *>("ui_beside")->click();
-    check(dlg.result() == QDialog::Accepted && dlg.target() == AddDeviceDlg::Beside, "beside finishes");
+    dlg.findChild<QToolButton *>("ui_connect")->click();
+    check(dlg.result() == QDialog::Accepted && dlg.target() == AddDeviceDlg::Connect, "Connect finishes");
     check(dlg.keys().value("DMM/model") == "QtDMM Simulated meter", "keys: the model");
   }
 
@@ -155,21 +155,17 @@ int main(int argc, char **argv)
     }
   }
 
-  // 2b. the empty start: no page 4, page 3 finishes with Add into this window
+  // 2b. page 4 always: Save only keeps it in My devices without connecting
   {
     AddDeviceDlg dlg(&library);
     dlg.setDiscoverers(noSearch);
-    dlg.setTargetChoice(false);
     dlg.chooseConnection(AddDeviceDlg::Simulated);
-    QPushButton *add = nullptr;
-    for (QPushButton *b : dlg.findChildren<QPushButton *>())
-      if (b->text() == "A&dd" && !b->isHidden())
-        add = b;
-    check(add && add->isEnabled(), "empty start: Add on page 3");
     dlg.next();
-    check(dlg.page() != AddDeviceDlg::TargetPage, "empty start: no page 4");
-    check(dlg.result() == QDialog::Accepted && dlg.target() == AddDeviceDlg::ThisWindow,
-          "empty start: into this window");
+    check(dlg.page() == AddDeviceDlg::TargetPage, "page 4 also in an empty window");
+    QToolButton *keep = dlg.findChild<QToolButton *>("ui_saveOnly");
+    check(keep && keep->text().contains("without connecting"), "Save only: says so");
+    keep->click();
+    check(dlg.result() == QDialog::Accepted && dlg.target() == AddDeviceDlg::SaveOnly, "Save only finishes");
   }
 
   // 3. the name follows the model until it is typed in
@@ -204,11 +200,10 @@ int main(int argc, char **argv)
     check(dlg.target() == AddDeviceDlg::NoTarget, "cancel: no target");
   }
 
-  // 4. cable: the finds as cards, recognised ones first; a port typed in; this window
+  // 4. cable: the finds as cards, recognised ones first; a port typed in; Connect
   {
     AddDeviceDlg dlg(&library);
     dlg.setDiscoverers(noSearch);
-    dlg.setCurrentDevice("UT803");
     const QString hidPlace = DeviceLibrary::place({ { "Port settings/device", "HID 0x1a86:0xe008 /dev/hidraw3" } });
     dlg.setPlacesInUse({ { hidPlace, "In use by the instance u" } });
     dlg.chooseConnection(AddDeviceDlg::Cable);
@@ -251,11 +246,10 @@ int main(int argc, char **argv)
     check(dlg.keys().value("Port settings/device") == "SERIAL /dev/ttyACM0", "typed port: " + dlg.keys().value("Port settings/device").toString());
     check(dlg.name() == "Meter", "nothing known of the port: manual settings: " + dlg.name());
     dlg.next();
-    QToolButton *here = dlg.findChild<QToolButton *>("ui_thisWindow");
-    check(here->text().contains("as the current device") && here->toolTip().contains("UT803"),
-          "this window: as the current device, the meter now in the tooltip: " + here->toolTip());
-    here->click();
-    check(dlg.target() == AddDeviceDlg::ThisWindow, "this window finishes");
+    QToolButton *connectNow = dlg.findChild<QToolButton *>("ui_connect");
+    check(connectNow->text().contains("connect at once"), "Connect: into My devices and connect at once");
+    connectNow->click();
+    check(dlg.target() == AddDeviceDlg::Connect, "Connect finishes");
   }
 
   // 4b. a find that is one of My devices: that entry, no second one
