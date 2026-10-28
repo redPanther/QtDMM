@@ -55,7 +55,9 @@ class DeviceLibrary;
 /// The meter session itself - connection, min/max memory, alarms, SCPI
 /// server, the alarms' programs - is a MeterController, which InstanceWidget creates.
 /// The views (display, analog meter, readings table, graph) are connected to
-/// its signals here and know nothing of each other. MainWindow provides the
+/// its signals here and know nothing of each other. The display is the
+/// window's FrontPanel; the meters open beside have front panels of their
+/// own, which MainWindow keeps (without alarms and limit test so far). MainWindow provides the
 /// frame (menus, toolbars, docks, status bar) and hooks its actions up to
 /// the *SLOT members here.
 class InstanceWidget : public QFrame, private Ui::UIInstanceWidget

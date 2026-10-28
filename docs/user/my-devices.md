@@ -38,9 +38,23 @@ meter shows it whenever there are devices to choose from - pick one, or add
 a new one with the big **Add device** button.
 
 Below My devices the node **Open devices** lists the meters this QtDMM
-reads with their current reading: this window's own in bold, then those
-opened beside it (**Open beside**, see below); *Close* in the context menu
-of one closes it. **Services** shows what this window offers to other
+reads with their current reading: this window's own, then those opened
+beside it (**Open beside**, see below). The active device is in bold, one
+not connected is grey. A double click or *Show front panel* in the context
+menu brings its front panel back; *Connect*/*Disconnect* there connects or
+disconnects it, *Close* closes one opened beside.
+
+### Several meters: front panels and the active device
+
+Each open meter has its own front panel: its LCD with its keys, as a
+window next to the analog meter. The X of a front panel only hides it, the
+meter stays open and keeps recording. The meter of the front panel clicked
+last is the **active device**: *Connect*, *Reset* (min/max) and the device
+settings (Shift+F8) act on it. The status bar shows its name while more
+than one meter is open. All front panels share the LCD colours of the
+window's display. The window layout remembers the meters open beside and
+opens them again at the next start, after the window's own; a workspace
+file does the same when it is loaded. **Services** shows what this window offers to other
 programs: the [SCPI server and HiSLIP](scpi-server.md) with their port, or
 *off*.
 
@@ -100,7 +114,7 @@ The context menu of a device:
     device in use takes them at once.
 - **Rename** - in place.
 - **Open beside** - opens the device in this QtDMM beside the window's
-  device, without a view of its own for now: it shows its reading in
+  device, with a front panel of its own: it shows its reading there and in
   **Open devices**, records whenever the window records, is a variable in
   [calculated values](calculated-values.md) and answers over SCPI
   (`INSTrument`). A device whose port the window uses is not opened twice.
