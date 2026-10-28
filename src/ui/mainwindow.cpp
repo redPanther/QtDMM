@@ -312,8 +312,6 @@ void MainWindow::createViews()
   // the scatter of the main value: every reading, also while hidden
   m_poincare = new PoincarePlot(this);
   m_poincare->setSettings(m_wid->settings());
-  connect(m_wid->controller(), &MeterController::reading, m_poincare, &PoincarePlot::addReading);
-  connect(m_wid->controller(), &MeterController::staleChanged, m_poincare, &PoincarePlot::setStale);
   connect(m_wid, &InstanceWidget::meterChanged, m_poincare, &PoincarePlot::clear);
   m_poincareWin = addView(m_poincare, tr("Poincaré plot"), MdiArranger::Table, "poincare");
   m_wid->setPoincare(m_poincare);

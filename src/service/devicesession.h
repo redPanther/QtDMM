@@ -8,6 +8,7 @@
 #include <QString>
 #include <QVariantMap>
 
+#include "core/valueref.h"
 #include "device/transports/calc.h"
 
 class DeviceLibrary;
@@ -60,6 +61,9 @@ public:
   QList<MeterController *> controllers() const;
   /// The meter whose readings come from @p source (MeterController::source()).
   MeterController *controller(const QString &source) const;
+  /// The meter of @p value: the window's for an empty source, nullptr while
+  /// that meter is not open.
+  MeterController *controller(const ValueRef &value) const;
   /// What a calculated value of this process reads (CalcDevice): the main
   /// value of each meter here by its name in My devices, as a variable
   /// ("UT61E Bench": ut61e_bench).

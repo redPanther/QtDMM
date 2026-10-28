@@ -248,6 +248,11 @@ MeterController *DeviceSession::controller(const QString &source) const
   return nullptr;
 }
 
+MeterController *DeviceSession::controller(const ValueRef &value) const
+{
+  return value.source.isEmpty() ? m_adopted.data() : controller(value.source);
+}
+
 void DeviceSession::installScpi()
 {
   ScpiServer::DeviceControl control;

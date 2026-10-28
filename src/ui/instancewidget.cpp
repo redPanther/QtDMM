@@ -56,6 +56,7 @@
 #include "core/siprefix.h"
 #include "core/settings.h"
 #include "service/devicesession.h"
+#include "service/valuefeed.h"
 
 
 
@@ -70,6 +71,13 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   m_session = session;
   m_ctl = new MeterController(this, session->host());
   session->adopt(m_ctl);
+  // the views' values: of the window's meter or of another one open here
+  m_lcdFeed = new ValueFeed(session, this);
+  m_meterFeed = new ValueFeed(session, this);
+  m_poincareFeed = new ValueFeed(session, this);
+  m_lcdFeed->setValue(ValueRef());
+  m_meterFeed->setValue(ValueRef());
+  m_poincareFeed->setValue(ValueRef());
   connect(session, &DeviceSession::error, this, &InstanceWidget::error);
   connect(session, &DeviceSession::info, this, &InstanceWidget::info);
   m_ctl->setInstanceId(instanceId.isEmpty() ? QString("default") : instanceId);
@@ -301,21 +309,38 @@ void InstanceWidget::setDisplay(LcdWidget *display)
     lcd = m_settings->getColor("Display/display-background", LcdWidget::classicFace()) == LcdWidget::classicFace()
             ? "blue" : "custom";
   display->setLcdVariant(LcdWidget::lcdVariantFromName(lcd));
-  connect(m_ctl, &MeterController::reading, display, &LcdWidget::showReading);
-  connect(m_ctl, &MeterController::staleChanged, display, &LcdWidget::setStale);
-  connect(m_ctl, &MeterController::minimumChanged, display, &LcdWidget::showMinimum);
-  connect(m_ctl, &MeterController::maximumChanged, display, &LcdWidget::showMaximum);
-  connect(m_ctl, &MeterController::minMaxReset, display, &LcdWidget::clearMinMax);
+  connect(m_lcdFeed, &ValueFeed::reading, display, &LcdWidget::showReading);
+  connect(m_lcdFeed, &ValueFeed::staleChanged, display, &LcdWidget::setStale);
+  connect(m_lcdFeed, &ValueFeed::minimumChanged, display, &LcdWidget::showMinimum);
+  connect(m_lcdFeed, &ValueFeed::maximumChanged, display, &LcdWidget::showMaximum);
+  connect(m_lcdFeed, &ValueFeed::minMaxReset, display, &LcdWidget::clearMinMax);
+  // another meter: its lines afresh, none of the one before
+  connect(m_lcdFeed, &ValueFeed::controllerChanged, display, [display]
+  {
+    display->clearMinMax();
+    for (int id = 0; id < kMaxValues; ++id)
+    {
+      Reading none;
+      none.id = id;
+      none.quality = Quality::NoValue;
+      display->showReading(none);
+    }
+  });
   display->setLimitTest(m_ctl->limitTest().enabled);
 }
 
 void InstanceWidget::setMeter(AnalogMeter *meter)
 {
   m_meter = meter;
-  connect(m_ctl, &MeterController::reading, meter, &AnalogMeter::showReading);
-  connect(m_ctl, &MeterController::staleChanged, meter, &AnalogMeter::setStale);
+  connect(m_meterFeed, &ValueFeed::reading, meter, &AnalogMeter::showReading);
+  connect(m_meterFeed, &ValueFeed::staleChanged, meter, &AnalogMeter::setStale);
   // the memory of the value it shows, whichever the LCD follows
-  connect(m_ctl, &MeterController::valueMinMaxChanged, meter, &AnalogMeter::showValueMinMax);
+  connect(m_meterFeed, &ValueFeed::valueMinMaxChanged, meter, &AnalogMeter::showValueMinMax);
+  connect(m_meterFeed, &ValueFeed::controllerChanged, meter, [meter]
+  {
+    meter->reset();
+    meter->clearMinMax();
+  });
   applyValueChoice();
   applyLimitBands();
 }
@@ -323,6 +348,9 @@ void InstanceWidget::setMeter(AnalogMeter *meter)
 void InstanceWidget::setPoincare(PoincarePlot *plot)
 {
   m_poincare = plot;
+  connect(m_poincareFeed, &ValueFeed::reading, plot, &PoincarePlot::addReading);
+  connect(m_poincareFeed, &ValueFeed::staleChanged, plot, &PoincarePlot::setStale);
+  connect(m_poincareFeed, &ValueFeed::controllerChanged, plot, &PoincarePlot::clear);
   applyValueChoice();
 }
 
@@ -404,21 +432,28 @@ void InstanceWidget::applyValueCount()
 void InstanceWidget::applyValueChoice()
 {
   updateValueNames();
-  const int lcd = ownValue(m_lcdValue);
+  // the window's meter by an empty source: it stays the window's when
+  // the window switches to another device; another meter's value as it is
+  auto feedValue = [this](const ValueRef &value)
+  {
+    return ownMeter(value) ? ValueRef(ownValue(value)) : value;
+  };
+  m_lcdFeed->setValue(feedValue(m_lcdValue));
+  m_meterFeed->setValue(feedValue(m_meterValue));
+  m_poincareFeed->setValue(feedValue(m_poincareValue));
   // the LCD itself falls back while the meter has fewer values (primaryShown())
   if (m_display)
-    m_display->setPrimary(ownMeter(m_lcdValue) ? m_lcdValue.id : 0);
-  m_ctl->setMinMaxValue(lcd);
+    m_display->setPrimary(m_lcdValue.id);
+  m_ctl->setMinMaxValue(ownValue(m_lcdValue));
   if (m_meter)
   {
-    const int id = ownValue(m_meterValue);
+    const int id = m_meterFeed->value().id;
     m_meter->setValueId(id);
-    const MinMaxMemory &mm = m_ctl->valueMinMax(id);
-    if (!mm.isEmpty())
-      m_meter->showValueMinMax(id, mm.minimum(), mm.maximum());
+    if (const MeterController *ctl = m_meterFeed->controller(); ctl && !ctl->valueMinMax(id).isEmpty())
+      m_meter->showValueMinMax(id, ctl->valueMinMax(id).minimum(), ctl->valueMinMax(id).maximum());
   }
   if (m_poincare)
-    m_poincare->setValueId(ownValue(m_poincareValue));
+    m_poincare->setValueId(m_poincareFeed->value().id);
 }
 
 void InstanceWidget::setReadingLog(ReadingsModel *log)
