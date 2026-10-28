@@ -6,25 +6,41 @@
 
 #include <QCoreApplication>
 
+#include "core/valueref.h"
+
 class QMenu;
+class FrontPanel;
 class InstanceWidget;
 
-/// The context menu of one of the meter's values (a value row of the
-/// sidebar): which window shows it, and where. One entry per kind of view -
-/// LCD as the main value or on the left or right of the small line (a
-/// choice takes the place, the value there swaps with it), Analog meter (one value), Graph shown or not and on
-/// which axis, Poincaré plot (one value). A choice opens the window it is for.
+/// The context menu of one value of an open meter (a value row of the
+/// sidebar, or the row of a meter with one value): which window shows it,
+/// and where. One entry per kind of view - LCD as the main value or on the
+/// left or right of the small line of the meter's front panel (a choice
+/// takes the place, the value there swaps with it), Analog meter (one
+/// value), Graph shown or not and on which axis, Poincaré plot (one value),
+/// Readings table. A choice opens the window it is for.
 ///
-/// It knows only the instance's choice of values (InstanceWidget) and asks
-/// the caller to open a window: with more meters (27.1) the same menu goes
-/// below a device of My devices, with a choice of window.
+/// The window's meter's values go to InstanceWidget, another meter's to its
+/// FrontPanel and to the views by their ValueRef.
 class ValueMenu
 {
   Q_DECLARE_TR_FUNCTIONS(ValueMenu)
 public:
   enum class View { Lcd, Meter, Poincare, Graph, Table };
 
-  /// Fills @p menu for value @p id (Reading::id) of @p wid; @p show opens the
-  /// window of a view.
-  static void fill(QMenu *menu, InstanceWidget *wid, int id, const std::function<void(View)> &show);
+  /// What the menu acts on.
+  struct Target
+  {
+    InstanceWidget *wid = nullptr;
+    /// The front panel of another meter by its source, nullptr when none.
+    std::function<FrontPanel *(const QString &source)> panel;
+    /// The readings table shows a value, and showing it.
+    std::function<bool(const ValueRef &)> tableShown;
+    std::function<void(const ValueRef &, bool)> setTableShown;
+    /// Opens the window of a view; for the LCD the meter's front panel (@p source).
+    std::function<void(View, const QString &source)> show;
+  };
+
+  /// Fills @p menu for @p value of an open meter.
+  static void fill(QMenu *menu, const Target &target, const ValueRef &value);
 };

@@ -60,6 +60,17 @@ ValueRef FrontPanel::value() const
   return m_feed->value();
 }
 
+void FrontPanel::setSecondaries(const std::optional<QList<int>> &ids)
+{
+  m_secondariesChosen = ids.has_value();
+  m_display->setSecondaries(ids);
+}
+
+QList<int> FrontPanel::secondaries() const
+{
+  return m_display->secondaries();
+}
+
 MeterController *FrontPanel::controller() const
 {
   return m_feed->controller();

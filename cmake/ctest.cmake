@@ -107,6 +107,12 @@ if (BUILD_TESTING)
 	## one meter's front: its LCD follows the meter of its value, keys only where the meter has them
 	qtdmm_add_test(front_panel test_frontpanel tests/test_frontpanel.cpp)
 
+	## the menu of a value: the LCD place on the meter's front panel, graph axis, analog meter, table
+	qtdmm_add_test(value_menu test_valuemenu tests/test_valuemenu.cpp)
+
+	## "Sources..." of a view: the open meters' values, several or one
+	qtdmm_add_test(sources_dialog test_sourcesdlg tests/test_sourcesdlg.cpp)
+
 	## the settings pages: keys through the pages, fields with their choice,
 	## the recording length asked by Record
 	qtdmm_add_test(settings_pages test_settingspages tests/test_settingspages.cpp)

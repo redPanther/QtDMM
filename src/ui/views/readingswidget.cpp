@@ -48,7 +48,7 @@ public:
 protected:
   bool filterAcceptsRow(int row, const QModelIndex &) const override
   {
-    return !m_log->hiddenValues().contains(m_log->entry(row).id);
+    return m_log->rowShown(row);
   }
 
 private:
@@ -208,6 +208,13 @@ ReadingsWidget::ReadingsWidget(QWidget *parent) :
     fitColumns();
   });
   m_view->setColumnHidden(ReadingsModel::Limit, !m_log->hasVerdicts());
+  // the meter of each row, while there is more than one
+  connect(m_log, &ReadingsModel::devicesChanged, this, [this](bool on)
+  {
+    m_view->setColumnHidden(ReadingsModel::Device, !on);
+    fitColumns();
+  });
+  m_view->setColumnHidden(ReadingsModel::Device, !m_log->hasDevices());
   m_need.fill(0, ReadingsModel::ColumnCount);
   measureRows(0, -1);
   updateStats();
@@ -227,6 +234,7 @@ void ReadingsWidget::applyFilter()
     m_view->setModel(model);
     m_view->setColumnHidden(ReadingsModel::Number, !m_log->hasOtherValues());
     m_view->setColumnHidden(ReadingsModel::Limit, !m_log->hasVerdicts());
+    m_view->setColumnHidden(ReadingsModel::Device, !m_log->hasDevices());
     fitColumns();
   }
   // the filter has a new row only after the model's signal: follow it from

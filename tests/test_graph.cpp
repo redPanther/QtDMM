@@ -1954,6 +1954,19 @@ int main(int argc, char **argv)
     check(!amps.isEmpty() && qAbs(amps.first().x() - 2.0) < 0.15,
           QString("its time: from 2 s on, %1").arg(amps.isEmpty() ? -1 : amps.first().x()));
     check(graph.legendText().contains("Sim B"), "its name in the legend: " + graph.legendText());
+    // an axis chosen: its V on the right is no room (A is there), with a notice
+    QSignalSpy notices(&graph, &GraphWidget::notice);
+    graph.setOtherValueAxis(ValueRef(1, "device:b"), GraphWidget::AxisRight);
+    check(!graph.otherCurveShown(1) && graph.otherValueSide(ValueRef(1, "device:b")) == GraphWidget::AxisAuto
+            && notices.size() == 1,
+          "its V chosen on the right beside A: not drawn, a notice");
+    graph.setOtherValueAxis(ValueRef(1, "device:b"), GraphWidget::AxisLeft);
+    check(graph.otherValueSide(ValueRef(1, "device:b")) == GraphWidget::AxisLeft
+            && graph.otherValueColor(ValueRef(1, "device:b")).isValid(),
+          "its V chosen on the left: drawn there, with its colour");
+    graph.setOtherValueShown(ValueRef(1, "device:b"), false);
+    check(graph.otherValues() == QList<ValueRef>{ ValueRef(0, "device:b") }, "one hidden: one kept");
+    graph.setOtherValueShown(ValueRef(1, "device:b"), true);
     open = false;
     graph.otherStoresChanged();
     check(!graph.otherCurveShown(0) && !graph.otherCurveShown(1) && graph.otherValues().size() == 2

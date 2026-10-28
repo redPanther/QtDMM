@@ -218,7 +218,7 @@ int main(int argc, char **argv)
     check(!sidebar.openItem("p") && sidebar.openNode()->childCount() == 2, "closed one gone");
   }
 
-  // 7b. this window's values below its device: a row each with the reading,
+  // 7b. the values below each open device: a row each with the reading,
   //     the curve's colour while in the graph, the menu per value
   {
     QList<DeviceSidebar::OpenDevice> rows;
@@ -228,11 +228,15 @@ int main(int argc, char **argv)
                                                { 1, "Current DC", "-14.9 A", QColor() },
                                                { 2, "Value 3", "", QColor() } };
     rows[0].values = values;
-    rows[1].values = values;   // one beside it: not shown here
+    rows[1].values = values;
     sidebar.setOpenDevices(rows, "device:w");
     QTreeWidgetItem *own = sidebar.openItem("device:w");
     check(own && own->childCount() == 3, QString("three values, got %1 rows").arg(own ? own->childCount() : -1));
-    check(sidebar.openItem("u")->childCount() == 0, "the values of one beside it are not here");
+    check(sidebar.openItem("u")->childCount() == 3, "the values of one beside it too");
+    const ValueRef beside = sidebar.valueOf(sidebar.valueItem(2, "u"));
+    check(beside == ValueRef(2, "device:u"), "a value beside it by its source: " + beside.toString());
+    check(sidebar.valueOf(sidebar.valueItem(1)) == ValueRef(1), "the window's by an empty source");
+    check(sidebar.valueOf(own).source == "-", "a device row with value rows is no value");
     QTreeWidgetItem *current = sidebar.valueItem(1);
     check(current && current->text(0) == "2  Current DC" && current->text(1) == "-14.9 A", "the row of value 2");
     check(sidebar.valueItem(0)->toolTip(0).contains("graph") && !current->toolTip(0).contains("graph"),
@@ -245,7 +249,8 @@ int main(int argc, char **argv)
     check(!own->isExpanded(), "folded away it stays so");
     own->setExpanded(true);
     int menuFor = -1;
-    QObject::connect(&sidebar, &DeviceSidebar::valueMenuRequested, [&](int id, const QPoint &) { menuFor = id; });
+    QObject::connect(&sidebar, &DeviceSidebar::valueMenuRequested,
+                     [&](const ValueRef &v, const QPoint &) { menuFor = v.id; });
     const QRect r = sidebar.visualItemRect(current);
     QContextMenuEvent menu(QContextMenuEvent::Mouse, r.center(), sidebar.viewport()->mapToGlobal(r.center()));
     QCoreApplication::sendEvent(sidebar.viewport(), &menu);
@@ -253,6 +258,7 @@ int main(int argc, char **argv)
     rows[0].values = values.mid(0, 1);
     sidebar.setOpenDevices(rows, "device:w");
     check(own->childCount() == 0 && !sidebar.valueItem(0), "one value: no rows");
+    check(sidebar.valueOf(own) == ValueRef(0), "one value: the device row is its main value");
     // where the row is short: unit and coupling, the full name in the tooltip
     rows[0].values = values;
     rows[0].values[1].shortName = "A DC";

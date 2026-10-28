@@ -42,6 +42,7 @@
 #include "core/devicelibrary.h"
 #include "core/sampletypes.h"
 #include "core/siprefix.h"
+#include "recording/recordingstore.h"
 #include "ui/instancewidget.h"
 #include "ui/views/graphwidget.h"
 #include "ui/views/lcdwidget.h"
@@ -52,6 +53,7 @@
 #include "ui/settings/keyboardprefs.h"
 #include "ui/views/analogmeter.h"
 #include "ui/views/readingswidget.h"
+#include "ui/dialogs/sourcesdlg.h"
 #include "core/settings.h"
 #include "ui/alarmbar.h"
 #include "ui/mdiarranger.h"
@@ -278,6 +280,7 @@ void MainWindow::createViews()
   // the window's meter's front: the LCD with its keys below (only for
   // meters that have them) and the fold button in its corner
   m_panel = new FrontPanel(m_session, this);
+  m_panel->display()->installEventFilter(this);   // a click: the active device
   m_panel->setFolded(m_wid->settings()->getBool("Display/controls-hidden", false));
   m_wid->setPanel(m_panel);
   connect(m_panel, &FrontPanel::foldToggled, this, [this](bool folded) { setControlsFolded(folded); });
@@ -351,8 +354,22 @@ void MainWindow::createViews()
     connect(hide, &QAction::triggered, win, &QWidget::hide);
     return hide;
   };
-  m_wid->graph()->setWindowActions({ hideWindow(m_graphWin) });
-  m_readings->setWindowActions({ hideWindow(m_readingsWin) });
+  // the values of the open meters they show, with more than one
+  m_graphSources = new QAction(tr("S&ources..."), this);
+  m_tableSources = new QAction(tr("S&ources..."), this);
+  connect(m_graphSources, &QAction::triggered, this, [this] { editSources(ValueMenu::View::Graph); });
+  connect(m_tableSources, &QAction::triggered, this, [this] { editSources(ValueMenu::View::Table); });
+  auto sourcesShown = [this]
+  {
+    const bool several = m_session->controllers().size() > 1;
+    m_graphSources->setVisible(several);
+    m_tableSources->setVisible(several);
+  };
+  sourcesShown();
+  connect(m_session, &DeviceSession::opened, this, sourcesShown);
+  connect(m_session, &DeviceSession::closed, this, sourcesShown);
+  m_wid->graph()->setWindowActions({ hideWindow(m_graphWin), m_graphSources });
+  m_readings->setWindowActions({ hideWindow(m_readingsWin), m_tableSources });
   m_displayAction->setObjectName("action_WindowDisplay");
   m_meterAction->setObjectName("action_WindowMeter");
   m_readingsAction->setObjectName("action_WindowReadings");
@@ -361,6 +378,9 @@ void MainWindow::createViews()
   // a front panel for each meter open beside the window's, also those
   // opened before the window (--also)
   connect(m_session, &DeviceSession::opened, this, &MainWindow::addPanel);
+  // a meter of the table opened again: its readings come in again
+  connect(m_session, &DeviceSession::opened, this, &MainWindow::connectTableSources);
+  connect(m_session, &DeviceSession::closed, this, &MainWindow::connectTableSources);
   connect(m_session, &DeviceSession::closed, this, &MainWindow::removePanel);
   for (MeterController *ctl : m_session->controllers())
     addPanel(ctl);
@@ -372,6 +392,7 @@ void MainWindow::addPanel(MeterController *ctl)
     return;
   const QString id = ctl->deviceId();
   auto *panel = new FrontPanel(m_session, this);
+  panel->display()->installEventFilter(this);   // a click: the active device
   panel->setValue(ValueRef(0, ctl->source()));
   applyLcdLook(panel);
   applyFrame(panel);
@@ -405,6 +426,8 @@ void MainWindow::applyPanelState(QMdiSubWindow *win, const PanelState &state)
     ctl->setMinMaxValue(state.value.id);
   }
   panel->setFolded(state.folded);
+  if (state.secondaries)
+    panel->setSecondaries(state.secondaries);
   const QStringList g = state.geometry.split(' ');
   if (m_arranger->mode() == MdiArranger::Free && g.size() == 4)
     win->setGeometry(g[0].toInt(), g[1].toInt(), g[2].toInt(), g[3].toInt());
@@ -451,15 +474,9 @@ void MainWindow::applyLcdLook(FrontPanel *panel)
 void MainWindow::openPending()
 {
   const QStringList ids = std::exchange(m_pendingOpen, {});
-  // a panel added becomes the active window: the one before stays active
-  QMdiSubWindow *active = m_mdi->activeSubWindow();
   for (const QString &id : ids)
     if (!m_session->controller("device:" + id))
       openBeside(id);
-  // none yet at the start: the window's meter, and a click on a panel makes it active
-  m_mdi->setActiveSubWindow(active);
-  if (!active)
-    setActive(m_wid->controller());
   // a layout naming panels takes once they are there
   if (!m_pendingLayout.isEmpty() && m_arranger->setLayoutText(m_pendingLayout))
     m_arranger->arrange();
@@ -503,6 +520,7 @@ void MainWindow::createSidebar()
   });
   connect(m_sidebar, &DeviceSidebar::settingsRequested, this, [this](const QString &id) { deviceSettings(id); });
   connect(m_sidebar, &DeviceSidebar::valueMenuRequested, this, &MainWindow::valueMenu);
+  m_sidebar->setValueMenuFiller([this](QMenu *menu, const ValueRef &value) { fillValueMenu(menu, value); });
   connect(m_wid->graph(), &GraphWidget::notice, this, [this](const QString &text)
   {
     statusBar()->showMessage(text, 5000);
@@ -525,6 +543,7 @@ void MainWindow::createSidebar()
       growFor(win);
     }
     m_mdi->setActiveSubWindow(win);
+    setActive(win == m_displayWin ? m_wid->controller() : panelOf(win)->controller());
     m_arranger->arrange();
   });
   connect(m_sidebar, &DeviceSidebar::connectRequested, this, [this](const QString &id, bool on)
@@ -737,13 +756,8 @@ void MainWindow::createStatusBar()
   m_activeName->setLineWidth(1);
   statusBar()->addWidget(m_activeName);
   m_activeName->hide();
-  connect(m_mdi, &QMdiArea::subWindowActivated, this, [this](QMdiSubWindow *win)
-  {
-    if (win == m_displayWin)
-      setActive(m_wid->controller());
-    else if (FrontPanel *panel = panelOf(win))
-      setActive(panel->controller());
-  });
+  // a click on a front panel makes its meter the active one (eventFilter());
+  // Qt activates windows on its own too (one shown, one added): not that
   connect(m_session, &DeviceSession::opened, this, [this] { setActive(m_active); });
   // the active one closed: the window's again
   connect(m_session, &DeviceSession::closed, this, [this] { setActive(m_active); });
@@ -1332,6 +1346,10 @@ void MainWindow::bindWindowAction(QAction *action, QMdiSubWindow *win)
 // A window was closed with its title bar button, or shown: its action follows.
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
+  if (event->type() == QEvent::MouseButtonPress)
+    if (auto *panel = qobject_cast<FrontPanel *>(watched->parent() ? watched->parent() : watched);
+        panel && watched == panel->display())
+      setActive(panel == m_panel ? m_wid->controller() : panel->controller());
   if (watched == m_mdi && event->type() == QEvent::Resize)
     m_emptyStart->setGeometry(m_mdi->rect());
   // closing a window (its title bar button, Ctrl+F4) only hides it: a real
@@ -1426,6 +1444,12 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
     });
     connect(menu.addAction(tr("L&imits...")), &QAction::triggered, this, [this] { editLimits(false); });
   }
+  // the value of an open meter it shows
+  if ((win == m_meterWin || win == m_poincareWin) && m_session->controllers().size() > 1)
+    connect(menu.addAction(tr("S&ources...")), &QAction::triggered, this, [this, win]
+    {
+      editSources(win == m_meterWin ? ValueMenu::View::Meter : ValueMenu::View::Poincare);
+    });
   if (win == m_meterWin)
   {
     QMenu *style = menu.addMenu(tr("Meter &style"));
@@ -1496,6 +1520,230 @@ void MainWindow::updateServices()
   m_sidebar->setServices(rows);
 }
 
+// A reading as the sidebar shows it: "1.5 V DC", "OL", "" without a number.
+static QString readingText(const Reading &r)
+{
+  if (r.overload)
+    return QStringLiteral("OL");
+  if (r.noNumber())
+    return QString();
+  QString prefix;
+  const QString value = SiPrefix::format(r.value, r.baseUnit, &prefix);
+  return QString("%1 %2%3 %4").arg(value.left(8), prefix, r.baseUnit, couplingText(r.port.defining)).trimmed();
+}
+
+void MainWindow::editSources(ValueMenu::View view)
+{
+  // the open meters with their values; the window's by an empty source
+  QList<SourcesDlg::Meter> meters;
+  QList<ValueRef> all;
+  for (const MeterController *ctl : m_session->controllers())
+  {
+    SourcesDlg::Meter meter;
+    const bool own = ctl == m_wid->controller();
+    meter.source = own ? QString() : ctl->source();
+    meter.name = own && ctl->deviceName().isEmpty() ? m_wid->dmmTitle() : ctl->deviceName();
+    const int count = own ? m_wid->numValues() : ctl->valueCount();
+    for (int id = 0; id < count; ++id)
+    {
+      meter.values << (own ? m_wid->valueName(id) : otherValueRow(ctl, id).name);
+      all << ValueRef(id, meter.source);
+    }
+    meters << meter;
+  }
+  GraphWidget *graph = m_wid->graph();
+  const bool several = view == ValueMenu::View::Graph || view == ValueMenu::View::Table;
+  QList<ValueRef> chosen;
+  QString name;
+  switch (view)
+  {
+    case ValueMenu::View::Graph:
+      name = tr("Graph");
+      if (graph->mainShown())
+        chosen << ValueRef(0);
+      for (int id : graph->shownValues())
+        chosen << ValueRef(id);
+      chosen << graph->otherValues();
+      break;
+    case ValueMenu::View::Table:
+      name = tr("Readings table");
+      for (const ValueRef &v : std::as_const(all))
+        if (tableShows(v))
+          chosen << v;
+      break;
+    case ValueMenu::View::Meter:
+      name = tr("Analog meter");
+      chosen << m_wid->meterValue();
+      break;
+    default:
+      name = tr("Poincaré plot");
+      chosen << m_wid->poincareValue();
+      break;
+  }
+  SourcesDlg dlg(name, several, meters, this);
+  dlg.setChosen(chosen);
+  if (dlg.exec() != QDialog::Accepted)
+    return;
+  const QList<ValueRef> picked = dlg.chosen();
+  if (!several && picked.isEmpty())
+    return;
+  switch (view)
+  {
+    case ValueMenu::View::Graph:
+    {
+      QList<ValueRef> others;
+      for (const ValueRef &v : picked)
+        if (!v.source.isEmpty())
+          others << v;
+      for (int id = 0; id < kMaxValues; ++id)
+        graph->setValueShown(id, picked.contains(ValueRef(id)));
+      graph->setOtherValues(others);
+      action_Graph->setChecked(true);
+      break;
+    }
+    case ValueMenu::View::Table:
+    {
+      ReadingsModel *log = m_readings->log();
+      QStringList others;
+      for (const ValueRef &v : std::as_const(all))
+      {
+        log->setValueHidden(v, !picked.contains(v));
+        if (!v.source.isEmpty() && picked.contains(v) && !others.contains(v.source))
+          others << v.source;
+      }
+      if (others != m_tableOthers)
+      {
+        m_tableOthers = others;
+        applyTableSources();
+      }
+      m_readingsAction->setChecked(true);
+      break;
+    }
+    case ValueMenu::View::Meter:
+      m_wid->setMeterValue(picked.first());
+      m_meterAction->setChecked(true);
+      break;
+    default:
+      m_wid->setPoincareValue(picked.first());
+      m_poincareAction->setChecked(true);
+      break;
+  }
+  updateOpenDevices();
+}
+
+QString MainWindow::sourceName(const QString &source) const
+{
+  const QString id = source.startsWith("device:") ? source.mid(7) : QString();
+  if (const std::optional<MyDevice> device = m_wid->devices()->find(id))
+    return device->name;
+  return source == m_wid->controller()->source() ? m_wid->dmmTitle() : source;
+}
+
+bool MainWindow::tableShows(const ValueRef &value) const
+{
+  const ValueRef ref = m_wid->ownMeter(value) ? ValueRef(value.id) : value;
+  const ReadingsModel *log = m_readings->log();
+  return (ref.source.isEmpty() || m_tableOthers.contains(ref.source)) && !log->hiddenValues().contains(ref);
+}
+
+void MainWindow::setTableShown(const ValueRef &value, bool shown)
+{
+  const ValueRef ref = m_wid->ownMeter(value) ? ValueRef(value.id) : value;
+  ReadingsModel *log = m_readings->log();
+  if (ref.source.isEmpty())
+  {
+    log->setValueHidden(ref, !shown);
+    return;
+  }
+  const MeterController *ctl = m_session->controller(ref.source);
+  const int count = ctl ? ctl->valueCount() : kMaxValues;
+  if (shown && !m_tableOthers.contains(ref.source))
+  {
+    // another meter comes in with this value only
+    for (int id = 0; id < count; ++id)
+      log->setValueHidden(ValueRef(id, ref.source), id != ref.id);
+    m_tableOthers << ref.source;
+    applyTableSources();
+    return;
+  }
+  log->setValueHidden(ref, !shown);
+  // none of its values left: it goes out of the table
+  bool any = false;
+  for (int id = 0; id < count; ++id)
+    any = any || !log->hiddenValues().contains(ValueRef(id, ref.source));
+  if (!any)
+  {
+    for (int id = 0; id < kMaxValues; ++id)
+      log->setValueHidden(ValueRef(id, ref.source), false);
+    m_tableOthers.removeAll(ref.source);
+    applyTableSources();
+  }
+}
+
+void MainWindow::applyTableSources()
+{
+  ReadingsModel *log = m_readings->log();
+  const int rows = log->maxRows();
+  const QString own = m_wid->controller()->source();
+  log->setDevices(!m_tableOthers.isEmpty(), own, [this](const QString &source) { return sourceName(source); });
+  if (m_tableOthers.isEmpty())
+  {
+    // the window's recorder's readings, as always
+    log->setStore(m_wid->controller()->recorder());
+    connectTableSources();
+    return;
+  }
+  // the rows the meters' recorders hold, merged by time, into the table's own store
+  QList<LoggedReading> merged;
+  for (const MeterController *ctl : m_session->controllers())
+    if (ctl == m_wid->controller() || m_tableOthers.contains(ctl->source()))
+      for (int i = 0; i < ctl->recorder()->readingCount(); ++i)
+      {
+        LoggedReading row = ctl->recorder()->readingAt(i);
+        row.source = ctl->source();
+        merged << row;
+      }
+  std::stable_sort(merged.begin(), merged.end(),
+                   [](const LoggedReading &a, const LoggedReading &b) { return a.when < b.when; });
+  log->setStore(nullptr);
+  log->setMaxRows(rows);
+  for (const LoggedReading &row : std::as_const(merged).mid(qMax(qsizetype(0), merged.size() - rows)))
+    log->store()->logRow(row);
+  connectTableSources();
+}
+
+void MainWindow::connectTableSources()
+{
+  for (const QMetaObject::Connection &c : std::as_const(m_tableLinks))
+    disconnect(c);
+  m_tableLinks.clear();
+  if (m_tableOthers.isEmpty())
+    return;   // the window's recorder feeds the table
+  ReadingsModel *log = m_readings->log();
+  for (MeterController *ctl : m_session->controllers())
+    if (ctl == m_wid->controller() || m_tableOthers.contains(ctl->source()))
+      m_tableLinks << connect(ctl, &MeterController::reading, log, &ReadingsModel::appendReading);
+}
+
+DeviceSidebar::Value MainWindow::otherValueRow(const MeterController *ctl, int id) const
+{
+  const Reading r = ctl->lastReading(id);
+  DeviceSidebar::Value row;
+  row.id = id;
+  if (r.msecs <= 0)
+    row.name = tr("Value %1").arg(id + 1);
+  else
+  {
+    row.name = r.name.isEmpty() ? RecordingStore::describe(r.port, r.baseUnit) : r.name;
+    row.text = readingText(r);
+    const QString unit = SiPrefix::displayText(r.baseUnit);
+    if (r.name.isEmpty() && !unit.isEmpty())
+      row.shortName = QString("%1 %2").arg(unit, couplingText(r.port.defining)).trimmed();
+  }
+  row.color = m_wid->graph()->otherValueColor(ValueRef(id, ctl->source()));
+  return row;
+}
+
 void MainWindow::updateOpenDevices()
 {
   // the active one connected or disconnected elsewhere (SCPI, an error)
@@ -1518,17 +1766,10 @@ void MainWindow::updateOpenDevices()
     const Reading &r = ctl->lastReading();
     if (r.msecs > 0)
     {
-      if (r.overload)
-        row.value = QStringLiteral("OL");
-      else if (!r.noNumber())
-      {
-        QString prefix;
-        const QString value = SiPrefix::format(r.value, r.baseUnit, &prefix);
-        row.value = QString("%1 %2%3 %4").arg(value.left(8), prefix, r.baseUnit, couplingText(r.port.defining)).trimmed();
-      }
+      row.value = readingText(r);
       row.active = now - r.msecs < 3000;
     }
-    // this window's values, with what the graph shows
+    // its values, with what the graph shows
     if (here)
       for (int value = 0; value < m_wid->numValues(); ++value)
       {
@@ -1538,25 +1779,47 @@ void MainWindow::updateOpenDevices()
                                             drawn ? m_wid->graph()->valueColor(value) : QColor(),
                                             m_wid->valueShortName(value) };
       }
+    else
+      for (int value = 0; value < ctl->valueCount(); ++value)
+        row.values << otherValueRow(ctl, value);
     rows << row;
   }
   m_sidebar->setOpenDevices(rows, own);
 }
 
-void MainWindow::valueMenu(int id, const QPoint &globalPos)
+void MainWindow::valueMenu(const ValueRef &value, const QPoint &globalPos)
 {
   QMenu menu(this);
-  ValueMenu::fill(&menu, m_wid, id, [this](ValueMenu::View view)
+  fillValueMenu(&menu, value);
+  menu.exec(globalPos);
+  updateOpenDevices();
+}
+
+void MainWindow::fillValueMenu(QMenu *menu, const ValueRef &value)
+{
+  ValueMenu::Target target;
+  target.wid = m_wid;
+  target.panel = [this](const QString &source) { return panelOf(m_panelWins.value(source)); };
+  target.tableShown = [this](const ValueRef &v) { return tableShows(v); };
+  target.setTableShown = [this](const ValueRef &v, bool on) { setTableShown(v, on); };
+  target.show = [this](ValueMenu::View view, const QString &source)
   {
+    QMdiSubWindow *panel = m_panelWins.value(source);
+    if (view == ValueMenu::View::Lcd && panel)
+    {
+      panel->show();
+      m_mdi->setActiveSubWindow(panel);
+      m_arranger->arrange();
+      return;
+    }
     QAction *action = view == ValueMenu::View::Lcd     ? m_displayAction
                     : view == ValueMenu::View::Meter   ? m_meterAction
                     : view == ValueMenu::View::Poincare ? m_poincareAction
                     : view == ValueMenu::View::Table   ? m_readingsAction
                                                         : action_Graph;
     action->setChecked(true);
-  });
-  menu.exec(globalPos);
-  updateOpenDevices();
+  };
+  ValueMenu::fill(menu, target, value);
 }
 
 void MainWindow::deviceSettings(const QString &id, bool settingsTab)
@@ -1739,6 +2002,13 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
     PanelState state;
     state.value = ValueRef::fromString(get(key + "-value", QString("0")).toString());
     state.folded = get(key + "-folded", false).toBool();
+    const QString small = get(key + "-secondary-values", QStringLiteral("-")).toString();
+    if (small != QLatin1String("-"))
+    {
+      state.secondaries = QList<int>();
+      for (const QString &v : small.split(' ', Qt::SkipEmptyParts))
+        state.secondaries->append(v.toInt());
+    }
     state.shown = get(key + "-shown", true).toBool();
     state.geometry = get("Windows/geometry-panel-" + id, QString()).toString();
     if (QMdiSubWindow *win = m_panelWins.value("device:" + id))
@@ -1810,6 +2080,17 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
         axis = GraphWidget::AxisRight;
       m_wid->graph()->setValueAxis(id, axis);
     }
+    // another meter's: "1@device:ab12cd34:right"
+    for (const QString &entry : axes)
+    {
+      const qsizetype colon = entry.lastIndexOf(':');
+      if (!entry.contains('@') || colon < 0)
+        continue;
+      const QString side = entry.mid(colon + 1);
+      m_wid->graph()->setOtherValueAxis(ValueRef::fromString(entry.left(colon)),
+                                        side == "left" ? GraphWidget::AxisLeft
+                                        : side == "right" ? GraphWidget::AxisRight : GraphWidget::AxisAuto);
+    }
   }
   // the meter's other values shown in the graph: their ids, "1 2"; none at
   // first. Another meter's ("1@device:ab12cd34") is drawn from its store.
@@ -1829,11 +2110,17 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
       m_wid->graph()->setValueShown(id, own.contains(id));
     m_wid->graph()->setValueShown(0, get("Windows/graph-main-shown", true).toBool());
   }
-  // the values the readings table leaves out, "1 2"; none at first
+  // the values the readings table leaves out, "1 2", another meter's
+  // "1@device:ab12cd34"; none at first. The other meters in it, by source
   {
     const QStringList hidden = get("Windows/table-hidden-values", QString()).toString().split(' ', Qt::SkipEmptyParts);
-    for (int id = 0; id < kMaxValues; ++id)
-      m_wid->setTableValueShown(id, !hidden.contains(QString::number(id)));
+    ReadingsModel *log = m_readings->log();
+    for (const ValueRef &v : log->hiddenValues())
+      log->setValueHidden(v, false);
+    for (const QString &text : hidden)
+      log->setValueHidden(ValueRef::fromString(text), true);
+    m_tableOthers = get("Windows/table-sources", QString()).toString().split(' ', Qt::SkipEmptyParts);
+    applyTableSources();
   }
   // an unchecked action did not toggle: hide its window explicitly
   for (QAction *a : { m_displayAction, m_meterAction, action_Graph, m_readingsAction, m_poincareAction })
@@ -1867,6 +2154,13 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
     open << id;
     set(key + "-value", ValueRef(panelOf(win)->value().id).toString());
     set(key + "-folded", panelOf(win)->isFolded());
+    if (panelOf(win)->secondariesChosen())
+    {
+      QStringList small;
+      for (int v : panelOf(win)->secondaries())
+        small << QString::number(v);
+      set(key + "-secondary-values", small.join(' '));
+    }
     set(key + "-shown", !win->isHidden());
   }
   set("Windows/open-devices", open.join(' '));
@@ -1889,10 +2183,11 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/graph-shown-values", shown.join(' '));
   set("Windows/graph-main-shown", m_wid->graph()->mainShown());
   QStringList tableHidden;
-  for (int id = 0; id < kMaxValues; ++id)
-    if (!m_wid->tableValueShown(id))
-      tableHidden << QString::number(id);
+  for (const ValueRef &v : m_readings->log()->hiddenValues())
+    tableHidden << v.toString();
+  tableHidden.sort();
   set("Windows/table-hidden-values", tableHidden.join(' '));
+  set("Windows/table-sources", m_tableOthers.join(' '));
   if (m_wid->lcdSecondariesChosen())
   {
     QStringList small;
@@ -1904,6 +2199,9 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   for (int id = 1; id <= 3; ++id)
     if (m_wid->graph()->valueAxis(id) != GraphWidget::AxisAuto)
       axes << QString("%1:%2").arg(id).arg(m_wid->graph()->valueAxis(id) == GraphWidget::AxisLeft ? "left" : "right");
+  for (const ValueRef &v : m_wid->graph()->otherValues())
+    if (m_wid->graph()->otherValueAxis(v) != GraphWidget::AxisAuto)
+      axes << QString("%1:%2").arg(v.toString(), m_wid->graph()->otherValueAxis(v) == GraphWidget::AxisLeft ? "left" : "right");
   set("Windows/graph-value-axes", axes.join(' '));
 }
 

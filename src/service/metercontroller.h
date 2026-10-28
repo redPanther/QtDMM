@@ -85,6 +85,11 @@ public:
   /// The last reading of the main value (a calculated value's input), an
   /// empty Reading before the first.
   const Reading &lastReading() const { return m_lastMain; }
+  /// The last reading of value @p id (Reading::id), empty before the first.
+  Reading     lastReading(int id) const { return m_lastReadings.value(id); }
+  /// The values seen since the meter was connected: the highest id + 1, at
+  /// least those the meter has (DMMInfo::valueCount()).
+  int         valueCount() const;
   /// The entry of My devices setDevice() gave, empty for none.
   QString     deviceId() const { return m_deviceId; }
   /// The name setDevice() gave, empty for none.
@@ -258,6 +263,7 @@ private:
   std::array<MinMaxMemory, kMaxValues> m_valueMinMax;   ///< per value id, valueMinMax()
   QString     m_lastUnit;
   Reading     m_lastMain;   ///< lastReading()
+  QMap<int, Reading> m_lastReadings;   ///< lastReading(int), by id
   QString     m_baseUnit;
   QMap<int, QString> m_valueUnits;   ///< base unit by value id, valueUnit()
   QMap<int, bool> m_valueOverload;   ///< the last reading of each value was OL

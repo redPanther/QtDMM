@@ -1162,8 +1162,6 @@ void RecordingStore::logReading(const Reading &reading)
   // a secondary display that is off (an empty second value) is no reading
   if (m_readingsPaused || (reading.id > 0 && reading.text.isEmpty()))
     return;
-  if (m_readings.size() >= m_readingCapacity)
-    removeOldestReadings(m_readings.size() - m_readingCapacity + 1);
 
   LoggedReading row;
   row.when = reading.msecs;
@@ -1175,7 +1173,16 @@ void RecordingStore::logReading(const Reading &reading)
   row.port = reading.port;
   row.range = reading.range;
   row.id = reading.id;
+  row.source = reading.source;
+  logRow(row);
+}
 
+void RecordingStore::logRow(const LoggedReading &row)
+{
+  if (m_readingsPaused)
+    return;
+  if (m_readings.size() >= m_readingCapacity)
+    removeOldestReadings(m_readings.size() - m_readingCapacity + 1);
   const int at = m_readings.size();
   Q_EMIT readingsAboutToInsert(at, at);
   m_readings.append(row);

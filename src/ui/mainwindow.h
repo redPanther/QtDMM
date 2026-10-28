@@ -24,6 +24,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 
 #include <QtGui>
 #include <QtWidgets>
@@ -33,6 +34,8 @@
 #include "ui_uimainwindow.h"
 #include "core/recentfiles.h"
 #include "core/valueref.h"
+#include "ui/devicesidebar.h"
+#include "ui/valuemenu.h"
 
 class InstanceWidget;
 class DeviceSession;
@@ -134,6 +137,7 @@ protected:
   {
     ValueRef value;
     bool     folded = false;
+    std::optional<QList<int>> secondaries;   ///< the LCD's small line, unset: not chosen
     bool     shown = true;
     QString  geometry;   ///< "x y w h" in Free mode
   };
@@ -293,8 +297,36 @@ protected:
   /// Adds @p view as an MDI window with @p title (@p role: MdiArranger::Role;
   /// @p name identifies it in the settings).
   QMdiSubWindow *addView(QWidget *view, const QString &title, int role, const QString &name);
-  /// The context menu of the sidebar's row of value @p id (ValueMenu).
-  void        valueMenu(int id, const QPoint &globalPos);
+  /// The context menu of the sidebar's row of @p value (ValueMenu).
+  void        valueMenu(const ValueRef &value, const QPoint &globalPos);
+  /// @name The readings table's meters
+  /// The window's meter always, the meters beside in m_tableOthers too: then
+  /// the table logs the readings of all of them in its own store, in the
+  /// order they come, with the Device column; without them it is the window
+  /// meter's recorder's readings, as always.
+  /// @{
+  QStringList m_tableOthers;   ///< sources ("device:<id>") of other meters in the table
+  QList<QMetaObject::Connection> m_tableLinks;
+  /// The table anew for m_tableOthers: its rows from before, merged by time.
+  void        applyTableSources();
+  /// The readings of the meters in the table to it (the open ones of them).
+  void        connectTableSources();
+  /// The table shows @p value (its meter is in it, the value not hidden).
+  bool        tableShows(const ValueRef &value) const;
+  /// Shows or hides @p value in the table; another meter's first value
+  /// shown brings it in (its other values hidden), its last one hidden takes it out.
+  void        setTableShown(const ValueRef &value, bool shown);
+  /// "Sources..." of a view: the values of the open meters it shows.
+  void        editSources(ValueMenu::View view);
+  QAction    *m_graphSources = nullptr;   ///< in the graph's menu, with more than one meter
+  QAction    *m_tableSources = nullptr;   ///< in the table's menu, the same
+  /// A meter's name by its source, also after it was closed.
+  QString     sourceName(const QString &source) const;
+  /// @}
+  /// The sidebar's row of value @p id of a meter open beside.
+  DeviceSidebar::Value otherValueRow(const MeterController *ctl, int id) const;
+  /// Fills @p menu for @p value of an open meter (ValueMenu).
+  void        fillValueMenu(QMenu *menu, const ValueRef &value);
   /// A checkable action that shows/hides @p win.
   QAction    *windowAction(QMdiSubWindow *win, const QString &text, const char *shortcut,
                            const char *icon, const QString &whatsThis);
