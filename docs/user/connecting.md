@@ -140,9 +140,10 @@ and maximum since the last **Reset** (F4), each as the meter showed it
 another function (V DC to Ω, DC to AC, °C to °F). An overload changes
 nothing.
 
-The display is a window like the [analog meter](analog-meter.md); digits and
-lettering scale with it. **Display** in the toolbar or the menu (Ctrl+1)
-hides and shows it. Bar graph and min/max (off by default) are set on the
+The display is a window like the [analog meter](analog-meter.md), one for
+each device connected (its front panel); digits and lettering scale with
+it. **Display** in the toolbar or the menu (Ctrl+1) hides and shows all of
+them. Bar graph and min/max (off by default) are set on the
 *Appearance* settings page, in the group *Digital display (LCD)*.
 
 **LCD colours** in the display's right-click menu: *Classic* (the
@@ -238,21 +239,22 @@ In *Displays on top* and *on the left* it lasts until a window is shown or
 hidden; then the windows are placed by the rule again.
 
 **Load workspace...** and **Save workspace...** in the same menu keep a
-measuring set-up in a file (`*.qtdmm-workspace`): the window's device and the
-devices open beside it with their front panels, which windows are shown with
+measuring set-up in a file (`*.qtdmm-workspace`): the devices connected
+with their front panels, which windows are shown with
 which values, the arrangement with its dividers, the title bars, the
 toolbar, the design and the size of the main window - for instance one
 set-up for the bench and one for the battery in the van. *Save workspace*
 first asks for a name and a description and shows the picture of the
 windows that goes into the file.
 
-Loading a workspace switches the window to its device and opens the
-devices beside it; devices open now that it does not have are closed (with
+Loading a workspace connects its devices; devices connected now that it
+does not have are closed (with
 a question when one has a recording not saved). The file keeps a copy of
 each device's entry in My devices, with its alarms and PASS/FAIL test: an
 entry that is there wins (a port changed since), one that is missing - on
 another computer, or deleted - is added back from the copy. Workspaces of
-QtDMM 26.2 to 26.4 before this (layout only) are still read.
+QtDMM 26.2 to 26.4 before this (layout only) are still read; their
+window's device is connected first.
 
 **Save layout on exit** (on by default) makes QtDMM start with
 the layout it had when it was closed. Switched off, it starts with the

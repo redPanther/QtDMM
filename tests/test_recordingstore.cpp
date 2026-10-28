@@ -1325,6 +1325,18 @@ int main(int argc, char **argv)
       check(back.write(raw2, &err, true, {}, { { &backSim, 0, "Sim B" }, { &backSim, 1, "Sim B" } }) && fileText(raw2) == raw,
             "another meter: export, import, export the same\n" + fileText(raw2));
     }
+    // this meter's columns after its name too (26.4): read back as its
+    // part, the other meter apart
+    {
+      const QString named = dir.path() + "/named.csv";
+      check(lead.write(named, &err, true, {}, { { &follow, 0, "Sim B" } }, "Sim A")
+              && fileText(named).startsWith("timestamp;time (s);Sim A: value;Sim A: unit;Sim A: status;Sim B: value;"),
+            "this meter after its name\n" + fileText(named).section('\n', 0, 0));
+      const std::optional<Recording> rec = RecordingFile::read(named, &err);
+      check(rec && rec->device == "Sim A" && RecordingFile::devices(*rec) == QStringList{ "Sim B" }
+              && RecordingFile::devicePart(*rec, "Sim A").unit == "V" && RecordingFile::devicePart(*rec, "Sim B").unit == "A",
+            "read back: the main value's meter, the other apart");
+    }
     // a limit test on the other meter's value: its column after its name
     Recording limits;
     limits.start = TestClock::wall(0);

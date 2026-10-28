@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QBrush>
+#include <QPointer>
 #include <QColor>
 #include <QVector>
 #include <QWidget>
@@ -107,7 +108,7 @@ private:
     RightBracket
   };
 
-  RecordingStore  *m_store = nullptr;
+  QPointer<RecordingStore> m_store;   ///< another meter's may close while shown
   int              m_value = 0;         ///< setValue()
   QVector<Column>  m_columns;
   qint64           m_firstColumn = 0;   ///< the index of m_columns[0], counted from the start

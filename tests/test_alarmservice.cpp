@@ -30,13 +30,10 @@ int main(int argc, char **argv)
                               {"DMM/virtual-waveform", 0}, {"DMM/virtual-min", "0.25"}, {"DMM/virtual-max", "0.25"} };
   const QString b = lib.add("Sim B", simKeys);
 
-  // 1. two meters, sounds of the one beside, one banner
+  // 1. a meter's sounds, the banner
   {
     DeviceSession session;
     session.setConfigDir(dir.path());
-    MeterController window(nullptr, session.host());
-    window.setDevice("w1", "Sim A");
-    session.adopt(&window);
     QWidget top;
     AlarmService service(&session, &top);
     QStringList played;
@@ -61,7 +58,7 @@ int main(int argc, char **argv)
     ctl->setAlarms({ high });
     check(waitFor([&] { return ctl->alarms()->anyRaised(); }, 4000), "Sim B's alarm raised");
     check(played.contains("alarm_warn") && service.sounding(ctl, 0), "its sound plays and goes on");
-    check(banner.startsWith("Sim B: High current"), "the banner names the meter: " + banner);
+    check(banner.startsWith("High current"), "the banner, one meter: " + banner);
     check(panel.display()->alertColor() == high.color, "its front panel in the alarm's colour");
 
     service.acknowledgeAll();
@@ -89,8 +86,8 @@ int main(int argc, char **argv)
     check(!panel.display()->alertColor().isValid(), "the panel without its meter: no colour");
   }
 
-  // 2. the window's rules from before 26.4 move into its entry, once; the
-  //    alarm list of the window then is the entry's
+  // 2. the rules of the window's meter from before 26.4 move into its entry,
+  //    once; connected, the meter has them, a change goes to the entry
   {
     const QString a = lib.add("Sim A", simKeys);
     Alarm low;
@@ -106,11 +103,16 @@ int main(int argc, char **argv)
     DeviceSession session;
     session.setConfigDir(dir.path());
     InstanceWidget wid("mig", dir.path(), &session);
-    check(wid.controller()->alarms()->alarms().size() == 1, "the window's meter has the old alarm");
-    check(Alarm::listFromJson(lib.find(a)->alarms).size() == 1, "it moved into the entry");
+    check(wid.takeOldDevice() == a, "the window's meter: Sim A");
+    check(Alarm::listFromJson(lib.find(a)->alarms).size() == 1, "its alarm moved into the entry");
     check(wid.settings()->getString("Alarms/list").isEmpty(), "and left the window's settings");
+    check(wid.takeOldDevice().isEmpty(), "once");
+    MeterController *ctl = session.open(a);
+    check(ctl && ctl->alarms()->alarms().size() == 1, "connected, it has the old alarm");
+    if (!ctl)
+      return 1;
     low.name = "Low 2";
-    wid.controller()->setAlarms({ low });
+    ctl->setAlarms({ low });
     check(Alarm::listFromJson(lib.find(a)->alarms).value(0).name == "Low 2", "a change goes to the entry");
   }
 

@@ -106,10 +106,11 @@ DeviceSidebar::DeviceSidebar(DeviceLibrary *library, QWidget *parent)
   m_devices->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
   m_devices->setFont(0, bold);
   m_devices->setFirstColumnSpanned(true);
-  // folded at the start: the devices in use are under "Open devices"
+  // folded at the start: the devices in use are under "Connected devices"
   m_devices->setExpanded(false);
-  m_open = new QTreeWidgetItem(this, { tr("Open devices") });
-  m_open->setFlags(Qt::ItemIsEnabled);
+  m_open = new QTreeWidgetItem(this, { tr("Connected devices") });
+  // an entry dragged here connects, one dragged back to My devices closes
+  m_open->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
   m_open->setFont(0, bold);
   m_open->setFirstColumnSpanned(true);
   m_open->setToolTip(0, tr("The devices this window reads: its own and those opened beside it."));
@@ -193,11 +194,10 @@ QTreeWidgetItem *DeviceSidebar::openItem(const QString &id) const
   return nullptr;
 }
 
-void DeviceSidebar::setOpenDevices(const QList<OpenDevice> &devices, const QString &own)
+void DeviceSidebar::setOpenDevices(const QList<OpenDevice> &devices)
 {
   m_openList = devices;
   m_filling = true;
-  m_own = own;
   QStringList ids, shown;
   for (const OpenDevice &device : devices)
     ids << device.id;
@@ -211,7 +211,7 @@ void DeviceSidebar::setOpenDevices(const QList<OpenDevice> &devices, const QStri
     {
       auto *item = new QTreeWidgetItem(m_open, { device.name });
       item->setData(0, Qt::UserRole, device.id);
-      item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+      item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
       item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
       item->setExpanded(true);
       if (device.id == selected)
@@ -224,8 +224,9 @@ void DeviceSidebar::setOpenDevices(const QList<OpenDevice> &devices, const QStri
     QTreeWidgetItem *item = m_open->child(i);
     item->setText(0, device.name);
     item->setText(1, device.value);
-    item->setToolTip(0, device.id == own ? tr("%1 - in this window").arg(device.name)
-                                         : tr("%1 - beside this window's device").arg(device.name));
+    item->setToolTip(0, device.current ? tr("%1 - active: Connect, Reset and the device settings act on it")
+                                                .arg(device.name)
+                                       : device.name);
     QFont font = item->font(0);
     font.setBold(device.current);
     item->setFont(0, font);
@@ -235,6 +236,7 @@ void DeviceSidebar::setOpenDevices(const QList<OpenDevice> &devices, const QStri
     item->setIcon(0, dot(device.active ? QColor(0x22, 0xaa, 0x22) : QColor(), devicePixelRatioF()));
     fillValues(item, 0, device.values);
   }
+  updateMarks();
   m_filling = false;
 }
 
@@ -270,7 +272,7 @@ ValueRef DeviceSidebar::valueOf(const QTreeWidgetItem *item) const
   if (!row || row->parent() != m_open)
     return ValueRef(0, "-");
   const QString device = row->data(0, Qt::UserRole).toString();
-  const QString source = device == m_own ? QString() : "device:" + device;
+  const QString source = "device:" + device;
   if (item != row)
     return ValueRef(item->data(0, kValueId).toInt(), source);
   // a device row stands for its value only while it has no value rows
@@ -279,10 +281,10 @@ ValueRef DeviceSidebar::valueOf(const QTreeWidgetItem *item) const
 
 QTreeWidgetItem *DeviceSidebar::valueItem(int id, const QString &device) const
 {
-  const QTreeWidgetItem *own = openItem(device.isEmpty() ? m_own : device);
-  for (int i = 0; own && i < own->childCount(); ++i)
-    if (own->child(i)->data(0, kValueId).isValid() && own->child(i)->data(0, kValueId).toInt() == id)
-      return own->child(i);
+  const QTreeWidgetItem *row = openItem(device);
+  for (int i = 0; row && i < row->childCount(); ++i)
+    if (row->child(i)->data(0, kValueId).isValid() && row->child(i)->data(0, kValueId).toInt() == id)
+      return row->child(i);
   return nullptr;
 }
 
@@ -433,18 +435,6 @@ void DeviceSidebar::fill()
   m_filling = false;
 }
 
-void DeviceSidebar::setCurrent(const QString &id, bool active, bool blink)
-{
-  if (id == m_current && active == m_active && blink == m_blink)
-    return;
-  m_current = id;
-  m_active = active;
-  m_blink = blink;
-  m_filling = true;
-  updateMarks();
-  m_filling = false;
-}
-
 void DeviceSidebar::updateMarks()
 {
   for (int i = 0; i < m_devices->childCount(); ++i)
@@ -452,17 +442,22 @@ void DeviceSidebar::updateMarks()
     QTreeWidgetItem *item = m_devices->child(i);
     if (item == m_addItem)
       continue;
-    const bool current = idOf(item) == m_current;
-    // model and port, whether it is in use here, how to read more
+    // connected: the dot, green while readings come in
+    const QString id = idOf(item);
+    const auto open = std::find_if(m_openList.cbegin(), m_openList.cend(),
+                                   [&id](const OpenDevice &d) { return d.id == id && d.connected; });
+    const bool connected = open != m_openList.cend();
+    const bool active = connected && open->active;
+    // model and port, whether it is connected, how to read more
     QString tip = item->data(0, kWhere).toString();
-    if (current)
-      tip += '\n' + (m_active ? tr("In use in this window, readings are coming in") : tr("In use in this window"));
+    if (connected)
+      tip += '\n' + (active ? tr("Connected, readings are coming in") : tr("Connected"));
     item->setToolTip(0, tip + '\n' + tr("Double-click: info and settings"));
     QFont font = item->font(0);
-    font.setBold(current);
+    font.setBold(connected);
     item->setFont(0, font);
-    item->setIcon(0, dot(!current  ? QColor()
-                         : m_active ? (m_blink ? QColor(0x66, 0xcc, 0x66) : QColor(0x22, 0xaa, 0x22))
+    item->setIcon(0, dot(!connected ? QColor()
+                         : active   ? QColor(0x22, 0xaa, 0x22)
                                     : palette().color(QPalette::Disabled, QPalette::WindowText),
                          devicePixelRatioF(), item->data(0, kSymbol).value<QPixmap>()));
   }
@@ -485,8 +480,40 @@ QStringList DeviceSidebar::deviceIds() const
   return ids;
 }
 
+QTreeWidgetItem *DeviceSidebar::nodeOf(QTreeWidgetItem *item)
+{
+  while (item && item->parent())
+    item = item->parent();
+  return item;
+}
+
+void DeviceSidebar::dragMoveEvent(QDragMoveEvent *event)
+{
+  QTreeWidget::dragMoveEvent(event);
+  // between the nodes: connect or close; within "Connected devices": nothing
+  const QTreeWidgetItem *from = nodeOf(currentItem());
+  const QTreeWidgetItem *to = nodeOf(itemAt(event->position().toPoint()));
+  if (from == m_open && to == m_open)
+    event->ignore();
+  else if ((from == m_devices && to == m_open && !isConnected(idOf(currentItem()))) || (from == m_open && to == m_devices))
+    event->accept();
+}
+
 void DeviceSidebar::dropEvent(QDropEvent *event)
 {
+  const QTreeWidgetItem *from = nodeOf(currentItem());
+  const QTreeWidgetItem *to = nodeOf(itemAt(event->position().toPoint()));
+  if (from == m_open || to == m_open)
+  {
+    // the items stay where they are: the session changes and fills them anew
+    event->setDropAction(Qt::IgnoreAction);
+    event->accept();
+    if (from == m_devices && to == m_open && !isConnected(idOf(currentItem())))
+      Q_EMIT openBesideRequested(idOf(currentItem()));
+    else if (from == m_open && to == m_devices)
+      Q_EMIT closeRequested(openOf(currentItem()));
+    return;
+  }
   const QString id = idOf(currentItem());
   QTreeWidget::dropEvent(event);
   // the entry's new place in the node is its place in the list
@@ -502,8 +529,7 @@ void DeviceSidebar::changeEvent(QEvent *event)
   if (event->type() != QEvent::PaletteChange || m_filling || !m_addItem)
     return;
   m_addItem->setForeground(0, palette().color(QPalette::Disabled, QPalette::WindowText));
-  updateMarks();
-  setOpenDevices(m_openList, m_own);
+  setOpenDevices(m_openList);
   setServices(m_serviceList);
   setWorkspaces(m_workspaceList);
 }
@@ -545,12 +571,8 @@ void DeviceSidebar::openMenu(QTreeWidgetItem *item, const QPoint &pos)
   menu.addSeparator();
   QAction *alarms = menu.addAction(tr("&Alarms..."));
   QAction *limits = menu.addAction(tr("L&imits..."));
-  QAction *close = nullptr;
-  if (id != m_own)
-  {
-    menu.addSeparator();
-    close = menu.addAction(QIcon::fromTheme("window-close"), tr("&Close"));
-  }
+  menu.addSeparator();
+  QAction *close = menu.addAction(QIcon::fromTheme("window-close"), tr("&Close"));
   QAction *chosen = menu.exec(pos);
   if (chosen == panel)
     Q_EMIT frontPanelRequested(id);
@@ -596,7 +618,7 @@ void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
   QAction *settings = menu.addAction(QIcon::fromTheme("configure"), tr("&Info and settings..."));
   QAction *rename = menu.addAction(tr("&Rename"));
   QAction *beside = menu.addAction(QIcon::fromTheme("network-connect"), tr("&Connect"));
-  beside->setToolTip(tr("Reads it beside this window's device: recorded with it, in formulas and over SCPI"));
+  beside->setToolTip(tr("Reads it with the other devices connected: recorded with them, in formulas and over SCPI"));
   beside->setEnabled(!isConnected(id));
   menu.addSeparator();
   QAction *remove = menu.addAction(QIcon::fromTheme("list-remove"), tr("Re&move from My devices"));
@@ -616,18 +638,14 @@ void DeviceSidebar::contextMenuEvent(QContextMenuEvent *event)
 
 bool DeviceSidebar::isConnected(const QString &id) const
 {
-  if (id == m_current)
-    return true;
   for (const OpenDevice &device : m_openList)
     if (device.id == id)
       return true;
   return false;
 }
 
-bool DeviceSidebar::shownAtStart(const QVariant &stored, int devices, bool configured)
+bool DeviceSidebar::shownAtStart(const QVariant &stored, int devices)
 {
-  if (!configured)
-    return devices > 0;
   return stored.isValid() ? stored.toBool() : devices >= 2;
 }
 

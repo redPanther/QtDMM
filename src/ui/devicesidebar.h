@@ -13,19 +13,20 @@
 class DeviceLibrary;
 
 /// The sidebar "Devices": the node "My devices" with the entries of the
-/// DeviceLibrary in their order. A click switches to an entry, the one in
-/// use is bold with the state of its readings; where a device is connected
-/// shows in its tooltip. The context menu has Settings, Rename (in place),
-/// Open beside and Remove; dragging an entry changes the order.
+/// DeviceLibrary in their order: the cupboard. A click does nothing; one
+/// connected is bold with a dot, green while its readings come in. The
+/// context menu has Info and settings (also a double click), Rename (in
+/// place), Connect and Remove; dragging an entry changes the order, dragged
+/// onto "Open devices" it connects.
 ///
-/// The node "Open devices" lists the meters of the process (MainWindow
-/// gives them with setOpenDevices()) with their reading: this window's own,
-/// then those opened beside it (DeviceSession::open()); the active one (the
-/// meter of the front panel used last) in bold, one not connected greyed.
-/// Their context menu shows the front panel (also a double click), connects
-/// or disconnects, and closes those beside. Below this window's own, for a meter with
-/// more than one value, a row for each value with its reading; its context
-/// menu says which window shows it where.
+/// The node "Open devices" (shown as connected devices) lists the meters of
+/// the process (MainWindow gives them with setOpenDevices()) with their
+/// reading; the active one (the meter of the front panel used last) in bold,
+/// one not connected greyed. Their context menu shows the front panel (also
+/// a double click), connects or disconnects, and closes; dragged back onto
+/// My devices one closes. For a meter with more than one value, a row for
+/// each value with its reading; its context menu says which window shows it
+/// where.
 ///
 /// The node "Services" shows what this window offers to other programs
 /// (setServices()): the SCPI server and HiSLIP, with their port or "off";
@@ -85,9 +86,6 @@ public:
 
   explicit DeviceSidebar(DeviceLibrary *library, QWidget *parent = nullptr);
 
-  /// The entry this window uses (empty: none) and whether its readings come
-  /// in; @p blink the dot in the other green, flipped with each reading.
-  void        setCurrent(const QString &id, bool active, bool blink = false);
   /// The node "My devices".
   QTreeWidgetItem *devicesNode() const { return m_devices; }
   /// The item of the entry @p id, nullptr when there is none.
@@ -95,9 +93,9 @@ public:
   /// The ids of the entries, in the order shown.
   QStringList deviceIds() const;
 
-  /// The open devices, @p own is this window's. Rebuilds only when the
-  /// list changed, else updates the readings.
-  void        setOpenDevices(const QList<OpenDevice> &devices, const QString &own);
+  /// The connected devices. Rebuilds only when the list changed, else
+  /// updates the readings; the dots of My devices follow.
+  void        setOpenDevices(const QList<OpenDevice> &devices);
   /// The node "Open devices".
   QTreeWidgetItem *openNode() const { return m_open; }
   /// The item of the open device @p id, nullptr when there is none.
@@ -107,12 +105,12 @@ public:
   /// @p first children; none for one value.
   /// Their context menu is valueMenuRequested().
   void        fillValues(QTreeWidgetItem *parent, int first, const QList<Value> &values);
-  /// The row of value @p id of the open device @p device (OpenDevice::id;
-  /// empty: this window's), nullptr when there is none.
-  QTreeWidgetItem *valueItem(int id, const QString &device = QString()) const;
+  /// The row of value @p id of the open device @p device (OpenDevice::id),
+  /// nullptr when there is none.
+  QTreeWidgetItem *valueItem(int id, const QString &device) const;
   /// The value a row of the open devices stands for: a value row, or the row
-  /// of a device with one value (its main value). The window's device's by an
-  /// empty source, another one's by "device:<id>". Invalid source "-" for none.
+  /// of a device with one value (its main value), by "device:<id>". Invalid
+  /// source "-" for none.
   ValueRef    valueOf(const QTreeWidgetItem *item) const;
   /// Fills the submenu "Value" of a device with one value (ValueMenu).
   void        setValueMenuFiller(std::function<void(QMenu *, const ValueRef &)> filler) { m_valueFiller = std::move(filler); }
@@ -131,10 +129,9 @@ public:
   QTreeWidgetItem *workspacesNode() const { return m_workspaces; }
 
   /// Shown at the start: as the user left it (@p stored, invalid when never
-  /// set), else with two devices or more; a window without a meter shows it
-  /// whenever there are devices to choose from.
-  static bool shownAtStart(const QVariant &stored, int devices, bool configured);
-  /// The entry @p id is the window's or open beside it.
+  /// set), else with two devices or more.
+  static bool shownAtStart(const QVariant &stored, int devices);
+  /// The entry @p id is connected.
   bool        isConnected(const QString &id) const;
   /// The assistant added an entry: the sidebar opens with the second device.
   static bool opensAfterAdd(int devicesBefore, int devicesAfter);
@@ -145,7 +142,7 @@ Q_SIGNALS:
   /// Connect the entry @p id beside this window's device (its menu,
   /// DeviceSession::open()).
   void        openBesideRequested(const QString &id);
-  /// Close the open device @p id (OpenDevice::id), not this window's.
+  /// Close the open device @p id (OpenDevice::id).
   void        closeRequested(const QString &id);
   /// Show the front panel of the open device @p id (OpenDevice::id).
   void        frontPanelRequested(const QString &id);
@@ -171,6 +168,7 @@ public Q_SLOTS:
   void        fill();
 
 protected:
+  void        dragMoveEvent(QDragMoveEvent *event) override;
   void        dropEvent(QDropEvent *event) override;
   void        contextMenuEvent(QContextMenuEvent *event) override;
   void        keyPressEvent(QKeyEvent *event) override;
@@ -178,6 +176,8 @@ protected:
 
 private:
   void        updateMarks();
+  /// The node (My devices, Open devices, ...) @p item is in, or is.
+  static QTreeWidgetItem *nodeOf(QTreeWidgetItem *item);
   QString     idOf(const QTreeWidgetItem *item) const;
   /// The last row of My devices, which adds one.
   QTreeWidgetItem *m_addItem = nullptr;
@@ -194,13 +194,9 @@ private:
   QTreeWidgetItem *m_devices = nullptr;
   QTreeWidgetItem *m_open = nullptr;
   QTreeWidgetItem *m_services = nullptr;
-  QString          m_own;
   QList<OpenDevice> m_openList;   ///< as last set: coloured anew with another design
   std::function<void(QMenu *, const ValueRef &)> m_valueFiller;   ///< setValueMenuFiller()
   QList<Service>   m_serviceList;
   QList<Workspace> m_workspaceList;
-  QString          m_current;
-  bool             m_active = false;
-  bool             m_blink = false;   ///< the other green, flipped with each reading
   bool             m_filling = false;
 };

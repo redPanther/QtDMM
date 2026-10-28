@@ -31,7 +31,7 @@ QStringList RecordingFile::devices(const Recording &recording)
 {
   QStringList out;
   for (const RecordingColumn &col : recording.extra)
-    if (!col.device.isEmpty() && !out.contains(col.device))
+    if (!col.device.isEmpty() && col.device != recording.device && !out.contains(col.device))
       out << col.device;
   return out;
 }
@@ -42,7 +42,7 @@ Recording RecordingFile::devicePart(const Recording &recording, const QString &d
   part.start = recording.start;
   part.sampleTimeTenths = recording.sampleTimeTenths;
   part.times = recording.times;
-  bool haveMain = device.isEmpty();
+  bool haveMain = device == recording.device;
   if (haveMain)
   {
     part.unit = recording.unit;
@@ -211,7 +211,7 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
     headerNames = line.split(';');
     while (headerNames.size() > 5 && columnName(headerNames.last()).word == QLatin1String("limit"))
       limitNames.prepend(headerNames.takeLast());
-    withStatus = headerNames.value(4) == QLatin1String("status");
+    withStatus = columnName(headerNames.value(4)).word == QLatin1String("status");
     groups = withStatus ? qMax(1, int(headerNames.size() - 2) / 3) : 1;
     header = true;
     line = ts.readLine();
@@ -238,6 +238,9 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
   }
   Recording rec;
   rec.extra.resize(groups - 1);
+  // "Sim A: value": the main value's meter (since 26.4)
+  if (header)
+    rec.device = columnName(headerNames.value(2)).device;
   // "value 3": the column group is value 3 (id 2); "Sim B: value" another
   // meter's main value
   for (int g = 1; g < groups; ++g)
@@ -252,7 +255,7 @@ std::optional<Recording> RecordingFile::read(const QString &path, QString *error
   for (const QString &text : std::as_const(limitNames))
   {
     const ColumnName name = columnName(text);
-    int g = name.device.isEmpty() && name.number <= 1 ? 0 : -1;
+    int g = name.device == rec.device && name.number <= 1 ? 0 : -1;
     for (int e = 0; g < 0 && e < rec.extra.size(); ++e)
     {
       const RecordingColumn &col = rec.extra[e];
@@ -373,10 +376,21 @@ QString columnName(const QString &word, const RecordingColumn &col, int g)
   return col.id > 0 ? QString("%1: %2 %3").arg(device, word).arg(col.id + 1) : QString("%1: %2").arg(device, word);
 }
 
-// the header of the columns of each value: value, unit, status, then value 2 ...
-QStringList columnNames(const QList<RecordingColumn> &extra, const QStringList &names)
+// the name of a column of the main value: "value", "Sim A: value"
+QString mainName(const QString &word, const Recording &rec)
 {
-  QStringList out = names;
+  QString device = rec.device;
+  device.replace(';', ',');   // the CSV's separator
+  return device.isEmpty() ? word : QString("%1: %2").arg(device, word);
+}
+
+// the header of the columns of each value: value, unit, status, then value 2 ...
+QStringList columnNames(const Recording &rec, const QStringList &names)
+{
+  const QList<RecordingColumn> &extra = rec.extra;
+  QStringList out;
+  for (const QString &name : names)
+    out << mainName(name, rec);
   for (int g = 0; g < extra.size(); ++g)
     for (const QString &name : names)
       out << columnName(name, extra[g], g);
@@ -405,7 +419,7 @@ QList<int> limitColumns(const Recording &rec)
 
 QString limitName(const Recording &rec, int column, const QString &word)
 {
-  return column < 0 ? word : columnName(word, rec.extra[column], column);
+  return column < 0 ? mainName(word, rec) : columnName(word, rec.extra[column], column);
 }
 
 QString limitCell(const Recording &rec, int column, int row)
@@ -431,7 +445,7 @@ bool RecordingFile::write(const Recording &recording, const QString &path, QStri
 
   QTextStream ts(&file);
   const QList<int> limits = limitColumns(recording);
-  ts << "timestamp;time (s);" << columnNames(recording.extra, { "value", "unit", "status" }).join(';');
+  ts << "timestamp;time (s);" << columnNames(recording, { "value", "unit", "status" }).join(';');
   for (int c : limits)
     ts << ';' << limitName(recording, c, QStringLiteral("limit"));
   ts << '\n';
@@ -470,7 +484,7 @@ bool RecordingFile::writeAny(const Recording &recording, const QString &path, QS
   }
   SpreadsheetWriter sheet(tr("Recording"));
   const QList<int> limits = limitColumns(recording);
-  QStringList head = QStringList{ tr("timestamp"), tr("time (s)") } + columnNames(recording.extra, { tr("value"), tr("unit"), tr("status") });
+  QStringList head = QStringList{ tr("timestamp"), tr("time (s)") } + columnNames(recording, { tr("value"), tr("unit"), tr("status") });
   for (int c : limits)
     head << limitName(recording, c, tr("limit"));
   sheet.setHeader(head);

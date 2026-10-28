@@ -23,9 +23,6 @@
 
 #pragma once
 
-#include <optional>
-
-
 #include <QtGui>
 #include <QtPrintSupport>
 
@@ -38,11 +35,10 @@
 #include "ui/settings/recorderprefs.h"
 
 class MeterController;
+class RecordingStore;
 class DeviceSession;
 class ValueFeed;
 class SettingsDialog;
-class LcdWidget;
-class FrontPanel;
 class Settings;
 class AnalogMeter;
 class PoincarePlot;
@@ -53,127 +49,67 @@ class DeviceLibrary;
 /// The recorder graph (shown in its own MDI window), plus the settings and
 /// the other dialogs.
 ///
-/// The meter session itself - connection, min/max memory, alarms, SCPI
-/// server, the alarms' programs - is a MeterController, which InstanceWidget creates.
-/// The views (display, analog meter, readings table, graph) are connected to
-/// its signals here and know nothing of each other. The display is the
-/// window's FrontPanel; the meters open beside have front panels of their
-/// own, which MainWindow keeps (without alarms and limit test so far). MainWindow provides the
-/// frame (menus, toolbars, docks, status bar) and hooks its actions up to
-/// the *SLOT members here.
+/// The window has no meter of its own: every meter connected is one of the
+/// DeviceSession (MeterController: connection, min/max memory, alarms, SCPI,
+/// the alarms' programs), each with its FrontPanel, which MainWindow keeps.
+/// The views (analog meter, readings table, graph, Poincaré plot) show the
+/// values they are given (ValueRef with the meter's source) and know nothing
+/// of each other. MainWindow provides the frame (menus, toolbars, docks,
+/// status bar) and hooks its actions up to the *SLOT members here.
 class InstanceWidget : public QFrame, private Ui::UIInstanceWidget
 {
   Q_OBJECT
 public:
   /// @param instanceId  name of this instance for multi-instance setups (--config-id)
   /// @param configPath  directory of the settings file (--config-dir), or empty
-  /// @param session     the meters of the process: the window's meter takes part
-  ///                    in its network services and is one of them
+  /// @param session     the meters of the process; its network services are
+  ///                    set up from this window's settings
   /// @param parent      the MainWindow
   InstanceWidget(QString instanceId, QString configPath, DeviceSession *session, QWidget *parent = nullptr);
-  /// Disconnects, saves the settings and asks about unsaved data. Returns
-  /// false when the user cancels; MainWindow then ignores the close event.
+  /// Saves the settings and asks about unsaved data. Returns false when the
+  /// user cancels; MainWindow then ignores the close event.
   bool        closeWin();
   /// The settings dialog: its pages hold what MainWindow reads (the window
   /// at exit, the analog meter's style, the shown display, the keys).
   SettingsDialog *settingsDialog() const { return m_configDlg; }
-  /// The window's front panel (LCD and keys) to feed; created by MainWindow.
-  /// It shows the LCD's value (setLcdValue()); the limit test and the alarm
-  /// colour are set here.
-  void        setPanel(FrontPanel *panel);
-  /// The LCD's colours (LcdWidget::LcdVariant), stored as Display/lcd.
-  void        setLcdVariant(int variant);
   /// The analog meter's style from its context menu (0 dark, 1 ivory):
   /// shown at once, saved, and the Appearance page follows.
   void        setMeterStyle(int style);
   /// The active device (MainWindow), the one the settings' Alarms page
-  /// shows first: its source, empty for the window's.
+  /// shows first: its source.
   void        setActiveSource(const QString &source) { m_activeSource = source; }
   /// The settings' Alarms page with the alarms of the meter @p source
-  /// (MeterController::source(); empty: the window's).
+  /// (MeterController::source()).
   void        openAlarms(const QString &source);
-  /// The window's meter's limit test (PASS/FAIL), kept with its rules (storeRules()).
-  void        setLimitTest(const LimitTest &test);
-  const LimitTest &limitTest() const;
   /// The analog meter to feed; created and docked by MainWindow.
   void        setMeter(AnalogMeter *);
   /// The Poincaré plot (MainWindow owns and feeds it), for its value.
   void        setPoincare(PoincarePlot *plot);
   /// Table model that gets every reading (MainWindow owns it).
   void        setReadingLog(ReadingsModel *);
-  /// @name Which value of the meter a view shows
-  /// Reading::id, 0 the main value; the sidebar's value menu (ValueMenu),
-  /// kept with the window layout. A value the meter does not have
-  /// (numValues()) gives the main value. The LCD's primary value is also the
-  /// one of the min/max memory; the recording stays the main value's.
-  /// A ValueRef of another meter shows that meter's value (ValueFeed),
-  /// "no value" while it is not open.
+  /// @name Which value a view shows
+  /// The sidebar's value menu (ValueMenu), kept with the window layout:
+  /// a meter's value (ValueFeed), "no value" while the meter is not connected.
   /// @{
-  void        setLcdValue(const ValueRef &value);
-  /// The LCD's small line (LcdWidget::setSecondaries()); std::nullopt: the
-  /// first values after the big one.
-  void        setLcdSecondaries(const std::optional<QList<int>> &ids);
-  /// The values on the LCD's small line now.
-  QList<int>  lcdSecondaries() const;
-  /// Whether the small line was chosen (else it is not saved).
-  bool        lcdSecondariesChosen() const { return m_lcdSecondaries.has_value(); }
   void        setMeterValue(const ValueRef &value);
   void        setPoincareValue(const ValueRef &value);
-  /// Whether the readings table shows value @p id (all at first).
-  bool        tableValueShown(int id) const;
-  void        setTableValueShown(int id, bool shown);
-  ValueRef    lcdValue() const { return m_lcdValue; }
   ValueRef    meterValue() const { return m_meterValue; }
   ValueRef    poincareValue() const { return m_poincareValue; }
-  /// The id of @p value among this meter's values; another meter's value
-  /// and one the meter does not have (numValues()) give the main value.
-  int         ownValue(const ValueRef &value) const;
-  /// @p value belongs to this window's meter (no source, or its own).
-  bool        ownMeter(const ValueRef &value) const;
+  /// @}
   /// The limit test's band to the graph and the analog meter (they draw it
   /// for the value they show).
   void        applyLimitBands();
-  /// The values the meter has: DMMInfo::valueCount(), or more when more came;
-  /// at most kMaxValues.
-  int         numValues() const;
-  /// The meter's own name of the value ("Battery voltage"), else "CO2 (ppm)"
-  /// from its last reading, "Value 2" before one came.
-  QString     valueName(int id) const;
-  /// Where room is short: the meter's own name, else unit and coupling
-  /// ("V DC", "°C"); valueName() before a reading came.
-  QString     valueShortName(int id) const;
-  /// Its last reading as shown: "-14.9 A", "OL"; empty before one came.
-  QString     valueText(int id) const { return m_lastText.value(id); }
-  /// @}
-  /// --debug: pass on to MeterConnection::setConsoleLogging().
+  /// --debug: pass on to MeterConnection::setConsoleLogging() of every meter.
   void        setConsoleLogging(bool);
   /// The recorder graph (for the zoom/pan shortcuts in MainWindow).
   GraphWidget   *graph() const { return ui_graph; }
-  /// False until a device has been chosen once (sidebar, Add device); a fresh
-  /// instance does not try to connect to a guessed port on its own.
-  bool        dmmConfigured() const;
-  /// What the window title shows: the model, else the port, else a hint.
-  QString     dmmTitle() const;
-  /// The configured port for display ("/dev/ttyUSB0", "BLE AA:BB:...";
-  /// never a Bluetooth key).
-  QString     portName() const;
-  /// The meter session (connection, alarms, SCPI); views connect to it.
-  MeterController *controller() const { return m_ctl; }
   Settings   *settings() const { return m_settings; }
   /// "My devices", shared by all instances.
   DeviceLibrary *devices() const { return m_devices; }
-  /// The entry of "My devices" this instance uses now (its key
-  /// DMM/my-device); empty when none.
-  QString     currentDevice() const;
-  /// Switches to the device @p id of "My devices": disconnects, takes over
-  /// its meter keys and connects again. A running recording stops with a
-  /// message - another meter is another function; unsaved readings are
-  /// offered for export first unless @p ask is false (confirmSwitch()).
-  /// False when there is no such entry or the user cancels.
-  bool        switchDevice(const QString &id, bool ask = true);
-  /// Before a switch to the device @p name: unsaved readings are exported
-  /// or dropped, or the user cancels (false).
-  bool        confirmSwitch(const QString &name);
+  /// The entry of My devices a window from before 26.4 had as its own meter
+  /// (DMM/my-device), once: its rules from the window go into the entry and
+  /// the key goes. Empty when there is none.
+  QString     takeOldDevice();
   /// Before a new recording: unsaved readings viewed are exported or
   /// dropped, or the user cancels (false). True at once in Live.
   bool        confirmRecording();
@@ -200,28 +136,15 @@ Q_SIGNALS:
   void        useTextLabel(bool);
   /// The symbols chosen: "colored", "plain" or "system" (Designs::IconSet).
   void        iconSet(const QString &set);
-  /// The configured meter has keys QtDMM can press (ControlBar).
-  void        remoteControl(bool supported);
-  /// Asks MainWindow to connect/disconnect (drives the Connect action).
-  void        setConnect(bool);
-  /// Whether the display is shown, read from the settings, for MainWindow.
+  /// Whether the front panels are shown, read from the settings, for MainWindow.
   void        showDisplay(bool show);
-  /// The connection state changed; MainWindow checks the Connect action.
-  void        connectDMM(bool);
-  /// The settings were applied; the meter shown in the title may have changed.
+  /// The settings were applied (the LCDs' look, the services).
   void        configChanged();
   /// The SCPI server or HiSLIP started, stopped or got a client
-  /// (controller()->services()).
+  /// (ServiceHost::services()).
   void        servicesChanged();
-  /// Another device was taken over (switchDevice()): what the views hold of
-  /// the one before is not this one's.
-  void        meterChanged();
 
 public Q_SLOTS:
-  /// Clears min/max memory and the meter's peak/auto-bipolar latch.
-  void        resetSLOT();
-  /// Connect (true) or disconnect (false) the meter.
-  void        connectSLOT(bool);
   void        quitSLOT();
   void        helpSLOT();
   /// Clears the graph.
@@ -242,81 +165,53 @@ public Q_SLOTS:
   void        importSLOT();
   /// Graph started/stopped recording.
   void        runningSLOT(bool);
-  /// Settings dialog OK/Apply: re-reads the configuration (readConfig());
-  /// the connection stays as it is.
+  /// Settings dialog OK/Apply: re-reads the configuration (readConfig()).
   void        applySLOT();
 
 protected:
   /// Shows the settings dialog, on @p page (a SettingsDialog::PageType) unless -1.
   void        openConfig(int page = -1);
   void        applyMeterStyle();   ///< style, ballistics, red zone from the settings
-  MeterController *m_ctl;
   DeviceSession   *m_session;
   ValueFeed       *m_meterFeed = nullptr;     ///< the analog meter's
   ValueFeed       *m_poincareFeed = nullptr;  ///< the Poincaré plot's
   SettingsDialog  *m_configDlg;
   qtdmm::PrintDlg *m_printDlg;
   QPrinter    m_printer;
-  LcdWidget *m_display;
-  FrontPanel *m_panel = nullptr;
-  QColor      m_lcdTint;   ///< the Appearance page's tint last applied
   QColor      m_alertColor;   ///< the raised alarm's colour for the analog meter, invalid when none
   QMetaObject::Connection m_alertLink;   ///< the alarm colour of the analog meter's meter
-  QMetaObject::Connection m_meterLimitLink;   ///< the limit test of the analog meter's meter, not the window's
-  QPointer<MeterController> m_graphBase;   ///< the meter of the graph's store when not the window's
+  QMetaObject::Connection m_meterLimitLink;   ///< the limit test of the analog meter's meter
+  /// The graph's store while no meter has it: empty, Live (time axis only).
+  RecordingStore *m_emptyStore = nullptr;
+  QPointer<MeterController> m_graphBase;   ///< the meter of the graph's store, nullptr: m_emptyStore
   QMetaObject::Connection m_graphUnit;      ///< its unit to the graph
+  MeterController *m_closing = nullptr;   ///< the meter closing now (DeviceSession::closing())
+  QMetaObject::Connection m_graphAlarms;    ///< its alarms: the reference line's thresholds
   /// The graph shows none of its store's meter's values: the meter of its first.
   void        followGraphBase();
+  /// The graph's store: of @p ctl, or the empty one for nullptr.
   void        setGraphBase(MeterController *ctl);
-  QMetaObject::Connection m_graphLimitLink;   ///< of the meter of the graph's left axis, not the window's
+  /// The alarms' thresholds of the graph's meter, for its reference line to snap to.
+  void        applyAlarmThresholds();
+  QMetaObject::Connection m_graphLimitLink;   ///< of the meter of the graph's left axis
   bool        m_alertBlink = false;   ///< Alarms/blink
   bool        m_alertPhase = true;    ///< blinking: the colour shown now
   QTimer     *m_alertTimer = nullptr;
   QString     m_activeSource;   ///< setActiveSource()
-  QString     m_rulesDevice;   ///< the entry the window's rules were loaded from, empty: the window's settings
+  bool        m_consoleLogging = false;   ///< setConsoleLogging()
   /// The analog meter in the alarm's colour (or its own in the dark phase
   /// of the blinking).
   void        showAlertColor();
-  /// The window's meter's rules (alarms, PASS/FAIL test): those of its
-  /// entry in My devices, else the window's (Alarms/list, Limits/test).
-  /// With @p moveOld (at start) rules of the window from before 26.4 move
-  /// into its entry when that has none.
-  void        loadRules(bool moveOld = false);
-  /// The window's meter's rules into its entry, or the window's settings.
-  void        storeRules();
   AnalogMeter   *m_meter;
   PoincarePlot  *m_poincare = nullptr;
   QPointer<ReadingsModel> m_readingLog;
-  ValueRef    m_lcdValue;
   ValueRef    m_meterValue;
   ValueRef    m_poincareValue;
-  std::optional<QList<int>> m_lcdSecondaries;   ///< setLcdSecondaries()
-  QMap<int, Reading> m_lastReading;   ///< by id, for valueName()
-  QMap<int, QString> m_lastText;      ///< by id, for valueText()
-  int         m_seenValues = 0;         ///< highest value id read + 1, since the meter was chosen
-  /// The number of values (numValues()) to the display and SCPI, then
-  /// applyValueChoice().
-  void        applyValueCount();
-  /// Another meter: the units, the values seen and SCPI's channels of the
-  /// one before go; they come with its first readings.
-  void        forgetValues();
-  /// The values chosen, as far as the meter has them, to the views and the
-  /// min/max memory.
+  /// The values chosen to the views.
   void        applyValueChoice();
-  /// The meter's values by name: the alarm page's choice of value, the
-  /// readings table's statistics line.
+  /// The meters' values by name: the recording's choice of trigger value.
   void        updateValueNames();
   Settings    *m_settings;
-  /// Disconnects, takes over @p keys of the entry @p id, clears the graph,
-  /// connects; @p name for the messages.
-  void        takeOver(const QVariantMap &keys, const QString &name, const QString &id);
-  /// After the settings were applied: the entry in use follows them (same
-  /// model: the same meter, its entry changes along); another model is
-  /// another meter - the entry at its place, or none.
-  void        syncDevice();
-  /// Opens or closes the port without touching the recorder (connectSLOT()
-  /// stops it on closing; an alarm's program does not).
-  void        connectPort(bool on);
   /// Asks about unsaved readings before they are lost (@p text says how,
   /// @p discard is the button that drops them): export first, drop or
   /// cancel. True when the caller may go on - nothing unsaved, exported or
@@ -326,11 +221,10 @@ protected:
   QString     m_instanceId;
   QString     m_configPath;   ///< --config-dir, passed on to new instances
 
-  /// Applies the settings to the MeterConnection, graph, display and meter.
+  /// Applies the settings to the services, graph and analog meter.
   void        readConfig();
-  /// The meter's keys (and sigrok-cli) the port was set up with last:
-  /// readConfig() opens the port again only when they changed.
-  QVariantMap m_appliedMeter;
+  /// The SCPI page's settings to the session's services (ServiceHost::apply()).
+  void        applyScpi();
   QRect       parentRect() const;
 
 protected Q_SLOTS:

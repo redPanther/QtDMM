@@ -35,7 +35,6 @@ class Settings;
 class DeviceLibrary;
 class QPrinter;
 class RecorderPrefs;
-class DeviceSettings;
 class GeneralPrefs;
 class GuiPrefs;
 class GraphPrefs;
@@ -85,14 +84,7 @@ public:
   AlarmPrefs           *alarmPage() const { return m_alarms; }
   ScpiPrefs            *scpiPage() const { return m_scpi; }
   KeyboardPrefs        *keyboardPage() const { return m_keyboard; }
-  /// Not shown: the meter of this instance from its settings keys (DMM/,
-  /// Port settings/); the assistant and the sidebar set it up.
-  DeviceSettings       *meterSettings() const { return m_meter; }
   /// @}
-
-  /// How to open the meter as the page has it (MeterSetup::fromKeys()),
-  /// with the sigrok program.
-  MeterSetup            meterSetup() const;
 
   /// The recording length as asked when Record is pressed (RecordLengthDlg):
   /// a value, 0 = until stopped, and its unit (0 s, 1 min, 2 h, 3 d). Stored
@@ -108,8 +100,6 @@ public:
   void                  readPrinter(QPrinter *);
   /// Raises the dialog on the given page.
   void                  showPage(PageType);
-  /// The meter is read from the settings again (another device was taken over).
-  void                  reloadMeter();
 
 public Q_SLOTS:
   /// OK or Apply: applies all pages and saves.
@@ -137,8 +127,6 @@ protected:
   QPrinter             *m_printer;
   QRect                 m_winRect;
   RecorderPrefs        *m_recorder;
-  /// Not shown: turns the meter's settings keys into the connection.
-  DeviceSettings       *m_meter;
   GeneralPrefs         *m_general;
   GuiPrefs             *m_gui;
   GraphPrefs           *m_graph;

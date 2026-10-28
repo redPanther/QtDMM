@@ -74,7 +74,7 @@ The vertical axis is in the unit that suits its range - mV for an axis up to
 Three ways to start, chosen under **Start** on the Recording page:
 
 - **By hand** — *Record* in the toolbar (Space) or the graph's right-click
-  menu. With devices open beside the window's, *Record* records all of them
+  menu. With several devices connected, *Record* records all of them
   on one time base; *Start recording* in the graph's menu only those whose
   values the graph shows (the others stay Live). A device opened while it
   records joins when the graph shows a value of it.
@@ -194,10 +194,10 @@ were; the integration curve carries on across a gap.
   the window layout. They are recorded either way. The time cursors show
   every value drawn, with a line of statistics each; the overview shows
   the value of the left axis (with none there the first one on the right),
-  in its colour. With none of the window's device on the left axis, the
-  first value of a device open beside it there is the left axis' value:
-  the overview, the reference line, the cursor levels and the PASS/FAIL
-  band are then that device's; the triggers are the main value's; the integration curve can
+  in its colour. With none of the graph's device (the device of its first
+  value) on the left axis, the first value of another device there is the
+  left axis' value: the overview, the reference line, the cursor levels
+  and the PASS/FAIL band are then that device's; the triggers are the main value's; the integration curve can
   take value 2 (see *Integration* below). The export has the values that
   are switched on (see [Export and import](#export-and-import)).
 - **Mouse wheel** zooms the time axis; the **middle button** drags it. On the
@@ -317,12 +317,13 @@ timestamp;time (s);value;unit;status;value 2;unit 2;status 2
 2026-09-19T10:00:01,000;1;12.4;mV;ok;50.02;Hz;ok
 ```
 
-The values of other devices the graph shows (devices open beside the
-window's) follow the same way, their columns named after the device:
-`Sim B: value;Sim B: unit;Sim B: status`, its second value
-`Sim B: value 2` ..., its PASS/FAIL verdict `Sim B: limit`. Their recordings
-count as saved then. `QTDMM:RECord:SAVE` at the window's meter writes all
-values of the devices that recorded with it.
+Since 26.4 every column is named after its device, the graph's first
+device too: `Sim A: value;Sim A: unit;Sim A: status`, its second value
+`Sim A: value 2` ..., its PASS/FAIL verdict `Sim A: limit`; the values of
+the other devices the graph shows follow the same way (`Sim B: value` ...).
+Their recordings count as saved then. `QTDMM:RECord:SAVE` at the meter
+that leads the recording writes all values of the devices that recorded
+with it. Files without the names (before 26.4) are read as before.
 
 ```
 timestamp;time (s);value;unit;status;Sim B: value;Sim B: unit;Sim B: status

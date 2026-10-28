@@ -1,9 +1,9 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// DeviceSession: meters of "My devices" opened in the process without a
-// window, next to the window's meter, on one SCPI server; their recordings
-// follow the window's. Simulated meters only, no hardware.
+// DeviceSession: meters of "My devices" opened in the process, on one SCPI
+// server; their recordings follow the one that leads (the first, called the
+// window's meter here). Simulated meters only, no hardware.
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -37,10 +37,15 @@ int main(int argc, char **argv)
   DeviceSession session;
   session.setInstanceId("test");
   session.setConfigDir(dir.path());
-  MeterController window(nullptr, session.host());
-  window.setInstanceId("test");
-  window.setDevice("w1", "Window meter");
-  session.adopt(&window);
+  // the first meter: it leads the recordings; disconnected, its readings
+  // come from the test
+  const QString w1 = lib.add("Window meter", {{"DMM/model", "QtDMM Simulated meter"}, {"Port settings/device", "calc V/DC 1"},
+                                              {"DMM/virtual-waveform", 0}, {"DMM/virtual-min", "1"}, {"DMM/virtual-max", "1"}});
+  MeterController *first = session.open(w1);
+  if (!first)
+    return 1;
+  MeterController &window = *first;
+  window.connectMeter(false);
   auto ask = [&](const char *line) { return QString::fromLatin1(session.host()->scpi()->process(line)).trimmed(); };
 
   // 1. open from My devices: connected, readings with its source
@@ -59,10 +64,9 @@ int main(int argc, char **argv)
   check(session.controller("device:" + sim) == ctl, "found by source");
   check(ask("INST:CAT?") == "\"WINDOW_METER\",\"BENCH_SIM\"", "both meters on one server: " + ask("INST:CAT?"));
 
-  // 2. refused: twice, unknown, the window's
+  // 2. refused: twice, unknown
   check(!session.open(sim, &error) && error.startsWith("-221,"), "open twice: " + error);
   check(!session.open("nosuch", &error) && error.startsWith("-224,"), "unknown id: " + error);
-  check(!session.close("w1", &error) && error.startsWith("-221,"), "the window's meter is not closed here: " + error);
   // 3. SCPI: catalog, open, close
   const QString cat = ask("QTDMM:DEV:CAT?");
   check(cat.contains(QString("\"%1\",\"Bench sim\",1").arg(sim)) && cat.contains(QString("\"%1\",\"Power\",0").arg(calc)),
@@ -112,7 +116,7 @@ int main(int argc, char **argv)
   // its Record button: the window's start there)
   RecordingStore *lead = window.recorder();
   RecordingStore *mine = ctl->recorder();
-  QObject::connect(&window, &MeterController::recordingRequested, lead, [lead](bool start)
+  session.setRecordingRequests([lead](bool start)
   {
     if (start)
       lead->start();
@@ -184,11 +188,9 @@ int main(int argc, char **argv)
   }
   lead->stop();
 
-  // 5. the window takes the meter open in the background: it is closed
-  QString message;
-  QObject::connect(&session, &DeviceSession::error, [&message](const QString &text) { message = text; });
-  session.release(sim);
-  check(!session.controller("device:" + sim) && message.contains("Bench sim"), "release: closed, said so: " + message);
+  // 5. closed: the window's meter alone
+  session.close(sim);
+  check(!session.controller("device:" + sim), "closed");
   check(session.controllers().size() == 1, "only the window's meter left");
   // the window alone: its time begins with its first reading, as before
   {
@@ -241,7 +243,7 @@ int main(int argc, char **argv)
     QObject::connect(&feed, &ValueFeed::reading, [&got](const Reading &r) { got << r; });
     QObject::connect(&feed, &ValueFeed::controllerChanged, [&changes](MeterController *) { ++changes; });
     feed.setValue(ValueRef(0));
-    check(feed.controller() == &window, "an empty source: the window's meter");
+    check(!feed.controller(), "an empty source: no meter");
     feed.setValue(ValueRef(0, "device:" + sim));
     check(feed.controller() == session.controller("device:" + sim) && changes == 2, "another meter's value");
     check(waitFor([&] { return !got.isEmpty() && got.last().source == "device:" + sim && !got.last().noNumber(); }, 4000),

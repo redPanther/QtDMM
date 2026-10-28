@@ -438,7 +438,7 @@ QString MeterController::saveRecording(const QString &name, bool raw)
       foreign << RecordingStore::Foreign{ store, id, other->deviceName() };
   }
   QString error;
-  if (!QDir().mkpath(dir) || !m_recorder->write(path, &error, raw, extras, foreign))
+  if (!QDir().mkpath(dir) || !m_recorder->write(path, &error, raw, extras, foreign, m_deviceName))
     return "-250,Mass storage error; " + (error.isEmpty() ? dir : error);
   Q_EMIT info(tr("SCPI: recording saved as %1").arg(QDir::toNativeSeparators(path)));
   return {};

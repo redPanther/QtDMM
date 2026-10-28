@@ -1,61 +1,62 @@
 # My devices
 
-If you own several meters and use them one at a time - a UT61E on the
-bench, a Brymen for the car, a Victron shunt in the van - **My devices**
-keeps each of them with its connection, so connecting one is its context
-menu in the sidebar instead of filling in the meter page again.
+If you own several meters - a UT61E on the bench, a Brymen for the car, a
+Victron shunt in the van - **My devices** keeps each of them with its
+connection: it is the cupboard. **Connect** takes a device out of it, one
+or several at a time; the window itself has no meter of its own.
 
 An entry holds the meter and its connection only, and of the connection
 what its way needs: model and protocol, the port with its line settings, a
 Bluetooth address (and for a Victron device its key and the values to
-show), sigrok options, the signal of the simulated meter. Display, graph,
-recorder and alarms stay with the window. An older `devices.conf` with more
-in it is tidied up when QtDMM starts.
+show), sigrok options, the signal of the simulated meter, and its rules
+(alarms, PASS/FAIL test). Graph, recorder and the views stay with the
+window. An older `devices.conf` with more in it is tidied up when QtDMM
+starts.
 
-The window remembers which entry it uses. **Info and settings...** of an
-entry in the sidebar, or a double click on it, shows and changes the entry
-(Shift+F8: the settings of the one in use); the window that uses it takes
-the change at once.
+**Info and settings...** of an entry in the sidebar, or a double click on
+it, shows and changes the entry (Shift+F8: the settings of the active
+device); a device connected takes the change at once.
 
 ## The sidebar
 
 **Devices** in the toolbar shows and hides the sidebar at the left of the
 window, with the node **My devices** (folded at the start: the devices in
-use are under **Open devices**; unfold it to choose another). Each entry has a small picture of its
+use are under **Connected devices**; unfold it to take out another). Each entry has a small picture of its
 kind of instrument (handheld, clamp, bench meter, ...) in its maker's
-colours. The device in use is bold, with a dot
-that blinks green while its readings come in and turns grey when none has
-come for three seconds; where a device is connected shows
-when the mouse rests on it. A click on a device does nothing: **Connect**
-in its context menu, or the button **Connect** in its info (a double click),
-connects it beside the window's device (see below).
+colours. A device connected is bold, with a dot that is green while its
+readings come in and grey when none has come for three seconds. A click on
+a device does nothing: **Connect** in its context menu, the button
+**Connect** in its info (a double click), or dragging it onto **Connected
+devices** connects it (see below).
 
 With a single device the sidebar stays closed; adding the second one opens
-it, and the window remembers whether you leave it open. A window without a
-meter shows it whenever there are devices to choose from - pick one, or add
-a new one with the big **Add device** button.
+it, and the window remembers whether you leave it open. With no device
+connected the window shows the big **Add device** button and, when My
+devices has entries, **Connect a device from My devices**, which opens the
+sidebar.
 
-Below My devices the node **Open devices** lists the meters this QtDMM
-reads with their current reading: this window's own, then those opened
-beside it (**Connect**, see below). The active device is in bold, one
-not connected is grey. A double click or *Show front panel* in the context
-menu brings its front panel back; *Connect*/*Disconnect* there connects or
-disconnects it, *Close* closes one opened beside.
+Below My devices the node **Connected devices** lists the meters this
+QtDMM reads with their current reading, in the order they were connected.
+The active device is in bold, one disconnected is grey. A double click or
+*Show front panel* in the context menu brings its front panel back;
+*Connect*/*Disconnect* there connects or disconnects it, *Close* (or
+dragging it back onto My devices) puts it back into the cupboard.
 
 ### Several meters: front panels and the active device
 
-Each open meter has its own front panel: its LCD with its keys, as a
-window next to the analog meter. The X of a front panel only hides it, the
-meter stays open and keeps recording. The meter of the front panel clicked
-last is the **active device**: *Connect*, *Reset* (min/max) and the device
-settings (Shift+F8) act on it. The status bar shows its name while more
-than one meter is open. All front panels share the LCD colours of the
-window's display. Each device has its own [alarms](alarms.md) and
+Each connected meter has its own front panel: its LCD with its keys, as a
+window next to the analog meter; all are alike. **Display** (Ctrl+1) shows
+or hides all of them, the X of one only hides it - the meter stays
+connected and keeps recording. The meter of the front panel clicked last
+(at first the first one connected) is the **active device**: *Connect*,
+*Reset* (min/max) and the device settings (Shift+F8) act on it. The status
+bar shows its name while more than one meter is connected. All front
+panels share the LCD colours. Each device has its own [alarms](alarms.md) and
 [PASS/FAIL test](limit-test.md); its front panel takes their colours, and
 *PASS/FAIL test*, *Limits...* and *Alarms...* are in the context menu of
-its front panel and of its row. The window layout remembers the meters open beside and
-opens them again at the next start, after the window's own; a workspace
-file does the same when it is loaded. **Services** shows what this window offers to other
+its front panel and of its row. The window layout remembers the meters
+connected and connects them again at the next start; a workspace file does
+the same when it is loaded. **Services** shows what this window offers to other
 programs: the [SCPI server and HiSLIP](scpi-server.md) with their port, or
 *off*.
 
@@ -68,8 +69,8 @@ a double click loads one (see
 
 For a meter with more than one value (a second display, the CO2,
 temperature and humidity of the TFA AirCO2ntrol, the voltage, current and
-state of charge of a Victron) each open device has a row for each
-value below it in **Open devices**: its number, its name and its reading.
+state of charge of a Victron) each device has a row for each
+value below it in **Connected devices**: its number, its name and its reading.
 A device with one value has the same menu in its own row, under **Value**. The name is
 the one the meter gives the value (a Victron's *Battery voltage*), else
 unit and coupling (*V DC*); the tooltip has the full one. A
@@ -87,35 +88,34 @@ shows which value - right-click a value:
   (two voltages on the left, a current on the right); one in another unit
   takes the axis over, and the curves of the old unit there go off - the
   status line says which. The main value is always on the left. A value of
-  a device opened beside joins an axis in its unit; one with no room there
-  is not drawn, and the status line says so.
+  another device joins an axis in its unit; one with no room there is not
+  drawn, and the status line says so.
 - **Poincaré plot** - the value the plot takes (one).
 - **Readings table** - whether the [readings table](readings-table.md)
-  lists it (all values of this window's device at first; another device
-  comes in with the value chosen).
+  lists it (all values of the devices it shows; another device comes in
+  with the value chosen).
 
 A choice opens the window it is for, also when the toolbar is hidden. The
 choices are kept with the window layout.
 
-With more than one device open, the context menus of the graph, the
+With more than one device connected, the context menus of the graph, the
 readings table, the analog meter and the Poincaré plot have **Sources...**:
-all open devices with their values, to tick those the view shows - several
-for the graph and the table, one for the analog meter and the Poincaré
-plot. A newly opened device changes nothing by itself - unless a view
-shows nothing: an empty graph then takes its main value, the analog meter
-and the Poincaré plot take it when their device is not connected. The graph
-draws its values from the store of the device of its first value: while it
-shows none of this window's device, another device's value is its main
-curve (with the overview, the reference line and the limit band of it).
+all connected devices with their values, to tick those the view shows -
+several for the graph and the table, one for the analog meter and the
+Poincaré plot. A device connected later changes nothing by itself - unless
+a view shows nothing: an empty graph then takes its main value, the analog
+meter and the Poincaré plot take it when their device is not connected.
+The graph draws its values from the recording of the device of its first
+value: that value is its main curve (with the overview, the reference line
+and the limit band of it), the others are drawn on its time.
 
 The context menu of a device:
 
 - **Info and settings...** (also a double click) - two or three tabs:
   - **Info**: the device at a glance as on the assistant's last page
-    (picture, name, model, type, protocol, connection); whether it is in use
-    in this window, open beside it or not at all; in this window
-    whether it is connected, how long ago the last reading came, a low
-    battery, and its values with their readings, updated every second. Below
+    (picture, name, model, type, protocol, connection); whether it is
+    connected, how long ago the last reading came, a low battery, and its
+    values with their readings, updated every second. Below
     a link to the maker's website (in the browser) and to the list of
     supported devices in this help.
   - **Data** (only for some meters - UNI-T UT803, UT804, UT61B+/D+/E+,
@@ -127,19 +127,20 @@ The context menu of a device:
     project (the HP-570C-APP's from its manual filed with the FCC, the CMT
     3503's from its data sheet, one accuracy per function) - check the
     manual before relying on a number.
-  - **Settings**: the meter's settings as in the assistant; with **OK** the
-    device in use takes them at once.
+  - **Settings**: the meter's settings as in the assistant; with **OK** a
+    device connected takes them at once (it connects anew).
 - **Rename** - in place.
-- **Connect** (also the button at the bottom left of its info) - opens
-  the device in this QtDMM beside the window's device, with a front panel of its own: it shows its reading there and in
-  **Open devices**, records whenever the window records, is a variable in
+- **Connect** (also the button at the bottom left of its info, or drag it
+  onto **Connected devices**) - takes the device out of the cupboard, with
+  a front panel of its own: it shows its reading there and in **Connected
+  devices**, records with the others, is a variable in
   [calculated values](calculated-values.md) and answers over SCPI
-  (`INSTrument`). Greyed while the device is connected; a device whose port
-  the window uses is not opened twice.
-- **Remove from My devices** - after a question; a window using it keeps its
-  meter.
+  (`INSTrument`). Greyed while the device is connected; a port another
+  device connected uses is not opened twice.
+- **Remove from My devices** - after a question; a device connected stays
+  so until it is closed.
 
-Drag a device to change the order.
+Drag a device within My devices to change the order.
 
 ## Adding a device
 
@@ -160,9 +161,10 @@ A serial port is saved under its stable name on Linux, the link in
 
 The list is kept in `devices.conf` next to the settings file, the same for
 every `--config-id`. An entry keeps the device's rules too: its alarms and
-its PASS/FAIL test. Alarms set up for the window before 26.4 move into the
-entry of the window's device at the first start. A port is read by one meter at a time: a device whose
-port is in use in this window or beside it is not opened again, and
+its PASS/FAIL test. A window of a version before 26.4 had a meter of its
+own: at the first start that entry is connected like the others, and alarms
+set up for the window move into it. A port is read by one meter at a time:
+a device whose port another device connected uses is not opened again, and
 another program (or another QtDMM) using it says the port is busy.
 
 A Victron key is kept in `devices.conf` in plain text, as in the settings

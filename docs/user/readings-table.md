@@ -38,15 +38,14 @@ table** in the menu of a value in the sidebar (see
 [The meter's values](my-devices.md#the-meters-values)) leaves a value out
 of the table and switches it on again. Kept with the window layout.
 
-The table lists the readings of the connected devices it is given, this
-window's device like the others; without a choice it lists all of them. A
+The table lists the readings of the connected devices it is given;
+without a choice it lists all of them. A
 value in the table (its value menu, or **Sources...** in the table's
 context menu) brings a device in or takes it out. With more than one device
 the rows come in time order, the Device column names each row's device, and
 copying and the export carry it as well (`device;timestamp;...`). The
-statistics line is of the window's device's first value shown, or, without
-its rows, of the first value the table shows, with the device's name in
-front.
+statistics line is of the first value the table shows, with the device's
+name in front.
 
 ## Following, keeping, clearing
 

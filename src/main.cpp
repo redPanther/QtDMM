@@ -134,7 +134,8 @@ int main(int argc, char **argv)
   parser.addOption({"debug", QObject::tr("protocol debugging information")});
   parser.addOption({"config-dir",QObject::tr("sets directory where config files are located"), "config-dir"});
   parser.addOption({"config-id",QObject::tr("sets <config-id>"), "config-id"});
-  parser.addOption({"also", QObject::tr("opens <id> of My devices as well, without a window (repeatable)"), "id"});
+  parser.addOption({"connect", QObject::tr("connects <id> of My devices at the start (repeatable)"), "id"});
+  parser.addOption({"also", QObject::tr("the same as --connect (its name before 26.4)"), "id"});
   parser.addOption({"vxi11-rpc", QObject::tr("VXI-11 portmapper for this run: auto, system (rpcbind) or own (port 111)"),
                     "mode"});
   parser.addOption({"vxi11-portmapper-port",

@@ -128,7 +128,10 @@ bool GraphWidget::exportCsvFile(const QString &fileName, bool raw)
     if (c.store)
       foreign << RecordingStore::Foreign{ c.store, c.value.id, otherName(c.value.source) };
   QString err;
-  if (!m_store->write(fileName, &err, raw, extras, foreign))
+  // every column after its meter, this one's too
+  const QString device = !m_sourceFile.isEmpty() ? m_sourceDevice
+                         : m_baseSource.isEmpty() ? QString() : otherName(m_baseSource);
+  if (!m_store->write(fileName, &err, raw, extras, foreign, device))
   {
     Q_EMIT error(err);
     return false;
@@ -167,8 +170,9 @@ bool GraphWidget::importCsvFile(const QString &fileName)
   m_scaleMax = -1e40;
 
   m_sourceFile = QFileInfo(fileName).fileName();
+  m_sourceDevice = rec->device;
   // this meter's columns into the store, another meter's into one of its own
-  m_store->load(RecordingFile::devicePart(*rec, QString()));
+  m_store->load(RecordingFile::devicePart(*rec, rec->device));
   setFileStores(*rec);
   updateStateLabel();
 

@@ -47,6 +47,9 @@ struct Recording
   QDateTime start;
   int sampleTimeTenths = 1;   ///< sample interval in tenths of a second (>= 1)
   QString unit;               ///< the graph's unit, without SI prefix ("V")
+  /// The meter of the main value ("Sim A"), its columns named after it like
+  /// those of the others; empty: unnamed (files before 26.4).
+  QString device;
   QVector<double> values;
   /// The state of each value; empty = Ok where the value is a number, else
   /// Gap. An overload's NaN carries the sign of -OL.
@@ -107,9 +110,11 @@ bool write(const Recording &recording, const QString &path, QString *error = nul
 /// suffix. Falls back to CSV for any other suffix.
 bool writeAny(const Recording &recording, const QString &path, QString *error = nullptr);
 
-/// The other meters in @p recording (RecordingColumn::device), in order.
+/// The other meters in @p recording (RecordingColumn::device, not
+/// Recording::device), in order.
 QStringList devices(const Recording &recording);
-/// The part of @p recording of the meter @p device (empty: this meter):
+/// The part of @p recording of the meter @p device (Recording::device: the
+/// main value's meter):
 /// its main value as the values, its other values as the extra columns,
 /// on the same rows and times.
 Recording devicePart(const Recording &recording, const QString &device);

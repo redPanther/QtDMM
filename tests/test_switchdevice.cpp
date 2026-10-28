@@ -1,9 +1,9 @@
 // Copyright (c) 2026 The QtDMM developers
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// A window switching between two of My devices (InstanceWidget::switchDevice(),
-// a click in the sidebar): it takes over exactly the entry's keys - a key of
-// the meter before stays neither in the window nor goes into the new entry.
+// The window's meter before 26.4 (InstanceWidget::takeOldDevice()): its entry
+// of My devices, once; the window keeps no meter of its own, the entry stays
+// as it is. And which keys an entry keeps (DeviceLibrary::isEntryKey()).
 #include <QApplication>
 #include <QDebug>
 #include <QTemporaryDir>
@@ -11,7 +11,6 @@
 #include "core/devicelibrary.h"
 #include "core/settings.h"
 #include "service/devicesession.h"
-#include "ui/frontpanel.h"
 #include "ui/instancewidget.h"
 #include "testutil.h"
 
@@ -48,29 +47,25 @@ int main(int argc, char **argv)
   }
   DeviceSession session;
   session.setConfigDir(dir.path());
-  FrontPanel panel(&session);   // MainWindow gives the window its display
   InstanceWidget wid("win", dir.path(), &session);
-  wid.setPanel(&panel);
-  check(wid.currentDevice() == b, "the window starts with Sim B");
-
-  check(wid.switchDevice(a, false), "switch to Sim A");
-  const QVariantMap now = wid.settings()->meterKeys(true);
-  check(wid.currentDevice() == a, "the window uses Sim A");
-  check(!now.contains("DMM/virtual-unit") && !now.contains("DMM/virtual-period"),
-        "Sim B's keys left the window: " + QStringList(now.keys()).join(", "));
-  check(now.value("Port settings/device") == "calc V/DC 1.5", "Sim A's place");
-  check(lib.find(a)->keys == entryA, "nothing of Sim B went into Sim A's entry");
-
-  check(wid.switchDevice(b, false), "switch back to Sim B");
-  const QVariantMap back = wid.settings()->meterKeys(true);
-  check(back.value("DMM/virtual-unit") == "A" && back.value("DMM/virtual-period") == "6", "Sim B's keys again");
+  check(wid.takeOldDevice() == b, "the window's meter was Sim B");
+  check(wid.settings()->getString("DMM/my-device").isEmpty() && wid.takeOldDevice().isEmpty(), "once");
+  check(session.controllers().isEmpty(), "the window opens no meter of its own");
   check(lib.find(b)->keys == entryB && lib.find(a)->keys == entryA, "both entries unchanged");
+  {
+    Settings gone("gone", dir.path());
+    gone.setString("DMM/my-device", "nosuch");
+    gone.save();
+    gone.sync();
+  }
+  InstanceWidget none("gone", dir.path(), &session);
+  check(none.takeOldDevice().isEmpty(), "an entry gone: none");
 
   if (failed)
   {
-    qWarning() << failed << "switch device check(s) failed";
+    qWarning() << failed << "old window device check(s) failed";
     return 1;
   }
-  qInfo() << "All switch device tests passed.";
+  qInfo() << "All old window device tests passed.";
   return 0;
 }

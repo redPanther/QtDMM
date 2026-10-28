@@ -57,30 +57,25 @@
 #include "core/siprefix.h"
 #include "core/settings.h"
 #include "service/devicesession.h"
+#include "service/servicehost.h"
 #include "service/valuefeed.h"
 
 
 
 InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSession *session, QWidget *parent) :  QFrame(parent),
-  m_display(nullptr),
   m_meter(nullptr)
 {
   setupUi(this);
   setWindowIcon(QPixmap(":/Symbols/icon.xpm"));
 
-  // the meter session: connection, min/max, alarms, SCPI
   m_session = session;
-  m_ctl = new MeterController(this, session->host());
-  session->adopt(m_ctl);
-  // the views' values: of the window's meter or of another one open here
+  // the views' values: of a meter of the session
   m_meterFeed = new ValueFeed(session, this);
   m_poincareFeed = new ValueFeed(session, this);
   m_meterFeed->setValue(ValueRef());
   m_poincareFeed->setValue(ValueRef());
   connect(session, &DeviceSession::error, this, &InstanceWidget::error);
   connect(session, &DeviceSession::info, this, &InstanceWidget::info);
-  m_ctl->setInstanceId(instanceId.isEmpty() ? QString("default") : instanceId);
-
   m_instanceId = instanceId;
   m_configPath = configPath;
   m_settings  = new Settings(instanceId, configPath, this);
@@ -114,19 +109,16 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
       AlarmPrefs::Device d;
       d.name = ctl->deviceName();
       d.alarms = ctl->alarms()->alarms();
-      if (ctl != m_ctl)
+      d.source = ctl->source();
+      const int count = ctl->valueCount();
+      for (int id = 0; id < count; ++id)
       {
-        d.source = ctl->source();
-        const int count = ctl->valueCount();
-        for (int id = 0; id < count; ++id)
-        {
-          const Reading r = ctl->lastReading(id);
-          d.units.insert(id, r.baseUnit);
-          if (count > 1)
-            d.valueNames << QString("%1: %2").arg(id + 1).arg(!r.name.isEmpty() ? r.name
-                                                               : r.baseUnit.isEmpty() ? tr("Value %1").arg(id + 1)
-                                                               : RecordingStore::describe(r.port, r.baseUnit));
-        }
+        const Reading r = ctl->lastReading(id);
+        d.units.insert(id, r.baseUnit);
+        if (count > 1)
+          d.valueNames << QString("%1: %2").arg(id + 1).arg(!r.name.isEmpty() ? r.name
+                                                             : r.baseUnit.isEmpty() ? tr("Value %1").arg(id + 1)
+                                                             : RecordingStore::describe(r.port, r.baseUnit));
       }
       out << d;
     }
@@ -142,13 +134,11 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   m_printDlg = new qtdmm::PrintDlg(this);
   m_printDlg->hide();
 
-  connect(m_ctl, &MeterController::error, this, &InstanceWidget::error);
-  connect(m_ctl, &MeterController::info, this, &InstanceWidget::info);
-  // the recorder belongs to the controller; the graph shows it, and the
-  // values of meters open beside it from their stores
-  ui_graph->setStore(m_ctl->recorder());
-  ui_graph->setOwnSource(m_ctl->source());
-  ui_graph->setBaseSource(m_ctl->source());
+  // the graph shows the store of the meter of its first value, the values
+  // of other meters from their stores; without a meter an empty one
+  m_emptyStore = new RecordingStore(this);
+  m_emptyStore->live();
+  ui_graph->setStore(m_emptyStore);
   // the recording is the session's: the graph's store may follow another meter's
   ui_graph->setControl({ [this] { m_session->startRecording(); }, [this] { m_session->stopRecording(); },
                          [this] { m_session->goLive(); }, [this] { m_session->clearRecording(); } });
@@ -164,50 +154,35 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   });
   connect(m_session, &DeviceSession::opened, ui_graph, &GraphWidget::otherStoresChanged);
   connect(m_session, &DeviceSession::closed, ui_graph, &GraphWidget::otherStoresChanged);
-  m_graphUnit = connect(m_ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
   // the graph's store: of the meter of its first value while it shows none
-  // of the meter before; that meter closed, the window's again
+  // of the meter before; that meter closed, of the next value's or empty
   connect(ui_graph, &GraphWidget::valuesChanged, this, &InstanceWidget::followGraphBase);
   connect(m_session, &DeviceSession::opened, this, &InstanceWidget::followGraphBase);
   connect(m_session, &DeviceSession::closing, this, [this](MeterController *ctl)
   {
-    if (ctl == m_graphBase)
-      setGraphBase(m_ctl);
-  });
-  // what each value measures, for the views' choice of value
-  connect(m_ctl, &MeterController::reading, this, [this](const Reading &r)
-  {
-    if (r.id >= m_seenValues)
-    {
-      const int before = numValues();
-      m_seenValues = r.id + 1;
-      if (numValues() != before)
-        applyValueCount();
-    }
-    m_lastText[r.id] = r.overload ? QStringLiteral("OL")
-                       : r.noNumber() ? r.text.trimmed()
-                                      : QString("%1 %2").arg(r.text, SiPrefix::displayText(r.unit)).trimmed();
-    if (r.text.isEmpty() || r.overload || r.noNumber() || r.port.quantity == Quantity::Unknown)
+    if (ctl != m_graphBase)
       return;
-    const bool news = m_lastReading.value(r.id).baseUnit != r.baseUnit || m_lastReading.value(r.id).name != r.name
-                      || !m_lastReading.contains(r.id);
-    m_lastReading[r.id] = r;
-    // the alarms on another value: their thresholds in its unit
-    if (news && r.id > 0)
-      m_configDlg->alarmPage()->setValueUnit(r.id, r.baseUnit);
-    if (news)
-      updateValueNames();
+    // still in the session while it closes: not the next base
+    const QScopedValueRollback<MeterController *> going(m_closing, ctl);
+    MeterController *next = nullptr;
+    for (const ValueRef &v : ui_graph->values())
+      if (MeterController *other = m_session->controller(v); other && other != ctl)
+      {
+        next = other;
+        break;
+      }
+    setGraphBase(next);
   });
-  // the alarm thresholds are in the reading's base unit, also while the
-  // (modeless) dialog is open
-  connect(m_ctl, &MeterController::baseUnitChanged, m_configDlg->alarmPage(), &AlarmPrefs::setUnit);
+  // --debug for every meter
+  connect(m_session, &DeviceSession::opened, this, [this](MeterController *ctl)
+  {
+    ctl->dmm()->setConsoleLogging(m_consoleLogging);
+  });
   connect(ui_graph, &GraphWidget::info, this, &InstanceWidget::info);
   connect(ui_graph, &GraphWidget::error, this, &InstanceWidget::error);
   connect(ui_graph, &GraphWidget::running, this, &InstanceWidget::runningSLOT);
   connect(ui_graph, &GraphWidget::stateChanged, this, &InstanceWidget::recorderState);
   connect(ui_graph, &GraphWidget::liveRequested, this, &InstanceWidget::liveSLOT);
-  // the graph runs from the start: Live, until a recording
-  m_ctl->recorder()->live();
   // OK and Apply take the settings over; the meter stays as it is - the
   // dialog has no meter page, a meter is changed through takeOver()
   connect(m_configDlg, &SettingsDialog::accepted, this, [this]() { applySLOT(); });
@@ -227,8 +202,6 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   connect(ui_graph, &GraphWidget::exportData, this, &InstanceWidget::exportSLOT);
   connect(ui_graph, &GraphWidget::importData, this, &InstanceWidget::importSLOT);
 
-  connect(ui_graph, &GraphWidget::connectDMM, this, &InstanceWidget::connectDMM);
-
   connect(ui_graph, &GraphWidget::zoomOut, m_configDlg, &SettingsDialog::zoomOutSLOT);
   connect(ui_graph, &GraphWidget::zoomIn, m_configDlg, &SettingsDialog::zoomInSLOT);
   connect(ui_graph, &GraphWidget::thresholdChanged, m_configDlg, &SettingsDialog::thresholdChangedSLOT);
@@ -237,17 +210,10 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
 
   m_settings->save();
 
-  // alarms and the limit test: the controller judges every reading and runs
-  // the program. They are the meter's (its entry in My devices); the sound,
-  // the popup and raising the window are AlarmService's, the banner
+  // alarms and the limit test: each meter's controller judges its readings
+  // and runs the program; they are kept with its entry (DeviceSession). The
+  // sound, the popup and raising the window are AlarmService's, the banner
   // MainWindow's, the LCD's colour its FrontPanel's
-  loadRules(true);
-  connect(m_ctl, &MeterController::alarmsChanged, this, [this] { storeRules(); });
-  connect(m_ctl, &MeterController::limitTestChanged, this, [this]
-  {
-    storeRules();
-    applyLimitBands();
-  });
   applyLimitBands();
   // the graph's band: the test of the meter whose value is on its left axis
   connect(ui_graph, &GraphWidget::leftValueChanged, this, [this](const ValueRef &value)
@@ -271,7 +237,7 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   {
     disconnect(m_alertLink);
     disconnect(m_meterLimitLink);
-    if (ctl && ctl != m_ctl)
+    if (ctl)
       m_meterLimitLink = connect(ctl, &MeterController::limitTestChanged, this, &InstanceWidget::applyLimitBands);
     applyLimitBands();
     m_alertColor = ctl ? ctl->alertColor() : QColor();
@@ -287,39 +253,23 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
   };
   connect(m_meterFeed, &ValueFeed::controllerChanged, this, followMeter);
   followMeter(m_meterFeed->controller());
-  connect(m_ctl, &MeterController::recordingRequested, this, [this](bool start)
+  // a recording asked for by a meter (SCPI INITiate, an alarm's program):
+  // as the Record button, with its questions
+  m_session->setRecordingRequests([this](bool start)
   {
     if (start)
       startSLOT();
     else
       stopSLOT();
   });
-  connect(m_ctl, &MeterController::markRequested, this, [this](const QColor &color, const QString &name, bool graph, bool)
-  {
-    if (graph)
-      ui_graph->addMark(color, name);
-  });
-  // SCPI server: the meter as a network instrument (applyScpi() starts it)
-  connect(m_ctl, &MeterController::connectRequested, this, [this](bool on)
-  {
-    Q_EMIT setConnect(on);
-    Q_EMIT connectDMM(on);
-    connectSLOT(on);
-  });
-  // an alarm's program has the port for a while: the recording runs on
-  connect(m_ctl, &MeterController::portReleased, this, [this](bool released)
-  {
-    Q_EMIT setConnect(!released);
-    Q_EMIT connectDMM(!released);
-    connectPort(!released);
-  });
-  connect(m_ctl, &MeterController::scpiStatusChanged, this, [this](const QString &detail)
+  // SCPI server: the meters as network instruments (applyScpi() starts it)
+  connect(m_session->host(), &ServiceHost::statusChanged, this, [this](const QString &detail)
   {
     m_configDlg->scpiPage()->setStatus(detail);
     Q_EMIT servicesChanged();
   });
   // HCOPy:SDUMp:DATA? - the main window as the "instrument screen"
-  m_ctl->setScreenshotSource([this](const QByteArray &format) -> QByteArray
+  m_session->host()->setScreenshotSource([this](const QByteArray &format) -> QByteArray
   {
     QWidget *top = window() ? window() : this;
     const QPixmap shot = top->grab();
@@ -334,21 +284,9 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
 
 void InstanceWidget::setConsoleLogging(bool on)
 {
-  m_ctl->dmm()->setConsoleLogging(on);
-}
-
-void InstanceWidget::setPanel(FrontPanel *panel)
-{
-  m_panel = panel;
-  m_display = panel->display();
-  // the LCD's colours: backlight blue unless chosen otherwise; a config
-  // from before the variants with a tint of its own lands on Custom
-  QString lcd = m_settings->getString("Display/lcd");
-  if (lcd.isEmpty())
-    lcd = m_settings->getColor("Display/display-background", LcdWidget::classicFace()) == LcdWidget::classicFace()
-            ? "blue" : "custom";
-  m_display->setLcdVariant(LcdWidget::lcdVariantFromName(lcd));
-  applyValueChoice();
+  m_consoleLogging = on;
+  for (MeterController *ctl : m_session->controllers())
+    ctl->dmm()->setConsoleLogging(on);
 }
 
 void InstanceWidget::setMeter(AnalogMeter *meter)
@@ -379,24 +317,6 @@ void InstanceWidget::setPoincare(PoincarePlot *plot)
   applyValueChoice();
 }
 
-void InstanceWidget::setLcdValue(const ValueRef &value)
-{
-  m_lcdValue = value;
-  applyValueChoice();
-}
-
-void InstanceWidget::setLcdSecondaries(const std::optional<QList<int>> &ids)
-{
-  m_lcdSecondaries = ids;
-  if (m_display)
-    m_display->setSecondaries(ids);
-}
-
-QList<int> InstanceWidget::lcdSecondaries() const
-{
-  return m_display ? m_display->secondaries() : m_lcdSecondaries.value_or(QList<int>());
-}
-
 void InstanceWidget::setMeterValue(const ValueRef &value)
 {
   m_meterValue = value;
@@ -409,65 +329,10 @@ void InstanceWidget::setPoincareValue(const ValueRef &value)
   applyValueChoice();
 }
 
-bool InstanceWidget::ownMeter(const ValueRef &value) const
-{
-  return value.source.isEmpty() || value.source == m_ctl->source();
-}
-
-int InstanceWidget::ownValue(const ValueRef &value) const
-{
-  return ownMeter(value) && value.id >= 0 && value.id < numValues() ? value.id : 0;
-}
-
-int InstanceWidget::numValues() const
-{
-  // a value the table does not know of counts as well (a meter set up by hand)
-  return qBound(1, qMax(m_configDlg->meterSettings()->valueCount(), m_seenValues), kMaxValues);
-}
-
-QString InstanceWidget::valueName(int id) const
-{
-  const auto it = m_lastReading.constFind(id);
-  if (it == m_lastReading.cend())
-    return tr("Value %1").arg(id + 1);
-  if (!it->name.isEmpty())
-    return it->name;
-  return RecordingStore::describe(it->port, it->baseUnit);
-}
-
-QString InstanceWidget::valueShortName(int id) const
-{
-  const auto it = m_lastReading.constFind(id);
-  if (it == m_lastReading.cend() || !it->name.isEmpty())
-    return valueName(id);
-  const QString unit = SiPrefix::displayText(it->baseUnit);
-  if (unit.isEmpty())
-    return valueName(id);
-  return QString("%1 %2").arg(unit, couplingText(it->port.defining)).trimmed();
-}
-
-void InstanceWidget::applyValueCount()
-{
-  if (m_display)
-    m_display->setValueCount(numValues());
-  m_ctl->setValueCount(numValues());
-  applyValueChoice();
-}
-
 void InstanceWidget::applyValueChoice()
 {
-  updateValueNames();
-  // the window's meter by an empty source: it stays the window's when
-  // the window switches to another device; another meter's value as it is
-  auto feedValue = [this](const ValueRef &value)
-  {
-    return ownMeter(value) ? ValueRef(ownValue(value)) : value;
-  };
-  if (m_panel)
-    m_panel->setValue(feedValue(m_lcdValue));
-  m_meterFeed->setValue(feedValue(m_meterValue));
-  m_poincareFeed->setValue(feedValue(m_poincareValue));
-  m_ctl->setMinMaxValue(ownValue(m_lcdValue));
+  m_meterFeed->setValue(m_meterValue);
+  m_poincareFeed->setValue(m_poincareValue);
   if (m_meter)
   {
     const int id = m_meterFeed->value().id;
@@ -481,26 +346,15 @@ void InstanceWidget::applyValueChoice()
 
 void InstanceWidget::setReadingLog(ReadingsModel *log)
 {
-  // the table shows the recorder's readings series: the controller feeds it
-  // whether or not a table exists
+  // the table shows the stores' readings series (MainWindow chooses the
+  // meters): the controllers feed them whether or not a table exists
   m_readingLog = log;
-  log->setStore(m_ctl->recorder());
-  updateValueNames();
-  connect(m_ctl, &MeterController::markRequested, log, [log](const QColor &color, const QString &name, bool, bool table)
-  {
-    if (table)
-      log->markLast(color, name);
-  });
 }
 
 bool InstanceWidget::closeWin()
 {
-  m_ctl->connectMeter(false);
   m_configDlg->setWinRect(parentRect());
   m_configDlg->on_ui_buttonBox_accepted();
-
-  Q_EMIT setConnect(false);
-
   return keepUnsavedData(tr("If you quit now it will be lost."), tr("Quit without saving"));
 }
 
@@ -555,30 +409,6 @@ QRect InstanceWidget::parentRect() const
   return QRect(fRect.x(), fRect.y(), rect.width(), rect.height());
 }
 
-void InstanceWidget::resetSLOT()
-{
-  m_ctl->resetMinMax();
-}
-
-void InstanceWidget::connectSLOT(bool on)
-{
-  connectPort(on);
-  if (!on)
-    ui_graph->stopSLOT();
-}
-
-void InstanceWidget::connectPort(bool on)
-{
-  // the recording stays: the next start clears it (a reconnect after the
-  // settings or an alarm program must not lose it)
-  if (on && !m_ctl->connectMeter(true))
-    Q_EMIT setConnect(false);   // the port could not be opened: button back to "off"
-  else if (!on)
-    m_ctl->connectMeter(false);
-
-  ui_graph->connectSLOT(on);
-}
-
 void InstanceWidget::quitSLOT()
 {
   if (closeWin()) qApp->quit();
@@ -600,67 +430,62 @@ void InstanceWidget::configSLOT()
 
 void InstanceWidget::updateValueNames()
 {
-  QStringList names, plain;
-  for (int id = 0; numValues() > 1 && id < numValues(); ++id)
-  {
-    names << QString("%1: %2").arg(id + 1).arg(valueName(id));
-    plain << valueName(id);
-  }
-  m_configDlg->alarmPage()->setValueNames(names);
   m_configDlg->recorderPage()->setTriggerChoices(triggerChoices());
-  if (m_readingLog)
-    m_readingLog->setValueNames(plain);
 }
 
 void InstanceWidget::followGraphBase()
 {
   const QList<ValueRef> values = ui_graph->values();
-  MeterController *base = m_graphBase ? m_graphBase.data() : m_ctl;
+  MeterController *base = m_graphBase.data();
   if (values.isEmpty() || std::any_of(values.cbegin(), values.cend(), [this](const ValueRef &v) { return ui_graph->isBase(v); }))
     return;
-  if (MeterController *next = m_session->controller(values.first()); next && next != base)
+  if (MeterController *next = m_session->controller(values.first()); next && next != base && next != m_closing)
     setGraphBase(next);
 }
 
 void InstanceWidget::setGraphBase(MeterController *ctl)
 {
   disconnect(m_graphUnit);
-  m_graphBase = ctl == m_ctl ? nullptr : ctl;
-  ui_graph->setBase(ctl->recorder(), ctl->source());
-  m_graphUnit = connect(ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
+  disconnect(m_graphAlarms);
+  m_graphBase = ctl;
+  ui_graph->setBase(ctl ? ctl->recorder() : m_emptyStore, ctl ? ctl->source() : QString());
+  if (ctl)
+  {
+    m_graphUnit = connect(ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
+    m_graphAlarms = connect(ctl, &MeterController::alarmsChanged, this, &InstanceWidget::applyAlarmThresholds);
+  }
+  applyAlarmThresholds();
+}
+
+void InstanceWidget::applyAlarmThresholds()
+{
+  // the reference line snaps to the thresholds of the alarms on the main value
+  QList<double> thresholds;
+  if (m_graphBase)
+    for (const Alarm &a : m_graphBase->alarms()->alarms())
+    {
+      if (!a.enabled || a.value.id != 0 || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
+        continue;
+      thresholds << a.a;
+      if (a.condition == Alarm::Outside || a.condition == Alarm::Inside)
+        thresholds << a.b;
+    }
+  ui_graph->setAlarmThresholds(thresholds);
 }
 
 QList<RecorderPrefs::TriggerChoice> InstanceWidget::triggerChoices() const
 {
-  // the values of every meter connected; with others the meter's name in front
+  // the values of every meter connected, the meter's name in front
   QList<RecorderPrefs::TriggerChoice> out;
-  const QList<MeterController *> all = m_session->controllers();
-  for (int id = 0; id < numValues(); ++id)
-  {
-    const QString name = numValues() > 1 ? QString("%1: %2").arg(id + 1).arg(valueName(id)) : valueName(id);
-    out.append({ ValueRef(id), all.size() > 1 ? tr("%1 · %2").arg(dmmTitle(), name) : name });
-  }
-  for (const MeterController *ctl : all)
-    if (ctl != m_ctl)
-      for (int id = 0; id < ctl->valueCount(); ++id)
-      {
-        const Reading r = ctl->lastReading(id);
-        const QString what = !r.name.isEmpty() ? r.name : r.baseUnit.isEmpty() ? tr("Value %1").arg(id + 1)
-                                                                                : RecordingStore::describe(r.port, r.baseUnit);
-        out.append({ ValueRef(id, ctl->source()), tr("%1 · %2").arg(ctl->deviceName(), what) });
-      }
+  for (const MeterController *ctl : m_session->controllers())
+    for (int id = 0; id < ctl->valueCount(); ++id)
+    {
+      const Reading r = ctl->lastReading(id);
+      const QString what = !r.name.isEmpty() ? r.name : r.baseUnit.isEmpty() ? tr("Value %1").arg(id + 1)
+                                                                              : RecordingStore::describe(r.port, r.baseUnit);
+      out.append({ ValueRef(id, ctl->source()), tr("%1 · %2").arg(ctl->deviceName(), what) });
+    }
   return out;
-}
-
-bool InstanceWidget::tableValueShown(int id) const
-{
-  return !m_readingLog || !m_readingLog->hiddenValues().contains(ValueRef(id));
-}
-
-void InstanceWidget::setTableValueShown(int id, bool shown)
-{
-  if (m_readingLog)
-    m_readingLog->setValueHidden(id, !shown);
 }
 
 void InstanceWidget::openConfig(int page)
@@ -681,92 +506,6 @@ void InstanceWidget::openConfig(int page)
   m_configDlg->raise();
 }
 
-QString InstanceWidget::currentDevice() const
-{
-  const QString id = m_settings->getString("DMM/my-device");
-  return !id.isEmpty() && m_devices->find(id) ? id : QString();
-}
-
-bool InstanceWidget::switchDevice(const QString &id, bool ask)
-{
-  const std::optional<MyDevice> device = m_devices->find(id);
-  if (!device || (ask && !confirmSwitch(device->name)))
-    return false;
-  takeOver(device->keys, device->name, id);
-  return true;
-}
-
-bool InstanceWidget::confirmSwitch(const QString &name)
-{
-  // the readings of the meter before are another function: export or drop them
-  return keepUnsavedData(tr("Switching to %1 clears it.").arg(name), tr("Switch without saving"));
-}
-
-void InstanceWidget::takeOver(const QVariantMap &keys, const QString &name, const QString &id)
-{
-  // another meter is another function: one recording does not mix them
-  if (m_ctl->recorder()->isRunning())
-  {
-    ui_graph->stopSLOT();
-    Q_EMIT error(tr("Recording stopped: switched to %1").arg(name));
-  }
-  Q_EMIT setConnect(false);
-  Q_EMIT connectDMM(false);
-  connectSLOT(false);
-
-  // exactly the entry's keys: a key of the meter before that this one has
-  // none of would stay, and syncDevice() would write it into this entry
-  const QVariantMap before = m_settings->meterKeys(true);
-  for (auto it = before.cbegin(); it != before.cend(); ++it)
-    if (DeviceLibrary::isEntryKey(it.key()) && !keys.contains(it.key()))
-      m_settings->remove(it.key());
-  m_settings->setValues(keys);
-  m_settings->setString("DMM/my-device", id);
-  m_settings->setBool("DMM/configured", true);
-  m_settings->save();
-  m_configDlg->reloadMeter();
-  applySLOT();
-  // another meter: its own minimum and maximum, even at the same port, and
-  // the window starts without the last value of the one before
-  m_ctl->resetMinMax();
-  m_ctl->recorder()->forgetReading();
-  forgetValues();
-  ui_graph->liveSLOT();
-  Q_EMIT meterChanged();
-
-  Q_EMIT setConnect(true);
-  Q_EMIT connectDMM(true);
-  connectSLOT(true);
-}
-
-void InstanceWidget::syncDevice()
-{
-  // another instance may have changed a formula here (renaming): the stale
-  // cache must not go back into the entry
-  m_settings->sync();
-  QVariantMap keys = m_settings->meterKeys();
-  keys.insert("Port settings/device", SerialDevice::stableDevice(keys.value("Port settings/device").toString()));
-  const QString model = keys.value("DMM/model").toString();
-  const QString stored = m_settings->getString("DMM/my-device");
-  std::optional<MyDevice> device = m_devices->find(stored);
-  if (!device || !DmmDecoder::sameModel(device->model(), model))
-  {
-    // another meter: one of My devices when it is at its place
-    device = m_devices->find(m_devices->findByPlace(keys));
-    if (device && !DmmDecoder::sameModel(device->model(), model))
-      device.reset();
-  }
-  const QString id = device ? device->id : QString();
-  if (id != stored)
-  {
-    m_settings->setString("DMM/my-device", id);
-    m_settings->save();
-  }
-  // the same meter: a port or a key changed here changes its entry
-  if (device && DeviceLibrary::entryKeys(keys) != device->keys)
-    m_devices->update(id, keys);
-}
-
 void InstanceWidget::configRecorderSLOT()
 {
   openConfig(SettingsDialog::Recorder);
@@ -777,28 +516,18 @@ void InstanceWidget::configScpiSLOT()
   openConfig(SettingsDialog::Scpi);
 }
 
-void InstanceWidget::forgetValues()
-{
-  m_ctl->forgetUnit();   // the axis title and the alarm unit come with the first reading
-  m_lastReading.clear();   // and what the values measure
-  m_lastText.clear();
-  m_seenValues = 0;
-  for (int id = 1; id < kMaxValues; ++id)
-    m_configDlg->alarmPage()->setValueUnit(id, QString());
-  applyValueCount();
-}
-
 void InstanceWidget::applySLOT()
 {
   readConfig();
   m_alertBlink = m_configDlg->alarmPage()->blink();
   showAlertColor();
   ui_graph->setAlertUnsaved(m_configDlg->generalPage()->alertUnsavedData());
-  const QString model = m_configDlg->meterSettings()->dmmName();
-  const bool otherMeter = !m_ctl->model().isEmpty() && model != m_ctl->model();
-  m_ctl->setModel(model);
-  if (otherMeter)   // chosen on the Device page; the sidebar's takeOver() does the same
-    forgetValues();
+  applyScpi();
+  Q_EMIT configChanged();
+}
+
+void InstanceWidget::applyScpi()
+{
   ScpiConfig scpi;
   scpi.enabled = m_configDlg->scpiPage()->enabled();
   scpi.allInterfaces = m_configDlg->scpiPage()->allInterfaces();
@@ -808,17 +537,10 @@ void InstanceWidget::applySLOT()
   scpi.hislipPort = quint16(m_configDlg->scpiPage()->hislipPort());
   scpi.vxi11 = m_configDlg->scpiPage()->vxi11();
   scpi.vxi11Rpc = Vxi11Server::modeFromName(m_configDlg->scpiPage()->vxi11Rpc());
-  m_ctl->applyScpi(scpi);
-  syncDevice();
-  const std::optional<MyDevice> device = m_devices->find(m_settings->getString("DMM/my-device"));
-  m_ctl->setDevice(device ? device->id : QString(), device ? device->name : QString());
-  ui_graph->setOwnSource(m_ctl->source());
-  if (!m_graphBase)
-    ui_graph->setBaseSource(m_ctl->source());
-  // another device (switched, or the port of another entry): its rules
-  if (currentDevice() != m_rulesDevice)
-    loadRules();
-  Q_EMIT configChanged();
+  // mDNS names the model of the first meter
+  const QList<MeterController *> all = m_session->controllers();
+  m_session->host()->apply(scpi, m_instanceId.isEmpty() ? QString("default") : m_instanceId,
+                           all.isEmpty() ? QString() : all.first()->model());
 }
 
 void InstanceWidget::zoomedSLOT()
@@ -854,7 +576,7 @@ void InstanceWidget::clearSLOT()
   if (!keepUnsavedData(tr("Clear deletes it."), tr("Clear without saving")))
     return;
   // an empty view is nothing to look at: Live again
-  if (m_ctl->recorder()->state() == RecordingStore::View)
+  if (ui_graph->store()->state() == RecordingStore::View)
     ui_graph->liveSLOT();
   else
     ui_graph->clearSLOT();
@@ -862,20 +584,20 @@ void InstanceWidget::clearSLOT()
 
 void InstanceWidget::liveSLOT()
 {
-  if (m_ctl->recorder()->state() != RecordingStore::View)
+  if (ui_graph->store()->state() != RecordingStore::View)
   {
-    Q_EMIT recorderState(int(m_ctl->recorder()->state()));   // the button shows the state again
+    Q_EMIT recorderState(int(ui_graph->store()->state()));   // the button shows the state again
     return;
   }
   if (keepUnsavedData(tr("Live clears it."), tr("Live without saving")))
     ui_graph->liveSLOT();
   else
-    Q_EMIT recorderState(int(m_ctl->recorder()->state()));
+    Q_EMIT recorderState(int(ui_graph->store()->state()));
 }
 
 bool InstanceWidget::confirmRecording()
 {
-  if (m_ctl->recorder()->state() != RecordingStore::View)
+  if (ui_graph->store()->state() != RecordingStore::View)
     return true;
   return keepUnsavedData(tr("A new recording clears it."), tr("Record without saving"));
 }
@@ -925,30 +647,9 @@ void InstanceWidget::stopSLOT()
 
 void InstanceWidget::readConfig()
 {
-  MeterConnection *dmm = m_ctl->dmm();
-  bool reopen = false;
   const GraphPrefs *graph = m_configDlg->graphPage();
   const RecorderPrefs *recorder = m_configDlg->recorderPage();
   const GuiPrefs *gui = m_configDlg->guiPage();
-
-  // the port only when the meter changed: a reopen costs a Bluetooth meter
-  // seconds, and the readings and a recording a gap
-  const MeterSetup setup = m_configDlg->meterSetup();
-  QVariantMap keys = m_settings->meterKeys();
-  keys.insert("sigrok", setup.info.sigrokExe);
-  if (!dmm->isOpen() || keys != m_appliedMeter)
-  {
-    m_appliedMeter = keys;
-    if (dmm->isOpen())
-    {
-      dmm->close();
-      reopen = true;
-    }
-
-    // a meter the session has open in the background gives up the port
-    m_session->release(m_settings->getString("DMM/my-device"));
-    m_ctl->configure(setup);
-  }
 
   // the sample time first: setGraphSize() counts the window in samples, and
   // the x axis converts them back with the sample time
@@ -956,20 +657,6 @@ void InstanceWidget::readConfig()
   ui_graph->setGraphSize(graph->windowSeconds());
   ui_graph->setCrosshair(graph->crosshair());
 
-  // the reference line snaps to the alarms' thresholds
-  {
-    QList<double> thresholds;
-    for (const Alarm &a : m_ctl->alarms()->alarms())
-    {
-      // the graph's axis is the main value's
-      if (!a.enabled || a.value != ValueRef() || a.condition == Alarm::Overload || a.condition == Alarm::NoReadings)
-        continue;
-      thresholds << a.a;
-      if (a.condition == Alarm::Outside || a.condition == Alarm::Inside)
-        thresholds << a.b;
-    }
-    ui_graph->setAlarmThresholds(thresholds);
-  }
   ui_graph->setScale(graph->automaticScale(), graph->includeZero(), graph->scaleMin(), graph->scaleMax());
 
   {
@@ -987,20 +674,11 @@ void InstanceWidget::readConfig()
 
   ui_graph->setLineStyle(graph->lineMode(), graph->pointMode(), graph->intLineMode(), graph->intPointMode());
 
-  // a tint changed on the Appearance page is meant to be seen: Custom
-  const QColor tint = gui->displayBgColor();
-  if (m_lcdTint.isValid() && tint != m_lcdTint && m_display->lcdVariant() != LcdWidget::Custom)
-    setLcdVariant(LcdWidget::Custom);
-  m_lcdTint = tint;
-  m_display->setFaceColor(tint);
-  m_display->setDisplayMode(setup.info.display, gui->showMinMax(), gui->showBar(), numValues());
-  applyValueCount();
-
   if (m_meter)
   {
-    // the scale of the meter that has the value: another one's its own
-    const MeterController *shown = m_meterFeed->controller();
-    m_meter->setDisplayCounts(shown && shown != m_ctl ? shown->dmm()->dmmInfo().display : setup.info.display);
+    // the scale of the meter that has the value
+    if (const MeterController *shown = m_meterFeed->controller())
+      m_meter->setDisplayCounts(shown->dmm()->dmmInfo().display);
     applyMeterStyle();
     m_meter->setScaleMode(static_cast<AnalogMeter::ScaleMode>(
       gui->meterScaleMode() == 1 ? AnalogMeter::Unipolar :
@@ -1020,90 +698,12 @@ void InstanceWidget::readConfig()
     Q_EMIT info(tr("Falling threshold %1").arg(recorder->fallingThreshold()));
   Q_EMIT useTextLabel(gui->useTextLabel());
   Q_EMIT iconSet(gui->iconSet());
-  Q_EMIT remoteControl(ControlBar::supported(setup.info));
   Q_EMIT showDisplay(gui->showDisplay());
-
-  if (reopen)
-    dmm->open();
 }
 
 void InstanceWidget::runningSLOT(bool on)
 {
   Q_EMIT running(on);
-}
-
-bool InstanceWidget::dmmConfigured() const
-{
-  // DMM/configured is set when a device is chosen (takeOver(), a new window
-  // with a device); the model check keeps configs from before that key
-  // working. "Manual" alone proves nothing: applySLOT() writes it at every
-  // exit, dialog or not.
-  if (m_settings->getBool("DMM/configured", false))
-    return true;
-  const QString model = m_settings->getString("DMM/model");
-  return !model.isEmpty() && model != "Manual";
-}
-
-QString InstanceWidget::portName() const
-{
-  // a Bluetooth port string carries the encryption key: never show it
-  const QString device = m_configDlg->meterSettings()->device().simplified();
-  const QString type = device.section(' ', 0, 0).toLower();
-  if (type == "ble" || type == "blegatt")
-    return "BLE " + device.section(' ', 1, 1);
-  if (type == "calc")
-    return tr("calculated");
-  if (type == "serial")
-    return device.section(' ', 1);   // "SERIAL /dev/ttyUSB0": the port alone
-  return device;
-}
-
-QString InstanceWidget::dmmTitle() const
-{
-  if (!dmmConfigured())
-    return tr("no meter configured");
-  const QString model = m_configDlg->meterSettings()->dmmName().trimmed();
-  if (!model.isEmpty())
-    return model;
-  return m_configDlg->meterSettings()->device().trimmed();
-}
-
-// ---------------------------------------------------------------- alarms
-
-void InstanceWidget::loadRules(bool moveOld)
-{
-  const QString id = currentDevice();
-  m_rulesDevice = id;
-  std::optional<MyDevice> entry = id.isEmpty() ? std::nullopt : m_devices->find(id);
-  const QString oldAlarms = m_settings->getString("Alarms/list");
-  const QString oldLimit = m_settings->getString("Limits/test");
-  // the rules of the window before 26.4 go to its device, once
-  if (moveOld && entry && entry->alarms.isEmpty() && entry->limitTest.isEmpty()
-      && (!oldAlarms.isEmpty() || !oldLimit.isEmpty()) && m_devices->setRules(id, oldAlarms, oldLimit))
-  {
-    m_settings->remove("Alarms/list");
-    m_settings->remove("Limits/test");
-    entry = m_devices->find(id);
-  }
-  const QString alarms = entry ? entry->alarms : oldAlarms;
-  const QString limit = entry ? entry->limitTest : oldLimit;
-  m_ctl->setAlarms(Alarm::listFromJson(alarms));
-  m_ctl->setLimitTest(LimitTest::fromJsonText(limit));
-}
-
-void InstanceWidget::storeRules()
-{
-  const QList<Alarm> &list = m_ctl->alarms()->alarms();
-  const QString alarms = list.isEmpty() ? QString() : Alarm::listToJson(list);
-  const QString limit = m_ctl->limitTest().toJsonText();
-  if (!m_rulesDevice.isEmpty() && m_devices->find(m_rulesDevice))
-    m_devices->setRules(m_rulesDevice, alarms, limit);
-  else
-  {
-    m_settings->setString("Alarms/list", alarms);
-    m_settings->setString("Limits/test", limit);
-    m_settings->save();
-  }
 }
 
 void InstanceWidget::showAlertColor()
@@ -1128,16 +728,11 @@ void InstanceWidget::openAlarms(const QString &source)
   m_configDlg->alarmPage()->setCurrentDevice(source);
 }
 
-void InstanceWidget::setLimitTest(const LimitTest &test)
-{
-  m_ctl->setLimitTest(test);
-}
-
 void InstanceWidget::applyLimitBands()
 {
   // the graph: the test of the meter of its left axis, when it tests that value
   const ValueRef ref = ui_graph->leftValue();
-  const MeterController *graphCtl = ref.id < 0 ? nullptr : ref.source.isEmpty() ? m_ctl : m_session->controller(ref.source);
+  const MeterController *graphCtl = ref.id < 0 ? nullptr : m_session->controller(ref.source);
   if (graphCtl && graphCtl->limitTest().enabled
       && (graphCtl->limitTest().value.source.isEmpty() || graphCtl->limitTest().value.source == graphCtl->source()))
   {
@@ -1154,11 +749,6 @@ void InstanceWidget::applyLimitBands()
   }
   else if (m_meter)
     m_meter->setLimits(-1);
-}
-
-const LimitTest &InstanceWidget::limitTest() const
-{
-  return m_ctl->limitTest();
 }
 
 void InstanceWidget::setMeterStyle(int style)
@@ -1178,9 +768,20 @@ void InstanceWidget::applyMeterStyle()
   m_meter->setStyle(style);
 }
 
-void InstanceWidget::setLcdVariant(int variant)
+QString InstanceWidget::takeOldDevice()
 {
-  const auto v = static_cast<LcdWidget::LcdVariant>(variant);
-  m_display->setLcdVariant(v);
-  m_settings->setString("Display/lcd", LcdWidget::lcdVariantName(v));
+  const QString id = m_settings->getString("DMM/my-device");
+  std::optional<MyDevice> entry = id.isEmpty() ? std::nullopt : m_devices->find(id);
+  if (!entry)
+    return QString();
+  // the rules of the window before 26.4 go to its device, once
+  const QString oldAlarms = m_settings->getString("Alarms/list");
+  const QString oldLimit = m_settings->getString("Limits/test");
+  if (entry->alarms.isEmpty() && entry->limitTest.isEmpty() && (!oldAlarms.isEmpty() || !oldLimit.isEmpty()))
+    m_devices->setRules(id, oldAlarms, oldLimit);
+  m_settings->remove("Alarms/list");
+  m_settings->remove("Limits/test");
+  m_settings->remove("DMM/my-device");
+  m_settings->save();
+  return id;
 }

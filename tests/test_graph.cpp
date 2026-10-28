@@ -1943,7 +1943,7 @@ int main(int argc, char **argv)
     other.live();
     bool open = true;
     graph.setOtherStores([&](const QString &source) { return open && source == "device:b" ? &other : nullptr; },
-                         [](const QString &) { return QStringLiteral("Sim B"); });
+                         [](const QString &source) { return source == "device:b" ? QStringLiteral("Sim B") : QStringLiteral("Sim W"); });
     graph.setOtherValues({ ValueRef(0, "device:b"), ValueRef(1, "device:b") });
     for (int i = 0; i < 50; ++i)
     {
@@ -2042,8 +2042,8 @@ int main(int argc, char **argv)
     graph.otherStoresChanged();
     const QString both = tmpDir.path() + "/othermeter.csv";
     check(graph.exportCsvFile(both, true) && readFile(both).startsWith(
-            "timestamp;time (s);value;unit;status;Sim B: value;Sim B: unit;Sim B: status;Sim B: value 2;"),
-          "export: another meter's values after its name\n" + readFile(both).section('\n', 0, 2));
+            "timestamp;time (s);Sim W: value;Sim W: unit;Sim W: status;Sim B: value;Sim B: unit;Sim B: status;Sim B: value 2;"),
+          "export: every meter's values after its name\n" + readFile(both).section('\n', 0, 2));
     GraphWidget viewed(nullptr, &cfg);
     viewed.resize(800, 500);
     viewed.show();
