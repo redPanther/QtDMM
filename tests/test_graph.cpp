@@ -1906,6 +1906,61 @@ int main(int argc, char **argv)
     check(graph.envelopePath().isEmpty(), "band: off again");
   }
 
+  // --- 7m. values of another meter, from its own store: shifted by the
+  //          starts of the stores, A on the free right axis, V with the
+  //          main value on the left, the meter's name in the legend; its
+  //          meter closed, no curve and the values kept ---
+  {
+    Settings cfg("othermeter", tmpDir.path());
+    GraphWidget graph(nullptr, &cfg);
+    graph.resize(800, 500);
+    graph.show();
+    QTest::qWait(50);
+    graph.setUnit("V");
+    Feed feed(graph);
+    graph.liveSLOT();
+    RecordingStore other;
+    Feed far(&other);
+    far.now = 2000;   // opened two seconds after the window's
+    other.setUnit("A");   // as its MeterController does
+    other.live();
+    bool open = true;
+    graph.setOtherStores([&](const QString &source) { return open && source == "device:b" ? &other : nullptr; },
+                         [](const QString &) { return QStringLiteral("Sim B"); });
+    graph.setOtherValues({ ValueRef(0, "device:b"), ValueRef(1, "device:b") });
+    for (int i = 0; i < 50; ++i)
+    {
+      feed.value(1.0 + i * 0.01);
+      if (i >= 20)
+      {
+        far.other(1, 3.0, "V", Quantity::Voltage);
+        Reading r;
+        r.value = 0.5;
+        r.text = "0.5";
+        r.unit = r.baseUnit = "A";
+        r.port.quantity = Quantity::Current;
+        r.t = far.now;
+        r.msecs = Feed::wall(far.now).toMSecsSinceEpoch();
+        other.setReading(r);
+        far.now += 100;
+      }
+    }
+    QTest::qWait(400);
+    check(graph.otherCurveCount() == 2 && graph.otherCurveShown(0) && graph.otherCurveOnRight(0)
+            && graph.rightAxisTitle() == "[A]",
+          QString("another meter's A: on the right, %1").arg(graph.rightAxisTitle()));
+    check(graph.otherCurveShown(1) && !graph.otherCurveOnRight(1), "its V: on the left with the main value");
+    const QList<QPointF> amps = graph.otherCurvePoints(0);
+    check(!amps.isEmpty() && qAbs(amps.first().x() - 2.0) < 0.15,
+          QString("its time: from 2 s on, %1").arg(amps.isEmpty() ? -1 : amps.first().x()));
+    check(graph.legendText().contains("Sim B"), "its name in the legend: " + graph.legendText());
+    open = false;
+    graph.otherStoresChanged();
+    check(!graph.otherCurveShown(0) && !graph.otherCurveShown(1) && graph.otherValues().size() == 2
+            && !graph.rightAxis()->isVisible(),
+          "closed: no curves, the values kept");
+  }
+
   // --- 7l. the meter's other values: a curve each in a colour of its own;
   //          the main unit on the left axis, the first other one on a right
   //          axis with its own scale, a third unit not drawn; a legend; a

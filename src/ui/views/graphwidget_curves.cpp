@@ -476,6 +476,8 @@ void GraphWidget::rebuildExtras()
           leftGrew = growScale(p.y(), m_scaleMin, m_scaleMax) || leftGrew;
       }
   }
+  // the other meters' values: the left axis in its unit, the right one if free
+  leftGrew = rebuildOtherCurves() || leftGrew;
   if (leftGrew)
   {
     setYRange(m_scaleMin, m_scaleMax);
@@ -622,6 +624,9 @@ void GraphWidget::updateLegend()
     seen.insert(s.id);
     entries.prepend({ extraPen(s.id), curveName(s, s.unit) });
   }
+  for (int i = 0; i < int(m_otherCurves.size()); ++i)
+    if (m_otherCurves[size_t(i)].shown)
+      entries.append({ otherPen(i), m_otherCurves[size_t(i)].name });
   // the main value alone needs none; without it, the axis does not say which
   if (entries.isEmpty() && m_mainShown)
   {

@@ -263,6 +263,9 @@ GraphWidget::GraphWidget(QWidget *parent, Settings *settings) :
   m_stateLabel->hide();
 
   m_legend = new GraphLegend(m_chartView);
+  m_otherTimer.setSingleShot(true);
+  m_otherTimer.setInterval(250);
+  connect(&m_otherTimer, &QTimer::timeout, this, &GraphWidget::onOtherReadings);
   m_legend->setObjectName("ui_graphLegend");
   m_legend->hide();
 

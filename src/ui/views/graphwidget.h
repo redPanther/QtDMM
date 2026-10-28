@@ -35,6 +35,9 @@
 
 #include "ui/views/gapline.h"
 #include "recording/recordingstore.h"
+#include "core/valueref.h"
+#include <QPointer>
+#include <functional>
 
 class GraphFlagItem;
 class GraphLegend;
@@ -332,6 +335,29 @@ public:
   int              minimapValue() const;
   /// The other values shown (ids > 0).
   QList<int>       shownValues() const;
+
+  /// @name Values of other meters
+  /// Curves of meters open beside the window's (DeviceSession), each from
+  /// that meter's own store, shifted to this store's time by their starts
+  /// (RecordingStore::startClock()). On the left axis in its unit, else on
+  /// the right one while that is free or has its unit; otherwise not
+  /// drawn. A value of a meter not open is kept without a curve. Minimap,
+  /// envelope, integral and the cursors' figures stay with this store's.
+  /// @{
+  /// Where they are: the store of a meter by its source (Reading::source),
+  /// nullptr while it is not open, and its name for the legend.
+  void             setOtherStores(std::function<RecordingStore *(const QString &source)> store,
+                                  std::function<QString(const QString &source)> name);
+  void             setOtherValues(const QList<ValueRef> &values);
+  QList<ValueRef>  otherValues() const;
+  /// A meter was opened or closed: the stores anew.
+  void             otherStoresChanged();
+  int              otherCurveCount() const { return int(m_otherCurves.size()); }
+  bool             otherCurveShown(int i) const { return m_otherCurves[size_t(i)].shown; }
+  bool             otherCurveOnRight(int i) const { return m_otherCurves[size_t(i)].right; }
+  /// The points of curve @p i as drawn, in this store's seconds.
+  QList<QPointF>   otherCurvePoints(int i) const { return m_otherCurves[size_t(i)].points; }
+  /// @}
   bool             mainShown() const { return m_mainShown; }
   /// The unit of the left axis: the main value's, or while it is hidden
   /// the one of the lowest value shown (its newest series).
@@ -598,6 +624,33 @@ protected:
     QList<QPointF> points;           ///< as drawn, for the band (m_curvePts)
   };
   std::vector<ExtraCurve> m_extraCurves;
+  /// A value of another meter (setOtherValues()).
+  struct OtherCurve
+  {
+    ValueRef     value;
+    QPointer<RecordingStore> store;   ///< nullptr while its meter is not open
+    QLineSeries *series = nullptr;
+    std::unique_ptr<GapLine> line;
+    bool         right = false;
+    bool         shown = false;
+    QString      unit;
+    QString      name;    ///< in the legend: the meter's name and the value's
+    QList<QPointF> points;
+  };
+  std::vector<OtherCurve> m_otherCurves;
+  QList<QPointer<RecordingStore>> m_otherConnected;   ///< the stores connected to
+  std::function<RecordingStore *(const QString &)> m_otherStore;
+  std::function<QString(const QString &)> m_otherName;
+  QTimer           m_otherTimer;   ///< their new readings, drawn together
+  /// Their stores, connections and curves anew.
+  void             attachOtherStores();
+  /// Their points and axes anew, after rebuildExtras() (the right axis
+  /// may be free); true when the left scale grew.
+  bool             rebuildOtherCurves();
+  /// New readings of theirs (m_otherTimer): their curves, axes, legend.
+  void             onOtherReadings();
+  QColor           otherColor(int i) const;
+  QPen             otherPen(int i) const;
   QValueAxis      *m_yAxis2 = nullptr;   ///< the right axis: the first unit other than the main one
   QString          m_unit2;              ///< its unit; empty while it is hidden
   QGraphicsSimpleTextItem *m_y2Title = nullptr;   ///< its title above it, as m_yTitle

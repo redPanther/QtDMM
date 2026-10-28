@@ -113,8 +113,21 @@ InstanceWidget::InstanceWidget(QString instanceId, QString configPath, DeviceSes
 
   connect(m_ctl, &MeterController::error, this, &InstanceWidget::error);
   connect(m_ctl, &MeterController::info, this, &InstanceWidget::info);
-  // the recorder belongs to the controller; the graph shows it
+  // the recorder belongs to the controller; the graph shows it, and the
+  // values of meters open beside it from their stores
   ui_graph->setStore(m_ctl->recorder());
+  ui_graph->setOtherStores([this](const QString &source) -> RecordingStore *
+  {
+    MeterController *ctl = m_session->controller(source);
+    return ctl && ctl != m_ctl ? ctl->recorder() : nullptr;
+  },
+  [this](const QString &source)
+  {
+    const MeterController *ctl = m_session->controller(source);
+    return ctl ? ctl->deviceName() : QString();
+  });
+  connect(m_session, &DeviceSession::opened, ui_graph, &GraphWidget::otherStoresChanged);
+  connect(m_session, &DeviceSession::closed, ui_graph, &GraphWidget::otherStoresChanged);
   connect(m_ctl, &MeterController::unitChanged, ui_graph, &GraphWidget::setUnit);
   // what each value measures, for the views' choice of value
   connect(m_ctl, &MeterController::reading, this, [this](const Reading &r)

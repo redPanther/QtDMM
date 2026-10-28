@@ -1601,18 +1601,19 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
     }
   }
   // the meter's other values shown in the graph: their ids, "1 2"; none at
-  // first. Another meter's ("1@device:ab12cd34") is kept for the save.
+  // first. Another meter's ("1@device:ab12cd34") is drawn from its store.
   {
     QSet<int> own;
-    m_graphOtherValues.clear();
+    QList<ValueRef> others;
     for (const QString &text : get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts))
     {
       const ValueRef v = ValueRef::fromString(text);
       if (m_wid->ownMeter(v))
         own.insert(v.id);
       else
-        m_graphOtherValues << v;
+        others << v;
     }
+    m_wid->graph()->setOtherValues(others);
     for (int id = 1; id <= 3; ++id)
       m_wid->graph()->setValueShown(id, own.contains(id));
     m_wid->graph()->setValueShown(0, get("Windows/graph-main-shown", true).toBool());
@@ -1660,7 +1661,7 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   QStringList shown;
   for (int id : m_wid->graph()->shownValues())
     shown << ValueRef(id).toString();
-  for (const ValueRef &v : m_graphOtherValues)
+  for (const ValueRef &v : m_wid->graph()->otherValues())
     shown << v.toString();
   set("Windows/graph-shown-values", shown.join(' '));
   set("Windows/graph-main-shown", m_wid->graph()->mainShown());

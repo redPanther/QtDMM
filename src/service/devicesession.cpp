@@ -124,10 +124,13 @@ QString DeviceSession::variableName(const QString &name)
 
 CalcDevice::Inputs DeviceSession::calcInputs() const
 {
-  return [this]
+  // a calculated meter may outlive the session by a deleteLater()
+  return [self = QPointer<const DeviceSession>(this)]
   {
     QMap<QString, CalcDevice::Input> out;
-    for (const MeterController *ctl : controllers())
+    if (!self)
+      return out;
+    for (const MeterController *ctl : self->controllers())
     {
       const Reading &r = ctl->lastReading();
       if (ctl->deviceName().isEmpty() || r.msecs == 0)
