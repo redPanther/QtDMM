@@ -136,7 +136,6 @@ qtdmm-mcp tool offers them only with `--allow-control`.
 | `QTDMM:LIMit:COUNt?` | `<pass>,<high>,<low>` | `LimitTest::Count` since the last reset (new test, min/max reset, `CALC:LIM:CLE`) |
 | `QTDMM:KEY:CATalog?` | `"<KEY>",…` | upper case, `""` for none |
 | `QTDMM:CHANnel:CATalog?` | `<n>,"<port>","<unit>",…` | the channels of `READ? (@n)`: what each measures (`PortKey`: `voltage.dc`, `temperature`, `carbon_dioxide`) and its unit, empty strings before its first reading |
-| `QTDMM:INSTances?` | `"<id>",<value>,"<unit>",…` | running instances (`SharedStateManager`), `9.91E+37` without a current reading |
 
 What the server does not hold itself it asks for through
 `ScpiServer::Sources`, set by `MeterController::installScpiSources()`.

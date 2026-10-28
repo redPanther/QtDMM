@@ -113,33 +113,33 @@ say why:
   portmapper on the privileged port 111 needs rights QtDMM does not take.
   Start the system rpcbind (`sudo systemctl enable --now rpcbind.socket`)
   or see [SCPI server, VXI-11](scpi-server.md#vxi-11) for the other ways.
-- *another program or QtDMM instance offers VXI-11 already*: one per
-  computer. Use HiSLIP in this instance, or switch VXI-11 off in the other.
+- *another program or QtDMM offers VXI-11 already*: one per computer. Use
+  HiSLIP in this QtDMM, or switch VXI-11 off in the other.
 - *rpcbind refused the registration over TCP*: rpcbind runs, but its Unix
   socket `/run/rpcbind.sock` is missing (an old setup, or a container or
   Flatpak without access to it).
 - *no rpcbind is running*: the Portmapper setting is *System rpcbind*;
   choose *Automatic*, or start rpcbind.
 
-## "Another instance is running"
+## "QtDMM is running already with these settings"
 
-QtDMM instances coordinate through shared memory so that several meters can be
-recorded side by side (see [Command line](command-line.md)). If an instance
-crashed or was killed, its entry could be left behind; QtDMM now checks whether
-that process still exists and replaces a stale entry automatically. Should the
-message appear anyway, no other QtDMM is running, and it persists across
-restarts, remove the shared memory segment with `ipcs -m` / `ipcrm` or simply
-reboot.
+One QtDMM per settings file: a second start with the same `--config-id`
+(or none, twice) would write over the first one's settings, so it stops
+with this message and the process number of the first. Use that one, or
+start the second with another `--config-id`. The lock is the file
+`<settings file>.running`; one left by a QtDMM that crashed is taken over
+at the next start.
 
-## A calculated instance shows OL and "Waiting for instance ..."
+## A calculated value shows OL and "Waiting for ..."
 
-The formula names an instance that is not running, or one that has not
-delivered a reading for three seconds (*No current value from instance
-...*), or whose meter shows an overload itself. The status line names the
+The formula names a device that is not open, or one that has not
+delivered a reading for three seconds (*No current value from ...*), or
+whose meter shows an overload itself. The status line names the
 variable; the *Formula* group in the settings of the device (*Settings...*
 in the sidebar, Shift+F8) lists all variables
-with their current values and the running instances. Remember that instance
-names with a hyphen are written with an underscore in formulas. *Formula
+with their current values and the open devices. Remember that a name is
+written in lower case with `_` for other characters than letters and
+digits. *Formula
 error at position n* means the formula does not parse; the position is
 counted from 1.
 

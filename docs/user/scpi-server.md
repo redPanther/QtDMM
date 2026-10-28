@@ -19,7 +19,7 @@ keeps deciding what it measures.
 | Setting | Meaning |
 |---|---|
 | Enable the SCPI server | off by default |
-| Port | 5025 is the usual raw-socket SCPI port. When it is taken - a second QtDMM instance, say - the next free one is used; the sidebar shows the actual port |
+| Port | 5025 is the usual raw-socket SCPI port. When it is taken - a second QtDMM, say - the next free one is used; the sidebar shows the actual port |
 | Listen on | *This computer only* binds to `localhost`; *All network interfaces* opens the port to the network |
 | Also HiSLIP | the same commands for VISA on a second port, off by default; see *VISA (HiSLIP)* below |
 | HiSLIP port | 4880 is the port VISA tries when the address names none; taken, the next free one is used |
@@ -95,7 +95,7 @@ command after `;` continues at the level of the one before
 ### QtDMM's own commands
 
 What a bench meter does not have - the graph, the alarms, the keys of a
-Bluetooth meter, the other instances - is under `QTDMM:`.
+Bluetooth meter, the other open devices - is under `QTDMM:`.
 
 | Command | Answer |
 |---|---|
@@ -110,7 +110,6 @@ Bluetooth meter, the other instances - is under `QTDMM:`.
 | `QTDMM:MARK "text"` | a mark at the newest reading, in the graph and the readings table (`SCPI` without text) |
 | `QTDMM:KEY "hold"`, `QTDMM:KEY:CATalog?` | presses a key of the meter (UNI-T UT60BT, UT61B+/D+/E+, UT161, UT202BT, the iENV meters UT333BT, UT353BT, UT363BT, UT383BT, the ZOTEK and OWON Bluetooth meters), lists the keys it has: `"SELECT1","RANGE","AUTO","HOLD",...`; a meter without keys gives error -241, a key not sent (the meter not connected) -240 |
 | `QTDMM:CHANnel:CATalog?` | the channels of `READ? (@n)`: number, what it measures and unit - `1,"carbon_dioxide","ppm",2,"temperature","C"`; empty strings before a channel's first reading |
-| `QTDMM:INSTances?` | the running instances with their last reading: `"default",+1.234000E+00,"V","psu",9.91E+37,""` |
 | `QTDMM:DEVice:CATalog?` | the entries of *My devices*: id, name, and 1 when this QtDMM has it open - `"ab12cd34","UT61E bench",1,"9f3e01aa","SmartShunt",0` |
 | `QTDMM:DEVice:OPEN "<id>"`, `QTDMM:DEVice:CLOSe "<id>"` | opens and connects an entry of *My devices* in this QtDMM without a window, or closes it again; `INSTrument` then reaches it. Error -224 for an unknown id, -221 for one open already (or the window's, which only the window closes), -240 when it does not connect. Such a meter has no alarms; it records with the window: its recording starts and stops with the window's, on the same time base and sample time, also when it is opened while the window records. Save it with `QTDMM:RECord:SAVE`: the next start overwrites one not saved (the status bar says so). When the window chooses it, it is closed in the background first |
 
@@ -133,7 +132,7 @@ VISA libraries address a LAN instrument by a resource string. With
 
 ```
 TCPIP::bench.local::hislip0::INSTR          (port 4880)
-TCPIP::bench.local::hislip0,4881::INSTR     (another port: a second instance)
+TCPIP::bench.local::hislip0,4881::INSTR     (another port: a second QtDMM)
 ```
 
 The settings page shows the address for this computer. It works with
@@ -203,7 +202,7 @@ In lxi-gui choose the plugin *keysight-dmm* instead of *auto*.
 **Prefer HiSLIP** where the client has it: VXI-11 needs a portmapper on
 port 111, which clients ask for the VXI-11 ports. A computer has one
 portmapper, so **only one program per computer** can offer VXI-11: a
-second QtDMM instance with VXI-11 shows *failed* and says which port
+second QtDMM with VXI-11 shows *failed* and says which port
 serves it already. HiSLIP and the raw socket keep running in either case.
 
 QtDMM never raises its own rights. The portmapper comes from one of two
@@ -232,13 +231,13 @@ requests).
   `+1.234000E-02`, `UNIT?` says `"V"`.
 - Units are plain ASCII with one spelling each, whatever the meter's
   protocol writes: `"C"` for °C, `"F"` for °F, `"K"`, `"Ohm"` for Ω - in
-  `UNIT?`, `CONFigure?`, `QTDMM:CHANnel:CATalog?`, `QTDMM:RECord?` and
-  `QTDMM:INSTances?` alike, so a script can compare against them. (`"F"` is
+  `UNIT?`, `CONFigure?`, `QTDMM:CHANnel:CATalog?`, and `QTDMM:RECord?`
+  alike, so a script can compare against them. (`"F"` is
   also farad: `CONFigure?` says `TEMP` or `CAP`.)
 - The reading is the last one the meter sent; `READ?` does not trigger a
   measurement. Meters deliver two to four readings a second, so polling
   faster than that repeats values.
-- Every instance of QtDMM (`--config-id`) has its own server; with the
+- Every QtDMM (`--config-id`) has its own server; with the
   same port configured they line up on 5025, 5026, ... and for HiSLIP on
   4880, 4881, ... VXI-11 only one of them can offer (see above).
 - sigrok's `scpi-dmm` driver identifies instruments by `*IDN?` and does not

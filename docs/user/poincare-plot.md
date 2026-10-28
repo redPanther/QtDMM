@@ -56,5 +56,5 @@ sidebar (**Poincaré plot** in the menu of a value, see
 [The meter's values](my-devices.md#the-meters-values)); another one starts
 afresh. Kept with the window layout.
 
-Distance, points and the ellipse are kept with the other settings of this
-instance.
+Distance, points and the ellipse are kept with the other settings of the
+window.

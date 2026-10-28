@@ -213,9 +213,8 @@ go to the display's second line, the graph and the
 
 The defaults are the first two of each row, no third and fourth value.
 About one reading per second arrives. The graph, min/max and the export
-keep the time to go in minutes throughout; while charging it has a gap. For more than four of its values at
-once, run several QtDMM instances on the same device
-([instances](command-line.md)).
+keep the time to go in minutes throughout; while charging it has a gap.
+Four values are the most at once.
 
 ### Setting it up
 

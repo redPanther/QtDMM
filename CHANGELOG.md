@@ -9,8 +9,10 @@
 - **More meters in one QtDMM** — besides the window's meter, entries of My devices can run without a window: `--also <id>` at start (repeatable), or over SCPI `QTDMM:DEVice:OPEN "<id>"`, `QTDMM:DEVice:CLOSe` and `QTDMM:DEVice:CATalog?`. The window for them comes with the multi-meter UI.
 - **SCPI chooses the meter with `INSTrument`** — `INSTrument:CATalog?` names the meters of the program (the My devices name in upper case), `INSTrument <name>` or `INSTrument:NSELect <n>` chooses one, and `READ?`, `CALC`, `QTDMM:` and the other commands go to it. The first meter is chosen at start, so existing clients see no change. The network services run once per program.
 - **They record together** — when the window records (Record, trigger, start time or SCPI), the meters without a window record on the same time base and stop with it; `INITiate`/`ABORt` on one of them starts and stops them all. `QTDMM:RECord:SAVE "<file>"[,RAW]` saves the chosen meter's recording into `Documents/QtDMM` (file name only, never overwrites).
-- **Calculated values read the meters of the program** — by their My devices name (`UT61E Bench` is `ut61e_bench`), before instances of the same name. A formula without variables (the Simulated meter, a formula of `t`) needs no other meter.
+- **Calculated values read the meters of the program** — by their My devices name (`UT61E Bench` is `ut61e_bench`). A formula without variables (the Simulated meter, a formula of `t`) needs no other meter.
 - **The recording trigger can watch another value** — on the Recording page, a meter with more than one value chooses which value the rising/falling threshold watches, e.g. record the voltage when the current crosses 5 A.
+- **Open beside instead of instances** — *Open beside* (context menu of My devices, *Beside it* in Add device) opens a device in the same QtDMM next to the window's; the sidebar node **Open devices** lists them with their readings and closes them. One QtDMM no longer starts others: the node **Instances**, *In a new window*, renaming and deleting instances, *All instances* for Record and the shared memory between QtDMMs are gone. A calculated value reads the open devices only.
+- **One QtDMM per settings file** — a second start with the same `--config-id` says that one runs already (process number) and stops; another `--config-id` runs on its own, without a link.
 
 ### Devices
 
@@ -24,6 +26,11 @@
 - **Alarm sounds** — instead of the Beep box an alarm chooses its sound: none, the system's beep, Warning, High, Low, Critical, OK or a WAV file of your own, with a button to try it. It plays once, while the alarm is raised, or a number of times while it is raised, a second apart; Acknowledge ends it. Optionally "OK" sounds when the alarm clears. Alarms with Beep keep the system's beep.
 - **PASS/FAIL limit test** — in the display's right-click menu: nominal ± percent, nominal ± amount, or lower and upper limit (**= reading** takes the value shown as the nominal). The display grows a column with PASS or FAIL, HI or LO and the deviation in percent, and turns green or red; optionally a sound for HI, for LO and for PASS, each repeated while the verdict stays if wanted. The verdict is recorded: a column *Limit* in the readings table and `limit` in the CSV and spreadsheet exports. The graph draws the limits as green lines with a faint band between, the analog meter a light green band on its arc in place of the red zone, and the status line counts PASS and FAIL (reset with min/max). Over SCPI as on Keysight's bench meters: `CALCulate:LIMit[:STATe]`, `:LOWer`, `:UPPer`, `:CLEar` (also `CALCulate:FUNCtion LIMit` + `CALCulate:STATe`), FAIL LO/HI in bits 11/12 of `STATus:QUEStionable?`, and `QTDMM:LIMit:VERDict?` / `:COUNt?`. qtdmm-mcp: `limit_test`, and with `--allow-control` `set_limit_test` and `clear_limit_count`.
 - **Silver is now called Light** — and the designs are named Light, Dark, Light Metal and Dark Metal in every language; the saved choice stays.
+
+### Please note when updating from 26.3
+
+- **Instances are gone.** The settings files of other instances (`QtDMM_<id>.conf`) stay where they are and are not read; a later 26.4 step takes them over into My devices and a workspace. Until then open the devices beside the window. A Victron with more than four values at once took two instances; four are the most now.
+- **SCPI:** `QTDMM:INSTances?` is gone (error -113), and with it the qtdmm-mcp tool `instances`; `INSTrument:CATalog?` names the meters of the program.
 
 ### Platforms and build
 

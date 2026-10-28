@@ -18,8 +18,8 @@ meter - the first start - shows nothing but a big **Add device** button.
    Bluetooth meter its name, a USB-serial adapter its chip. A device you keep
    in My devices says so - also when the port has another name now
    (`/dev/ttyUSB0` for the saved `/dev/serial/by-id/...`, another
-   `/dev/hidraw` number) - and a port a running window uses says *In use
-   here* or which instance has it. In the network these are the ports of a
+   `/dev/hidraw` number) - and a port in use says *In use here* or which
+   open device has it. In the network these are the ports of a
    [qtdmm-bridge](remote-bridge.md) announcing itself by mDNS. Click one, or
    type the port (a Bluetooth address, `host:port` of a bridge or another
    RFC 2217 server) into **Port**. A device QtDMM may not open is listed with the
@@ -30,9 +30,9 @@ meter - the first start - shows nothing but a big **Add device** button.
    behind a serial port, a UT-D04 cable or a bridge port QtDMM cannot tell yet: choose
    yours. A Victron device needs its key here. One of My devices comes with
    its own name and model: it is changed, not added a second time.
-4. **Where should it go?** *In this window* as the current device, or *In
-   a new window* - a new instance with the settings of this one. A window
-   without a meter skips this: **Add** on step 3 puts the device into it.
+4. **Where should it go?** *In this window* as the current device, or
+   *Beside it* - opened beside the current device (see
+   [My devices](my-devices.md)). A window without a meter skips this: **Add** on step 3 puts the device into it.
 
 sigrok and *Simulated / calculated* skip step 2.
 
@@ -107,7 +107,7 @@ as a service, is on [Meters over the network](remote-bridge.md).
 ## Connecting
 
 Click **Connect** (F3) in the toolbar. QtDMM connects on its own at
-start-up once a meter has been chosen in the settings; a fresh instance
+start-up once a meter has been chosen in the settings; a fresh start
 waits for you to configure one. The status line at the bottom shows what is
 happening:
 

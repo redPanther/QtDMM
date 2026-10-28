@@ -17,9 +17,9 @@ by its name or its key. Changed keys are shown in bold.
 
 A key another command already has is taken from it after a question. Esc,
 Tab, Return and Alt with a letter or a digit stay with the window: they
-move through buttons, menus and dialogs. The keys are the same in all
-instances (the file `shortcuts.conf` next to the instances' settings); an
-instance that runs takes over a change at once. The tables below show the
+move through buttons, menus and dialogs. The keys are the same for every
+`--config-id` (the file `shortcuts.conf` next to the settings); another
+QtDMM that runs takes over a change at once. The tables below show the
 defaults.
 
 The keys of the graph, the readings table, the settings dialog and the
@@ -40,7 +40,7 @@ handbook window are fixed.
 | F8 | Settings |
 | Shift+F8 | Settings of the device in use (without one: Add device) |
 | Ctrl+F8 | Settings, Recording page |
-| F9 | Show or hide the sidebar with My devices and the instances |
+| F9 | Show or hide the sidebar with My devices and the open devices |
 | F7 | Open the menu |
 | F1 | This handbook |
 | Shift+F1 | Direct help — then click any control for an explanation |
@@ -112,6 +112,6 @@ While the table has the focus:
 
 ## Sidebar
 
-F8 opens the settings here too; F2 renames the selected device or stopped
-instance (also through its context menu, **Rename**). Enter on a workspace
+F8 opens the settings here too; F2 renames the selected device (also
+through its context menu, **Rename**). Enter on a workspace
 loads it.

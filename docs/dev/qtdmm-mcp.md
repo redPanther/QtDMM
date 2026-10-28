@@ -45,11 +45,11 @@ tools.
 
 A test instance needs no display: with `QT_QPA_PLATFORM=offscreen` QtDMM
 runs without a window on screen, and `screenshot` still returns the
-window as it would look. Give it its own configuration and, beside a QtDMM
-in use, its own shared memory key:
+window as it would look. Give it its own configuration (and, beside a QtDMM
+in use, its own SCPI port):
 
 ```
-QT_QPA_PLATFORM=offscreen QTDMM_IPC_KEY=mcptest qtdmm --config-dir /tmp/qtdmm-test --config-id mcp
+QT_QPA_PLATFORM=offscreen qtdmm --config-dir /tmp/qtdmm-test --config-id mcp
 ```
 
 ## Tools
@@ -68,7 +68,6 @@ QT_QPA_PLATFORM=offscreen QTDMM_IPC_KEY=mcptest qtdmm --config-dir /tmp/qtdmm-te
 | `recording_data` | `QTDMM:RECord:DATA? <n>,(@n)` | the last `count` readings of `channel` in the graph (1 the main value, the default; at most 10000): seconds since the start and value, `overload` or `gap` |
 | `alarms` | `QTDMM:ALARm:LIST?` | each alarm with its state: `off`, `pending`, `raised`, `acknowledged` |
 | `limit_test` | `CALCulate:LIMit:…?`, `QTDMM:LIMit:VERDict?`, `QTDMM:LIMit:COUNt?` | the PASS/FAIL test: on or off, lower and upper limit in base units, the verdict (`pass`, `high`, `low`, `none`) and the count since the last reset |
-| `instances` | `QTDMM:INSTances?` | the running instances with their last reading |
 | `keys` | `QTDMM:KEY:CATalog?` | the meter's keys QtDMM can press, empty for most meters |
 
 ### Control

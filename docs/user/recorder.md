@@ -103,8 +103,8 @@ quitting; the warning can be switched off under
 **Settings → General → At program exit**.
 
 [Alarms](alarms.md) can start and stop the recorder as well, on any of
-their conditions. Such a start - and one from the [SCPI server](scpi-server.md)
-or from another instance's *All instances* - asks nobody: a recording
+their conditions. Such a start - and one from the [SCPI server](scpi-server.md) - asks
+nobody: a recording
 running goes on instead of starting afresh, and a recording shown that is
 not saved yet stays; the status bar says why the start was ignored.
 
