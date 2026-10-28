@@ -238,18 +238,32 @@ In *Displays on top* and *on the left* it lasts until a window is shown or
 hidden; then the windows are placed by the rule again.
 
 **Load workspace...** and **Save workspace...** in the same menu keep a
-window layout in a file (`*.qtdmm-workspace`): which windows are shown, the
-arrangement with its dividers, the title bars, the toolbar, the design and
-the size of the main window - for instance one layout for the bench and one
-for long recordings. **Save layout on exit** (on by default) makes QtDMM start with
+measuring set-up in a file (`*.qtdmm-workspace`): the window's device and the
+devices open beside it with their front panels, which windows are shown with
+which values, the arrangement with its dividers, the title bars, the
+toolbar, the design and the size of the main window - for instance one
+set-up for the bench and one for the battery in the van. *Save workspace*
+first asks for a name and a description and shows the picture of the
+windows that goes into the file.
+
+Loading a workspace switches the window to its device and opens the
+devices beside it; devices open now that it does not have are closed (with
+a question when one has a recording not saved). The file keeps a copy of
+each device's entry in My devices, with its alarms and PASS/FAIL test: an
+entry that is there wins (a port changed since), one that is missing - on
+another computer, or deleted - is added back from the copy. Workspaces of
+QtDMM 26.2 to 26.4 before this (layout only) are still read.
+
+**Save layout on exit** (on by default) makes QtDMM start with
 the layout it had when it was closed. Switched off, it starts with the
 layout it had when the option was switched off, or with the workspace
 loaded last.
 
 **Recent workspaces** in the same menu lists the workspaces loaded or saved
-last, newest first; **Clear list** empties it. The node **Workspaces** at
-the top of the sidebar shows the same list, folded at the start: a double
-click or Enter loads one, its context menu also opens its folder or takes
+last by their names, newest first; the tooltip shows the description, the
+picture and the file. **Clear list** empties it. The node **Workspaces** at
+the top of the sidebar shows the same list, folded at the start, with the
+name of the workspace in use at its right: a double click or Enter loads one, its context menu also opens its folder or takes
 it off the list. A file that is gone is grey. The list is shared by all
 QtDMM windows; how many it shows is set under **Preferences** >
 **Appearance** > **Recent workspaces** (10, *none* hides it).
