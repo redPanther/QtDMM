@@ -7,6 +7,10 @@ on:
     branches: [ "master", "release/**" ]
   workflow_call:   # from release.yml for a version tag
 
+# the token reads the repository only; release.yml publishes
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: windows-latest
