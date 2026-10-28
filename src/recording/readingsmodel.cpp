@@ -332,20 +332,33 @@ ReadingsModel::Stats ReadingsModel::stats(int id) const
 {
   static const QRegularExpression letters("[A-Za-z]");
   Stats s;
+  ValueRef target(id);
   if (id < 0)
   {
-    id = 0;
-    while (m_hidden.contains(ValueRef(id)) && id < kMaxValues - 1)
-      ++id;
+    // the window meter's first value shown; a table without its rows: the
+    // first value another meter's rows show
+    target = ValueRef(0);
+    while (m_hidden.contains(target) && target.id < kMaxValues - 1)
+      target.id++;
+    bool any = false;
+    for (int i = 0; i < m_store->readingCount() && !any; ++i)
+      any = valueOf(i) == target;
+    for (int i = 0; i < m_store->readingCount() && !any; ++i)
+      if (!m_hidden.contains(valueOf(i)))
+      {
+        target = valueOf(i);
+        any = true;
+      }
   }
-  s.id = id;
+  s.id = target.id;
+  s.source = target.source;
   for (int i = 0; i < m_store->readingCount(); ++i)
-    if (valueOf(i) == ValueRef(id))
+    if (valueOf(i) == target)
       ++s.count;
   // the function of the value's newest reading: the numbers are over its
   // readings only - a table that holds volts and ohms has no minimum of both
   int newest = m_store->readingCount() - 1;
-  while (newest >= 0 && valueOf(newest) != ValueRef(id))
+  while (newest >= 0 && valueOf(newest) != target)
     --newest;
   if (newest < 0)
     return s;
@@ -355,7 +368,7 @@ ReadingsModel::Stats ReadingsModel::stats(int id) const
   for (int i = 0; i <= newest; ++i)
   {
     const LoggedReading &e = m_store->readingAt(i);
-    if (valueOf(i) != ValueRef(id) || e.text.contains(letters) || !std::isfinite(e.value))   // other values, OL
+    if (valueOf(i) != target || e.text.contains(letters) || !std::isfinite(e.value))   // other values, OL
       continue;
     if (e.port != port || SiPrefix::split(e.unit).baseUnit != s.unit)
       continue;

@@ -325,8 +325,8 @@ void GraphWidget::setValues(const QList<ValueRef> &values)
   for (const ValueRef &v : values)
     if (isBase(v))
       own.insert(v.id);
-    else if (!others.contains(v))
-      others << v;
+    else if (!others.contains(resolved(v)))
+      others << resolved(v);
   setOtherValues(others);
   for (int id = 1; id < kMaxValues; ++id)
     setValueShown(id, own.contains(id));
@@ -337,7 +337,7 @@ void GraphWidget::setValues(const QList<ValueRef> &values)
 bool GraphWidget::valueShown(const ValueRef &value) const
 {
   if (!isBase(value))
-    return otherValues().contains(value);
+    return otherValues().contains(resolved(value));
   return value.id == 0 ? m_mainShown : m_shownValues.contains(value.id);
 }
 
@@ -348,13 +348,13 @@ void GraphWidget::setValueShown(const ValueRef &value, bool shown)
   if (isBase(value))
     setValueShown(value.id, shown);
   else
-    setOtherValueShown(value, shown);
+    setOtherValueShown(resolved(value), shown);
   Q_EMIT valuesChanged();
 }
 
 GraphWidget::ValueAxis GraphWidget::valueAxis(const ValueRef &value) const
 {
-  return isBase(value) ? valueAxis(value.id) : otherValueAxis(value);
+  return isBase(value) ? valueAxis(value.id) : otherValueAxis(resolved(value));
 }
 
 void GraphWidget::setValueAxis(const ValueRef &value, ValueAxis axis)
@@ -362,17 +362,39 @@ void GraphWidget::setValueAxis(const ValueRef &value, ValueAxis axis)
   if (isBase(value))
     setValueAxis(value.id, axis);
   else
-    setOtherValueAxis(value, axis);
+    setOtherValueAxis(resolved(value), axis);
 }
 
 GraphWidget::ValueAxis GraphWidget::valueSide(const ValueRef &value) const
 {
-  return isBase(value) ? valueSide(value.id) : otherValueSide(value);
+  return isBase(value) ? valueSide(value.id) : otherValueSide(resolved(value));
 }
 
 QColor GraphWidget::drawnColor(const ValueRef &value) const
 {
   if (!isBase(value))
-    return otherValueColor(value);
+    return otherValueColor(resolved(value));
   return valueDrawn(value.id) ? valueColor(value.id) : QColor();
+}
+
+void GraphWidget::setBase(RecordingStore *store, const QString &source)
+{
+  if (!store || (store == m_store && source == m_baseSource))
+    return;
+  const QList<ValueRef> values = this->values();
+  QHash<ValueRef, ValueAxis> axes;
+  for (const ValueRef &v : values)
+    axes.insert(v, valueAxis(v));
+  // all off, then on again with the new meter's split
+  makeOtherCurves(m_fileValues);
+  m_mainShown = false;
+  m_shownValues.clear();
+  m_valueAxes.clear();
+  m_otherAxes.clear();
+  m_baseSource = source;
+  setStore(store);
+  for (auto it = axes.cbegin(); it != axes.cend(); ++it)
+    if (it.value() != AxisAuto)
+      setValueAxis(it.key(), it.value());
+  setValues(values);
 }

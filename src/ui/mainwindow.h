@@ -302,14 +302,16 @@ protected:
   /// The context menu of the sidebar's row of @p value (ValueMenu).
   void        valueMenu(const ValueRef &value, const QPoint &globalPos);
   /// @name The readings table's meters
-  /// The window's meter always, the meters beside in m_tableOthers too: then
-  /// the table logs the readings of all of them in its own store, in the
-  /// order they come, with the Device column; without them it is the window
-  /// meter's recorder's readings, as always.
+  /// The meters in it, the window's like the others (m_tableMeters; none
+  /// chosen: all connected). More than the window's: the table logs the
+  /// readings of all of them in its own store, in the order they come, with
+  /// the Device column; the window's alone: its recorder's readings.
   /// @{
-  QStringList m_tableOthers;   ///< sources ("device:<id>") of other meters in the table
+  QStringList m_tableMeters;   ///< sources ("device:<id>"); empty: all connected
+  /// The meters the table shows now: m_tableMeters, or all connected.
+  QStringList tableSources() const;
   QList<QMetaObject::Connection> m_tableLinks;
-  /// The table anew for m_tableOthers: its rows from before, merged by time.
+  /// The table anew for tableSources(): its rows from before, merged by time.
   void        applyTableSources();
   /// The readings of the meters in the table to it (the open ones of them).
   void        connectTableSources();

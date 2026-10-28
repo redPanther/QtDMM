@@ -54,6 +54,7 @@ public:
   struct Stats
   {
     int id = 0;           ///< the value they are of
+    QString source;       ///< of another meter than the window's; empty: the window's
     int count = 0;        ///< its rows in the log, overloads included
     int numeric = 0;      ///< rows min/max/mean are computed from: its readings of the newest one's
                           ///< function (port and unit), without overloads
@@ -108,6 +109,8 @@ public:
 
   /// Over value @p id; the first one shown in the table when -1.
   Stats stats(int id = -1) const;
+  /// The name of the meter of @p source, as the column Device shows it.
+  QString deviceName(const QString &source) const { return m_deviceName ? m_deviceName(source) : source; }
 
   /// The values the table leaves out (by Reading::id); copying leaves them
   /// out too, the export and the store keep them.

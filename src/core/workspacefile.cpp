@@ -60,7 +60,8 @@ const Place kPlaces[] = {
   { "Windows/graph-envelope", "views/graph", "envelope", Kind::Flag },
   { "Windows/readings", "views/readings", "shown", Kind::Flag },
   { "Windows/table-hidden-values", "views/readings", "hidden", Kind::List },
-  { "Windows/table-sources", "views/readings", "sources", Kind::List },
+  { "Windows/table-devices", "views/readings", "devices", Kind::List },
+  { "Windows/table-sources", "views/readings", "sources", Kind::List },   // before 26.4: the others only
   { "Windows/poincare", "views/poincare", "shown", Kind::Flag },
   { "Windows/poincare-value", "views/poincare", "value", Kind::Text },
 };

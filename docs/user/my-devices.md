@@ -101,7 +101,12 @@ With more than one device open, the context menus of the graph, the
 readings table, the analog meter and the Poincaré plot have **Sources...**:
 all open devices with their values, to tick those the view shows - several
 for the graph and the table, one for the analog meter and the Poincaré
-plot. A newly opened device changes nothing by itself.
+plot. A newly opened device changes nothing by itself - unless a view
+shows nothing: an empty graph then takes its main value, the analog meter
+and the Poincaré plot take it when their device is not connected. The graph
+draws its values from the store of the device of its first value: while it
+shows none of this window's device, another device's value is its main
+curve (with the overview, the reference line and the limit band of it).
 
 The context menu of a device:
 

@@ -375,7 +375,9 @@ void ReadingsWidget::updateStats()
   auto entry = [&](const QString &e) { return QString(e).replace(' ', nbsp); };
   QStringList entries;
   // a meter with more values: which one they are of
-  if (m_log->hasOtherValues())
+  if (!s.source.isEmpty())
+    entries << entry(tr("%1:").arg(m_log->deviceName(s.source)));
+  else if (m_log->hasOtherValues())
   {
     const QString name = m_log->valueNames().value(s.id);
     entries << entry(name.isEmpty() ? tr("Value %1:").arg(s.id + 1) : tr("Value %1 (%2):").arg(s.id + 1).arg(name));

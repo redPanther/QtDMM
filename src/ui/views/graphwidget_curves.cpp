@@ -838,7 +838,7 @@ int GraphWidget::referenceId() const
 ValueRef GraphWidget::leftValue() const
 {
   if (const int id = referenceId(); id >= 0)
-    return ValueRef(id);
+    return ValueRef(id, m_baseSource);
   const int other = referenceOther();
   return other >= 0 ? m_otherCurves[size_t(other)].value : ValueRef(-1);
 }

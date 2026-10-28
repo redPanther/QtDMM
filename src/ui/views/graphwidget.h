@@ -400,8 +400,19 @@ public:
   /// setBaseSource()).
   /// @{
   void             setBaseSource(const QString &source) { m_baseSource = source; }
+  /// The meter an empty source means (the window's); none set: the base.
+  void             setOwnSource(const QString &source) { m_ownSource = source; }
+  /// @p value with the meter an empty source means.
+  ValueRef         resolved(const ValueRef &value) const
+  {
+    return value.source.isEmpty() ? ValueRef(value.id, m_ownSource.isEmpty() ? m_baseSource : m_ownSource) : value;
+  }
+  /// Another meter's store becomes the graph's (@p source its meter): the
+  /// values and their axes stay, its values become the main curve and the
+  /// other values, the ones of the meter before curves of another meter.
+  void             setBase(RecordingStore *store, const QString &source);
   QString          baseSource() const { return m_baseSource; }
-  bool             isBase(const ValueRef &value) const { return value.source.isEmpty() || value.source == m_baseSource; }
+  bool             isBase(const ValueRef &value) const { return resolved(value).source == m_baseSource; }
   /// The values shown, the base meter's first (with its source), in order.
   QList<ValueRef>  values() const;
   void             setValues(const QList<ValueRef> &values);
@@ -816,6 +827,7 @@ protected:
   QGraphicsLineItem *m_limitLines[2] = { nullptr, nullptr };   ///< low, high
   Control          m_control;   ///< setControl()
   QString          m_baseSource;   ///< setBaseSource()
+  QString          m_ownSource;    ///< setOwnSource()
   ValueRef         m_limitValue{ -1 };
   ValueRef         m_lastReference{ -1 };   ///< for leftValueChanged()
   qint64           m_minimapShift = 0;      ///< where the overview's store begins on this one's time (ms)
