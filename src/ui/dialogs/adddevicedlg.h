@@ -25,9 +25,8 @@ class QToolButton;
 /// The assistant "Add device": how the meter is connected (page 1), where
 /// (page 2: a passive search for that connection, every port found, the
 /// recognised ones first, or typed in), which meter it is with its settings
-/// and a name (page 3), and where it goes - in this window or beside its
-/// device (page 4). sigrok and simulated meters have no page 2. An empty window
-/// skips page 4: the device goes into it.
+/// and a name (page 3), and whether it is connected at once or only kept
+/// (page 4). sigrok and simulated meters have no page 2.
 /// The caller keeps the result in My devices - a find that already is one
 /// of them (knownDevice()) changes that entry instead.
 class AddDeviceDlg : public QDialog
@@ -36,7 +35,8 @@ class AddDeviceDlg : public QDialog
 public:
   enum Connection { Cable, Bluetooth, Network, Sigrok, Simulated };
   enum Page { ConnectionPage, PortPage, DevicePage, TargetPage };
-  enum Target { NoTarget, ThisWindow, Beside };
+  /// Page 4: into My devices and connected at once, or into My devices only.
+  enum Target { NoTarget, Connect, SaveOnly };
 
   explicit AddDeviceDlg(DeviceLibrary *library, QWidget *parent = nullptr);
   ~AddDeviceDlg() override;
@@ -46,12 +46,6 @@ public:
   void        setSigrokExe(const QString &exe);
   /// The readings of the meters open here, for the formula of a calculated value.
   void        setCalcInputs(const CalcDevice::Inputs &inputs);
-  /// The meter of this window, named in the tooltip of "In this window".
-  void        setCurrentDevice(const QString &name);
-  /// Whether page 4 asks where the device goes. Without it (an empty
-  /// window) the button on page 3 is "Add" and the device goes into this
-  /// window.
-  void        setTargetChoice(bool choice);
   /// Places (DeviceLibrary::place()) the open devices use, with what a
   /// find at that place says ("In use here").
   void        setPlacesInUse(const QMap<QString, QString> &places) { m_inUse = places; }
@@ -133,8 +127,8 @@ private:
   QStackedWidget *m_pages = nullptr;
   QLabel         *m_title = nullptr;
   QLineEdit      *m_name = nullptr;
-  QToolButton    *m_thisWindow = nullptr;
-  QToolButton    *m_beside = nullptr;
+  QToolButton    *m_connect = nullptr;
+  QToolButton    *m_saveOnly = nullptr;
   DeviceSummary  *m_summary = nullptr;   ///< page 4: the device as set up
   QProgressBar   *m_progress = nullptr;
   QListWidget    *m_cards = nullptr;
@@ -155,9 +149,7 @@ private:
   QPushButton    *m_next = nullptr;
   Connection      m_connection = Cable;
   Target          m_target = NoTarget;
-  QString         m_currentDevice;
   QString         m_model;   ///< the model the name was suggested for
-  bool            m_targetChoice = true;
   QToolButton    *m_bluetoothTile = nullptr;
   QString         m_bluetoothTip;   ///< its tooltip while Bluetooth can be used
   std::function<QString()> m_bluetoothCheck;
