@@ -2186,6 +2186,9 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
       for (const QString &text : get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts))
         values << valueOf(text);
     }
+    // without the old window's meter its values are none: the first meter
+    // connected takes the empty graph
+    values.removeIf([](const ValueRef &v) { return v.source.isEmpty(); });
     m_wid->graph()->setValues(values);
   }
   // the values the readings table leaves out, "1 2", another meter's
