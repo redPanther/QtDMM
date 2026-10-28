@@ -783,6 +783,7 @@ void InstanceWidget::applySLOT()
   syncDevice();
   const std::optional<MyDevice> device = m_devices->find(m_settings->getString("DMM/my-device"));
   m_ctl->setDevice(device ? device->id : QString(), device ? device->name : QString());
+  ui_graph->setBaseSource(m_ctl->source());
   // another device (switched, or the port of another entry): its rules
   if (currentDevice() != m_rulesDevice)
     loadRules();

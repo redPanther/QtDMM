@@ -2011,6 +2011,22 @@ int main(int argc, char **argv)
       graph.setValueShown(0, true);
       check(graph.leftValue() == ValueRef(0) && graph.minimap()->value() == 0, "main value back: its axis, its overview");
     }
+    // one list for all meters: the graph's meter (its source, or none) and the others
+    {
+      graph.setBaseSource("device:w");
+      QSignalSpy changed(&graph, &GraphWidget::valuesChanged);
+      check(graph.values() == QList<ValueRef>{ ValueRef(0, "device:w"), ValueRef(0, "device:b"), ValueRef(1, "device:b") },
+            "values: the graph's meter's main value with its source, then the other meter's");
+      graph.setValues({ ValueRef(1, "device:b"), ValueRef(0) });
+      check(graph.mainShown() && graph.otherValues() == QList<ValueRef>{ ValueRef(1, "device:b") }
+              && graph.valueShown(ValueRef(0, "device:w")) && !graph.valueShown(ValueRef(0, "device:b"))
+              && changed.size() == 1,
+            "setValues: an empty source and its own source are the graph's meter");
+      graph.setValueShown(ValueRef(0, "device:b"), true);
+      check(graph.valueShown(ValueRef(0, "device:b")) && changed.size() == 2, "setValueShown: another meter's");
+      check(graph.drawnColor(ValueRef(0, "device:w")) == graph.valueColor(0) && !graph.drawnColor(ValueRef(2, "device:w")).isValid(),
+            "drawnColor: the main curve's, none for a value not drawn");
+    }
     graph.setOtherValueShown(ValueRef(1, "device:b"), false);
     check(graph.otherValues() == QList<ValueRef>{ ValueRef(0, "device:b") }, "one hidden: one kept");
     graph.setOtherValueShown(ValueRef(1, "device:b"), true);

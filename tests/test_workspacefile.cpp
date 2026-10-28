@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     ws.devices = { b, a };
     ws.keys = { { "Windows/arrange", "left" }, { "Windows/layout", "V(0.5:display,0.5:graph)" },
                 { "Windows/title-bars-hidden", true }, { "Display/show", true }, { "MainWindow/show-graph", false },
-                { "Windows/graph-shown-values", "0 1 0@device:a" }, { "Windows/lcd-secondary-values", "" },
+                { "Windows/graph-values", "0 1 0@device:a" }, { "Windows/lcd-secondary-values", "" },
                 { "Windows/geometry-graph", "0 0 400 300" }, { "Windows/open-devices", "a" },
                 { "Windows/panel-a-value", "0" }, { "Windows/panel-a-folded", false },
                 { "Windows/geometry-panel-a", "10 10 200 100" }, { "Windows/future-key", "kept" } };

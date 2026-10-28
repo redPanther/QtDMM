@@ -1644,11 +1644,9 @@ void MainWindow::editSources(ValueMenu::View view)
   {
     case ValueMenu::View::Graph:
       name = tr("Graph");
-      if (graph->mainShown())
-        chosen << ValueRef(0);
-      for (int id : graph->shownValues())
-        chosen << ValueRef(id);
-      chosen << graph->otherValues();
+      // the window's meter by an empty source, as the dialog lists it
+      for (const ValueRef &v : graph->values())
+        chosen << (graph->isBase(v) ? ValueRef(v.id) : v);
       break;
     case ValueMenu::View::Table:
       name = tr("Readings table");
@@ -1675,17 +1673,9 @@ void MainWindow::editSources(ValueMenu::View view)
   switch (view)
   {
     case ValueMenu::View::Graph:
-    {
-      QList<ValueRef> others;
-      for (const ValueRef &v : picked)
-        if (!v.source.isEmpty())
-          others << v;
-      for (int id = 0; id < kMaxValues; ++id)
-        graph->setValueShown(id, picked.contains(ValueRef(id)));
-      graph->setOtherValues(others);
+      graph->setValues(picked);
       action_Graph->setChecked(true);
       break;
-    }
     case ValueMenu::View::Table:
     {
       ReadingsModel *log = m_readings->log();
@@ -1835,7 +1825,7 @@ DeviceSidebar::Value MainWindow::otherValueRow(const MeterController *ctl, int i
     if (r.name.isEmpty() && !unit.isEmpty())
       row.shortName = QString("%1 %2").arg(unit, couplingText(r.port.defining)).trimmed();
   }
-  row.color = m_wid->graph()->otherValueColor(ValueRef(id, ctl->source()));
+  row.color = m_wid->graph()->drawnColor(ValueRef(id, ctl->source()));
   return row;
 }
 
@@ -1872,9 +1862,8 @@ void MainWindow::updateOpenDevices()
       for (int value = 0; value < m_wid->numValues(); ++value)
       {
         const QString text = m_wid->valueText(value);
-        const bool drawn = m_wid->graph()->valueDrawn(value);
         row.values << DeviceSidebar::Value{ value, m_wid->valueName(value), text,
-                                            drawn ? m_wid->graph()->valueColor(value) : QColor(),
+                                            m_wid->graph()->drawnColor(ValueRef(value)),
                                             m_wid->valueShortName(value) };
       }
     else
@@ -2174,47 +2163,39 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
     }
     m_wid->setLcdSecondaries(ids);
   }
-  // the axis of each value in the graph, "1:right 2:left"; missing: automatic
+  // the axis of each value in the graph, "1@device:a:right 0@device:b:left";
+  // before 26.4 the window's meter by its id alone ("1:right"); missing: automatic
   {
     const QStringList axes = get("Windows/graph-value-axes", QString()).toString().split(' ', Qt::SkipEmptyParts);
     for (int id = 1; id <= 3; ++id)
-    {
-      GraphWidget::ValueAxis axis = GraphWidget::AxisAuto;
-      if (axes.contains(QString("%1:left").arg(id)))
-        axis = GraphWidget::AxisLeft;
-      else if (axes.contains(QString("%1:right").arg(id)))
-        axis = GraphWidget::AxisRight;
-      m_wid->graph()->setValueAxis(id, axis);
-    }
-    // another meter's: "1@device:ab12cd34:right"
+      m_wid->graph()->setValueAxis(id, GraphWidget::AxisAuto);
     for (const QString &entry : axes)
     {
       const qsizetype colon = entry.lastIndexOf(':');
-      if (!entry.contains('@') || colon < 0)
+      if (colon < 0)
         continue;
       const QString side = entry.mid(colon + 1);
-      m_wid->graph()->setOtherValueAxis(ValueRef::fromString(entry.left(colon)),
-                                        side == "left" ? GraphWidget::AxisLeft
-                                        : side == "right" ? GraphWidget::AxisRight : GraphWidget::AxisAuto);
+      m_wid->graph()->setValueAxis(ValueRef::fromString(entry.left(colon)),
+                                   side == "left" ? GraphWidget::AxisLeft
+                                   : side == "right" ? GraphWidget::AxisRight : GraphWidget::AxisAuto);
     }
   }
-  // the meter's other values shown in the graph: their ids, "1 2"; none at
-  // first. Another meter's ("1@device:ab12cd34") is drawn from its store.
+  // the graph's values, of any meter: "0@device:a 2@device:a 0@device:b";
+  // before 26.4 the window's ids ("1 2") with the main value apart
   {
-    QSet<int> own;
-    QList<ValueRef> others;
-    for (const QString &text : get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts))
+    QList<ValueRef> values;
+    const QString list = get("Windows/graph-values", QStringLiteral("-")).toString();
+    if (list != QLatin1String("-"))
+      for (const QString &text : list.split(' ', Qt::SkipEmptyParts))
+        values << ValueRef::fromString(text);
+    else
     {
-      const ValueRef v = ValueRef::fromString(text);
-      if (m_wid->ownMeter(v))
-        own.insert(v.id);
-      else
-        others << v;
+      if (get("Windows/graph-main-shown", true).toBool())
+        values << ValueRef(0);
+      for (const QString &text : get("Windows/graph-shown-values", QString()).toString().split(' ', Qt::SkipEmptyParts))
+        values << ValueRef::fromString(text);
     }
-    m_wid->graph()->setOtherValues(others);
-    for (int id = 1; id <= 3; ++id)
-      m_wid->graph()->setValueShown(id, own.contains(id));
-    m_wid->graph()->setValueShown(0, get("Windows/graph-main-shown", true).toBool());
+    m_wid->graph()->setValues(values);
   }
   // the values the readings table leaves out, "1 2", another meter's
   // "1@device:ab12cd34"; none at first. The other meters in it, by source
@@ -2281,13 +2262,11 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
   set("Windows/lcd-value", m_wid->lcdValue().toString());
   set("Windows/meter-value", m_wid->meterValue().toString());
   set("Windows/poincare-value", m_wid->poincareValue().toString());
+  GraphWidget *graph = m_wid->graph();
   QStringList shown;
-  for (int id : m_wid->graph()->shownValues())
-    shown << ValueRef(id).toString();
-  for (const ValueRef &v : m_wid->graph()->otherValues())
+  for (const ValueRef &v : graph->values())
     shown << v.toString();
-  set("Windows/graph-shown-values", shown.join(' '));
-  set("Windows/graph-main-shown", m_wid->graph()->mainShown());
+  set("Windows/graph-values", shown.join(' '));
   QStringList tableHidden;
   for (const ValueRef &v : m_readings->log()->hiddenValues())
     tableHidden << v.toString();
@@ -2301,13 +2280,16 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
       small << QString::number(id);
     set("Windows/lcd-secondary-values", small.join(' '));
   }
-  QStringList axes;
+  // the axes chosen, of the graph's meter also for its values not shown
+  QList<ValueRef> withAxis;
   for (int id = 1; id <= 3; ++id)
-    if (m_wid->graph()->valueAxis(id) != GraphWidget::AxisAuto)
-      axes << QString("%1:%2").arg(id).arg(m_wid->graph()->valueAxis(id) == GraphWidget::AxisLeft ? "left" : "right");
-  for (const ValueRef &v : m_wid->graph()->otherValues())
-    if (m_wid->graph()->otherValueAxis(v) != GraphWidget::AxisAuto)
-      axes << QString("%1:%2").arg(v.toString(), m_wid->graph()->otherValueAxis(v) == GraphWidget::AxisLeft ? "left" : "right");
+    withAxis << ValueRef(id, graph->baseSource());
+  for (const ValueRef &v : graph->otherValues())
+    withAxis << v;
+  QStringList axes;
+  for (const ValueRef &v : std::as_const(withAxis))
+    if (graph->valueAxis(v) != GraphWidget::AxisAuto)
+      axes << QString("%1:%2").arg(v.toString(), graph->valueAxis(v) == GraphWidget::AxisLeft ? "left" : "right");
   set("Windows/graph-value-axes", axes.join(' '));
 }
 

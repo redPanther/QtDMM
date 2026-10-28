@@ -305,3 +305,74 @@ QColor GraphWidget::otherColor(int i) const
   static const char *darkSteps[] = { "#5b8def", "#e0568f", "#26a69a", "#b39060" };
   return QColor(dark ? darkSteps[i % 4] : light[i % 4]);
 }
+
+QList<ValueRef> GraphWidget::values() const
+{
+  QList<ValueRef> out;
+  if (m_mainShown)
+    out << ValueRef(0, m_baseSource);
+  for (int id : shownValues())
+    out << ValueRef(id, m_baseSource);
+  return out + otherValues();
+}
+
+void GraphWidget::setValues(const QList<ValueRef> &values)
+{
+  if (values == this->values())
+    return;
+  QList<ValueRef> others;
+  QSet<int> own;
+  for (const ValueRef &v : values)
+    if (isBase(v))
+      own.insert(v.id);
+    else if (!others.contains(v))
+      others << v;
+  setOtherValues(others);
+  for (int id = 1; id < kMaxValues; ++id)
+    setValueShown(id, own.contains(id));
+  setValueShown(0, own.contains(0));
+  Q_EMIT valuesChanged();
+}
+
+bool GraphWidget::valueShown(const ValueRef &value) const
+{
+  if (!isBase(value))
+    return otherValues().contains(value);
+  return value.id == 0 ? m_mainShown : m_shownValues.contains(value.id);
+}
+
+void GraphWidget::setValueShown(const ValueRef &value, bool shown)
+{
+  if (shown == valueShown(value))
+    return;
+  if (isBase(value))
+    setValueShown(value.id, shown);
+  else
+    setOtherValueShown(value, shown);
+  Q_EMIT valuesChanged();
+}
+
+GraphWidget::ValueAxis GraphWidget::valueAxis(const ValueRef &value) const
+{
+  return isBase(value) ? valueAxis(value.id) : otherValueAxis(value);
+}
+
+void GraphWidget::setValueAxis(const ValueRef &value, ValueAxis axis)
+{
+  if (isBase(value))
+    setValueAxis(value.id, axis);
+  else
+    setOtherValueAxis(value, axis);
+}
+
+GraphWidget::ValueAxis GraphWidget::valueSide(const ValueRef &value) const
+{
+  return isBase(value) ? valueSide(value.id) : otherValueSide(value);
+}
+
+QColor GraphWidget::drawnColor(const ValueRef &value) const
+{
+  if (!isBase(value))
+    return otherValueColor(value);
+  return valueDrawn(value.id) ? valueColor(value.id) : QColor();
+}

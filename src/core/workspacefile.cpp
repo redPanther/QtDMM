@@ -50,7 +50,9 @@ const Place kPlaces[] = {
   { "Windows/meter", "views/meter", "shown", Kind::Flag },
   { "Windows/meter-value", "views/meter", "value", Kind::Text },
   { "MainWindow/show-graph", "views/graph", "shown", Kind::Flag },
-  { "Windows/graph-shown-values", "views/graph", "values", Kind::List },
+  { "Windows/graph-values", "views/graph", "values", Kind::List },
+  // before the values had their meter: the window's ids, the main value apart
+  { "Windows/graph-shown-values", "views/graph", "shownValues", Kind::List },
   { "Windows/graph-main-shown", "views/graph", "mainShown", Kind::Flag },
   { "Windows/graph-value-axes", "views/graph", "axes", Kind::List },
   { "Windows/graph-reference", "views/graph", "reference", Kind::Text },
