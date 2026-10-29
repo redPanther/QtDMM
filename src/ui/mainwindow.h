@@ -138,6 +138,7 @@ protected:
     std::optional<QList<int>> secondaries;   ///< the LCD's small line, unset: not chosen
     bool     shown = true;
     QString  geometry;   ///< "x y w h" in Free mode
+    std::optional<int> lcdVariant;   ///< its own LCD colours, unset: the settings'
   };
   QMap<QString, PanelState> m_panelStates;
   /// The entries a workspace had connected, to open (openPending()).
@@ -153,13 +154,14 @@ protected:
   void        removePanel(const QString &source);
   /// The workspace's @p state of a panel on its window @p win.
   void        applyPanelState(QMdiSubWindow *win, const PanelState &state);
-  /// The LCDs' look on @p panel: variant, tint, its meter's display (one
-  /// look for all, [E 28.10.]).
+  /// The LCD's look on @p panel: its colours (its own or the Appearance
+  /// page's), the tint, its meter's display.
   void        applyLcdLook(FrontPanel *panel);
-  /// The LCDs' colours (LcdWidget::LcdVariant) for all panels, stored as Display/lcd.
-  void        setLcdVariant(int variant);
-  int         m_lcdVariant = 0;   ///< LcdWidget::LcdVariant, setLcdVariant()
-  QColor      m_lcdTint;          ///< the Appearance page's tint last applied
+  /// The LCD colours of the panel of @p source, unset: the settings' again.
+  void        setPanelLcdVariant(const QString &source, std::optional<int> variant);
+  /// The LCD colours chosen in a panel's context menu (LcdWidget::LcdVariant),
+  /// by source; gone with its meter closed.
+  QHash<QString, int> m_panelLcd;
   /// Opens the entries of m_pendingOpen.
   void        openPending();
   /// The front panel windows.

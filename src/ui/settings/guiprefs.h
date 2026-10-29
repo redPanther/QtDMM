@@ -45,6 +45,9 @@ public:
   bool      useTextLabel() const;
   /// The symbols: "colored", "plain" or "system" (Designs::IconSet).
   QString   iconSet() const;
+  /// The LCDs' colours (LcdWidget::LcdVariant, Display/lcd); a display's
+  /// own from its context menu goes before (MainWindow).
+  int       lcdVariant() const;
   QColor    displayBgColor() const;
   bool      showDisplay() const;
   void      setShowDisplay(bool show);
@@ -63,7 +66,7 @@ public Q_SLOTS:
   virtual void applySLOT();
 
 private:
-  QComboBox   *ui_design, *ui_iconSet, *ui_meterScale, *ui_meterStyle;
+  QComboBox   *ui_design, *ui_iconSet, *ui_lcdVariant, *ui_meterScale, *ui_meterStyle;
   QCheckBox   *ui_textLabel, *ui_showDisplay, *ui_showBar, *ui_showMinMax, *ui_meterBallistics;
   ColorButton *ui_bgColorDisplay;
   QSpinBox    *ui_meterRedZone, *ui_recentWorkspaces;

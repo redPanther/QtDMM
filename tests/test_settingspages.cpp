@@ -21,6 +21,7 @@
 #include "ui/settings/graphprefs.h"
 #include "ui/settings/guiprefs.h"
 #include "ui/settings/recorderprefs.h"
+#include "ui/views/lcdwidget.h"
 #include "testutil.h"
 
 template <typename T> static T *child(QWidget &page, const char *name)
@@ -51,6 +52,7 @@ int main(int argc, char **argv)
       { "Alert/unsaved-file", false }, { "Save/window-pos", false }, { "Icons/text-label", true },
       { "Port settings/sigrok_exe", QString("/opt/sigrok-cli") },
       { "Windows/design", QString("silver") }, { "Display/display-bar", false }, { "Display/display-min-max", true },
+      { "Display/lcd", QString("amber") },
       { "Meter/scale-mode", 2 }, { "Meter/style", 0 }, { "Meter/ballistics", false }, { "Meter/red-zone", 75 },
       { "Graph/variant", QString("custom") }, { "Graph/line-mode", 2 }, { "Graph/point-mode", 3 },
       { "Graph/line-width", 4 }, { "Graph/crosshair-cursor", false },
@@ -107,6 +109,20 @@ int main(int argc, char **argv)
     gui.applySLOT();
     blank.save();
     check(blank.getString("Windows/design", "-") == "dark", "gui: the menu's design after OK, got " + blank.getString("Windows/design", "-"));
+    // the LCD colours of a config from before the choice: blue, or Custom with a tint of its own
+    {
+      Settings before("pages_lcd", dir.path());
+      GuiPrefs page;
+      page.setCfg(&before);
+      page.defaultsSLOT();
+      check(page.lcdVariant() == LcdWidget::BacklightBlue, "gui: LCD colours of an old config: backlight blue");
+      before.setColor("Display/display-background", QColor(0x80, 0xc0, 0xff));
+      before.save();
+      page.defaultsSLOT();
+      check(page.lcdVariant() == LcdWidget::Custom, "gui: an old config with a tint of its own: Custom");
+      page.factoryDefaultsSLOT();
+      check(page.lcdVariant() == LcdWidget::BacklightBlue, "gui: factory defaults: backlight blue");
+    }
 
     // what the dialog reads
     check(graph.windowSeconds() == 45 * 60 && !graph.automaticScale() && graph.scaleMax() == 7000,

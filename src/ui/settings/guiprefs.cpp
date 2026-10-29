@@ -28,6 +28,7 @@
 #include "ui/colorbutton.h"
 #include "ui/designs.h"
 #include "ui/settings/guiprefs.h"
+#include "ui/views/lcdwidget.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFormLayout>
@@ -80,14 +81,26 @@ GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
   ui_showMinMax = new QCheckBox(tr("&Min/Max"), this);
   ui_showMinMax->setObjectName("ui_showMinMax");
   ui_showMinMax->setToolTip(tr("The smallest and largest reading beside the value."));
+  // the colours of every LCD; one chosen in its context menu has the say there
+  ui_lcdVariant = new QComboBox(this);
+  ui_lcdVariant->setObjectName("ui_lcdVariant");
+  for (const auto &[v, text] : { std::pair{ LcdWidget::Classic, tr("Classic") },
+                                 std::pair{ LcdWidget::BacklightBlue, tr("Backlight blue") },
+                                 std::pair{ LcdWidget::Amber, tr("Amber") },
+                                 std::pair{ LcdWidget::HighContrast, tr("High contrast") },
+                                 std::pair{ LcdWidget::Custom, tr("Custom") } })
+    ui_lcdVariant->addItem(text, LcdWidget::lcdVariantName(v));
+  ui_lcdVariant->setToolTip(tr("The colours of the digital displays. One display can have others: "
+                               "its context menu, LCD colours."));
   ui_bgColorDisplay = new ColorButton(this);
   ui_bgColorDisplay->setObjectName("ui_bgColorDisplay");
-  ui_bgColorDisplay->setToolTip(tr("Tint of the LCD face of the digital display. The default is a classic "
+  ui_bgColorDisplay->setToolTip(tr("Tint of the LCD face for the colours Custom. The default is a classic "
                                    "greenish LCD."));
   form->addRow(QString(), ui_showDisplay);
   form->addRow(QString(), ui_showBar);
   form->addRow(QString(), ui_showMinMax);
-  form->addRow(tr("LCD &colour:"), ui_bgColorDisplay);
+  form->addRow(tr("LCD &colours:"), ui_lcdVariant);
+  form->addRow(tr("Custom &face:"), ui_bgColorDisplay);
 
   addSection(form, tr("Analog meter"));
   ui_meterScale = new QComboBox(this);
@@ -128,16 +141,21 @@ GuiPrefs::GuiPrefs(QWidget *parent) : SettingsPage(parent)
 
   // the fields of a section line up
   const int width = qMax(ui_meterStyle->sizeHint().width(), ui_meterScale->sizeHint().width());
-  for (QWidget *w : std::initializer_list<QWidget *>{ ui_design, ui_iconSet, ui_meterScale, ui_meterStyle })
+  for (QWidget *w : std::initializer_list<QWidget *>{ ui_design, ui_iconSet, ui_lcdVariant, ui_meterScale, ui_meterStyle })
     w->setMinimumWidth(width);
 
   // bargraph and min/max belong to the display
-  connect(ui_showDisplay, &QCheckBox::toggled, this, [this](bool on)
+  // the tint is Custom's
+  auto enable = [this]
   {
+    const bool on = ui_showDisplay->isChecked();
     ui_showBar->setEnabled(on);
     ui_showMinMax->setEnabled(on);
-    ui_bgColorDisplay->setEnabled(on);
-  });
+    ui_lcdVariant->setEnabled(on);
+    ui_bgColorDisplay->setEnabled(on && lcdVariant() == LcdWidget::Custom);
+  };
+  connect(ui_showDisplay, &QCheckBox::toggled, this, enable);
+  connect(ui_lcdVariant, &QComboBox::currentIndexChanged, this, enable);
 }
 
 GuiPrefs::~GuiPrefs()
@@ -151,6 +169,11 @@ void GuiPrefs::defaultsSLOT()
   ui_textLabel->setChecked(m_cfg->getBool("Icons/text-label", false));
   ui_showDisplay->setChecked(m_cfg->getBool("Display/show", true));
   ui_bgColorDisplay->setColor(m_cfg->getColor("Display/display-background", QColor(0xda, 0xdc, 0x77)));
+  // before the choice here (26.4) a config with a tint of its own: Custom
+  QString lcd = m_cfg->getString("Display/lcd");
+  if (lcd.isEmpty())
+    lcd = ui_bgColorDisplay->color() == LcdWidget::classicFace() ? "blue" : "custom";
+  ui_lcdVariant->setCurrentIndex(qMax(0, ui_lcdVariant->findData(lcd)));
   ui_showBar->setChecked(m_cfg->getBool("Display/display-bar", true));
   ui_showMinMax->setChecked(m_cfg->getBool("Display/display-min-max", false));
 
@@ -177,6 +200,7 @@ void GuiPrefs::factoryDefaultsSLOT()
   ui_textLabel->setChecked(false);
   ui_showDisplay->setChecked(true);
   ui_bgColorDisplay->setColor(QColor(0xda, 0xdc, 0x77));
+  ui_lcdVariant->setCurrentIndex(ui_lcdVariant->findData(LcdWidget::lcdVariantName(LcdWidget::BacklightBlue)));
 
   ui_showBar->setChecked(true);
   ui_showMinMax->setChecked(false);
@@ -207,6 +231,7 @@ void GuiPrefs::applySLOT()
   m_cfg->setBool("Display/show", showDisplay());
   m_cfg->setBool("Icons/text-label", useTextLabel());
   m_cfg->setColor("Display/display-background", ui_bgColorDisplay->color());
+  m_cfg->setString("Display/lcd", ui_lcdVariant->currentData().toString());
   m_cfg->setBool("Display/display-bar", showBar());
   m_cfg->setBool("Display/display-min-max", showMinMax());
   m_cfg->setString("Windows/design", ui_design->currentData().toString());
@@ -272,6 +297,11 @@ bool GuiPrefs::showMinMax() const
 QString GuiPrefs::iconSet() const
 {
   return ui_iconSet->currentData().toString();
+}
+
+int GuiPrefs::lcdVariant() const
+{
+  return LcdWidget::lcdVariantFromName(ui_lcdVariant->currentData().toString());
 }
 
 QColor GuiPrefs::displayBgColor() const
