@@ -1454,172 +1454,177 @@
 <context>
     <name>DeviceSidebar</name>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="105"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="123"/>
         <source>My devices</source>
         <translation>Moje urządzenia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="391"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="414"/>
         <source>&amp;Settings...</source>
         <translation>&amp;Ustawienia...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="454"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="477"/>
         <source>Connected, readings are coming in</source>
         <translation>Połączone, odczyty napływają</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="454"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="477"/>
         <source>Connected</source>
         <translation>Połączone</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="575"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="598"/>
         <source>&amp;Close</source>
         <translation>&amp;Zamknij</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="619"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="642"/>
         <source>&amp;Rename</source>
         <translation>Zmień &amp;nazwę</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="97"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="115"/>
         <source>Workspaces</source>
         <translation>Obszary robocze</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="103"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="121"/>
         <source>The workspaces used last: a double click loads one.</source>
         <translation>Ostatnio używane obszary robocze: podwójne kliknięcie wczytuje jeden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="116"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="134"/>
         <source>The devices this window reads: its own and those opened beside it.</source>
         <translation>Urządzenia, które odczytuje to okno: jego własne i otwarte obok.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="118"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="136"/>
         <source>Services</source>
         <translation>Usługi</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="122"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="140"/>
         <source>What this window offers to other programs over the network.</source>
         <translation>Co to okno udostępnia innym programom przez sieć.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="111"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="129"/>
         <source>Connected devices</source>
         <translation>Połączone urządzenia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="227"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="247"/>
         <source>%1 - active: Connect, Reset and the device settings act on it</source>
         <translation>%1 – aktywne: Połącz, Reset i ustawienia urządzenia działają na nie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="263"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="250"/>
+        <source>In the graph</source>
+        <translation>Na wykresie</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/devicesidebar.cpp" line="286"/>
         <source>%1 - in the graph</source>
         <translation>%1 - na wykresie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="353"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="376"/>
         <source>%1 (not found)</source>
         <translation>%1 (nie znaleziono)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="372"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="395"/>
         <source>&amp;Load</source>
         <translation>&amp;Wczytaj</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="374"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="397"/>
         <source>Open &amp;folder</source>
         <translation>Otwórz &amp;folder</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="377"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="400"/>
         <source>&amp;Remove from list</source>
         <translation>&amp;Usuń z listy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="392"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="415"/>
         <source>&amp;Copy address</source>
         <translation>&amp;Kopiuj adres</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="425"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="448"/>
         <source>+ Add device...</source>
         <translation>＋ Dodaj urządzenie…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="429"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="452"/>
         <source>Set up another meter (the assistant).</source>
         <translation>Skonfiguruj kolejny miernik (asystent).</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="455"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="478"/>
         <source>Double-click: info and settings</source>
         <translation>Dwuklik: informacje i ustawienia</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="565"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="588"/>
         <source>Show &amp;front panel</source>
         <translation>Pokaż panel &amp;przedni</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="568"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="591"/>
         <source>&amp;Value</source>
         <translation>&amp;Wartość</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="569"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="592"/>
         <source>&amp;Disconnect</source>
         <translation>&amp;Rozłącz</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="569"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="592"/>
         <source>Co&amp;nnect</source>
         <translation>Połą&amp;cz</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="572"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="595"/>
         <source>&amp;Alarms...</source>
         <translation>&amp;Alarmy...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="573"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="596"/>
         <source>L&amp;imits...</source>
         <translation>&amp;Granice...</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="618"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="641"/>
         <source>&amp;Info and settings...</source>
         <translation>&amp;Informacje i ustawienia…</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="620"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="643"/>
         <source>&amp;Connect</source>
         <translation>&amp;Połącz</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="621"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="644"/>
         <source>Reads it with the other devices connected: recorded with them, in formulas and over SCPI</source>
         <translation>Odczytuje je razem z innymi połączonymi urządzeniami: nagrywane z nimi, w formułach i przez SCPI</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="624"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="647"/>
         <source>Re&amp;move from My devices</source>
         <translation>U&amp;suń z Moich urządzeń</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="634"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="657"/>
         <source>Remove device</source>
         <translation>Usuń urządzenie</translation>
     </message>
     <message>
-        <location filename="../../src/ui/devicesidebar.cpp" line="634"/>
+        <location filename="../../src/ui/devicesidebar.cpp" line="657"/>
         <source>Remove &quot;%1&quot; from My devices?</source>
         <translation>Usunąć „%1” z Moich urządzeń?</translation>
     </message>
@@ -2780,7 +2785,7 @@ a potem wyloguj się i zaloguj ponownie.</translation>
         <translation>lewa</translation>
     </message>
     <message>
-        <location filename="../../src/ui/views/graphwidget_others.cpp" line="136"/>
+        <location filename="../../src/ui/views/graphwidget_others.cpp" line="137"/>
         <source>%1: its unit %2 has no room on that axis</source>
         <translation>%1: jednostka %2 nie mieści się na tej osi</translation>
     </message>
@@ -3121,7 +3126,7 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
     </message>
     <message>
         <location filename="../../src/ui/instancewidget.cpp" line="120"/>
-        <location filename="../../src/ui/instancewidget.cpp" line="484"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="490"/>
         <source>Value %1</source>
         <translation>Wartość %1</translation>
     </message>
@@ -3136,77 +3141,77 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>&lt;font size=+2&gt;&lt;b&gt;Niezapisane dane&lt;/b&gt;&lt;/font&gt;&lt;p&gt;W pamięci są jeszcze niezapisane pomiary. %1&lt;p&gt;Czy najpierw je wyeksportować?</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="486"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="492"/>
         <source>%1 · %2</source>
         <translation>%1 · %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="558"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="564"/>
         <source>Loading a file replaces it.</source>
         <translation>Wczytanie pliku je zastąpi.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="558"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="564"/>
         <source>Load without saving</source>
         <translation>Wczytaj bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="576"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="582"/>
         <source>Clear deletes it.</source>
         <translation>Wyczyszczenie je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="576"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="582"/>
         <source>Clear without saving</source>
         <translation>Wyczyść bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="592"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="598"/>
         <source>Live clears it.</source>
         <translation>Tryb na żywo je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="592"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="598"/>
         <source>Live without saving</source>
         <translation>Na żywo bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="602"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="608"/>
         <source>A new recording clears it.</source>
         <translation>Nowa rejestracja je usunie.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="602"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="608"/>
         <source>Record without saving</source>
         <translation>Rejestruj bez zapisywania</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="610"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="616"/>
         <source>It starts now. A recording at %1 starts by itself from Live.</source>
         <translation>Zaczyna się teraz. Rejestracja o %1 zacznie się sama z trybu Na żywo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="612"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="618"/>
         <source>It starts now. A recording at the threshold starts by itself from Live.</source>
         <translation>Zaczyna się teraz. Rejestracja po przekroczeniu progu zacznie się sama z trybu Na żywo.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="694"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="700"/>
         <source>Automatic start at %1</source>
         <translation>Automatyczny start o %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="696"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="702"/>
         <source>Raising threshold %1</source>
         <translation>Próg narastający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="698"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="704"/>
         <source>Falling threshold %1</source>
         <translation>Próg opadający %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/instancewidget.cpp" line="788"/>
+        <location filename="../../src/ui/instancewidget.cpp" line="794"/>
         <source>Meter</source>
         <translation>Miernik</translation>
     </message>
@@ -3738,7 +3743,7 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
     <message>
         <location filename="../../src/ui/mainwindow.cpp" line="629"/>
         <location filename="../../src/ui/mainwindow.cpp" line="1807"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="2373"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2376"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
@@ -3923,22 +3928,22 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>%1 połączone</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2391"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2394"/>
         <source>The workspace closes %1, its recording is not saved.</source>
         <translation>Obszar roboczy zamyka %1, jego nagranie nie jest zapisane.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2436"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2439"/>
         <source>back in My devices: %1</source>
         <translation>ponownie w Moich urządzeniach: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2732"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2735"/>
         <source>Active: %1</source>
         <translation>Aktywne: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2733"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2736"/>
         <source>Connect, Reset and the device settings act on this device; a click on another front panel makes that one active</source>
         <translation>Połącz, Resetuj i ustawienia urządzenia działają na to urządzenie; kliknięcie innego panelu przedniego czyni go aktywnym</translation>
     </message>
@@ -4127,49 +4132,49 @@ Brak uprawnień? Czujnik wymaga reguły udev dla identyfikatora USB %1:%2.</tran
         <translation>Bateria miernika jest słaba.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2320"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2323"/>
         <source>Save workspace</source>
         <translation>Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2321"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="2361"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2324"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2364"/>
         <source>QtDMM workspace (*.%1)</source>
         <translation>Obszar roboczy QtDMM (*.%1)</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2345"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2348"/>
         <source>QtDMM: Save workspace</source>
         <translation>QtDMM: Zapisz obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2345"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2348"/>
         <source>Could not write %1.</source>
         <translation>Nie można zapisać %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2352"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2355"/>
         <source>Workspace saved to %1</source>
         <translation>Obszar roboczy zapisany w %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2360"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2363"/>
         <source>Load workspace</source>
         <translation>Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2373"/>
-        <location filename="../../src/ui/mainwindow.cpp" line="2390"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2376"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2393"/>
         <source>QtDMM: Load workspace</source>
         <translation>QtDMM: Wczytaj obszar roboczy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2434"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2437"/>
         <source>Workspace loaded from %1</source>
         <translation>Obszar roboczy wczytany z %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/mainwindow.cpp" line="2494"/>
+        <location filename="../../src/ui/mainwindow.cpp" line="2497"/>
         <source>&amp;Clear list</source>
         <translation>&amp;Wyczyść listę</translation>
     </message>

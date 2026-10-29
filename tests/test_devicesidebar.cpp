@@ -192,6 +192,22 @@ int main(int argc, char **argv)
     rows[2].current = true;
     sidebar.setOpenDevices(rows);
     check(!own->font(0).bold() && sidebar.openItem("u")->font(0).bold(), "another active one bold");
+    // one value in the graph: its curve's colour beside the device's dot, none without
+    {
+      auto curveAt = [&](const QString &id)
+      {
+        const QImage icon = sidebar.openItem(id)->icon(0).pixmap(sidebar.iconSize()).toImage();
+        return icon.pixelColor(icon.width() - icon.height() / 2 - 2, icon.height() / 2);
+      };
+      rows[2].values = { DeviceSidebar::Value { 0, "Voltage DC (V)", "OL", QColor(Qt::magenta) } };
+      sidebar.setOpenDevices(rows);
+      check(curveAt("u") == QColor(Qt::magenta) && sidebar.openItem("u")->toolTip(0).contains("In the graph")
+              && sidebar.openItem("u")->childCount() == 0,
+            "one value in the graph: its colour on the device's row");
+      rows[2].values.first().color = QColor();
+      sidebar.setOpenDevices(rows);
+      check(curveAt("u").alpha() == 0, "not in the graph: no colour");
+    }
     // a double click shows its front panel
     QSignalSpy panel(&sidebar, &DeviceSidebar::frontPanelRequested);
     Q_EMIT sidebar.itemDoubleClicked(sidebar.openItem("u"), 0);

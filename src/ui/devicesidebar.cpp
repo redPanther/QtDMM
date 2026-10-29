@@ -62,6 +62,24 @@ QIcon dot(const QColor &color, qreal dpr, const QPixmap &symbol = QPixmap())
   return icon;
 }
 
+// the colour of a curve in the graph, in the place of a picture
+QPixmap curveDot(const QColor &color, qreal dpr)
+{
+  QPixmap pixmap(QSize(kSymbolSize, kSymbolSize) * dpr);
+  pixmap.setDevicePixelRatio(dpr);
+  pixmap.fill(Qt::transparent);
+  if (color.isValid())
+  {
+    QPainter p(&pixmap);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::NoPen);
+    p.setBrush(color);
+    const double top = (kSymbolSize - kDotSize) / 2.0;
+    p.drawEllipse(QRectF(1, top + 1, kDotSize - 2, kDotSize - 2));
+  }
+  return pixmap;
+}
+
 // the picture of the model an entry of My devices has; "unknown" for
 // manual settings
 QPixmap symbolOf(const MyDevice &d, qreal dpr)
@@ -224,16 +242,21 @@ void DeviceSidebar::setOpenDevices(const QList<OpenDevice> &devices)
     QTreeWidgetItem *item = m_open->child(i);
     item->setText(0, device.name);
     item->setText(1, device.value);
-    item->setToolTip(0, device.current ? tr("%1 - active: Connect, Reset and the device settings act on it")
-                                                .arg(device.name)
-                                       : device.name);
+    // one value, no rows below: its curve's colour beside the device's dot
+    const QColor curve = device.values.size() == 1 ? device.values.first().color : QColor();
+    QString tip = device.current ? tr("%1 - active: Connect, Reset and the device settings act on it").arg(device.name)
+                                 : device.name;
+    if (curve.isValid())
+      tip += '\n' + tr("In the graph");
+    item->setToolTip(0, tip);
     QFont font = item->font(0);
     font.setBold(device.current);
     item->setFont(0, font);
     const QBrush text = device.connected ? palette().text() : palette().brush(QPalette::Disabled, QPalette::Text);
     item->setForeground(0, text);
     item->setForeground(1, text);
-    item->setIcon(0, dot(device.active ? QColor(0x22, 0xaa, 0x22) : QColor(), devicePixelRatioF()));
+    item->setIcon(0, dot(device.active ? QColor(0x22, 0xaa, 0x22) : QColor(), devicePixelRatioF(),
+                         curve.isValid() ? curveDot(curve, devicePixelRatioF()) : QPixmap()));
     fillValues(item, 0, device.values);
   }
   updateMarks();

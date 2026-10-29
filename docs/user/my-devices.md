@@ -76,7 +76,8 @@ A device with one value has the same menu in its own row, under **Value**. The n
 the one the meter gives the value (a Victron's *Battery voltage*), else
 unit and coupling (*V DC*); the tooltip has the full one. A
 coloured dot shows that the graph draws it, in the colour of its curve, so
-the rows are the graph's legend as well. This is where you say which window
+the rows are the graph's legend as well; a device with one value has that dot
+in its own row, after the green one. This is where you say which window
 shows which value - right-click a value:
 
 - **LCD** ▸ **Main value**, **Secondary value left**, **Secondary value
