@@ -49,6 +49,6 @@ namespace HidPath
   /// choose() against the devices hidapi lists now.
   Choice resolve(const QString &entry);
 
-  /// The udev links in /dev/qtdmm that point to @p path (Linux; empty elsewhere).
-  QString linkFor(const QString &path);
+  /// The udev link in @p dir that points to @p path (Linux; empty elsewhere).
+  QString linkFor(const QString &path, const QString &dir = QStringLiteral("/dev/qtdmm"));
 }

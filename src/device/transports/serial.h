@@ -25,9 +25,10 @@ public:
     /// it - ttyUSB0 may be ttyUSB1 tomorrow. Else, or when there is none,
     /// @p port as it is.
     static QString stablePortName(const QString &port, const QString &byIdDir = QStringLiteral("/dev/serial/by-id"));
-    /// A device string ("SERIAL /dev/ttyUSB0") with the stable port name;
-    /// any other kind of device as it is.
-    static QString stableDevice(const QString &device);
+    /// A device string ("SERIAL /dev/ttyUSB0") with the stable port name,
+    /// a USB-HID one ("HID 0x1a86:0xe008 /dev/hidraw3", HIDHOLTEK) with its
+    /// udev link /dev/qtdmm/... when there is one; any other kind as it is.
+    static QString stableDevice(const QString &device, const QString &hidLinkDir = QStringLiteral("/dev/qtdmm"));
     /// Sets baud rate, data/stop bits, parity and the DTR/RTS lines from
     /// the DMMInfo. Must be called on an open port.
     bool init();

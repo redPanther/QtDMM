@@ -75,10 +75,10 @@ Choice resolve(const QString &entry)
   return choose(e, present, canonicalPath);
 }
 
-QString linkFor(const QString &path)
+QString linkFor(const QString &path, const QString &linkDir)
 {
 #ifdef Q_OS_LINUX
-  const QDir dir("/dev/qtdmm");
+  const QDir dir(linkDir);
   if (!dir.exists())
     return QString();
   const QString target = canonicalPath(path);
@@ -86,7 +86,7 @@ QString linkFor(const QString &path)
     if (fi.isSymLink() && canonicalPath(fi.absoluteFilePath()) == target)
       return fi.absoluteFilePath();
 #else
-  Q_UNUSED(path)
+  Q_UNUSED(path) Q_UNUSED(linkDir)
 #endif
   return QString();
 }

@@ -1,4 +1,5 @@
 #include "device/transports/serial.h"
+#include "device/transports/hidpath.h"
 #include <QSerialPortInfo>
 
 #ifdef Q_OS_LINUX
@@ -68,9 +69,17 @@ QString SerialDevice::stablePortName(const QString &port, const QString &byIdDir
   return port;
 }
 
-QString SerialDevice::stableDevice(const QString &device)
+QString SerialDevice::stableDevice(const QString &device, const QString &hidLinkDir)
 {
   const QString type = device.section(' ', 0, 0);
+  // a USB-HID cable: its udev link (/dev/qtdmm/...) in place of /dev/hidrawN
+  if (type.compare(QLatin1String("HID"), Qt::CaseInsensitive) == 0
+      || type.compare(QLatin1String("HIDHOLTEK"), Qt::CaseInsensitive) == 0)
+  {
+    const QString path = device.section(' ', -1);
+    const QString link = path.startsWith('/') ? HidPath::linkFor(path, hidLinkDir) : QString();
+    return link.isEmpty() ? device : device.section(' ', 0, -2) + ' ' + link;
+  }
   if (type.compare(QLatin1String("SERIAL"), Qt::CaseInsensitive) != 0)
     return device;
   return type + ' ' + stablePortName(device.section(' ', 1).trimmed());
