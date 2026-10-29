@@ -227,11 +227,6 @@ MainWindow::MainWindow(QCommandLineParser &parser, QWidget *parent)
   connect(m_wid->devices(), &DeviceLibrary::changed, this, &MainWindow::updateEmptyStart);
   connect(m_wid, &InstanceWidget::configChanged, this, [this]
   {
-    // a tint changed on the Appearance page is meant to be seen: Custom
-    const QColor tint = m_wid->settingsDialog()->guiPage()->displayBgColor();
-    if (m_lcdTint.isValid() && tint != m_lcdTint && m_lcdVariant != LcdWidget::Custom)
-      setLcdVariant(LcdWidget::Custom);
-    m_lcdTint = tint;
     for (QMdiSubWindow *win : std::as_const(m_panelWins))
       applyLcdLook(panelOf(win));
   });
@@ -300,16 +295,7 @@ void MainWindow::createViews()
   connect(m_alarmBar, &AlarmBar::acknowledged, m_alarmService, &AlarmService::acknowledgeAll);
 
   // the views; none of them knows another, they show the values of the
-  // meters they are given (see InstanceWidget). The LCDs' colours: backlight
-  // blue unless chosen otherwise; a config from before the variants with a
-  // tint of its own lands on Custom
-  {
-    QString lcd = m_wid->settings()->getString("Display/lcd");
-    if (lcd.isEmpty())
-      lcd = m_wid->settings()->getColor("Display/display-background", LcdWidget::classicFace()) == LcdWidget::classicFace()
-              ? "blue" : "custom";
-    m_lcdVariant = LcdWidget::lcdVariantFromName(lcd);
-  }
+  // meters they are given (see InstanceWidget)
 
   m_meter = new AnalogMeter(this);
   m_wid->setMeter(m_meter);
@@ -479,6 +465,8 @@ void MainWindow::applyPanelState(QMdiSubWindow *win, const PanelState &state)
     panel->setValue(ValueRef(state.value.id, ctl->source()));
     ctl->setMinMaxValue(state.value.id);
   }
+  if (ctl)
+    setPanelLcdVariant(ctl->source(), state.lcdVariant);
   panel->setFolded(state.folded);
   if (state.secondaries)
     panel->setSecondaries(state.secondaries);
@@ -491,6 +479,7 @@ void MainWindow::applyPanelState(QMdiSubWindow *win, const PanelState &state)
 
 void MainWindow::removePanel(const QString &source)
 {
+  m_panelLcd.remove(source);   // connected again: the settings' colours
   QMdiSubWindow *win = m_panelWins.take(source);
   if (!win)
     return;
@@ -516,21 +505,24 @@ void MainWindow::applyLcdLook(FrontPanel *panel)
   const GuiPrefs *gui = m_wid->settingsDialog()->guiPage();
   LcdWidget *lcd = panel->display();
   lcd->setFaceColor(gui->displayBgColor());
-  lcd->setLcdVariant(static_cast<LcdWidget::LcdVariant>(m_lcdVariant));
-  if (const MeterController *ctl = panel->controller())
+  const MeterController *ctl = panel->controller();
+  const int variant = m_panelLcd.value(ctl ? ctl->source() : QString(), gui->lcdVariant());
+  lcd->setLcdVariant(static_cast<LcdWidget::LcdVariant>(variant));
+  if (ctl)
   {
     const DmmDecoder::DMMInfo &info = ctl->dmm()->dmmInfo();
     lcd->setDisplayMode(info.display, gui->showMinMax(), gui->showBar(), info.valueCount());
   }
 }
 
-void MainWindow::setLcdVariant(int variant)
+void MainWindow::setPanelLcdVariant(const QString &source, std::optional<int> variant)
 {
-  const auto v = static_cast<LcdWidget::LcdVariant>(variant);
-  m_lcdVariant = v;
-  m_wid->settings()->setString("Display/lcd", LcdWidget::lcdVariantName(v));
-  for (QMdiSubWindow *w : std::as_const(m_panelWins))
-    applyLcdLook(panelOf(w));
+  if (variant)
+    m_panelLcd.insert(source, *variant);
+  else
+    m_panelLcd.remove(source);
+  if (QMdiSubWindow *win = m_panelWins.value(source))
+    applyLcdLook(panelOf(win));
 }
 
 void MainWindow::openPending()
@@ -1460,15 +1452,22 @@ void MainWindow::windowMenu(QMdiSubWindow *win, const QPoint &globalPos)
       { LcdWidget::Classic, tr("&Classic") }, { LcdWidget::BacklightBlue, tr("&Backlight blue") },
       { LcdWidget::Amber, tr("&Amber") }, { LcdWidget::HighContrast, tr("&High contrast") },
       { LcdWidget::Custom, tr("C&ustom (from the settings)") } };
+    // this panel's own, or those of the settings
+    const QString source = panel->controller() ? panel->controller()->source() : QString();
+    auto *group = new QActionGroup(lcd);
+    QAction *settings = lcd->addAction(tr("As in the &settings"));
+    settings->setCheckable(true);
+    settings->setChecked(!m_panelLcd.contains(source));
+    group->addAction(settings);
+    connect(settings, &QAction::triggered, this, [this, source] { setPanelLcdVariant(source, std::nullopt); });
+    lcd->addSeparator();
     for (const auto &[v, text] : variants)
     {
-      if (v == LcdWidget::Custom)
-        lcd->addSeparator();
       QAction *a = lcd->addAction(text);
       a->setCheckable(true);
-      a->setChecked(m_lcdVariant == v);
-      // one look for all panels
-      connect(a, &QAction::triggered, this, [this, v = v] { setLcdVariant(v); });
+      a->setChecked(m_panelLcd.value(source, -1) == v);
+      group->addAction(a);
+      connect(a, &QAction::triggered, this, [this, source, v = v] { setPanelLcdVariant(source, v); });
     }
   }
   if (panel && panel->controller())
@@ -1945,6 +1944,8 @@ void MainWindow::deviceSettings(const QString &id, bool settingsTab)
       if (panel->secondariesChosen())
         state.secondaries = panel->secondaries();
       state.shown = !win->isHidden();
+      if (m_panelLcd.contains(ctl->source()))
+        state.lcdVariant = m_panelLcd.value(ctl->source());
       m_panelStates.insert(id, state);
     }
     m_session->close(id);
@@ -2109,6 +2110,8 @@ void MainWindow::applyWorkspace(const WorkspaceGet &get)
         state.secondaries->append(v.toInt());
     }
     state.shown = get(key + "-shown", true).toBool();
+    if (const QString lcd = get(key + "-lcd", QString()).toString(); !lcd.isEmpty())
+      state.lcdVariant = LcdWidget::lcdVariantFromName(lcd);
     state.geometry = get("Windows/geometry-panel-" + id, QString()).toString();
     if (QMdiSubWindow *win = m_panelWins.value("device:" + id))
       applyPanelState(win, state);
@@ -2256,6 +2259,11 @@ void MainWindow::storeWorkspace(const WorkspaceSet &set)
       set(key + "-secondary-values", small.join(' '));
     }
     set(key + "-shown", !win->isHidden());
+    // its own LCD colours, none: the settings'
+    const QString source = "device:" + id;
+    set(key + "-lcd", m_panelLcd.contains(source)
+                        ? LcdWidget::lcdVariantName(static_cast<LcdWidget::LcdVariant>(m_panelLcd.value(source)))
+                        : QString());
   }
   set("Windows/open-devices", open.join(' '));
   set("Display/show", m_displayAction->isChecked());

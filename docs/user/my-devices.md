@@ -51,7 +51,8 @@ connected and keeps recording. The meter of the front panel clicked last
 (at first the first one connected) is the **active device**: *Connect*,
 *Reset* (min/max) and the device settings (Shift+F8) act on it. The status
 bar shows its name while more than one meter is connected. All front
-panels share the LCD colours. Each device has its own [alarms](alarms.md) and
+panels take the LCD colours of the settings, one can have its own (see
+[LCD colours](connecting.md)). Each device has its own [alarms](alarms.md) and
 [PASS/FAIL test](limit-test.md); its front panel takes their colours, and
 *PASS/FAIL test*, *Limits...* and *Alarms...* are in the context menu of
 its front panel and of its row. The window layout remembers the meters

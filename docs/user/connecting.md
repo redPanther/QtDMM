@@ -146,10 +146,13 @@ it. **Display** in the toolbar or the menu (Ctrl+1) hides and shows all of
 them. Bar graph and min/max (off by default) are set on the
 *Appearance* settings page, in the group *Digital display (LCD)*.
 
-**LCD colours** in the display's right-click menu: *Classic* (the
-yellow-green of most meters), *Backlight blue* (light segments on blue, the default),
-*Amber*, *High contrast* (black on white) or *Custom*, the tint from the
-*Appearance* page. Changing that tint switches the display to *Custom*.
+**LCD colours** on the *Appearance* settings page, for all displays:
+*Classic* (the yellow-green of most meters), *Backlight blue* (light
+segments on blue, the default), *Amber*, *High contrast* (black on white) or
+*Custom*, the tint set below it (*Custom face*). The same colours in a
+display's right-click menu are that display's own, until *As in the
+settings* or until its device is closed; the workspace keeps them. Colours
+changed in the settings reach every display without colours of its own.
 
 **PASS/FAIL test** and **Limits...** in the same menu judge each reading
 against limits; see [PASS/FAIL limit test](limit-test.md).
