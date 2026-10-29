@@ -244,6 +244,19 @@ int main(int argc, char **argv)
           "stable: no link, the port as it is");
     const QString link = byId + "/usb-Other_cable-if00-port0";
     check(SerialDevice::stablePortName(link, byId) == link, "stable: a by-id name stays");
+    // a USB-HID cable: its udev link in /dev/qtdmm, none: as it is
+    {
+      QDir(dir.path()).mkpath("dev/qtdmm");
+      check(QFile(dir.path() + "/dev/hidraw3").open(QIODevice::WriteOnly), "hidraw3 written");
+      const QString links = dir.path() + "/dev/qtdmm";
+      QFile::link("../hidraw3", links + "/holtek-co2-pci-0000_02_00_0-usb-0_11_6_1_0");
+      const QString raw = "HIDHOLTEK 0x04d9:0xa052 " + dir.path() + "/dev/hidraw3";
+      check(SerialDevice::stableDevice(raw, links) == "HIDHOLTEK 0x04d9:0xa052 " + links + "/holtek-co2-pci-0000_02_00_0-usb-0_11_6_1_0",
+            "stable HID: the udev link, got " + SerialDevice::stableDevice(raw, links));
+      const QString other = "HID 0x1a86:0xe008 " + dir.path() + "/dev/hidraw4";
+      check(SerialDevice::stableDevice(other, links) == other, "stable HID: no link, as it is");
+      check(SerialDevice::stableDevice("calc V 1", links) == "calc V 1", "stable: another kind as it is");
+    }
 
     // a by-id name in the entry, the ttyUSB in the find: the same place
     DeviceLibrary ports(dir.path());

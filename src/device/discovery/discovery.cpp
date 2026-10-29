@@ -9,7 +9,9 @@
 
 #include "device/dmmdecoder.h"
 #include "device/framereader.h"
+#include "device/transports/hidpath.h"
 #include "device/transports/hidreader.h"   // hidapi
+#include "device/transports/serial.h"
 #include "service/mdnsbrowser.h"
 
 #ifdef QTDMM_WITH_BLE
@@ -217,16 +219,19 @@ void UsbDiscoverer::start()
       if (!family)
         continue;
       const QString path = QString::fromLatin1(d->path);
+      // the udev link (/dev/qtdmm/...) when there is one: it stays across plugs
+      const QString link = HidPath::linkFor(path);
+      const QString place = link.isEmpty() ? path : link;
       Candidate c;
       c.kind = Candidate::UsbCable;
       c.key = path;
       c.title = family->title;
-      c.detail = family->cable.isEmpty() ? path : QCoreApplication::translate("Discovery", "%1 cable · %2").arg(family->cable, path);
+      c.detail = family->cable.isEmpty() ? place : QCoreApplication::translate("Discovery", "%1 cable · %2").arg(family->cable, place);
       c.hint = family->hint;
       c.models = family->models;
       c.keys.insert("Port settings/device", QString("%1 0x%2:0x%3 %4").arg(family->portType)
                                               .arg(d->vendor_id, 4, 16, QLatin1Char('0'))
-                                              .arg(d->product_id, 4, 16, QLatin1Char('0')).arg(path));
+                                              .arg(d->product_id, 4, 16, QLatin1Char('0')).arg(place));
       const AccessProblem a = accessProblem(path, true, d->vendor_id, d->product_id);
       c.problem = a.problem;
       c.fix = a.fix;
@@ -262,7 +267,7 @@ void SerialDiscoverer::start()
       c.title = chip.isEmpty() ? QCoreApplication::translate("Discovery", "Serial port") : QCoreApplication::translate("Discovery", "USB-serial adapter (%1)").arg(chip);
       c.detail = p.manufacturer().isEmpty() ? port : QString("%1 · %2").arg(p.manufacturer(), port);
       c.hint = QCoreApplication::translate("Discovery", "Which meter is on it, QtDMM cannot tell yet: choose the model.");
-      c.keys.insert("Port settings/device", "SERIAL " + port);
+      c.keys.insert("Port settings/device", SerialDevice::stableDevice("SERIAL " + port));   // by-id, as saved
       const AccessProblem a = accessProblem(port, false);
       c.problem = a.problem;
       c.fix = a.fix;

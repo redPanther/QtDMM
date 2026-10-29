@@ -26,6 +26,7 @@
 ### Devices
 
 - **AOPUTTRIVER AP-570C-APP no longer marked as untried** — it is the HoldPeak HP-570C-APP under another name, which a user confirmed in 26.3.
+- **USB-HID cables keep their udev link** — Add device's search and the saving of a device now take the link in `/dev/qtdmm/` (UT-D04 and similar cables, the TFA CO2 monitor) instead of `/dev/hidrawN`, which changes with every plug; a serial adapter found is saved under `/dev/serial/by-id/` as before. An entry saved with `/dev/hidrawN` gets the link when Add device finds it again.
 - **OWON meters over Bluetooth LE** — tried on the CM2100B clamp (all keys and ranges); the B33T+, B35T+, B41T+, OW16B, OW18B and OW18E are built much the same but not tried yet. All of them with OL, NCV, HOLD, REL, MIN/MAX and low battery, and the keys of OWON's app under the display. Add device asks the meter which model it is.
 
 ### GUI
