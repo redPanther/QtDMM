@@ -10,7 +10,7 @@ set(PROJECT_LICENSE "GPL-3.0-or-later AND LGPL-3.0-or-later")
 set(RESOURCES "${CMAKE_BINARY_DIR}/resources.qrc")
 set(APP_NAME "QtDMM")
 set(APP_ORGANIZATION "QtDMM")
-set(QT_COMPONENTS Widgets SerialPort PrintSupport Test LinguistTools Network Charts Svg)
+set(QT_COMPONENTS Widgets SerialPort PrintSupport Test LinguistTools Network Charts Svg OpenGL)
 
 include( cmake/git_version.cmake )
 
@@ -309,6 +309,7 @@ target_link_libraries(qtdmm_core PUBLIC
 	Qt6::Network
 	Qt6::Charts
 	Qt6::Svg
+	Qt6::OpenGL
 	${HIDAPI_TARGET}
 	$<$<BOOL:${QTDMM_WITH_BLE}>:Qt6::Bluetooth>
 	$<$<BOOL:${QTDMM_WITH_MULTIMEDIA}>:Qt6::Multimedia>
@@ -320,6 +321,8 @@ endif()
 if (QTDMM_WITH_MULTIMEDIA)
 	target_compile_definitions(qtdmm_core PUBLIC QTDMM_WITH_MULTIMEDIA)
 endif()
+
+target_compile_definitions(qtdmm_core PRIVATE QCUSTOMPLOT_USE_OPENGL )
 
 add_executable(${PROJECT_NAME}
 	MACOSX_BUNDLE

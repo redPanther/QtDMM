@@ -16,6 +16,7 @@ XYPlot::XYPlot(QWidget *parent) : QWidget(parent)
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   m_plot = new QCustomPlot(this);
+  m_plot->setOpenGl(true, 4);
   layout->addWidget(m_plot);
   m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_plot, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos)
