@@ -29,6 +29,7 @@ public:
   ColorMap::Scheme colorScheme() const { return m_scheme; }
   void setCellCount(int nx, int ny);   // grid resolution, default 32 x 32
   void addPoint(double x, double y, double z);
+  void setHold(bool hold) override;
   void clear() override;
 
 private:

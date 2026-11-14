@@ -21,6 +21,7 @@ public:
   void        setAxisUnits(const QString &x, const QString &y);
   void        setLegend(const QString &legend);
   void        addPoint(double x, double y);
+  void        setHold(bool hold) override;
   void        clear() override;
 
 private:
