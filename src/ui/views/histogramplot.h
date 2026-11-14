@@ -4,31 +4,27 @@
 
 #include <QBrush>
 #include <QColor>
-#include <QVector>
 #include <QTimer>
-#include <QWidget>
+#include <QVector>
 
 #include "core/reading.h"
+#include "ui/views/qcpgraphcommon.h"
 
 class QCPBars;
-class QCPItemText;
-class QCPTextElement;
-class QCustomPlot;
 
 /// A live histogram of the selected value's recent readings.
-class HistogramPlot : public QWidget
+class HistogramPlot : public QcpGraphCommon
 {
   Q_OBJECT
 public:
   explicit HistogramPlot(QWidget *parent = nullptr);
   void        setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels, const QColor &data);
   void        setValueId(int id);
+  void        setHold(bool hold) override;
+  void        clear() override;
 
 public Q_SLOTS:
   void        addReading(const Reading &reading);
-  void        clear();
-  void        setHold(bool hold);
-  bool        hold() const { return m_hold; }
   void        setCaption(const QString &caption);
   void        setNotice(const QString &notice);
 
@@ -37,22 +33,13 @@ private:
   void scheduleRefresh();
   void refreshPlot();
 
-  QTimer m_refreshTimer;
+  QTimer          m_refreshTimer;
   QVector<double> m_values;
   QVector<double> m_shown;
-  int         m_valueHead = 0;
-  bool        m_hold = false;
-  int         m_valueId = 0;
-  QString     m_caption;
-  QString     m_notice;
-  QString     m_unit;
-  QCustomPlot *m_plot = nullptr;
-  QCPBars    *m_bars = nullptr;
-  QCPTextElement *m_title = nullptr;
-  QCPItemText *m_noDataText = nullptr;
-  QCPItemText *m_holdText = nullptr;
-  QBrush      m_background;
-  QColor      m_grid;
-  QColor      m_labels;
-  QColor      m_data;
+  int             m_valueHead = 0;
+  int             m_valueId = 0;
+  QString         m_caption;
+  QString         m_notice;
+  QString         m_unit;
+  QCPBars        *m_bars = nullptr;
 };

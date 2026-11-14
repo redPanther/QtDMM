@@ -4,76 +4,37 @@
 
 #include "3rdparty/qcustomplot/qcustomplot.h"
 #include "ui/views/plotaxis.h"
-#include "ui/views/qcpgraphcommon.h"
 
 #include <QCoreApplication>
-#include <QVBoxLayout>
 
+#include <algorithm>
 #include <cmath>
 
-HistogramPlot::HistogramPlot(QWidget *parent) : QWidget(parent)
+HistogramPlot::HistogramPlot(QWidget *parent) :
+  QcpGraphCommon(parent, QCoreApplication::translate("HistogramPlot", "No readings yet"))
 {
   m_refreshTimer.setSingleShot(true);
   connect(&m_refreshTimer, &QTimer::timeout, this, &HistogramPlot::refreshPlot);
-  setMinimumSize(220, 180);
-  auto *layout = new QVBoxLayout(this);
-  layout->setContentsMargins(0, 0, 0, 0);
-  m_plot = new QCustomPlot(this);
-  m_plot->setOpenGl(QcpGraphCommon::openGlEnabledDefault(), 4);
-  layout->addWidget(m_plot);
-  m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_plot, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos)
-  {
-    emit customContextMenuRequested(mapFromGlobal(m_plot->mapToGlobal(pos)));
-  });
-  m_plot->plotLayout()->insertRow(0);
-  m_title = new QCPTextElement(m_plot, QString(), font());
-  m_plot->plotLayout()->addElement(0, 0, m_title);
   m_plot->xAxis->setNumberFormat(QStringLiteral("gb"));
   m_plot->xAxis->setNumberPrecision(4);
   m_plot->yAxis->setNumberFormat(QStringLiteral("gb"));
   m_plot->yAxis->setNumberPrecision(3);
   m_bars = new QCPBars(m_plot->xAxis, m_plot->yAxis);
   m_bars->setAntialiased(false);
-
-  m_noDataText = new QCPItemText(m_plot);
-  m_noDataText->position->setType(QCPItemPosition::ptAxisRectRatio);
-  m_noDataText->position->setCoords(0.5, 0.5);
-  m_noDataText->setPositionAlignment(Qt::AlignCenter);
-  m_noDataText->setText(QCoreApplication::translate("HistogramPlot", "No readings yet"));
-  m_holdText = new QCPItemText(m_plot);
-  m_holdText->position->setType(QCPItemPosition::ptAxisRectRatio);
-  m_holdText->position->setCoords(0.98, 0.02);
-  m_holdText->setPositionAlignment(Qt::AlignRight | Qt::AlignTop);
-  m_holdText->setText(QCoreApplication::translate("HistogramPlot", "HOLD"));
   refreshPlot();
 }
 
 void HistogramPlot::setThemeColors(const QBrush &background, const QColor &grid, const QColor &labels,
                                    const QColor &data)
 {
-  m_background = background;
-  m_grid = grid;
-  m_labels = labels;
-  m_data = data;
-  const QBrush bg = background.style() == Qt::NoBrush ? QBrush(palette().base()) : background;
-  m_plot->setBackground(bg);
-  m_plot->axisRect()->setBackground(Qt::NoBrush);
-  for (QCPAxis *axis : { m_plot->xAxis, m_plot->yAxis })
-  {
-    axis->setBasePen(QPen(grid));
-    axis->setTickPen(QPen(grid));
-    axis->setSubTickPen(QPen(grid));
-    axis->setTickLabelColor(labels);
-    axis->setLabelColor(labels);
-    axis->grid()->setPen(QPen(grid, 1, Qt::DotLine));
-    axis->grid()->setSubGridPen(QPen(grid, 1, Qt::DotLine));
-  }
+  PlotTheme theme;
+  theme.background = background.style() == Qt::NoBrush ? QBrush(palette().base()) : background;
+  theme.grid = grid;
+  theme.labels = labels;
+  theme.data = data;
+  setTheme(theme);
   m_bars->setPen(QPen(data.darker(115)));
   m_bars->setBrush(data);
-  m_title->setTextColor(labels);
-  m_noDataText->setColor(labels);
-  m_holdText->setColor(labels);
   m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
@@ -103,7 +64,7 @@ void HistogramPlot::addReading(const Reading &reading)
     m_values[m_valueHead] = reading.value;
     m_valueHead = (m_valueHead + 1) % kMaxValues;
   }
-  if (!m_hold)
+  if (!hold())
     scheduleRefresh();
 }
 
@@ -118,10 +79,10 @@ void HistogramPlot::clear()
 
 void HistogramPlot::setHold(bool hold)
 {
-  if (m_hold == hold)
+  if (this->hold() == hold)
     return;
   m_refreshTimer.stop();
-  m_hold = hold;
+  QcpGraphCommon::setHold(hold);
   if (hold)
     m_shown = m_values;
   else
@@ -134,7 +95,7 @@ void HistogramPlot::setCaption(const QString &caption)
   if (m_caption == caption)
     return;
   m_caption = caption;
-  m_title->setText(caption);
+  setTitle(caption);
   m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
@@ -143,7 +104,7 @@ void HistogramPlot::setNotice(const QString &notice)
   if (m_notice == notice)
     return;
   m_notice = notice;
-  m_noDataText->setText(notice.isEmpty() ? tr("No readings yet") : notice);
+  setNoDataText(notice.isEmpty() ? tr("No readings yet") : notice);
   m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
@@ -156,16 +117,14 @@ void HistogramPlot::scheduleRefresh()
 
 void HistogramPlot::refreshPlot()
 {
-  const QVector<double> &shown = m_hold ? m_shown : m_values;
-  m_noDataText->setVisible(shown.isEmpty());
-  m_holdText->setVisible(m_hold);
+  const QVector<double> &shown = hold() ? m_shown : m_values;
+  setNoDataVisible(shown.isEmpty());
   if (shown.isEmpty())
   {
     const PlotAxis::Range axis = PlotAxis::range(0, 0, m_unit);
     m_bars->setData(QVector<double>(), QVector<double>());
-    m_plot->xAxis->setRange(axis.minimum / axis.factor, axis.maximum / axis.factor);
+    setAxisRange(m_plot->xAxis, axis);
     m_plot->yAxis->setRange(0, 1);
-    m_plot->xAxis->setLabel(axis.title);
     m_plot->yAxis->setLabel(tr("Count"));
     m_plot->replot(QCustomPlot::rpQueuedReplot);
     return;
@@ -189,9 +148,8 @@ void HistogramPlot::refreshPlot()
   }
   m_bars->setWidth(step / axis.factor * 0.94);
   m_bars->setData(keys, counts);
-  m_plot->xAxis->setRange(axis.minimum / axis.factor, axis.maximum / axis.factor);
+  setAxisRange(m_plot->xAxis, axis);
   m_plot->yAxis->setRange(0, qMax(1.0, *std::max_element(counts.cbegin(), counts.cend()) * 1.12));
-  m_plot->xAxis->setLabel(axis.title);
   m_plot->yAxis->setLabel(tr("Count"));
   m_plot->replot(QCustomPlot::rpQueuedReplot);
 }
