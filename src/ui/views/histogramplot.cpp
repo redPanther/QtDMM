@@ -4,6 +4,7 @@
 
 #include "3rdparty/qcustomplot/qcustomplot.h"
 #include "ui/views/plotaxis.h"
+#include "ui/views/qcpgraphcommon.h"
 
 #include <QCoreApplication>
 #include <QVBoxLayout>
@@ -16,6 +17,7 @@ HistogramPlot::HistogramPlot(QWidget *parent) : QWidget(parent)
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   m_plot = new QCustomPlot(this);
+  m_plot->setOpenGl(QcpGraphCommon::openGlEnabledDefault(), 4);
   layout->addWidget(m_plot);
   m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_plot, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos)
