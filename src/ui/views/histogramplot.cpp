@@ -13,6 +13,8 @@
 
 HistogramPlot::HistogramPlot(QWidget *parent) : QWidget(parent)
 {
+  m_refreshTimer.setSingleShot(true);
+  connect(&m_refreshTimer, &QTimer::timeout, this, &HistogramPlot::refreshPlot);
   setMinimumSize(220, 180);
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
@@ -102,11 +104,12 @@ void HistogramPlot::addReading(const Reading &reading)
     m_valueHead = (m_valueHead + 1) % kMaxValues;
   }
   if (!m_hold)
-    refreshPlot();
+    scheduleRefresh();
 }
 
 void HistogramPlot::clear()
 {
+  m_refreshTimer.stop();
   m_values.clear();
   m_shown.clear();
   m_valueHead = 0;
@@ -117,6 +120,7 @@ void HistogramPlot::setHold(bool hold)
 {
   if (m_hold == hold)
     return;
+  m_refreshTimer.stop();
   m_hold = hold;
   if (hold)
     m_shown = m_values;
@@ -141,6 +145,13 @@ void HistogramPlot::setNotice(const QString &notice)
   m_notice = notice;
   m_noDataText->setText(notice.isEmpty() ? tr("No readings yet") : notice);
   m_plot->replot(QCustomPlot::rpQueuedReplot);
+}
+
+void HistogramPlot::scheduleRefresh()
+{
+  // Keep expensive data preparation and plotting to at most ~30 updates/second.
+  if (!m_refreshTimer.isActive())
+    m_refreshTimer.start(33);
 }
 
 void HistogramPlot::refreshPlot()

@@ -5,6 +5,7 @@
 #include <QBrush>
 #include <QColor>
 #include <QVector>
+#include <QTimer>
 #include <QWidget>
 
 #include "core/reading.h"
@@ -33,8 +34,10 @@ public Q_SLOTS:
 
 private:
   static constexpr int kMaxValues = 1000;
+  void scheduleRefresh();
   void refreshPlot();
 
+  QTimer m_refreshTimer;
   QVector<double> m_values;
   QVector<double> m_shown;
   int         m_valueHead = 0;

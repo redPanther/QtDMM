@@ -6,13 +6,16 @@
 #include <QBrush>
 #include <QColor>
 #include <QVector>
-#include "ui/views/qcpgraphcommon.h"
-#include "ui/views/plotsamples.h"
+#include <QTimer>
+#include <QWidget>
 
 class QCPGraph;
+class QCPItemText;
+class QCPTextElement;
+class QCustomPlot;
 
 /// A live scatter plot of one value against another.
-class XYPlot : public QcpGraphCommon
+class XYPlot : public QWidget
 {
   Q_OBJECT
 public:
@@ -21,15 +24,31 @@ public:
   void        setAxisUnits(const QString &x, const QString &y);
   void        setLegend(const QString &legend);
   void        addPoint(double x, double y);
-  void        setHold(bool hold) override;
-  void        clear() override;
+  void        clear();
+  void        setHold(bool hold);
+  bool        hold() const { return m_hold; }
 
+protected:
 private:
+  static constexpr int kMaxPoints = 2000;
+  void scheduleRefresh();
   void refreshPlot();
 
+  QCustomPlot *m_plot = nullptr;
   QCPGraph *m_graph = nullptr;
-  RingBuffer<QPointF> m_points{2000};
+  QCPTextElement *m_title = nullptr;
+  QCPItemText *m_noDataText = nullptr;
+  QCPItemText *m_holdText = nullptr;
+  QTimer m_refreshTimer;
+  QVector<QPointF> m_points;
   QVector<QPointF> m_shown;
+  int         m_pointHead = 0;
+  bool        m_hold = false;
   QString     m_xUnit;
   QString     m_yUnit;
+  QString     m_legend;
+  QBrush      m_background;
+  QColor      m_grid;
+  QColor      m_labels;
+  QColor      m_data;
 };
